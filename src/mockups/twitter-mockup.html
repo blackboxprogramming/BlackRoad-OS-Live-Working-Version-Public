@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadX — BlackRoad Signal Stream Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="mockup-base.css">
+<style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --g:      linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      --bg:     #000000;
+      --s1:     #111111;
+      --s2:     #181818;
+      --s3:     #1a1a1a;
+      --s4:     #333333;
+      --border: #333333;
+      --text:   #e7e9ea;
+      --muted:  #71767b;
+      --dim:    #444444;
+      --white:  #ffffff;
+      --sg:     'Space Grotesk',sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sg);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 0px; }
+
+    /* ══════════════════════════════
+       OUTER WRAPPER — max 1200px
+    ══════════════════════════════ */
+    .wrapper {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    /* ══════════════════════════════
+       LEFT NAV
+    ══════════════════════════════ */
+    .leftnav {
+      width: 260px;
+      height: 100vh;
+      padding: 0 12px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+
+    .nav-logo {
+      padding: 12px 14px 4px;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--white);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      margin-bottom: 2px;
+    }
+    .nav-logo:hover { background: var(--s3); }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 14px;
+      border-radius: 50px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 19px;
+      font-weight: 400;
+      transition: background 0.15s;
+      width: fit-content;
+      margin-bottom: 2px;
+    }
+    .nav-item:hover { background: var(--s3); }
+    .nav-item.active .nav-label { font-weight: 700; }
+    .nav-icon { font-size: 24px; flex-shrink: 0; width: 26px; text-align: center; position: relative; }
+    .nav-label { font-size: 19px; white-space: nowrap; }
+    .nav-badge {
+      background: var(--white); color: #000;
+      font-size: 11px; font-weight: 800;
+      min-width: 18px; height: 18px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px;
+      position: absolute; top: -5px; right: -6px;
+    }
+
+    .post-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      background: var(--white);
+      color: #000;
+      border-radius: 50px;
+      padding: 14px 26px;
+      font-size: 16px; font-weight: 800;
+      cursor: pointer;
+      margin: 14px 4px;
+      width: calc(100% - 8px);
+      transition: background 0.15s;
+    }
+    .post-btn:hover { background: #e5e5e5; }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-profile {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 50px;
+      cursor: pointer; margin-bottom: 12px;
+      width: 100%;
+    }
+    .nav-profile:hover { background: var(--s3); }
+    .np-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+    }
+    .np-info { flex: 1; min-width: 0; }
+    .np-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .np-handle { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .np-dots { font-size: 16px; color: var(--muted); }
+
+    /* ══════════════════════════════
+       MAIN FEED
+    ══════════════════════════════ */
+    .feed {
+      flex: 1;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      max-width: 600px;
+    }
+
+    /* sticky tabs */
+    .feed-tabs {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-tab {
+      flex: 1; text-align: center;
+      padding: 14px 0;
+      font-size: 15px; font-weight: 500;
+      color: var(--muted); cursor: pointer;
+      position: relative;
+      transition: background 0.1s;
+    }
+    .feed-tab:hover { background: rgba(255,255,255,0.04); }
+    .feed-tab.active {
+      color: var(--white);
+      font-weight: 800;
+    }
+    .feed-tab.active::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 48px; height: 3px;
+      background: var(--white); border-radius: 2px;
+    }
+
+    /* composer */
+    .composer {
+      display: flex; gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .comp-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+    }
+    .comp-right { flex: 1; }
+    .comp-audience {
+      display: inline-flex; align-items: center; gap: 4px;
+      color: var(--white); font-size: 13px; font-weight: 700;
+      border: 1px solid var(--s4); border-radius: 16px;
+      padding: 2px 10px; cursor: pointer; margin-bottom: 8px;
+    }
+    .comp-input {
+      font-size: 19px; color: var(--muted);
+      padding: 4px 0 10px;
+      min-height: 50px;
+      cursor: text;
+    }
+    .comp-divider { height: 1px; background: var(--border); margin-bottom: 8px; }
+    .comp-actions {
+      display: flex; align-items: center; gap: 2px;
+    }
+    .comp-action {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; cursor: pointer; color: var(--muted);
+    }
+    .comp-action:hover { background: var(--s3); color: var(--text); }
+    .comp-spacer { flex: 1; }
+    .comp-counter {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid var(--s4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: var(--muted);
+    }
+    .comp-sep { width: 1px; height: 24px; background: var(--border); margin: 0 6px; }
+    .comp-post-btn {
+      background: var(--white); color: #000;
+      border-radius: 50px; padding: 8px 18px;
+      font-size: 14px; font-weight: 800; cursor: pointer;
+    }
+    .comp-post-btn:hover { background: #e5e5e5; }
+
+    /* ── Tweet ── */
+    .tweet {
+      display: flex; gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .tweet:hover { background: rgba(255,255,255,0.02); }
+
+    .tweet-avatar-col { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+    .tweet-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--s3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      flex-shrink: 0; cursor: pointer;
+    }
+    .tweet-thread-line {
+      width: 2px; flex: 1; background: var(--s4);
+      margin-top: 6px; min-height: 20px;
+    }
+
+    .tweet-body { flex: 1; min-width: 0; }
+    .tweet-header {
+      display: flex; align-items: center; gap: 4px;
+      flex-wrap: wrap; margin-bottom: 2px;
+    }
+    .tweet-name { font-size: 15px; font-weight: 700; color: var(--text); cursor: pointer; }
+    .tweet-name:hover { text-decoration: underline; }
+    .tweet-verified {
+      color: var(--white); font-size: 14px;
+    }
+    .tweet-handle { font-size: 15px; color: var(--muted); }
+    .tweet-dot { color: var(--muted); font-size: 12px; }
+    .tweet-time { font-size: 15px; color: var(--muted); }
+    .tweet-menu {
+      margin-left: auto; font-size: 18px; color: var(--muted);
+      padding: 2px 6px; border-radius: 50%;
+      opacity: 0;
+    }
+    .tweet:hover .tweet-menu { opacity: 1; }
+    .tweet-menu:hover { background: var(--s3); color: var(--text); }
+
+    .tweet-text {
+      font-size: 15px; line-height: 1.55; color: var(--text);
+      margin-bottom: 8px; white-space: pre-wrap;
+    }
+    .tweet-text .link { color: var(--muted); }
+    .tweet-text .mention { color: var(--white); }
+    .tweet-text .hashtag { color: var(--white); }
+
+    /* media */
+    .tweet-media {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .tweet-img {
+      width: 100%; aspect-ratio: 16/9;
+      background: var(--s2);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tweet-img-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, var(--s2) 0, var(--s2) 10px, var(--s3) 10px, var(--s3) 20px
+      );
+    }
+    .tweet-img-icon { font-size: 48px; opacity: 0.12; position: relative; z-index: 1; }
+    .tweet-img-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+    .tweet-img-2col .tweet-img { aspect-ratio: 1/1; }
+
+    /* quote tweet */
+    .quote-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .quote-box:hover { background: var(--s2); }
+    .quote-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .quote-avatar { width: 18px; height: 18px; border-radius: 50%; background: var(--s4); display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; color: var(--muted); }
+    .quote-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .quote-handle { font-size: 13px; color: var(--muted); }
+    .quote-text { font-size: 14px; color: var(--text); line-height: 1.4; }
+
+    /* poll */
+    .poll-option {
+      border: 1px solid var(--s4); border-radius: 6px;
+      margin-bottom: 6px; overflow: hidden; position: relative; height: 38px;
+      display: flex; align-items: center; cursor: pointer;
+    }
+    .poll-fill {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      background: var(--s3); border-radius: 4px 0 0 4px;
+    }
+    .poll-label { position: relative; z-index: 1; font-size: 14px; padding: 0 12px; color: var(--text); font-weight: 500; flex: 1; }
+    .poll-pct { position: relative; z-index: 1; font-size: 14px; font-weight: 700; color: var(--text); padding-right: 12px; }
+    .poll-meta { font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 8px; }
+
+    /* actions row */
+    .tweet-actions {
+      display: flex; align-items: center;
+      gap: 0; margin-top: 4px;
+      margin-left: -8px;
+    }
+    .ta-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 8px; border-radius: 50px;
+      cursor: pointer; color: var(--muted);
+      font-size: 13px; transition: color 0.1s, background 0.1s;
+      flex: 1; max-width: 80px;
+    }
+    .ta-btn:hover { color: var(--text); background: var(--s3); }
+    .ta-btn.liked { color: var(--white); }
+    .ta-btn.bookmarked { color: var(--white); }
+    .ta-icon { font-size: 17px; }
+    .ta-count { font-size: 13px; }
+
+    /* repost indicator */
+    .repost-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted);
+      padding: 8px 16px 0;
+      font-weight: 600;
+    }
+
+    /* pinned label */
+    .pin-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; color: var(--muted);
+      padding: 8px 16px 0 68px;
+      font-weight: 600;
+    }
+
+    /* ══════════════════════════════
+       RIGHT PANEL
+    ══════════════════════════════ */
+    .right-panel {
+      width: 340px;
+      padding: 0 16px;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    /* search bar */
+    .rp-search {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--bg);
+      padding: 10px 0;
+    }
+    .search-wrap {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--s2);
+      border: 1px solid transparent;
+      border-radius: 50px;
+      padding: 10px 16px;
+    }
+    .search-wrap:focus-within {
+      background: var(--bg);
+      border-color: var(--white);
+    }
+    .search-wrap span { font-size: 16px; color: var(--muted); }
+    .search-wrap input { background: transparent; border: none; outline: none; color: var(--text); font-size: 15px; flex: 1; }
+    .search-wrap input::placeholder { color: var(--muted); }
+
+    /* subscribe box */
+    .rp-card {
+      background: var(--s1);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .rp-card-title { font-size: 19px; font-weight: 800; color: var(--white); margin-bottom: 10px; }
+    .rp-card-sub { font-size: 14px; color: var(--muted); margin-bottom: 12px; line-height: 1.4; }
+
+    .sub-plan {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      border: 1px solid var(--border); margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .sub-plan:hover { background: var(--s3); }
+    .sub-icon { font-size: 22px; }
+    .sub-info { flex: 1; }
+    .sub-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .sub-price { font-size: 13px; color: var(--muted); }
+    .sub-check { font-size: 16px; color: var(--muted); }
+
+    /* trending */
+    .trend-item {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .trend-item:hover { background: rgba(255,255,255,0.02); margin: 0 -14px; padding: 10px 14px; border-radius: 0; }
+    .trend-item:last-child { border-bottom: none; }
+    .trend-meta { font-size: 13px; color: var(--muted); margin-bottom: 2px; display: flex; justify-content: space-between; }
+    .trend-topic { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .trend-count { font-size: 13px; color: var(--muted); }
+    .trend-menu { font-size: 16px; color: var(--muted); cursor: pointer; }
+
+    .rp-show-more {
+      padding: 14px 0 4px;
+      font-size: 15px; color: var(--muted); cursor: pointer;
+    }
+    .rp-show-more:hover { text-decoration: underline; }
+
+    /* who to follow */
+    .follow-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .follow-row:last-child { border-bottom: none; }
+    .follow-row:hover { background: rgba(255,255,255,0.02); margin: 0 -14px; padding: 10px 14px; }
+    .follow-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+    }
+    .follow-info { flex: 1; min-width: 0; }
+    .follow-name { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 3px; }
+    .follow-handle { font-size: 14px; color: var(--muted); }
+    .follow-btn {
+      background: var(--white); color: #000;
+      border-radius: 50px; padding: 7px 16px;
+      font-size: 14px; font-weight: 800; cursor: pointer; white-space: nowrap;
+    }
+    .follow-btn:hover { background: #e5e5e5; }
+
+    .rp-footer {
+      display: flex; flex-wrap: wrap; gap: 4px 10px;
+      padding: 14px 0; font-size: 13px; color: var(--muted);
+    }
+    .rp-footer a { cursor: pointer; }
+    .rp-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+
+  <div class="wrapper">
+
+    <!-- ══════════════════════ LEFT NAV ══════════════════════ -->
+    <div class="leftnav">
+
+      <div class="nav-logo">RX</div>
+
+      <div class="nav-item active">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">🔍</span>
+        <span class="nav-label">Signals</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon" style="position:relative;">
+          🔔
+          <span class="nav-badge">9+</span>
+        </span>
+        <span class="nav-label">Alerts</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon" style="position:relative;">
+          ✉️
+          <span class="nav-badge">4</span>
+        </span>
+        <span class="nav-label">Threads</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">🔖</span>
+        <span class="nav-label">Saves</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Rooms</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">✕</span>
+        <span class="nav-label">Pro</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">⋯</span>
+        <span class="nav-label">More</span>
+      </div>
+
+      <div class="post-btn">Signal</div>
+
+      <div class="nav-spacer"></div>
+
+      <div class="nav-profile">
+        <div class="np-avatar">AR</div>
+        <div class="np-info">
+          <div class="np-name">Alexa Amundson</div>
+          <div class="np-handle">@alexa_road</div>
+        </div>
+        <div class="np-dots">···</div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ FEED ══════════════════════ -->
+    <div class="feed">
+
+      <!-- Tabs -->
+      <div class="feed-tabs">
+        <div class="feed-tab active">Signal flow</div>
+        <div class="feed-tab">Following</div>
+      </div>
+
+      <!-- Composer -->
+      <div class="composer">
+        <div class="comp-avatar">AR</div>
+        <div class="comp-right">
+          <div class="comp-audience">Public stream ▾</div>
+          <div class="comp-input">What needs to move today?</div>
+          <div class="comp-divider"></div>
+          <div class="comp-actions">
+            <div class="comp-action">🖼</div>
+            <div class="comp-action">🎬</div>
+            <div class="comp-action">📊</div>
+            <div class="comp-action">😊</div>
+            <div class="comp-action">📅</div>
+            <div class="comp-action">📍</div>
+            <div class="comp-spacer"></div>
+            <div class="comp-counter">280</div>
+            <div class="comp-sep"></div>
+            <div class="comp-post-btn">Signal</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 1 — Pinned ── -->
+      <div class="pin-label">📌 Pinned</div>
+      <div class="tweet">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">MK</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">RoadCanvas</span>
+            <span class="tweet-verified">✓</span>
+            <span class="tweet-handle">@roadcanvas_studio</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">Mar 30</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">RoadCanvas is live.
+
+one studio for brand systems, launch decks, signal graphics, and the product stories that make BlackRoad surfaces legible 👇</div>
+          <div class="tweet-media">
+            <div class="tweet-img">
+              <div class="tweet-img-pattern"></div>
+              <div class="tweet-img-icon">🎨</div>
+            </div>
+          </div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">1.2K</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">4.8K</span></div>
+            <div class="ta-btn liked"><span class="ta-icon">♥</span><span class="ta-count">38.4K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">1.2M</span></div>
+            <div class="ta-btn bookmarked"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 2 — Repost ── -->
+      <div class="repost-label">🔁 <span style="font-weight:700;color:var(--muted);">Alexa Amundson reposted</span></div>
+      <div class="tweet">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">TT</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">RoadCode</span>
+            <span class="tweet-verified">✓</span>
+            <span class="tweet-handle">@roadcode</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">2h</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">Builder note:
+
+if a product shell can’t explain its canonical route, naming discipline, and operating surface in one screen, it’s not ready to ship.</div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">8.3K</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">62K</span></div>
+            <div class="ta-btn liked"><span class="ta-icon">♥</span><span class="ta-count">241K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">4.1M</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 3 — with poll ── -->
+      <div class="tweet">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">DB</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">BackRoad</span>
+            <span class="tweet-handle">@backroad</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">5h</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">Which BlackRoad surface should get the next public signal push?</div>
+
+          <div class="poll-option">
+            <div class="poll-fill" style="width:48%"></div>
+            <div class="poll-label">RoadCanvas</div>
+            <div class="poll-pct">48%</div>
+          </div>
+          <div class="poll-option">
+            <div class="poll-fill" style="width:28%"></div>
+            <div class="poll-label">RoadTube</div>
+            <div class="poll-pct">28%</div>
+          </div>
+          <div class="poll-option">
+            <div class="poll-fill" style="width:16%"></div>
+            <div class="poll-label">RoadWorld</div>
+            <div class="poll-pct">16%</div>
+          </div>
+          <div class="poll-option">
+            <div class="poll-fill" style="width:8%"></div>
+            <div class="poll-label">Other / convoy decides</div>
+            <div class="poll-pct">8%</div>
+          </div>
+          <div class="poll-meta">82,441 votes · Final results</div>
+
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">2.1K</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">7.8K</span></div>
+            <div class="ta-btn"><span class="ta-icon">♥</span><span class="ta-count">29.1K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">880K</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 4 — Thread starter ── -->
+      <div class="tweet" style="padding-bottom:0;border-bottom:none;">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">NL</div>
+          <div class="tweet-thread-line"></div>
+        </div>
+        <div class="tweet-body" style="padding-bottom:12px;">
+          <div class="tweet-header">
+            <span class="tweet-name">OfficeRoad</span>
+            <span class="tweet-verified">✓</span>
+            <span class="tweet-handle">@officeroad</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">8h</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">OfficeRoad runtime thread: what broke, what held, and what actually changed after the latest collaboration pass 🧵</div>
+          <div class="tweet-media">
+            <div class="tweet-img-2col">
+              <div class="tweet-img">
+                <div class="tweet-img-pattern"></div>
+                <div class="tweet-img-icon">🎮</div>
+              </div>
+              <div class="tweet-img">
+                <div class="tweet-img-pattern"></div>
+                <div class="tweet-img-icon">⚙️</div>
+              </div>
+            </div>
+          </div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">944</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">5.2K</span></div>
+            <div class="ta-btn liked"><span class="ta-icon">♥</span><span class="ta-count">44.8K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">2.3M</span></div>
+            <div class="ta-btn bookmarked"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Thread reply -->
+      <div class="tweet" style="padding-top:0;">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar" style="width:30px;height:30px;font-size:11px;margin-top:2px;">NL</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">OfficeRoad</span>
+            <span class="tweet-verified">✓</span>
+            <span class="tweet-handle">@officeroad</span>
+          </div>
+          <div class="tweet-text">1/ first lesson: if rooms, floors, and agent presence are the product, the world model has to stay readable before it gets clever.
+
+we cut visual noise, clarified movement, and the system got better immediately.</div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">312</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">1.4K</span></div>
+            <div class="ta-btn"><span class="ta-icon">♥</span><span class="ta-count">18.2K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">1.1M</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 5 — Quote tweet ── -->
+      <div class="tweet">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">VF</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">RoadTube</span>
+            <span class="tweet-handle">@roadtube</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">12h</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">this is exactly the kind of systems note public product teams should quote and keep moving with</div>
+          <div class="quote-box">
+            <div class="quote-header">
+              <div class="quote-avatar">SC</div>
+              <span class="quote-name">RoadWork</span>
+              <span class="quote-handle">@roadwork</span>
+              <span style="font-size:13px;color:var(--muted);">· Apr 8</span>
+            </div>
+            <div class="quote-text">the best ops surfaces are the ones that still read clearly at 2am when nobody has patience left</div>
+          </div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">441</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">3.1K</span></div>
+            <div class="ta-btn liked"><span class="ta-icon">♥</span><span class="ta-count">27.6K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">640K</span></div>
+            <div class="ta-btn bookmarked"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tweet 6 — Image grid ── -->
+      <div class="tweet">
+        <div class="tweet-avatar-col">
+          <div class="tweet-avatar">SC</div>
+        </div>
+        <div class="tweet-body">
+          <div class="tweet-header">
+            <span class="tweet-name">RoadCanvas</span>
+            <span class="tweet-verified">✓</span>
+            <span class="tweet-handle">@roadcanvas_studio</span>
+            <span class="tweet-dot">·</span>
+            <span class="tweet-time">1d</span>
+            <span class="tweet-menu">⋯</span>
+          </div>
+          <div class="tweet-text">new BlackRoad system pass just wrapped. tighter type, clearer cards, cleaner shells, and a much stronger family resemblance across products.</div>
+          <div class="tweet-media">
+            <div class="tweet-img-2col">
+              <div class="tweet-img">
+                <div class="tweet-img-pattern"></div>
+                <div class="tweet-img-icon">🖋</div>
+              </div>
+              <div class="tweet-img">
+                <div class="tweet-img-pattern"></div>
+                <div class="tweet-img-icon">📐</div>
+              </div>
+            </div>
+          </div>
+          <div class="tweet-actions">
+            <div class="ta-btn"><span class="ta-icon">💬</span><span class="ta-count">621</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔁</span><span class="ta-count">2.4K</span></div>
+            <div class="ta-btn"><span class="ta-icon">♥</span><span class="ta-count">19.8K</span></div>
+            <div class="ta-btn"><span class="ta-icon">📊</span><span class="ta-count">490K</span></div>
+            <div class="ta-btn"><span class="ta-icon">🔖</span></div>
+            <div class="ta-btn"><span class="ta-icon">↗</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ RIGHT PANEL ══════════════════════ -->
+    <div class="right-panel">
+
+      <!-- Search -->
+      <div class="rp-search">
+        <div class="search-wrap">
+          <span>🔍</span>
+          <input type="text" placeholder="Search RoadX" />
+        </div>
+      </div>
+
+      <!-- Premium CTA -->
+      <div class="rp-card">
+        <div class="rp-card-title">Upgrade to Pro</div>
+        <div class="rp-card-sub">Unlock stronger analytics, routing signals, and better public-stream controls.</div>
+        <div class="sub-plan">
+          <div class="sub-icon">⭐</div>
+          <div class="sub-info">
+            <div class="sub-name">Basic</div>
+            <div class="sub-price">$3 / month</div>
+          </div>
+          <div class="sub-check">›</div>
+        </div>
+        <div class="sub-plan" style="border-color:var(--white);">
+          <div class="sub-icon">✕</div>
+          <div class="sub-info">
+            <div class="sub-name" style="color:#fff;">Pro</div>
+            <div class="sub-price">$8 / month</div>
+          </div>
+          <div class="sub-check" style="color:#fff;">›</div>
+        </div>
+      </div>
+
+      <!-- Trending -->
+      <div class="rp-card">
+        <div class="rp-card-title">Trending now</div>
+
+        <div class="trend-item">
+          <div class="trend-meta"><span>Signal flow · Trending</span><span class="trend-menu">⋯</span></div>
+          <div class="trend-topic">#RoadCanvas</div>
+          <div class="trend-count">48.2K posts</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-meta"><span>Design · Trending</span><span class="trend-menu">⋯</span></div>
+          <div class="trend-topic">RoadTube launch</div>
+          <div class="trend-count">92.4K posts</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-meta"><span>Trending in network</span><span class="trend-menu">⋯</span></div>
+          <div class="trend-topic">#OfficeRoad</div>
+          <div class="trend-count">118K posts</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-meta"><span>Builder</span><span class="trend-menu">⋯</span></div>
+          <div class="trend-topic">Canonical routing</div>
+          <div class="trend-count">22.1K posts</div>
+        </div>
+        <div class="trend-item">
+          <div class="trend-meta"><span>Search · Trending</span><span class="trend-menu">⋯</span></div>
+          <div class="trend-topic">RoadView ranking</div>
+          <div class="trend-count">61.8K posts</div>
+        </div>
+
+        <div class="rp-show-more">Show more</div>
+      </div>
+
+      <!-- Who to follow -->
+      <div class="rp-card">
+        <div class="rp-card-title">Who to follow</div>
+
+        <div class="follow-row">
+          <div class="follow-avatar">JK</div>
+          <div class="follow-info">
+            <div class="follow-name">RoadTube <span style="font-size:13px;color:var(--muted);">✓</span></div>
+            <div class="follow-handle">@roadtube</div>
+          </div>
+          <div class="follow-btn">Follow</div>
+        </div>
+
+        <div class="follow-row">
+          <div class="follow-avatar">LG</div>
+          <div class="follow-info">
+            <div class="follow-name">RoadView</div>
+            <div class="follow-handle">@roadview</div>
+          </div>
+          <div class="follow-btn">Follow</div>
+        </div>
+
+        <div class="follow-row">
+          <div class="follow-avatar">KD</div>
+          <div class="follow-info">
+            <div class="follow-name">RoadWork</div>
+            <div class="follow-handle">@roadwork</div>
+          </div>
+          <div class="follow-btn">Follow</div>
+        </div>
+
+        <div class="rp-show-more">Show more</div>
+      </div>
+
+      <!-- Footer -->
+      <div class="rp-footer">
+        <a>Terms of Service</a>
+        <a>Privacy Policy</a>
+        <a>Cookie Policy</a>
+        <a>Accessibility</a>
+        <a>Ads info</a>
+        <a>More ···</a>
+        <span>© 2026 RoadX Corp.</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
+    .grad-bar { height: 3px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 20; }

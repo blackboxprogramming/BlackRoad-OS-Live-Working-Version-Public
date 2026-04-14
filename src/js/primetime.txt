@@ -1,0 +1,31 @@
+// ── RENDER PRIME TIME ──
+function renderPT(){
+  var el=document.getElementById('pt-body'),e=S.event;
+  var sorted=[].concat(e.competitors).sort(function(a,b){return b.score-a.score}),mx=sorted[0].score;
+  var m=Math.floor(e.timer/60),s=e.timer%60,tm=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  var tv=Object.values(S.votes).reduce(function(a,b){return a+b},0)||1;
+  var pc={};for(var k in S.votes)pc[k]=Math.round(S.votes[k]/tv*100);
+  var days=['SUN','MON','TUE','WED','THU','FRI','SAT'],today=days[new Date().getDay()];
+  var h='<div class="pt-event"><div class="pt-type">'+e.type+'</div><div class="pt-title">'+e.title+'</div><div class="pt-desc">'+e.desc+'</div><div class="pt-cast">'+e.cast.join(' / ')+'</div></div>';
+  h+='<div class="pt-timer">'+tm+'</div>';
+  h+='<div class="pt-section">Leaderboard</div>';
+  sorted.forEach(function(c,r){var ld=c.score===mx&&mx>0?' leading':'';h+='<div class="pt-comp'+ld+'"><span class="pt-rank">'+(r+1)+'</span><span class="pt-avatar">'+c.i+'</span><span class="pt-comp-name">'+c.name+'</span><span class="pt-comp-role">'+c.role+'</span><span class="pt-score">'+c.score+'</span></div>'});
+  h+='<div class="vote-section"><div class="vote-label">Vote</div><div class="vote-bar">';
+  e.competitors.forEach(function(c){h+='<div class="vote-seg" style="width:'+(pc[c.id]||0)+'%"></div>'});
+  h+='</div><div class="vote-results">';
+  e.competitors.forEach(function(c){h+='<span>'+c.name+' '+(pc[c.id]||0)+'%</span>'});
+  h+='</div><div class="vote-buttons">';
+  e.competitors.forEach(function(c){var v=S.votedFor[c.id]?' voted':'';h+='<button class="vote-btn'+v+'" data-agent="'+c.id+'">ROAD '+c.name+'</button>'});
+  h+='</div></div>';
+  h+='<div class="pt-section">This Week</div>';
+  S.schedule.forEach(function(r){var td=r.day===today?' today':'';h+='<div class="sched-row'+td+'"><span class="sched-day">'+r.day+'</span><span class="sched-name">'+r.name+'</span><span class="sched-time">'+r.time+'</span></div>'});
+  el.innerHTML=h;
+  el.querySelectorAll('.vote-btn').forEach(function(b){b.addEventListener('click',function(){
+    var a=b.dataset.agent;if(S.votedFor[a])return;S.votedFor[a]=true;S.votes[a]++;
+    localStorage.setItem('br-voted',JSON.stringify(S.votedFor));
+    S.msgs.push({u:'system',t:'Vote recorded for '+a.charAt(0).toUpperCase()+a.slice(1)});
+    render();
+  })});
+  document.getElementById('pt-clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+

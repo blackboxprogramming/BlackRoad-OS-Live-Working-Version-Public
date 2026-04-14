@@ -1,0 +1,93 @@
+// ── RENDER WORLD CENTER (always HQ image) ──
+function updateWorld(){
+  var el=document.getElementById('world-center');
+  var sprites='';
+  var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
+  defaultAgents.forEach(function(name,i){
+    var p=getAgentPos(name,i);
+    var ghost=makeGhost(name,p.frame);
+    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;transform:scale(3);transform-origin:top left;pointer-events:none;transition:left .6s linear,top .6s linear" title="'+name+'">'+ghost+'<div style="font-family:var(--jb);font-size:4px;color:var(--sub);text-align:center;margin-top:1px;white-space:nowrap;opacity:.7">'+name.substring(0,3)+'</div></div>';
+  });
+  el.innerHTML='<img src="'+HQ_IMG+'" alt="BlackRoad HQ" style="filter:brightness(0.85)">'+sprites+'<div class="world-center-label">BlackRoad HQ / '+defaultAgents.length+' agents</div>';
+}
+
+// ── RENDER 4 MINI VIEWERS (agent device screens) ──
+// These show what 4 agents are working on at their desks in the HQ
+var AGENT_SCREENS=[
+  {agent:'Roadie',task:'FLEET CHECK',lines:function(){
+    var up=Math.floor(Math.random()*3)+16;
+    return ['> smoke-test --all','','roadtrip    [=====] UP','roadcode    [=====] UP','backroad    [=====] UP','carkeys     [=====] UP',
+    'roadwork    [=====] UP','roadworld   [=====] UP','blackboard  [=====] UP','roadpay     [='+(Math.random()>.7?'====':'==  ')+'] '+(Math.random()>.7?'UP':'SLOW'),'',up+'/18 products responding','latency: '+Math.floor(Math.random()*60+100)+'ms','','> next task...'].join('\n')}},
+  {agent:'Lucidia',task:'MEMORY WRITE',lines:function(){
+    var n=7693+Math.floor(Math.random()*50);
+    return ['> memory-chain --status','','entries:   '+n,'sessions:  442','tables:    442','integrity: VERIFIED','chain:     INTACT','','> writing new entry...','  context: agent-olympics','  source: session-'+Math.floor(Math.random()*9000+1000),'  hash: 0x'+Math.random().toString(16).slice(2,10),'','> persisted. chain +1','> total: '+(n+1)].join('\n')}},
+  {agent:'Gematria',task:'ANALYTICS',lines:function(){
+    var c=Math.floor(Math.random()*20+35);
+    return ['> analytics --today','','commits:  '+c+' across 44 orgs','repos:    2,890 indexed','agents:   27 online','domains:  19 active','apps:     109 configured','','top repos today:','  BlackRoad-OS-Inc  +'+Math.floor(Math.random()*10+5),'  BlackRoad-AI      +'+Math.floor(Math.random()*8+2),'  BlackRoadOS       +'+Math.floor(Math.random()*6+1),'','viewers: '+Math.floor(Math.random()*30+10)].join('\n')}},
+  {agent:'Elias',task:'DEPLOY PIPELINE',lines:function(){
+    var n=Math.floor(Math.random()*100+800);
+    return ['> deploy --status','','BUILD #'+n,'  target: cloudflare edge','  worker: roadtrip-hub','  size:   '+(Math.random()*30+10).toFixed(1)+' KB','  status: '+(Math.random()>.8?'BUILDING...':'DEPLOYED'),'  time:   '+(Math.random()*3+1).toFixed(1)+'s','','BUILD #'+(n+1),'  target: cloudflare edge','  worker: backroad-dist','  status: QUEUED','','queue: '+Math.floor(Math.random()*3)+' pending'].join('\n')}},
+  {agent:'Sophia',task:'REASONING',lines:function(){
+    var thoughts=['What makes a system alive?','Can agents truly collaborate?','Is memory the same as identity?','When does automation become autonomy?','What does the road remember?'];
+    var t=thoughts[Math.floor(Math.random()*thoughts.length)];
+    return ['> think --deep','','SESSION: reflection-'+Math.floor(Math.random()*900+100),'','QUESTION:','  "'+t+'"','','PROCESSING...','  depth: '+Math.floor(Math.random()*5+3)+' layers','  connections: '+Math.floor(Math.random()*20+5),'  confidence: '+(Math.random()*30+70).toFixed(1)+'%','','> writing observation...','> logged to memory chain'].join('\n')}},
+  {agent:'Cecilia',task:'GOVERNANCE',lines:function(){
+    return ['> audit --full','','NODES:','  alice    (Pi 5)   ONLINE','  octavia  (Pi 4)   ONLINE','  cecilia  (Pi 4)   ONLINE','  mesh     (LoRa)   '+(Math.random()>.3?'ACTIVE':'STANDBY'),'','SECURITY:','  tokens:   rotated','  tunnels:  '+Math.floor(Math.random()*3+2)+' active','  secrets:  encrypted','  auth:     verified','','STATUS: ALL CLEAR'].join('\n')}},
+];
+var screenRotation=0;
+
+function updateViewer(){
+  // Show 4 agent device screens, rotate through agents
+  for(var i=0;i<4;i++){
+    var idx=(screenRotation+i)%AGENT_SCREENS.length;
+    var scr=AGENT_SCREENS[idx];
+    document.getElementById('mw-title-'+i).textContent=scr.agent+' / '+scr.task;
+    document.getElementById('mw-badge-'+i).textContent='LIVE';
+    document.getElementById('mw-body-'+i).textContent=scr.lines();
+  }
+  // Rotate one agent every cycle
+  if(Math.random()>.6)screenRotation=(screenRotation+1)%AGENT_SCREENS.length;
+}
+
+function getChannelArt(ch){
+    var arts={'Deploy Pipeline':' BUILD QUEUE\n ────────────────────\n #847 roadtrip   OK  2.1s\n #848 roadpay    OK  1.8s\n #849 carkeys    ..  ----\n #850 blackboard OK  2.4s\n\n queue: 2 pending\n next: carkeys-auth',
+      'Memory Chain':' MEMORY CHAIN STATUS\n ────────────────────\n entries:    7,693\n sessions:   442\n tables:     442\n last write: 3s ago\n integrity:  VERIFIED\n chain:      INTACT',
+      'Fleet Health':' FLEET STATUS\n ────────────────────\n roadtrip    [=====] UP\n roadcode    [=====] UP\n roadwork    [=====] UP\n carkeys     [=====] UP\n roadpay     [===  ] SLOW\n blackboard  [=====] UP\n\n 18/18 responding\n avg latency: 142ms',
+      'Build Log':' COMMIT FEED\n ────────────────────\n 14:02 roadie    +3 files\n 14:01 elias     deploy\n 13:58 lucidia   +47 mem\n 13:55 calliope  brand.md\n 13:51 gematria  metrics\n\n today: 47 commits\n 44 orgs / 2,890 repos',
+      'Agent Chat':' AGENT COORDINATION\n ────────────────────\n Roadie   > status?\n Lucidia  > all clear\n Cordelia > routing to Elias\n Elias    > deploying now\n Roadie   > confirmed\n\n 27 agents online\n 4 handoffs today',
+      'BRX Intelligence':' SYSTEM INTELLIGENCE\n ────────────────────\n 44 orgs | 2,890 repos\n 27 agents | 19 domains\n 109 subdomain apps\n 17 products live\n 150/mo infrastructure\n uptime: 99.8%',
+      'RollerCoaster World':' PARK SIMULATION\n ────────────────────\n    /\\      /\\      /\\\n   /  \\    /  \\    /  \\\n  /    \\  /    \\  /    \\\n /      \\/      \\/      \\\n  [====]  [====]  [====]\n\n agents: 4 competing\n physics: ON',
+      'Strategy Room':' STRATEGY BRIEF\n ────────────────────\n P0: get first user\n P1: fix products\n P2: SEO discovery\n P3: infra maint\n\n owner: Valeria\n updated: today',
+      'Model Training':' FINE-TUNE RUN\n ────────────────────\n run-034 llama-7b\n epoch: 12 / 50\n loss:  0.0431 (v)\n lr:    0.00003\n gpu:   alice (Pi 5)\n eta:   2h 14m',
+      'Mesh Network':' MESH TOPOLOGY\n ────────────────────\n nodes:    9 active\n links:    34\n LoRa:     3 radios\n tunnels:  WireGuard UP\n fallback: Meshtastic\n latency:  <50ms',
+      'Philosophy Hour':' REFLECTION\n ────────────────────\n Sophia is thinking...\n\n "What does it mean\n  for a system to\n  observe itself?"\n\n session: active\n depth: increasing',
+      'Music Lab':' GENERATIVE AUDIO\n ────────────────────\n Lyra + Aria active\n mode: ambient\n generating...\n\n ~~~~~~~~~~~~~~~\n  ~ ~ ~ ~ ~ ~ ~\n ~~~~~~~~~~~~~~~',
+      'Art Studio':' VISUAL GENERATION\n ────────────────────\n Sapphira rendering\n mode: pixel art\n resolution: 800x600\n\n [...........]\n [###........] 27%',
+      'RoadTrip':'ROADTRIP CHAT HUB\n agents: 27 online\n channels: 14 active\n messages: 1,842 today\n Roadie > next task?',
+      'RoadCode':'DEV STREAM\n repos: 2,890 / orgs: 44\n commits today: 47\n PRs open: 12\n latest: roadie +3 files',
+      'BackRoad':'DISTRIBUTION ENGINE\n platforms: X, Reddit, LI\n posts queued: 3\n clips ready: 2\n reach: 727 views/mo',
+      'RoadView':'SEARCH INDEX\n indexed: 2,890 repos\n domains: 109 apps\n queries today: 34\n trending: RoadCode',
+      'RoadWork':'TASK EXECUTION\n active: 3 tasks\n completed: 47 today\n queue: 2 pending\n P0: first real user',
+      'RoadWorld':'WORLD ENGINE\n worlds: 3 active\n physics: ON\n agents: 4 competing\n renderer: running',
+      'BlackBoard':'EDUCATION\n lessons: 12 active\n knowledge: 442 entries\n Alexandria teaching...',
+      'RoadPay':'PAYMENTS\n stripe: connected\n plans: 3 active\n revenue: 0.00\n invoices: 0',
+      'Roadie':'FLEET OPERATOR\n products: 18/18 UP\n deploys today: 14\n smoke test: PASS\n > all clear',
+      'CarKeys':'AUTH SYSTEM\n tokens: rotated\n sessions: 12 active\n 2FA: enabled',
+      'RoadChain':'CHAIN ACTIVITY\n minted: 47 ROAD\n contributors: 12\n chain: verified',
+      'RoadCoin':'TOKEN ECONOMY\n ROAD token\n staking: ON\n basescan: monitoring',
+      'OfficeRoad':'COLLABORATION\n rooms: 3 active\n agents: 8 present',
+      'CarPool':'PAIR BUILDING\n session: active\n builders: 2',
+      'OneWay':'SECURE GATEWAY\n tunnels: 2 active\n encryption: WireGuard',
+      'RoadSide':'SUPPORT LOGS\n errors: 3 today\n wellness: nominal',
+      'RoadBook':'KNOWLEDGE BASE\n entries: 442\n Alexandria curating...',
+      'Pixel Office':'VIRTUAL HQ | floors: 14 | agents: 27 | rooms: active',
+    };
+  return arts[ch.name]||'CH '+ch.ch+'\n'+ch.name+'\n'+ch.agent+' operating\n'+ch.domain+'\nstatus: '+ch.state;
+}
+function showHQ(){
+  var el=document.getElementById('world-body');
+  el.innerHTML='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0a0a0a;overflow:hidden;position:relative">'
+    +'<img src="'+HQ_IMG+'" style="max-width:100%;max-height:100%;object-fit:contain;image-rendering:pixelated" alt="BlackRoad HQ">'
+    +'<div style="position:absolute;bottom:8px;left:12px;font-family:var(--jb);font-size:9px;color:var(--muted);background:rgba(0,0,0,.7);padding:2px 6px;border-radius:2px">BlackRoad HQ / 2 floors / 27 agents</div>'
+    +'</div>';
+}

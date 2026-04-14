@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+  <title>RoadIn — LinkedIn-style Mockup</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:     #0a0a0a;
+      --s1:     #111111;
+      --s2:     #181818;
+      --s3:     #1a1a1a;
+      --s4:     #222222;
+      --s5:     #333333;
+      --border: #2a2a2a;
+      --text:   #e5e5e5;
+      --muted:  #737373;
+      --dim:    #525252;
+      --white:  #ffffff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    
+    
+    
+
+    /* ══════════════════════════════
+       TOP NAV
+    ══════════════════════════════ */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 52px;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 6px;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 0;
+      cursor: pointer; flex-shrink: 0; margin-right: 6px;
+    }
+    .nav-logo-icon {
+      width: 34px; height: 34px; border-radius: 6px;
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 900; color: #000;
+      letter-spacing: -1px;
+    }
+
+    .nav-search {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--s3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 7px 12px;
+      width: 260px;
+    }
+    .nav-search:focus-within { border-color: var(--white); }
+    .nav-search input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: 14px; flex: 1;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search span { font-size: 15px; color: var(--muted); }
+
+    .nav-center {
+      flex: 1; display: flex; justify-content: center;
+      align-items: stretch; gap: 2px;
+      max-width: 600px; margin: 0 auto;
+    }
+
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; padding: 0 18px;
+      cursor: pointer; color: var(--muted);
+      border-bottom: 2px solid transparent;
+      font-size: 22px; position: relative;
+      min-width: 80px;
+      transition: color 0.1s, border-color 0.1s;
+    }
+    .nav-item:hover { color: var(--text); border-bottom-color: var(--text); }
+    .nav-item.active { color: var(--white); border-bottom-color: var(--white); }
+    .nav-label { font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .nav-badge {
+      position: absolute; top: 6px; right: 12px;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      background: var(--white); color: #000;
+      font-size: 9px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 3px; border: 2px solid var(--s1);
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 0; margin-left: 4px; }
+
+    .nav-profile-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; padding: 0 10px; cursor: pointer;
+      color: var(--muted); border-bottom: 2px solid transparent;
+      min-width: 60px;
+    }
+    .nav-profile-item:hover { color: var(--text); border-bottom-color: var(--text); }
+    .nav-profile-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--s4); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--muted);
+    }
+    .nav-profile-label { font-size: 11px; font-weight: 500; white-space: nowrap; }
+
+    .nav-divider { width: 1px; height: 28px; background: var(--border); margin: 0 4px; }
+
+    .nav-premium-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 0 14px; cursor: pointer; gap: 2px;
+      color: var(--muted); min-width: 80px;
+    }
+    .nav-premium-btn:hover { color: var(--text); }
+    .nav-premium-icon { font-size: 15px; }
+    .nav-premium-label { font-size: 11px; font-weight: 500; white-space: nowrap; }
+
+    /* ══════════════════════════════
+       PAGE LAYOUT
+    ══════════════════════════════ */
+    .page {
+      display: flex;
+      max-width: 1128px;
+      margin: 0 auto;
+      padding: 68px 16px 40px;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    /* ══════════════════════════════
+       LEFT COLUMN — Profile card
+    ══════════════════════════════ */
+    .leftcol { width: 225px; flex-shrink: 0; }
+
+    .profile-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .profile-banner {
+      height: 56px;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 8px, var(--s4) 8px, var(--s4) 16px
+      );
+    }
+    .profile-card-body { padding: 0 14px 14px; }
+    .profile-avatar-wrap {
+      margin-top: -26px; margin-bottom: 8px;
+    }
+    .profile-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--s4);
+      border: 3px solid var(--s2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: var(--muted);
+      cursor: pointer;
+    }
+    .profile-avatar:hover { border-color: var(--white); }
+    .profile-name {
+      font-size: 15px; font-weight: 700; color: var(--white);
+      cursor: pointer; line-height: 1.3;
+    }
+    .profile-name:hover { text-decoration: underline; }
+    .profile-title { font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.4; }
+    .profile-company {
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 2px;
+    }
+    .profile-school {
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 5px; margin-bottom: 10px;
+    }
+
+    .profile-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+    .profile-stat {
+      padding: 4px 0; cursor: pointer;
+    }
+    .profile-stat:hover .ps-label { text-decoration: underline; }
+    .ps-label { font-size: 12px; color: var(--muted); }
+    .ps-val { font-size: 13px; font-weight: 700; color: var(--white); }
+
+    .profile-premium-cta {
+      padding: 10px 0 4px;
+      font-size: 12px; color: var(--text);
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+    }
+    .profile-premium-cta:hover .ppc-label { text-decoration: underline; }
+    .ppc-icon { font-size: 14px; }
+    .ppc-label { color: var(--white); font-weight: 600; font-size: 12px; }
+
+    .profile-saved {
+      padding: 6px 0 0;
+      font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; color: var(--text);
+    }
+    .profile-saved:hover .psa-label { text-decoration: underline; }
+    .psa-label { font-weight: 600; color: var(--white); font-size: 12px; }
+
+    /* recents card */
+    .recents-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px 8px;
+      margin-bottom: 10px;
+    }
+    .rc-title {
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+    .rc-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 0; cursor: pointer; font-size: 13px; color: var(--muted);
+    }
+    .rc-item:hover { color: var(--text); }
+    .rc-icon { font-size: 14px; }
+    .rc-show-more {
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      cursor: pointer; padding: 6px 0 2px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .rc-show-more:hover { color: var(--text); }
+
+    /* ══════════════════════════════
+       MAIN FEED
+    ══════════════════════════════ */
+    .feed { flex: 1; min-width: 0; }
+
+    /* ── Composer ── */
+    .composer {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .composer-top {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .comp-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+    }
+    .comp-input {
+      flex: 1; background: none;
+      border: 1px solid var(--s5); border-radius: 16px;
+      padding: 10px 16px; font-size: 14px; color: var(--muted);
+      cursor: text;
+    }
+    .comp-input:hover { border-color: var(--white); color: var(--text); }
+    .composer-actions {
+      display: flex; align-items: center; gap: 0; padding-top: 4px;
+    }
+    .ca-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 14px; border-radius: 4px;
+      cursor: pointer; color: var(--muted);
+      font-size: 13px; font-weight: 600;
+      transition: background 0.1s, color 0.1s;
+    }
+    .ca-btn:hover { background: var(--s3); color: var(--text); }
+    .ca-icon { font-size: 16px; }
+
+    /* ── Post Card ── */
+    .post {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    /* promo label */
+    .post-promoted {
+      padding: 10px 16px 0;
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .post-header {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 14px 16px 10px;
+    }
+    .post-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      cursor: pointer; position: relative;
+    }
+    .post-avatar:hover { outline: 2px solid var(--white); }
+    .post-avatar-badge {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 18px; height: 18px; border-radius: 4px;
+      background: var(--s5); border: 2px solid var(--s2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+    }
+    .post-meta { flex: 1; min-width: 0; }
+    .post-author {
+      font-size: 14px; font-weight: 700; color: var(--white);
+      cursor: pointer; line-height: 1.3;
+    }
+    .post-author:hover { text-decoration: underline; }
+    .post-title-line { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .post-time { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .post-follow {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 14px; font-weight: 700;
+      color: var(--white); cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; border-radius: 4px;
+    }
+    .post-follow:hover { background: var(--s3); }
+    .post-menu {
+      font-size: 20px; color: var(--muted); cursor: pointer;
+      padding: 4px 6px; border-radius: 50%;
+    }
+    .post-menu:hover { background: var(--s3); color: var(--text); }
+
+    .post-body { padding: 0 16px 12px; }
+    .post-text {
+      font-size: 14px; color: var(--text);
+      line-height: 1.6; margin-bottom: 10px;
+      white-space: pre-wrap;
+    }
+    .post-text .hashtag { color: var(--white); font-weight: 600; cursor: pointer; }
+    .post-text .hashtag:hover { text-decoration: underline; }
+    .post-text .see-more { color: var(--muted); cursor: pointer; font-weight: 600; }
+    .post-text .see-more:hover { text-decoration: underline; }
+
+    /* image */
+    .post-image {
+      width: 100%; aspect-ratio: 16/9;
+      background: var(--s3);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px; cursor: pointer;
+    }
+    .post-image-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 10px, var(--s4) 10px, var(--s4) 20px
+      );
+    }
+    .post-image-icon { position: relative; z-index: 1; font-size: 56px; opacity: 0.12; }
+
+    /* article preview */
+    .post-article {
+      border: 1px solid var(--border); border-radius: 4px;
+      overflow: hidden; cursor: pointer; margin-bottom: 12px;
+    }
+    .post-article:hover { border-color: var(--muted); }
+    .pa-thumb {
+      width: 100%; height: 140px;
+      background: var(--s3);
+      position: relative; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pa-thumb-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 10px, var(--s4) 10px, var(--s4) 20px
+      );
+    }
+    .pa-thumb-icon { position: relative; z-index: 1; font-size: 40px; opacity: 0.15; }
+    .pa-info { padding: 10px 14px; background: var(--s3); }
+    .pa-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+    .pa-source { font-size: 12px; color: var(--muted); }
+
+    /* reactions bar */
+    .post-reactions {
+      display: flex; align-items: center; gap: 4px;
+      padding: 4px 16px 6px;
+      font-size: 12px; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .reaction-emojis { display: flex; gap: 0; margin-right: 4px; }
+    .reaction-emoji {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--s3); border: 1px solid var(--s2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; margin-left: -4px;
+    }
+    .reaction-emoji:first-child { margin-left: 0; }
+    .reaction-count { cursor: pointer; }
+    .reaction-count:hover { text-decoration: underline; color: var(--text); }
+    .post-comments-count {
+      margin-left: auto; cursor: pointer;
+    }
+    .post-comments-count:hover { text-decoration: underline; color: var(--text); }
+
+    /* action buttons */
+    .post-actions {
+      display: flex; align-items: center;
+      padding: 2px 8px;
+    }
+    .pa-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 8px; border-radius: 4px;
+      cursor: pointer; color: var(--muted);
+      font-size: 13px; font-weight: 600;
+      transition: background 0.1s, color 0.1s;
+    }
+    .pa-btn:hover { background: var(--s3); color: var(--text); }
+    .pa-btn.liked { color: var(--white); }
+    .pa-icon { font-size: 17px; }
+
+    /* repost indicator */
+    .post-repost-label {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 16px 4px;
+      font-size: 12px; color: var(--muted); font-weight: 600;
+    }
+
+    /* ── Newsletter post ── */
+    .post-newsletter {
+      margin: 0 16px 12px;
+      background: var(--s3); border: 1px solid var(--border);
+      border-radius: 6px; padding: 12px;
+      cursor: pointer;
+    }
+    .post-newsletter:hover { border-color: var(--muted); }
+    .pn-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .pn-icon { font-size: 20px; }
+    .pn-name { font-size: 13px; font-weight: 700; color: var(--white); }
+    .pn-label { font-size: 11px; color: var(--muted); }
+    .pn-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+    .pn-sub { font-size: 12px; color: var(--muted); }
+
+    /* ══════════════════════════════
+       RIGHT COLUMN
+    ══════════════════════════════ */
+    .rightcol { width: 300px; flex-shrink: 0; }
+
+    .rs-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .rs-card-title {
+      font-size: 15px; font-weight: 700; color: var(--white);
+      margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .rs-card-title .rs-edit { font-size: 18px; color: var(--muted); cursor: pointer; }
+    .rs-card-title .rs-edit:hover { color: var(--text); }
+
+    /* news */
+    .news-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 7px 0; cursor: pointer;
+      border-bottom: 1px solid var(--border);
+    }
+    .news-item:last-child { border-bottom: none; }
+    .news-item:hover .ni-title { text-decoration: underline; }
+    .ni-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--white); flex-shrink: 0; margin-top: 6px; }
+    .ni-content { flex: 1; }
+    .ni-title { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 2px; }
+    .ni-meta { font-size: 11px; color: var(--muted); }
+
+    .rs-show-more {
+      font-size: 13px; font-weight: 600; color: var(--muted);
+      cursor: pointer; padding: 8px 0 2px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .rs-show-more:hover { color: var(--text); }
+
+    /* people you may know */
+    .pymk-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .pymk-item:last-child { border-bottom: none; }
+    .pymk-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      cursor: pointer; position: relative;
+    }
+    .pymk-info { flex: 1; min-width: 0; }
+    .pymk-name {
+      font-size: 13px; font-weight: 700; color: var(--white);
+      cursor: pointer; line-height: 1.3;
+    }
+    .pymk-name:hover { text-decoration: underline; }
+    .pymk-title { font-size: 12px; color: var(--muted); line-height: 1.3; margin-bottom: 6px; }
+    .pymk-mutual { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; }
+    .pymk-connect-btn {
+      width: 100%; padding: 5px 14px; border-radius: 12px;
+      border: 1px solid var(--white); color: var(--white);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      background: none; margin-top: 6px; text-align: center;
+    }
+    .pymk-connect-btn:hover { background: rgba(255,255,255,0.08); }
+
+    /* ad card */
+    .ad-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .ad-image {
+      width: 100%; height: 90px;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 8px, var(--s4) 8px, var(--s4) 16px
+      );
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; opacity: 0.2;
+    }
+    .ad-body { padding: 10px 12px; }
+    .ad-name { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+    .ad-desc { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .ad-follow-btn {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 6px 14px; border-radius: 12px;
+      border: 1px solid var(--muted); color: var(--text);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .ad-follow-btn:hover { border-color: var(--white); color: var(--white); }
+    .ad-label { font-size: 11px; color: var(--dim); margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════ TOP NAV ══════════════════════ -->
+  <div class="topnav">
+
+    <div class="nav-logo">
+      <div class="nav-logo-icon">in</div>
+    </div>
+
+    <div class="nav-search">
+      <span>🔍</span>
+      <input type="text" placeholder="Search" />
+    </div>
+
+    <div class="nav-center">
+      <div class="nav-item active">
+        <span>🏠</span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <span>👥</span>
+        <span class="nav-label">My Network</span>
+        <div class="nav-badge">8</div>
+      </div>
+      <div class="nav-item">
+        <span>💼</span>
+        <span class="nav-label">Jobs</span>
+      </div>
+      <div class="nav-item">
+        <span>💬</span>
+        <span class="nav-label">Messaging</span>
+        <div class="nav-badge">3</div>
+      </div>
+      <div class="nav-item">
+        <span>🔔</span>
+        <span class="nav-label">Notifications</span>
+        <div class="nav-badge">12</div>
+      </div>
+    </div>
+
+    <div class="nav-right">
+      <div class="nav-profile-item">
+        <div class="nav-profile-avatar">AR</div>
+        <span class="nav-profile-label">Me ▾</span>
+      </div>
+      <div class="nav-divider"></div>
+      <div class="nav-premium-btn">
+        <span class="nav-premium-icon">🟡</span>
+        <span class="nav-premium-label">Try Premium</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════ PAGE ══════════════════════ -->
+  <div class="page">
+
+    <!-- ══════════════════════ LEFT COLUMN ══════════════════════ -->
+    <div class="leftcol">
+
+      <div class="profile-card">
+        <div class="profile-banner"></div>
+        <div class="profile-card-body">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">AR</div>
+          </div>
+          <div class="profile-name">Alexa Amundson</div>
+          <div class="profile-title">Founder & CEO at BlackRoad OS · Building the web's operating layer · prev. @RoadCorp</div>
+          <div class="profile-company">🏢 <span>BlackRoad OS Inc.</span></div>
+          <div class="profile-school">🎓 <span>Computer Science, U of Minnesota</span></div>
+
+          <div class="profile-divider"></div>
+
+          <div class="profile-stat">
+            <div class="ps-label">Profile viewers</div>
+            <div class="ps-val">1,241 <span style="font-size:12px;color:#737373;">this week</span></div>
+          </div>
+          <div class="profile-stat">
+            <div class="ps-label">Post impressions</div>
+            <div class="ps-val">48,392 <span style="font-size:12px;color:#737373;">past 90 days</span></div>
+          </div>
+
+          <div class="profile-divider"></div>
+
+          <div class="profile-premium-cta">
+            <span class="ppc-icon">🟡</span>
+            <span class="ppc-label">Unlock with Premium</span>
+          </div>
+
+          <div class="profile-saved">
+            <span>🔖</span>
+            <span class="psa-label">My items</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="recents-card">
+        <div class="rc-title">Recents</div>
+        <div class="rc-item"><span class="rc-icon">👥</span> Indie Founders Network</div>
+        <div class="rc-item"><span class="rc-icon">🏷️</span> #buildinpublic</div>
+        <div class="rc-item"><span class="rc-icon">🏢</span> BlackRoad OS Inc.</div>
+        <div class="rc-item"><span class="rc-icon">👥</span> Game Dev Professionals</div>
+        <div class="rc-item"><span class="rc-icon">🏷️</span> #rustlang</div>
+        <div class="rc-show-more">⊕ Discover more</div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ MAIN FEED ══════════════════════ -->
+    <div class="feed">
+
+      <!-- Composer -->
+      <div class="composer">
+        <div class="composer-top">
+          <div class="comp-avatar">AR</div>
+          <div class="comp-input">Start a post, try a video or photo</div>
+        </div>
+        <div class="composer-actions">
+          <div class="ca-btn"><span class="ca-icon">🖼</span> Photo</div>
+          <div class="ca-btn"><span class="ca-icon">🎬</span> Video</div>
+          <div class="ca-btn"><span class="ca-icon">📅</span> Event</div>
+          <div class="ca-btn"><span class="ca-icon">✏️</span> Write article</div>
+        </div>
+      </div>
+
+      <!-- ── Post 1 — with image ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar">NL<div class="post-avatar-badge">✓</div></div>
+          <div class="post-meta">
+            <div class="post-author">Nolan Labs</div>
+            <div class="post-title-line">Founder @ Nolan Labs · Building developer tools</div>
+            <div class="post-time">🌐 6 hours ago</div>
+          </div>
+          <div class="post-follow">＋ Follow</div>
+          <div class="post-menu">⋯</div>
+        </div>
+        <div class="post-body">
+          <div class="post-text">I spent 6 months building a game engine from scratch. Here's what I learned — and what nearly broke me. 🧵
+
+The first month: I thought I could build a renderer in a week. I was wrong. I underestimated every single subsystem by a factor of 10.
+
+The real lesson? The hardest part of building something complex isn't the code. It's deciding what not to build.
+
+<span class="hashtag">#GameDev</span> <span class="hashtag">#BuildInPublic</span> <span class="hashtag">#IndieGame</span> <span class="hashtag">#Rust</span></div>
+          <div class="post-image">
+            <div class="post-image-pattern"></div>
+            <div class="post-image-icon">🎮</div>
+          </div>
+        </div>
+        <div class="post-reactions">
+          <div class="reaction-emojis">
+            <div class="reaction-emoji">👍</div>
+            <div class="reaction-emoji">❤️</div>
+            <div class="reaction-emoji">🔥</div>
+          </div>
+          <span class="reaction-count">Alexa Amundson and 4,812 others</span>
+          <span class="post-comments-count" style="margin-left:auto;">842 comments · 218 reposts</span>
+        </div>
+        <div class="post-actions">
+          <div class="pa-btn liked"><span class="pa-icon">👍</span> Like</div>
+          <div class="pa-btn"><span class="pa-icon">💬</span> Comment</div>
+          <div class="pa-btn"><span class="pa-icon">🔁</span> Repost</div>
+          <div class="pa-btn"><span class="pa-icon">↗</span> Send</div>
+        </div>
+      </div>
+
+      <!-- ── Post 2 — repost ── -->
+      <div class="post">
+        <div class="post-repost-label">🔁 <strong>Alexa Amundson</strong> reposted this</div>
+        <div class="post-header">
+          <div class="post-avatar">SC</div>
+          <div class="post-meta">
+            <div class="post-author">sarahchen</div>
+            <div class="post-title-line">Brand Designer · Founder @ SC Studio · ex-Figma</div>
+            <div class="post-time">🌐 1 day ago</div>
+          </div>
+          <div class="post-follow">＋ Follow</div>
+          <div class="post-menu">⋯</div>
+        </div>
+        <div class="post-body">
+          <div class="post-text">Hot take: the best time to work on a side project is when you have a full-time job. Not because it's easier — but because constraints force clarity.
+
+When you only have 2 hours, you can't afford to bikeshed. You ship.
+
+This post is for everyone building something nights and weekends. Keep going. 🖤
+
+<span class="hashtag">#SideProject</span> <span class="hashtag">#Founders</span> <span class="hashtag">#BuildInPublic</span></div>
+        </div>
+        <div class="post-reactions">
+          <div class="reaction-emojis">
+            <div class="reaction-emoji">❤️</div>
+            <div class="reaction-emoji">👍</div>
+            <div class="reaction-emoji">🙌</div>
+          </div>
+          <span class="reaction-count">28,441 reactions</span>
+          <span class="post-comments-count" style="margin-left:auto;">3,102 comments</span>
+        </div>
+        <div class="post-actions">
+          <div class="pa-btn"><span class="pa-icon">👍</span> Like</div>
+          <div class="pa-btn"><span class="pa-icon">💬</span> Comment</div>
+          <div class="pa-btn"><span class="pa-icon">🔁</span> Repost</div>
+          <div class="pa-btn"><span class="pa-icon">↗</span> Send</div>
+        </div>
+      </div>
+
+      <!-- ── Post 3 — Newsletter ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar">MK<div class="post-avatar-badge">✓</div></div>
+          <div class="post-meta">
+            <div class="post-author">mkdesign</div>
+            <div class="post-title-line">Design Lead · 2.1M followers · Newsletter: The Design Brief</div>
+            <div class="post-time">🌐 2 days ago</div>
+          </div>
+          <div class="post-follow">＋ Follow</div>
+          <div class="post-menu">⋯</div>
+        </div>
+        <div class="post-body">
+          <div class="post-text">New issue of The Design Brief just dropped. This week: why every startup's first redesign is a mistake — and what to do instead. <span class="see-more">…see more</span></div>
+        </div>
+        <div class="post-newsletter">
+          <div class="pn-header">
+            <span class="pn-icon">📰</span>
+            <div>
+              <div class="pn-name">The Design Brief</div>
+              <div class="pn-label">Newsletter · 48,200 subscribers</div>
+            </div>
+          </div>
+          <div class="pn-title">Why your startup's first redesign is always a mistake</div>
+          <div class="pn-sub">Edition #42 · 6 min read</div>
+        </div>
+        <div class="post-reactions">
+          <div class="reaction-emojis">
+            <div class="reaction-emoji">👍</div>
+            <div class="reaction-emoji">🔥</div>
+          </div>
+          <span class="reaction-count">9,218 reactions</span>
+          <span class="post-comments-count" style="margin-left:auto;">741 comments</span>
+        </div>
+        <div class="post-actions">
+          <div class="pa-btn"><span class="pa-icon">👍</span> Like</div>
+          <div class="pa-btn"><span class="pa-icon">💬</span> Comment</div>
+          <div class="pa-btn"><span class="pa-icon">🔁</span> Repost</div>
+          <div class="pa-btn"><span class="pa-icon">↗</span> Send</div>
+        </div>
+      </div>
+
+      <!-- ── Post 4 — Article link ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar">TT<div class="post-avatar-badge">🏢</div></div>
+          <div class="post-meta">
+            <div class="post-author">TechTalk Daily</div>
+            <div class="post-title-line">Technology news · 14.2M followers · Company Page</div>
+            <div class="post-time">🌐 3 hours ago</div>
+          </div>
+          <div class="post-follow">＋ Follow</div>
+          <div class="post-menu">⋯</div>
+        </div>
+        <div class="post-body">
+          <div class="post-text">TypeScript 6.0 just shipped and the developer community is losing it. Faster type-checking, native decorators, better inference. Here's our full breakdown ↓</div>
+          <div class="post-article">
+            <div class="pa-thumb">
+              <div class="pa-thumb-pattern"></div>
+              <div class="pa-thumb-icon">📘</div>
+            </div>
+            <div class="pa-info">
+              <div class="pa-title">TypeScript 6.0: Everything you need to know about the biggest release yet</div>
+              <div class="pa-source">techtalkdaily.com · 8 min read</div>
+            </div>
+          </div>
+        </div>
+        <div class="post-reactions">
+          <div class="reaction-emojis">
+            <div class="reaction-emoji">👍</div>
+            <div class="reaction-emoji">🔥</div>
+            <div class="reaction-emoji">🙌</div>
+          </div>
+          <span class="reaction-count">14,882 reactions</span>
+          <span class="post-comments-count" style="margin-left:auto;">1,924 comments</span>
+        </div>
+        <div class="post-actions">
+          <div class="pa-btn liked"><span class="pa-icon">👍</span> Like</div>
+          <div class="pa-btn"><span class="pa-icon">💬</span> Comment</div>
+          <div class="pa-btn"><span class="pa-icon">🔁</span> Repost</div>
+          <div class="pa-btn"><span class="pa-icon">↗</span> Send</div>
+        </div>
+      </div>
+
+      <!-- ── Post 5 — Promoted ── -->
+      <div class="post">
+        <div class="post-promoted">Promoted</div>
+        <div class="post-header">
+          <div class="post-avatar" style="border-radius:8px;">BR<div class="post-avatar-badge">🏢</div></div>
+          <div class="post-meta">
+            <div class="post-author">BlackRoad OS</div>
+            <div class="post-title-line">The web's operating system · 2,800 followers</div>
+            <div class="post-time">Sponsored</div>
+          </div>
+          <div class="post-menu">⋯</div>
+        </div>
+        <div class="post-body">
+          <div class="post-text">BlackRoad OS gives your AI agents, products, and teams a shared operating layer — with auth, memory, routing, and identity built in. Start free. Scale forever. 🖤</div>
+          <div class="post-image">
+            <div class="post-image-pattern"></div>
+            <div class="post-image-icon">🖥️</div>
+          </div>
+        </div>
+        <div class="post-actions">
+          <div class="pa-btn"><span class="pa-icon">👍</span> Like</div>
+          <div class="pa-btn"><span class="pa-icon">💬</span> Comment</div>
+          <div class="pa-btn"><span class="pa-icon">🔁</span> Repost</div>
+          <div class="pa-btn"><span class="pa-icon">↗</span> Send</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ RIGHT COLUMN ══════════════════════ -->
+    <div class="rightcol">
+
+      <!-- LinkedIn News -->
+      <div class="rs-card">
+        <div class="rs-card-title">
+          RoadIn News
+          <span class="rs-edit">ℹ</span>
+        </div>
+
+        <div class="news-item">
+          <div class="ni-dot"></div>
+          <div class="ni-content">
+            <div class="ni-title">Rust overtakes Python as #1 language for systems dev</div>
+            <div class="ni-meta">8 hours ago · 18,441 readers</div>
+          </div>
+        </div>
+        <div class="news-item">
+          <div class="ni-dot"></div>
+          <div class="ni-content">
+            <div class="ni-title">TypeScript 6.0 ships with 40% faster type-checking</div>
+            <div class="ni-meta">3 hours ago · 41,200 readers</div>
+          </div>
+        </div>
+        <div class="news-item">
+          <div class="ni-dot"></div>
+          <div class="ni-content">
+            <div class="ni-title">Indie game studios are quietly outpacing big publishers in 2026</div>
+            <div class="ni-meta">1 day ago · 12,884 readers</div>
+          </div>
+        </div>
+        <div class="news-item">
+          <div class="ni-dot"></div>
+          <div class="ni-content">
+            <div class="ni-title">Why senior engineers are leaving FAANG for bootstrapped startups</div>
+            <div class="ni-meta">2 days ago · 88,102 readers</div>
+          </div>
+        </div>
+        <div class="news-item">
+          <div class="ni-dot"></div>
+          <div class="ni-content">
+            <div class="ni-title">AI agents replace traditional SaaS workflows at 300 companies</div>
+            <div class="ni-meta">6 hours ago · 24,310 readers</div>
+          </div>
+        </div>
+
+        <div class="rs-show-more">Show more ›</div>
+      </div>
+
+      <!-- People you may know -->
+      <div class="rs-card">
+        <div class="rs-card-title">People you may know</div>
+
+        <div class="pymk-item">
+          <div class="pymk-avatar">PF</div>
+          <div class="pymk-info">
+            <div class="pymk-name">Pixel Forge</div>
+            <div class="pymk-title">Indie Game Developer · Solo building city-gen engine</div>
+            <div class="pymk-mutual">👥 12 mutual connections</div>
+            <div class="pymk-connect-btn">＋ Connect</div>
+          </div>
+        </div>
+
+        <div class="pymk-item">
+          <div class="pymk-avatar">JK</div>
+          <div class="pymk-info">
+            <div class="pymk-name">Jordan K.</div>
+            <div class="pymk-title">Content Creator · Gaming & Tech · 4.2M followers across platforms</div>
+            <div class="pymk-mutual">👥 8 mutual connections</div>
+            <div class="pymk-connect-btn">＋ Connect</div>
+          </div>
+        </div>
+
+        <div class="pymk-item">
+          <div class="pymk-avatar">VF</div>
+          <div class="pymk-info">
+            <div class="pymk-name">voxfilm</div>
+            <div class="pymk-title">Director & Editor · Documentary · Film & Creative Tech</div>
+            <div class="pymk-mutual">👥 3 mutual connections</div>
+            <div class="pymk-connect-btn">＋ Connect</div>
+          </div>
+        </div>
+
+        <div class="rs-show-more">Show all recommendations ›</div>
+      </div>
+
+      <!-- Ad / Company to follow -->
+      <div class="ad-card">
+        <div class="ad-image">🏢</div>
+        <div class="ad-body">
+          <div class="ad-name">Nolan Labs</div>
+          <div class="ad-desc">Developer tools for the modern era. Trusted by 8,000+ engineers.</div>
+          <div class="ad-follow-btn">＋ Follow</div>
+          <div class="ad-label">Promoted</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>
