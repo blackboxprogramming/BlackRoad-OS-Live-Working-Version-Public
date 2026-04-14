@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products | BlackRoad OS</title>
+  <meta name="description" content="BlackRoad OS — 17 products. Build anything. Remember everything. The OS for AI orchestration.">
+  <style>
+/* BlackRoad Gateway Base Styles */
+/* Brand: black bg, white/gray text, colors for shapes/accents only */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --pink: #FF1D6C;
+  --amber: #F5A623;
+  --blue: #2979FF;
+  --violet: #9C27B0;
+  --bg: #000000;
+  --surface: #0a0a0a;
+  --surface-hover: #111111;
+  --border: #1a1a1a;
+  --border-hover: #2a2a2a;
+  --text: #e0e0e0;
+  --text-muted: #888888;
+  --text-dim: #555555;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Layout */
+.gateway-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+
+@media (max-width: 768px) {
+  .gateway-container {
+    padding: 32px 16px 64px;
+  }
+}
+
+/* Back link */
+.gateway-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  transition: color 0.2s;
+}
+
+.gateway-back:hover {
+  color: var(--text);
+}
+
+.gateway-back::before {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-dim);
+  transition: background 0.2s, width 0.2s;
+}
+
+.gateway-back:hover::before {
+  background: var(--text-muted);
+  width: 28px;
+}
+
+/* Header */
+.gateway-header {
+  margin-bottom: 64px;
+}
+
+.gateway-header h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.gateway-header .gateway-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.gateway-accent-bar {
+  width: 48px;
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .gateway-header h1 {
+    font-size: 2.25rem;
+  }
+  .gateway-header .gateway-subtitle {
+    font-size: 1rem;
+  }
+}
+
+/* Mockup Grid */
+.mockup-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 480px) {
+  .mockup-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* Mockup Card */
+.mockup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+
+.mockup-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.mockup-card .card-preview {
+  width: 100%;
+  height: 300px;
+  border: none;
+  pointer-events: none;
+  background: var(--bg);
+  display: block;
+}
+
+.mockup-card .card-label {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mockup-card .card-label span {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.mockup-card .card-label .card-arrow {
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.mockup-card:hover .card-label .card-arrow {
+  color: var(--text-muted);
+  transform: translateX(4px);
+}
+
+/* Index page product cards */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.product-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.product-card .product-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.product-card .product-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.product-card .product-tagline {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.product-card .product-count {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: auto;
+}
+
+.product-card .product-arrow {
+  position: absolute;
+  top: 32px;
+  right: 28px;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.product-card:hover .product-arrow {
+  color: var(--text-muted);
+  transform: translateX(4px);
+}
+
+/* Index header */
+.index-header {
+  margin-bottom: 64px;
+  text-align: center;
+}
+
+.index-header h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.index-header p {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.index-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.index-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .index-header h1 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Footer */
+.gateway-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+  </style>
+</head>
+<body>
+  <div class="gateway-container">
+    <header class="index-header">
+      <div class="index-dots">
+        <span style="background: #FF1D6C"></span>
+        <span style="background: #F5A623"></span>
+        <span style="background: #2979FF"></span>
+        <span style="background: #9C27B0"></span>
+      </div>
+      <h1 style="margin-top: 32px">BlackRoad OS</h1>
+      <p>17 products. One operating system. Build anything. Remember everything.</p>
+    </header>
+
+    <section class="product-grid">
+    <a class="product-card" href="/gateways/roadtrip">
+      <div class="product-dot" style="background: #FF1D6C"></div>
+      <div class="product-name">RoadTrip</div>
+      <div class="product-tagline">The Agents</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadie">
+      <div class="product-dot" style="background: #F5A623"></div>
+      <div class="product-name">Roadie</div>
+      <div class="product-tagline">The Tutor</div>
+      <div class="product-count">4 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadview">
+      <div class="product-dot" style="background: #2979FF"></div>
+      <div class="product-name">RoadView</div>
+      <div class="product-tagline">The Search Engine</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/backroad">
+      <div class="product-dot" style="background: #FF1D6C"></div>
+      <div class="product-name">BackRoad</div>
+      <div class="product-tagline">The Social Engine</div>
+      <div class="product-count">10 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadcode">
+      <div class="product-dot" style="background: #9C27B0"></div>
+      <div class="product-name">RoadCode</div>
+      <div class="product-tagline">The Code Editor</div>
+      <div class="product-count">5 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadwork">
+      <div class="product-dot" style="background: #F5A623"></div>
+      <div class="product-name">RoadWork</div>
+      <div class="product-tagline">The Task Manager</div>
+      <div class="product-count">6 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/carkeys">
+      <div class="product-dot" style="background: #2979FF"></div>
+      <div class="product-name">CarKeys</div>
+      <div class="product-tagline">The Vault</div>
+      <div class="product-count">4 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadchain">
+      <div class="product-dot" style="background: #9C27B0"></div>
+      <div class="product-name">RoadChain</div>
+      <div class="product-tagline">The Ledger</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadcoin">
+      <div class="product-dot" style="background: #F5A623"></div>
+      <div class="product-name">RoadCoin</div>
+      <div class="product-tagline">The Economy</div>
+      <div class="product-count">2 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadbook">
+      <div class="product-dot" style="background: #FF1D6C"></div>
+      <div class="product-name">RoadBook</div>
+      <div class="product-tagline">The Publisher</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadworld">
+      <div class="product-dot" style="background: #2979FF"></div>
+      <div class="product-name">RoadWorld</div>
+      <div class="product-tagline">The World</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/officeroad">
+      <div class="product-dot" style="background: #F5A623"></div>
+      <div class="product-name">OfficeRoad</div>
+      <div class="product-tagline">The Office Suite</div>
+      <div class="product-count">4 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/carpool">
+      <div class="product-dot" style="background: #9C27B0"></div>
+      <div class="product-name">CarPool</div>
+      <div class="product-tagline">The AI Router</div>
+      <div class="product-count">3 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/oneway">
+      <div class="product-dot" style="background: #2979FF"></div>
+      <div class="product-name">OneWay</div>
+      <div class="product-tagline">The Messenger</div>
+      <div class="product-count">4 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/roadside">
+      <div class="product-dot" style="background: #FF1D6C"></div>
+      <div class="product-name">RoadSide</div>
+      <div class="product-tagline">The Support Desk</div>
+      <div class="product-count">2 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/blackboard">
+      <div class="product-dot" style="background: #9C27B0"></div>
+      <div class="product-name">BlackBoard</div>
+      <div class="product-tagline">The Creative Studio</div>
+      <div class="product-count">7 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    <a class="product-card" href="/gateways/highway">
+      <div class="product-dot" style="background: #F5A623"></div>
+      <div class="product-name">Highway</div>
+      <div class="product-tagline">The Dashboard</div>
+      <div class="product-count">4 mockups</div>
+      <span class="product-arrow">&#8594;</span>
+    </a>
+    </section>
+
+    <footer class="gateway-footer">
+      BlackRoad OS
+    </footer>
+  </div>
+</body>
+</html>
