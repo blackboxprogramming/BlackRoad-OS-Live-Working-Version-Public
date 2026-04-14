@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoadBoard — BlackRoad OS Planning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="mockup-base.css" />
+<style>
+  :root {
+    --bg-base:       #000;
+    --bg-surface:    #0a0a0a;
+    --bg-raised:     #111;
+    --bg-float:      #1a1a1a;
+    --bg-deep:       #0a0a0a;
+    --text-primary:  #f5f5f5;
+    --text-muted:    #737373;
+    --text-dim:      #444;
+    --text-white:    #fff;
+    --grad:          linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --grad-diag:     linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --grad-vert:     linear-gradient(180deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --radius-sm:     6px;
+    --radius-md:     10px;
+    --radius-lg:     16px;
+    --radius-pill:   999px;
+    --font-ui:       'Space Grotesk', sans-serif;
+    --font-mono:     'JetBrains Mono', monospace;
+    --toolbar-w:     52px;
+    --topbar-h:      52px;
+    --bottombar-h:   44px;
+    --shadow-float:  0 8px 32px rgba(0,0,0,.8), 0 2px 8px rgba(0,0,0,.6);
+    --shadow-card:   0 4px 16px rgba(0,0,0,.6);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-base);
+    font-family: var(--font-ui);
+    color: var(--text-primary);
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* ─── CANVAS VIEWPORT ──────────────────────────────── */
+  #viewport {
+    position: fixed; inset: 0;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  #canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 4000px; height: 3000px;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+
+  /* dot grid */
+  #canvas::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(circle, #1a1a1a 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-color: var(--bg-surface);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── TOP BAR ──────────────────────────────────────── */
+  #topbar {
+    position: fixed;
+    top: 12px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    border-radius: var(--radius-pill);
+    padding: 6px 12px;
+    box-shadow: var(--shadow-float);
+    white-space: nowrap;
+  }
+  .topbar-logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-right: 4px;
+  }
+  .topbar-divider {
+    width: 1px; height: 20px;
+    background: var(--bg-raised);
+    flex-shrink: 0;
+  }
+  #boardName {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    width: 200px;
+    cursor: text;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    transition: background .15s;
+  }
+  #boardName:hover { background: rgba(255,255,255,.04); }
+  #boardName:focus { background: rgba(255,255,255,.06); }
+  .collaborators {
+    display: flex; align-items: center;
+    margin-left: 4px;
+  }
+  .collab-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700;
+    background: var(--grad-diag);
+    border: 2px solid var(--bg-float);
+    margin-left: -8px;
+    cursor: pointer;
+    transition: transform .15s;
+    color: var(--text-white);
+  }
+  .collab-avatar:first-child { margin-left: 0; }
+  .collab-avatar:hover { transform: translateY(-2px) scale(1.1); z-index: 1; }
+  .collab-count {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600;
+    background: var(--bg-raised);
+    border: 2px solid var(--bg-float);
+    margin-left: -8px;
+    color: var(--text-muted);
+  }
+  .topbar-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 12px;
+    border: none; border-radius: var(--radius-pill);
+    font-family: var(--font-ui);
+    font-size: 12px; font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .02em;
+  }
+  .topbar-btn.share {
+    background: var(--bg-raised);
+    color: var(--text-primary);
+    border: 1px solid var(--text-dim);
+  }
+  .topbar-btn.share:hover { background: #222; border-color: var(--text-muted); }
+  .topbar-btn.present {
+    background: var(--grad);
+    color: var(--text-white);
+    border: none;
+    box-shadow: 0 2px 12px rgba(255,34,85,.3);
+  }
+  .topbar-btn.present:hover { opacity: .9; transform: translateY(-1px); }
+  .topbar-btn svg { width: 13px; height: 13px; }
+
+  /* ─── LEFT TOOLBAR ─────────────────────────────────── */
+  #toolbar {
+    position: fixed;
+    top: 50%; left: 14px;
+    transform: translateY(-50%);
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    border-radius: var(--radius-pill);
+    padding: 8px 6px;
+    box-shadow: var(--shadow-float);
+  }
+  .tool-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all .15s;
+    position: relative;
+  }
+  .tool-btn:hover { background: var(--bg-raised); color: var(--text-primary); }
+  .tool-btn.active {
+    color: var(--text-white);
+    background: var(--bg-raised);
+  }
+  .tool-btn.active::before {
+    content: '';
+    position: absolute; inset: -1.5px;
+    border-radius: 8px;
+    background: var(--grad);
+    z-index: -1;
+  }
+  .tool-btn svg { width: 16px; height: 16px; }
+  .tool-separator {
+    width: 24px; height: 1px;
+    background: var(--bg-raised);
+    margin: 3px 0;
+  }
+
+  /* ─── RIGHT PANEL ──────────────────────────────────── */
+  #rightpanel {
+    position: fixed;
+    top: 72px; right: 14px;
+    z-index: 1000;
+    width: 220px;
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-float);
+    overflow: hidden;
+    transition: width .2s, opacity .2s;
+  }
+  #rightpanel.collapsed { width: 36px; }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--bg-raised);
+    cursor: pointer;
+  }
+  .panel-title {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .panel-collapse-btn {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: var(--bg-raised);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: transform .2s;
+  }
+  #rightpanel.collapsed .panel-collapse-btn { transform: rotate(180deg); }
+  .panel-body { padding: 8px; }
+  .panel-section-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 6px 4px 4px;
+  }
+  .layer-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 6px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .12s;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .layer-item:hover { background: var(--bg-raised); color: var(--text-primary); }
+  .layer-item.selected { background: var(--bg-raised); color: var(--text-primary); }
+  .layer-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .layer-icon { width: 14px; height: 14px; flex-shrink: 0; opacity: .6; }
+  .prop-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4px 4px;
+    font-size: 11px; color: var(--text-muted);
+  }
+  .prop-val {
+    font-family: var(--font-mono);
+    font-size: 10px; color: var(--text-primary);
+    background: var(--bg-raised);
+    padding: 2px 6px; border-radius: 4px;
+    min-width: 60px; text-align: center;
+  }
+
+  /* ─── BOTTOM BAR ───────────────────────────────────── */
+  #bottombar {
+    position: fixed;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    border-radius: var(--radius-pill);
+    padding: 5px 10px;
+    box-shadow: var(--shadow-float);
+  }
+  .zoom-btn {
+    width: 28px; height: 28px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-raised);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+    transition: all .12s;
+  }
+  .zoom-btn:hover { background: #222; color: var(--text-primary); }
+  #zoomLabel {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 500;
+    color: var(--text-primary);
+    min-width: 42px; text-align: center;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: background .12s;
+  }
+  #zoomLabel:hover { background: var(--bg-raised); }
+  .zoom-preset {
+    font-size: 10px; font-weight: 500;
+    color: var(--text-muted);
+    padding: 3px 7px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-raised);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .12s;
+    font-family: var(--font-ui);
+  }
+  .zoom-preset:hover { color: var(--text-primary); border-color: var(--text-dim); }
+  .bottombar-divider {
+    width: 1px; height: 20px;
+    background: var(--bg-raised);
+  }
+  #minimap {
+    width: 96px; height: 54px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-deep);
+    border: 1px solid var(--bg-raised);
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  #minimap-viewport {
+    position: absolute;
+    border: 1.5px solid #FF2255;
+    border-radius: 2px;
+    background: rgba(255,34,85,.08);
+    transition: all .1s;
+    pointer-events: none;
+  }
+  .minimap-frame {
+    position: absolute;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 0px;
+  }
+  .page-count {
+    font-size: 11px; font-weight: 500;
+    color: var(--text-muted);
+    padding: 2px 8px;
+    cursor: pointer;
+  }
+  .page-count span { color: var(--text-primary); }
+
+  /* ─── CANVAS ELEMENTS ──────────────────────────────── */
+  .canvas-el {
+    position: absolute;
+    cursor: pointer;
+  }
+  .canvas-el.selected > .el-inner {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+  .canvas-el.selected::after {
+    content: '';
+    position: absolute; inset: -3px;
+    border-radius: inherit;
+    background: var(--grad);
+    z-index: -1;
+    opacity: .8;
+  }
+
+  /* Board Frame */
+  .board-frame {
+    position: absolute;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,.015);
+  }
+  .board-frame-border {
+    position: absolute; inset: 0;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--bg-raised);
+    pointer-events: none;
+  }
+  .board-frame-label {
+    position: absolute;
+    top: -32px; left: 0;
+    display: flex; align-items: center; gap: 0;
+    cursor: pointer;
+  }
+  .board-frame-label-inner {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: .03em;
+    padding: 4px 12px;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--grad);
+    color: var(--text-white);
+    white-space: nowrap;
+  }
+
+  /* Sticky Note */
+  .sticky {
+    position: absolute;
+    width: 160px; min-height: 100px;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex; flex-direction: column;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: var(--shadow-card);
+    transition: transform .15s, box-shadow .15s;
+    z-index: 2;
+  }
+  .sticky:hover { transform: translateY(-2px) rotate(.4deg); box-shadow: 0 8px 24px rgba(0,0,0,.7); }
+  .sticky.selected {
+    transform: translateY(-2px) scale(1.02);
+    z-index: 10;
+  }
+  .sticky.grad-border { padding: 2px; }
+  .sticky.grad-border > .sticky-inner {
+    background: var(--bg-raised);
+    border-radius: calc(var(--radius-md) - 2px);
+    padding: 10px;
+    min-height: 96px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .sticky.grad-border::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: var(--radius-md);
+    background: var(--grad);
+    z-index: -1;
+  }
+  .sticky-emoji { font-size: 18px; line-height: 1; }
+  .sticky-text {
+    font-size: 12px; font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.4;
+    flex: 1;
+    outline: none;
+    cursor: text;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .sticky-author {
+    font-size: 9px; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    margin-top: auto;
+  }
+  .resize-handle {
+    position: absolute; bottom: 3px; right: 3px;
+    width: 10px; height: 10px;
+    cursor: se-resize;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .sticky.selected .resize-handle { opacity: 1; }
+  .resize-handle::before, .resize-handle::after {
+    content: '';
+    position: absolute;
+    background: var(--text-dim);
+    border-radius: 0px;
+  }
+  .resize-handle::before { width: 2px; height: 8px; right: 0; bottom: 0; }
+  .resize-handle::after  { width: 8px; height: 2px; right: 0; bottom: 0; }
+
+  /* Flowchart */
+  .flow-box {
+    position: absolute;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-raised);
+    border: 1px solid var(--text-dim);
+    font-size: 12px; font-weight: 600;
+    color: var(--text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    text-align: center;
+    z-index: 2;
+    transition: border-color .15s, background .15s;
+  }
+  .flow-box:hover { background: #1a1a1a; border-color: var(--text-muted); }
+  .flow-box.selected {
+    border-color: transparent;
+    box-shadow: 0 0 0 1.5px rgba(0,0,0,0), 0 0 0 3px rgba(0,0,0,0);
+    position: relative;
+  }
+  .flow-box.selected::before {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: calc(var(--radius-sm) + 2px);
+    background: var(--grad);
+    z-index: -1;
+  }
+
+  /* SVG arrows on canvas */
+  .canvas-svg {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: visible;
+  }
+
+  /* Section text labels */
+  .section-label {
+    position: absolute;
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -.02em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    cursor: default;
+    white-space: nowrap;
+    z-index: 2;
+    filter: blur(0);
+  }
+  .section-sublabel {
+    position: absolute;
+    font-size: 12px; font-weight: 400;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    z-index: 2;
+    letter-spacing: .02em;
+  }
+
+  /* Kanban inside frame */
+  .kanban {
+    position: absolute;
+    display: flex; gap: 10px;
+  }
+  .kanban-col {
+    width: 110px;
+    background: var(--bg-deep);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--bg-raised);
+    padding: 8px 6px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .kanban-col-title {
+    font-size: 9px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-align: center;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--bg-raised);
+  }
+  .kanban-card {
+    background: var(--bg-raised);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 10px; font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.35;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .kanban-card:hover { background: #1a1a1a; }
+  .kanban-card-tag {
+    display: inline-block;
+    font-size: 8px; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: 1px 5px; border-radius: 3px;
+    margin-bottom: 3px;
+    font-family: var(--font-mono);
+  }
+
+  /* Collaborator cursors */
+  .collab-cursor {
+    position: absolute;
+    pointer-events: none;
+    z-index: 500;
+    transition: left 2s linear, top 2s linear;
+  }
+  .collab-cursor-arrow {
+    width: 0; height: 0;
+    border-left: 7px solid transparent;
+    border-right: 0px solid transparent;
+    border-bottom: 12px solid #FF2255;
+    transform: rotate(-15deg);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+  }
+  .collab-cursor.cursor-b .collab-cursor-arrow { border-bottom-color: #8844FF; }
+  .collab-cursor-label {
+    font-size: 10px; font-weight: 600;
+    color: var(--text-white);
+    background: #FF2255;
+    padding: 2px 6px; border-radius: 3px;
+    position: absolute;
+    top: 12px; left: 6px;
+    white-space: nowrap;
+    font-family: var(--font-ui);
+  }
+  .collab-cursor.cursor-b .collab-cursor-label { background: #8844FF; }
+
+  /* Selection ring overlay */
+  .sel-ring {
+    position: absolute; inset: -3px;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    z-index: 100;
+  }
+  .sel-ring::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    background: var(--grad);
+    opacity: .7;
+    z-index: -1;
+  }
+  .sel-ring::after {
+    content: '';
+    position: absolute; inset: 1.5px;
+    border-radius: calc(var(--radius-md) - 1px);
+    background: transparent;
+    border: 1.5px solid transparent;
+  }
+
+  /* Tooltip on toolbar */
+  .tool-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: calc(100% + 10px); top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    color: var(--text-primary);
+    font-size: 10px; font-weight: 500;
+    padding: 3px 8px;
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+    z-index: 99;
+    box-shadow: var(--shadow-card);
+    pointer-events: none;
+  }
+
+  /* Notification toast */
+  #toast {
+    position: fixed;
+    bottom: 70px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-float);
+    border: 1px solid var(--bg-raised);
+    border-radius: var(--radius-pill);
+    padding: 7px 16px;
+    font-size: 12px; font-weight: 500;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-float);
+    opacity: 0;
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+    z-index: 2000;
+    white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Panel collapsed — hide body */
+  #rightpanel.collapsed .panel-body { display: none; }
+  #rightpanel.collapsed .panel-title { display: none; }
+
+  /* Fancy gradient tag colors */
+  .tag-now   { background: rgba(255,107,43,.15); color: var(--text); }
+  .tag-next  { background: rgba(136,68,255,.15); color: var(--sub); }
+  .tag-later { background: rgba(0,212,255,.15);  color: var(--text); }
+
+  /* Active page indicator */
+  .page-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .page-dot.active {
+    background: #FF2255;
+    width: 16px; border-radius: 3px;
+  }
+
+  /* Connection line label */
+  .conn-label {
+    position: absolute;
+    font-size: 9px; font-weight: 500;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    background: var(--bg-surface);
+    padding: 1px 5px; border-radius: 3px;
+    pointer-events: none;
+    z-index: 3;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── TOP BAR ─────────────────────────────────────────────── -->
+<div id="topbar">
+  <span class="topbar-logo">RB</span>
+  <div class="topbar-divider"></div>
+  <input id="boardName" value="BlackRoad OS Planning" type="text" spellcheck="false" />
+  <div class="topbar-divider"></div>
+  <div class="collaborators">
+    <div class="collab-avatar" title="Alex M." style="background:linear-gradient(135deg,#FF6B2B,#FF2255)">AM</div>
+    <div class="collab-avatar" title="River K." style="background:linear-gradient(135deg,#CC00AA,#8844FF)">RK</div>
+    <div class="collab-avatar" title="Jo T." style="background:linear-gradient(135deg,#4488FF,#00D4FF)">JT</div>
+    <div class="collab-count">+4</div>
+  </div>
+  <div class="topbar-divider"></div>
+  <button class="topbar-btn share" onclick="showToast('Link copied to clipboard')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><path d="M5.5 7.1l5-2.2M5.5 8.9l5 2.2" stroke-linecap="round"/></svg>
+    Share
+  </button>
+  <button class="topbar-btn present" onclick="showToast('Presentation mode — press Esc to exit')">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="2" width="14" height="10" rx="1.5"/><path d="M6 14h4M8 12v2" stroke-linecap="round"/></svg>
+    Present
+  </button>
+</div>
+
+<!-- ── LEFT TOOLBAR ────────────────────────────────────────── -->
+<div id="toolbar">
+  <button class="tool-btn active" data-tool="select" data-tip="Select (V)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 1l10 6.5L9.5 9l2 5-2 .8-2-5L4 11.5z"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="hand" data-tip="Pan (H)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 2v7M6 4V3M4.5 5.5v-2M10 4V3M11.5 5.5v-2M4.5 9.5c0 0-.5 2 1 3.5h4c1.5-1.5 2-3.5 2-3.5V5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div class="tool-separator"></div>
+  <button class="tool-btn" data-tool="sticky" data-tip="Sticky Note (S)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h12v9l-3 3H2z" stroke-linejoin="round"/><path d="M11 11v3M11 11h3" stroke-linecap="round"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="text" data-tip="Text (T)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H9.5v8h-3V5H2z"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="shape" data-tip="Shape (R)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="4" width="12" height="8" rx="1.5"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="arrow" data-tip="Arrow (A)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 13L13 3M8 3h5v5"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="draw" data-tip="Draw (P)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14c2-1 3-3 5-5s3-4 4-5a1 1 0 011 1c-1 1-3 2-5 4s-4 3-5 5z"/></svg>
+  </button>
+  <div class="tool-separator"></div>
+  <button class="tool-btn" data-tool="frame" data-tip="Frame (F)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="12" height="12" rx="1"/><rect x="5" y="5" width="6" height="6" rx=".5"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="image" data-tip="Image (I)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="3" width="14" height="10" rx="1.5"/><circle cx="5.5" cy="6.5" r="1.2"/><path d="M1 11l4-3.5 3 3 2.5-2 3.5 4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="tool-btn" data-tool="comment" data-tip="Comment (C)" onclick="setTool(this)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 2h12v9H6l-4 3V2z" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+
+<!-- ── RIGHT PANEL ─────────────────────────────────────────── -->
+<div id="rightpanel">
+  <div class="panel-header" onclick="togglePanel()">
+    <span class="panel-title">Layers & Props</span>
+    <div class="panel-collapse-btn">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#737373" stroke-width="1.5" stroke-linecap="round"><path d="M2 7l3-3 3 3"/></svg>
+    </div>
+  </div>
+  <div class="panel-body">
+    <div class="panel-section-label">Layers</div>
+    <div class="layer-item selected" onclick="selectLayer(this,'frame1')">
+      <svg class="layer-icon" viewBox="0 0 14 14" fill="none" stroke="#737373" stroke-width="1.4"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
+      <span>Q2 Roadmap</span>
+    </div>
+    <div class="layer-item" onclick="selectLayer(this,'frame2')">
+      <svg class="layer-icon" viewBox="0 0 14 14" fill="none" stroke="#737373" stroke-width="1.4"><rect x="1" y="1" width="12" height="12" rx="1"/></svg>
+      <span>System Architecture</span>
+    </div>
+    <div class="layer-item" onclick="selectLayer(this,'sticky-cluster')">
+      <svg class="layer-icon" viewBox="0 0 14 14" fill="none" stroke="#737373" stroke-width="1.4"><path d="M1 1h12v8l-3 3H1z"/></svg>
+      <span>Idea Cluster</span>
+    </div>
+    <div class="layer-item" onclick="selectLayer(this,'arrow1')">
+      <svg class="layer-icon" viewBox="0 0 14 14" fill="none" stroke="#737373" stroke-width="1.4" stroke-linecap="round"><path d="M2 12L12 2M7 2h5v5"/></svg>
+      <span>Connector A→B</span>
+    </div>
+    <div class="layer-item" onclick="selectLayer(this,'label-q2')">
+      <svg class="layer-icon" viewBox="0 0 14 14" fill="currentColor" style="color:#737373"><path d="M1 2h12v2H1zm0 4h8v2H1zm0 4h6v2H1z"/></svg>
+      <span>Section Labels</span>
+    </div>
+
+    <div class="panel-section-label" style="margin-top:8px">Properties</div>
+    <div class="prop-row"><span>X</span><span class="prop-val" id="prop-x">320</span></div>
+    <div class="prop-row"><span>Y</span><span class="prop-val" id="prop-y">140</span></div>
+    <div class="prop-row"><span>W</span><span class="prop-val" id="prop-w">680</span></div>
+    <div class="prop-row"><span>H</span><span class="prop-val" id="prop-h">460</span></div>
+    <div class="prop-row"><span>Opacity</span><span class="prop-val">100%</span></div>
+    <div class="prop-row"><span>Lock</span><span class="prop-val">—</span></div>
+  </div>
+</div>
+
+<!-- ── CANVAS VIEWPORT ─────────────────────────────────────── -->
+<div id="viewport">
+  <div id="canvas">
+    <!-- SVG layer for arrows / connectors -->
+    <svg class="canvas-svg" id="arrowSvg"></svg>
+
+    <!-- ── FRAME 1: Q2 Roadmap ─────────────────────────────── -->
+    <div class="board-frame" id="frame1" style="left:280px;top:120px;width:720px;height:500px;" onclick="selectEl('frame1')">
+      <div class="board-frame-border"></div>
+      <div class="board-frame-label"><div class="board-frame-label-inner">Q2 Roadmap</div></div>
+
+      <!-- 2×2 sticky grid -->
+      <div class="sticky" id="s1" style="left:28px;top:28px;background:#111;width:155px;" onclick="selectEl('s1')">
+        <span class="sticky-emoji">🚀</span>
+        <div class="sticky-text" contenteditable="false">Deploy RoadCode v2</div>
+        <span class="sticky-author">@alexm</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="s2" style="left:198px;top:28px;background:#0a0a0a;width:155px;" onclick="selectEl('s2')">
+        <span class="sticky-emoji">📊</span>
+        <div class="sticky-text" contenteditable="false">Analytics dashboard</div>
+        <span class="sticky-author">@riverk</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="s3" style="left:28px;top:148px;background:#111;width:155px;" onclick="selectEl('s3')">
+        <span class="sticky-emoji">🔐</span>
+        <div class="sticky-text" contenteditable="false">SSO integration</div>
+        <span class="sticky-author">@jot</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky grad-border" id="s4" style="left:198px;top:148px;width:155px;" onclick="selectEl('s4')">
+        <div class="sticky-inner">
+          <span class="sticky-emoji">🤖</span>
+          <div class="sticky-text" contenteditable="false">Agent marketplace</div>
+          <span class="sticky-author">@alexm · ★ hot</span>
+        </div>
+        <div class="resize-handle"></div>
+      </div>
+
+      <!-- Kanban NOW / NEXT / LATER -->
+      <div class="kanban" style="left:28px;top:288px;">
+        <div class="kanban-col">
+          <div class="kanban-col-title" style="color:#FF6B2B">NOW</div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-now">ship</div><br/>
+            RoadCode CI/CD pipeline
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-now">fix</div><br/>
+            Auth token refresh bug
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-title" style="color:#8844FF">NEXT</div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-next">design</div><br/>
+            Analytics v2 wireframes
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-next">spec</div><br/>
+            Agent API contracts
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-title" style="color:#00D4FF">LATER</div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-later">explore</div><br/>
+            Multi-tenant billing
+          </div>
+          <div class="kanban-card">
+            <div class="kanban-card-tag tag-later">research</div><br/>
+            Offline-first sync
+          </div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-title" style="color:#737373">DONE</div>
+          <div class="kanban-card" style="opacity:.5">
+            <div class="kanban-card-tag" style="background:rgba(255,255,255,.06);color:#444">done</div><br/>
+            RoadBoard v0.1 alpha
+          </div>
+          <div class="kanban-card" style="opacity:.5">
+            <div class="kanban-card-tag" style="background:rgba(255,255,255,.06);color:#444">done</div><br/>
+            Fleet host audit
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FRAME 2: System Architecture ───────────────────── -->
+    <div class="board-frame" id="frame2" style="left:1120px;top:120px;width:560px;height:340px;" onclick="selectEl('frame2')">
+      <div class="board-frame-border"></div>
+      <div class="board-frame-label"><div class="board-frame-label-inner">System Architecture</div></div>
+
+      <!-- Flowchart boxes -->
+      <div class="flow-box" id="fb-user"   style="left:28px;  top:60px;  width:100px;" onclick="selectEl('fb-user')">👤 User</div>
+      <div class="flow-box" id="fb-gate"   style="left:168px; top:60px;  width:120px;" onclick="selectEl('fb-gate')">🛡 RoadGate</div>
+      <div class="flow-box" id="fb-svc"    style="left:338px; top:60px;  width:100px;" onclick="selectEl('fb-svc')">⚡ Services</div>
+      <div class="flow-box" id="fb-db"     style="left:338px; top:170px; width:100px;" onclick="selectEl('fb-db')">🗄 Database</div>
+      <div class="flow-box" id="fb-cache"  style="left:168px; top:170px; width:120px;" onclick="selectEl('fb-cache')">⚡ Cache Layer</div>
+      <div class="flow-box" id="fb-cdn"    style="left:28px;  top:170px; width:100px;" onclick="selectEl('fb-cdn')">🌐 CDN</div>
+
+      <!-- Arch note -->
+      <div style="position:absolute;left:28px;bottom:18px;right:28px;font-size:10px;color:#444;font-family:var(--font-mono);line-height:1.5">
+        Cloudflare → Railway → Neon DB · 18 canonical services
+      </div>
+    </div>
+
+    <!-- ── STICKY CLUSTER ──────────────────────────────────── -->
+    <div id="sticky-cluster" style="position:absolute;left:280px;top:700px;width:740px;height:320px;z-index:2">
+      <div class="section-label" style="left:0;top:-40px">💡 Ideas</div>
+      <div class="section-sublabel" style="left:2px;top:-16px">freeform · sprint 23</div>
+
+      <div class="sticky" id="sc1" style="left:0;  top:20px;background:#111;width:150px;transform:rotate(-2deg);" onclick="selectEl('sc1')">
+        <span class="sticky-emoji">🎨</span>
+        <div class="sticky-text" contenteditable="false">Dark mode toggle per user preference — persist in profile</div>
+        <span class="sticky-author">@alexm</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="sc2" style="left:165px;top:0;  background:#0a0a0a;width:150px;transform:rotate(1.2deg);" onclick="selectEl('sc2')">
+        <span class="sticky-emoji">🔔</span>
+        <div class="sticky-text" contenteditable="false">Real-time notifications via WebSocket hub</div>
+        <span class="sticky-author">@riverk</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky grad-border" id="sc3" style="left:330px;top:10px;width:150px;transform:rotate(-1deg);" onclick="selectEl('sc3')">
+        <div class="sticky-inner">
+          <span class="sticky-emoji">⚡</span>
+          <div class="sticky-text" contenteditable="false">Edge compute for sub-50ms API responses globally</div>
+          <span class="sticky-author">@jot · ★ P0</span>
+        </div>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="sc4" style="left:495px;top:5px; background:#1a1a1a;width:150px;transform:rotate(.8deg);" onclick="selectEl('sc4')">
+        <span class="sticky-emoji">🗺</span>
+        <div class="sticky-text" contenteditable="false">RoadMap public changelog page (auto-generated from commits)</div>
+        <span class="sticky-author">@alexm</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="sc5" style="left:80px; top:160px;background:#0a0a0a;width:150px;transform:rotate(1.5deg);" onclick="selectEl('sc5')">
+        <span class="sticky-emoji">📱</span>
+        <div class="sticky-text" contenteditable="false">Mobile-first RoadTrip companion app</div>
+        <span class="sticky-author">@riverk</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" id="sc6" style="left:260px;top:150px;background:#111;width:150px;transform:rotate(-1.3deg);" onclick="selectEl('sc6')">
+        <span class="sticky-emoji">🤝</span>
+        <div class="sticky-text" contenteditable="false">Partner API program — first 3 integrations</div>
+        <span class="sticky-author">@jot</span>
+        <div class="resize-handle"></div>
+      </div>
+    </div>
+
+    <!-- ── SECTION LABELS floating on canvas ──────────────── -->
+    <div class="section-label"    id="label-q2"   style="left:280px;top:68px">Sprint Planning</div>
+    <div class="section-sublabel" style="left:282px;top:96px">Board · Q2 2025 · 8 members online</div>
+    <div class="section-label"    id="label-arch" style="left:1120px;top:68px">Infrastructure</div>
+    <div class="section-sublabel" style="left:1122px;top:96px">Canonical · 18 services · Cloudflare + Railway</div>
+    <div class="section-label"    id="label-notes" style="left:700px;top:1080px">Research Notes</div>
+    <div class="section-sublabel" style="left:702px;top:1108px">Async reads · competitor analysis · v3 thesis</div>
+
+    <!-- ── EXTRA STICKY CLUSTER (research) ────────────────── -->
+    <div style="position:absolute;left:700px;top:1130px;z-index:2">
+      <div class="sticky" style="left:0;top:0;background:#111;width:160px;transform:rotate(.6deg);" onclick="selectEl('sr1')">
+        <span class="sticky-emoji">📚</span>
+        <div class="sticky-text" contenteditable="false">Miro charges $16/user — undercut with $8 + OSS core</div>
+        <span class="sticky-author">@alexm</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" style="left:175px;top:10px;background:#0a0a0a;width:160px;transform:rotate(-1.1deg);" onclick="selectEl('sr2')">
+        <span class="sticky-emoji">🔍</span>
+        <div class="sticky-text" contenteditable="false">FigJam strong in design teams — target eng+PM hybrid</div>
+        <span class="sticky-author">@riverk</span>
+        <div class="resize-handle"></div>
+      </div>
+      <div class="sticky" style="left:350px;top:0;background:#1a1a1a;width:160px;transform:rotate(.9deg);" onclick="selectEl('sr3')">
+        <span class="sticky-emoji">🏆</span>
+        <div class="sticky-text" contenteditable="false">Win condition: sovereign data + AI-native workflow</div>
+        <span class="sticky-author">@alexm · ★ vision</span>
+        <div class="resize-handle"></div>
+      </div>
+    </div>
+
+    <!-- ── COLLABORATOR CURSORS ────────────────────────────── -->
+    <div class="collab-cursor cursor-a" id="cursor-a" style="left:520px;top:250px">
+      <div class="collab-cursor-arrow"></div>
+      <div class="collab-cursor-label">River K.</div>
+    </div>
+    <div class="collab-cursor cursor-b" id="cursor-b" style="left:1300px;top:200px">
+      <div class="collab-cursor-arrow"></div>
+      <div class="collab-cursor-label">Jo T.</div>
+    </div>
+
+  </div><!-- #canvas -->
+</div><!-- #viewport -->
+
+<!-- ── BOTTOM BAR ─────────────────────────────────────────── -->
+<div id="bottombar">
+  <button class="zoom-btn" onclick="zoomBy(-0.1)">−</button>
+  <span id="zoomLabel" onclick="resetZoom()">100%</span>
+  <button class="zoom-btn" onclick="zoomBy(+0.1)">+</button>
+  <span class="zoom-preset" onclick="setZoom(.5)">50%</span>
+  <span class="zoom-preset" onclick="setZoom(.75)">75%</span>
+  <span class="zoom-preset" onclick="setZoom(1)">100%</span>
+  <span class="zoom-preset" onclick="fitToScreen()">Fit</span>
+  <div class="bottombar-divider"></div>
+  <div id="minimap" title="Click to navigate">
+    <div class="minimap-frame" style="left:7%;top:8%;width:24%;height:36%"></div>
+    <div class="minimap-frame" style="left:37%;top:8%;width:20%;height:26%"></div>
+    <div class="minimap-frame" style="left:7%;top:52%;width:26%;height:22%"></div>
+    <div id="minimap-viewport"></div>
+  </div>
+  <div class="bottombar-divider"></div>
+  <div class="page-count">
+    <span id="pageDots">
+      <span class="page-dot active" onclick="goPage(0)"></span>
+      <span class="page-dot" onclick="goPage(1)"></span>
+    </span>
+    &nbsp;<span id="pageLabel">1</span> / 2
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── SCRIPT ─────────────────────────────────────────────── -->
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────
+const state = {
+  zoom: 1,
+  panX: -180,
+  panY: -60,
+  isPanning: false,
+  panStartX: 0,
+  panStartY: 0,
+  canvasStartX: 0,
+  canvasStartY: 0,
+  activeTool: 'select',
+  selectedId: 'frame1',
+  currentPage: 0,
+};
+
+const CANVAS_W = 4000;
+const CANVAS_H = 3000;
+const MINIMAP_W = 96;
+const MINIMAP_H = 54;
+
+const canvas     = document.getElementById('canvas');
+const viewport   = document.getElementById('viewport');
+const zoomLabel  = document.getElementById('zoomLabel');
+const minimapVp  = document.getElementById('minimap-viewport');
+const arrowSvg   = document.getElementById('arrowSvg');
+
+// ── Apply canvas transform ─────────────────────────────────
+function applyTransform() {
+  canvas.style.transform =
+    `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  zoomLabel.textContent = Math.round(state.zoom * 100) + '%';
+  updateMinimap();
+}
+
+// ── Zoom helpers ───────────────────────────────────────────
+function clampZoom(z) { return Math.min(3, Math.max(0.1, z)); }
+
+function zoomBy(delta) {
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const prev = state.zoom;
+  state.zoom = clampZoom(state.zoom + delta);
+  const ratio = state.zoom / prev;
+  state.panX = cx - ratio * (cx - state.panX);
+  state.panY = cy - ratio * (cy - state.panY);
+  applyTransform();
+}
+
+function setZoom(z) {
+  const cx = window.innerWidth  / 2;
+  const cy = window.innerHeight / 2;
+  const prev = state.zoom;
+  state.zoom = clampZoom(z);
+  const ratio = state.zoom / prev;
+  state.panX = cx - ratio * (cx - state.panX);
+  state.panY = cy - ratio * (cy - state.panY);
+  applyTransform();
+}
+
+function resetZoom() { setZoom(1); }
+
+function fitToScreen() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scaleX = (vw - 120) / CANVAS_W;
+  const scaleY = (vh - 120) / CANVAS_H;
+  state.zoom = clampZoom(Math.min(scaleX, scaleY));
+  state.panX = (vw - CANVAS_W * state.zoom) / 2;
+  state.panY = (vh - CANVAS_H * state.zoom) / 2;
+  applyTransform();
+}
+
+// ── Scroll wheel zoom ──────────────────────────────────────
+viewport.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 0.08 : -0.08;
+  const prev = state.zoom;
+  state.zoom = clampZoom(state.zoom + delta);
+  const ratio = state.zoom / prev;
+  state.panX = e.clientX - ratio * (e.clientX - state.panX);
+  state.panY = e.clientY - ratio * (e.clientY - state.panY);
+  applyTransform();
+}, { passive: false });
+
+// ── Pan (hand tool or middle-click / space+drag) ───────────
+viewport.addEventListener('mousedown', (e) => {
+  const isMiddle = e.button === 1;
+  const isHand   = state.activeTool === 'hand';
+  const target   = e.target;
+  const onCanvas = target === canvas || target === arrowSvg || target.classList.contains('canvas-svg');
+
+  if (isMiddle || isHand || (onCanvas && state.activeTool === 'select')) {
+    if (!isMiddle && !isHand && !onCanvas) return;
+    if (target.closest('.sticky') || target.closest('.flow-box') ||
+        target.closest('.board-frame-label') || target.closest('.kanban-card')) return;
+    state.isPanning = true;
+    state.panStartX  = e.clientX;
+    state.panStartY  = e.clientY;
+    state.canvasStartX = state.panX;
+    state.canvasStartY = state.panY;
+    viewport.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+
+  // sticky tool — drop new sticky
+  if (state.activeTool === 'sticky' && onCanvas) {
+    dropSticky(e.clientX, e.clientY);
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!state.isPanning) return;
+  state.panX = state.canvasStartX + (e.clientX - state.panStartX);
+  state.panY = state.canvasStartY + (e.clientY - state.panStartY);
+  applyTransform();
+});
+
+window.addEventListener('mouseup', () => {
+  if (state.isPanning) {
+    state.isPanning = false;
+    viewport.style.cursor = '';
+  }
+});
+
+// ── Tool selection ─────────────────────────────────────────
+function setTool(btn) {
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.activeTool = btn.dataset.tool;
+  viewport.style.cursor = state.activeTool === 'hand' ? 'grab' :
+                           state.activeTool === 'sticky' ? 'crosshair' : '';
+  if (state.activeTool !== 'select') deselectAll();
+}
+
+// ── Element selection ──────────────────────────────────────
+function selectEl(id) {
+  if (state.activeTool !== 'select') return;
+  deselectAll();
+  state.selectedId = id;
+  const el = document.getElementById(id);
+  if (el) el.classList.add('selected');
+  updateProps(id);
+}
+
+function deselectAll() {
+  document.querySelectorAll('.selected').forEach(e => e.classList.remove('selected'));
+}
+
+function updateProps(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  document.getElementById('prop-x').textContent = el.style.left  || '—';
+  document.getElementById('prop-y').textContent = el.style.top   || '—';
+  document.getElementById('prop-w').textContent = el.offsetWidth  + 'px';
+  document.getElementById('prop-h').textContent = el.offsetHeight + 'px';
+}
+
+// ── Layers panel ───────────────────────────────────────────
+function selectLayer(item, id) {
+  document.querySelectorAll('.layer-item').forEach(i => i.classList.remove('selected'));
+  item.classList.add('selected');
+  selectEl(id);
+  // scroll canvas to element
+  const el = document.getElementById(id);
+  if (!el) return;
+  const x = parseInt(el.style.left) || 0;
+  const y = parseInt(el.style.top)  || 0;
+  const vw = window.innerWidth / 2;
+  const vh = window.innerHeight / 2;
+  state.panX = vw - x * state.zoom - (el.offsetWidth  * state.zoom) / 2;
+  state.panY = vh - y * state.zoom - (el.offsetHeight * state.zoom) / 2;
+  applyTransform();
+}
+
+// ── Double-click to edit sticky text ──────────────────────
+document.querySelectorAll('.sticky-text').forEach(el => {
+  el.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    el.contentEditable = 'true';
+    el.focus();
+    // select all text
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  el.addEventListener('blur', () => {
+    el.contentEditable = 'false';
+  });
+  el.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { el.blur(); }
+  });
+  el.addEventListener('mousedown', (e) => e.stopPropagation());
+  el.addEventListener('click', (e) => e.stopPropagation());
+});
+
+// ── Drop new sticky ────────────────────────────────────────
+let stickyCounter = 100;
+function dropSticky(clientX, clientY) {
+  const canvasX = (clientX - state.panX) / state.zoom;
+  const canvasY = (clientY - state.panY) / state.zoom;
+  const id = 'dynamic-sticky-' + (++stickyCounter);
+  const bgs = ['#111','#0a0a0a','#1a1a1a'];
+  const bg = bgs[stickyCounter % bgs.length];
+  const emojis = ['✨','💬','🎯','📌','🔥','⚡'];
+  const em = emojis[stickyCounter % emojis.length];
+
+  const s = document.createElement('div');
+  s.className = 'sticky';
+  s.id = id;
+  s.style.cssText = `left:${canvasX - 80}px;top:${canvasY - 50}px;background:${bg};width:160px;`;
+  s.innerHTML = `
+    <span class="sticky-emoji">${em}</span>
+    <div class="sticky-text" contenteditable="false">New idea...</div>
+    <span class="sticky-author">@you</span>
+    <div class="resize-handle"></div>`;
+  canvas.appendChild(s);
+
+  // wire double-click for new sticky
+  const textEl = s.querySelector('.sticky-text');
+  textEl.addEventListener('dblclick', (e) => {
+    e.stopPropagation();
+    textEl.contentEditable = 'true';
+    textEl.focus();
+    const range = document.createRange();
+    range.selectNodeContents(textEl);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+  textEl.addEventListener('blur', () => { textEl.contentEditable = 'false'; });
+  textEl.addEventListener('keydown', (e) => { if (e.key === 'Escape') textEl.blur(); });
+  textEl.addEventListener('mousedown', (e) => e.stopPropagation());
+  textEl.addEventListener('click', (e) => e.stopPropagation());
+
+  s.addEventListener('click', () => selectEl(id));
+
+  selectEl(id);
+  showToast('Sticky note added — double-click to edit');
+
+  // switch back to select
+  const selectBtn = document.querySelector('[data-tool="select"]');
+  setTool(selectBtn);
+}
+
+// ── Minimap ────────────────────────────────────────────────
+function updateMinimap() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const scaleX = MINIMAP_W / CANVAS_W;
+  const scaleY = MINIMAP_H / CANVAS_H;
+  // current visible area in canvas coords
+  const visX = -state.panX / state.zoom;
+  const visY = -state.panY / state.zoom;
+  const visW = vw / state.zoom;
+  const visH = vh / state.zoom;
+
+  const mx = Math.max(0, visX * scaleX);
+  const my = Math.max(0, visY * scaleY);
+  const mw = Math.min(MINIMAP_W, visW * scaleX);
+  const mh = Math.min(MINIMAP_H, visH * scaleY);
+
+  minimapVp.style.left   = mx + 'px';
+  minimapVp.style.top    = my + 'px';
+  minimapVp.style.width  = mw + 'px';
+  minimapVp.style.height = mh + 'px';
+}
+
+document.getElementById('minimap').addEventListener('click', (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const canvasX = (mx / MINIMAP_W) * CANVAS_W;
+  const canvasY = (my / MINIMAP_H) * CANVAS_H;
+  state.panX = window.innerWidth  / 2 - canvasX * state.zoom;
+  state.panY = window.innerHeight / 2 - canvasY * state.zoom;
+  applyTransform();
+});
+
+// ── Right panel collapse ───────────────────────────────────
+function togglePanel() {
+  document.getElementById('rightpanel').classList.toggle('collapsed');
+}
+
+// ── Toast ──────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// ── Pages ──────────────────────────────────────────────────
+const pagePositions = [
+  { x: -180, y: -60, z: 1 },
+  { x: -700, y: -800, z: .8 },
+];
+function goPage(idx) {
+  state.currentPage = idx;
+  document.querySelectorAll('.page-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === idx);
+  });
+  document.getElementById('pageLabel').textContent = idx + 1;
+  const p = pagePositions[idx];
+  state.panX = p.x; state.panY = p.y; state.zoom = p.z;
+  applyTransform();
+  showToast('Page ' + (idx + 1));
+}
+
+// ── Draw arrows between elements ──────────────────────────
+function getCenter(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const x = parseFloat(el.style.left) + el.offsetWidth  / 2;
+  const y = parseFloat(el.style.top)  + el.offsetHeight / 2;
+  return { x, y };
+}
+function getRightEdge(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return { x: parseFloat(el.style.left) + el.offsetWidth, y: parseFloat(el.style.top) + el.offsetHeight / 2 };
+}
+function getLeftEdge(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return { x: parseFloat(el.style.left), y: parseFloat(el.style.top) + el.offsetHeight / 2 };
+}
+function getBottomEdge(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return { x: parseFloat(el.style.left) + el.offsetWidth / 2, y: parseFloat(el.style.top) + el.offsetHeight };
+}
+function getTopEdge(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  return { x: parseFloat(el.style.left) + el.offsetWidth / 2, y: parseFloat(el.style.top) };
+}
+
+function makeCurve(p1, p2, color, dashed, label) {
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+  const cx1 = p1.x + (p2.x - p1.x) * 0.5;
+  const cy1 = p1.y;
+  const cx2 = p1.x + (p2.x - p1.x) * 0.5;
+  const cy2 = p2.y;
+  const d = `M ${p1.x} ${p1.y} C ${cx1} ${cy1} ${cx2} ${cy2} ${p2.x} ${p2.y}`;
+
+  // gradient stroke via linearGradient
+  const gradId = 'ag' + Math.random().toString(36).slice(2,7);
+  const defs = arrowSvg.querySelector('defs') || (() => {
+    const d = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    arrowSvg.prepend(d);
+    return d;
+  })();
+  const lg = document.createElementNS('http://www.w3.org/2000/svg','linearGradient');
+  lg.setAttribute('id', gradId);
+  lg.setAttribute('gradientUnits','userSpaceOnUse');
+  lg.setAttribute('x1', p1.x); lg.setAttribute('y1', p1.y);
+  lg.setAttribute('x2', p2.x); lg.setAttribute('y2', p2.y);
+  const stops = [
+    ['0%','#FF6B2B'],['20%','#FF2255'],['40%','#CC00AA'],
+    ['60%','#8844FF'],['80%','#4488FF'],['100%','#00D4FF']
+  ];
+  stops.forEach(([o,c]) => {
+    const s = document.createElementNS('http://www.w3.org/2000/svg','stop');
+    s.setAttribute('offset',o); s.setAttribute('stop-color',c);
+    lg.appendChild(s);
+  });
+  defs.appendChild(lg);
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill','none');
+  path.setAttribute('stroke', `url(#${gradId})`);
+  path.setAttribute('stroke-width','1.8');
+  path.setAttribute('stroke-linecap','round');
+  if (dashed) path.setAttribute('stroke-dasharray','5 4');
+  g.appendChild(path);
+
+  // arrowhead
+  const ah = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  const angle = Math.atan2(p2.y - cy2, p2.x - cx2);
+  const aLen = 8, aW = 4;
+  const ax1 = p2.x - aLen * Math.cos(angle) + aW * Math.sin(angle);
+  const ay1 = p2.y - aLen * Math.sin(angle) - aW * Math.cos(angle);
+  const ax2 = p2.x - aLen * Math.cos(angle) - aW * Math.sin(angle);
+  const ay2 = p2.y - aLen * Math.sin(angle) + aW * Math.cos(angle);
+  ah.setAttribute('points', `${p2.x},${p2.y} ${ax1},${ay1} ${ax2},${ay2}`);
+  ah.setAttribute('fill', '#00D4FF');
+  g.appendChild(ah);
+
+  arrowSvg.appendChild(g);
+}
+
+function drawArrows() {
+  // Wait for layout
+  setTimeout(() => {
+    // Frame 1 → Frame 2 connector
+    const f1r = getRightEdge('frame1');
+    const f2l = getLeftEdge('frame2');
+    if (f1r && f2l) makeCurve(
+      { x: f1r.x + 8, y: f1r.y },
+      { x: f2l.x - 8, y: f2l.y },
+      null, false
+    );
+
+    // Flowchart arrows inside frame2
+    const fbOffX = 1120, fbOffY = 120;
+    function boxEdge(id, side) {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const bx = parseFloat(el.style.left) + fbOffX;
+      const by = parseFloat(el.style.top)  + fbOffY;
+      const bw = el.offsetWidth, bh = el.offsetHeight;
+      if (side==='r') return { x: bx + bw, y: by + bh/2 };
+      if (side==='l') return { x: bx,      y: by + bh/2 };
+      if (side==='b') return { x: bx + bw/2, y: by + bh };
+      if (side==='t') return { x: bx + bw/2, y: by };
+    }
+    const pairs = [
+      ['fb-user','r','fb-gate','l'],
+      ['fb-gate','r','fb-svc','l'],
+      ['fb-svc','b','fb-db','t'],
+      ['fb-gate','b','fb-cache','t'],
+      ['fb-cache','l','fb-cdn','r'],
+    ];
+    pairs.forEach(([a,as,b,bs]) => {
+      const p1 = boxEdge(a,as), p2 = boxEdge(b,bs);
+      if (p1 && p2) makeCurve(p1, p2, null, false);
+    });
+
+    // Frame2 → sticky cluster connector (dashed)
+    const f2b = getBottomEdge('frame2');
+    const sc  = getTopEdge('sticky-cluster');
+    // no direct connection here — skip (different vertical position)
+
+    updateMinimap();
+  }, 150);
+}
+
+// ── Collaborator cursor animation ─────────────────────────
+const cursorPaths = {
+  'cursor-a': [
+    [520,250],[680,310],[560,400],[420,340],[360,480],[480,520],[600,460],[520,370],
+    [650,300],[580,240],[520,250],
+  ],
+  'cursor-b': [
+    [1300,200],[1450,260],[1380,340],[1260,290],[1180,380],[1320,420],[1460,350],
+    [1520,220],[1400,180],[1300,200],
+  ],
+};
+const cursorState = {
+  'cursor-a': { idx: 0, progress: 0 },
+  'cursor-b': { idx: 0, progress: 0 },
+};
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function animateCursors() {
+  ['cursor-a','cursor-b'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const s = cursorState[id];
+    const path = cursorPaths[id];
+    s.progress += 0.004;
+    if (s.progress >= 1) {
+      s.progress = 0;
+      s.idx = (s.idx + 1) % (path.length - 1);
+    }
+    const from = path[s.idx];
+    const to   = path[(s.idx + 1) % path.length];
+    const x = lerp(from[0], to[0], s.progress);
+    const y = lerp(from[1], to[1], s.progress);
+    el.style.left = x + 'px';
+    el.style.top  = y + 'px';
+  });
+  requestAnimationFrame(animateCursors);
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────
+window.addEventListener('keydown', (e) => {
+  if (e.target.isContentEditable || e.target.tagName === 'INPUT') return;
+  const map = {
+    'v':'select','h':'hand','s':'sticky','t':'text',
+    'r':'shape','a':'arrow','p':'draw','f':'frame',
+    'i':'image','c':'comment',
+  };
+  const key = e.key.toLowerCase();
+  if (map[key]) {
+    const btn = document.querySelector(`[data-tool="${map[key]}"]`);
+    if (btn) setTool(btn);
+  }
+  if (e.key === '=' || e.key === '+') zoomBy(0.1);
+  if (e.key === '-') zoomBy(-0.1);
+  if (e.key === '0') resetZoom();
+  if (e.key === 'Escape') deselectAll();
+  if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (state.selectedId && state.selectedId.startsWith('dynamic-')) {
+      const el = document.getElementById(state.selectedId);
+      if (el) { el.remove(); showToast('Element deleted'); }
+    }
+  }
+});
+
+// ── Space bar pan ──────────────────────────────────────────
+let spacePanning = false;
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && !e.target.isContentEditable && e.target.tagName !== 'INPUT') {
+    e.preventDefault();
+    if (!spacePanning) {
+      spacePanning = true;
+      viewport.style.cursor = 'grab';
+    }
+  }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code === 'Space') {
+    spacePanning = false;
+    viewport.style.cursor = '';
+  }
+});
+
+// ── Board name saves on blur ───────────────────────────────
+document.getElementById('boardName').addEventListener('blur', (e) => {
+  if (e.target.value.trim()) {
+    showToast('Board renamed: ' + e.target.value.trim());
+  }
+});
+
+// ── Init ───────────────────────────────────────────────────
+applyTransform();
+drawArrows();
+animateCursors();
+
+// initial selection highlight
+setTimeout(() => selectEl('frame1'), 80);
+
+// announce
+showToast('RoadBoard loaded — 8 collaborators online');
+</script>
+</body>
+</html>

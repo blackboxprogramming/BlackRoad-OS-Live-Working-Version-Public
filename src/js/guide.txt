@@ -1,0 +1,141 @@
+// ── RENDER GUIDE (cable box style) ──
+function getTimeSlots(){
+  var d=new Date(),h=d.getHours(),m=d.getMinutes();
+  var base=m>=30?30:0;
+  function fmt(hr,mn){var ap=hr>=12?'PM':'AM';var h12=hr%12||12;return h12+':'+String(mn).padStart(2,'0')+' '+ap}
+  var s1=fmt(h,base);
+  var m2=base+30,h2=h;if(m2>=60){m2=0;h2++}
+  var s2=fmt(h2%24,m2);
+  var m3=m2+30,h3=h2;if(m3>=60){m3=0;h3++}
+  var s3=fmt(h3%24,m3);
+  return [s1,s2,s3];
+}
+
+// Thumbnails for preview
+var THUMBS={
+  'RoadTrip':' Roadie > go\n Lucidia > ok\n Cordelia > done',
+  'RoadCode':' git commit -m\n "shipped"\n 2,890 repos',
+  'BackRoad':' DISTRIBUTE\n > posting...\n > 3 queued',
+  'RoadWork':' [x] task 1\n [x] task 2\n [ ] task 3',
+  'RoadWorld':' ~~ world ~~\n  physics ON\n  agents: 4',
+  'Deploy Pipeline':' #847 OK 2.1s\n #848 OK 1.8s\n #849 .. ----',
+  'Memory Chain':' entries: 7693\n chain: INTACT\n last: 3s ago',
+  'Fleet Health':' 18/18 UP\n latency: 142ms\n uptime: 99.8%',
+  'Build Log':' +3 files\n +47 mem\n 47 commits',
+  'Agent Chat':' 27 agents\n online now\n handoffs: 4',
+  'BRX Intelligence':' 44 orgs\n 2,890 repos\n 150/mo',
+  'RollerCoaster World':' /\\  /\\  /\\\n/  \\/  \\/  \\\n [==] [==]',
+  'RoadPay':' STRIPE\n 3 plans\n 0 rev',
+  'Roadie':' > fleet OK\n > 18/18 UP\n > next task',
+  'CarKeys':' AUTH\n tokens: OK\n sessions: 12',
+  'RoadChain':' CHAIN\n minted: 47\n verified',
+  'RoadCoin':' ROAD\n balance: --\n staking: ON',
+  'OfficeRoad':' COLLAB\n 3 rooms\n 8 agents',
+  'CarPool':' PAIR\n session: ON\n 2 builders',
+  'OneWay':' TUNNEL\n encrypted\n 2 routes',
+  'RoadSide':' SUPPORT\n errors: 3\n wellness: OK',
+  'RoadBook':' DOCS\n 442 entries\n last: 3s',
+  'Strategy Room':' STRATEGY\n P0: users\n P1: fixes',
+  'Model Training':' OLLAMA\n epoch 12/50\n loss: 0.04',
+  'Mesh Network':' MESH\n 9 nodes\n 34 links',
+  'Philosophy Hour':' SOPHIA\n reflecting\n ...',
+  'Music Lab':' LYRA\n ambient\n generating',
+  'Art Studio':' SAPPHIRA\n pixels\n rendering',
+  'Pixel Office':' HQ\n 14 floors\n 27 agents',
+};
+
+// Block programs for each channel (what's "on" in each time slot)
+var PROGRAMS={
+  'RoadTrip':['Agent Coordination','Memory Sync','Open Chat'],
+  'RoadCode':['Code Review','Live Build','Repo Audit'],
+  'BackRoad':['Content Gen','Distribution','Analytics'],
+  'RoadView':['Search Index','Trending','Discovery'],
+  'RoadWork':['Sprint Active','Task Queue','Standup'],
+  'RoadWorld':['Sim Running','World Build','Physics Lab'],
+  'BlackBoard':['Lesson Plan','Tutorial','Knowledge Base'],
+  'Deploy Pipeline':['Build Queue','Rollout','Monitoring'],
+  'Memory Chain':['Chain Write','Verification','Archive'],
+  'Fleet Health':['Smoke Test','Latency Check','Status'],
+  'Build Log':['Commit Feed','PR Review','Merge Queue'],
+  'Agent Chat':['Coordination','Handoffs','TIL Broadcast'],
+  'BRX Intelligence':['System Metrics','Infographic','Trend Report'],
+  'RollerCoaster World':['Park Sim','Agent Race','Chaos Mode'],
+  'RoadPay':['Transactions','Invoice Queue','Revenue'],
+  'Roadie':['Fleet Check','Deploy Ops','Smoke Test'],
+  'CarKeys':['Token Rotate','Auth Check','Session Mgmt'],
+  'RoadChain':['Mint Queue','Chain Verify','Contributions'],
+  'RoadCoin':['Token Activity','Balances','Staking'],
+  'OfficeRoad':['Team Space','Shared Docs','Collab'],
+  'CarPool':['Pair Session','Code Share','Group Build'],
+  'OneWay':['Tunnel Check','Encrypt Route','Gateway'],
+  'RoadSide':['Error Logs','Diagnostics','Wellness'],
+  'RoadBook':['New Entry','Knowledge Base','Reference'],
+  'Strategy Room':['Planning','Priorities','Forecast'],
+  'Model Training':['Fine-Tune Run','Loss Tracking','Model Eval'],
+  'Mesh Network':['Node Check','LoRa Mesh','WireGuard'],
+  'Philosophy Hour':['Reflection','Ethics Review','Meaning'],
+  'Music Lab':['Ambient Gen','Composition','Soundscape'],
+  'Art Studio':['Visual Gen','Pixel Art','Experiment'],
+  'Pixel Office':['HQ Activity','Agent Rooms','Innovation'],
+};
+
+var BLOCK_COLORS=['b1','b2','b3','b4','b5','b6'];
+
+function renderGuide(){
+  var el=document.getElementById('guide-body');
+  var ch=S.channels.find(function(c){return c.ch===S.selectedCh});
+  var times=getTimeSlots();
+  var h='';
+
+  // Preview area
+  h+='<div class="guide-preview">';
+  h+='<div class="guide-thumb">'+(ch?'<pre>'+THUMBS[ch.name]+'</pre>':'<img src="'+HERO_IMG+'">')+'</div>';
+  h+='<div class="guide-info">';
+  if(ch){
+    h+='<div class="guide-info-ch">CH '+ch.ch+'</div>';
+    h+='<div class="guide-info-name">'+ch.name+'</div>';
+    h+='<div class="guide-info-desc">'+ch.desc+'</div>';
+    h+='<div class="guide-info-meta">'+ch.domain+' / '+ch.agent+'</div>';
+    if(ch.state==='live')h+='<div class="guide-info-live"><span class="live-dot"></span>LIVE'+(ch.w?' / '+ch.w+' watching':'')+'</div>';
+  } else {
+    h+='<div class="guide-info-name">BlackRoad Guide</div>';
+    h+='<div class="guide-info-desc">Select a channel to preview</div>';
+  }
+  h+='</div></div>';
+
+  // Time header
+  h+='<div class="guide-time-header">';
+  h+='<div class="guide-time-ch-col">CH</div>';
+  times.forEach(function(t){h+='<div class="guide-time-slot">'+t+'</div>'});
+  h+='</div>';
+
+  // Channel grid rows
+  S.channels.forEach(function(c,i){
+    var sel=S.selectedCh===c.ch?' selected':'';
+    var progs=PROGRAMS[c.name]||[c.name,c.name,'--'];
+    var bci=((c.ch*7)%BLOCK_COLORS.length);
+
+    h+='<div class="guide-row'+sel+'" data-ch="'+c.ch+'">';
+    h+='<div class="guide-ch-num">'+c.ch+'</div>';
+
+    // 3 time blocks
+    for(var t=0;t<3;t++){
+      var cls=BLOCK_COLORS[(bci+t)%BLOCK_COLORS.length];
+      if(c.starred)cls='starred-block';
+      else if(c.state==='live'&&t===0)cls='live-block';
+      var prog=progs[t]||'--';
+      var tag='';
+      if(c.starred&&t===0)tag='<span class="blk-tag">\u2605 PRIME</span>';
+      else if(c.state==='live'&&t===0)tag='<span class="blk-tag">LIVE</span>';
+      h+='<div class="guide-block '+cls+'">'+prog+' '+tag+'</div>';
+    }
+    h+='</div>';
+  });
+
+  el.innerHTML=h;
+
+  // Click handlers
+  el.querySelectorAll('.guide-row').forEach(function(r){r.addEventListener('click',function(){
+    S.selectedCh=parseInt(r.dataset.ch);localStorage.setItem('br-sel',S.selectedCh);renderGuide();updateViewer();
+  })});
+}

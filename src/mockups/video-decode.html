@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Classified — Decode Sequence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Mono',monospace;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#111;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.9);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-size:11px;letter-spacing:4px;color:#333;text-transform:uppercase;}
+
+/* ── Scanline & noise ── */
+#scanlines{position:absolute;inset:0;z-index:100;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);}
+
+/* ── Dossier container ── */
+#dossier{
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:760px;
+  pointer-events:none;z-index:10;
+}
+
+/* Header */
+#dos-header{
+  text-align:center;margin-bottom:48px;
+  opacity:0;transition:opacity .6s;
+}
+#dos-header.in{opacity:1;}
+#dos-stamp{
+  display:inline-block;
+  border:2px solid #1a1a1a;
+  color:#1a1a1a;font-size:11px;letter-spacing:8px;
+  padding:6px 20px;margin-bottom:16px;
+}
+#dos-title{font-size:13px;letter-spacing:6px;color:#fff;}
+#dos-line{height:1px;background:#111;margin:16px 0 0;}
+
+/* Rows */
+#dos-rows{}
+.dr{
+  display:flex;align-items:baseline;
+  padding:14px 0;border-bottom:1px solid #0a0a0a;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .4s,transform .4s;
+}
+.dr.in{opacity:1;transform:translateY(0);}
+.dr-key{
+  font-size:10px;letter-spacing:3px;color:#2a2a2a;
+  width:220px;flex-shrink:0;text-transform:uppercase;
+}
+.dr-dots{
+  flex:1;
+  color:#111;font-size:10px;letter-spacing:3px;
+  overflow:hidden;white-space:nowrap;
+}
+.dr-val{
+  font-size:13px;color:#fff;letter-spacing:2px;
+  width:260px;text-align:right;
+  white-space:nowrap;min-height:18px;
+}
+.dr-val.decoded{color:#fff;}
+
+/* Status badge */
+.dr-badge{
+  display:inline-block;
+  border:1px solid #1c1c1c;
+  padding:1px 8px;font-size:10px;letter-spacing:3px;color:#444;
+  margin-left:12px;vertical-align:middle;
+}
+.dr-badge.active{color:#888;border-color:#2a2a2a;}
+
+/* Footer */
+#dos-footer{
+  margin-top:40px;text-align:center;
+  opacity:0;transition:opacity .8s;
+}
+#dos-footer.in{opacity:1;}
+#dos-footer-line{height:1px;background:#0d0d0d;margin-bottom:20px;}
+#dos-clearance{
+  font-size:11px;letter-spacing:8px;color:#fff;
+  opacity:0;transform:scale(.96);
+  transition:opacity .7s .2s,transform .7s .2s;
+}
+#dos-clearance.in{opacity:1;transform:scale(1);}
+#dos-clearance-sub{font-size:9px;letter-spacing:6px;color:#1a1a1a;margin-top:8px;opacity:0;transition:opacity .6s .5s;}
+#dos-clearance-sub.in{opacity:1;}
+
+/* cursor blink in val */
+@keyframes valcur{0%,100%{opacity:1}50%{opacity:0}}
+.decoding::after{content:'▌';animation:valcur .5s step-end infinite;color:#444;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="scanlines"></div>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+
+  <div id="play-overlay">
+    <div id="play-btn">
+      <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg>
+    </div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <div id="dossier">
+    <div id="dos-header">
+      <div id="dos-stamp">TOP SECRET</div>
+      <div id="dos-title">BLACKROAD OS // SYSTEM BRIEFING // AUTHORIZED ACCESS ONLY</div>
+      <div id="dos-line"></div>
+    </div>
+
+    <div id="dos-rows">
+      <div class="dr" id="r0">
+        <div class="dr-key">Designation</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v0"></div>
+      </div>
+      <div class="dr" id="r1">
+        <div class="dr-key">Classification</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v1"></div>
+      </div>
+      <div class="dr" id="r2">
+        <div class="dr-key">Products</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v2"></div>
+      </div>
+      <div class="dr" id="r3">
+        <div class="dr-key">Strategic Domains</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v3"></div>
+      </div>
+      <div class="dr" id="r4">
+        <div class="dr-key">Agents Online</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v4"></div>
+      </div>
+      <div class="dr" id="r5">
+        <div class="dr-key">Fleet Status</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v5"></div>
+      </div>
+      <div class="dr" id="r6">
+        <div class="dr-key">Deployment</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v6"></div>
+      </div>
+      <div class="dr" id="r7">
+        <div class="dr-key">Clearance Level</div>
+        <div class="dr-dots">············································</div>
+        <div class="dr-val" id="v7"></div>
+      </div>
+    </div>
+
+    <div id="dos-footer">
+      <div id="dos-footer-line"></div>
+      <div id="dos-clearance">ACCESS GRANTED</div>
+      <div id="dos-clearance-sub">SESSION AUTHENTICATED · BLACKROAD SECURITY PROTOCOL</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280;
+  stage.style.transform=`scale(${sc})`;
+  shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const ROWS=[
+  {id:'v0', target:'BLACKROAD OS'},
+  {id:'v1', target:'TOP SECRET / SCI'},
+  {id:'v2', target:'18 ACTIVE'},
+  {id:'v3', target:'20 DOMAINS'},
+  {id:'v4', target:'69+ ONLINE'},
+  {id:'v5', target:'ALL SYSTEMS GO'},
+  {id:'v6', target:'GLOBAL'},
+  {id:'v7', target:'LEVEL FIVE'},
+];
+
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%@&*?/\\|<>[]{}~^';
+
+function decodeField(elId, target, startDelay){
+  const el=document.getElementById(elId);
+  return new Promise(resolve=>{
+    setTimeout(()=>{
+      el.classList.add('decoding');
+      let frame=0;
+      const FRAMES=18;
+      function step(){
+        const p=frame/FRAMES;
+        const lockedCount=Math.floor(p*target.length);
+        const display=target.split('').map((ch,i)=>{
+          if(i<lockedCount) return ch;
+          return CHARS[Math.floor(Math.random()*CHARS.length)];
+        }).join('');
+        el.textContent=display;
+        frame++;
+        if(frame<=FRAMES){
+          setTimeout(step, 55);
+        } else {
+          el.textContent=target;
+          el.classList.remove('decoding');
+          el.classList.add('decoded');
+          resolve();
+        }
+      }
+      step();
+    }, startDelay);
+  });
+}
+
+// ─── Timeline ─────────────────────────────────────────────────────
+const DURATION=16;
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[];
+function at(sec,fn){timeline.push({sec,fn});}
+
+at(0.0,()=>{
+  // Header appears
+  document.getElementById('dos-header').classList.add('in');
+});
+
+at(1.2,()=>{
+  // Rows appear and decode, staggered
+  ROWS.forEach(({id},i)=>{
+    const rowEl=document.getElementById('r'+i);
+    setTimeout(()=>{
+      rowEl.classList.add('in');
+      // Start decoding 400ms after row appears
+      decodeField(id, ROWS[i].target, 400);
+    }, i*900);
+  });
+});
+
+at(13.0,()=>{
+  document.getElementById('dos-footer').classList.add('in');
+  document.getElementById('dos-clearance').classList.add('in');
+  document.getElementById('dos-clearance-sub').classList.add('in');
+});
+
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); resetAll();
+  raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  document.getElementById('dos-header').classList.remove('in');
+  ROWS.forEach((_,i)=>{
+    document.getElementById('r'+i).classList.remove('in');
+    const vel=document.getElementById('v'+i);
+    vel.textContent=''; vel.classList.remove('decoded','decoding');
+  });
+  document.getElementById('dos-footer').classList.remove('in');
+  document.getElementById('dos-clearance').classList.remove('in');
+  document.getElementById('dos-clearance-sub').classList.remove('in');
+  document.getElementById('prog-fill').style.width='0';
+}
+</script>
+</body>
+</html>

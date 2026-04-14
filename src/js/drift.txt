@@ -1,0 +1,18 @@
+// ── DRIFT (runs every 4 seconds) ──
+function drift(){
+  // Watchers
+  S.channels.forEach(function(c){if(c.state==='live'&&Math.random()>.5)c.w=Math.max(1,c.w+Math.floor(Math.random()*5)-2)});
+  // Scores
+  S.event.competitors.forEach(function(c){c.score+=Math.floor(Math.random()*4)+1});
+  // Timer
+  if(S.event.timer>0)S.event.timer=Math.max(0,S.event.timer-6);
+  // Sim votes
+  var ks=Object.keys(S.votes);S.votes[ks[Math.floor(Math.random()*ks.length)]]+=Math.floor(Math.random()*3);
+  // Sim chat
+  if(simI<SIM.length&&Math.random()>.4){S.msgs.push(SIM[simI]);simI++;if(S.msgs.length>40)S.msgs.shift()}
+  // Ticker
+  var ts=['Roadie: '+S.event.competitors[0].score+'pts','Sophia: '+S.event.competitors[1].score+'pts',
+    'Calliope: '+S.event.competitors[2].score+'pts',Math.floor(Math.random()*30+10)+' viewers',
+    'Memory +'+Math.floor(Math.random()*20)+' entries','Build Log +'+Math.floor(Math.random()*5)+' commits'];
+  S.ticker.push(ts[Math.floor(Math.random()*ts.length)]);if(S.ticker.length>20)S.ticker.shift();
+}

@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS, Inc. — blackroad.company</title>
+<meta name="description" content="BlackRoad OS, Inc. is a Delaware C-Corporation building the sovereign operating system for the next generation of computing.">
+<meta property="og:title" content="BlackRoad OS, Inc. — blackroad.company">
+<meta property="og:description" content="Building the sovereign operating system. Delaware incorporated. 18 products. 20 orgs.">
+<meta property="og:url" content="https://blackroad.company">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup-base.css">
+<style>
+/* ─── RESET & TOKENS ─────────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135: linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+
+  --bg:      #000;
+  --card:    #0a0a0a;
+  --elevated:#111;
+  --surface: #1a1a1a;
+  --border:  #1a1a1a;
+
+  --text:    #f5f5f5;
+  --sub:     #737373;
+  --muted:   #444;
+  --white:   #fff;
+
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 16px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sg);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+
+a { color: var(--text); text-decoration: none; }
+button { font-family: var(--sg); cursor: pointer; border: none; background: none; }
+img { display: block; max-width: 100%; }
+
+/* ─── LAYOUT ─────────────────────────────────────────────────────────── */
+.container {
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.section { padding: 96px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* ─── GRADIENT UTILITIES ─────────────────────────────────────────────── */
+.grad-bar { height: 1px; background: var(--g); }
+
+.grad-text {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient border via pseudo-element wrapper */
+.grad-border {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.grad-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius) + 1px);
+  background: var(--g);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.grad-border > * { position: relative; z-index: 1; }
+.grad-border:hover::before { opacity: 1; }
+.grad-border-inner {
+  background: var(--card);
+  border-radius: var(--radius);
+  position: relative;
+  z-index: 1;
+}
+
+/* Always-on gradient border variant */
+.grad-border-on::before { opacity: 1; }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { border-color: #444; color: var(--white); }
+
+/* Gradient border button */
+.btn-grad-border {
+  position: relative;
+  background: transparent;
+  color: var(--text);
+  border: none;
+  padding: 0;
+}
+.btn-grad-border-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: var(--radius-sm);
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 13px;
+  background: var(--bg);
+  position: relative;
+  z-index: 1;
+  transition: background .15s, color .15s;
+}
+.btn-grad-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-sm) + 1px);
+  background: var(--g);
+  z-index: 0;
+}
+.btn-grad-border:hover .btn-grad-border-inner { background: #0a0a0a; color: var(--white); }
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  color: var(--sub);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 0;
+}
+.btn-ghost:hover { color: var(--text); }
+
+.btn-lg { padding: 13px 32px; font-size: 14px; border-radius: var(--radius-sm); }
+
+/* ─── NAV ────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 14px 32px;
+}
+
+.nav-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 22px;
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: -.01em;
+}
+.nav-logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--g);
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sub);
+  transition: color .15s;
+}
+.nav-links a:hover { color: var(--white); }
+
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ─── HERO ───────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 140px 32px 80px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--sub);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.hero-eyebrow-divider { width: 1px; height: 14px; background: var(--border); }
+
+.hero-headline {
+  font-size: clamp(44px, 6vw, 64px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -.03em;
+  color: var(--white);
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--sub);
+  max-width: 580px;
+  line-height: 1.75;
+  margin-bottom: 40px;
+}
+
+.hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 72px;
+}
+
+/* Stats row */
+.hero-stats {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: fit-content;
+}
+.hero-stat {
+  padding: 18px 32px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.hero-stat:last-child { border-right: none; }
+.hero-stat-value {
+  font-family: var(--jb);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--white);
+  display: block;
+  margin-bottom: 4px;
+}
+.hero-stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-family: var(--jb);
+}
+
+/* ─── SECTION HEADER ─────────────────────────────────────────────────── */
+.section-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -.02em;
+  line-height: 1.1;
+  margin-bottom: 12px;
+}
+
+.section-sub {
+  font-size: 15px;
+  color: var(--sub);
+  max-width: 520px;
+  line-height: 1.7;
+}
+
+/* ─── SECTION 1: COMPANY OVERVIEW ────────────────────────────────────── */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.overview-card {
+  padding: 32px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color .2s;
+}
+.overview-card:hover { border-color: #2a2a2a; }
+
+.overview-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.overview-card-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.overview-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+  letter-spacing: -.01em;
+}
+
+.overview-card-body {
+  font-size: 14px;
+  color: var(--sub);
+  line-height: 1.7;
+}
+
+.overview-card-stat {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--muted);
+}
+.overview-card-stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--g);
+  flex-shrink: 0;
+}
+
+/* ─── SECTION 2: TEAM ────────────────────────────────────────────────── */
+.team-section { background: var(--bg); }
+
+.founder-card {
+  position: relative;
+  margin-top: 48px;
+  border-radius: var(--radius-lg);
+  overflow: visible;
+}
+.founder-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-lg) + 1px);
+  background: var(--g);
+  z-index: 0;
+}
+.founder-card-inner {
+  position: relative;
+  z-index: 1;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.founder-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--g);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+}
+
+.founder-meta-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.founder-name {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -.02em;
+  margin-bottom: 4px;
+}
+
+.founder-title {
+  font-size: 14px;
+  color: var(--sub);
+  margin-bottom: 16px;
+}
+
+.founder-bio {
+  font-size: 15px;
+  color: var(--sub);
+  line-height: 1.75;
+  max-width: 580px;
+  margin-bottom: 20px;
+}
+
+.founder-links {
+  display: flex;
+  gap: 16px;
+}
+.founder-link {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: lowercase;
+  letter-spacing: .04em;
+  transition: color .15s;
+  border-bottom: 1px solid transparent;
+}
+.founder-link:hover { color: var(--text); border-bottom-color: var(--muted); }
+
+/* Agent team */
+.agent-team-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-top: 48px;
+  margin-bottom: 16px;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.agent-card {
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color .2s, background .2s;
+}
+.agent-card:hover { border-color: #2a2a2a; background: var(--elevated); }
+
+.agent-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--sub);
+  margin-bottom: 14px;
+  font-family: var(--jb);
+}
+
+.agent-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+
+.agent-role {
+  font-size: 12px;
+  color: var(--sub);
+  margin-bottom: 14px;
+}
+
+.agent-stat {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* ─── SECTION 3: CAREERS ─────────────────────────────────────────────── */
+.careers-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.job-card {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: visible;
+}
+.job-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius) + 1px);
+  background: var(--g);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity .2s;
+}
+.job-card:hover::before { opacity: 1; }
+
+.job-card-inner {
+  position: relative;
+  z-index: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color .2s;
+}
+.job-card:hover .job-card-inner { border-color: transparent; }
+
+.job-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.job-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: -.01em;
+  margin-bottom: 4px;
+}
+
+.job-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.job-tag {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.job-apply {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  padding-top: 4px;
+  transition: color .15s;
+}
+.job-card:hover .job-apply { color: var(--text); }
+
+.careers-footnote {
+  margin-top: 28px;
+  font-style: italic;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ─── SECTION 4: PRESS & CORPORATE ──────────────────────────────────── */
+.press-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.press-col {
+  padding: 36px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.press-col-title {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.facts-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 20px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.fact-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.fact-row:last-child { border-bottom: none; }
+.fact-row:nth-child(odd) { background: var(--elevated); }
+
+.fact-key {
+  font-size: 12px;
+  color: var(--sub);
+  font-family: var(--jb);
+}
+
+.fact-val {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.press-email {
+  font-family: var(--jb);
+  font-size: 12px;
+  color: var(--sub);
+  margin-top: 16px;
+}
+.press-email a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+.press-email a:hover { color: var(--white); }
+
+.corp-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.corp-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.corp-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+.corp-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.corp-value {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.corp-legal-note {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 16px;
+  line-height: 1.6;
+  font-style: italic;
+}
+.corp-legal-note a { color: var(--sub); text-decoration: underline; text-underline-offset: 3px; }
+.corp-legal-note a:hover { color: var(--text); }
+
+/* ─── SECTION 5: CONTACT FORM ────────────────────────────────────────── */
+.contact-wrap {
+  max-width: 640px;
+  margin-top: 48px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.form-label {
+  font-size: 11px;
+  color: var(--sub);
+  font-family: var(--jb);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  font-family: var(--sg);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .15s;
+  width: 100%;
+}
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus { border-color: #444; }
+.form-input::placeholder,
+.form-textarea::placeholder { color: var(--muted); }
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23444' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.form-select option { background: #111; color: var(--text); }
+
+.form-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.6;
+}
+
+.form-submit {
+  margin-top: 20px;
+}
+
+/* Send button — gradient border */
+.btn-send {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-send::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--radius-sm) + 1px);
+  background: var(--g);
+  z-index: 0;
+}
+.btn-send-inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: var(--bg);
+  border-radius: var(--radius-sm);
+  font-family: var(--sg);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  transition: background .15s;
+}
+.btn-send:hover .btn-send-inner { background: #0a0a0a; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 56px 32px 40px;
+}
+
+.footer-inner {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.footer-brand {}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.footer-logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--g);
+}
+
+.footer-brand-desc {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 200px;
+}
+
+.footer-col-title {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  margin-bottom: 16px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  font-size: 13px;
+  color: var(--sub);
+  transition: color .15s;
+}
+.footer-links a:hover { color: var(--text); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-copy {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.footer-legal-links {
+  display: flex;
+  gap: 20px;
+}
+.footer-legal-links a {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  transition: color .15s;
+}
+.footer-legal-links a:hover { color: var(--sub); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .overview-grid { grid-template-columns: 1fr; }
+  .agent-grid { grid-template-columns: repeat(2, 1fr); }
+  .jobs-grid { grid-template-columns: 1fr; }
+  .press-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .founder-card-inner { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  nav { padding: 10px 16px; }
+  .hero { padding: 120px 20px 60px; }
+  .container { padding: 0 20px; }
+  .hero-stats { flex-wrap: wrap; }
+  .hero-stat { flex: 1; min-width: 120px; }
+  .careers-header { flex-direction: column; }
+  .footer-top { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── GRAD BAR ─────────────────────────────────────────────────────── -->
+<div class="grad-bar"></div>
+
+<!-- ── NAV ─────────────────────────────────────────────────────────── -->
+<nav role="navigation" aria-label="Primary navigation">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo" aria-label="BlackRoad Company Home">
+      <span class="nav-logo-dot" aria-hidden="true"></span>
+      blackroad.company
+    </a>
+
+    <ul class="nav-links" role="list">
+      <li><a href="#about">About</a></li>
+      <li><a href="#team">Team</a></li>
+      <li><a href="#careers">Careers</a></li>
+      <li><a href="#press">Press</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-outline" aria-label="Investor Relations">Investor Relations</button>
+      <button class="btn-grad-border" aria-label="Get in Touch">
+        <span class="btn-grad-border-inner">Get in Touch</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────── -->
+<section class="hero" id="about" aria-label="Hero">
+  <div class="hero-eyebrow">
+    <span>BlackRoad OS, Inc.</span>
+    <span class="hero-eyebrow-divider" aria-hidden="true"></span>
+    <span>Delaware C-Corporation</span>
+    <span class="hero-eyebrow-divider" aria-hidden="true"></span>
+    <span>Est. 2024</span>
+  </div>
+
+  <h1 class="hero-headline">
+    Building the sovereign<br>operating system.
+  </h1>
+
+  <p class="hero-sub">
+    We believe the next generation of computing should be owned by the people who build and use it — not by platforms that extract from them.
+  </p>
+
+  <div class="hero-actions">
+    <button class="btn-grad-border btn-lg" aria-label="Read our story">
+      <span class="btn-grad-border-inner">Read our story →</span>
+    </button>
+    <button class="btn btn-outline btn-lg" aria-label="Join the team">Join the team</button>
+  </div>
+
+  <dl class="hero-stats" aria-label="Company stats">
+    <div class="hero-stat">
+      <dt class="hero-stat-label">Founder</dt>
+      <dd class="hero-stat-value">1</dd>
+    </div>
+    <div class="hero-stat">
+      <dt class="hero-stat-label">Products</dt>
+      <dd class="hero-stat-value">18</dd>
+    </div>
+    <div class="hero-stat">
+      <dt class="hero-stat-label">Orgs</dt>
+      <dd class="hero-stat-value">20</dd>
+    </div>
+    <div class="hero-stat">
+      <dt class="hero-stat-label">Incorporated</dt>
+      <dd class="hero-stat-value">Delaware</dd>
+    </div>
+  </dl>
+</section>
+
+<!-- ── SECTION 1: COMPANY OVERVIEW ─────────────────────────────────── -->
+<section class="section" id="overview" aria-labelledby="overview-title">
+  <div class="container">
+    <p class="section-label" aria-hidden="true">01 — Overview</p>
+    <h2 class="section-title" id="overview-title">What we're building.</h2>
+    <p class="section-sub">
+      A complete, sovereign software ecosystem — from infrastructure to applications — that returns ownership to creators, builders, and users.
+    </p>
+
+    <div class="overview-grid" role="list">
+
+      <article class="overview-card" role="listitem">
+        <div class="overview-card-icon" aria-hidden="true">⬡</div>
+        <p class="overview-card-label">01</p>
+        <h3 class="overview-card-title">The Platform</h3>
+        <p class="overview-card-body">
+          BlackRoad OS is a suite of 18 sovereign products spanning work, communication, finance, and creation. Each product runs independently — and together, they form a complete operating layer for the modern builder.
+        </p>
+        <div class="overview-card-stat">
+          <span class="overview-card-stat-dot" aria-hidden="true"></span>
+          18 products · Production-grade
+        </div>
+      </article>
+
+      <article class="overview-card" role="listitem">
+        <div class="overview-card-icon" aria-hidden="true">◎</div>
+        <p class="overview-card-label">02</p>
+        <h3 class="overview-card-title">The Network</h3>
+        <p class="overview-card-body">
+          Nine Pi fleet nodes. Twenty organizations. 847+ hosts across the ecosystem. BlackRoad operates a distributed physical and cloud infrastructure that no single provider controls.
+        </p>
+        <div class="overview-card-stat">
+          <span class="overview-card-stat-dot" aria-hidden="true"></span>
+          9 nodes · 20 orgs · 847+ hosts
+        </div>
+      </article>
+
+      <article class="overview-card" role="listitem">
+        <div class="overview-card-icon" aria-hidden="true">◈</div>
+        <p class="overview-card-label">03</p>
+        <h3 class="overview-card-title">The Mission</h3>
+        <p class="overview-card-body">
+          Sovereignty through creation. We build tools people actually own — not license, not rent. Every person deserves infrastructure that answers to them, not to a quarterly earnings report.
+        </p>
+        <div class="overview-card-stat">
+          <span class="overview-card-stat-dot" aria-hidden="true"></span>
+          First principles · Founder-led
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2: TEAM ───────────────────────────────────────────────── -->
+<section class="section" id="team" aria-labelledby="team-title">
+  <div class="container">
+    <p class="section-label" aria-hidden="true">02 — Leadership</p>
+    <h2 class="section-title" id="team-title">The team.</h2>
+    <p class="section-sub">
+      A founder and a fleet of specialized AI agents building one of the most ambitious software ecosystems in independent tech.
+    </p>
+
+    <!-- Founder card -->
+    <article class="founder-card" aria-label="Alexa Amundson, Founder and Chancellor">
+      <div class="founder-card-inner">
+        <div class="founder-avatar" aria-hidden="true">A</div>
+        <div>
+          <p class="founder-meta-label">Founder</p>
+          <h3 class="founder-name">Alexa Amundson</h3>
+          <p class="founder-title">Founder &amp; Chancellor</p>
+          <p class="founder-bio">
+            Building BlackRoad from first principles. Architect of the university-as-corporation model — a structure that merges institutional rigor with founder velocity. Believes sovereignty is a right, not a feature, and that the best software is built by people who use it every day.
+          </p>
+          <nav class="founder-links" aria-label="Alexa's sites">
+            <a href="https://blackroad.me" class="founder-link" target="_blank" rel="noopener">blackroad.me ↗</a>
+            <a href="https://blackroad.io" class="founder-link" target="_blank" rel="noopener">blackroad.io ↗</a>
+          </nav>
+        </div>
+      </div>
+    </article>
+
+    <!-- Agent team -->
+    <p class="agent-team-label" aria-hidden="true">Agent team — always on</p>
+    <div class="agent-grid" role="list" aria-label="AI agent team">
+
+      <article class="agent-card" role="listitem">
+        <div class="agent-avatar" aria-hidden="true">Or</div>
+        <h3 class="agent-name">Orion</h3>
+        <p class="agent-role">Chief AI Officer</p>
+        <p class="agent-stat">Handles 2,847 tasks/day</p>
+      </article>
+
+      <article class="agent-card" role="listitem">
+        <div class="agent-avatar" aria-hidden="true">Al</div>
+        <h3 class="agent-name">Alice</h3>
+        <p class="agent-role">Fleet Intelligence</p>
+        <p class="agent-stat">Manages 9 Pi nodes</p>
+      </article>
+
+      <article class="agent-card" role="listitem">
+        <div class="agent-avatar" aria-hidden="true">At</div>
+        <h3 class="agent-name">Atlas</h3>
+        <p class="agent-role">Infrastructure</p>
+        <p class="agent-stat">Uptime: 99.97%</p>
+      </article>
+
+      <article class="agent-card" role="listitem">
+        <div class="agent-avatar" aria-hidden="true">Rd</div>
+        <h3 class="agent-name">Road</h3>
+        <p class="agent-role">Operations</p>
+        <p class="agent-stat">Primary ops agent</p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 3: CAREERS ────────────────────────────────────────────── -->
+<section class="section" id="careers" aria-labelledby="careers-title">
+  <div class="container">
+    <div class="careers-header">
+      <div>
+        <p class="section-label" aria-hidden="true">03 — Careers</p>
+        <h2 class="section-title" id="careers-title">We're hiring.</h2>
+        <p class="section-sub">
+          We hire builders. If you're good at something, there's a place on the road.
+        </p>
+      </div>
+      <button class="btn btn-outline" style="flex-shrink:0; align-self:flex-start; margin-top:40px;" aria-label="View all open roles">View all roles</button>
+    </div>
+
+    <div class="jobs-grid" role="list" aria-label="Open positions">
+
+      <article class="job-card" role="listitem">
+        <div class="job-card-inner">
+          <div class="job-card-top">
+            <div>
+              <h3 class="job-title">Senior Full-Stack Engineer</h3>
+              <div class="job-tags">
+                <span class="job-tag">Remote</span>
+                <span class="job-tag">Engineering</span>
+              </div>
+            </div>
+            <a href="#contact" class="job-apply" aria-label="Apply for Senior Full-Stack Engineer">Apply →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="job-card" role="listitem">
+        <div class="job-card-inner">
+          <div class="job-card-top">
+            <div>
+              <h3 class="job-title">AI / ML Engineer</h3>
+              <div class="job-tags">
+                <span class="job-tag">Remote</span>
+                <span class="job-tag">Research</span>
+              </div>
+            </div>
+            <a href="#contact" class="job-apply" aria-label="Apply for AI/ML Engineer">Apply →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="job-card" role="listitem">
+        <div class="job-card-inner">
+          <div class="job-card-top">
+            <div>
+              <h3 class="job-title">Design Systems Lead</h3>
+              <div class="job-tags">
+                <span class="job-tag">Remote</span>
+                <span class="job-tag">Design</span>
+              </div>
+            </div>
+            <a href="#contact" class="job-apply" aria-label="Apply for Design Systems Lead">Apply →</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="job-card" role="listitem">
+        <div class="job-card-inner">
+          <div class="job-card-top">
+            <div>
+              <h3 class="job-title">DevOps / Fleet Engineer</h3>
+              <div class="job-tags">
+                <span class="job-tag">Remote</span>
+                <span class="job-tag">Infrastructure</span>
+              </div>
+            </div>
+            <a href="#contact" class="job-apply" aria-label="Apply for DevOps / Fleet Engineer">Apply →</a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="careers-footnote">Don't see your role? Build something and show us.</p>
+  </div>
+</section>
+
+<!-- ── SECTION 4: PRESS & CORPORATE ─────────────────────────────────── -->
+<section class="section" id="press" aria-labelledby="press-title">
+  <div class="container">
+    <p class="section-label" aria-hidden="true">04 — Press &amp; Company</p>
+    <h2 class="section-title" id="press-title">Company information.</h2>
+    <p class="section-sub">
+      For press inquiries, legal matters, and investor communications.
+    </p>
+
+    <div class="press-grid">
+
+      <!-- Press column -->
+      <div class="press-col">
+        <p class="press-col-title">Press</p>
+
+        <button class="btn-grad-border" style="width:100%;" aria-label="Download press kit">
+          <span class="btn-grad-border-inner" style="width:100%; justify-content:center;">
+            ↓ Download Press Kit
+          </span>
+        </button>
+
+        <ul class="facts-list" role="list" aria-label="Company facts">
+          <li class="fact-row" role="listitem">
+            <span class="fact-key">Founded</span>
+            <span class="fact-val">2024</span>
+          </li>
+          <li class="fact-row" role="listitem">
+            <span class="fact-key">Incorporated</span>
+            <span class="fact-val">Delaware</span>
+          </li>
+          <li class="fact-row" role="listitem">
+            <span class="fact-key">HQ</span>
+            <span class="fact-val">Minneapolis, MN</span>
+          </li>
+          <li class="fact-row" role="listitem">
+            <span class="fact-key">Products</span>
+            <span class="fact-val">18</span>
+          </li>
+          <li class="fact-row" role="listitem">
+            <span class="fact-key">Employees</span>
+            <span class="fact-val">Growing</span>
+          </li>
+        </ul>
+
+        <p class="press-email">
+          Press contact: <a href="mailto:press@blackroad.io">press@blackroad.io</a>
+        </p>
+      </div>
+
+      <!-- Corporate column -->
+      <div class="press-col">
+        <p class="press-col-title">Corporate</p>
+
+        <div class="corp-detail">
+          <div class="corp-row">
+            <span class="corp-label">Entity Type</span>
+            <span class="corp-value">Delaware C-Corporation</span>
+          </div>
+          <div class="corp-row">
+            <span class="corp-label">Legal Name</span>
+            <span class="corp-value">BlackRoad OS, Inc.</span>
+          </div>
+          <div class="corp-row">
+            <span class="corp-label">EIN</span>
+            <span class="corp-value">On file</span>
+          </div>
+          <div class="corp-row">
+            <span class="corp-label">Registered Agent</span>
+            <span class="corp-value">On file — Delaware</span>
+          </div>
+          <div class="corp-row">
+            <span class="corp-label">State of Incorporation</span>
+            <span class="corp-value">Delaware, USA</span>
+          </div>
+          <div class="corp-row">
+            <span class="corp-label">Operating HQ</span>
+            <span class="corp-value">Minneapolis, MN</span>
+          </div>
+        </div>
+
+        <p class="corp-legal-note">
+          For legal inquiries: <a href="mailto:legal@blackroadinc.us">legal@blackroadinc.us</a><br>
+          Investor relations and formal correspondence should be directed to the registered corporate address.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 5: CONTACT ────────────────────────────────────────────── -->
+<section class="section" id="contact" aria-labelledby="contact-title">
+  <div class="container">
+    <p class="section-label" aria-hidden="true">05 — Contact</p>
+    <h2 class="section-title" id="contact-title">Get in touch.</h2>
+    <p class="section-sub">
+      Whether you're a press contact, a prospective builder, an investor, or a partner — we read every message.
+    </p>
+
+    <form class="contact-wrap" novalidate aria-label="Contact form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="contact-name">Name</label>
+          <input
+            class="form-input"
+            type="text"
+            id="contact-name"
+            name="name"
+            placeholder="Your name"
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact-email">Email</label>
+          <input
+            class="form-input"
+            type="email"
+            id="contact-email"
+            name="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="contact-subject">Subject</label>
+          <select class="form-select" id="contact-subject" name="subject">
+            <option value="" disabled selected>Select a topic</option>
+            <option value="general">General</option>
+            <option value="press">Press</option>
+            <option value="investor">Investor Relations</option>
+            <option value="legal">Legal</option>
+            <option value="partnership">Partnership</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label" for="contact-message">Message</label>
+          <textarea
+            class="form-textarea"
+            id="contact-message"
+            name="message"
+            placeholder="Tell us what's on your mind…"
+            rows="5"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="form-submit">
+        <button type="submit" class="btn-send" aria-label="Send message">
+          <span class="btn-send-inner">Send message →</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────────── -->
+<div class="grad-bar" aria-hidden="true"></div>
+
+<footer role="contentinfo">
+  <div class="footer-inner">
+
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="footer-logo-dot" aria-hidden="true"></span>
+          BlackRoad OS, Inc.
+        </div>
+        <p class="footer-brand-desc">
+          Building the sovereign operating system for the next generation of computing.
+        </p>
+      </div>
+
+      <nav aria-label="Company links">
+        <p class="footer-col-title">Company</p>
+        <ul class="footer-links" role="list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#team">Team</a></li>
+          <li><a href="#careers">Careers</a></li>
+          <li><a href="#press">Press</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Product links">
+        <p class="footer-col-title">Products</p>
+        <ul class="footer-links" role="list">
+          <li><a href="https://blackroad.io" target="_blank" rel="noopener">BlackRoad OS</a></li>
+          <li><a href="https://roadcode.io" target="_blank" rel="noopener">RoadCode</a></li>
+          <li><a href="https://roadtrip.blackroad.io" target="_blank" rel="noopener">RoadTrip</a></li>
+          <li><a href="https://blackroad.me" target="_blank" rel="noopener">blackroad.me</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Legal links">
+        <p class="footer-col-title">Legal</p>
+        <ul class="footer-links" role="list">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="mailto:legal@blackroadinc.us">Legal Contact</a></li>
+          <li><a href="mailto:press@blackroad.io">Press Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">
+        BlackRoad OS, Inc. · All rights reserved · blackroad.company
+      </p>
+      <nav class="footer-legal-links" aria-label="Legal">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Cookies</a>
+        <a href="mailto:legal@blackroadinc.us">Legal</a>
+      </nav>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>

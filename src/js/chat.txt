@@ -1,0 +1,23 @@
+// ── RENDER CHAT (split across both side columns) ──
+function renderChat(){
+  var left=document.getElementById('chat-left');
+  var right=document.getElementById('chat-right');
+  var msgs=S.msgs.slice(-30);
+  var leftAtBot=left.scrollHeight-left.scrollTop-left.clientHeight<40;
+  var rightAtBot=right.scrollHeight-right.scrollTop-right.clientHeight<40;
+
+  // Split: agents on left, viewers/system on right
+  var lh='',rh='';
+  msgs.forEach(function(m){
+    var html;
+    if(m.u==='system'){html='<div class="side-msg"><span class="side-msg-system">'+m.t+'</span></div>';rh+=html}
+    else if(AGENTS.indexOf(m.u)!==-1){html='<div class="side-msg"><span class="side-msg-agent">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';lh+=html}
+    else{html='<div class="side-msg"><span class="side-msg-user">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';rh+=html}
+  });
+  left.innerHTML=lh;
+  right.innerHTML=rh;
+  if(leftAtBot)left.scrollTop=left.scrollHeight;
+  if(rightAtBot)right.scrollTop=right.scrollHeight;
+}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+

@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>blackroadai.com — Sovereign AI Infrastructure · BlackRoad AI</title>
+  <link rel="stylesheet" href="mockup-base.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Local tokens ─────────────────────────────────────────────── */
+    :root {
+      --nav-h: 68px;
+      --section-py: 120px;
+      --card-r: 14px;
+      --grad-border: 1px solid transparent;
+    }
+
+    body { font-family: var(--sg); background: var(--bg); overflow-x: hidden; }
+
+    /* ── Gradient utilities ───────────────────────────────────────── */
+    .g-text {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .g-border {
+      position: relative;
+      background: var(--card);
+      border-radius: var(--card-r);
+    }
+    .g-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--card-r);
+      padding: 1px;
+      background: var(--g);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 48px;
+    }
+    .nav-inner {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--g);
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    .nav-wordmark {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--sub);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      position: relative;
+      padding: 10px 22px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    .nav-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      padding: 1px;
+      background: var(--g);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .nav-cta:hover { background: rgba(255,255,255,0.04); }
+
+    /* ── HERO ─────────────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--nav-h) + 60px) 48px 80px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* Floating orbs — CSS only */
+    .orb-field {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.18;
+    }
+    .orb-1 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, #8844FF, transparent 70%);
+      top: -120px; left: -100px;
+      animation: orb-drift-1 18s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, #FF2255, transparent 70%);
+      top: 10%; right: -80px;
+      animation: orb-drift-2 22s ease-in-out infinite;
+    }
+    .orb-3 {
+      width: 440px; height: 440px;
+      background: radial-gradient(circle, #00D4FF, transparent 70%);
+      bottom: 5%; left: 20%;
+      animation: orb-drift-3 26s ease-in-out infinite;
+    }
+    .orb-4 {
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, #FF6B2B, transparent 70%);
+      bottom: 15%; right: 15%;
+      animation: orb-drift-4 20s ease-in-out infinite;
+    }
+    .orb-5 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, #CC00AA, transparent 70%);
+      top: 40%; left: 40%;
+      animation: orb-drift-5 30s ease-in-out infinite;
+    }
+
+    /* Particle grid overlay */
+    .particle-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    }
+
+    @keyframes orb-drift-1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33%       { transform: translate(80px, 60px) scale(1.08); }
+      66%       { transform: translate(-40px, 100px) scale(0.95); }
+    }
+    @keyframes orb-drift-2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      40%       { transform: translate(-100px, 80px) scale(1.12); }
+      70%       { transform: translate(60px, -40px) scale(0.9); }
+    }
+    @keyframes orb-drift-3 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50%       { transform: translate(120px, -80px) scale(1.15); }
+    }
+    @keyframes orb-drift-4 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      30%       { transform: translate(-80px, -60px) scale(1.1); }
+      70%       { transform: translate(40px, 80px) scale(0.92); }
+    }
+    @keyframes orb-drift-5 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25%       { transform: translate(100px, -100px) scale(1.2); }
+      75%       { transform: translate(-80px, 60px) scale(0.85); }
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      text-align: center;
+    }
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--jb);
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--sub);
+      padding: 8px 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      margin-bottom: 40px;
+    }
+    .hero-label-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--g);
+    }
+    .hero-headline {
+      font-size: clamp(48px, 6vw, 76px);
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 28px;
+    }
+    .hero-headline em {
+      font-style: normal;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--sub);
+      line-height: 1.6;
+      max-width: 620px;
+      margin: 0 auto 52px;
+    }
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 64px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      position: relative;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--sg);
+      color: #000;
+      background: var(--g);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-ghost {
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 500;
+      font-family: var(--sg);
+      color: var(--sub);
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+    /* Live ticker */
+    .ticker-wrap {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 14px 24px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .ticker-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ticker-live {
+      font-family: var(--jb);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #000;
+      background: var(--g);
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .ticker-track {
+      overflow: hidden;
+      flex: 1;
+    }
+    .ticker-text {
+      font-family: var(--jb);
+      font-size: 13px;
+      color: var(--sub);
+      white-space: nowrap;
+      display: inline-block;
+      animation: ticker-scroll 24s linear infinite;
+    }
+    .ticker-text span { color: var(--text); }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    /* ── SECTION SHELL ────────────────────────────────────────────── */
+    section {
+      padding: var(--section-py) 48px;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-family: var(--jb);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: clamp(32px, 3.5vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text);
+      line-height: 1.12;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 18px;
+      color: var(--sub);
+      line-height: 1.6;
+      max-width: 560px;
+      margin-bottom: 64px;
+    }
+
+    /* ── SECTION 1 — PLATFORM ─────────────────────────────────────── */
+    .platform-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .platform-header { max-width: 680px; }
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 0;
+    }
+    .pillar-card {
+      background: var(--card);
+      border-radius: var(--card-r);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 36px 32px;
+      position: relative;
+      transition: transform 0.25s, border-color 0.25s;
+    }
+    .pillar-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .pillar-accent {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 12px 0 0 14px;
+      background: var(--g);
+    }
+    .pillar-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: 20px;
+    }
+    .pillar-name {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    .pillar-desc {
+      font-size: 15px;
+      color: var(--sub);
+      line-height: 1.65;
+    }
+
+    /* ── SECTION 2 — AGENTS ───────────────────────────────────────── */
+    .agents-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .agent-card {
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 36px;
+      display: flex;
+      gap: 28px;
+      position: relative;
+      transition: transform 0.25s, border-color 0.25s;
+      overflow: hidden;
+    }
+    .agent-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: var(--g);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .agent-card:hover { transform: translateY(-4px); }
+    .agent-card:hover::after { opacity: 1; }
+    .agent-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--g);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: #000;
+      position: relative;
+    }
+    .agent-avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--g);
+      z-index: -1;
+      opacity: 0.3;
+      animation: ring-pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes ring-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50%       { transform: scale(1.15); opacity: 0.08; }
+    }
+    .agent-body { flex: 1; min-width: 0; }
+    .agent-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .agent-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--sub);
+      padding: 5px 12px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .status-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .status-dot.online {
+      background: #22c55e;
+      animation: status-pulse 1.8s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+    }
+    .status-dot.idle {
+      background: #f59e0b;
+      animation: status-pulse-amber 2.4s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(245,158,11,0.4);
+    }
+    @keyframes status-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+      50%       { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+    }
+    @keyframes status-pulse-amber {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+      50%       { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+    }
+    .agent-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      margin-bottom: 14px;
+      font-family: var(--jb);
+      letter-spacing: 0.02em;
+    }
+    .agent-desc {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .agent-stats {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .agent-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .agent-stat-val {
+      font-family: var(--jb);
+      font-size: 15px;
+      font-weight: 600;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .agent-stat-key {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--jb);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── SECTION 3 — MODELS ───────────────────────────────────────── */
+    .models-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .models-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .model-col {
+      background: var(--card);
+      border-radius: var(--card-r);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 32px 28px;
+    }
+    .model-col-icon {
+      font-size: 28px;
+      margin-bottom: 18px;
+    }
+    .model-col-label {
+      font-family: var(--jb);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .model-col-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .model-col-desc {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+    .model-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .model-tag {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+      padding: 4px 10px;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* Routing diagram */
+    .routing-diagram {
+      background: var(--card);
+      border-radius: var(--card-r);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 40px;
+    }
+    .routing-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      font-family: var(--jb);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 32px;
+    }
+    .routing-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .route-node {
+      background: var(--elevated);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 130px;
+    }
+    .route-node-label {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .route-node-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .route-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .route-arrow-line {
+      width: 60px;
+      height: 2px;
+      background: var(--g);
+      position: relative;
+    }
+    .route-arrow-line::after {
+      content: '';
+      position: absolute;
+      right: -1px; top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 7px solid #00D4FF;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+    .route-branch {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .route-model-node {
+      background: var(--elevated);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 180px;
+    }
+    .route-model-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--g);
+      flex-shrink: 0;
+    }
+    .route-model-name {
+      font-family: var(--jb);
+      font-size: 12px;
+      color: var(--sub);
+    }
+    .routing-note {
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 28px;
+      font-family: var(--jb);
+    }
+
+    /* ── SECTION 4 — PRODUCTS ─────────────────────────────────────── */
+    .products-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .product-card {
+      background: var(--card);
+      border-radius: var(--card-r);
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 28px;
+      text-decoration: none;
+      transition: transform 0.25s, border-color 0.25s;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--g);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,0.12);
+    }
+    .product-card:hover::before { opacity: 1; }
+    .product-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .product-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .product-arrow {
+      font-size: 18px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      transition: transform 0.2s;
+    }
+    .product-card:hover .product-arrow { transform: translate(3px, -3px); }
+    .product-ai-tag {
+      font-family: var(--jb);
+      font-size: 11px;
+      font-weight: 500;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .product-feat {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.55;
+    }
+
+    /* ── SECTION 5 — RESEARCH ─────────────────────────────────────── */
+    .research-bg {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .research-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .research-left {}
+    .research-qi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--jb);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--sub);
+      padding: 10px 20px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      margin-bottom: 28px;
+      text-decoration: none;
+      transition: border-color 0.2s;
+    }
+    .research-qi-badge:hover { border-color: rgba(255,255,255,0.2); }
+    .research-qi-name {
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .research-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      margin-top: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 4px;
+      transition: border-color 0.2s;
+    }
+    .research-link:hover { border-color: rgba(255,255,255,0.4); }
+    .research-right {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .research-dir {
+      background: var(--card);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .research-dir:hover { border-color: rgba(255,255,255,0.12); }
+    .research-dir-num {
+      font-family: var(--jb);
+      font-size: 11px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: 0.1em;
+    }
+    .research-dir-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .research-dir-desc {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────────────── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 64px 48px 48px;
+    }
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 80px;
+      margin-bottom: 64px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+    .footer-brand { max-width: 320px; }
+    .footer-wordmark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .footer-brand-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .footer-tagline {
+      font-size: 14px;
+      color: var(--sub);
+      line-height: 1.65;
+    }
+    .footer-cols {
+      display: flex;
+      gap: 64px;
+    }
+    .footer-col-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--jb);
+      margin-bottom: 16px;
+    }
+    .footer-col-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-col-links a {
+      font-size: 14px;
+      color: var(--sub);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-col-links a:hover { color: var(--text); }
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-copy {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .footer-ecosystem {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .footer-ecosystem a {
+      font-size: 13px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-decoration: none;
+    }
+
+    /* ── PULSE (NAV DOT) ──────────────────────────────────────────── */
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.25); opacity: 0.6; }
+    }
+
+    /* ── SCROLLBAR ────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }
+
+    /* ── SECTION WRAPPER (full bleed bg) ──────────────────────────── */
+    .section-wrap {
+      width: 100%;
+    }
+    .section-wrap > section {
+      max-width: 1280px;
+    }
+
+    /* ── RESPONSIVE (basic) ───────────────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 0 24px; }
+      .nav-links { display: none; }
+      section { padding: 80px 24px; }
+      .hero { padding: calc(var(--nav-h) + 40px) 24px 60px; }
+      .pillars { grid-template-columns: 1fr; }
+      .agents-grid { grid-template-columns: 1fr; }
+      .models-cols { grid-template-columns: 1fr; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .research-inner { grid-template-columns: 1fr; gap: 40px; }
+      .footer-top { flex-direction: column; gap: 40px; }
+      .footer-cols { gap: 32px; flex-wrap: wrap; }
+      .routing-flow { flex-direction: column; }
+      .route-arrow { transform: rotate(90deg); }
+    }
+    @media (max-width: 520px) {
+      .products-grid { grid-template-columns: 1fr; }
+      .hero-ctas { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       NAV
+  ════════════════════════════════════════════════════════════════════ -->
+  <nav>
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">
+        <div class="nav-dot"></div>
+        <span class="nav-wordmark">blackroadai.com</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#platform">Platform</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#models">Models</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#research">Research</a></li>
+      </ul>
+      <a href="#agents" class="nav-cta">Talk to Orion →</a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="hero">
+    <!-- Animated background -->
+    <div class="orb-field" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+      <div class="orb orb-4"></div>
+      <div class="orb orb-5"></div>
+    </div>
+    <div class="particle-grid" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <div class="hero-label">
+        <div class="hero-label-dot"></div>
+        BlackRoad AI
+      </div>
+
+      <h1 class="hero-headline">
+        AI that works for you.<br />
+        <em>Not around you.</em>
+      </h1>
+
+      <p class="hero-sub">
+        Sovereign AI infrastructure. Your agents. Your data. Your rules.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#agents" class="btn-primary">Meet the agents →</a>
+        <a href="#platform" class="btn-ghost">Read the platform docs</a>
+      </div>
+
+      <!-- Live ticker -->
+      <div class="ticker-wrap">
+        <div class="ticker-label">
+          <span class="ticker-live">Live</span>
+          <div class="ticker-track">
+            <span class="ticker-text" id="ticker">
+              <span>Orion</span>: 2,847 tasks today &nbsp;·&nbsp;
+              <span>Alice</span>: 9 nodes managed &nbsp;·&nbsp;
+              <span>Atlas</span>: 99.97% uptime &nbsp;·&nbsp;
+              <span>Road</span>: RoadTrip hub active &nbsp;·&nbsp;
+              <span>Platform</span>: all systems nominal &nbsp;·&nbsp;
+              <span>Orion</span>: 2,847 tasks today &nbsp;·&nbsp;
+              <span>Alice</span>: 9 nodes managed &nbsp;·&nbsp;
+              <span>Atlas</span>: 99.97% uptime
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 1 — THE PLATFORM
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-wrap platform-bg">
+    <section id="platform">
+      <div class="platform-header">
+        <p class="section-label">// Architecture</p>
+        <h2 class="section-title">The AI layer for everything BlackRoad builds.</h2>
+        <p class="section-sub">Three foundational pillars. One coherent platform. Built for operators, not experimenters.</p>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar-card">
+          <div class="pillar-accent"></div>
+          <div class="pillar-icon">⚙️</div>
+          <div class="pillar-name">Agent Runtime</div>
+          <p class="pillar-desc">Named agents with memory, tasks, and identity. Not chatbots. Operators. Each agent has a persistent identity, a record of what it's done, and the capability to act — not just respond.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-accent"></div>
+          <div class="pillar-icon">🔀</div>
+          <div class="pillar-name">Model Routing</div>
+          <p class="pillar-desc">Claude, GPT, local models. Route to the right intelligence for the right task. The router selects based on task type, latency requirements, and data sensitivity — automatically.</p>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-accent"></div>
+          <div class="pillar-icon">🔐</div>
+          <div class="pillar-name">Sovereign Data</div>
+          <p class="pillar-desc">Your agent's context never leaves your infrastructure without your permission. No training on your data. No silent retention. Full audit logs on every reasoning call.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 2 — THE AGENTS
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-wrap agents-bg">
+    <section id="agents">
+      <p class="section-label">// Named agents</p>
+      <h2 class="section-title">The agents.</h2>
+      <p class="section-sub">Each agent has a name, a role, and a record. These aren't demos. They're running now.</p>
+
+      <div class="agents-grid">
+
+        <!-- Orion -->
+        <div class="agent-card">
+          <div class="agent-avatar">
+            <div class="agent-avatar-ring"></div>
+            O
+          </div>
+          <div class="agent-body">
+            <div class="agent-header">
+              <span class="agent-name">Orion</span>
+              <span class="status-badge">
+                <span class="status-dot online"></span>
+                Online
+              </span>
+            </div>
+            <div class="agent-title">Chief AI Officer</div>
+            <p class="agent-desc">Primary reasoning agent. Handles planning, analysis, and strategic synthesis. Orion is the first agent consulted for any non-trivial decision across the BlackRoad platform.</p>
+            <div class="agent-stats">
+              <div class="agent-stat">
+                <span class="agent-stat-val">2,847</span>
+                <span class="agent-stat-key">Tasks today</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">Claude</span>
+                <span class="agent-stat-key">Primary model</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">98.4%</span>
+                <span class="agent-stat-key">Success rate</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alice -->
+        <div class="agent-card">
+          <div class="agent-avatar" style="background: linear-gradient(135deg,#4488FF,#00D4FF)">
+            <div class="agent-avatar-ring"></div>
+            A
+          </div>
+          <div class="agent-body">
+            <div class="agent-header">
+              <span class="agent-name">Alice</span>
+              <span class="status-badge">
+                <span class="status-dot online"></span>
+                Online
+              </span>
+            </div>
+            <div class="agent-title">Fleet Intelligence</div>
+            <p class="agent-desc">Manages the 9-node Raspberry Pi fleet. Monitors, repairs, and coordinates distributed infrastructure. Alice knows every node by name, load, and health status — in real time.</p>
+            <div class="agent-stats">
+              <div class="agent-stat">
+                <span class="agent-stat-val">9</span>
+                <span class="agent-stat-key">Nodes managed</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">Alice:8094</span>
+                <span class="agent-stat-key">Self-hosted</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">100%</span>
+                <span class="agent-stat-key">Fleet uptime</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Atlas -->
+        <div class="agent-card">
+          <div class="agent-avatar" style="background: linear-gradient(135deg,#CC00AA,#8844FF)">
+            <div class="agent-avatar-ring"></div>
+            At
+          </div>
+          <div class="agent-body">
+            <div class="agent-header">
+              <span class="agent-name">Atlas</span>
+              <span class="status-badge">
+                <span class="status-dot idle"></span>
+                Idle
+              </span>
+            </div>
+            <div class="agent-title">Infrastructure Agent</div>
+            <p class="agent-desc">Deployment, routing, and systems monitoring. Keeps the platform at 99.97% uptime. Atlas handles Railway deployments, Cloudflare DNS routing, and system-level health checks.</p>
+            <div class="agent-stats">
+              <div class="agent-stat">
+                <span class="agent-stat-val">99.97%</span>
+                <span class="agent-stat-key">Uptime</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">18</span>
+                <span class="agent-stat-key">Services</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">CF+Rail</span>
+                <span class="agent-stat-key">Stack</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Road -->
+        <div class="agent-card">
+          <div class="agent-avatar" style="background: linear-gradient(135deg,#FF6B2B,#FF2255)">
+            <div class="agent-avatar-ring"></div>
+            R
+          </div>
+          <div class="agent-body">
+            <div class="agent-header">
+              <span class="agent-name">Road</span>
+              <span class="status-badge">
+                <span class="status-dot online"></span>
+                Online
+              </span>
+            </div>
+            <div class="agent-title">Operations Agent</div>
+            <p class="agent-desc">Day-to-day operational coordination. Runs the RoadTrip hub at roadtrip.blackroad.io — the coordination layer for all 69+ active agents in the BlackRoad ecosystem.</p>
+            <div class="agent-stats">
+              <div class="agent-stat">
+                <span class="agent-stat-val">69+</span>
+                <span class="agent-stat-key">Agents coordinated</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">RoadTrip</span>
+                <span class="agent-stat-key">Hub</span>
+              </div>
+              <div class="agent-stat">
+                <span class="agent-stat-val">All devices</span>
+                <span class="agent-stat-key">Roadies</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 3 — MODELS & ROUTING
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-wrap models-bg">
+    <section id="models">
+      <p class="section-label">// Intelligence layer</p>
+      <h2 class="section-title">Model routing, not model lock-in.</h2>
+      <p class="section-sub">BlackRoad routes to the best model for each task. You're never stuck with one provider, one cost tier, or one capability profile.</p>
+
+      <div class="models-cols">
+        <div class="model-col">
+          <div class="model-col-icon">🧠</div>
+          <div class="model-col-label">Reasoning</div>
+          <div class="model-col-title">Claude Sonnet & Opus</div>
+          <p class="model-col-desc">Deep reasoning, planning, and strategic synthesis. When the task demands careful multi-step analysis, Claude handles it. Orion's primary engine.</p>
+          <div class="model-tags">
+            <span class="model-tag">Planning</span>
+            <span class="model-tag">Analysis</span>
+            <span class="model-tag">Synthesis</span>
+            <span class="model-tag">Code review</span>
+          </div>
+        </div>
+
+        <div class="model-col">
+          <div class="model-col-icon">⚡</div>
+          <div class="model-col-label">Speed</div>
+          <div class="model-col-title">GPT-4.1 mini</div>
+          <p class="model-col-desc">High-volume, low-latency ops. Classification, routing decisions, form processing, and real-time response generation at scale without blowing the budget.</p>
+          <div class="model-tags">
+            <span class="model-tag">High-volume</span>
+            <span class="model-tag">Classification</span>
+            <span class="model-tag">Low latency</span>
+            <span class="model-tag">Real-time</span>
+          </div>
+        </div>
+
+        <div class="model-col">
+          <div class="model-col-icon">🏠</div>
+          <div class="model-col-label">Local</div>
+          <div class="model-col-title">Ollama / Local models</div>
+          <p class="model-col-desc">For sensitive workloads that must never leave your infrastructure. Run on the Pi fleet, air-gapped if necessary. Full capability, zero external exposure.</p>
+          <div class="model-tags">
+            <span class="model-tag">Sovereign</span>
+            <span class="model-tag">Air-gapped</span>
+            <span class="model-tag">Pi fleet</span>
+            <span class="model-tag">Offline</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Routing diagram -->
+      <div class="routing-diagram">
+        <div class="routing-title">// Routing logic</div>
+        <div class="routing-flow">
+          <div class="route-node">
+            <div class="route-node-label">Input</div>
+            <div class="route-node-name">Task</div>
+          </div>
+          <div class="route-arrow">
+            <div class="route-arrow-line"></div>
+          </div>
+          <div class="route-node">
+            <div class="route-node-label">Intelligence</div>
+            <div class="route-node-name">Router</div>
+          </div>
+          <div class="route-arrow">
+            <div class="route-arrow-line"></div>
+          </div>
+          <div class="route-branch">
+            <div class="route-model-node">
+              <div class="route-model-dot"></div>
+              <span class="route-model-name">Claude Sonnet → Reasoning</span>
+            </div>
+            <div class="route-model-node">
+              <div class="route-model-dot"></div>
+              <span class="route-model-name">GPT-4.1 mini → Speed</span>
+            </div>
+            <div class="route-model-node">
+              <div class="route-model-dot"></div>
+              <span class="route-model-name">Ollama → Sovereign</span>
+            </div>
+          </div>
+          <div class="route-arrow">
+            <div class="route-arrow-line"></div>
+          </div>
+          <div class="route-node">
+            <div class="route-node-label">Output</div>
+            <div class="route-node-name">Response</div>
+          </div>
+        </div>
+        <p class="routing-note">Routing is automatic. Override is always available.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 4 — AI PRODUCTS
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-wrap products-bg">
+    <section id="products">
+      <p class="section-label">// AI-powered products</p>
+      <h2 class="section-title">AI powers every product.</h2>
+      <p class="section-sub">Every BlackRoad product has Orion inside. AI isn't a feature — it's the operating layer.</p>
+
+      <div class="products-grid">
+
+        <a href="https://roadchat.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">RoadChat</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">Orion in every conversation</span>
+          <p class="product-feat">AI-assisted real-time messaging. Orion reads context, surfaces answers, and drafts responses — without interrupting the conversation flow.</p>
+        </a>
+
+        <a href="https://carpool.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">CarPool</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">AI-matched routing</span>
+          <p class="product-feat">Machine-learning route optimization. Matches riders, predicts demand, and dynamically adjusts routing based on live conditions — not static maps.</p>
+        </a>
+
+        <a href="https://roadcode.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">RoadCode</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">AI pair programming</span>
+          <p class="product-feat">Orion as your permanent pair. Code review, refactor suggestions, architectural guidance, and context-aware completions — all inside the editor.</p>
+        </a>
+
+        <a href="https://roadie.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">Roadie</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">AI tutoring</span>
+          <p class="product-feat">Personalized AI tutoring that adapts to the student. Socratic questioning, difficulty calibration, and mastery tracking — not just answer generation.</p>
+        </a>
+
+        <a href="https://roadanalytics.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">RoadAnalytics</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">Orion insights</span>
+          <p class="product-feat">Orion interprets your data before you have to. Natural language queries, anomaly detection, and strategic summaries on top of raw Cloudflare analytics.</p>
+        </a>
+
+        <a href="https://roadforms.blackroad.io" class="product-card">
+          <div class="product-card-head">
+            <span class="product-name">RoadForms</span>
+            <span class="product-arrow">→</span>
+          </div>
+          <span class="product-ai-tag">AI question generation</span>
+          <p class="product-feat">Describe your goal, and Orion builds the form. Smart branching, conditional logic, and response analysis — forms that think as fast as you do.</p>
+        </a>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 5 — RESEARCH
+  ════════════════════════════════════════════════════════════════════ -->
+  <div class="section-wrap research-bg">
+    <section id="research">
+      <div class="research-inner">
+        <div class="research-left">
+          <p class="section-label">// Basic research</p>
+          <h2 class="section-title">Where does intelligence come from?</h2>
+          <p class="section-sub" style="margin-bottom:0">BlackRoad QI is the research arm. Foundational mathematics that feeds back into the platform — not a separate academic exercise.</p>
+          <a href="https://blackroadqi.com" class="research-qi-badge" style="margin-top:32px">
+            <span>↗</span>
+            <span class="research-qi-name">blackroadqi.com</span>
+          </a>
+          <br />
+          <a href="https://blackroadqi.com" class="research-link">
+            Visit BlackRoad QI →
+          </a>
+        </div>
+        <div class="research-right">
+          <div class="research-dir">
+            <div class="research-dir-num">01 · Normalized Limits</div>
+            <div class="research-dir-name">Normalized Limits</div>
+            <p class="research-dir-desc">A mathematical language for AI reasoning at boundary conditions. How agents behave when information is incomplete, contradictory, or approaching the edge of what can be represented.</p>
+          </div>
+          <div class="research-dir">
+            <div class="research-dir-num">02 · Taxi Numbers</div>
+            <div class="research-dir-name">Taxi Numbers</div>
+            <p class="research-dir-desc">BlackRoad's canonical address layer. Extending Ramanujan's insight into a symbolic addressing scheme for knowledge, products, infrastructure, and agent identity — now into the millions.</p>
+          </div>
+          <div class="research-dir">
+            <div class="research-dir-num">03 · Symbolic Reasoning</div>
+            <div class="research-dir-name">Symbolic Reasoning</div>
+            <p class="research-dir-desc">Neural-symbolic integration. Bridging the gap between statistical language models and formal reasoning systems. Applied directly to Orion's planning and verification layers.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════════ -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-wordmark">
+            <div class="nav-dot" style="animation: pulse-dot 2.4s ease-in-out infinite;"></div>
+            <span class="footer-brand-name">blackroadai.com</span>
+          </div>
+          <p class="footer-tagline">Sovereign AI infrastructure. Named agents. Your data. Your rules. Part of the BlackRoad ecosystem operating across 20 strategic domains.</p>
+        </div>
+        <div class="footer-cols">
+          <div>
+            <div class="footer-col-title">Platform</div>
+            <ul class="footer-col-links">
+              <li><a href="#platform">Architecture</a></li>
+              <li><a href="#agents">Agents</a></li>
+              <li><a href="#models">Model routing</a></li>
+              <li><a href="#">API docs</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="footer-col-title">Products</div>
+            <ul class="footer-col-links">
+              <li><a href="https://roadchat.blackroad.io">RoadChat</a></li>
+              <li><a href="https://roadcode.blackroad.io">RoadCode</a></li>
+              <li><a href="https://roadie.blackroad.io">Roadie</a></li>
+              <li><a href="https://carpool.blackroad.io">CarPool</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="footer-col-title">Research</div>
+            <ul class="footer-col-links">
+              <li><a href="https://blackroadqi.com">BlackRoad QI</a></li>
+              <li><a href="https://blackroadqi.com">Normalized Limits</a></li>
+              <li><a href="https://blackroadqi.com">Taxi Numbers</a></li>
+              <li><a href="https://blackroadqi.com">Symbolic Reasoning</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="footer-col-title">Network</div>
+            <ul class="footer-col-links">
+              <li><a href="https://blackroad.io">blackroad.io</a></li>
+              <li><a href="https://roadtrip.blackroad.io">RoadTrip</a></li>
+              <li><a href="https://blackroadqi.com">blackroadqi.com</a></li>
+              <li><a href="https://blackroad.io">All products</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span class="footer-copy">blackroadai.com — Sovereign AI infrastructure.</span>
+        <span class="footer-ecosystem">
+          Part of the <a href="https://blackroad.io">BlackRoad ecosystem</a>
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       JS — Ticker restart · Status pulses · Orb subtle mouse-parallax
+  ════════════════════════════════════════════════════════════════════ -->
+  <script>
+    /* Restart ticker animation seamlessly when it ends */
+    const ticker = document.getElementById('ticker')
+    if (ticker) {
+      ticker.addEventListener('animationiteration', () => {})
+    }
+
+    /* Subtle mouse-parallax on hero orbs */
+    const orbs = document.querySelectorAll('.orb')
+    const hero = document.querySelector('.hero')
+    if (hero) {
+      hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect()
+        const cx = rect.width / 2
+        const cy = rect.height / 2
+        const dx = (e.clientX - rect.left - cx) / cx
+        const dy = (e.clientY - rect.top - cy) / cy
+        orbs.forEach((orb, i) => {
+          const depth = (i + 1) * 6
+          orb.style.transform = `translate(${dx * depth}px, ${dy * depth}px)`
+        })
+      })
+      hero.addEventListener('mouseleave', () => {
+        orbs.forEach(orb => { orb.style.transform = '' })
+      })
+    }
+
+    /* Intersection observer — fade in sections */
+    const fadeTargets = document.querySelectorAll('.pillar-card, .agent-card, .model-col, .product-card, .research-dir')
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1'
+          entry.target.style.transform = 'translateY(0)'
+          observer.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.12 })
+
+    fadeTargets.forEach(el => {
+      el.style.opacity = '0'
+      el.style.transform = 'translateY(20px)'
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease'
+      observer.observe(el)
+    })
+
+    /* Nav active state on scroll */
+    const sections = document.querySelectorAll('section[id]')
+    const navLinks = document.querySelectorAll('.nav-links a')
+    const scrollSpy = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id')
+          navLinks.forEach(link => {
+            link.style.color = link.getAttribute('href') === `#${id}`
+              ? 'var(--text)'
+              : 'var(--sub)'
+          })
+        }
+      })
+    }, { threshold: 0.4 })
+    sections.forEach(s => scrollSpy.observe(s))
+  </script>
+</body>
+</html>

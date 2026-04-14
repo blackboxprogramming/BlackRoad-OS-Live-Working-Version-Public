@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLACKROAD OS — Origin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Grotesk',sans-serif;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#050505;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#222;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.95);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#2a2a2a;text-transform:uppercase;}
+
+/* ── Flash overlay ── */
+#flash{position:absolute;inset:0;z-index:80;background:#fff;opacity:0;pointer-events:none;transition:opacity .08s;}
+
+/* ══════════════════════════════════
+   PHASE 1 — BOOT
+══════════════════════════════════ */
+#phase-boot{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0;
+  opacity:0;transition:opacity .6s;
+  pointer-events:none;
+}
+#phase-boot.active{opacity:1;}
+#boot-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:10px;color:#1a1a1a;text-transform:uppercase;margin-bottom:24px;opacity:0;transition:opacity .6s;}
+#boot-eyebrow.in{opacity:1;}
+#boot-title-wrap{position:relative;text-align:center;margin-bottom:32px;}
+#boot-title{font-size:92px;font-weight:700;letter-spacing:14px;color:#fff;font-family:'Space Grotesk',sans-serif;text-transform:uppercase;line-height:1;}
+#boot-cursor{
+  display:inline-block;width:6px;height:80px;background:#fff;
+  vertical-align:middle;margin-left:4px;
+  animation:cursor-blink .7s step-end infinite;
+}
+@keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
+#boot-sub{font-family:'Space Mono',monospace;font-size:12px;letter-spacing:6px;color:#222;text-transform:uppercase;margin-bottom:40px;opacity:0;transition:opacity .5s;}
+#boot-sub.in{opacity:1;}
+#boot-status{display:flex;flex-direction:column;gap:6px;width:320px;opacity:0;transition:opacity .4s;}
+#boot-status.in{opacity:1;}
+.bst{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;color:#1a1a1a;text-transform:uppercase;display:flex;justify-content:space-between;opacity:0;transition:opacity .3s;}
+.bst.in{opacity:1;}
+.bst-ok{color:#333;}
+#boot-bar-wrap{margin-top:32px;display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;transition:opacity .5s;}
+#boot-bar-wrap.in{opacity:1;}
+#boot-bar-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:5px;color:#1a1a1a;text-transform:uppercase;}
+#boot-bar-track{width:280px;height:2px;background:#0a0a0a;border:1px solid #111;}
+#boot-bar-fill{height:100%;width:0;background:#1c1c1c;transition:width 2.2s linear;}
+#boot-bar-pct{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:#111;}
+
+/* ══════════════════════════════════
+   PHASE 2 — SERVICES
+══════════════════════════════════ */
+#phase-services{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0;
+  opacity:0;transition:opacity .7s;pointer-events:none;
+}
+#phase-services.active{opacity:1;}
+#svc-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:10px;color:#111;text-transform:uppercase;margin-bottom:20px;}
+#svc-headline{font-size:52px;font-weight:700;color:#fff;letter-spacing:10px;text-transform:uppercase;margin-bottom:36px;opacity:0;transform:translateY(-10px);transition:opacity .6s,transform .6s cubic-bezier(.16,1,.3,1);}
+#svc-headline.in{opacity:1;transform:translateY(0);}
+#svc-grid{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:8px;width:900px;
+  margin-bottom:28px;
+}
+.svc-box{
+  border:1px solid #0d0d0d;padding:10px 6px;text-align:center;
+  font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:#0d0d0d;
+  text-transform:uppercase;background:#000;
+  opacity:0;transition:opacity .3s,border-color .4s,color .4s,background .4s;
+}
+.svc-box.lit{opacity:1;border-color:#222;color:#666;background:#050505;}
+.svc-box.bright{border-color:#444;color:#ccc;background:#080808;}
+#svc-counter-wrap{display:flex;align-items:baseline;gap:16px;opacity:0;transition:opacity .5s;}
+#svc-counter-wrap.in{opacity:1;}
+#svc-counter{font-size:80px;font-weight:700;color:#fff;letter-spacing:-2px;font-variant-numeric:tabular-nums;transition:all .1s;}
+#svc-counter-label{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:6px;color:#1a1a1a;text-transform:uppercase;}
+
+/* ══════════════════════════════════
+   PHASE 3 — CONSTELLATION
+══════════════════════════════════ */
+#phase-domains{
+  position:absolute;inset:0;
+  opacity:0;transition:opacity .7s;pointer-events:none;
+}
+#phase-domains.active{opacity:1;}
+#domain-svg{position:absolute;inset:0;width:100%;height:100%;}
+#dom-title-wrap{
+  position:absolute;left:0;right:0;top:36px;text-align:center;pointer-events:none;
+}
+#dom-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:10px;color:#111;text-transform:uppercase;margin-bottom:12px;opacity:0;transition:opacity .6s;}
+#dom-eyebrow.in{opacity:1;}
+#dom-headline{font-size:52px;font-weight:700;color:#fff;letter-spacing:10px;text-transform:uppercase;opacity:0;transform:translateY(-8px);transition:opacity .6s .1s,transform .6s .1s cubic-bezier(.16,1,.3,1);}
+#dom-headline.in{opacity:1;transform:translateY(0);}
+#dom-counter-wrap{
+  position:absolute;right:80px;bottom:80px;text-align:right;
+  opacity:0;transition:opacity .5s;
+}
+#dom-counter-wrap.in{opacity:1;}
+#dom-counter{font-size:72px;font-weight:700;color:#fff;letter-spacing:-2px;}
+#dom-counter-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:6px;color:#1a1a1a;text-transform:uppercase;}
+
+/* ══════════════════════════════════
+   PHASE 4 — AGENTS
+══════════════════════════════════ */
+#phase-agents{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0;
+  opacity:0;transition:opacity .7s;pointer-events:none;
+}
+#phase-agents.active{opacity:1;}
+#agents-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:10px;color:#111;text-transform:uppercase;margin-bottom:16px;}
+#agents-count{font-size:200px;font-weight:700;color:#fff;letter-spacing:-8px;line-height:1;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .3s;}
+#agents-count.in{opacity:1;}
+#agents-plus{font-size:120px;font-weight:300;color:#222;letter-spacing:0;display:inline;}
+#agents-label{font-family:'Space Mono',monospace;font-size:13px;letter-spacing:12px;color:#1a1a1a;text-transform:uppercase;margin-top:8px;opacity:0;transition:opacity .5s .2s;}
+#agents-label.in{opacity:1;}
+#agents-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:6px;color:#0f0f0f;margin-top:12px;text-transform:uppercase;opacity:0;transition:opacity .5s .4s;}
+#agents-sub.in{opacity:1;}
+
+/* ══════════════════════════════════
+   PHASE 5 — STATEMENT
+══════════════════════════════════ */
+#phase-statement{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:0;
+  opacity:0;transition:opacity .7s;pointer-events:none;
+}
+#phase-statement.active{opacity:1;}
+#stmt-rule-top{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .1s;margin-bottom:40px;}
+#stmt-rule-top.in{width:600px;}
+#stmt-main{font-size:108px;font-weight:700;color:#fff;letter-spacing:16px;text-transform:uppercase;line-height:1;text-align:center;opacity:0;transform:scale(.95);transition:opacity .8s .2s,transform .8s .2s cubic-bezier(.16,1,.3,1);}
+#stmt-main.in{opacity:1;transform:scale(1);}
+#stmt-rule-mid{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .4s;margin:40px 0 24px;}
+#stmt-rule-mid.in{width:600px;}
+#stmt-stats{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:8px;color:#1c1c1c;text-transform:uppercase;text-align:center;opacity:0;transition:opacity .7s .6s;}
+#stmt-stats.in{opacity:1;}
+#stmt-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:6px;color:#0f0f0f;text-transform:uppercase;margin-top:12px;text-align:center;opacity:0;transition:opacity .7s .9s;}
+#stmt-sub.in{opacity:1;}
+#stmt-rule-bot{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .7s;margin-top:36px;}
+#stmt-rule-bot.in{width:600px;}
+
+/* ══════════════════════════════════
+   END CARD
+══════════════════════════════════ */
+#end-card{
+  position:absolute;inset:0;z-index:60;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:#000;opacity:0;transition:opacity .8s;pointer-events:none;
+}
+#end-card.in{opacity:1;pointer-events:auto;}
+#ec-logo{font-size:72px;font-weight:700;letter-spacing:16px;color:#fff;text-transform:uppercase;opacity:0;transform:scale(.94);transition:opacity .8s .2s,transform .8s .2s cubic-bezier(.16,1,.3,1);}
+#ec-logo.in{opacity:1;transform:scale(1);}
+#ec-rule{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .5s;margin:24px auto;}
+#ec-rule.in{width:400px;}
+#ec-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:8px;color:#111;text-transform:uppercase;opacity:0;transition:opacity .7s .7s;}
+#ec-tag.in{opacity:1;}
+#ec-ver{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#0a0a0a;margin-top:24px;opacity:0;transition:opacity .6s 1s;}
+#ec-ver.in{opacity:1;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="play-overlay">
+    <div id="play-btn"><svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg></div>
+    <div id="play-lbl">Play</div>
+  </div>
+  <div id="flash"></div>
+
+  <!-- ══ PHASE 1: BOOT ══ -->
+  <div id="phase-boot">
+    <div id="boot-eyebrow">BlackRoad OS</div>
+    <div id="boot-title-wrap">
+      <span id="boot-title"></span><span id="boot-cursor"></span>
+    </div>
+    <div id="boot-sub">v1.0 · System Initialize</div>
+    <div id="boot-status">
+      <div class="bst" id="bst-0"><span>CORE MODULES</span><span class="bst-ok">——</span></div>
+      <div class="bst" id="bst-1"><span>MEMORY ALLOC</span><span class="bst-ok">——</span></div>
+      <div class="bst" id="bst-2"><span>NETWORK STACK</span><span class="bst-ok">——</span></div>
+      <div class="bst" id="bst-3"><span>AGENT MESH</span><span class="bst-ok">——</span></div>
+      <div class="bst" id="bst-4"><span>FLEET READY</span><span class="bst-ok">——</span></div>
+    </div>
+    <div id="boot-bar-wrap">
+      <div id="boot-bar-label">Initializing</div>
+      <div id="boot-bar-track"><div id="boot-bar-fill"></div></div>
+      <div id="boot-bar-pct" id="boot-pct">0%</div>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 2: SERVICES ══ -->
+  <div id="phase-services">
+    <div id="svc-eyebrow">Product Fleet</div>
+    <div id="svc-headline">SERVICES</div>
+    <div id="svc-grid"></div>
+    <div id="svc-counter-wrap">
+      <div id="svc-counter">0</div>
+      <div id="svc-counter-label">Services Online</div>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 3: CONSTELLATION ══ -->
+  <div id="phase-domains">
+    <svg id="domain-svg" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="node-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fff" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <g id="dom-lines"></g>
+      <g id="dom-nodes"></g>
+    </svg>
+    <div id="dom-title-wrap">
+      <div id="dom-eyebrow">Strategic Domains</div>
+      <div id="dom-headline">DOMAINS</div>
+    </div>
+    <div id="dom-counter-wrap">
+      <div id="dom-counter">0</div>
+      <div id="dom-counter-label">Connected</div>
+    </div>
+  </div>
+
+  <!-- ══ PHASE 4: AGENTS ══ -->
+  <div id="phase-agents">
+    <div id="agents-eyebrow">Fleet Status</div>
+    <div id="agents-count">0<span id="agents-plus"></span></div>
+    <div id="agents-label">Agents Online</div>
+    <div id="agents-sub">Deployed · Active · Always Shipping</div>
+  </div>
+
+  <!-- ══ PHASE 5: STATEMENT ══ -->
+  <div id="phase-statement">
+    <div id="stmt-rule-top"></div>
+    <div id="stmt-main">BUILT<br>DIFFERENT</div>
+    <div id="stmt-rule-mid"></div>
+    <div id="stmt-stats">18 Services · 20 Domains · 69+ Agents</div>
+    <div id="stmt-sub">Built by Roadies · Running 24/7 · Shipping Forever</div>
+    <div id="stmt-rule-bot"></div>
+  </div>
+
+  <!-- ══ END CARD ══ -->
+  <div id="end-card">
+    <div id="ec-logo">BLACKROAD OS</div>
+    <div id="ec-rule"></div>
+    <div id="ec-tag">Ship the future.</div>
+    <div id="ec-ver">v1.0 · 2026 · All Systems Operational</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   ENGINE
+═══════════════════════════════════════ */
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280; stage.style.transform=`scale(${sc})`; shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const DURATION=62;
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[]; function at(sec,fn){timeline.push({sec,fn});}
+
+let intervals=[];
+function si(fn,ms){const id=setInterval(fn,ms);intervals.push(id);return id;}
+function ct(id){clearInterval(id);}
+function clearAllIntervals(){intervals.forEach(clearInterval);intervals=[];}
+
+function flash(dur=100){
+  const f=document.getElementById('flash');
+  f.style.transition='none'; f.style.opacity='1';
+  setTimeout(()=>{f.style.transition=`opacity ${dur}ms`; f.style.opacity='0';},16);
+}
+
+function showPhase(id){
+  ['phase-boot','phase-services','phase-domains','phase-agents','phase-statement'].forEach(p=>{
+    const el=document.getElementById(p);
+    if(el){ el.classList.remove('active'); el.style.zIndex='1'; }
+  });
+  const target=document.getElementById(id);
+  if(target){ target.style.zIndex='5'; setTimeout(()=>target.classList.add('active'),20); }
+}
+function hidePhase(id){
+  const el=document.getElementById(id);
+  if(el){ el.classList.remove('active'); }
+}
+
+/* ═══════════════════════════════════════
+   PHASE 1: BOOT
+═══════════════════════════════════════ */
+const TITLE_TEXT='BLACKROAD OS';
+let typePos=0, typeIv=null;
+
+at(0.2, ()=>{
+  showPhase('phase-boot');
+  document.getElementById('boot-eyebrow').classList.add('in');
+  // start typing
+  typePos=0;
+  const title=document.getElementById('boot-title');
+  typeIv=si(()=>{
+    if(typePos<TITLE_TEXT.length){
+      title.textContent=TITLE_TEXT.slice(0,++typePos);
+    } else { ct(typeIv); }
+  }, 75);
+});
+at(2.4, ()=>{
+  document.getElementById('boot-sub').classList.add('in');
+  // status lines
+  const labels=[' OK ',' OK ',' OK ',' OK ',' OK '];
+  let i=0;
+  const iv=si(()=>{
+    if(i<5){
+      const el=document.getElementById('bst-'+i);
+      el.classList.add('in');
+      el.querySelector('.bst-ok').textContent=labels[i];
+      i++;
+    } else ct(iv);
+  }, 320);
+});
+at(4.2, ()=>{
+  document.getElementById('boot-status').classList.add('in');
+  document.getElementById('boot-bar-wrap').classList.add('in');
+  document.getElementById('boot-bar-fill').style.width='100%';
+  // pct count
+  let p=0;
+  const pctEl=document.getElementById('boot-bar-pct');
+  const piv=si(()=>{
+    p=Math.min(p+2,100);
+    pctEl.textContent=p+'%';
+    if(p>=100)ct(piv);
+  },44);
+});
+
+/* ═══════════════════════════════════════
+   PHASE 2: SERVICES
+═══════════════════════════════════════ */
+const SERVICES=[
+  'RoadHome','RoadCode','RoadChat','RoadDocs',
+  'RoadVault','RoadMind','RoadFlow','RoadBook',
+  'RoadLink','RoadScan','RoadCast','RoadBase',
+  'RoadMesh','RoadAPI','RoadAuth','RoadDash',
+  'RoadSign','RoadOps'
+];
+
+function buildServiceGrid(){
+  const grid=document.getElementById('svc-grid');
+  grid.innerHTML='';
+  SERVICES.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='svc-box'; d.id='sb-'+i; d.textContent=s; grid.appendChild(d);
+  });
+}
+
+at(8.5, ()=>{
+  flash(180);
+  buildServiceGrid();
+  setTimeout(()=>{
+    showPhase('phase-services');
+    document.getElementById('svc-headline').classList.add('in');
+  }, 180);
+});
+at(9.5, ()=>{
+  const counter=document.getElementById('svc-counter');
+  const cwrap=document.getElementById('svc-counter-wrap');
+  cwrap.classList.add('in');
+  let svcIdx=0;
+  const siv=si(()=>{
+    if(svcIdx<18){
+      const box=document.getElementById('sb-'+svcIdx);
+      if(box) box.classList.add('lit');
+      // slight delay then brighten
+      const idx=svcIdx;
+      setTimeout(()=>{
+        const b=document.getElementById('sb-'+idx);
+        if(b){b.classList.remove('lit');b.classList.add('bright');}
+      },200);
+      counter.textContent=svcIdx+1;
+      svcIdx++;
+    } else ct(siv);
+  }, 290);
+});
+
+/* ═══════════════════════════════════════
+   PHASE 3: CONSTELLATION
+═══════════════════════════════════════ */
+const DOM_NODES=[
+  {x:190,y:220,n:'ROADHOME'},{x:380,y:130,n:'ROADCODE'},{x:580,y:160,n:'ROADCHAT'},
+  {x:780,y:130,n:'ROADDOCS'},{x:960,y:200,n:'ROADAUTH'},{x:1060,y:330,n:'ROADAPI'},
+  {x:1020,y:470,n:'ROADDASH'},{x:900,y:570,n:'ROADMESH'},{x:740,y:618,n:'ROADBASE'},
+  {x:580,y:640,n:'ROADOPS'}, {x:420,y:618,n:'ROADCAST'},{x:270,y:560,n:'ROADLINK'},
+  {x:165,y:430,n:'ROADSCAN'},{x:140,y:290,n:'ROADMIND'},{x:640,y:360,n:'ROADVAULT'},
+  {x:460,y:268,n:'ROADFLOW'},{x:730,y:258,n:'ROADBOOK'},{x:480,y:460,n:'ROADSIGN'},
+  {x:760,y:445,n:'ROADTASK'},{x:620,y:510,n:'ROADWORK'},
+];
+const DOM_EDGES=[
+  [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[10,11],[11,12],[12,13],[13,0],
+  [14,0],[14,2],[14,4],[14,6],[14,8],[14,10],[14,12],
+  [15,1],[15,14],[15,9],[16,3],[16,14],[16,10],
+  [17,14],[17,9],[18,14],[18,7],[19,14],[19,8],
+];
+
+function buildConstellation(){
+  const lineG=document.getElementById('dom-lines');
+  const nodeG=document.getElementById('dom-nodes');
+  lineG.innerHTML=''; nodeG.innerHTML='';
+  DOM_EDGES.forEach(([a,b])=>{
+    const na=DOM_NODES[a],nb=DOM_NODES[b];
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',na.x); line.setAttribute('y1',na.y);
+    line.setAttribute('x2',nb.x); line.setAttribute('y2',nb.y);
+    line.setAttribute('stroke','#0d0d0d'); line.setAttribute('stroke-width','1');
+    line.style.opacity='0'; line.id=`dl-${a}-${b}`;
+    lineG.appendChild(line);
+  });
+  DOM_NODES.forEach((nd,i)=>{
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',nd.x); circle.setAttribute('cy',nd.y);
+    circle.setAttribute('r','4'); circle.setAttribute('fill','#fff');
+    circle.style.opacity='0'; circle.id='dn-'+i;
+    const pulse=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    pulse.setAttribute('cx',nd.x); pulse.setAttribute('cy',nd.y);
+    pulse.setAttribute('r','4'); pulse.setAttribute('fill','none');
+    pulse.setAttribute('stroke','#111'); pulse.setAttribute('stroke-width','1');
+    pulse.style.opacity='0'; pulse.id='dp-'+i;
+    const text=document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',nd.x); text.setAttribute('y',nd.y-10);
+    text.setAttribute('text-anchor','middle');
+    text.setAttribute('font-family','Space Mono, monospace');
+    text.setAttribute('font-size','7'); text.setAttribute('fill','#1a1a1a');
+    text.setAttribute('letter-spacing','2');
+    text.textContent=nd.n; text.style.opacity='0'; text.id='dt-'+i;
+    g.appendChild(pulse); g.appendChild(circle); g.appendChild(text);
+    nodeG.appendChild(g);
+  });
+}
+
+at(19.5, ()=>{
+  flash(220);
+  buildConstellation();
+  setTimeout(()=>{
+    showPhase('phase-domains');
+    document.getElementById('dom-eyebrow').classList.add('in');
+    document.getElementById('dom-headline').classList.add('in');
+    document.getElementById('dom-counter-wrap').classList.add('in');
+    let nodeIdx=0;
+    const domCounter=document.getElementById('dom-counter');
+    const niv=si(()=>{
+      if(nodeIdx<20){
+        const c=document.getElementById('dn-'+nodeIdx);
+        const t=document.getElementById('dt-'+nodeIdx);
+        if(c){
+          c.style.transition='opacity .25s'; c.style.opacity='1';
+          // add pulse anim
+          const anim=document.createElementNS('http://www.w3.org/2000/svg','animate');
+          anim.setAttribute('attributeName','r'); anim.setAttribute('values','4;12;4');
+          anim.setAttribute('dur',`${2+Math.random()}s`); anim.setAttribute('repeatCount','indefinite');
+          const animO=document.createElementNS('http://www.w3.org/2000/svg','animate');
+          animO.setAttribute('attributeName','opacity'); animO.setAttribute('values','0.2;0;0.2');
+          animO.setAttribute('dur',`${2+Math.random()}s`); animO.setAttribute('repeatCount','indefinite');
+          const p=document.getElementById('dp-'+nodeIdx);
+          if(p){p.appendChild(anim);p.appendChild(animO);p.style.opacity='1';}
+        }
+        if(t){t.style.transition='opacity .3s .1s';t.style.opacity='1';}
+        domCounter.textContent=nodeIdx+1;
+        // reveal edges connected to this node
+        DOM_EDGES.forEach(([a,b],ei)=>{
+          if(a===nodeIdx||b===nodeIdx){
+            const line=document.getElementById(`dl-${a}-${b}`);
+            if(line&&document.getElementById('dn-'+a)?.style.opacity==='1'
+               &&document.getElementById('dn-'+b)?.style.opacity==='1'){
+              line.style.transition='opacity .4s'; line.style.opacity='1';
+            }
+          }
+        });
+        nodeIdx++;
+      } else {
+        ct(niv);
+        // light up remaining edges
+        DOM_EDGES.forEach(([a,b])=>{
+          const line=document.getElementById(`dl-${a}-${b}`);
+          if(line&&line.style.opacity!=='1'){line.style.transition='opacity .3s';line.style.opacity='1';}
+        });
+      }
+    }, 430);
+  }, 200);
+});
+
+/* ═══════════════════════════════════════
+   PHASE 4: AGENTS
+═══════════════════════════════════════ */
+at(30.5, ()=>{
+  flash(200);
+  setTimeout(()=>{
+    showPhase('phase-agents');
+    const countEl=document.getElementById('agents-count');
+    const plusEl=document.getElementById('agents-plus');
+    document.getElementById('agents-count').classList.add('in');
+    document.getElementById('agents-label').classList.add('in');
+    document.getElementById('agents-sub').classList.add('in');
+    let n=0;
+    const target=69;
+    const aiv=si(()=>{
+      n=Math.min(n+2,target);
+      countEl.firstChild.textContent=n;
+      if(n>=target){
+        ct(aiv);
+        plusEl.textContent='+';
+        plusEl.style.transition='opacity .4s'; plusEl.style.opacity='1';
+      }
+    }, 60);
+  }, 200);
+});
+
+/* ═══════════════════════════════════════
+   PHASE 5: STATEMENT
+═══════════════════════════════════════ */
+at(40.0, ()=>{
+  flash(250);
+  setTimeout(()=>{
+    showPhase('phase-statement');
+    requestAnimationFrame(()=>{
+      document.getElementById('stmt-rule-top').classList.add('in');
+      document.getElementById('stmt-main').classList.add('in');
+      document.getElementById('stmt-rule-mid').classList.add('in');
+      document.getElementById('stmt-stats').classList.add('in');
+      document.getElementById('stmt-sub').classList.add('in');
+      document.getElementById('stmt-rule-bot').classList.add('in');
+    });
+  }, 200);
+});
+
+/* ═══════════════════════════════════════
+   END CARD
+═══════════════════════════════════════ */
+at(53.0, ()=>{
+  flash(400);
+  setTimeout(()=>{
+    const ec=document.getElementById('end-card');
+    ec.classList.add('in');
+    setTimeout(()=>{
+      document.getElementById('ec-logo').classList.add('in');
+      document.getElementById('ec-rule').classList.add('in');
+      document.getElementById('ec-tag').classList.add('in');
+      document.getElementById('ec-ver').classList.add('in');
+    },100);
+  }, 350);
+});
+
+/* ═══════════════════════════════════════
+   TICK
+═══════════════════════════════════════ */
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); clearAllIntervals(); resetAll(); raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false; clearAllIntervals();
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null; clearAllIntervals(); typePos=0;
+  // phases
+  ['phase-boot','phase-services','phase-domains','phase-agents','phase-statement'].forEach(id=>{
+    const el=document.getElementById(id); if(el){el.classList.remove('active');el.style.zIndex='';}
+  });
+  // boot
+  document.getElementById('boot-title').textContent='';
+  document.getElementById('boot-eyebrow').classList.remove('in');
+  document.getElementById('boot-sub').classList.remove('in');
+  document.getElementById('boot-status').classList.remove('in');
+  document.getElementById('boot-bar-wrap').classList.remove('in');
+  document.getElementById('boot-bar-fill').style.width='0';
+  document.getElementById('boot-bar-fill').style.transition='none';
+  document.getElementById('boot-bar-pct').textContent='0%';
+  for(let i=0;i<5;i++){const e=document.getElementById('bst-'+i);if(e)e.classList.remove('in');}
+  // services
+  document.getElementById('svc-headline').classList.remove('in');
+  document.getElementById('svc-counter-wrap').classList.remove('in');
+  document.getElementById('svc-counter').textContent='0';
+  document.getElementById('svc-grid').innerHTML='';
+  // domains
+  document.getElementById('dom-eyebrow').classList.remove('in');
+  document.getElementById('dom-headline').classList.remove('in');
+  document.getElementById('dom-counter-wrap').classList.remove('in');
+  document.getElementById('dom-counter').textContent='0';
+  document.getElementById('dom-lines').innerHTML='';
+  document.getElementById('dom-nodes').innerHTML='';
+  // agents
+  document.getElementById('agents-count').classList.remove('in');
+  document.getElementById('agents-label').classList.remove('in');
+  document.getElementById('agents-sub').classList.remove('in');
+  document.getElementById('agents-count').firstChild.textContent='0';
+  document.getElementById('agents-plus').textContent='';
+  // statement
+  ['stmt-rule-top','stmt-main','stmt-rule-mid','stmt-stats','stmt-sub','stmt-rule-bot'].forEach(id=>{
+    const e=document.getElementById(id); if(e){e.classList.remove('in');}
+  });
+  document.getElementById('stmt-rule-top').style.transition='none'; document.getElementById('stmt-rule-top').style.width='0';
+  document.getElementById('stmt-rule-mid').style.transition='none'; document.getElementById('stmt-rule-mid').style.width='0';
+  document.getElementById('stmt-rule-bot').style.transition='none'; document.getElementById('stmt-rule-bot').style.width='0';
+  // end card
+  const ec=document.getElementById('end-card'); ec.classList.remove('in');
+  ['ec-logo','ec-rule','ec-tag','ec-ver'].forEach(id=>{
+    const e=document.getElementById(id); if(e){e.classList.remove('in');}
+  });
+  document.getElementById('ec-rule').style.transition='none'; document.getElementById('ec-rule').style.width='0';
+  document.getElementById('flash').style.opacity='0';
+  document.getElementById('prog-fill').style.width='0';
+}
+</script>
+</body>
+</html>
