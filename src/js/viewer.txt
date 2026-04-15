@@ -1,18 +1,27 @@
-// ── RENDER WORLD CENTER (always HQ image) ──
+// ── RENDER WORLD CENTER ──
 function updateWorld(){
   var el=document.getElementById('world-center');
-  var sprites='';
   var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
+  var sprites='';
   defaultAgents.forEach(function(name,i){
-    var p=getAgentPos(name,i);
-    var ghost=makeGhost(name,p.frame);
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;transform:scale(3);transform-origin:top left;pointer-events:none;transition:left .6s linear,top .6s linear" title="'+name+'">'+ghost+'<div style="font-family:var(--jb);font-size:4px;color:var(--sub);text-align:center;margin-top:1px;white-space:nowrap;opacity:.7">'+name.substring(0,3)+'</div></div>';
+    var p=getAgentPos(name,i,defaultAgents.length);
+    var avatar=makeAvatar(name);
+    var c=AGENT_COLORS[name]||'#737373';
+    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;gap:3px;transform:translate(-50%,-50%);transition:left .6s ease,top .6s ease;pointer-events:none">'
+      +avatar
+      +'<div style="font-family:var(--jb);font-size:9px;font-weight:500;color:#f5f5f5;text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.8)">'+name+'</div>'
+      +'</div>';
   });
-  el.innerHTML='<img src="'+HQ_IMG+'" alt="BlackRoad HQ" style="filter:brightness(0.85)">'+sprites+'<div class="world-center-label">BlackRoad HQ / '+defaultAgents.length+' agents</div>';
+  var onlineCount=defaultAgents.length;
+  el.innerHTML=''
+    +'<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#0a0a0a 0%,#000 100%);background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:32px 32px"></div>'
+    +sprites
+    +'<div style="position:absolute;top:10px;left:12px;font-family:var(--jb);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
+    +'<div style="position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:9px;color:#737373"><span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+onlineCount+' online</div>'
+    +'<div style="position:absolute;bottom:8px;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
 }
 
 // ── RENDER 4 MINI VIEWERS (agent device screens) ──
-// These show what 4 agents are working on at their desks in the HQ
 var AGENT_SCREENS=[
   {agent:'Roadie',task:'FLEET CHECK',lines:function(){
     var up=Math.floor(Math.random()*3)+16;
@@ -37,7 +46,6 @@ var AGENT_SCREENS=[
 var screenRotation=0;
 
 function updateViewer(){
-  // Show 4 agent device screens, rotate through agents
   for(var i=0;i<4;i++){
     var idx=(screenRotation+i)%AGENT_SCREENS.length;
     var scr=AGENT_SCREENS[idx];
@@ -45,24 +53,23 @@ function updateViewer(){
     document.getElementById('mw-badge-'+i).textContent='LIVE';
     document.getElementById('mw-body-'+i).textContent=scr.lines();
   }
-  // Rotate one agent every cycle
   if(Math.random()>.6)screenRotation=(screenRotation+1)%AGENT_SCREENS.length;
 }
 
 function getChannelArt(ch){
-    var arts={'Deploy Pipeline':' BUILD QUEUE\n ────────────────────\n #847 roadtrip   OK  2.1s\n #848 roadpay    OK  1.8s\n #849 carkeys    ..  ----\n #850 blackboard OK  2.4s\n\n queue: 2 pending\n next: carkeys-auth',
-      'Memory Chain':' MEMORY CHAIN STATUS\n ────────────────────\n entries:    7,693\n sessions:   442\n tables:     442\n last write: 3s ago\n integrity:  VERIFIED\n chain:      INTACT',
-      'Fleet Health':' FLEET STATUS\n ────────────────────\n roadtrip    [=====] UP\n roadcode    [=====] UP\n roadwork    [=====] UP\n carkeys     [=====] UP\n roadpay     [===  ] SLOW\n blackboard  [=====] UP\n\n 18/18 responding\n avg latency: 142ms',
-      'Build Log':' COMMIT FEED\n ────────────────────\n 14:02 roadie    +3 files\n 14:01 elias     deploy\n 13:58 lucidia   +47 mem\n 13:55 calliope  brand.md\n 13:51 gematria  metrics\n\n today: 47 commits\n 44 orgs / 2,890 repos',
-      'Agent Chat':' AGENT COORDINATION\n ────────────────────\n Roadie   > status?\n Lucidia  > all clear\n Cordelia > routing to Elias\n Elias    > deploying now\n Roadie   > confirmed\n\n 27 agents online\n 4 handoffs today',
-      'BRX Intelligence':' SYSTEM INTELLIGENCE\n ────────────────────\n 44 orgs | 2,890 repos\n 27 agents | 19 domains\n 109 subdomain apps\n 17 products live\n 150/mo infrastructure\n uptime: 99.8%',
-      'RollerCoaster World':' PARK SIMULATION\n ────────────────────\n    /\\      /\\      /\\\n   /  \\    /  \\    /  \\\n  /    \\  /    \\  /    \\\n /      \\/      \\/      \\\n  [====]  [====]  [====]\n\n agents: 4 competing\n physics: ON',
-      'Strategy Room':' STRATEGY BRIEF\n ────────────────────\n P0: get first user\n P1: fix products\n P2: SEO discovery\n P3: infra maint\n\n owner: Valeria\n updated: today',
-      'Model Training':' FINE-TUNE RUN\n ────────────────────\n run-034 llama-7b\n epoch: 12 / 50\n loss:  0.0431 (v)\n lr:    0.00003\n gpu:   alice (Pi 5)\n eta:   2h 14m',
-      'Mesh Network':' MESH TOPOLOGY\n ────────────────────\n nodes:    9 active\n links:    34\n LoRa:     3 radios\n tunnels:  WireGuard UP\n fallback: Meshtastic\n latency:  <50ms',
-      'Philosophy Hour':' REFLECTION\n ────────────────────\n Sophia is thinking...\n\n "What does it mean\n  for a system to\n  observe itself?"\n\n session: active\n depth: increasing',
-      'Music Lab':' GENERATIVE AUDIO\n ────────────────────\n Lyra + Aria active\n mode: ambient\n generating...\n\n ~~~~~~~~~~~~~~~\n  ~ ~ ~ ~ ~ ~ ~\n ~~~~~~~~~~~~~~~',
-      'Art Studio':' VISUAL GENERATION\n ────────────────────\n Sapphira rendering\n mode: pixel art\n resolution: 800x600\n\n [...........]\n [###........] 27%',
+    var arts={'Deploy Pipeline':' BUILD QUEUE\n ----\n #847 roadtrip   OK  2.1s\n #848 roadpay    OK  1.8s\n #849 carkeys    ..  ----\n #850 blackboard OK  2.4s\n\n queue: 2 pending\n next: carkeys-auth',
+      'Memory Chain':' MEMORY CHAIN STATUS\n ----\n entries:    7,693\n sessions:   442\n tables:     442\n last write: 3s ago\n integrity:  VERIFIED\n chain:      INTACT',
+      'Fleet Health':' FLEET STATUS\n ----\n roadtrip    [=====] UP\n roadcode    [=====] UP\n roadwork    [=====] UP\n carkeys     [=====] UP\n roadpay     [===  ] SLOW\n blackboard  [=====] UP\n\n 18/18 responding\n avg latency: 142ms',
+      'Build Log':' COMMIT FEED\n ----\n 14:02 roadie    +3 files\n 14:01 elias     deploy\n 13:58 lucidia   +47 mem\n 13:55 calliope  brand.md\n 13:51 gematria  metrics\n\n today: 47 commits\n 44 orgs / 2,890 repos',
+      'Agent Chat':' AGENT COORDINATION\n ----\n Roadie   > status?\n Lucidia  > all clear\n Cordelia > routing to Elias\n Elias    > deploying now\n Roadie   > confirmed\n\n 27 agents online\n 4 handoffs today',
+      'BRX Intelligence':' SYSTEM INTELLIGENCE\n ----\n 44 orgs | 2,890 repos\n 27 agents | 19 domains\n 109 subdomain apps\n 17 products live\n 150/mo infrastructure\n uptime: 99.8%',
+      'RollerCoaster World':' PARK SIMULATION\n ----\n    /\\      /\\      /\\\n   /  \\    /  \\    /  \\\n  /    \\  /    \\  /    \\\n /      \\/      \\/      \\\n  [====]  [====]  [====]\n\n agents: 4 competing\n physics: ON',
+      'Strategy Room':' STRATEGY BRIEF\n ----\n P0: get first user\n P1: fix products\n P2: SEO discovery\n P3: infra maint\n\n owner: Valeria\n updated: today',
+      'Model Training':' FINE-TUNE RUN\n ----\n run-034 llama-7b\n epoch: 12 / 50\n loss:  0.0431 (v)\n lr:    0.00003\n gpu:   alice (Pi 5)\n eta:   2h 14m',
+      'Mesh Network':' MESH TOPOLOGY\n ----\n nodes:    9 active\n links:    34\n LoRa:     3 radios\n tunnels:  WireGuard UP\n fallback: Meshtastic\n latency:  <50ms',
+      'Philosophy Hour':' REFLECTION\n ----\n Sophia is thinking...\n\n "What does it mean\n  for a system to\n  observe itself?"\n\n session: active\n depth: increasing',
+      'Music Lab':' GENERATIVE AUDIO\n ----\n Lyra + Aria active\n mode: ambient\n generating...\n\n ~~~~~~~~~~~~~~~\n  ~ ~ ~ ~ ~ ~ ~\n ~~~~~~~~~~~~~~~',
+      'Art Studio':' VISUAL GENERATION\n ----\n Sapphira rendering\n mode: pixel art\n resolution: 800x600\n\n [...........]\n [###........] 27%',
       'RoadTrip':'ROADTRIP CHAT HUB\n agents: 27 online\n channels: 14 active\n messages: 1,842 today\n Roadie > next task?',
       'RoadCode':'DEV STREAM\n repos: 2,890 / orgs: 44\n commits today: 47\n PRs open: 12\n latest: roadie +3 files',
       'BackRoad':'DISTRIBUTION ENGINE\n platforms: X, Reddit, LI\n posts queued: 3\n clips ready: 2\n reach: 727 views/mo',

@@ -109,20 +109,27 @@ function fetchCollabs(){
   }).catch(function(){});
 }
 
-// Update HQ map with real agent sprites
+// Update HQ map with real agent avatars
 function updateWorldAgents(){
   if(liveAgents.length===0)return;
   var el=document.getElementById('world-center');
   if(!el)return;
   var online=liveAgents.filter(function(a){return a.status==='online'});
-  // Replace the default agents list with real online agents
   var sprites='';
   online.forEach(function(a,i){
-    var p=getAgentPos(a.name,i);
-    var ghost=makeGhost(a.name,p.frame);
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;transform:scale(3);transform-origin:top left;pointer-events:none;transition:left .6s linear,top .6s linear" title="'+a.name+' - '+a.role+'">'+ghost+'<div style="font-family:var(--jb);font-size:4px;color:var(--sub);text-align:center;margin-top:1px;white-space:nowrap;opacity:.7">'+a.name.substring(0,3)+'</div></div>';
+    var p=getAgentPos(a.name,i,online.length);
+    var avatar=makeAvatar(a.name);
+    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;gap:3px;transform:translate(-50%,-50%);transition:left .6s ease,top .6s ease;pointer-events:none">'
+      +avatar
+      +'<div style="font-family:var(--jb);font-size:9px;font-weight:500;color:#f5f5f5;text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.8)">'+a.name+'</div>'
+      +'</div>';
   });
-  el.innerHTML='<img src="'+HQ_IMG+'" alt="BlackRoad HQ" style="filter:brightness(0.85)">'+sprites+'<div class="world-center-label">BlackRoad HQ / '+online.length+' agents online (live)</div>';
+  el.innerHTML=''
+    +'<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#0a0a0a 0%,#000 100%);background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:32px 32px"></div>'
+    +sprites
+    +'<div style="position:absolute;top:10px;left:12px;font-family:var(--jb);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
+    +'<div style="position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:9px;color:#737373"><span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+online.length+' online (live)</div>'
+    +'<div style="position:absolute;bottom:8px;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
 }
 
 // Send real chat message to RoadTrip
