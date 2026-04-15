@@ -63,7 +63,8 @@ function makeAvatar(name,dir){
   var sk=skinPair[0];
   var sks=skinPair[1];
   var e='#fff'; // eye white
-  var ep='#111'; // eye pupil
+  var ep='#222'; // eye pupil
+  var shoe='#555'; // shoes — visible on dark floor
   dir=dir||'down';
 
   var rows;
@@ -84,8 +85,8 @@ function makeAvatar(name,dir){
       [_,_,sd,s,s,s,s,sd,_,_],
       // Legs
       [_,_,_,sd,sd,sd,sd,_,_,_],
-      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
-      [_,_,_,'#111',_,_,'#111',_,_,_],
+      [_,_,_,'#444',_,_,'#444',_,_,_],
+      [_,_,_,shoe,_,_,shoe,_,_,_],
     ];
   } else if(dir==='up'){
     rows=[
@@ -101,8 +102,8 @@ function makeAvatar(name,dir){
       [_,sk,s,s,sd,sd,s,sd,sks,_],
       [_,_,sd,s,s,s,s,sd,_,_],
       [_,_,_,sd,sd,sd,sd,_,_,_],
-      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
-      [_,_,_,'#111',_,_,'#111',_,_,_],
+      [_,_,_,'#444',_,_,'#444',_,_,_],
+      [_,_,_,shoe,_,_,shoe,_,_,_],
     ];
   } else if(dir==='left'){
     rows=[
@@ -118,8 +119,8 @@ function makeAvatar(name,dir){
       [sk,s,s,sd,sd,_,_,_,_,_],
       [_,sd,s,s,sd,_,_,_,_,_],
       [_,_,sd,sd,_,_,_,_,_,_],
-      [_,_,'#1a1a1a','#1a1a1a',_,_,_,_,_,_],
-      [_,_,'#111','#111',_,_,_,_,_,_],
+      [_,_,'#444','#444',_,_,_,_,_,_],
+      [_,_,shoe,shoe,_,_,_,_,_,_],
     ];
   } else { // right
     rows=[
@@ -135,8 +136,8 @@ function makeAvatar(name,dir){
       [_,_,_,_,_,sd,sd,s,s,sks],
       [_,_,_,_,_,sd,s,s,sd,_],
       [_,_,_,_,_,_,sd,sd,_,_],
-      [_,_,_,_,_,_,'#1a1a1a','#1a1a1a',_,_],
-      [_,_,_,_,_,_,'#111','#111',_,_],
+      [_,_,_,_,_,_,'#444','#444',_,_],
+      [_,_,_,_,_,_,shoe,shoe,_,_],
     ];
   }
 
@@ -149,13 +150,18 @@ function makeAvatar(name,dir){
   return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:9px;margin-bottom:13px"></div>';
 }
 
-// Darken/lighten a hex color
+// Darken/lighten a hex color (handles both #RGB and #RRGGBB)
 function shadeColor(color,percent){
-  var num=parseInt(color.replace('#',''),16);
-  var r=(num>>16)+Math.round(((num>>16))*percent);
-  var g=((num>>8)&0x00FF)+Math.round(((num>>8)&0x00FF)*percent);
-  var b=(num&0x0000FF)+Math.round((num&0x0000FF)*percent);
-  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  var hex=color.replace('#','');
+  // Expand 3-digit to 6-digit
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var num=parseInt(hex,16);
+  var r=(num>>16)&0xFF;
+  var g=(num>>8)&0xFF;
+  var b=num&0xFF;
+  r=Math.max(0,Math.min(255,Math.round(r*(1+percent))));
+  g=Math.max(0,Math.min(255,Math.round(g*(1+percent))));
+  b=Math.max(0,Math.min(255,Math.round(b*(1+percent))));
   return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
 }
 
