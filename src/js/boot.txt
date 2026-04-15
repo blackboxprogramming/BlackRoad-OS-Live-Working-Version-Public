@@ -1,7 +1,20 @@
-// ── CHAT SEND ──
+// ── CHAT SEND (posts to RoadTrip API) ──
 document.getElementById('chat-send').addEventListener('click',sendChat);
 document.getElementById('chat-input').addEventListener('keydown',function(e){if(e.key==='Enter')sendChat()});
-function sendChat(){var inp=document.getElementById('chat-input'),t=inp.value.trim();if(!t)return;inp.value='';S.msgs.push({u:userId,t:t});if(S.msgs.length>40)S.msgs.shift();render()}
+function sendChat(){
+  var inp=document.getElementById('chat-input'),t=inp.value.trim();
+  if(!t)return;
+  inp.value='';
+  S.msgs.push({u:userId,t:t});
+  if(S.msgs.length>60)S.msgs.shift();
+  render();
+  // Post to RoadTrip
+  fetch('https://roadtrip.blackroad.io/api/rooms/general/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sender:userId,content:t,sender_type:'user'})
+  }).catch(function(){});
+}
 
 // ── MAIN LOOP ──
 function render(){renderGuide();renderPT();renderChat();renderTicker()}
@@ -13,6 +26,7 @@ S.selectedCh=parseInt(localStorage.getItem('br-sel'))||S.channels.find(function(
 render();
 updateWorld(); // sets up office + starts requestAnimationFrame loop
 updateViewer();
+startLiveChat(); // begin streaming real agent messages
 
 // Refresh agent device screens every 3 seconds
 setInterval(updateViewer,3000);
