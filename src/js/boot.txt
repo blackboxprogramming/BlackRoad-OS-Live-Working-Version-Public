@@ -11,11 +11,9 @@ S.selectedCh=parseInt(localStorage.getItem('br-sel'))||S.channels.find(function(
 
 // First render
 render();
-updateWorld();
+updateWorld(); // sets up office + starts requestAnimationFrame loop
 updateViewer();
 
-// Animate sprites frequently (every 600ms for smooth ghost movement)
-setInterval(updateWorld,600);
 // Refresh agent device screens every 3 seconds
 setInterval(updateViewer,3000);
 
@@ -120,17 +118,11 @@ function updateWorldAgents(){
     var p=getAgentPos(a.name,i,online.length);
     var avatar=makeAvatar(a.name);
     var shirtColor=(AGENT_COLORS[a.name]||['#888'])[0];
-    var shirtColor=(AGENT_COLORS[a.name]||['#888'])[0];
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:left .5s linear,top .5s linear;pointer-events:none">'
-      +'<div style="transform:scale(2);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
-      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:1px">'+a.name+'</div>'
-      +'</div>';
+    // Initialize positions for live agents
+    getAgentPos(a.name,i,online.length);
   });
-  el.innerHTML=buildOffice()+sprites
-    +'<div style="position:absolute;top:8px;left:10px;font-family:var(--jb);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
-    +'<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:8px;color:#555"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+online.length+' online (live)</div>'
-    +'<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
-  if(worldExpanded)updateWorldBig();
+  // The animation loop handles movement — just rebuild sprites
+  rebuildWorldSprites();
 }
 
 // Send real chat message to RoadTrip

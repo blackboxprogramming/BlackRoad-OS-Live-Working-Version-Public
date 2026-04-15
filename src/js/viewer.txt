@@ -1,21 +1,6 @@
 // ── RENDER WORLD CENTER ──
 var worldExpanded=false;
-
-function renderWorldSprites(agents,scale){
-  var sprites='';
-  agents.forEach(function(name,i){
-    var p=getAgentPos(name,i,agents.length);
-    var avatar=makeAvatar(name,p.dir);
-    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
-    var s=scale||2;
-    var fs=s>2?10:8;
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:left .5s linear,top .5s linear;pointer-events:none">'
-      +'<div style="transform:scale('+s+');image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
-      +'<div style="font-family:var(--jb);font-size:'+fs+'px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.6);margin-top:'+(s>2?4:1)+'px;letter-spacing:.01em">'+name+'</div>'
-      +'</div>';
-  });
-  return sprites;
-}
+var worldInitialized=false;
 
 function toggleWorldExpand(){
   var overlay=document.getElementById('world-overlay');
@@ -25,35 +10,38 @@ function toggleWorldExpand(){
   } else {
     overlay.style.display='flex';
     worldExpanded=true;
-    updateWorldBig();
+    initWorldBig();
   }
 }
 
-function updateWorldBig(){
-  if(!worldExpanded)return;
+function initWorldBig(){
   var el=document.getElementById('world-big-content');
   if(!el)return;
   var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
-  var sprites=renderWorldSprites(defaultAgents,3);
-  el.innerHTML=buildOffice()+sprites
+  el.innerHTML=buildOffice()
+    +'<div id="world-big-sprites" style="position:absolute;inset:0;pointer-events:none"></div>'
     +'<div style="position:absolute;top:12px;left:16px;font-family:var(--jb);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
     +'<div style="position:absolute;top:12px;right:16px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:11px;color:#555"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+defaultAgents.length+' online</div>'
     +'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.5"></div>';
+  rebuildWorldSprites();
 }
 
 function updateWorld(){
   var el=document.getElementById('world-center');
-  var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
-  var sprites=renderWorldSprites(defaultAgents,2);
-  var onlineCount=defaultAgents.length;
-
-  el.innerHTML=buildOffice()+sprites
-    +'<div style="position:absolute;top:8px;left:10px;font-family:var(--jb);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
-    +'<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:8px;color:#555"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+onlineCount+' online</div>'
-    +'<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
-
-  // Also update expanded view if open
-  if(worldExpanded)updateWorldBig();
+  if(!worldInitialized){
+    var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
+    // Initialize agent positions
+    defaultAgents.forEach(function(name,i){getAgentPos(name,i,defaultAgents.length)});
+    var onlineCount=defaultAgents.length;
+    el.innerHTML=buildOffice()
+      +'<div id="world-sprites" style="position:absolute;inset:0;pointer-events:none"></div>'
+      +'<div style="position:absolute;top:8px;left:10px;font-family:var(--jb);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
+      +'<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:8px;color:#555"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+onlineCount+' online</div>'
+      +'<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
+    rebuildWorldSprites();
+    startWorldLoop();
+    worldInitialized=true;
+  }
 }
 
 // ── RENDER 4 MINI VIEWERS (agent device screens) ──

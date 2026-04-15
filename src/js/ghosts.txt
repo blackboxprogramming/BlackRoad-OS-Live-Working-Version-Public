@@ -140,62 +140,156 @@ function shadeColor(color,percent){
   return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
 }
 
-// Agent positions + walking state
+// Agent positions + smooth walking state
 var agentPositions={};
-var DIRS=['down','left','up','right'];
+var worldAnimId=null;
+var lastWorldTick=0;
+
+function initAgentPos(name,idx,total){
+  var h=0;for(var i=0;i<name.length;i++)h=h*31+name.charCodeAt(i);
+  // Spread agents across the walkable floor area
+  var x=12+((h>>>0)%72);
+  var y=50+((h*7>>>0)%38);
+  return {
+    x:x,y:y,
+    targetX:x,targetY:y,
+    dir:'down',
+    moving:false,
+    waitMs:1000+Math.random()*3000,
+    waitStart:performance.now(),
+    step:0,
+    speed:0.012+Math.random()*0.008 // slightly different speeds per agent
+  };
+}
+
+// Points of interest agents walk toward (desks, conference, couch, server, etc.)
+var POI=[
+  // Desks
+  {x:13,y:54},{x:33,y:54},{x:65,y:54},{x:85,y:54},
+  // Conference table area
+  {x:60,y:68},{x:66,y:68},{x:72,y:68},{x:66,y:74},
+  // Couch area
+  {x:16,y:70},{x:20,y:72},
+  // Near server
+  {x:90,y:38},
+  // Near whiteboard
+  {x:12,y:36},
+  // Doorway
+  {x:50,y:52},
+  // Wandering spots
+  {x:40,y:60},{x:50,y:70},{x:30,y:65},{x:70,y:60},{x:45,y:80},{x:55,y:55},
+  {x:25,y:58},{x:75,y:75},{x:35,y:78},{x:60,y:82},{x:80,y:62},
+];
+
+function tickAgent(p,now){
+  if(!p.moving){
+    // Waiting — check if wait time is over
+    if(now-p.waitStart>p.waitMs){
+      // Pick a point of interest (sometimes random, sometimes POI)
+      if(Math.random()<0.6){
+        var poi=POI[Math.floor(Math.random()*POI.length)];
+        p.targetX=poi.x+(Math.random()-0.5)*8;
+        p.targetY=poi.y+(Math.random()-0.5)*6;
+      } else {
+        p.targetX=10+Math.random()*78;
+        p.targetY=48+Math.random()*42;
+      }
+      // Clamp to walkable area
+      p.targetX=Math.max(6,Math.min(94,p.targetX));
+      p.targetY=Math.max(46,Math.min(92,p.targetY));
+      p.moving=true;
+      p.step=0;
+    }
+    return;
+  }
+
+  var dx=p.targetX-p.x;
+  var dy=p.targetY-p.y;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+
+  if(dist<0.5){
+    p.x=p.targetX;
+    p.y=p.targetY;
+    p.moving=false;
+    p.waitMs=2000+Math.random()*5000;
+    p.waitStart=now;
+  } else {
+    p.x+=dx/dist*p.speed*16.67; // normalize to ~60fps feel
+    p.y+=dy/dist*p.speed*16.67;
+    p.step++;
+    // Face direction of movement
+    if(Math.abs(dx)>Math.abs(dy)){
+      p.dir=dx>0?'right':'left';
+    } else {
+      p.dir=dy>0?'down':'up';
+    }
+  }
+}
 
 function getAgentPos(name,idx,total){
   if(!agentPositions[name]){
-    // Seed positions spread across the office floor area (bottom 55%)
-    var h=0;for(var i=0;i<name.length;i++)h=h*31+name.charCodeAt(i);
-    var x=10+((h>>>0)%75);
-    var y=48+((h*7>>>0)%42);
-    agentPositions[name]={
-      x:x,y:y,
-      targetX:x,targetY:y,
-      dir:'down',
-      moving:false,
-      waitTicks:Math.floor(Math.random()*20),
-      step:0
-    };
+    agentPositions[name]=initAgentPos(name,idx,total);
   }
-  var p=agentPositions[name];
+  return agentPositions[name];
+}
 
-  // Walking AI — pick a destination, walk to it, pause, repeat
-  if(p.waitTicks>0){
-    p.waitTicks--;
-    p.moving=false;
-  } else if(!p.moving){
-    // Pick new target within office floor bounds
-    p.targetX=10+Math.random()*75;
-    p.targetY=48+Math.random()*42;
-    p.moving=true;
-    p.step=0;
-  }
-
-  if(p.moving){
-    var dx=p.targetX-p.x;
-    var dy=p.targetY-p.y;
-    var dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<1.5){
-      p.x=p.targetX;
-      p.y=p.targetY;
-      p.moving=false;
-      p.waitTicks=20+Math.floor(Math.random()*40);
-    } else {
-      var speed=0.6;
-      p.x+=dx/dist*speed;
-      p.y+=dy/dist*speed;
-      p.step++;
-      // Face direction of movement
-      if(Math.abs(dx)>Math.abs(dy)){
-        p.dir=dx>0?'right':'left';
-      } else {
-        p.dir=dy>0?'down':'up';
-      }
+// Smooth animation loop — runs independently of render interval
+function startWorldLoop(){
+  if(worldAnimId)return;
+  function loop(now){
+    // Tick all agents
+    var names=Object.keys(agentPositions);
+    for(var i=0;i<names.length;i++){
+      tickAgent(agentPositions[names[i]],now);
     }
+    // Update DOM elements by moving them (no innerHTML rebuild)
+    names.forEach(function(name){
+      var p=agentPositions[name];
+      var el=document.getElementById('agent-'+name);
+      if(el){
+        el.style.left=p.x+'%';
+        el.style.top=p.y+'%';
+      }
+      var elBig=document.getElementById('agent-big-'+name);
+      if(elBig){
+        elBig.style.left=p.x+'%';
+        elBig.style.top=p.y+'%';
+      }
+    });
+    // Rebuild sprites every 400ms to update facing direction
+    if(now-lastWorldTick>400){
+      lastWorldTick=now;
+      rebuildWorldSprites();
+    }
+    worldAnimId=requestAnimationFrame(loop);
   }
-  return p;
+  worldAnimId=requestAnimationFrame(loop);
+}
+
+function rebuildWorldSprites(){
+  var el=document.getElementById('world-sprites');
+  var elBig=document.getElementById('world-big-sprites');
+  if(!el)return;
+  var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
+
+  var html='';
+  var htmlBig='';
+  defaultAgents.forEach(function(name){
+    var p=agentPositions[name];
+    if(!p)return;
+    var avatar=makeAvatar(name,p.dir);
+    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
+    html+='<div id="agent-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
+      +'<div style="transform:scale(2);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:1px">'+name+'</div>'
+      +'</div>';
+    htmlBig+='<div id="agent-big-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
+      +'<div style="transform:scale(3);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:10px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-top:4px">'+name+'</div>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+  if(elBig)elBig.innerHTML=htmlBig;
 }
 
 // ── OFFICE MAP (top-down tiles) ──
