@@ -1,37 +1,53 @@
 // ── POKEMON RED STYLE TOP-DOWN AGENTS ──
 // 16x16 pixel sprites viewed from above, walking around office
 
+// Black & white palette — agents differentiated by hair shade + shirt tone
 var AGENT_COLORS={
-  'Roadie':['#FF6B2B','#cc5520'],'Lucidia':['#CC00AA','#990080'],
-  'Sophia':['#8844FF','#6633cc'],'Erebus':['#555','#333'],
-  'Cecilia':['#4488FF','#3366cc'],'Gematria':['#00D4FF','#00a8cc'],
-  'Valeria':['#FF2255','#cc1a44'],'Olympia':['#FF6B2B','#cc5520'],
-  'Cordelia':['#8844FF','#6633cc'],'Alice':['#4488FF','#3366cc'],
-  'Sebastian':['#CC00AA','#990080'],'Calliope':['#00D4FF','#00a8cc'],
-  'Elias':['#FF2255','#cc1a44'],'Gaia':['#22c55e','#1a9e4a'],
-  'Atticus':['#8844FF','#6633cc'],'Sapphira':['#4488FF','#3366cc'],
-  'Thalia':['#CC00AA','#990080'],'Ophelia':['#00D4FF','#00a8cc'],
-  'Lyra':['#FF2255','#cc1a44'],'Celeste':['#FF6B2B','#cc5520'],
-  'Alexandria':['#8844FF','#6633cc'],'Cicero':['#4488FF','#3366cc'],
-  'Portia':['#CC00AA','#990080'],'Theodosia':['#00D4FF','#00a8cc'],
-  'Seraphina':['#FF2255','#cc1a44'],'Anastasia':['#FF6B2B','#cc5520'],
-  'Octavia':['#8844FF','#6633cc'],'Aria':['#4488FF','#3366cc'],
-  'Silas':['#666','#444']
+  'Roadie':['#eee','#ccc'],'Lucidia':['#fff','#ddd'],
+  'Sophia':['#bbb','#999'],'Erebus':['#333','#222'],
+  'Cecilia':['#ddd','#bbb'],'Gematria':['#aaa','#888'],
+  'Valeria':['#ccc','#aaa'],'Olympia':['#eee','#ccc'],
+  'Cordelia':['#999','#777'],'Alice':['#fff','#ddd'],
+  'Sebastian':['#bbb','#999'],'Calliope':['#ddd','#bbb'],
+  'Elias':['#ccc','#aaa'],'Gaia':['#aaa','#888'],
+  'Atticus':['#999','#777'],'Sapphira':['#eee','#ccc'],
+  'Thalia':['#bbb','#999'],'Ophelia':['#ddd','#bbb'],
+  'Lyra':['#ccc','#aaa'],'Celeste':['#fff','#ddd'],
+  'Alexandria':['#aaa','#888'],'Cicero':['#999','#777'],
+  'Portia':['#eee','#ccc'],'Theodosia':['#bbb','#999'],
+  'Seraphina':['#ddd','#bbb'],'Anastasia':['#ccc','#aaa'],
+  'Octavia':['#aaa','#888'],'Aria':['#eee','#ccc'],
+  'Silas':['#888','#666']
 };
 
+// Hair is the main differentiator — wide range from white to black
 var HAIR_COLORS={
-  'Roadie':'#222','Lucidia':'#eee','Sophia':'#6633cc','Erebus':'#111',
-  'Cecilia':'#3366cc','Gematria':'#222','Valeria':'#cc1a44','Olympia':'#FF6B2B',
-  'Cordelia':'#444','Alice':'#f5e6a0','Sebastian':'#222','Calliope':'#00a8cc',
-  'Elias':'#333','Gaia':'#1a9e4a','Atticus':'#333','Sapphira':'#222',
-  'Thalia':'#990080','Ophelia':'#444','Lyra':'#cc1a44','Celeste':'#cc5520',
-  'Alexandria':'#333','Cicero':'#222','Portia':'#444','Theodosia':'#222',
-  'Seraphina':'#cc1a44','Anastasia':'#FF6B2B','Octavia':'#333','Aria':'#222',
-  'Silas':'#555'
+  'Roadie':'#222','Lucidia':'#fff','Sophia':'#888','Erebus':'#000',
+  'Cecilia':'#555','Gematria':'#333','Valeria':'#aaa','Olympia':'#111',
+  'Cordelia':'#777','Alice':'#eee','Sebastian':'#444','Calliope':'#bbb',
+  'Elias':'#222','Gaia':'#666','Atticus':'#111','Sapphira':'#ddd',
+  'Thalia':'#555','Ophelia':'#999','Lyra':'#333','Celeste':'#ccc',
+  'Alexandria':'#444','Cicero':'#222','Portia':'#777','Theodosia':'#bbb',
+  'Seraphina':'#eee','Anastasia':'#111','Octavia':'#666','Aria':'#ddd',
+  'Silas':'#888'
 };
 
-var SKIN='#d4a574';
-var SKIN_S='#c49464'; // skin shadow
+// Skin tones in grayscale — slight variation between agents
+var AGENT_SKIN={
+  'Roadie':['#ccc','#bbb'],'Lucidia':['#ddd','#ccc'],'Sophia':['#bbb','#aaa'],
+  'Erebus':['#999','#888'],'Cecilia':['#ccc','#bbb'],'Gematria':['#bbb','#aaa'],
+  'Valeria':['#ddd','#ccc'],'Olympia':['#ccc','#bbb'],'Cordelia':['#bbb','#aaa'],
+  'Alice':['#ddd','#ccc'],'Sebastian':['#ccc','#bbb'],'Calliope':['#ddd','#ccc'],
+  'Elias':['#bbb','#aaa'],'Gaia':['#ccc','#bbb'],'Atticus':['#bbb','#aaa'],
+  'Sapphira':['#ddd','#ccc'],'Thalia':['#ccc','#bbb'],'Ophelia':['#ddd','#ccc'],
+  'Lyra':['#bbb','#aaa'],'Celeste':['#ddd','#ccc'],'Alexandria':['#ccc','#bbb'],
+  'Cicero':['#bbb','#aaa'],'Portia':['#ccc','#bbb'],'Theodosia':['#ddd','#ccc'],
+  'Seraphina':['#ddd','#ccc'],'Anastasia':['#ccc','#bbb'],'Octavia':['#bbb','#aaa'],
+  'Aria':['#ddd','#ccc'],'Silas':['#aaa','#999']
+};
+
+var SKIN='#ccc';
+var SKIN_S='#bbb';
 var _='transparent';
 
 // Isometric 3D-ish character (10 wide x 14 tall)
@@ -43,10 +59,11 @@ function makeAvatar(name,dir){
   var h=HAIR_COLORS[name]||'#333';
   // Darker variant of hair for shadow side
   var hd=shadeColor(h,-.25);
-  var sk=SKIN;
-  var sks=SKIN_S;
+  var skinPair=AGENT_SKIN[name]||['#ccc','#bbb'];
+  var sk=skinPair[0];
+  var sks=skinPair[1];
   var e='#fff'; // eye white
-  var ep='#222'; // eye pupil
+  var ep='#111'; // eye pupil
   dir=dir||'down';
 
   var rows;
@@ -280,14 +297,13 @@ function rebuildWorldSprites(){
     var p=agentPositions[name];
     if(!p)return;
     var avatar=makeAvatar(name,p.dir);
-    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
     html+='<div id="agent-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
       +'<div style="transform:scale(2);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
-      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:1px">'+name+'</div>'
+      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:#ccc;text-align:center;white-space:nowrap;text-shadow:0 1px 3px #000;margin-top:1px">'+name+'</div>'
       +'</div>';
     htmlBig+='<div id="agent-big-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
       +'<div style="transform:scale(3);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
-      +'<div style="font-family:var(--jb);font-size:10px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-top:4px">'+name+'</div>'
+      +'<div style="font-family:var(--jb);font-size:10px;font-weight:600;color:#ccc;text-align:center;white-space:nowrap;text-shadow:0 1px 4px #000;margin-top:4px">'+name+'</div>'
       +'</div>';
   });
   el.innerHTML=html;
@@ -297,14 +313,14 @@ function rebuildWorldSprites(){
 // ── OFFICE MAP (top-down tiles) ──
 function buildOffice(){
   // Floor colors
-  var FLOOR='#1a1612';
-  var FLOOR_L='#1e1915';
-  var WALL='#222';
-  var WALL_D='#1a1a1a';
-  var DESK='#2a2520';
-  var DESK_D='#221e1a';
-  var CHAIR='#333';
-  var RUG='#1a1420';
+  var FLOOR='#141414';
+  var FLOOR_L='#181818';
+  var WALL='#1e1e1e';
+  var WALL_D='#161616';
+  var DESK='#252525';
+  var DESK_D='#1e1e1e';
+  var CHAIR='#2a2a2a';
+  var RUG='#181818';
 
   var html='';
   // Base floor — warm dark wood tone
@@ -322,10 +338,10 @@ function buildOffice(){
 
   // Desks (4 workstations along the wall)
   var deskY='26%';
-  var desks=[{x:'6%',c:'#FF6B2B'},{x:'26%',c:'#CC00AA'},{x:'58%',c:'#4488FF'},{x:'78%',c:'#00D4FF'}];
+  var desks=[{x:'6%',c:'#555'},{x:'26%',c:'#666'},{x:'58%',c:'#555'},{x:'78%',c:'#666'}];
   desks.forEach(function(d){
     // Desk surface
-    html+='<div style="position:absolute;top:'+deskY+';left:'+d.x+';width:14%;height:14%;background:'+DESK+';border:1px solid #332e28;border-radius:1px"></div>';
+    html+='<div style="position:absolute;top:'+deskY+';left:'+d.x+';width:14%;height:14%;background:'+DESK+';border:1px solid #333;border-radius:1px"></div>';
     // Monitor on desk
     html+='<div style="position:absolute;top:27%;left:calc('+d.x+' + 3%);width:8%;height:5%;background:#111;border:1px solid #2a2a2a;border-radius:1px">';
     html+='<div style="margin:2px;height:2px;background:'+d.c+';opacity:.5;border-radius:1px"></div></div>';
@@ -334,7 +350,7 @@ function buildOffice(){
   });
 
   // Conference table (center-right)
-  html+='<div style="position:absolute;top:60%;left:55%;width:22%;height:18%;background:#252018;border:1px solid #332e28;border-radius:2px"></div>';
+  html+='<div style="position:absolute;top:60%;left:55%;width:22%;height:18%;background:#222;border:1px solid #333;border-radius:2px"></div>';
   // Chairs around table
   var chairs=[{x:'54%',y:'65%'},{x:'54%',y:'72%'},{x:'78%',y:'65%'},{x:'78%',y:'72%'},{x:'62%',y:'58%'},{x:'70%',y:'58%'},{x:'62%',y:'80%'},{x:'70%',y:'80%'}];
   chairs.forEach(function(c){
@@ -343,10 +359,10 @@ function buildOffice(){
 
   // Server rack (right wall area)
   html+='<div style="position:absolute;top:8%;right:3%;width:5%;height:28%;background:#111;border:1px solid #1a1a1a;border-radius:1px">';
-  html+='<div style="margin:4px 2px;height:2px;background:#22c55e;opacity:.6;border-radius:1px"></div>';
-  html+='<div style="margin:3px 2px;height:2px;background:#4488FF;opacity:.5;border-radius:1px"></div>';
-  html+='<div style="margin:3px 2px;height:2px;background:#FF6B2B;opacity:.4;border-radius:1px"></div>';
-  html+='<div style="margin:3px 2px;height:2px;background:#22c55e;opacity:.3;border-radius:1px"></div>';
+  html+='<div style="margin:4px 2px;height:2px;background:#666;opacity:.6;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#555;opacity:.5;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#666;opacity:.4;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#555;opacity:.3;border-radius:1px"></div>';
   html+='</div>';
 
   // Whiteboard (left wall)
@@ -364,8 +380,8 @@ function buildOffice(){
   html+='<div style="position:absolute;top:88%;left:40%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
 
   // Gradient accent on wall
-  html+='<div style="position:absolute;top:16%;left:24%;width:20%;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA);opacity:.5;border-radius:1px"></div>';
-  html+='<div style="position:absolute;top:16%;right:12%;width:20%;height:2px;background:linear-gradient(90deg,#8844FF,#4488FF,#00D4FF);opacity:.5;border-radius:1px"></div>';
+  html+='<div style="position:absolute;top:16%;left:24%;width:20%;height:2px;background:linear-gradient(90deg,#444,#666,#444);opacity:.5;border-radius:1px"></div>';
+  html+='<div style="position:absolute;top:16%;right:12%;width:20%;height:2px;background:linear-gradient(90deg,#444,#666,#444);opacity:.5;border-radius:1px"></div>';
 
   return html;
 }
