@@ -1,42 +1,25 @@
-// ── MINECRAFT-STYLE PIXEL AGENTS ──
-// Blocky humanoid characters, each with unique colors
+// ── POKEMON RED STYLE TOP-DOWN AGENTS ──
+// 16x16 pixel sprites viewed from above, walking around office
 
 var AGENT_COLORS={
-  'Roadie':['#FF6B2B','#cc5520','#1a1a1a'],
-  'Lucidia':['#CC00AA','#990080','#1a1a1a'],
-  'Sophia':['#8844FF','#6633cc','#1a1a1a'],
-  'Erebus':['#333','#222','#111'],
-  'Cecilia':['#4488FF','#3366cc','#1a1a1a'],
-  'Gematria':['#00D4FF','#00a8cc','#1a1a1a'],
-  'Valeria':['#FF2255','#cc1a44','#1a1a1a'],
-  'Olympia':['#FF6B2B','#cc5520','#222'],
-  'Cordelia':['#8844FF','#6633cc','#222'],
-  'Alice':['#4488FF','#3366cc','#222'],
-  'Sebastian':['#CC00AA','#990080','#222'],
-  'Calliope':['#00D4FF','#00a8cc','#222'],
-  'Elias':['#FF2255','#cc1a44','#222'],
-  'Gaia':['#22c55e','#1a9e4a','#1a1a1a'],
-  'Atticus':['#8844FF','#6633cc','#111'],
-  'Sapphira':['#4488FF','#3366cc','#111'],
-  'Thalia':['#CC00AA','#990080','#111'],
-  'Ophelia':['#00D4FF','#00a8cc','#111'],
-  'Lyra':['#FF2255','#cc1a44','#111'],
-  'Celeste':['#FF6B2B','#cc5520','#111'],
-  'Alexandria':['#8844FF','#6633cc','#1a1a1a'],
-  'Cicero':['#4488FF','#3366cc','#1a1a1a'],
-  'Portia':['#CC00AA','#990080','#1a1a1a'],
-  'Theodosia':['#00D4FF','#00a8cc','#1a1a1a'],
-  'Seraphina':['#FF2255','#cc1a44','#1a1a1a'],
-  'Anastasia':['#FF6B2B','#cc5520','#1a1a1a'],
-  'Octavia':['#8844FF','#6633cc','#1a1a1a'],
-  'Aria':['#4488FF','#3366cc','#1a1a1a']
+  'Roadie':['#FF6B2B','#cc5520'],'Lucidia':['#CC00AA','#990080'],
+  'Sophia':['#8844FF','#6633cc'],'Erebus':['#555','#333'],
+  'Cecilia':['#4488FF','#3366cc'],'Gematria':['#00D4FF','#00a8cc'],
+  'Valeria':['#FF2255','#cc1a44'],'Olympia':['#FF6B2B','#cc5520'],
+  'Cordelia':['#8844FF','#6633cc'],'Alice':['#4488FF','#3366cc'],
+  'Sebastian':['#CC00AA','#990080'],'Calliope':['#00D4FF','#00a8cc'],
+  'Elias':['#FF2255','#cc1a44'],'Gaia':['#22c55e','#1a9e4a'],
+  'Atticus':['#8844FF','#6633cc'],'Sapphira':['#4488FF','#3366cc'],
+  'Thalia':['#CC00AA','#990080'],'Ophelia':['#00D4FF','#00a8cc'],
+  'Lyra':['#FF2255','#cc1a44'],'Celeste':['#FF6B2B','#cc5520'],
+  'Alexandria':['#8844FF','#6633cc'],'Cicero':['#4488FF','#3366cc'],
+  'Portia':['#CC00AA','#990080'],'Theodosia':['#00D4FF','#00a8cc'],
+  'Seraphina':['#FF2255','#cc1a44'],'Anastasia':['#FF6B2B','#cc5520'],
+  'Octavia':['#8844FF','#6633cc'],'Aria':['#4488FF','#3366cc']
 };
 
-// Skin tone palette
-var SKIN='#d4a574';
-var SKIN_D='#c4956a';
 var HAIR_COLORS={
-  'Roadie':'#222','Lucidia':'#f5f5f5','Sophia':'#6633cc','Erebus':'#111',
+  'Roadie':'#222','Lucidia':'#eee','Sophia':'#6633cc','Erebus':'#111',
   'Cecilia':'#3366cc','Gematria':'#222','Valeria':'#cc1a44','Olympia':'#FF6B2B',
   'Cordelia':'#444','Alice':'#f5e6a0','Sebastian':'#222','Calliope':'#00a8cc',
   'Elias':'#333','Gaia':'#1a9e4a','Atticus':'#333','Sapphira':'#222',
@@ -45,84 +28,204 @@ var HAIR_COLORS={
   'Seraphina':'#cc1a44','Anastasia':'#FF6B2B','Octavia':'#333','Aria':'#222'
 };
 
-// Build a Minecraft-style character: 8 wide x 16 tall pixels
-// Rendered at 2x scale for compact size
-function makeAvatar(name){
-  var cols=AGENT_COLORS[name]||['#888','#666','#1a1a1a'];
-  var shirt=cols[0];
-  var shirt_d=cols[1];
-  var pants=cols[2];
-  var hair=HAIR_COLORS[name]||'#333';
-  var e='#fff'; // eye whites
-  var ep='#222'; // eye pupils
-  var _='transparent';
+var SKIN='#d4a574';
+var _='transparent';
 
-  // 8x16 pixel character (front view, Minecraft style)
-  // Row format: [col0, col1, col2, col3, col4, col5, col6, col7]
-  var rows=[
-    // Row 0-1: Hair top
-    [_,_,hair,hair,hair,hair,_,_],
-    [_,hair,hair,hair,hair,hair,hair,_],
-    // Row 2: Hair + forehead
-    [_,hair,SKIN,SKIN,SKIN,SKIN,hair,_],
-    // Row 3: Eyes
-    [_,SKIN,e,ep,SKIN,e,ep,_],
-    // Row 4: Nose/mouth
-    [_,SKIN,SKIN,SKIN_D,SKIN,SKIN,SKIN,_],
-    // Row 5: Chin
-    [_,_,SKIN,SKIN,SKIN,SKIN,_,_],
-    // Row 6-7: Neck + shirt top
-    [_,_,_,SKIN,SKIN,_,_,_],
-    [_,shirt,shirt,shirt,shirt,shirt,shirt,_],
-    // Row 8-9: Shirt body + arms
-    [shirt_d,shirt,shirt,shirt,shirt,shirt,shirt,shirt_d],
-    [SKIN,shirt,shirt,shirt,shirt,shirt,shirt,SKIN],
-    // Row 10: Shirt bottom + hands
-    [SKIN,shirt_d,shirt,shirt,shirt,shirt,shirt_d,SKIN],
-    [_,_,shirt_d,shirt_d,shirt_d,shirt_d,_,_],
-    // Row 12-13: Pants
-    [_,_,pants,pants,pants,pants,_,_],
-    [_,_,pants,pants,pants,pants,_,_],
-    // Row 14-15: Legs + shoes
-    [_,_,pants,'#111',pants,'#111',_,_],
-    [_,_,'#111','#111','#111','#111',_,_],
-  ];
+// Top-down 8x8 character sprite (Pokemon Red style — looking down)
+function makeAvatar(name,dir){
+  var cols=AGENT_COLORS[name]||['#888','#666'];
+  var s=cols[0]; // shirt
+  var sd=cols[1]; // shirt dark
+  var h=HAIR_COLORS[name]||'#333';
+  var sk=SKIN;
+  dir=dir||'down';
 
-  // Build box-shadow string
+  var rows;
+  if(dir==='down'){
+    rows=[
+      [_,_,h,h,h,h,_,_],
+      [_,h,h,h,h,h,h,_],
+      [_,h,h,h,h,h,h,_],
+      [_,sk,sk,sk,sk,sk,sk,_],
+      [_,s,s,s,s,s,s,_],
+      [sk,s,s,sd,sd,s,s,sk],
+      [_,sd,s,s,s,s,sd,_],
+      [_,_,sd,_,_,sd,_,_],
+    ];
+  } else if(dir==='up'){
+    rows=[
+      [_,_,h,h,h,h,_,_],
+      [_,h,h,h,h,h,h,_],
+      [_,h,h,h,h,h,h,_],
+      [_,h,h,h,h,h,h,_],
+      [_,s,s,s,s,s,s,_],
+      [sk,s,s,sd,sd,s,s,sk],
+      [_,sd,s,s,s,s,sd,_],
+      [_,_,sd,_,_,sd,_,_],
+    ];
+  } else if(dir==='left'){
+    rows=[
+      [_,h,h,h,h,_,_,_],
+      [h,h,h,h,h,h,_,_],
+      [h,h,h,h,h,_,_,_],
+      [sk,sk,sk,sk,_,_,_,_],
+      [_,s,s,s,s,_,_,_],
+      [_,s,s,sd,s,sk,_,_],
+      [_,sd,s,s,sd,_,_,_],
+      [_,_,sd,_,sd,_,_,_],
+    ];
+  } else {
+    rows=[
+      [_,_,_,h,h,h,h,_],
+      [_,_,h,h,h,h,h,h],
+      [_,_,_,h,h,h,h,h],
+      [_,_,_,_,sk,sk,sk,sk],
+      [_,_,_,s,s,s,s,_],
+      [_,_,sk,s,sd,s,s,_],
+      [_,_,_,sd,s,s,sd,_],
+      [_,_,_,sd,_,sd,_,_],
+    ];
+  }
+
   var shadows=[];
   for(var y=0;y<rows.length;y++){
     for(var x=0;x<rows[y].length;x++){
-      if(rows[y][x]!==_){
-        shadows.push(x+'px '+y+'px 0 '+rows[y][x]);
-      }
+      if(rows[y][x]!==_) shadows.push(x+'px '+y+'px 0 '+rows[y][x]);
     }
   }
-
-  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:7px;margin-bottom:15px"></div>';
+  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:7px;margin-bottom:7px"></div>';
 }
 
-// Agent grid positions
+// Agent positions + walking state
 var agentPositions={};
+var DIRS=['down','left','up','right'];
 
 function getAgentPos(name,idx,total){
   if(!agentPositions[name]){
-    var cols=Math.ceil(Math.sqrt(total));
-    var row=Math.floor(idx/cols);
-    var col=idx%cols;
-    var spacingX=84/(cols+1);
-    var spacingY=72/(Math.ceil(total/cols)+1);
+    // Seed positions spread across the office floor area (bottom 55%)
+    var h=0;for(var i=0;i<name.length;i++)h=h*31+name.charCodeAt(i);
+    var x=10+((h>>>0)%75);
+    var y=48+((h*7>>>0)%42);
     agentPositions[name]={
-      x:8+spacingX*(col+1),
-      y:6+spacingY*(row+1),
-      baseX:8+spacingX*(col+1),
-      baseY:6+spacingY*(row+1),
-      phase:Math.random()*Math.PI*2
+      x:x,y:y,
+      targetX:x,targetY:y,
+      dir:'down',
+      moving:false,
+      waitTicks:Math.floor(Math.random()*20),
+      step:0
     };
   }
   var p=agentPositions[name];
-  // Gentle idle animation — slight bob
-  p.phase+=0.03;
-  p.x=p.baseX+Math.sin(p.phase)*0.8;
-  p.y=p.baseY+Math.sin(p.phase*1.3)*0.6;
+
+  // Walking AI — pick a destination, walk to it, pause, repeat
+  if(p.waitTicks>0){
+    p.waitTicks--;
+    p.moving=false;
+  } else if(!p.moving){
+    // Pick new target within office floor bounds
+    p.targetX=10+Math.random()*75;
+    p.targetY=48+Math.random()*42;
+    p.moving=true;
+    p.step=0;
+  }
+
+  if(p.moving){
+    var dx=p.targetX-p.x;
+    var dy=p.targetY-p.y;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<1.5){
+      p.x=p.targetX;
+      p.y=p.targetY;
+      p.moving=false;
+      p.waitTicks=20+Math.floor(Math.random()*40);
+    } else {
+      var speed=0.6;
+      p.x+=dx/dist*speed;
+      p.y+=dy/dist*speed;
+      p.step++;
+      // Face direction of movement
+      if(Math.abs(dx)>Math.abs(dy)){
+        p.dir=dx>0?'right':'left';
+      } else {
+        p.dir=dy>0?'down':'up';
+      }
+    }
+  }
   return p;
+}
+
+// ── OFFICE MAP (top-down tiles) ──
+function buildOffice(){
+  // Floor colors
+  var FLOOR='#1a1612';
+  var FLOOR_L='#1e1915';
+  var WALL='#222';
+  var WALL_D='#1a1a1a';
+  var DESK='#2a2520';
+  var DESK_D='#221e1a';
+  var CHAIR='#333';
+  var RUG='#1a1420';
+
+  var html='';
+  // Base floor — warm dark wood tone
+  html+='<div style="position:absolute;inset:0;background:'+FLOOR+'"></div>';
+  // Floor tile pattern
+  html+='<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.01) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.01) 1px,transparent 1px);background-size:16px 16px"></div>';
+
+  // Top wall (0-42% height)
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:42%;background:'+WALL+';border-bottom:2px solid '+WALL_D+'"></div>';
+  // Wall texture
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:42%;background-image:linear-gradient(rgba(0,0,0,.1) 1px,transparent 1px);background-size:100% 8px"></div>';
+
+  // Doorway opening (bottom of wall, center)
+  html+='<div style="position:absolute;top:36%;left:44%;width:12%;height:8%;background:'+FLOOR+';border-left:2px solid '+WALL_D+';border-right:2px solid '+WALL_D+'"></div>';
+
+  // Desks (4 workstations along the wall)
+  var deskY='26%';
+  var desks=[{x:'6%',c:'#FF6B2B'},{x:'26%',c:'#CC00AA'},{x:'58%',c:'#4488FF'},{x:'78%',c:'#00D4FF'}];
+  desks.forEach(function(d){
+    // Desk surface
+    html+='<div style="position:absolute;top:'+deskY+';left:'+d.x+';width:14%;height:14%;background:'+DESK+';border:1px solid #332e28;border-radius:1px"></div>';
+    // Monitor on desk
+    html+='<div style="position:absolute;top:27%;left:calc('+d.x+' + 3%);width:8%;height:5%;background:#111;border:1px solid #2a2a2a;border-radius:1px">';
+    html+='<div style="margin:2px;height:2px;background:'+d.c+';opacity:.5;border-radius:1px"></div></div>';
+    // Chair below desk
+    html+='<div style="position:absolute;top:42%;left:calc('+d.x+' + 4%);width:6%;height:5%;background:'+CHAIR+';border-radius:50%;border:1px solid #444"></div>';
+  });
+
+  // Conference table (center-right)
+  html+='<div style="position:absolute;top:60%;left:55%;width:22%;height:18%;background:#252018;border:1px solid #332e28;border-radius:2px"></div>';
+  // Chairs around table
+  var chairs=[{x:'54%',y:'65%'},{x:'54%',y:'72%'},{x:'78%',y:'65%'},{x:'78%',y:'72%'},{x:'62%',y:'58%'},{x:'70%',y:'58%'},{x:'62%',y:'80%'},{x:'70%',y:'80%'}];
+  chairs.forEach(function(c){
+    html+='<div style="position:absolute;top:'+c.y+';left:'+c.x+';width:3%;height:3%;background:'+CHAIR+';border-radius:50%;border:1px solid #444"></div>';
+  });
+
+  // Server rack (right wall area)
+  html+='<div style="position:absolute;top:8%;right:3%;width:5%;height:28%;background:#111;border:1px solid #1a1a1a;border-radius:1px">';
+  html+='<div style="margin:4px 2px;height:2px;background:#22c55e;opacity:.6;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#4488FF;opacity:.5;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#FF6B2B;opacity:.4;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#22c55e;opacity:.3;border-radius:1px"></div>';
+  html+='</div>';
+
+  // Whiteboard (left wall)
+  html+='<div style="position:absolute;top:6%;left:4%;width:16%;height:16%;background:#181818;border:1px solid #2a2a2a;border-radius:1px">';
+  html+='<div style="padding:3px 4px;font-family:var(--jb);font-size:4px;color:#444;line-height:1.6">ROADMAP<br>- get first user<br>- fix products<br>- seo + index</div></div>';
+
+  // Couch area (bottom-left)
+  html+='<div style="position:absolute;top:60%;left:6%;width:20%;height:20%;background:'+RUG+';border-radius:2px;opacity:.4"></div>';
+  html+='<div style="position:absolute;top:62%;left:8%;width:16%;height:6%;background:#2a2228;border:1px solid #3a2e38;border-radius:2px"></div>';
+  html+='<div style="position:absolute;top:70%;left:10%;width:8%;height:8%;background:#252020;border:1px solid #332e2e;border-radius:1px"></div>';
+
+  // Plants
+  html+='<div style="position:absolute;top:44%;left:2%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+  html+='<div style="position:absolute;top:44%;right:2%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+  html+='<div style="position:absolute;top:88%;left:40%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+
+  // Gradient accent on wall
+  html+='<div style="position:absolute;top:16%;left:24%;width:20%;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA);opacity:.5;border-radius:1px"></div>';
+  html+='<div style="position:absolute;top:16%;right:12%;width:20%;height:2px;background:linear-gradient(90deg,#8844FF,#4488FF,#00D4FF);opacity:.5;border-radius:1px"></div>';
+
+  return html;
 }

@@ -1,59 +1,59 @@
 // ── RENDER WORLD CENTER ──
+var worldExpanded=false;
+
+function renderWorldSprites(agents,scale){
+  var sprites='';
+  agents.forEach(function(name,i){
+    var p=getAgentPos(name,i,agents.length);
+    var avatar=makeAvatar(name,p.dir);
+    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
+    var s=scale||2;
+    var fs=s>2?10:8;
+    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:left .5s linear,top .5s linear;pointer-events:none">'
+      +'<div style="transform:scale('+s+');image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:'+fs+'px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.6);margin-top:'+(s>2?4:1)+'px;letter-spacing:.01em">'+name+'</div>'
+      +'</div>';
+  });
+  return sprites;
+}
+
+function toggleWorldExpand(){
+  var overlay=document.getElementById('world-overlay');
+  if(worldExpanded){
+    overlay.style.display='none';
+    worldExpanded=false;
+  } else {
+    overlay.style.display='flex';
+    worldExpanded=true;
+    updateWorldBig();
+  }
+}
+
+function updateWorldBig(){
+  if(!worldExpanded)return;
+  var el=document.getElementById('world-big-content');
+  if(!el)return;
+  var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
+  var sprites=renderWorldSprites(defaultAgents,3);
+  el.innerHTML=buildOffice()+sprites
+    +'<div style="position:absolute;top:12px;left:16px;font-family:var(--jb);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
+    +'<div style="position:absolute;top:12px;right:16px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:11px;color:#555"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+defaultAgents.length+' online</div>'
+    +'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.5"></div>';
+}
+
 function updateWorld(){
   var el=document.getElementById('world-center');
   var defaultAgents=['Roadie','Lucidia','Sophia','Erebus','Cecilia','Gematria','Valeria','Olympia','Cordelia','Alice','Sebastian','Calliope'];
-  var sprites='';
-  defaultAgents.forEach(function(name,i){
-    var p=getAgentPos(name,i,defaultAgents.length);
-    var avatar=makeAvatar(name);
-    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:left .6s ease,top .6s ease;pointer-events:none">'
-      +'<div style="transform:scale(2);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
-      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:1px;letter-spacing:.01em">'+name+'</div>'
-      +'</div>';
-  });
+  var sprites=renderWorldSprites(defaultAgents,2);
   var onlineCount=defaultAgents.length;
 
-  // Office scene built with CSS
-  var office=''
-    // Floor
-    +'<div style="position:absolute;inset:0;background:#0a0a0a"></div>'
-    // Floor tiles
-    +'<div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,#111 0%,#0d0d0d 60%,#0a0a0a 100%)"></div>'
-    +'<div style="position:absolute;bottom:0;left:0;right:0;height:40%;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:48px 48px"></div>'
-    // Back wall
-    +'<div style="position:absolute;top:0;left:0;right:0;height:60%;background:linear-gradient(to bottom,#111 0%,#0d0d0d 100%);border-bottom:1px solid #1a1a1a"></div>'
-    // Wall art — gradient bar
-    +'<div style="position:absolute;top:18%;left:10%;width:16%;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA);border-radius:1px;opacity:.6"></div>'
-    +'<div style="position:absolute;top:18%;right:10%;width:16%;height:3px;background:linear-gradient(90deg,#8844FF,#4488FF,#00D4FF);border-radius:1px;opacity:.6"></div>'
-    // Desks (dark rectangles along the back)
-    +'<div style="position:absolute;top:50%;left:5%;width:18%;height:8px;background:#161616;border:1px solid #1f1f1f;border-radius:1px"></div>'
-    +'<div style="position:absolute;top:50%;left:28%;width:18%;height:8px;background:#161616;border:1px solid #1f1f1f;border-radius:1px"></div>'
-    +'<div style="position:absolute;top:50%;left:54%;width:18%;height:8px;background:#161616;border:1px solid #1f1f1f;border-radius:1px"></div>'
-    +'<div style="position:absolute;top:50%;left:78%;width:18%;height:8px;background:#161616;border:1px solid #1f1f1f;border-radius:1px"></div>'
-    // Monitor screens on desks (tiny bright rectangles)
-    +'<div style="position:absolute;top:44%;left:8%;width:6%;height:6%;background:#0a0a0a;border:1px solid #222;border-radius:1px"><div style="width:100%;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255);opacity:.4;margin-top:2px"></div></div>'
-    +'<div style="position:absolute;top:44%;left:33%;width:6%;height:6%;background:#0a0a0a;border:1px solid #222;border-radius:1px"><div style="width:100%;height:2px;background:linear-gradient(90deg,#CC00AA,#8844FF);opacity:.4;margin-top:2px"></div></div>'
-    +'<div style="position:absolute;top:44%;left:58%;width:6%;height:6%;background:#0a0a0a;border:1px solid #222;border-radius:1px"><div style="width:100%;height:2px;background:linear-gradient(90deg,#4488FF,#00D4FF);opacity:.4;margin-top:2px"></div></div>'
-    +'<div style="position:absolute;top:44%;left:83%;width:6%;height:6%;background:#0a0a0a;border:1px solid #222;border-radius:1px"><div style="width:100%;height:2px;background:linear-gradient(90deg,#FF2255,#8844FF);opacity:.4;margin-top:2px"></div></div>'
-    // Ceiling lights (subtle glows)
-    +'<div style="position:absolute;top:4%;left:25%;width:20%;height:2px;background:#222;border-radius:1px;box-shadow:0 0 12px 2px rgba(255,255,255,.03)"></div>'
-    +'<div style="position:absolute;top:4%;left:55%;width:20%;height:2px;background:#222;border-radius:1px;box-shadow:0 0 12px 2px rgba(255,255,255,.03)"></div>'
-    // Server rack (right side)
-    +'<div style="position:absolute;top:24%;right:4%;width:4%;height:26%;background:#0e0e0e;border:1px solid #1a1a1a;border-radius:1px">'
-    +'<div style="width:60%;height:2px;background:#22c55e;opacity:.5;margin:3px auto"></div>'
-    +'<div style="width:60%;height:2px;background:#4488FF;opacity:.4;margin:3px auto"></div>'
-    +'<div style="width:60%;height:2px;background:#22c55e;opacity:.3;margin:3px auto"></div>'
-    +'</div>'
-    // Whiteboard (left wall)
-    +'<div style="position:absolute;top:12%;left:4%;width:14%;height:20%;background:#131313;border:1px solid #1f1f1f;border-radius:1px">'
-    +'<div style="padding:3px;font-family:var(--jb);font-size:5px;color:#333;line-height:1.4">P0 GET USER<br>P1 FIX APPS<br>P2 SEO</div>'
-    +'</div>';
-
-  el.innerHTML=office+sprites
-    +'<div style="position:absolute;top:8px;left:10px;font-family:var(--jb);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#333">BlackRoad HQ</div>'
-    +'<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:8px;color:#444"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+onlineCount+' online</div>'
+  el.innerHTML=buildOffice()+sprites
+    +'<div style="position:absolute;top:8px;left:10px;font-family:var(--jb);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
+    +'<div style="position:absolute;top:8px;right:10px;display:flex;align-items:center;gap:4px;font-family:var(--jb);font-size:8px;color:#555"><span style="width:4px;height:4px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+onlineCount+' online</div>'
     +'<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
+
+  // Also update expanded view if open
+  if(worldExpanded)updateWorldBig();
 }
 
 // ── RENDER 4 MINI VIEWERS (agent device screens) ──
