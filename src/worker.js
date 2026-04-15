@@ -103,6 +103,47 @@ import MOCKUP_video_robot_vs from './mockups/video-robot-vs.html';
 import MOCKUP_video_warp from './mockups/video-warp.html';
 import MOCKUP_youtube_mockup from './mockups/youtube-mockup.html';
 
+// Gateway imports
+import GATEWAY_CSS from './gateways/gateway-base.css';
+import GATEWAY_INDEX from './gateways/gateway-index.html';
+import GATEWAY_roadtrip from './gateways/roadtrip.html';
+import GATEWAY_roadie from './gateways/roadie.html';
+import GATEWAY_roadview from './gateways/roadview.html';
+import GATEWAY_backroad from './gateways/backroad.html';
+import GATEWAY_roadcode from './gateways/roadcode.html';
+import GATEWAY_roadwork from './gateways/roadwork.html';
+import GATEWAY_carkeys from './gateways/carkeys.html';
+import GATEWAY_roadchain from './gateways/roadchain.html';
+import GATEWAY_roadcoin from './gateways/roadcoin.html';
+import GATEWAY_roadbook from './gateways/roadbook.html';
+import GATEWAY_roadworld from './gateways/roadworld.html';
+import GATEWAY_officeroad from './gateways/officeroad.html';
+import GATEWAY_carpool from './gateways/carpool.html';
+import GATEWAY_oneway from './gateways/oneway.html';
+import GATEWAY_roadside from './gateways/roadside.html';
+import GATEWAY_blackboard from './gateways/blackboard.html';
+import GATEWAY_highway from './gateways/highway.html';
+
+const GATEWAY_FILES = {
+  'roadtrip': GATEWAY_roadtrip,
+  'roadie': GATEWAY_roadie,
+  'roadview': GATEWAY_roadview,
+  'backroad': GATEWAY_backroad,
+  'roadcode': GATEWAY_roadcode,
+  'roadwork': GATEWAY_roadwork,
+  'carkeys': GATEWAY_carkeys,
+  'roadchain': GATEWAY_roadchain,
+  'roadcoin': GATEWAY_roadcoin,
+  'roadbook': GATEWAY_roadbook,
+  'roadworld': GATEWAY_roadworld,
+  'officeroad': GATEWAY_officeroad,
+  'carpool': GATEWAY_carpool,
+  'oneway': GATEWAY_oneway,
+  'roadside': GATEWAY_roadside,
+  'blackboard': GATEWAY_blackboard,
+  'highway': GATEWAY_highway,
+};
+
 const MOCKUP_FILES = {
   'animations': MOCKUP_animations,
   'asana-mockup': MOCKUP_asana_mockup,
@@ -228,11 +269,29 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/^\//, '').replace(/\/$/, '');
 
-    // Products page
+    // Products page (gateway index)
     if (path === 'products') {
-      return new Response(PRODUCTS_PAGE, {
+      return new Response(GATEWAY_INDEX, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
+    }
+
+    // Gateway CSS
+    if (path === 'gateways/gateway-base.css') {
+      return new Response(GATEWAY_CSS, {
+        headers: { 'Content-Type': 'text/css; charset=utf-8' }
+      });
+    }
+
+    // Individual gateway pages: /gateways/roadtrip, /products/roadtrip
+    if (path.startsWith('gateways/') || path.startsWith('products/')) {
+      const slug = path.replace(/^(gateways|products)\//, '');
+      const file = GATEWAY_FILES[slug];
+      if (file) {
+        return new Response(file, {
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        });
+      }
     }
 
     // Mockups gallery

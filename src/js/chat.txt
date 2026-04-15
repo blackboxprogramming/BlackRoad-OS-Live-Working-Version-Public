@@ -2,17 +2,24 @@
 function renderChat(){
   var left=document.getElementById('chat-left');
   var right=document.getElementById('chat-right');
-  var msgs=S.msgs.slice(-30);
+  var msgs=S.msgs.slice(-40);
   var leftAtBot=left.scrollHeight-left.scrollTop-left.clientHeight<40;
   var rightAtBot=right.scrollHeight-right.scrollTop-right.clientHeight<40;
 
-  // Split: agents on left, viewers/system on right
   var lh='',rh='';
   msgs.forEach(function(m){
     var html;
-    if(m.u==='system'){html='<div class="side-msg"><span class="side-msg-system">'+m.t+'</span></div>';rh+=html}
-    else if(AGENTS.indexOf(m.u)!==-1){html='<div class="side-msg"><span class="side-msg-agent">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';lh+=html}
-    else{html='<div class="side-msg"><span class="side-msg-user">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';rh+=html}
+    if(m.u==='system'){
+      html='<div class="side-msg"><span class="side-msg-system">'+m.t+'</span></div>';
+      rh+=html;
+    } else if(AGENTS.indexOf(m.u)!==-1){
+      var c=(AGENT_COLORS[m.u]||['#888'])[0];
+      html='<div class="side-msg"><span class="side-msg-agent" style="color:'+c+'">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';
+      lh+=html;
+    } else {
+      html='<div class="side-msg"><span class="side-msg-user">'+m.u+'</span><span class="side-msg-text">'+esc(m.t)+'</span></div>';
+      rh+=html;
+    }
   });
   left.innerHTML=lh;
   right.innerHTML=rh;
@@ -20,4 +27,72 @@ function renderChat(){
   if(rightAtBot)right.scrollTop=right.scrollHeight;
 }
 function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ── LIVE CHAT STREAMING — pull from RoadTrip API ──
+var RT_API='https://roadtrip.blackroad.io/api';
+var lastMsgId='';
+var liveStreamActive=false;
+
+function startLiveChat(){
+  if(liveStreamActive)return;
+  liveStreamActive=true;
+  // Initial fetch
+  fetchLiveMessages();
+  // Poll every 5 seconds for new messages
+  setInterval(fetchLiveMessages,5000);
+}
+
+function fetchLiveMessages(){
+  fetch(RT_API+'/rooms/general/messages?limit=10',{signal:AbortSignal.timeout(4000)})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(!d.messages||!d.messages.length)return;
+    var newMsgs=d.messages;
+    // Sort oldest first
+    newMsgs.sort(function(a,b){return new Date(a.created_at)-new Date(b.created_at)});
+    // Only add messages we haven't seen
+    newMsgs.forEach(function(m){
+      if(m.id===lastMsgId)return;
+      // Check if already in S.msgs (by content+sender combo)
+      var isDupe=S.msgs.some(function(existing){
+        return existing.u===m.sender_name&&existing.t===m.content&&existing.live;
+      });
+      if(!isDupe){
+        S.msgs.push({u:m.sender_name,t:m.content,live:true});
+        if(S.msgs.length>60)S.msgs.shift();
+      }
+    });
+    lastMsgId=newMsgs[newMsgs.length-1].id;
+    renderChat();
+  })
+  .catch(function(){});
+}
+
+// Also fetch from multiple rooms for variety
+var LIVE_ROOMS=['general','blackroados','blackroad_agents'];
+var roomIdx=0;
+
+function fetchMultiRoomMessages(){
+  var room=LIVE_ROOMS[roomIdx%LIVE_ROOMS.length];
+  roomIdx++;
+  fetch(RT_API+'/rooms/'+room+'/messages?limit=5',{signal:AbortSignal.timeout(4000)})
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(!d.messages||!d.messages.length)return;
+    d.messages.forEach(function(m){
+      var isDupe=S.msgs.some(function(existing){
+        return existing.u===m.sender_name&&existing.t===m.content&&existing.live;
+      });
+      if(!isDupe&&m.sender_type==='agent'){
+        S.msgs.push({u:m.sender_name,t:m.content,live:true});
+        if(S.msgs.length>60)S.msgs.shift();
+      }
+    });
+    renderChat();
+  })
+  .catch(function(){});
+}
+
+// Fetch from different rooms every 8 seconds for cross-room agent chatter
+setInterval(fetchMultiRoomMessages,8000);
 

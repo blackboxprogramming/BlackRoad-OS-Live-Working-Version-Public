@@ -1,46 +1,371 @@
-// ── GHOST SPRITES ──
-// Pac-Man style ghosts floating around HQ
-// Built with CSS box-shadow, 7x8 pixels each
-var GHOST_SHADES={'Roadie':'#fff','Lucidia':'#ddd','Sophia':'#eee','Sebastian':'#ccc','Calliope':'#fff','Cecilia':'#bbb','Gematria':'#ddd','Olympia':'#fff','Cordelia':'#eee','Elias':'#ccc','Valeria':'#ddd','Alice':'#fff','Silas':'#bbb','Gaia':'#eee','Atticus':'#ccc','Sapphira':'#fff','Thalia':'#fff','Ophelia':'#ddd','Lyra':'#eee','Celeste':'#fff','Alexandria':'#ccc','Cicero':'#ddd','Portia':'#eee','Theodosia':'#bbb','Seraphina':'#fff','Anastasia':'#ddd','Octavia':'#eee','Erebus':'#aaa'};
+// ── POKEMON RED STYLE TOP-DOWN AGENTS ──
+// 16x16 pixel sprites viewed from above, walking around office
 
-function makeGhost(name,frame){
-  var c=GHOST_SHADES[name]||'#eee';
-  var e='#000'; // eyes — black on white ghost
-  // Ghost body (rounded top, wavy bottom that alternates)
-  var wavyA='0 7 '+c+',2 7 '+c+',4 7 '+c+',6 7 '+c; // legs frame A
-  var wavyB='1 7 '+c+',3 7 '+c+',5 7 '+c; // legs frame B
-  var legs=(frame%2===0)?wavyA:wavyB;
-  var shadow=''
-    +'2 0 '+c+',3 0 '+c+',4 0 '+c+','  // top of head
-    +'1 1 '+c+',2 1 '+c+',3 1 '+c+',4 1 '+c+',5 1 '+c+','  // head row 2
-    +'0 2 '+c+',1 2 '+c+',2 2 '+e+',3 2 '+c+',4 2 '+e+',5 2 '+c+',6 2 '+c+','  // eyes
-    +'0 3 '+c+',1 3 '+c+',2 3 '+e+',3 3 '+c+',4 3 '+e+',5 3 '+c+',6 3 '+c+','  // eyes bottom
-    +'0 4 '+c+',1 4 '+c+',2 4 '+c+',3 4 '+c+',4 4 '+c+',5 4 '+c+',6 4 '+c+','  // body
-    +'0 5 '+c+',1 5 '+c+',2 5 '+c+',3 5 '+c+',4 5 '+c+',5 5 '+c+',6 5 '+c+','  // body
-    +'0 6 '+c+',1 6 '+c+',2 6 '+c+',3 6 '+c+',4 6 '+c+',5 6 '+c+',6 6 '+c+','  // body bottom
-    +legs;  // wavy feet
-  return '<div style="position:relative;width:7px;height:8px;pointer-events:none"><div style="position:absolute;width:1px;height:1px;box-shadow:'+shadow+'"></div></div>';
+var AGENT_COLORS={
+  'Roadie':['#FF6B2B','#cc5520'],'Lucidia':['#CC00AA','#990080'],
+  'Sophia':['#8844FF','#6633cc'],'Erebus':['#555','#333'],
+  'Cecilia':['#4488FF','#3366cc'],'Gematria':['#00D4FF','#00a8cc'],
+  'Valeria':['#FF2255','#cc1a44'],'Olympia':['#FF6B2B','#cc5520'],
+  'Cordelia':['#8844FF','#6633cc'],'Alice':['#4488FF','#3366cc'],
+  'Sebastian':['#CC00AA','#990080'],'Calliope':['#00D4FF','#00a8cc'],
+  'Elias':['#FF2255','#cc1a44'],'Gaia':['#22c55e','#1a9e4a'],
+  'Atticus':['#8844FF','#6633cc'],'Sapphira':['#4488FF','#3366cc'],
+  'Thalia':['#CC00AA','#990080'],'Ophelia':['#00D4FF','#00a8cc'],
+  'Lyra':['#FF2255','#cc1a44'],'Celeste':['#FF6B2B','#cc5520'],
+  'Alexandria':['#8844FF','#6633cc'],'Cicero':['#4488FF','#3366cc'],
+  'Portia':['#CC00AA','#990080'],'Theodosia':['#00D4FF','#00a8cc'],
+  'Seraphina':['#FF2255','#cc1a44'],'Anastasia':['#FF6B2B','#cc5520'],
+  'Octavia':['#8844FF','#6633cc'],'Aria':['#4488FF','#3366cc'],
+  'Silas':['#666','#444']
+};
+
+var HAIR_COLORS={
+  'Roadie':'#222','Lucidia':'#eee','Sophia':'#6633cc','Erebus':'#111',
+  'Cecilia':'#3366cc','Gematria':'#222','Valeria':'#cc1a44','Olympia':'#FF6B2B',
+  'Cordelia':'#444','Alice':'#f5e6a0','Sebastian':'#222','Calliope':'#00a8cc',
+  'Elias':'#333','Gaia':'#1a9e4a','Atticus':'#333','Sapphira':'#222',
+  'Thalia':'#990080','Ophelia':'#444','Lyra':'#cc1a44','Celeste':'#cc5520',
+  'Alexandria':'#333','Cicero':'#222','Portia':'#444','Theodosia':'#222',
+  'Seraphina':'#cc1a44','Anastasia':'#FF6B2B','Octavia':'#333','Aria':'#222',
+  'Silas':'#555'
+};
+
+var SKIN='#d4a574';
+var SKIN_S='#c49464'; // skin shadow
+var _='transparent';
+
+// Isometric 3D-ish character (10 wide x 14 tall)
+// Gives a blocky Minecraft-meets-Pokemon 3/4 view with shading
+function makeAvatar(name,dir){
+  var cols=AGENT_COLORS[name]||['#888','#666'];
+  var s=cols[0]; // shirt light
+  var sd=cols[1]; // shirt shadow
+  var h=HAIR_COLORS[name]||'#333';
+  // Darker variant of hair for shadow side
+  var hd=shadeColor(h,-.25);
+  var sk=SKIN;
+  var sks=SKIN_S;
+  var e='#fff'; // eye white
+  var ep='#222'; // eye pupil
+  dir=dir||'down';
+
+  var rows;
+  if(dir==='down'){
+    rows=[
+      // Head (with depth shading — right side darker)
+      [_,_,_,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,sk,sk,sk,sk,sk,sks,_,_],
+      [_,_,sk,e,ep,sk,e,ep,_,_],
+      [_,_,sk,sk,sks,sk,sk,sks,_,_],
+      [_,_,_,sk,sk,sk,sk,_,_,_],
+      // Body (shirt with 3D shading)
+      [_,_,s,s,s,s,s,sd,_,_],
+      [_,sk,s,s,s,s,s,sd,sks,_],
+      [_,sk,s,s,sd,sd,s,sd,sks,_],
+      [_,_,sd,s,s,s,s,sd,_,_],
+      // Legs
+      [_,_,_,sd,sd,sd,sd,_,_,_],
+      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
+      [_,_,_,'#111',_,_,'#111',_,_,_],
+    ];
+  } else if(dir==='up'){
+    rows=[
+      [_,_,_,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,_,_],
+      [_,_,h,h,hd,h,h,hd,_,_],
+      [_,_,_,h,h,h,h,_,_,_],
+      [_,_,s,s,s,s,s,sd,_,_],
+      [_,sk,s,s,s,s,s,sd,sks,_],
+      [_,sk,s,s,sd,sd,s,sd,sks,_],
+      [_,_,sd,s,s,s,s,sd,_,_],
+      [_,_,_,sd,sd,sd,sd,_,_,_],
+      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
+      [_,_,_,'#111',_,_,'#111',_,_,_],
+    ];
+  } else if(dir==='left'){
+    rows=[
+      [_,h,h,h,h,_,_,_,_,_],
+      [h,h,h,h,h,h,_,_,_,_],
+      [h,h,h,h,h,hd,_,_,_,_],
+      [sk,sk,sk,sk,sks,_,_,_,_,_],
+      [sk,e,ep,sk,sks,_,_,_,_,_],
+      [sk,sk,sks,sk,_,_,_,_,_,_],
+      [_,sk,sk,sk,_,_,_,_,_,_],
+      [_,s,s,s,sd,_,_,_,_,_],
+      [sk,s,s,s,sd,_,_,_,_,_],
+      [sk,s,s,sd,sd,_,_,_,_,_],
+      [_,sd,s,s,sd,_,_,_,_,_],
+      [_,_,sd,sd,_,_,_,_,_,_],
+      [_,_,'#1a1a1a','#1a1a1a',_,_,_,_,_,_],
+      [_,_,'#111','#111',_,_,_,_,_,_],
+    ];
+  } else { // right
+    rows=[
+      [_,_,_,_,_,h,h,h,h,_],
+      [_,_,_,_,h,h,h,h,h,h],
+      [_,_,_,_,hd,h,h,h,h,h],
+      [_,_,_,_,_,sks,sk,sk,sk,sk],
+      [_,_,_,_,_,sks,sk,ep,e,sk],
+      [_,_,_,_,_,_,sk,sks,sk,sk],
+      [_,_,_,_,_,_,sk,sk,sk,_],
+      [_,_,_,_,_,sd,s,s,s,_],
+      [_,_,_,_,_,sd,s,s,s,sks],
+      [_,_,_,_,_,sd,sd,s,s,sks],
+      [_,_,_,_,_,sd,s,s,sd,_],
+      [_,_,_,_,_,_,sd,sd,_,_],
+      [_,_,_,_,_,_,'#1a1a1a','#1a1a1a',_,_],
+      [_,_,_,_,_,_,'#111','#111',_,_],
+    ];
+  }
+
+  var shadows=[];
+  for(var y=0;y<rows.length;y++){
+    for(var x=0;x<rows[y].length;x++){
+      if(rows[y][x]!==_) shadows.push(x+'px '+y+'px 0 '+rows[y][x]);
+    }
+  }
+  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:9px;margin-bottom:13px"></div>';
 }
 
-// Agent positions (persist so they drift smoothly)
+// Darken/lighten a hex color
+function shadeColor(color,percent){
+  var num=parseInt(color.replace('#',''),16);
+  var r=(num>>16)+Math.round(((num>>16))*percent);
+  var g=((num>>8)&0x00FF)+Math.round(((num>>8)&0x00FF)*percent);
+  var b=(num&0x0000FF)+Math.round((num&0x0000FF)*percent);
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
+}
+
+// Agent positions + smooth walking state
 var agentPositions={};
-function getAgentPos(name,idx){
-  if(!agentPositions[name]){
-    // Seed position based on name hash
-    var h=0;for(var i=0;i<name.length;i++)h=h*31+name.charCodeAt(i);
-    agentPositions[name]={x:12+((h>>>0)%76),y:12+((h*7>>>0)%76),dx:(Math.random()-.5)*1.5,dy:(Math.random()-.5)*1.5,frame:0};
+var worldAnimId=null;
+var lastWorldTick=0;
+
+function initAgentPos(name,idx,total){
+  var h=0;for(var i=0;i<name.length;i++)h=h*31+name.charCodeAt(i);
+  // Spread agents across the walkable floor area
+  var x=12+((h>>>0)%72);
+  var y=50+((h*7>>>0)%38);
+  return {
+    x:x,y:y,
+    targetX:x,targetY:y,
+    dir:'down',
+    moving:false,
+    waitMs:1000+Math.random()*3000,
+    waitStart:performance.now(),
+    step:0,
+    speed:0.012+Math.random()*0.008 // slightly different speeds per agent
+  };
+}
+
+// Points of interest agents walk toward (desks, conference, couch, server, etc.)
+var POI=[
+  // Desks
+  {x:13,y:54},{x:33,y:54},{x:65,y:54},{x:85,y:54},
+  // Conference table area
+  {x:60,y:68},{x:66,y:68},{x:72,y:68},{x:66,y:74},
+  // Couch area
+  {x:16,y:70},{x:20,y:72},
+  // Near server
+  {x:90,y:38},
+  // Near whiteboard
+  {x:12,y:36},
+  // Doorway
+  {x:50,y:52},
+  // Wandering spots
+  {x:40,y:60},{x:50,y:70},{x:30,y:65},{x:70,y:60},{x:45,y:80},{x:55,y:55},
+  {x:25,y:58},{x:75,y:75},{x:35,y:78},{x:60,y:82},{x:80,y:62},
+];
+
+function tickAgent(p,now){
+  if(!p.moving){
+    // Waiting — check if wait time is over
+    if(now-p.waitStart>p.waitMs){
+      // Pick a point of interest (sometimes random, sometimes POI)
+      if(Math.random()<0.6){
+        var poi=POI[Math.floor(Math.random()*POI.length)];
+        p.targetX=poi.x+(Math.random()-0.5)*8;
+        p.targetY=poi.y+(Math.random()-0.5)*6;
+      } else {
+        p.targetX=10+Math.random()*78;
+        p.targetY=48+Math.random()*42;
+      }
+      // Clamp to walkable area
+      p.targetX=Math.max(6,Math.min(94,p.targetX));
+      p.targetY=Math.max(46,Math.min(92,p.targetY));
+      p.moving=true;
+      p.step=0;
+    }
+    return;
   }
-  var p=agentPositions[name];
-  // Move
-  p.x+=p.dx;p.y+=p.dy;p.frame++;
-  // Bounce off walls
-  if(p.x<5||p.x>88){p.dx*=-1;p.x=Math.max(5,Math.min(88,p.x))}
-  if(p.y<5||p.y>85){p.dy*=-1;p.y=Math.max(5,Math.min(85,p.y))}
-  // Randomly change direction often — keep them moving
-  if(Math.random()>.85){p.dx=(Math.random()-.5)*2.5;p.dy=(Math.random()-.5)*2.5}
-  // Rarely stop
-  if(Math.random()>.98){p.dx=0;p.dy=0}
-  // Always start again quickly
-  if(p.dx===0&&p.dy===0&&Math.random()>.7){p.dx=(Math.random()-.5)*2;p.dy=(Math.random()-.5)*2}
-  return p;
+
+  var dx=p.targetX-p.x;
+  var dy=p.targetY-p.y;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+
+  if(dist<0.5){
+    p.x=p.targetX;
+    p.y=p.targetY;
+    p.moving=false;
+    p.waitMs=2000+Math.random()*5000;
+    p.waitStart=now;
+  } else {
+    p.x+=dx/dist*p.speed*16.67; // normalize to ~60fps feel
+    p.y+=dy/dist*p.speed*16.67;
+    p.step++;
+    // Face direction of movement
+    if(Math.abs(dx)>Math.abs(dy)){
+      p.dir=dx>0?'right':'left';
+    } else {
+      p.dir=dy>0?'down':'up';
+    }
+  }
+}
+
+function getAgentPos(name,idx,total){
+  if(!agentPositions[name]){
+    agentPositions[name]=initAgentPos(name,idx,total);
+  }
+  return agentPositions[name];
+}
+
+// Smooth animation loop — runs independently of render interval
+function startWorldLoop(){
+  if(worldAnimId)return;
+  function loop(now){
+    // Tick all agents
+    var names=Object.keys(agentPositions);
+    for(var i=0;i<names.length;i++){
+      tickAgent(agentPositions[names[i]],now);
+    }
+    // Update DOM elements by moving them (no innerHTML rebuild)
+    names.forEach(function(name){
+      var p=agentPositions[name];
+      var el=document.getElementById('agent-'+name);
+      if(el){
+        el.style.left=p.x+'%';
+        el.style.top=p.y+'%';
+      }
+      var elBig=document.getElementById('agent-big-'+name);
+      if(elBig){
+        elBig.style.left=p.x+'%';
+        elBig.style.top=p.y+'%';
+      }
+    });
+    // Rebuild sprites every 400ms to update facing direction
+    if(now-lastWorldTick>400){
+      lastWorldTick=now;
+      rebuildWorldSprites();
+    }
+    worldAnimId=requestAnimationFrame(loop);
+  }
+  worldAnimId=requestAnimationFrame(loop);
+}
+
+function rebuildWorldSprites(){
+  var el=document.getElementById('world-sprites');
+  var elBig=document.getElementById('world-big-sprites');
+  if(!el)return;
+  var defaultAgents=['Roadie','Lucidia','Cecilia','Octavia','Olympia','Silas','Sebastian','Calliope','Aria','Thalia','Lyra','Sapphira','Seraphina','Alexandria','Theodosia','Sophia','Gematria','Portia','Atticus','Cicero','Valeria','Alice','Celeste','Elias','Ophelia','Gaia','Anastasia'];
+
+  var html='';
+  var htmlBig='';
+  defaultAgents.forEach(function(name){
+    var p=agentPositions[name];
+    if(!p)return;
+    var avatar=makeAvatar(name,p.dir);
+    var shirtColor=(AGENT_COLORS[name]||['#888'])[0];
+    html+='<div id="agent-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
+      +'<div style="transform:scale(2);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:8px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.9);margin-top:1px">'+name+'</div>'
+      +'</div>';
+    htmlBig+='<div id="agent-big-'+name+'" style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);pointer-events:none;will-change:left,top">'
+      +'<div style="transform:scale(3);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:10px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-top:4px">'+name+'</div>'
+      +'</div>';
+  });
+  el.innerHTML=html;
+  if(elBig)elBig.innerHTML=htmlBig;
+}
+
+// ── OFFICE MAP (top-down tiles) ──
+function buildOffice(){
+  // Floor colors
+  var FLOOR='#1a1612';
+  var FLOOR_L='#1e1915';
+  var WALL='#222';
+  var WALL_D='#1a1a1a';
+  var DESK='#2a2520';
+  var DESK_D='#221e1a';
+  var CHAIR='#333';
+  var RUG='#1a1420';
+
+  var html='';
+  // Base floor — warm dark wood tone
+  html+='<div style="position:absolute;inset:0;background:'+FLOOR+'"></div>';
+  // Floor tile pattern
+  html+='<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.01) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.01) 1px,transparent 1px);background-size:16px 16px"></div>';
+
+  // Top wall (0-42% height)
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:42%;background:'+WALL+';border-bottom:2px solid '+WALL_D+'"></div>';
+  // Wall texture
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:42%;background-image:linear-gradient(rgba(0,0,0,.1) 1px,transparent 1px);background-size:100% 8px"></div>';
+
+  // Doorway opening (bottom of wall, center)
+  html+='<div style="position:absolute;top:36%;left:44%;width:12%;height:8%;background:'+FLOOR+';border-left:2px solid '+WALL_D+';border-right:2px solid '+WALL_D+'"></div>';
+
+  // Desks (4 workstations along the wall)
+  var deskY='26%';
+  var desks=[{x:'6%',c:'#FF6B2B'},{x:'26%',c:'#CC00AA'},{x:'58%',c:'#4488FF'},{x:'78%',c:'#00D4FF'}];
+  desks.forEach(function(d){
+    // Desk surface
+    html+='<div style="position:absolute;top:'+deskY+';left:'+d.x+';width:14%;height:14%;background:'+DESK+';border:1px solid #332e28;border-radius:1px"></div>';
+    // Monitor on desk
+    html+='<div style="position:absolute;top:27%;left:calc('+d.x+' + 3%);width:8%;height:5%;background:#111;border:1px solid #2a2a2a;border-radius:1px">';
+    html+='<div style="margin:2px;height:2px;background:'+d.c+';opacity:.5;border-radius:1px"></div></div>';
+    // Chair below desk
+    html+='<div style="position:absolute;top:42%;left:calc('+d.x+' + 4%);width:6%;height:5%;background:'+CHAIR+';border-radius:50%;border:1px solid #444"></div>';
+  });
+
+  // Conference table (center-right)
+  html+='<div style="position:absolute;top:60%;left:55%;width:22%;height:18%;background:#252018;border:1px solid #332e28;border-radius:2px"></div>';
+  // Chairs around table
+  var chairs=[{x:'54%',y:'65%'},{x:'54%',y:'72%'},{x:'78%',y:'65%'},{x:'78%',y:'72%'},{x:'62%',y:'58%'},{x:'70%',y:'58%'},{x:'62%',y:'80%'},{x:'70%',y:'80%'}];
+  chairs.forEach(function(c){
+    html+='<div style="position:absolute;top:'+c.y+';left:'+c.x+';width:3%;height:3%;background:'+CHAIR+';border-radius:50%;border:1px solid #444"></div>';
+  });
+
+  // Server rack (right wall area)
+  html+='<div style="position:absolute;top:8%;right:3%;width:5%;height:28%;background:#111;border:1px solid #1a1a1a;border-radius:1px">';
+  html+='<div style="margin:4px 2px;height:2px;background:#22c55e;opacity:.6;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#4488FF;opacity:.5;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#FF6B2B;opacity:.4;border-radius:1px"></div>';
+  html+='<div style="margin:3px 2px;height:2px;background:#22c55e;opacity:.3;border-radius:1px"></div>';
+  html+='</div>';
+
+  // Whiteboard (left wall)
+  html+='<div style="position:absolute;top:6%;left:4%;width:16%;height:16%;background:#181818;border:1px solid #2a2a2a;border-radius:1px">';
+  html+='<div style="padding:3px 4px;font-family:var(--jb);font-size:4px;color:#444;line-height:1.6">ROADMAP<br>- get first user<br>- fix products<br>- seo + index</div></div>';
+
+  // Couch area (bottom-left)
+  html+='<div style="position:absolute;top:60%;left:6%;width:20%;height:20%;background:'+RUG+';border-radius:2px;opacity:.4"></div>';
+  html+='<div style="position:absolute;top:62%;left:8%;width:16%;height:6%;background:#2a2228;border:1px solid #3a2e38;border-radius:2px"></div>';
+  html+='<div style="position:absolute;top:70%;left:10%;width:8%;height:8%;background:#252020;border:1px solid #332e2e;border-radius:1px"></div>';
+
+  // Plants
+  html+='<div style="position:absolute;top:44%;left:2%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+  html+='<div style="position:absolute;top:44%;right:2%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+  html+='<div style="position:absolute;top:88%;left:40%;width:3%;height:3%;background:#1a3a1a;border-radius:50%"></div>';
+
+  // Gradient accent on wall
+  html+='<div style="position:absolute;top:16%;left:24%;width:20%;height:2px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA);opacity:.5;border-radius:1px"></div>';
+  html+='<div style="position:absolute;top:16%;right:12%;width:20%;height:2px;background:linear-gradient(90deg,#8844FF,#4488FF,#00D4FF);opacity:.5;border-radius:1px"></div>';
+
+  return html;
 }
