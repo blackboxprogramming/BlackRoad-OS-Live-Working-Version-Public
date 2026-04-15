@@ -29,61 +29,95 @@ var HAIR_COLORS={
 };
 
 var SKIN='#d4a574';
+var SKIN_S='#c49464'; // skin shadow
 var _='transparent';
 
-// Top-down 8x8 character sprite (Pokemon Red style — looking down)
+// Isometric 3D-ish character (10 wide x 14 tall)
+// Gives a blocky Minecraft-meets-Pokemon 3/4 view with shading
 function makeAvatar(name,dir){
   var cols=AGENT_COLORS[name]||['#888','#666'];
-  var s=cols[0]; // shirt
-  var sd=cols[1]; // shirt dark
+  var s=cols[0]; // shirt light
+  var sd=cols[1]; // shirt shadow
   var h=HAIR_COLORS[name]||'#333';
+  // Darker variant of hair for shadow side
+  var hd=shadeColor(h,-.25);
   var sk=SKIN;
+  var sks=SKIN_S;
+  var e='#fff'; // eye white
+  var ep='#222'; // eye pupil
   dir=dir||'down';
 
   var rows;
   if(dir==='down'){
     rows=[
-      [_,_,h,h,h,h,_,_],
-      [_,h,h,h,h,h,h,_],
-      [_,h,h,h,h,h,h,_],
-      [_,sk,sk,sk,sk,sk,sk,_],
-      [_,s,s,s,s,s,s,_],
-      [sk,s,s,sd,sd,s,s,sk],
-      [_,sd,s,s,s,s,sd,_],
-      [_,_,sd,_,_,sd,_,_],
+      // Head (with depth shading — right side darker)
+      [_,_,_,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,sk,sk,sk,sk,sk,sks,_,_],
+      [_,_,sk,e,ep,sk,e,ep,_,_],
+      [_,_,sk,sk,sks,sk,sk,sks,_,_],
+      [_,_,_,sk,sk,sk,sk,_,_,_],
+      // Body (shirt with 3D shading)
+      [_,_,s,s,s,s,s,sd,_,_],
+      [_,sk,s,s,s,s,s,sd,sks,_],
+      [_,sk,s,s,sd,sd,s,sd,sks,_],
+      [_,_,sd,s,s,s,s,sd,_,_],
+      // Legs
+      [_,_,_,sd,sd,sd,sd,_,_,_],
+      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
+      [_,_,_,'#111',_,_,'#111',_,_,_],
     ];
   } else if(dir==='up'){
     rows=[
-      [_,_,h,h,h,h,_,_],
-      [_,h,h,h,h,h,h,_],
-      [_,h,h,h,h,h,h,_],
-      [_,h,h,h,h,h,h,_],
-      [_,s,s,s,s,s,s,_],
-      [sk,s,s,sd,sd,s,s,sk],
-      [_,sd,s,s,s,s,sd,_],
-      [_,_,sd,_,_,sd,_,_],
+      [_,_,_,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,hd,_],
+      [_,_,h,h,h,h,h,hd,_,_],
+      [_,_,h,h,h,h,h,hd,_,_],
+      [_,_,h,h,hd,h,h,hd,_,_],
+      [_,_,_,h,h,h,h,_,_,_],
+      [_,_,s,s,s,s,s,sd,_,_],
+      [_,sk,s,s,s,s,s,sd,sks,_],
+      [_,sk,s,s,sd,sd,s,sd,sks,_],
+      [_,_,sd,s,s,s,s,sd,_,_],
+      [_,_,_,sd,sd,sd,sd,_,_,_],
+      [_,_,_,'#1a1a1a',_,_,'#1a1a1a',_,_,_],
+      [_,_,_,'#111',_,_,'#111',_,_,_],
     ];
   } else if(dir==='left'){
     rows=[
-      [_,h,h,h,h,_,_,_],
-      [h,h,h,h,h,h,_,_],
-      [h,h,h,h,h,_,_,_],
-      [sk,sk,sk,sk,_,_,_,_],
-      [_,s,s,s,s,_,_,_],
-      [_,s,s,sd,s,sk,_,_],
-      [_,sd,s,s,sd,_,_,_],
-      [_,_,sd,_,sd,_,_,_],
+      [_,h,h,h,h,_,_,_,_,_],
+      [h,h,h,h,h,h,_,_,_,_],
+      [h,h,h,h,h,hd,_,_,_,_],
+      [sk,sk,sk,sk,sks,_,_,_,_,_],
+      [sk,e,ep,sk,sks,_,_,_,_,_],
+      [sk,sk,sks,sk,_,_,_,_,_,_],
+      [_,sk,sk,sk,_,_,_,_,_,_],
+      [_,s,s,s,sd,_,_,_,_,_],
+      [sk,s,s,s,sd,_,_,_,_,_],
+      [sk,s,s,sd,sd,_,_,_,_,_],
+      [_,sd,s,s,sd,_,_,_,_,_],
+      [_,_,sd,sd,_,_,_,_,_,_],
+      [_,_,'#1a1a1a','#1a1a1a',_,_,_,_,_,_],
+      [_,_,'#111','#111',_,_,_,_,_,_],
     ];
-  } else {
+  } else { // right
     rows=[
-      [_,_,_,h,h,h,h,_],
-      [_,_,h,h,h,h,h,h],
-      [_,_,_,h,h,h,h,h],
-      [_,_,_,_,sk,sk,sk,sk],
-      [_,_,_,s,s,s,s,_],
-      [_,_,sk,s,sd,s,s,_],
-      [_,_,_,sd,s,s,sd,_],
-      [_,_,_,sd,_,sd,_,_],
+      [_,_,_,_,_,h,h,h,h,_],
+      [_,_,_,_,h,h,h,h,h,h],
+      [_,_,_,_,hd,h,h,h,h,h],
+      [_,_,_,_,_,sks,sk,sk,sk,sk],
+      [_,_,_,_,_,sks,sk,ep,e,sk],
+      [_,_,_,_,_,_,sk,sks,sk,sk],
+      [_,_,_,_,_,_,sk,sk,sk,_],
+      [_,_,_,_,_,sd,s,s,s,_],
+      [_,_,_,_,_,sd,s,s,s,sks],
+      [_,_,_,_,_,sd,sd,s,s,sks],
+      [_,_,_,_,_,sd,s,s,sd,_],
+      [_,_,_,_,_,_,sd,sd,_,_],
+      [_,_,_,_,_,_,'#1a1a1a','#1a1a1a',_,_],
+      [_,_,_,_,_,_,'#111','#111',_,_],
     ];
   }
 
@@ -93,7 +127,17 @@ function makeAvatar(name,dir){
       if(rows[y][x]!==_) shadows.push(x+'px '+y+'px 0 '+rows[y][x]);
     }
   }
-  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:7px;margin-bottom:7px"></div>';
+  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:9px;margin-bottom:13px"></div>';
+}
+
+// Darken/lighten a hex color
+function shadeColor(color,percent){
+  var num=parseInt(color.replace('#',''),16);
+  var r=(num>>16)+Math.round(((num>>16))*percent);
+  var g=((num>>8)&0x00FF)+Math.round(((num>>8)&0x00FF)*percent);
+  var b=(num&0x0000FF)+Math.round((num&0x0000FF)*percent);
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return '#'+(0x1000000+r*0x10000+g*0x100+b).toString(16).slice(1);
 }
 
 // Agent positions + walking state
