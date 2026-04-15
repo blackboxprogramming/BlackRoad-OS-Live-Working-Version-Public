@@ -1,47 +1,128 @@
-// ── AGENT AVATARS ──
-// Clean circle avatars with initials + full names, positioned on a grid
+// ── MINECRAFT-STYLE PIXEL AGENTS ──
+// Blocky humanoid characters, each with unique colors
 
-// Agent colors — each agent gets a unique color from the brand gradient
 var AGENT_COLORS={
-  'Roadie':'#FF6B2B','Lucidia':'#CC00AA','Sophia':'#8844FF','Erebus':'#444',
-  'Cecilia':'#4488FF','Gematria':'#00D4FF','Valeria':'#FF2255','Olympia':'#FF6B2B',
-  'Cordelia':'#8844FF','Alice':'#4488FF','Sebastian':'#CC00AA','Calliope':'#00D4FF',
-  'Elias':'#FF2255','Gaia':'#FF6B2B','Atticus':'#8844FF','Sapphira':'#4488FF',
-  'Thalia':'#CC00AA','Ophelia':'#00D4FF','Lyra':'#FF2255','Celeste':'#FF6B2B',
-  'Alexandria':'#8844FF','Cicero':'#4488FF','Portia':'#CC00AA','Theodosia':'#00D4FF',
-  'Seraphina':'#FF2255','Anastasia':'#FF6B2B','Octavia':'#8844FF','Aria':'#4488FF'
+  'Roadie':['#FF6B2B','#cc5520','#1a1a1a'],
+  'Lucidia':['#CC00AA','#990080','#1a1a1a'],
+  'Sophia':['#8844FF','#6633cc','#1a1a1a'],
+  'Erebus':['#333','#222','#111'],
+  'Cecilia':['#4488FF','#3366cc','#1a1a1a'],
+  'Gematria':['#00D4FF','#00a8cc','#1a1a1a'],
+  'Valeria':['#FF2255','#cc1a44','#1a1a1a'],
+  'Olympia':['#FF6B2B','#cc5520','#222'],
+  'Cordelia':['#8844FF','#6633cc','#222'],
+  'Alice':['#4488FF','#3366cc','#222'],
+  'Sebastian':['#CC00AA','#990080','#222'],
+  'Calliope':['#00D4FF','#00a8cc','#222'],
+  'Elias':['#FF2255','#cc1a44','#222'],
+  'Gaia':['#22c55e','#1a9e4a','#1a1a1a'],
+  'Atticus':['#8844FF','#6633cc','#111'],
+  'Sapphira':['#4488FF','#3366cc','#111'],
+  'Thalia':['#CC00AA','#990080','#111'],
+  'Ophelia':['#00D4FF','#00a8cc','#111'],
+  'Lyra':['#FF2255','#cc1a44','#111'],
+  'Celeste':['#FF6B2B','#cc5520','#111'],
+  'Alexandria':['#8844FF','#6633cc','#1a1a1a'],
+  'Cicero':['#4488FF','#3366cc','#1a1a1a'],
+  'Portia':['#CC00AA','#990080','#1a1a1a'],
+  'Theodosia':['#00D4FF','#00a8cc','#1a1a1a'],
+  'Seraphina':['#FF2255','#cc1a44','#1a1a1a'],
+  'Anastasia':['#FF6B2B','#cc5520','#1a1a1a'],
+  'Octavia':['#8844FF','#6633cc','#1a1a1a'],
+  'Aria':['#4488FF','#3366cc','#1a1a1a']
 };
 
+// Skin tone palette
+var SKIN='#d4a574';
+var SKIN_D='#c4956a';
+var HAIR_COLORS={
+  'Roadie':'#222','Lucidia':'#f5f5f5','Sophia':'#6633cc','Erebus':'#111',
+  'Cecilia':'#3366cc','Gematria':'#222','Valeria':'#cc1a44','Olympia':'#FF6B2B',
+  'Cordelia':'#444','Alice':'#f5e6a0','Sebastian':'#222','Calliope':'#00a8cc',
+  'Elias':'#333','Gaia':'#1a9e4a','Atticus':'#333','Sapphira':'#222',
+  'Thalia':'#990080','Ophelia':'#444','Lyra':'#cc1a44','Celeste':'#cc5520',
+  'Alexandria':'#333','Cicero':'#222','Portia':'#444','Theodosia':'#222',
+  'Seraphina':'#cc1a44','Anastasia':'#FF6B2B','Octavia':'#333','Aria':'#222'
+};
+
+// Build a Minecraft-style character: 8 wide x 16 tall pixels
+// Scale factor applied via CSS transform
 function makeAvatar(name){
-  var c=AGENT_COLORS[name]||'#737373';
-  var initials=name.substring(0,1);
-  return '<div style="width:28px;height:28px;border-radius:50%;background:'+c+';display:flex;align-items:center;justify-content:center;font-family:var(--sg);font-size:11px;font-weight:700;color:#000;flex-shrink:0;border:2px solid rgba(0,0,0,.3)">'+initials+'</div>';
+  var cols=AGENT_COLORS[name]||['#888','#666','#1a1a1a'];
+  var shirt=cols[0];
+  var shirt_d=cols[1];
+  var pants=cols[2];
+  var hair=HAIR_COLORS[name]||'#333';
+  var e='#fff'; // eye whites
+  var ep='#222'; // eye pupils
+  var _='transparent';
+
+  // 8x16 pixel character (front view, Minecraft style)
+  // Row format: [col0, col1, col2, col3, col4, col5, col6, col7]
+  var rows=[
+    // Row 0-1: Hair top
+    [_,_,hair,hair,hair,hair,_,_],
+    [_,hair,hair,hair,hair,hair,hair,_],
+    // Row 2: Hair + forehead
+    [_,hair,SKIN,SKIN,SKIN,SKIN,hair,_],
+    // Row 3: Eyes
+    [_,SKIN,e,ep,SKIN,e,ep,_],
+    // Row 4: Nose/mouth
+    [_,SKIN,SKIN,SKIN_D,SKIN,SKIN,SKIN,_],
+    // Row 5: Chin
+    [_,_,SKIN,SKIN,SKIN,SKIN,_,_],
+    // Row 6-7: Neck + shirt top
+    [_,_,_,SKIN,SKIN,_,_,_],
+    [_,shirt,shirt,shirt,shirt,shirt,shirt,_],
+    // Row 8-9: Shirt body + arms
+    [shirt_d,shirt,shirt,shirt,shirt,shirt,shirt,shirt_d],
+    [SKIN,shirt,shirt,shirt,shirt,shirt,shirt,SKIN],
+    // Row 10: Shirt bottom + hands
+    [SKIN,shirt_d,shirt,shirt,shirt,shirt,shirt_d,SKIN],
+    [_,_,shirt_d,shirt_d,shirt_d,shirt_d,_,_],
+    // Row 12-13: Pants
+    [_,_,pants,pants,pants,pants,_,_],
+    [_,_,pants,pants,pants,pants,_,_],
+    // Row 14-15: Legs + shoes
+    [_,_,pants,'#111',pants,'#111',_,_],
+    [_,_,'#111','#111','#111','#111',_,_],
+  ];
+
+  // Build box-shadow string
+  var shadows=[];
+  for(var y=0;y<rows.length;y++){
+    for(var x=0;x<rows[y].length;x++){
+      if(rows[y][x]!==_){
+        shadows.push(x+'px '+y+'px 0 '+rows[y][x]);
+      }
+    }
+  }
+
+  return '<div style="width:1px;height:1px;box-shadow:'+shadows.join(',')+';margin-right:7px;margin-bottom:15px"></div>';
 }
 
-// Agent grid positions — arranged in a neat layout, not random bouncing
+// Agent grid positions
 var agentPositions={};
-var agentFrame=0;
 
 function getAgentPos(name,idx,total){
   if(!agentPositions[name]){
-    // Place agents in a grid layout
     var cols=Math.ceil(Math.sqrt(total));
     var row=Math.floor(idx/cols);
     var col=idx%cols;
-    var spacingX=88/(cols+1);
-    var spacingY=80/(Math.ceil(total/cols)+1);
+    var spacingX=84/(cols+1);
+    var spacingY=72/(Math.ceil(total/cols)+1);
     agentPositions[name]={
       x:8+spacingX*(col+1),
-      y:8+spacingY*(row+1),
+      y:6+spacingY*(row+1),
       baseX:8+spacingX*(col+1),
-      baseY:8+spacingY*(row+1),
+      baseY:6+spacingY*(row+1),
       phase:Math.random()*Math.PI*2
     };
   }
   var p=agentPositions[name];
-  // Gentle floating — breathe in place, not random chaos
-  p.phase+=0.04;
-  p.x=p.baseX+Math.sin(p.phase)*1.5;
-  p.y=p.baseY+Math.cos(p.phase*0.7)*1.2;
+  // Gentle idle animation — slight bob
+  p.phase+=0.03;
+  p.x=p.baseX+Math.sin(p.phase)*0.8;
+  p.y=p.baseY+Math.sin(p.phase*1.3)*0.6;
   return p;
 }

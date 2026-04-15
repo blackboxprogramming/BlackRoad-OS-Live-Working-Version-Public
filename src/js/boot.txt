@@ -109,7 +109,7 @@ function fetchCollabs(){
   }).catch(function(){});
 }
 
-// Update HQ map with real agent avatars
+// Update HQ map with real agent characters
 function updateWorldAgents(){
   if(liveAgents.length===0)return;
   var el=document.getElementById('world-center');
@@ -119,17 +119,19 @@ function updateWorldAgents(){
   online.forEach(function(a,i){
     var p=getAgentPos(a.name,i,online.length);
     var avatar=makeAvatar(a.name);
-    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;gap:3px;transform:translate(-50%,-50%);transition:left .6s ease,top .6s ease;pointer-events:none">'
-      +avatar
-      +'<div style="font-family:var(--jb);font-size:9px;font-weight:500;color:#f5f5f5;text-align:center;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,.8)">'+a.name+'</div>'
+    var shirtColor=(AGENT_COLORS[a.name]||['#888'])[0];
+    sprites+='<div style="position:absolute;left:'+p.x+'%;top:'+p.y+'%;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%);transition:left .6s ease,top .6s ease;pointer-events:none">'
+      +'<div style="transform:scale(3);image-rendering:pixelated;transform-origin:center top">'+avatar+'</div>'
+      +'<div style="font-family:var(--jb);font-size:9px;font-weight:600;color:'+shirtColor+';text-align:center;white-space:nowrap;text-shadow:0 1px 4px rgba(0,0,0,.9),0 0 8px rgba(0,0,0,.7);margin-top:2px;letter-spacing:.02em">'+a.name+'</div>'
       +'</div>';
   });
   el.innerHTML=''
-    +'<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,#0a0a0a 0%,#000 100%);background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:32px 32px"></div>'
+    +'<div style="position:absolute;inset:0;background:#0c1a0c;background-image:linear-gradient(rgba(34,197,94,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.04) 1px,transparent 1px);background-size:24px 24px"></div>'
+    +'<div style="position:absolute;bottom:0;left:0;right:0;height:32px;background:linear-gradient(to top,#1a3a1a,transparent);pointer-events:none"></div>'
     +sprites
-    +'<div style="position:absolute;top:10px;left:12px;font-family:var(--jb);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#444">BlackRoad HQ</div>'
-    +'<div style="position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:9px;color:#737373"><span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+online.length+' online (live)</div>'
-    +'<div style="position:absolute;bottom:8px;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.4"></div>';
+    +'<div style="position:absolute;top:10px;left:12px;font-family:var(--jb);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#2d5a2d">BlackRoad HQ</div>'
+    +'<div style="position:absolute;top:10px;right:12px;display:flex;align-items:center;gap:5px;font-family:var(--jb);font-size:9px;color:#4a7a4a"><span style="width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block"></span>'+online.length+' online (live)</div>'
+    +'<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);opacity:.5"></div>';
 }
 
 // Send real chat message to RoadTrip
