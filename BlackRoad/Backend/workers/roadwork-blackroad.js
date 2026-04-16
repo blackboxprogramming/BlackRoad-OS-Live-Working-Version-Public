@@ -1,1 +1,0 @@
-/Users/alexa/roadwork-blackroad/src/worker.js

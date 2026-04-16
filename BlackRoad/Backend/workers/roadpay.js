@@ -1,1 +1,0 @@
-/Users/alexa/roadpay-worker/src/worker.js
