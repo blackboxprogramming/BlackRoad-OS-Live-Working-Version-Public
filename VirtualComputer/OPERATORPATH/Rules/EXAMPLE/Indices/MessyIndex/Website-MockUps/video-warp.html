@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hyperspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#0a0a0a;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.9);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#333;text-transform:uppercase;}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:99;}
+#warp-svg{position:absolute;inset:0;width:100%;height:100%;}
+
+/* Overlay text */
+#warp-status{
+  position:absolute;bottom:80px;left:0;right:0;text-align:center;
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:6px;color:#111;
+  text-transform:uppercase;pointer-events:none;z-index:10;
+  transition:color .4s;
+}
+#warp-status.active{color:#333;}
+#warp-status.go{color:#fff;}
+
+#dest-card{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;z-index:10;
+  opacity:0;transition:opacity .8s;
+}
+#dest-card.in{opacity:1;}
+#dest-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:8px;color:#2a2a2a;margin-bottom:12px;}
+#dest-main{font-family:'Space Grotesk',sans-serif;font-size:72px;font-weight:700;color:#fff;letter-spacing:8px;opacity:0;transform:scale(.95);transition:opacity .7s .2s,transform .7s .2s cubic-bezier(.16,1,.3,1);}
+#dest-main.in{opacity:1;transform:scale(1);}
+#dest-data{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;color:#222;margin-top:12px;opacity:0;transition:opacity .8s .6s;}
+#dest-data.in{opacity:1;}
+
+/* Speed dial */
+#speed-wrap{
+  position:absolute;left:80px;bottom:60px;
+  pointer-events:none;z-index:10;
+  opacity:0;transition:opacity .6s;
+}
+#speed-wrap.in{opacity:1;}
+#speed-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#1c1c1c;margin-bottom:4px;}
+#speed-val{font-family:'Space Mono',monospace;font-size:28px;color:#fff;}
+#speed-unit{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:#1c1c1c;margin-left:4px;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="flash"></div>
+
+  <div id="play-overlay">
+    <div id="play-btn">
+      <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg>
+    </div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <svg id="warp-svg" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+    <g id="star-group"></g>
+    <g id="warp-group"></g>
+  </svg>
+
+  <div id="warp-status">NAVIGATION LOCKED · DESTINATION: ANDROMEDA</div>
+  <div id="speed-wrap">
+    <div id="speed-lbl">Velocity</div>
+    <div id="speed-val">0<span id="speed-unit"> km/s</span></div>
+  </div>
+  <div id="dest-card">
+    <div id="dest-sub">Warp Complete</div>
+    <div id="dest-main">ANDROMEDA</div>
+    <div id="dest-data">2,537,000 LIGHT YEARS · TRAVEL TIME: 0.004s</div>
+  </div>
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280; stage.style.transform=`scale(${sc})`; shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const ns='http://www.w3.org/2000/svg';
+const VCX=640, VCY=360;
+
+// ─── Static starfield (pre-warp) ─────────────────────────────────
+const NUM_STARS=320;
+const stars=[];
+const starG=document.getElementById('star-group');
+
+for(let i=0;i<NUM_STARS;i++){
+  const angle=Math.random()*Math.PI*2;
+  const dist=30+Math.random()*600;
+  const size=Math.random()<0.08?1.5:Math.random()<0.3?1:0.6;
+  const bright=Math.random()*0.6+0.1;
+
+  const line=document.createElementNS(ns,'line');
+  line.setAttribute('stroke','#fff');
+  line.setAttribute('stroke-width', size);
+  line.setAttribute('opacity', bright);
+  line.setAttribute('stroke-linecap','round');
+  starG.appendChild(line);
+
+  stars.push({angle, dist, size, bright, line});
+}
+
+// ─── Warp stream stars (during warp) ──────────────────────────────
+const NUM_WARP=180;
+const warpStars=[];
+const warpG=document.getElementById('warp-group');
+
+for(let i=0;i<NUM_WARP;i++){
+  const angle=Math.random()*Math.PI*2;
+  const startDist=5+Math.random()*40;
+  const speed=300+Math.random()*500;
+  const size=0.5+Math.random()*1;
+  const bright=0.2+Math.random()*0.6;
+  const birthOffset=Math.random()*3; // stagger birth times
+
+  const line=document.createElementNS(ns,'line');
+  line.setAttribute('stroke','#fff');
+  line.setAttribute('stroke-width', size);
+  line.setAttribute('stroke-linecap','round');
+  line.setAttribute('opacity','0');
+  warpG.appendChild(line);
+
+  warpStars.push({angle, startDist, speed, size, bright, birthOffset, line});
+}
+
+// ─── Render functions ─────────────────────────────────────────────
+let stretchFactor=0; // 0→1 during pre-warp stretch
+let warpActive=false;
+let warpT=0; // time into warp phase
+let speedKms=0;
+
+function renderStaticStars(stretch){
+  stars.forEach(s=>{
+    const x=VCX+Math.cos(s.angle)*s.dist;
+    const y=VCY+Math.sin(s.angle)*s.dist;
+    if(stretch<0.01){
+      // dot
+      s.line.setAttribute('x1',x); s.line.setAttribute('y1',y);
+      s.line.setAttribute('x2',x+0.1); s.line.setAttribute('y2',y);
+    } else {
+      // streak toward center
+      const pullFactor=stretch*0.85;
+      const nx=VCX+Math.cos(s.angle)*s.dist*(1-pullFactor);
+      const ny=VCY+Math.sin(s.angle)*s.dist*(1-pullFactor);
+      s.line.setAttribute('x1',nx); s.line.setAttribute('y1',ny);
+      s.line.setAttribute('x2',x); s.line.setAttribute('y2',y);
+    }
+    s.line.setAttribute('opacity', s.bright*(0.4+stretch*0.6));
+  });
+}
+
+function renderWarpStars(wt){
+  warpStars.forEach(ws=>{
+    if(wt<ws.birthOffset){
+      ws.line.setAttribute('opacity','0');
+      return;
+    }
+    const age=wt-ws.birthOffset;
+    const curDist=ws.startDist+ws.speed*age;
+    const trailDist=Math.max(ws.startDist, curDist-ws.speed*0.08);
+
+    const x2=VCX+Math.cos(ws.angle)*curDist;
+    const y2=VCY+Math.sin(ws.angle)*curDist;
+    const x1=VCX+Math.cos(ws.angle)*trailDist;
+    const y1=VCY+Math.sin(ws.angle)*trailDist;
+
+    ws.line.setAttribute('x1',x1); ws.line.setAttribute('y1',y1);
+    ws.line.setAttribute('x2',x2); ws.line.setAttribute('y2',y2);
+
+    // Fade in quickly, fade out at edge
+    const edgeDist=Math.hypot(x2-VCX, y2-VCY);
+    const fadeEdge=Math.max(0,1-(edgeDist/700));
+    ws.line.setAttribute('opacity',(ws.bright*fadeEdge).toFixed(2));
+
+    // If past edge, reset star
+    if(edgeDist>700){
+      ws.birthOffset=wt+Math.random()*0.3;
+    }
+  });
+}
+
+// ─── Timeline ─────────────────────────────────────────────────────
+const DURATION=14;
+let playing=false, startTime=null, raf=null, fired=new Set();
+const timeline=[]; function at(sec,fn){timeline.push({sec,fn});}
+
+at(0.0,()=>{
+  document.getElementById('warp-status').classList.add('active');
+  document.getElementById('speed-wrap').classList.add('in');
+});
+at(2.0,()=>{
+  document.getElementById('warp-status').textContent='WARP DRIVE CHARGING · STAND BY';
+});
+at(3.5,()=>{
+  document.getElementById('warp-status').textContent='ENGAGING WARP · T MINUS 3';
+  document.getElementById('warp-status').classList.add('go');
+});
+at(6.0,()=>{
+  // Flash and warp start
+  flashFn(()=>{
+    warpActive=true; warpT=0;
+    // Hide static stars
+    starG.setAttribute('opacity','0');
+    document.getElementById('warp-status').textContent='WARP · ENGAGED';
+  });
+});
+at(10.5,()=>{
+  // Decelerate: flash and exit warp
+  flashFn(()=>{
+    warpActive=false;
+    starG.setAttribute('opacity','1');
+    stretchFactor=0;
+    renderStaticStars(0);
+    warpG.setAttribute('opacity','0');
+    document.getElementById('warp-status').textContent='DROPPING OUT OF WARP';
+  });
+});
+at(11.8,()=>{
+  document.getElementById('dest-card').classList.add('in');
+  document.getElementById('dest-main').classList.add('in');
+  document.getElementById('dest-data').classList.add('in');
+  document.getElementById('warp-status').style.opacity='0';
+  document.getElementById('speed-wrap').style.opacity='0';
+});
+
+let lastT=null;
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  const dt=lastT===null?0.016:t-lastT; lastT=t;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+
+  if(!warpActive){
+    // Stretch phase: t=3.5 to 6.0 (2.5 seconds)
+    if(t>=3.5 && t<6.0){
+      stretchFactor=Math.min((t-3.5)/2.5, 1);
+      renderStaticStars(stretchFactor);
+      speedKms=Math.round(stretchFactor*299792);
+      document.getElementById('speed-val').childNodes[0].textContent=speedKms.toLocaleString();
+    } else if(t<3.5){
+      renderStaticStars(0);
+      speedKms=0;
+      document.getElementById('speed-val').childNodes[0].textContent='0';
+    }
+  } else {
+    warpT+=dt;
+    warpG.setAttribute('opacity','1');
+    renderWarpStars(warpT);
+    speedKms=299792;
+    document.getElementById('speed-val').childNodes[0].textContent='299,792';
+  }
+
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); warpActive=false; stretchFactor=0; warpT=0; lastT=null;
+  resetAll(); raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  starG.setAttribute('opacity','1');
+  warpG.setAttribute('opacity','0');
+  warpStars.forEach((ws,i)=>{ws.birthOffset=Math.random()*3; ws.line.setAttribute('opacity','0');});
+  renderStaticStars(0);
+  document.getElementById('flash').style.opacity='0';
+  document.getElementById('warp-status').className='';
+  document.getElementById('warp-status').style.opacity='1';
+  document.getElementById('warp-status').textContent='NAVIGATION LOCKED · DESTINATION: ANDROMEDA';
+  document.getElementById('speed-wrap').className='';
+  document.getElementById('speed-wrap').style.opacity='0';
+  document.getElementById('speed-val').childNodes[0].textContent='0';
+  document.getElementById('dest-card').classList.remove('in');
+  document.getElementById('dest-main').classList.remove('in');
+  document.getElementById('dest-data').classList.remove('in');
+  document.getElementById('prog-fill').style.width='0';
+}
+function flashFn(cb){
+  const el=document.getElementById('flash');
+  el.style.transition='none'; el.style.opacity='1';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.transition='opacity .5s'; el.style.opacity='0'; cb&&cb();
+  }));
+}
+</script>
+</body>
+</html>

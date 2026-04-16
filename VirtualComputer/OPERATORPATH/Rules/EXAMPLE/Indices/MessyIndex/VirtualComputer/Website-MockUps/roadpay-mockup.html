@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadPay — Payment Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+  <style>
+
+    /* ── Page shell ──────────────────────────────────────────── */
+    :root { --in: 'Inter', sans-serif; }
+
+  body {
+      font-family: var(--sg);
+      background: radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), #0a0a0a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    /* ── macOS window chrome ─────────────────────────────────── */
+    .macos-window {
+      width: 1300px;
+      max-width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1a1a1a;
+      box-shadow: 0 40px 100px rgba(0,0,0,.9), 0 0 0 1px rgba(255,255,255,.04);
+    }
+
+    .macos-titlebar {
+      background: rgba(0,0,0,.94);
+      backdrop-filter: blur(16px);
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+      border-bottom: 1px solid #1a1a1a;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .macos-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .macos-dot.red    { background: #FF5F57; box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset; }
+    .macos-dot.yellow { background: #FEBC2E; box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset; }
+    .macos-dot.green  { background: #28C840; box-shadow: 0 0 0 1px rgba(0,0,0,.25) inset; }
+
+    .macos-title {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-family: var(--in); font-size: 13px; font-weight: 500;
+      color: var(--sub); letter-spacing: .01em;
+    }
+
+    /* ── App layout ──────────────────────────────────────────── */
+    .gradient-topbar { height: 3px; background: var(--g); flex-shrink: 0; }
+
+    .app-shell {
+      display: flex;
+      background: var(--bg);
+      height: 820px;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────── */
+    .sidebar {
+      width: 220px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      padding: 18px 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-icon-wrap {
+      width: 34px; height: 34px;
+      border-radius: 8px; padding: 1.5px;
+      background: var(--g); flex-shrink: 0;
+    }
+    .logo-icon-inner {
+      width: 100%; height: 100%;
+      border-radius: 6.5px;
+      background: var(--card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; line-height: 1;
+    }
+    .logo-text { display: flex; flex-direction: column; gap: 1px; }
+    .logo-name {
+      font-size: 15px; font-weight: 700; letter-spacing: -.02em;
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1;
+    }
+    .logo-tagline { font-size: 9px; color: var(--sub); font-family: var(--jb); letter-spacing: .08em; text-transform: uppercase; }
+
+    /* Nav */
+    .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+    .nav-section-label {
+      font-size: 9px; font-weight: 600; color: var(--muted);
+      letter-spacing: .1em; text-transform: uppercase;
+      padding: 8px 8px 4px;
+    }
+
+    .nav-item {
+      font-family: var(--in);
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; color: var(--sub);
+      cursor: pointer; transition: all .15s;
+      border: 1px solid transparent;
+    }
+    .nav-item:hover { background: var(--elevated); color: var(--text); }
+    .nav-item.active {
+      background: var(--elevated);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .nav-item.active .nav-icon { filter: none; }
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .nav-badge {
+      margin-left: auto; font-size: 10px; font-family: var(--jb);
+      background: var(--elevated); border: 1px solid var(--border);
+      color: var(--sub); padding: 1px 6px; border-radius: 10px;
+    }
+
+    /* Active indicator line */
+    .nav-item.active .nav-icon-wrap { position: relative; }
+
+    /* Balance widget */
+    .balance-widget {
+      margin: 0 10px 14px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .balance-label {
+      font-family: var(--jb); font-size: 9px; color: var(--muted);
+      letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .balance-amount {
+      font-size: 22px; font-weight: 700; letter-spacing: -.03em;
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 12px; line-height: 1;
+    }
+    .payout-btn {
+      width: 100%; padding: 7px 0;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text); font-size: 12px; font-weight: 600;
+      letter-spacing: .02em; cursor: pointer;
+      transition: all .15s;
+      position: relative; overflow: hidden;
+    }
+    .payout-btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: var(--grad-tint); opacity: 0; transition: opacity .15s;
+    }
+    .payout-btn:hover { border-color: #444; }
+    .payout-btn:hover::before { opacity: 1; }
+
+    /* ── Main content ────────────────────────────────────────── */
+    .main {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      background: var(--bg);
+    }
+
+    /* Top bar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      background: rgba(0,0,0,.92); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 10;
+    }
+    .topbar-left { display: flex; flex-direction: column; gap: 1px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+    .topbar-sub {
+      font-size: 11px; color: var(--sub); font-family: var(--jb); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 5px 11px; border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--elevated);
+      font-size: 11px; color: var(--sub); font-family: var(--jb);
+    }
+    .topbar-pill .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #28C840; animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(40,200,64,.4); }
+      50%      { opacity:.8; box-shadow: 0 0 0 4px rgba(40,200,64,0); }
+    }
+    .topbar-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--elevated); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg, #FF6B2B22, #4488FF22);
+      color: var(--text);
+    }
+
+    /* ── Content padding ─────────────────────────────────────── */
+    .settlement-strip { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; } .settlement-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; } .settlement-card h3 { font-size: 14px; margin-bottom: 8px; letter-spacing: -.01em; } .settlement-card p { font-size: 12px; line-height: 1.6; color: var(--sub); margin-bottom: 12px; font-family: var(--in); } .settlement-meta { display:flex; justify-content:space-between; gap:10px; font-family: var(--jb); font-size: 10px; color: var(--muted); } .content { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── Stats row ───────────────────────────────────────────── */
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .stat-card:hover { border-color: #333; }
+    .stat-card::after {
+      content: ''; position: absolute;
+      bottom: 0; left: 0; right: 0; height: 2px;
+      background: var(--g); opacity: .4;
+    }
+
+    .stat-label {
+      font-size: 10px; font-weight: 600; color: var(--sub);
+      letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .stat-value {
+      font-size: 22px; font-weight: 700; letter-spacing: -.03em;
+      color: var(--text); margin-bottom: 6px; line-height: 1;
+      font-family: var(--jb);
+    }
+    .stat-change {
+      font-size: 11px; font-family: var(--jb);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .stat-change.up {
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-change.flat { color: var(--sub); }
+
+    /* ── Chart area ──────────────────────────────────────────── */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+    .chart-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+    }
+    .chart-title { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+    .chart-range-pill {
+      font-family: var(--jb); font-size: 10px; color: var(--sub);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 4px 10px; background: var(--elevated);
+    }
+    .chart-wrap { position: relative; }
+
+    /* SVG chart */
+    .chart-svg-container {
+      width: 100%; position: relative;
+    }
+    .chart-svg-container svg { display: block; width: 100%; }
+
+    /* Tooltip */
+    .chart-tooltip {
+      position: absolute;
+      top: 8px; right: 60px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      pointer-events: none;
+    }
+    .tooltip-label { font-size: 9px; color: var(--sub); font-family: var(--jb); margin-bottom: 2px; letter-spacing: .05em; }
+    .tooltip-value {
+      font-size: 14px; font-weight: 700; font-family: var(--jb);
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .tooltip-date { font-size: 9px; color: var(--muted); font-family: var(--jb); }
+
+    /* ── Two-col row ─────────────────────────────────────────── */
+    .two-col { display: grid; grid-template-columns: 1fr 300px; gap: 14px; align-items: start; }
+
+    /* ── Transactions table ──────────────────────────────────── */
+    .table-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .table-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--border);
+    }
+    .table-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+    .table-action {
+      font-size: 11px; color: var(--sub); font-family: var(--jb);
+      border: 1px solid var(--border); background: var(--elevated);
+      padding: 4px 10px; border-radius: 5px; cursor: pointer;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      font-family: var(--jb); font-size: 9px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .08em;
+      padding: 9px 16px; text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--elevated); }
+    tbody td {
+      padding: 10px 16px; font-size: 12px; color: var(--text);
+      vertical-align: middle;
+    }
+
+    .customer-cell { display: flex; flex-direction: column; gap: 1px; }
+    .customer-email { font-size: 12px; color: var(--text); }
+    .customer-id { font-size: 9px; font-family: var(--jb); color: var(--muted); }
+
+    .product-name { font-size: 12px; color: var(--sub); }
+
+    .amount-cell { font-family: var(--jb); font-size: 12px; color: var(--text); white-space: nowrap; }
+    .amount-zero { color: var(--muted); }
+
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 600; font-family: var(--jb);
+      white-space: nowrap;
+    }
+    .status-paid {
+      border: 1px solid transparent;
+      background:
+        linear-gradient(var(--card), var(--card)) padding-box,
+        var(--g) border-box;
+      color: var(--text);
+    }
+    .status-paid::before { content: '✓ '; }
+    .status-free {
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .status-free::before { content: '– '; }
+
+    .date-cell { font-family: var(--jb); font-size: 11px; color: var(--sub); }
+
+    /* ── Right column ────────────────────────────────────────── */
+    .right-col { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── Active now widget ───────────────────────────────────── */
+    .active-widget {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .active-widget-title {
+      font-size: 11px; font-weight: 600; color: var(--sub);
+      letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .live-sessions {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .live-count {
+      font-size: 20px; font-weight: 700; font-family: var(--jb);
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .live-label { font-size: 12px; color: var(--sub); }
+    .live-indicator {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #28C840;
+      animation: pulse-dot 1.5s infinite;
+      margin-left: auto;
+    }
+
+    .meta-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-top: 1px solid var(--border);
+    }
+    .meta-label { font-size: 10px; font-family: var(--jb); color: var(--muted); }
+    .meta-value { font-size: 11px; font-family: var(--jb); color: var(--sub); }
+    .meta-value.highlight {
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      font-weight: 600;
+    }
+
+    /* ── Subscriptions ───────────────────────────────────────── */
+    .subs-section { display: flex; flex-direction: column; gap: 8px; }
+    .subs-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 2px;
+    }
+    .subs-title { font-size: 13px; font-weight: 600; letter-spacing: -.01em; }
+    .subs-count {
+      font-size: 10px; font-family: var(--jb); color: var(--sub);
+      background: var(--elevated); border: 1px solid var(--border);
+      padding: 2px 7px; border-radius: 10px;
+    }
+
+    .sub-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px 14px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+    .sub-card:hover { border-color: #333; }
+    .sub-card.featured::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: var(--g);
+    }
+    .sub-card-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .sub-email { font-size: 11px; color: var(--sub); font-family: var(--jb); margin-bottom: 4px; }
+    .sub-plan { font-size: 13px; font-weight: 600; color: var(--text); }
+    .sub-plan.pro {
+      background: var(--g); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .sub-price { font-size: 13px; font-weight: 700; font-family: var(--jb); color: var(--text); }
+    .sub-renewal { font-size: 10px; font-family: var(--jb); color: var(--muted); margin-bottom: 10px; }
+    .manage-btn {
+      width: 100%; padding: 6px 0;
+      background: transparent; border: 1px solid var(--border);
+      border-radius: 5px; color: var(--sub); font-size: 11px;
+      font-weight: 500; cursor: pointer; transition: all .15s;
+    }
+    .manage-btn:hover { border-color: #333; color: var(--text); }
+
+    /* ── Defs gradient for SVG ───────────────────────────────── */
+    .grad-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  </style>
+</head>
+<body>
+
+  <div class="macos-window">
+
+    <!-- Title bar -->
+    <div class="macos-titlebar">
+      <div class="macos-dot red"></div>
+      <div class="macos-dot yellow"></div>
+      <div class="macos-dot green"></div>
+      <span class="macos-title">RoadPay — Payment Dashboard</span>
+    </div>
+
+    <!-- Gradient stripe -->
+    <div class="gradient-topbar"></div>
+
+    <!-- App shell -->
+    <div class="app-shell">
+
+      <!-- ── Sidebar ── -->
+      <aside class="sidebar">
+
+        <!-- Logo -->
+        <div class="sidebar-logo">
+          <div class="logo-icon-wrap">
+            <div class="logo-icon-inner">💳</div>
+          </div>
+          <div class="logo-text">
+            <div class="logo-name">RoadPay</div>
+            <div class="logo-tagline">Sovereign Payments</div>
+          </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="sidebar-nav">
+          <div class="nav-section-label">Dashboard</div>
+
+          <div class="nav-item active">
+            <span class="nav-icon">◈</span>
+            Overview
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">↕</span>
+            Transactions
+            <span class="nav-badge">8</span>
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">∞</span>
+            Subscriptions
+            <span class="nav-badge">3</span>
+          </div>
+
+          <div class="nav-section-label" style="margin-top:6px;">Revenue</div>
+
+          <div class="nav-item">
+            <span class="nav-icon">◎</span>
+            Customers
+          </div>
+          <div class="nav-item">
+            <span class="nav-icon">⬆</span>
+            Payouts
+          </div>
+
+          <div class="nav-section-label" style="margin-top:6px;">System</div>
+
+          <div class="nav-item">
+            <span class="nav-icon">⚙</span>
+            Settings
+          </div>
+        </nav>
+
+        <!-- Balance widget -->
+        <div class="balance-widget">
+          <div class="balance-label">Available Balance</div>
+          <div class="balance-amount">$1,247.83</div>
+          <button class="payout-btn">⬆ Payout</button>
+        </div>
+
+      </aside>
+
+      <!-- ── Main ── -->
+      <main class="main">
+
+        <!-- Top bar -->
+        <div class="topbar">
+          <div class="topbar-left">
+            <div class="topbar-title">Overview</div>
+            <div class="topbar-sub">Apr 1 – Apr 10, 2025</div>
+          </div>
+          <div class="topbar-right">
+            <div class="topbar-pill">
+              <div class="live-dot"></div>
+              2 live sessions
+            </div>
+            <div class="topbar-avatar">A</div>
+          </div>
+        </div>
+
+        <!-- Dashboard content -->
+        <div class="content">
+
+          <!-- Stats row -->
+          <div class="stats-row">
+            <div class="stat-card">
+              <div class="stat-label">Monthly Recurring Revenue</div>
+              <div class="stat-value">$238</div>
+              <div class="stat-change up">↑ 40% vs last month</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Total Revenue</div>
+              <div class="stat-value">$1,892</div>
+              <div class="stat-change up">↑ 12% all time</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Active Subscriptions</div>
+              <div class="stat-value">3</div>
+              <div class="stat-change flat">↑ 1 this week</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Avg Revenue / User</div>
+              <div class="stat-value">$79.33</div>
+              <div class="stat-change up">↑ 8% vs last mo</div>
+            </div>
+          </div>
+
+          <!-- Revenue chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">Revenue — Last 30 Days</div>
+              <div class="chart-range-pill">Mar 11 → Apr 10, 2025</div>
+            </div>
+            <div class="chart-wrap">
+              <div class="chart-svg-container">
+
+                <!-- SVG bar chart -->
+                <svg viewBox="0 0 860 180" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="height:180px;">
+                  <defs>
+                    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#FF6B2B"/>
+                      <stop offset="30%" stop-color="#CC00AA"/>
+                      <stop offset="70%" stop-color="#4488FF"/>
+                      <stop offset="100%" stop-color="#00D4FF" stop-opacity=".3"/>
+                    </linearGradient>
+                    <linearGradient id="barGradHover" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#FF6B2B"/>
+                      <stop offset="50%" stop-color="#FF2255"/>
+                      <stop offset="100%" stop-color="#4488FF"/>
+                    </linearGradient>
+                    <!-- Y-axis gridlines -->
+                  </defs>
+
+                  <!-- Gridlines -->
+                  <line x1="40" y1="20"  x2="855" y2="20"  stroke="#1a1a1a" stroke-width="1"/>
+                  <line x1="40" y1="55"  x2="855" y2="55"  stroke="#1a1a1a" stroke-width="1"/>
+                  <line x1="40" y1="90"  x2="855" y2="90"  stroke="#1a1a1a" stroke-width="1"/>
+                  <line x1="40" y1="125" x2="855" y2="125" stroke="#1a1a1a" stroke-width="1"/>
+                  <line x1="40" y1="155" x2="855" y2="155" stroke="#1a1a1a" stroke-width="1"/>
+
+                  <!-- Y-axis labels -->
+                  <text x="34" y="24"  font-family="JetBrains Mono,monospace" font-size="9" fill="#444" text-anchor="end">$80</text>
+                  <text x="34" y="59"  font-family="JetBrains Mono,monospace" font-size="9" fill="#444" text-anchor="end">$60</text>
+                  <text x="34" y="94"  font-family="JetBrains Mono,monospace" font-size="9" fill="#444" text-anchor="end">$40</text>
+                  <text x="34" y="129" font-family="JetBrains Mono,monospace" font-size="9" fill="#444" text-anchor="end">$20</text>
+                  <text x="34" y="159" font-family="JetBrains Mono,monospace" font-size="9" fill="#444" text-anchor="end">$0</text>
+
+                  <!-- 30 bars — heights vary naturally (155 = $0 baseline, 20 = $80 top) -->
+                  <!-- bar width ~26px, gap ~1px, starting x=42 -->
+                  <rect x="42"  y="120" width="22" height="35" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="69"  y="130" width="22" height="25" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="96"  y="108" width="22" height="47" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="123" y="125" width="22" height="30" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="150" y="140" width="22" height="15" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="177" y="115" width="22" height="40" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="204" y="100" width="22" height="55" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="231" y="135" width="22" height="20" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="258" y="90"  width="22" height="65" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="285" y="118" width="22" height="37" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="312" y="128" width="22" height="27" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="339" y="105" width="22" height="50" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="366" y="75"  width="22" height="80" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="393" y="120" width="22" height="35" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="420" y="110" width="22" height="45" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="447" y="140" width="22" height="15" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="474" y="95"  width="22" height="60" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="501" y="130" width="22" height="25" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="528" y="85"  width="22" height="70" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="555" y="115" width="22" height="40" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="582" y="125" width="22" height="30" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="609" y="100" width="22" height="55" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="636" y="80"  width="22" height="75" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="663" y="130" width="22" height="25" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="690" y="110" width="22" height="45" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="717" y="90"  width="22" height="65" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="744" y="120" width="22" height="35" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="771" y="105" width="22" height="50" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <rect x="798" y="95"  width="22" height="60" rx="3" fill="url(#barGrad)" opacity=".75"/>
+                  <!-- Last bar (highlighted / hover state) -->
+                  <rect x="825" y="83"  width="22" height="72" rx="3" fill="url(#barGradHover)" opacity="1"/>
+                  <!-- Hover line -->
+                  <line x1="836" y1="20" x2="836" y2="83" stroke="#FF6B2B" stroke-width="1" stroke-dasharray="3,3" opacity=".5"/>
+
+                  <!-- X-axis date labels (every 5 bars) -->
+                  <text x="42"  y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Mar 11</text>
+                  <text x="177" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Mar 17</text>
+                  <text x="312" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Mar 23</text>
+                  <text x="447" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Mar 29</text>
+                  <text x="582" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Apr 4</text>
+                  <text x="717" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Apr 8</text>
+                  <text x="812" y="174" font-family="JetBrains Mono,monospace" font-size="8" fill="#444">Apr 10</text>
+                </svg>
+
+              </div>
+
+              <!-- Tooltip -->
+              <div class="chart-tooltip">
+                <div class="tooltip-label">APR 10</div>
+                <div class="tooltip-value">$57.00</div>
+                <div class="tooltip-date">Today · 2 txns</div>
+              </div>
+            </div>
+          </div>
+
+          <section class="settlement-strip"><div class="settlement-card"><div class="stat-label">Settlement rhythm</div><h3>Payout timing is part of the product</h3><p>RoadPay feels stronger when settlement windows, pending balances, and payout expectations are visible as operational states instead of buried finance details.</p><div class="settlement-meta"><span>T+2 STANDARD</span><span>5 QUEUED</span></div></div><div class="settlement-card"><div class="stat-label">Risk language</div><h3>Review stays legible</h3><p>Disputes, fraud checks, and unusual upgrade spikes read better when operators can see why revenue is healthy or temporarily held.</p><div class="settlement-meta"><span>2 REVIEWS</span><span>LOW RISK</span></div></div><div class="settlement-card"><div class="stat-label">Product linkage</div><h3>Subscriptions map to the suite</h3><p>Payments become more believable when RoadPay clearly reflects which BlackRoad products, plans, and upgrade paths are driving the revenue picture.</p><div class="settlement-meta"><span>12 PRODUCTS</span><span>SYNCED</span></div></div></section>
+
+          <!-- Transactions + right panel -->
+          <div class="two-col">
+
+            <!-- Transactions table -->
+            <div class="table-card">
+              <div class="table-header">
+                <div class="table-title">Recent Transactions</div>
+                <div class="table-action">View all →</div>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">alexa@blackroad.io</span>
+                        <span class="customer-id">#cust_001</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">CarKeys Pro</span></td>
+                    <td><span class="amount-cell">$19.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 10</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">test@example.com</span>
+                        <span class="customer-id">#cust_002</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">OS Pro</span></td>
+                    <td><span class="amount-cell">$29.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 10</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">dev@agency.io</span>
+                        <span class="customer-id">#cust_003</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">Team Plan</span></td>
+                    <td><span class="amount-cell">$49.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 9</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">demo@user.io</span>
+                        <span class="customer-id">#cust_004</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">CarKeys Free → Pro</span></td>
+                    <td><span class="amount-cell">$19.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 8</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">anon@guest.io</span>
+                        <span class="customer-id">#cust_005</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">OS Free</span></td>
+                    <td><span class="amount-cell amount-zero">$0.00</span></td>
+                    <td><span class="status-pill status-free">Free</span></td>
+                    <td><span class="date-cell">Apr 7</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">build@studio.io</span>
+                        <span class="customer-id">#cust_006</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">Highway Pro</span></td>
+                    <td><span class="amount-cell">$39.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 6</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">road@operator.io</span>
+                        <span class="customer-id">#cust_007</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">RoadCode Seat × 2</span></td>
+                    <td><span class="amount-cell">$58.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 5</span></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="customer-cell">
+                        <span class="customer-email">new@signup.io</span>
+                        <span class="customer-id">#cust_008</span>
+                      </div>
+                    </td>
+                    <td><span class="product-name">OS Pro Annual</span></td>
+                    <td><span class="amount-cell">$290.00</span></td>
+                    <td><span class="status-pill status-paid">Paid</span></td>
+                    <td><span class="date-cell">Apr 4</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Right column -->
+            <div class="right-col">
+
+              <!-- Active now -->
+              <div class="active-widget">
+                <div class="active-widget-title">Active Right Now</div>
+                <div class="live-sessions">
+                  <div class="live-count">2</div>
+                  <div class="live-label">live sessions</div>
+                  <div class="live-indicator"></div>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Last payment</span>
+                  <span class="meta-value">2 hours ago</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Next payout</span>
+                  <span class="meta-value highlight">Friday, Apr 11</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Payout method</span>
+                  <span class="meta-value">••• 4242</span>
+                </div>
+              </div>
+
+              <!-- Subscriptions -->
+              <div class="subs-section">
+                <div class="subs-header">
+                  <div class="subs-title">Subscriptions</div>
+                  <div class="subs-count">3 active</div>
+                </div>
+
+                <!-- Sub 1 — Pro (featured) -->
+                <div class="sub-card featured">
+                  <div class="sub-email">alexa@blackroad.io</div>
+                  <div class="sub-card-row">
+                    <span class="sub-plan pro">CarKeys Pro</span>
+                    <span class="sub-price">$19/mo</span>
+                  </div>
+                  <div class="sub-renewal">Renews Apr 17, 2025</div>
+                  <button class="manage-btn">Manage</button>
+                </div>
+
+                <!-- Sub 2 -->
+                <div class="sub-card">
+                  <div class="sub-email">test@example.com</div>
+                  <div class="sub-card-row">
+                    <span class="sub-plan">OS Pro</span>
+                    <span class="sub-price">$29/mo</span>
+                  </div>
+                  <div class="sub-renewal">Renews Apr 22, 2025</div>
+                  <button class="manage-btn">Manage</button>
+                </div>
+
+                <!-- Sub 3 -->
+                <div class="sub-card">
+                  <div class="sub-email">dev@agency.io</div>
+                  <div class="sub-card-row">
+                    <span class="sub-plan">Team Plan</span>
+                    <span class="sub-price">$49/mo</span>
+                  </div>
+                  <div class="sub-renewal">Renews May 1, 2025</div>
+                  <button class="manage-btn">Manage</button>
+                </div>
+
+              </div><!-- /subs-section -->
+
+            </div><!-- /right-col -->
+
+          </div><!-- /two-col -->
+
+        </div><!-- /content -->
+      </main>
+    </div><!-- /app-shell -->
+  </div><!-- /macos-window -->
+
+</body>
+</html>

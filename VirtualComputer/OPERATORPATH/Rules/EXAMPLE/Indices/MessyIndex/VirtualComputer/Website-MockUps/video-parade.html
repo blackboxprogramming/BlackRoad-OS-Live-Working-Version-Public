@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Fleet — Robot Parade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Grotesk',sans-serif;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#050505;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#222;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.95);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#2a2a2a;text-transform:uppercase;}
+
+@keyframes bot-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── Background SVG ── */
+#bg-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+
+/* ── Stage header ── */
+#stage-header{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:40px 64px 0;pointer-events:none;
+}
+#hdr-title{font-size:13px;font-weight:700;letter-spacing:10px;color:#111;text-transform:uppercase;opacity:0;transition:opacity .8s;}
+#hdr-title.in{opacity:1;}
+#hdr-right{text-align:right;}
+#hdr-num{font-family:'Space Mono',monospace;font-size:32px;color:#111;letter-spacing:-1px;font-variant-numeric:tabular-nums;transition:color .3s;}
+#hdr-num.lit{color:#fff;}
+#hdr-total{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#0f0f0f;text-transform:uppercase;}
+
+/* ── Spotlight ── */
+#spotlight{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse 480px 540px at 640px 580px, rgba(255,255,255,0.025) 0%, transparent 100%);
+  opacity:0;transition:opacity 1s;
+}
+#spotlight.in{opacity:1;}
+
+/* ── Floor ── */
+#floor-svg{position:absolute;bottom:0;left:0;right:0;height:90px;z-index:2;pointer-events:none;}
+
+/* ── Robot stage area ── */
+#robot-stage{
+  position:absolute;left:0;right:0;z-index:10;
+  bottom:88px;height:480px;pointer-events:none;
+}
+
+/* ── Robot wrapper ── */
+#robot-wrap{
+  position:absolute;bottom:0;
+  width:160px;
+  transform:scale(2.2) translateX(0);
+  transform-origin:center bottom;
+  opacity:0;
+  left:560px; /* center: 640 - 80 */
+}
+
+/* ── Name badge ── */
+#name-badge{
+  position:absolute;z-index:20;pointer-events:none;
+  left:50%;transform:translateX(-50%);
+  bottom:58px;
+  text-align:center;opacity:0;transition:opacity .4s;
+  white-space:nowrap;
+}
+#badge-name{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:6px;color:#fff;text-transform:uppercase;margin-bottom:4px;}
+#badge-role{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:4px;color:#1c1c1c;text-transform:uppercase;}
+#badge-rule{height:1px;background:#111;width:120px;margin:6px auto 0;}
+#name-badge.in{opacity:1;}
+
+/* ── Counter ring at bottom ── */
+#counter-ring{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:6px;z-index:20;pointer-events:none;
+}
+.dot{width:5px;height:5px;border-radius:50%;background:#0d0d0d;transition:background .3s;}
+.dot.done{background:#1a1a1a;}
+.dot.active{background:#fff;}
+
+/* ── Robot entry/exit transitions ── */
+#robot-wrap{transition:transform 0.7s cubic-bezier(.16,1,.3,1), opacity 0.5s, left 0.7s cubic-bezier(.16,1,.3,1);}
+
+/* ── Intro screen ── */
+#intro-screen{
+  position:absolute;inset:0;z-index:40;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:#000;opacity:1;transition:opacity .8s;pointer-events:none;
+}
+#intro-main{font-size:80px;font-weight:700;letter-spacing:14px;color:#fff;text-transform:uppercase;line-height:1;margin-bottom:20px;opacity:0;transform:translateY(-10px);transition:opacity .8s .1s,transform .8s .1s cubic-bezier(.16,1,.3,1);}
+#intro-main.in{opacity:1;transform:translateY(0);}
+#intro-rule{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .4s;margin:0 auto 20px;}
+#intro-rule.in{width:500px;}
+#intro-sub{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:8px;color:#1a1a1a;text-transform:uppercase;opacity:0;transition:opacity .7s .7s;}
+#intro-sub.in{opacity:1;}
+#intro-screen.out{opacity:0;}
+
+/* ── End card ── */
+#end-card{
+  position:absolute;inset:0;z-index:60;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  background:rgba(0,0,0,.95);opacity:0;transition:opacity .8s;pointer-events:none;
+}
+#end-card.in{opacity:1;pointer-events:auto;}
+#ec-main{font-size:72px;font-weight:700;letter-spacing:14px;color:#fff;text-transform:uppercase;opacity:0;transform:scale(.94);transition:opacity .8s .2s,transform .8s .2s cubic-bezier(.16,1,.3,1);}
+#ec-main.in{opacity:1;transform:scale(1);}
+#ec-rule{height:1px;background:#0d0d0d;width:0;transition:width 1.2s .5s;margin:24px auto;}
+#ec-rule.in{width:420px;}
+#ec-stats{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:8px;color:#111;text-transform:uppercase;opacity:0;transition:opacity .7s .7s;}
+#ec-stats.in{opacity:1;}
+#ec-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:6px;color:#0a0a0a;margin-top:12px;opacity:0;transition:opacity .7s 1s;}
+#ec-sub.in{opacity:1;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="play-overlay">
+    <div id="play-btn"><svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg></div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <!-- Spotlight -->
+  <div id="spotlight"></div>
+
+  <!-- Floor lines -->
+  <svg id="floor-svg" viewBox="0 0 1280 90" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <line x1="0" y1="1" x2="1280" y2="1" stroke="#0d0d0d" stroke-width="1"/>
+    <rect x="0" y="0" width="1280" height="90" fill="#000" opacity=".4"/>
+  </svg>
+
+  <!-- Header -->
+  <div id="stage-header">
+    <div id="hdr-title">THE BLACKROAD FLEET</div>
+    <div id="hdr-right">
+      <div id="hdr-num">—</div>
+      <div id="hdr-total">/ 21 Agents</div>
+    </div>
+  </div>
+
+  <!-- Robot area -->
+  <div id="robot-stage">
+    <div id="robot-wrap"></div>
+  </div>
+
+  <!-- Name badge -->
+  <div id="name-badge">
+    <div id="badge-name"></div>
+    <div id="badge-role"></div>
+    <div id="badge-rule"></div>
+  </div>
+
+  <!-- Counter dots -->
+  <div id="counter-ring"></div>
+
+  <!-- Intro -->
+  <div id="intro-screen">
+    <div id="intro-main">THE FLEET</div>
+    <div id="intro-rule"></div>
+    <div id="intro-sub">21 Agents · Always Online · Always Shipping</div>
+  </div>
+
+  <!-- End card -->
+  <div id="end-card">
+    <div id="ec-main">ALL 21</div>
+    <div id="ec-rule"></div>
+    <div id="ec-stats">Deployed · Active · Operational</div>
+    <div id="ec-sub">BlackRoad OS · The Complete Fleet</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   PARAMETRIC ROBOT SVG GENERATOR
+══════════════════════════════════════════════════ */
+function rnd(min,max){return min+Math.random()*(max-min);}
+
+function makeRobot(cfg){
+  const {
+    shell='#111', shellStroke='#444', headColor,
+    eyeFill='#fff', eyeStyle='rect',
+    screenColor='#0a0a0a', screenType='dots',
+    screenText='',
+    armL='sway', armR='sway',
+    mouth='smile', mouthColor='#fff',
+    antColor='#333', antLight='#fff',
+    legAnim=true, floatDur=2.2,
+    bodyAccent='#fff',
+    hat=null, glasses=false, collar=false
+  }=cfg;
+  const hc=headColor||shell;
+
+  const legLA=legAnim?`<animateTransform attributeName="transform" type="rotate" values="-10 65 150;10 65 150;-10 65 150" dur="${rnd(.7,.9).toFixed(2)}s" repeatCount="indefinite"/>`:''
+  const legRA=legAnim?`<animateTransform attributeName="transform" type="rotate" values="10 95 150;-10 95 150;10 95 150" dur="${rnd(.7,.9).toFixed(2)}s" repeatCount="indefinite" begin="0.1s"/>`:''
+
+  const legFill=shell==='#fff'?'#ddd':'#1c1c1c';
+  const armFill=shell==='#fff'?'#ccc':'#1c1c1c';
+  const handFill=shell==='#fff'?'#bbb':'#222';
+
+  const armLv=armL==='wave'?`60 37 92;80 37 92;60 37 92`:armL==='up'?`65 37 92;65 37 92;65 37 92`:`-10 37 92;10 37 92;-10 37 92`;
+  const armRv=armR==='wave'?`-60 123 92;-80 123 92;-60 123 92`:armR==='up'?`-65 123 92;-65 123 92;-65 123 92`:`10 123 92;-10 123 92;10 123 92`;
+  const armLD=rnd(.6,1.8).toFixed(2),armRD=rnd(.6,1.8).toFixed(2);
+
+  let screenSvg='';
+  if(screenType==='dots'){
+    const c1=rnd(1,1.8).toFixed(1),c2=rnd(1,1.8).toFixed(1),c3=rnd(1,1.8).toFixed(1);
+    screenSvg=`
+      <circle cx="65" cy="110" r="4" fill="#333"><animate attributeName="fill" values="#333;${bodyAccent};#333" dur="${c1}s" repeatCount="indefinite"/></circle>
+      <circle cx="80" cy="110" r="4" fill="#2a2a2a"><animate attributeName="fill" values="#2a2a2a;${bodyAccent};#2a2a2a" dur="${c2}s" begin=".4s" repeatCount="indefinite"/></circle>
+      <circle cx="95" cy="110" r="4" fill="#333"><animate attributeName="fill" values="#333;${bodyAccent};#333" dur="${c3}s" begin=".8s" repeatCount="indefinite"/></circle>`;
+  } else if(screenType==='lines'){
+    screenSvg=`
+      <line x1="58" y1="102" x2="102" y2="102" stroke="#1e1e1e" stroke-width="1.5"/>
+      <line x1="58" y1="108" x2="90"  y2="108" stroke="#161616" stroke-width="1"/>
+      <line x1="58" y1="114" x2="98"  y2="114" stroke="#1e1e1e" stroke-width="1.5"/>
+      <line x1="58" y1="120" x2="86"  y2="120" stroke="#161616" stroke-width="1"/>
+      <line x1="58" y1="126" x2="100" y2="126" stroke="#1e1e1e" stroke-width="1.5"/>
+      <line x1="58" y1="132" x2="88"  y2="132" stroke="#161616" stroke-width="1"/>
+      <line x1="58" y1="138" x2="94"  y2="138" stroke="#1e1e1e" stroke-width="1"/>`;
+  } else if(screenType==='text'){
+    screenSvg=`
+      <text x="58" y="115" font-size="11" fill="${bodyAccent}" font-family="Space Mono,monospace" font-weight="700">&gt; _</text>
+      <rect x="79" y="117" width="7" height="2" fill="${bodyAccent}"><animate attributeName="opacity" values="1;0;1" dur=".8s" repeatCount="indefinite"/></rect>`;
+  } else if(screenType==='heart'){
+    screenSvg=`<text x="80" y="122" font-size="22" fill="${bodyAccent}" font-family="serif" text-anchor="middle">♥</text>`;
+  } else if(screenType==='music'){
+    screenSvg=`<text x="80" y="122" font-size="22" fill="${bodyAccent}" font-family="serif" text-anchor="middle">♪</text>`;
+  } else if(screenType==='skull'){
+    screenSvg=`<text x="80" y="122" font-size="22" fill="${bodyAccent}" font-family="serif" text-anchor="middle">☠</text>`;
+  } else if(screenType==='star'){
+    screenSvg=`<text x="80" y="122" font-size="22" fill="${bodyAccent}" font-family="serif" text-anchor="middle">★</text>`;
+  } else if(screenType==='cross'){
+    screenSvg=`<text x="80" y="122" font-size="22" fill="${bodyAccent}" font-family="serif" text-anchor="middle">✚</text>`;
+  } else if(screenType==='gauge'){
+    screenSvg=`
+      <path d="M60 130 A 20 20 0 0 1 100 130" fill="none" stroke="#1a1a1a" stroke-width="4"/>
+      <path d="M60 130 A 20 20 0 0 1 95 112" fill="none" stroke="${bodyAccent}" stroke-width="4"/>
+      <line x1="80" y1="130" x2="90" y2="108" stroke="${bodyAccent}" stroke-width="2"/>`;
+  }
+
+  // eyes
+  const eyeBlinkDur=rnd(2.5,5.5).toFixed(1);
+  const eyeBlinkDur2=rnd(2.5,5.5).toFixed(1);
+  let eyesSvg='';
+  if(eyeStyle==='rect'){
+    eyesSvg=`
+      <rect x="52" y="32" width="20" height="16" rx="1" fill="${eyeFill}" opacity=".95"><animate attributeName="height" values="16;2;16" dur="${eyeBlinkDur}s" keyTimes="0;.47;.53" repeatCount="indefinite"/></rect>
+      <rect x="88" y="32" width="20" height="16" rx="1" fill="${eyeFill}" opacity=".95"><animate attributeName="height" values="16;2;16" dur="${eyeBlinkDur2}s" keyTimes="0;.47;.53" begin=".12s" repeatCount="indefinite"/></rect>
+      <rect x="57" y="36" width="10" height="8" fill="#000"/>
+      <rect x="93" y="36" width="10" height="8" fill="#000"/>`;
+  } else if(eyeStyle==='circle'){
+    eyesSvg=`
+      <circle cx="62" cy="40" r="9" fill="${eyeFill}"/>
+      <circle cx="98" cy="40" r="9" fill="${eyeFill}"/>
+      <circle cx="62" cy="40" r="5" fill="#000"/>
+      <circle cx="98" cy="40" r="5" fill="#000"/>
+      <circle cx="64" cy="38" r="2" fill="#fff" opacity=".7"/>
+      <circle cx="100" cy="38" r="2" fill="#fff" opacity=".7"/>`;
+  } else if(eyeStyle==='led'){
+    eyesSvg=`
+      <rect x="54" y="35" width="16" height="8" rx="1" fill="${eyeFill}"><animate attributeName="opacity" values="1;.2;1" dur="${eyeBlinkDur}s" repeatCount="indefinite"/></rect>
+      <rect x="90" y="35" width="16" height="8" rx="1" fill="${eyeFill}"><animate attributeName="opacity" values="1;.2;1" dur="${eyeBlinkDur2}s" repeatCount="indefinite"/></rect>`;
+  } else if(eyeStyle==='x'){
+    eyesSvg=`
+      <line x1="54" y1="32" x2="70" y2="48" stroke="${eyeFill}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="70" y1="32" x2="54" y2="48" stroke="${eyeFill}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="90" y1="32" x2="106" y2="48" stroke="${eyeFill}" stroke-width="3" stroke-linecap="round"/>
+      <line x1="106" y1="32" x2="90" y2="48" stroke="${eyeFill}" stroke-width="3" stroke-linecap="round"/>`;
+  } else if(eyeStyle==='star'){
+    eyesSvg=`
+      <text x="62" y="47" font-size="16" fill="${eyeFill}" text-anchor="middle">★</text>
+      <text x="98" y="47" font-size="16" fill="${eyeFill}" text-anchor="middle">★</text>`;
+  } else if(eyeStyle==='mono'){
+    // cyclops / single center eye
+    eyesSvg=`
+      <circle cx="80" cy="40" r="14" fill="${eyeFill}"/>
+      <circle cx="80" cy="40" r="8" fill="#000"/>
+      <circle cx="83" cy="37" r="3" fill="#fff" opacity=".6"/>`;
+  }
+
+  // mouth
+  let mouthSvg='';
+  if(mouth==='smile'){
+    mouthSvg=`<polyline points="53,56 61,62 99,62 107,56" fill="none" stroke="${mouthColor}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  } else if(mouth==='grin'){
+    mouthSvg=`<path d="M 52 56 Q 80 68 108 56" fill="none" stroke="${mouthColor}" stroke-width="2.5" stroke-linecap="round"/>`;
+  } else if(mouth==='frown'){
+    mouthSvg=`<polyline points="53,62 61,56 99,56 107,62" fill="none" stroke="${mouthColor}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  } else if(mouth==='flat'){
+    mouthSvg=`<line x1="58" y1="59" x2="102" y2="59" stroke="${mouthColor}" stroke-width="2"/>`;
+  } else if(mouth==='o'){
+    mouthSvg=`<ellipse cx="80" cy="59" rx="10" ry="7" fill="none" stroke="${mouthColor}" stroke-width="2"/>`;
+  } else if(mouth==='teeth'){
+    mouthSvg=`
+      <rect x="57" y="53" width="46" height="10" rx="2" fill="${mouthColor}"/>
+      <line x1="65" y1="53" x2="65" y2="63" stroke="#000" stroke-width="1.5"/>
+      <line x1="73" y1="53" x2="73" y2="63" stroke="#000" stroke-width="1.5"/>
+      <line x1="80" y1="53" x2="80" y2="63" stroke="#000" stroke-width="1.5"/>
+      <line x1="87" y1="53" x2="87" y2="63" stroke="#000" stroke-width="1.5"/>
+      <line x1="95" y1="53" x2="95" y2="63" stroke="#000" stroke-width="1.5"/>`;
+  } else if(mouth==='tusk'){
+    mouthSvg=`
+      <line x1="58" y1="56" x2="102" y2="56" stroke="${mouthColor}" stroke-width="2"/>
+      <line x1="64" y1="56" x2="64" y2="65" stroke="${mouthColor}" stroke-width="2"/>
+      <line x1="96" y1="56" x2="96" y2="65" stroke="${mouthColor}" stroke-width="2"/>`;
+  }
+
+  // accessories
+  let accSvg='';
+  if(hat==='tophat'){
+    accSvg=`
+      <rect x="56" y="-12" width="48" height="22" fill="${hc}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="44" y="8" width="72" height="8" fill="${hc}" stroke="${shellStroke}" stroke-width="1.5"/>`;
+  } else if(hat==='hardhat'){
+    accSvg=`
+      <path d="M 36 18 Q 80 -8 124 18 Z" fill="${hc==='#fff'?'#eee':'#333'}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="34" y="16" width="92" height="6" fill="${hc==='#fff'?'#ccc':'#444'}" stroke="${shellStroke}" stroke-width="1"/>`;
+  } else if(hat==='chef'){
+    accSvg=`
+      <ellipse cx="80" cy="10" rx="36" ry="18" fill="${hc==='#fff'?'#fff':'#eee'}" stroke="#ccc" stroke-width="1.5"/>
+      <ellipse cx="80" cy="18" rx="36" ry="6" fill="${hc==='#fff'?'#ddd':'#ccc'}" stroke="#ccc" stroke-width="1"/>`;
+  } else if(hat==='cap'){
+    accSvg=`
+      <path d="M 38 18 Q 80 2 122 18" fill="${hc==='#fff'?'#ccc':'#2a2a2a'}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="36" y="16" width="86" height="7" fill="${hc==='#fff'?'#bbb':'#333'}" stroke="${shellStroke}" stroke-width="1"/>
+      <rect x="30" y="21" width="42" height="6" rx="2" fill="${hc==='#fff'?'#aaa':'#222'}" stroke="${shellStroke}" stroke-width="1"/>`;
+  } else if(hat==='crown'){
+    accSvg=`
+      <polygon points="36,18 36,0 55,12 80,-2 105,12 124,0 124,18" fill="#888" stroke="#999" stroke-width="1.5"/>
+      <circle cx="80" cy="0" r="4" fill="#fff"/>
+      <circle cx="46" cy="10" r="3" fill="#ddd"/>
+      <circle cx="114" cy="10" r="3" fill="#ddd"/>`;
+  } else if(hat==='ninja'){
+    accSvg=`
+      <rect x="36" y="16" width="88" height="60" fill="${hc}" stroke="${shellStroke}" stroke-width="1" opacity=".5"/>
+      <rect x="36" y="39" width="88" height="12" fill="${hc==='#fff'?'#ccc':'#333'}" stroke="${shellStroke}" stroke-width="1"/>
+      <rect x="42" y="30" width="76" height="24" fill="#000" opacity=".6"/>`;
+  } else if(hat==='pirate'){
+    accSvg=`
+      <rect x="50" y="-4" width="60" height="24" fill="${hc==='#fff'?'#ccc':'#1a1a1a'}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <line x1="36" y1="18" x2="124" y2="18" stroke="${shellStroke}" stroke-width="3"/>
+      <text x="80" y="13" font-size="14" text-anchor="middle" fill="${hc==='#fff'?'#000':'#fff'}">☠</text>`;
+  } else if(hat==='wizard'){
+    accSvg=`
+      <polygon points="80,-30 50,18 110,18" fill="${hc==='#fff'?'#777':'#333'}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <text x="80" y="10" font-size="10" text-anchor="middle" fill="${hc==='#fff'?'#fff':'#fff'}">★</text>`;
+  } else if(glasses){
+    accSvg=`
+      <rect x="50" y="32" width="24" height="14" rx="3" fill="none" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="86" y="32" width="24" height="14" rx="3" fill="none" stroke="${shellStroke}" stroke-width="1.5"/>
+      <line x1="74" y1="39" x2="86" y2="39" stroke="${shellStroke}" stroke-width="1.5"/>`;
+  }
+
+  const antLightDur=rnd(.9,1.5).toFixed(1);
+
+  return `<svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <g style="animation:bot-float ${floatDur}s ease-in-out infinite">
+    <ellipse cx="80" cy="205" rx="28" ry="4" fill="#111"/>
+    <rect x="52" y="192" width="26" height="12" fill="${legFill}" stroke="${shellStroke}" stroke-width="1.5"/>
+    <rect x="84" y="192" width="26" height="12" fill="${legFill}" stroke="${shellStroke}" stroke-width="1.5"/>
+    <g>${legLA}<rect x="54" y="150" width="22" height="44" fill="${legFill}" stroke="${shellStroke}" stroke-width="1.5"/></g>
+    <g>${legRA}<rect x="86" y="150" width="22" height="44" fill="${legFill}" stroke="${shellStroke}" stroke-width="1.5"/></g>
+    <rect x="46" y="88" width="68" height="64" fill="${shell}" stroke="${shellStroke}" stroke-width="2"/>
+    <rect x="54" y="96" width="52" height="50" fill="${screenColor}" stroke="#2a2a2a" stroke-width="1"/>
+    ${screenSvg}
+    ${collar?`<rect x="54" y="148" width="52" height="8" fill="${shell==='#fff'?'#ddd':'#1e1e1e'}" stroke="${shellStroke}" stroke-width="1"/>`:''}
+    <g><animateTransform attributeName="transform" type="rotate" values="${armLv}" dur="${armLD}s" repeatCount="indefinite"/>
+      <rect x="28" y="88" width="18" height="48" fill="${armFill}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="30" y="136" width="16" height="12" fill="${handFill}" stroke="${shellStroke}" stroke-width="1"/>
+    </g>
+    <g><animateTransform attributeName="transform" type="rotate" values="${armRv}" dur="${armRD}s" repeatCount="indefinite"/>
+      <rect x="114" y="88" width="18" height="48" fill="${armFill}" stroke="${shellStroke}" stroke-width="1.5"/>
+      <rect x="114" y="136" width="16" height="12" fill="${handFill}" stroke="${shellStroke}" stroke-width="1"/>
+    </g>
+    <rect x="66" y="74" width="28" height="16" fill="${shell==='#000'?'#000':'#0d0d0d'}" stroke="#2a2a2a" stroke-width="1"/>
+    <rect x="36" y="18" width="88" height="58" fill="${hc}" stroke="${shellStroke}" stroke-width="2.5"/>
+    <rect x="42" y="24" width="76" height="46" fill="#080808" stroke="#333" stroke-width="1"/>
+    <rect x="46" y="27" width="68" height="40" fill="#000"/>
+    ${accSvg}
+    ${eyesSvg}
+    ${mouthSvg}
+    <rect x="78" y="5" width="4" height="15" fill="${antColor}"/>
+    <rect x="75" y="2" width="10" height="7" rx="1" fill="#1a1a1a" stroke="#444" stroke-width="1"/>
+    <circle cx="80" cy="1" r="3.5" fill="${antLight}"><animate attributeName="fill" values="${antLight};#111;${antLight}" dur="${antLightDur}s" repeatCount="indefinite"/></circle>
+  </g>
+</svg>`;
+}
+
+/* ══════════════════════════════════════════════════
+   FLEET MANIFEST — 21 AGENTS
+══════════════════════════════════════════════════ */
+const FLEET=[
+  {name:'IDLE BOT',   role:'Core Operations',    cfg:{shell:'#111',mouth:'smile',screenType:'dots',bodyAccent:'#fff',floatDur:2.2}},
+  {name:'COPILOT',    role:'AI Assistant',        cfg:{shell:'#fff',shellStroke:'#bbb',eyeFill:'#111',screenType:'text',screenColor:'#111',mouth:'grin',mouthColor:'#111',antLight:'#111',bodyAccent:'#111',floatDur:2}},
+  {name:'WALK BOT',   role:'Delivery Agent',      cfg:{shell:'#111',mouth:'flat',screenType:'dots',bodyAccent:'#aaa',floatDur:1.8}},
+  {name:'WAVE BOT',   role:'Interface Lead',      cfg:{shell:'#111',mouth:'smile',screenType:'dots',armR:'wave',bodyAccent:'#fff',floatDur:2.4}},
+  {name:'TYPING BOT', role:'Code Monkey',         cfg:{shell:'#111',mouth:'flat',screenType:'lines',armR:'wave',bodyAccent:'#fff',floatDur:2.1}},
+  {name:'DJ BOT',     role:'Broadcast System',    cfg:{shell:'#222',shellStroke:'#555',mouth:'grin',screenType:'music',bodyAccent:'#fff',eyeStyle:'rect',floatDur:1.6}},
+  {name:'BUILDER BOT',role:'Infra Engineer',      cfg:{shell:'#1a1a1a',shellStroke:'#444',mouth:'flat',screenType:'gauge',hat:'hardhat',bodyAccent:'#bbb',floatDur:2.3}},
+  {name:'GHOST BOT',  role:'Stealth Ops',         cfg:{shell:'#040404',shellStroke:'#111',eyeFill:'#aaa',eyeStyle:'led',mouth:'o',screenType:'dots',screenColor:'#000',bodyAccent:'#444',antLight:'#666',floatDur:3.0}},
+  {name:'SCOUT BOT',  role:'Recon Agent',         cfg:{shell:'#111',hat:'cap',mouth:'smile',screenType:'dots',armL:'sway',bodyAccent:'#ccc',floatDur:1.9}},
+  {name:'MEDIC BOT',  role:'Health Monitor',      cfg:{shell:'#fff',shellStroke:'#ccc',eyeFill:'#cc0000',eyeStyle:'circle',screenType:'cross',screenColor:'#f0f0f0',mouth:'smile',mouthColor:'#cc0000',bodyAccent:'#cc3333',antLight:'#cc0000',floatDur:2.5}},
+  {name:'BOXER BOT',  role:'Defense System',      cfg:{shell:'#111',mouth:'teeth',screenType:'skull',armL:'up',armR:'up',eyeStyle:'circle',eyeFill:'#fff',bodyAccent:'#fff',floatDur:1.7}},
+  {name:'CHEF BOT',   role:'Data Processor',      cfg:{shell:'#fff',shellStroke:'#ddd',hat:'chef',mouth:'grin',mouthColor:'#222',screenType:'dots',screenColor:'#f8f8f8',eyeStyle:'circle',eyeFill:'#333',bodyAccent:'#333',antLight:'#333',floatDur:2.2}},
+  {name:'NINJA BOT',  role:'Security Agent',      cfg:{shell:'#080808',shellStroke:'#222',hat:'ninja',mouth:'flat',screenType:'dots',eyeStyle:'led',eyeFill:'#ff2222',bodyAccent:'#882222',antLight:'#880000',floatDur:2.0}},
+  {name:'ASTRONAUT',  role:'Space Division',      cfg:{shell:'#fff',shellStroke:'#ccc',mouth:'smile',mouthColor:'#888',screenType:'star',screenColor:'#080808',eyeStyle:'circle',eyeFill:'#aaf',bodyAccent:'#aaf',antLight:'#aaf',collar:true,floatDur:3.5}},
+  {name:'PIRATE BOT', role:'Data Raider',         cfg:{shell:'#111',hat:'pirate',mouth:'tusk',screenType:'skull',eyeStyle:'x',eyeFill:'#fff',bodyAccent:'#888',floatDur:2.1}},
+  {name:'WIZARD BOT', role:'Inference Engine',    cfg:{shell:'#222',shellStroke:'#444',hat:'wizard',mouth:'o',screenType:'dots',eyeStyle:'star',eyeFill:'#fff',bodyAccent:'#fff',antLight:'#fff',floatDur:2.8}},
+  {name:'PAINTER BOT',role:'Design System',       cfg:{shell:'#fff',shellStroke:'#ccc',mouth:'grin',mouthColor:'#222',screenType:'heart',screenColor:'#f8f8f8',eyeStyle:'circle',eyeFill:'#333',bodyAccent:'#333',antLight:'#333',floatDur:2.3}},
+  {name:'DETECTIVE',  role:'Analytics Agent',     cfg:{shell:'#111',hat:'tophat',mouth:'flat',glasses:true,screenType:'lines',eyeStyle:'rect',eyeFill:'#ccc',bodyAccent:'#888',floatDur:2.6}},
+  {name:'ROCKSTAR',   role:'Launch System',       cfg:{shell:'#111',shellStroke:'#555',mouth:'grin',screenType:'music',armL:'up',eyeStyle:'star',eyeFill:'#fff',bodyAccent:'#fff',floatDur:1.5}},
+  {name:'CAPTAIN BOT',role:'Fleet Commander',     cfg:{shell:'#fff',shellStroke:'#bbb',hat:'crown',mouth:'smile',mouthColor:'#888',eyeStyle:'circle',eyeFill:'#1a1a1a',screenType:'text',screenColor:'#111',bodyAccent:'#888',antLight:'#888',floatDur:2.4}},
+  {name:'CYCLOPS BOT',role:'Vision System',       cfg:{shell:'#111',shellStroke:'#444',mouth:'smile',eyeStyle:'mono',eyeFill:'#fff',screenType:'gauge',bodyAccent:'#fff',floatDur:2.2}},
+];
+
+/* ══════════════════════════════════════════════════
+   ENGINE
+══════════════════════════════════════════════════ */
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280; stage.style.transform=`scale(${sc})`; shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const DURATION=64;
+const ROBOT_DURATION=2.6;   // seconds each robot stays in spotlight
+const ENTER_DUR=600;         // ms for enter transition
+const STAY_DUR=1800;         // ms in spotlight
+const EXIT_DUR=600;          // ms for exit transition
+const INTRO_END=4.5;         // seconds before first robot
+
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[]; function at(sec,fn){timeline.push({sec,fn});}
+
+let robotIndex=0,robotTimer=null,allIntervals=[];
+function si(fn,ms){const id=setInterval(fn,ms);allIntervals.push(id);return id;}
+function clearAll(){allIntervals.forEach(clearInterval);allIntervals=[];clearTimeout(robotTimer);}
+
+/* Build counter dots */
+function buildDots(){
+  const ring=document.getElementById('counter-ring');
+  ring.innerHTML='';
+  for(let i=0;i<21;i++){
+    const d=document.createElement('div');
+    d.className='dot'; d.id='dot-'+i; ring.appendChild(d);
+  }
+}
+
+function setDot(idx){
+  for(let i=0;i<21;i++){
+    const d=document.getElementById('dot-'+i);
+    if(!d)continue;
+    if(i<idx) d.className='dot done';
+    else if(i===idx) d.className='dot active';
+    else d.className='dot';
+  }
+}
+
+function showRobot(idx){
+  if(idx>=FLEET.length){onAllDone();return;}
+  const robot=FLEET[idx];
+  const wrap=document.getElementById('robot-wrap');
+  const badge=document.getElementById('name-badge');
+  const numEl=document.getElementById('hdr-num');
+
+  // update header
+  numEl.textContent=String(idx+1).padStart(2,'0');
+  numEl.classList.add('lit');
+
+  // set dot
+  setDot(idx);
+
+  // enter from left
+  wrap.innerHTML=makeRobot(robot.cfg);
+  wrap.style.transition='none';
+  wrap.style.left='-200px';
+  wrap.style.opacity='0';
+  wrap.style.transform='scale(2.2)';
+
+  badge.classList.remove('in');
+
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    wrap.style.transition=`left ${ENTER_DUR}ms cubic-bezier(.16,1,.3,1), opacity ${ENTER_DUR/2}ms`;
+    wrap.style.left='560px';
+    wrap.style.opacity='1';
+
+    // name badge
+    setTimeout(()=>{
+      document.getElementById('badge-name').textContent=robot.name;
+      document.getElementById('badge-role').textContent=robot.role;
+      badge.classList.add('in');
+    }, ENTER_DUR*0.6);
+
+    // exit after stay
+    robotTimer=setTimeout(()=>{
+      badge.classList.remove('in');
+      wrap.style.transition=`left ${EXIT_DUR}ms cubic-bezier(.55,0,1,.45), opacity ${EXIT_DUR*0.8}ms ${EXIT_DUR*0.2}ms`;
+      wrap.style.left='1440px';
+      wrap.style.opacity='0';
+
+      // next robot
+      robotTimer=setTimeout(()=>{
+        robotIndex++;
+        showRobot(robotIndex);
+      }, EXIT_DUR + 80);
+    }, ENTER_DUR + STAY_DUR);
+  }));
+}
+
+function onAllDone(){
+  // All 21 robots done — show end card
+  setTimeout(()=>{
+    const ec=document.getElementById('end-card');
+    ec.classList.add('in');
+    setTimeout(()=>{
+      document.getElementById('ec-main').classList.add('in');
+      document.getElementById('ec-rule').classList.add('in');
+      document.getElementById('ec-stats').classList.add('in');
+      document.getElementById('ec-sub').classList.add('in');
+    },100);
+  }, 300);
+}
+
+/* ══════════════════════════════════════════════════
+   TIMELINE
+══════════════════════════════════════════════════ */
+at(0.3,()=>{
+  // Intro animation
+  const intro=document.getElementById('intro-screen');
+  document.getElementById('intro-main').classList.add('in');
+  document.getElementById('intro-rule').classList.add('in');
+  document.getElementById('intro-sub').classList.add('in');
+  document.getElementById('spotlight').classList.add('in');
+  document.getElementById('hdr-title').classList.add('in');
+});
+at(INTRO_END,()=>{
+  // fade out intro
+  document.getElementById('intro-screen').classList.add('out');
+  buildDots();
+  robotIndex=0;
+  setTimeout(()=>showRobot(0), 600);
+});
+
+/* ══════════════════════════════════════════════════
+   TICK
+══════════════════════════════════════════════════ */
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+  if(t<DURATION+2) raf=requestAnimationFrame(tick); else onEnd();
+}
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); clearAll(); resetAll(); raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false; clearAll();
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null; robotIndex=0; clearAll();
+  // intro
+  const intro=document.getElementById('intro-screen');
+  intro.classList.remove('out'); intro.style.opacity='1';
+  document.getElementById('intro-main').classList.remove('in');
+  document.getElementById('intro-rule').classList.remove('in'); document.getElementById('intro-rule').style.width='0'; document.getElementById('intro-rule').style.transition='none';
+  document.getElementById('intro-sub').classList.remove('in');
+  document.getElementById('spotlight').classList.remove('in');
+  document.getElementById('hdr-title').classList.remove('in');
+  document.getElementById('hdr-num').textContent='—'; document.getElementById('hdr-num').classList.remove('lit');
+  // robot
+  const wrap=document.getElementById('robot-wrap');
+  wrap.style.transition='none'; wrap.style.left='-200px'; wrap.style.opacity='0'; wrap.innerHTML='';
+  document.getElementById('name-badge').classList.remove('in');
+  document.getElementById('counter-ring').innerHTML='';
+  // end card
+  const ec=document.getElementById('end-card'); ec.classList.remove('in');
+  ['ec-main','ec-rule','ec-stats','ec-sub'].forEach(id=>{
+    const e=document.getElementById(id); if(e) e.classList.remove('in');
+  });
+  document.getElementById('ec-rule').style.transition='none'; document.getElementById('ec-rule').style.width='0';
+  document.getElementById('prog-fill').style.width='0';
+}
+</script>
+</body>
+</html>

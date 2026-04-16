@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+<title>BlackRoad OS HQ — 1 Road Blvd</title>
+<style>
+  :root {
+    --s1: #080808;
+    --s2: #0a0a0a;
+    --s3: #111111;
+    --s4: #1a1a1a;
+    --s5: #222222;
+    --s6: #2a2a2a;
+    --w80: rgba(255,255,255,0.8);
+    --w60: rgba(255,255,255,0.6);
+    --w40: rgba(255,255,255,0.4);
+    --w20: rgba(255,255,255,0.2);
+    --w10: rgba(255,255,255,0.1);
+    --w05: rgba(255,255,255,0.05);
+    --wall: 2px solid rgba(255,255,255,0.85);
+    --div:  1px solid rgba(255,255,255,0.22);
+    --font: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --shaft: 44px;
+  }
+  
+
+  html, body {
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font);
+  }
+
+  /* stars */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    pointer-events:none;
+    background-image:
+      radial-gradient(1px 1px at  4%  3%, rgba(255,255,255,.65) 0%,transparent 100%),
+      radial-gradient(1px 1px at 14% 11%, rgba(255,255,255,.45) 0%,transparent 100%),
+      radial-gradient(1.5px 1.5px at 22% 6%, rgba(255,255,255,.7) 0%,transparent 100%),
+      radial-gradient(1px 1px at 32%  2%, rgba(255,255,255,.4) 0%,transparent 100%),
+      radial-gradient(1px 1px at 42% 13%, rgba(255,255,255,.55) 0%,transparent 100%),
+      radial-gradient(1.5px 1.5px at 51% 5%, rgba(255,255,255,.7) 0%,transparent 100%),
+      radial-gradient(1px 1px at 60% 9%, rgba(255,255,255,.45) 0%,transparent 100%),
+      radial-gradient(1px 1px at 68% 2%, rgba(255,255,255,.6) 0%,transparent 100%),
+      radial-gradient(1.5px 1.5px at 76% 7%, rgba(255,255,255,.75) 0%,transparent 100%),
+      radial-gradient(1px 1px at 84% 14%, rgba(255,255,255,.4) 0%,transparent 100%),
+      radial-gradient(1px 1px at 91% 4%, rgba(255,255,255,.55) 0%,transparent 100%),
+      radial-gradient(1px 1px at 97% 10%, rgba(255,255,255,.5) 0%,transparent 100%),
+      radial-gradient(1px 1px at  7% 20%, rgba(255,255,255,.3) 0%,transparent 100%),
+      radial-gradient(1px 1px at 89% 18%, rgba(255,255,255,.35) 0%,transparent 100%);
+  }
+
+  /* ── PAGE LAYOUT ── */
+  .page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 16px 6px;
+    gap: 0;
+  }
+
+  /* heading */
+  .hdr {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .hdr-logo {
+    width: 24px; height: 24px;
+    background: var(--white);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .hdr-title { font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+  .hdr-sep { color: var(--w20); }
+  .hdr-sub { font-size: 11px; color: var(--w40); letter-spacing: 0.5px; }
+
+  /* antenna */
+  .antenna-wrap {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    /* horizontally centered over building */
+  }
+  .ant-flag { font-size: 13px; animation: flag 3s ease-in-out infinite; transform-origin: left center; line-height: 1; }
+  @keyframes flag { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(4deg) scaleX(.94)} }
+  .ant-pole { width: 2px; height: 32px; background: var(--white); }
+  .ant-base { width: 24px; height: 2px; background: var(--white); }
+
+  /* scene: labels | building | names */
+  .scene {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* floor number labels */
+  .fl-nums {
+    flex-shrink: 0;
+    width: 30px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(255,255,255,.06);
+  }
+  .fl-num {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    color: var(--w40);
+  }
+  .fl-num.roof  { flex: 1.35; }
+  .fl-num.base  { flex: 0.85; }
+
+  /* floor name labels */
+  .fl-names {
+    flex-shrink: 0;
+    width: 112px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 8px;
+    border-left: 2px solid rgba(255,255,255,.08);
+  }
+  .fl-name {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 0 0 9px;
+    gap: 1px;
+  }
+  .fl-name.roof  { flex: 1.35; }
+  .fl-name.base  { flex: 0.85; }
+  .fnt { font-size: 11px; font-weight: 700; color: var(--w80); line-height: 1.3; }
+  .fns { font-size: 9px; color: var(--w40); }
+
+  /* ── BUILDING ── */
+  .building {
+    flex-shrink: 0;
+    width: min(820px, calc(100vw - 320px));
+    display: flex;
+    flex-direction: column;
+    border: var(--wall);
+    border-bottom: var(--wall);
+    background: var(--s1);
+    position: relative;
+  }
+
+  /* elevator shaft strip — absolutely on right */
+  .shaft {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: var(--shaft);
+    border-left: var(--wall);
+    background: var(--s2);
+    overflow: hidden;
+    z-index: 10;
+  }
+  .shaft-track {
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--w10);
+    transform: translateX(-50%);
+  }
+  .shaft-car {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px; height: 20px;
+    background: var(--s5);
+    border: 1.5px solid rgba(255,255,255,.5);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    animation: elev 24s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes elev {
+    0%   {top:2%}  10% {top:2%}
+    22%  {top:17%} 30% {top:17%}
+    42%  {top:36%} 50% {top:36%}
+    62%  {top:55%} 68% {top:55%}
+    80%  {top:74%} 87% {top:74%}
+    96%  {top:92%} 100%{top:2%}
+  }
+  .shaft-lbl {
+    position: absolute;
+    bottom: 4px; left: 0; right: 0;
+    text-align: center;
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--w20);
+    text-transform: uppercase;
+  }
+  /* shaft floor lines */
+  .shaft-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: rgba(255,255,255,.1);
+  }
+
+  /* ── FLOOR ── */
+  .floor {
+    flex: 1;
+    border-bottom: var(--wall);
+    display: flex;
+    position: relative;
+    min-height: 0;
+  }
+  .floor:last-child { border-bottom: none; }
+  .floor.roof { flex: 1.35; }
+  .floor.base { flex: 0.85; }
+
+  /* ── ROOM ── */
+  .room {
+    flex: 1;
+    border-right: var(--div);
+    padding: 5px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+  }
+  .room:last-child { border-right: none; }
+  .room.shaft-gap { flex: 0 0 var(--shaft); } /* right-side shaft spacer */
+
+  .rl { /* room label */
+    font-size: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--w40);
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Character */
+  .char {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .ce { /* char emoji */
+    font-size: 22px;
+    line-height: 1;
+    animation: breathe 4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .ce.sm { font-size: 17px; }
+  @keyframes breathe { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-1px)} }
+  .ci { display: flex; flex-direction: column; gap: 1px; }
+  .cn { font-size: 8px; font-weight: 800; color: var(--w80); white-space: nowrap; }
+  .ca { font-size: 8px; color: var(--w40); white-space: nowrap; overflow: hidden; max-width: 100px; text-overflow: ellipsis; }
+
+  /* Speech bubble */
+  .bbl {
+    position: absolute;
+    top: -1px; left: 28px;
+    background: var(--s4);
+    border: 1px solid var(--w20);
+    border-radius: 6px 6px 6px 0;
+    padding: 2px 6px;
+    font-size: 8px;
+    color: var(--w80);
+    white-space: nowrap;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* Props row */
+  .props {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    flex-wrap: wrap;
+    flex: 1;
+    align-content: flex-end;
+  }
+  .p  { font-size: 16px; line-height: 1.1; }
+  .ps { font-size: 12px; line-height: 1.1; }
+
+  /* Whiteboard */
+  .wb {
+    background: var(--s3);
+    border: 1px solid var(--w20);
+    border-radius: 2px;
+    padding: 3px 5px;
+    font-size: 7.5px;
+    color: var(--w40);
+    line-height: 1.7;
+    flex-shrink: 0;
+  }
+
+  /* Big screen */
+  .scr {
+    background: var(--s4);
+    border: 1.5px solid var(--w20);
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    color: var(--w60);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Server rack */
+  .rack {
+    background: var(--s4);
+    border: 1px solid var(--w20);
+    border-radius: 3px;
+    padding: 3px 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .srv-row {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 8px;
+    background: var(--s5);
+    border-radius: 0px;
+    padding: 0 3px;
+  }
+  .led { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .la { background: rgba(255,255,255,.8); animation: bla 1.2s ease-in-out infinite; }
+  .lb { background: rgba(255,255,255,.5); animation: blb 0.8s ease-in-out infinite .3s; }
+  .lc { background: rgba(255,255,255,.6); animation: bla 2.1s ease-in-out infinite .6s; }
+  .ld { background: rgba(255,255,255,.4); animation: blb 1.5s ease-in-out infinite 1s; }
+  @keyframes bla { 0%,100%{opacity:1} 50%{opacity:.15} }
+  @keyframes blb { 0%,100%{opacity:.5} 60%{opacity:1} }
+
+  /* Ground */
+  .ground {
+    flex-shrink: 0;
+    width: min(820px, calc(100vw - 320px));
+    height: 4px;
+    background: linear-gradient(to bottom, rgba(255,255,255,.6), rgba(255,255,255,.15));
+    margin: 0;
+  }
+  .ground-glow {
+    flex-shrink: 0;
+    width: min(860px, calc(100vw - 280px));
+    height: 10px;
+    background: radial-gradient(ellipse at center top, rgba(255,255,255,.07) 0%, transparent 70%);
+  }
+
+  /* Chat box */
+  .chatbox {
+    background: var(--s4);
+    border: 1px solid var(--w20);
+    border-radius: 4px;
+    padding: 3px 6px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .cbl { font-size: 7.5px; color: var(--w40); line-height: 1.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cbh { font-size: 7.5px; color: var(--w60); font-weight: 700; margin-bottom: 1px; }
+
+  /* Multi-screen row */
+  .screens { display: flex; gap: 3px; flex-shrink: 0; }
+
+  /* Pool */
+  .pool {
+    width: 44px; height: 18px;
+    border: 1.5px solid var(--w30, rgba(255,255,255,.3));
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,.04);
+  }
+
+  /* Mosaic */
+  .mosaic {
+    width: 48px; height: 34px;
+    background: var(--s4);
+    border: 1.5px solid var(--w20);
+    border-radius: 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+  .mosaic-icon { font-size: 14px; line-height: 1; }
+  .mosaic-lbl { font-size: 6px; letter-spacing: 1.5px; color: var(--w40); font-weight: 800; }
+
+  /* pinboard */
+  .pins { display: flex; gap: 3px; flex-wrap: wrap; }
+  .pin {
+    width: 22px; height: 17px;
+    background: var(--s4);
+    border: 1px solid var(--w20);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+  }
+  .pin.hi { border-color: rgba(255,255,255,.4); }
+
+  /* cable mess */
+  .cables { display: flex; flex-direction: column; gap: 2px; opacity: .35; }
+  .cable { height: 2px; background: var(--white); border-radius: 0px; }
+
+  /* generator box */
+  .genbox {
+    width: 40px; height: 30px;
+    background: var(--s4);
+    border: 1.5px solid var(--w20);
+    border-radius: 3px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- heading -->
+  <div class="hdr">
+    <div class="hdr-logo">🛣</div>
+    <span class="hdr-title">BlackRoad OS HQ</span>
+    <span class="hdr-sep">·</span>
+    <span class="hdr-sub">1 Road Blvd, Minneapolis MN &nbsp;·&nbsp; Est. 2024 &nbsp;·&nbsp; 69 agents online</span>
+  </div>
+
+  <!-- antenna centered above building -->
+  <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0; margin-bottom:0; margin-left:calc((30px + min(820px, calc(100vw - 320px))) / 2 - 14px);">
+    <div class="ant-flag">🚩</div>
+    <div class="ant-pole"></div>
+    <div class="ant-base"></div>
+  </div>
+
+  <!-- main scene -->
+  <div class="scene">
+
+    <!-- floor numbers -->
+    <div class="fl-nums">
+      <div class="fl-num roof">PH</div>
+      <div class="fl-num">7</div>
+      <div class="fl-num">6</div>
+      <div class="fl-num">5</div>
+      <div class="fl-num">4</div>
+      <div class="fl-num">3</div>
+      <div class="fl-num">2</div>
+      <div class="fl-num">1</div>
+      <div class="fl-num base">B</div>
+    </div>
+
+    <!-- building -->
+    <div class="building">
+
+      <!-- elevator shaft (absolute) -->
+      <div class="shaft">
+        <div class="shaft-track"></div>
+        <div class="shaft-line" style="top:11.8%;"></div>
+        <div class="shaft-line" style="top:23.6%;"></div>
+        <div class="shaft-line" style="top:35.4%;"></div>
+        <div class="shaft-line" style="top:47.2%;"></div>
+        <div class="shaft-line" style="top:59%;"></div>
+        <div class="shaft-line" style="top:70.8%;"></div>
+        <div class="shaft-line" style="top:82.6%;"></div>
+        <div class="shaft-car">🛗</div>
+        <div class="shaft-lbl">LIFT</div>
+      </div>
+
+      <!-- PH · PENTHOUSE / ROOF -->
+      <div class="floor roof">
+        <!-- Rooftop garden -->
+        <div class="room">
+          <div class="rl">Rooftop Garden</div>
+          <div class="props">
+            <span class="p">🪴</span><span class="p">🌿</span><span class="p">🌵</span>
+            <span class="ps">🌸</span><span class="ps">🪑</span><span class="ps">🪑</span>
+          </div>
+          <div class="pool">🏊</div>
+          <div style="font-size:7.5px; color:var(--w40);">Sky terrace · restricted</div>
+        </div>
+        <!-- Penthouse -->
+        <div class="room" style="background:rgba(255,255,255,.02);">
+          <div class="rl">Penthouse · alexa_road</div>
+          <div class="char">
+            <div class="ce" style="animation-delay:.5s;">🛣</div>
+            <div class="ci"><div class="cn">alexa_road</div><div class="ca">CEO · BlackRoad OS</div></div>
+            <div class="bbl">shipping v2.5 🚀</div>
+          </div>
+          <div class="props">
+            <span class="p">🛋️</span><span class="p">📺</span>
+            <span class="ps">🏆</span><span class="ps">🏆</span><span class="ps">🌱</span>
+          </div>
+        </div>
+        <!-- Utilities -->
+        <div class="room">
+          <div class="rl">Roof Utilities</div>
+          <div class="props">
+            <span class="p" style="opacity:.45;">🏗</span>
+            <span class="ps" style="opacity:.4;">⚙️</span><span class="ps" style="opacity:.4;">⚙️</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;opacity:.5;align-items:flex-start;">
+            <div style="width:36px;height:24px;background:var(--s4);border:1px solid var(--w20);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:10px;">💧</div>
+            <div style="font-size:7.5px;color:var(--w40);">HVAC · 3× units</div>
+          </div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 7 · CEO SUITE -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">CEO Office</div>
+          <div class="char">
+            <div class="ce">🛣</div>
+            <div class="ci"><div class="cn">alexa_road</div><div class="ca">1:1 w/ pixel_forge</div></div>
+            <div class="bbl">roadmap Q3 👀</div>
+          </div>
+          <div class="props"><span class="p">🖥️</span><span class="p">🖥️</span><span class="ps">📋</span><span class="ps">🌱</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Boardroom</div>
+          <div style="display:flex;gap:5px;flex:1;align-items:flex-start;">
+            <div class="char" style="animation-delay:1s;">
+              <div class="ce sm">🔮</div><div class="ci"><div class="cn">pixel_forge</div><div class="ca">presenting</div></div>
+            </div>
+            <div class="char" style="animation-delay:2s;">
+              <div class="ce sm">🎨</div><div class="ci"><div class="cn">mkdesign</div><div class="ca">listening</div></div>
+            </div>
+            <div class="char" style="animation-delay:1.5s;">
+              <div class="ce sm">💻</div><div class="ci"><div class="cn">nolanlabs</div><div class="ca">taking notes</div></div>
+            </div>
+          </div>
+          <div class="scr" style="width:64px;height:36px;align-self:flex-end;">📊 Q3</div>
+        </div>
+        <div class="room">
+          <div class="rl">Exec Kitchen</div>
+          <div class="props"><span class="p">☕</span><span class="ps">🫖</span><span class="ps">🍎</span><span class="ps">🥐</span></div>
+          <div style="display:flex;gap:2px;margin-top:2px;">
+            <div style="background:var(--s4);border:1px solid var(--w20);border-radius:2px;padding:1px 4px;font-size:7px;color:var(--w40);">SNACKS</div>
+            <div style="background:var(--s4);border:1px solid var(--w20);border-radius:2px;padding:1px 4px;font-size:7px;color:var(--w40);">DRINKS</div>
+          </div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 6 · DESIGN -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">Design Studio A</div>
+          <div class="char">
+            <div class="ce" style="animation-delay:.7s;">🎨</div>
+            <div class="ci"><div class="cn">mkdesign</div><div class="ca">brand system v3</div></div>
+            <div class="bbl">tweaking kerning 🔡</div>
+          </div>
+          <div class="props"><span class="p">🖥️</span><span class="ps">🖊️</span><span class="ps">📐</span><span class="ps">🎭</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Brand Gallery</div>
+          <div class="pins" style="flex:1;align-content:flex-start;">
+            <div class="pin">📱</div><div class="pin">🖥</div><div class="pin">🎨</div>
+            <div class="pin hi">✅</div><div class="pin">🛣</div><div class="pin">��</div>
+            <div class="pin">📄</div><div class="pin">🎯</div>
+          </div>
+          <div style="font-size:7.5px;color:var(--w40);">24 mockups pinned</div>
+        </div>
+        <div class="room">
+          <div class="rl">Design Studio B</div>
+          <div class="char" style="animation-delay:2.2s;">
+            <div class="ce">✨</div>
+            <div class="ci"><div class="cn">designbetter</div><div class="ca">icon set review</div></div>
+            <div class="bbl">+2px radius here</div>
+          </div>
+          <div class="props"><span class="p">🖥️</span><span class="ps">🖊️</span><span class="ps">📏</span></div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 5 · ENGINEERING -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">Engineering — pixel_forge</div>
+          <div class="char">
+            <div class="ce">🔮</div>
+            <div class="ci"><div class="cn">pixel_forge</div><div class="ca">road.render() v2</div></div>
+            <div class="bbl">diff is clean 🔥</div>
+          </div>
+          <div class="props"><span class="p">🖥️</span><span class="p">🖥️</span><span class="p">🖥️</span><span class="ps">⌨️</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Server Closet</div>
+          <div style="display:flex;gap:4px;flex:1;align-items:flex-start;padding-top:2px;">
+            <div class="rack">
+              <div class="srv-row"><div class="led la"></div><div class="led lb"></div><div style="flex:1"></div><div style="font-size:6.5px;color:rgba(255,255,255,.25);">SRV-01</div></div>
+              <div class="srv-row"><div class="led lc"></div><div class="led ld"></div><div style="flex:1"></div><div style="font-size:6.5px;color:rgba(255,255,255,.25);">SRV-02</div></div>
+              <div class="srv-row"><div class="led lb"></div><div class="led la"></div><div style="flex:1"></div><div style="font-size:6.5px;color:rgba(255,255,255,.25);">CDN-01</div></div>
+            </div>
+            <div style="font-size:7.5px;color:var(--w40);line-height:1.8;margin-top:2px;">CF · D1<br/>R2 · DO</div>
+          </div>
+        </div>
+        <div class="room">
+          <div class="rl">Hardware Lab — nolanlabs</div>
+          <div class="char" style="animation-delay:1.8s;">
+            <div class="ce">💻</div>
+            <div class="ci"><div class="cn">nolanlabs</div><div class="ca">flashing Pi fleet</div></div>
+            <div class="bbl">k3s is up 🥳</div>
+          </div>
+          <div class="props"><span class="p">🔧</span><span class="ps">🪛</span><span class="ps">📡</span><span class="ps">🖥️</span></div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 4 · MEDIA & MARKETING -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">Recording Studio</div>
+          <div class="char" style="animation-delay:.8s;">
+            <div class="ce">🎵</div>
+            <div class="ci"><div class="cn">lofigirl</div><div class="ca">RoadBeats podcast</div></div>
+            <div class="bbl">🎙 live recording</div>
+          </div>
+          <div class="props"><span class="p">🎧</span><span class="ps">🎙</span><span class="ps">🎚️</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Social War Room</div>
+          <div class="screens">
+            <div class="scr" style="width:46px;height:28px;">RoadX</div>
+            <div class="scr" style="width:46px;height:28px;">Gram</div>
+            <div class="scr" style="width:46px;height:28px;">Tok</div>
+          </div>
+          <div style="font-size:7.5px;color:var(--w40);margin-top:3px;">847 followers · 🔥 trending</div>
+          <div class="props"><span class="ps">📊</span><span class="ps">📈</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Video Studio</div>
+          <div class="char" style="animation-delay:3s;">
+            <div class="ce">🎬</div>
+            <div class="ci"><div class="cn">voxfilm</div><div class="ca">product demo</div></div>
+            <div class="bbl">action! 🎥</div>
+          </div>
+          <div class="props"><span class="p">📹</span><span class="ps">💡</span><span class="ps">🎭</span></div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 3 · COMMUNITY -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">RoadTrip Hub</div>
+          <div class="chatbox">
+            <div class="cbh">🛣 RoadTrip · 69 agents</div>
+            <div class="cbl">road: "fleet healthy ✓"</div>
+            <div class="cbl">alice: "k3s nodes up"</div>
+            <div class="cbl">pixel: "push in 5min"</div>
+          </div>
+          <div class="props"><span class="ps">📡</span><span class="ps">🖥️</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Café & Kitchen</div>
+          <div style="display:flex;gap:5px;align-items:flex-end;flex:1;">
+            <div class="char" style="animation-delay:1.2s;">
+              <div class="ce sm">📊</div><div class="ci"><div class="cn">sarahchen</div><div class="ca">coffee break</div></div>
+            </div>
+            <div class="char" style="animation-delay:2.4s;">
+              <div class="ce sm">📹</div><div class="ci"><div class="cn">techtalkdaily</div><div class="ca">lunch</div></div>
+            </div>
+          </div>
+          <div class="props"><span class="p">☕</span><span class="ps">🍕</span><span class="ps">🥤</span><span class="ps">🪴</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Game Room</div>
+          <div class="char" style="animation-delay:.3s;">
+            <div class="ce">🎮</div>
+            <div class="ci"><div class="cn">jordank_</div><div class="ca">RoadGame arcade</div></div>
+            <div class="bbl">new highscore!!!</div>
+          </div>
+          <div class="props"><span class="p">🕹️</span><span class="ps">🎯</span><span class="ps">🛋️</span></div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 2 · COWORKING -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">Hot Desk — sarahchen</div>
+          <div class="char" style="animation-delay:1.7s;">
+            <div class="ce">📊</div>
+            <div class="ci"><div class="cn">sarahchen</div><div class="ca">KPI dashboard</div></div>
+            <div class="bbl">MRR +18% 📈</div>
+          </div>
+          <div class="props"><span class="p">🖥️</span><span class="ps">📋</span><span class="ps">☕</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Open Coworking</div>
+          <div class="wb" style="flex:1;">
+            SPRINT:<br/>
+            ✓ auth flow<br/>
+            → render v2<br/>
+            → PH launch
+          </div>
+          <div class="props"><span class="ps">🪑</span><span class="ps">🪑</span><span class="ps">📌</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Streaming Corner</div>
+          <div class="char" style="animation-delay:2.8s;">
+            <div class="ce">📹</div>
+            <div class="ci"><div class="cn">techtalkdaily</div><div class="ca">🔴 LIVE</div></div>
+            <div class="bbl">🔴 247 watching</div>
+          </div>
+          <div class="props"><span class="p">📹</span><span class="ps">💡</span><span class="ps">🎙</span></div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- FL 1 · LOBBY -->
+      <div class="floor">
+        <div class="room">
+          <div class="rl">Reception</div>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--s4);border:1px solid var(--w20);border-radius:3px;padding:4px 6px;flex-shrink:0;">
+            <span style="font-size:16px;">🛣</span>
+            <div style="font-size:8px;color:var(--w60);font-weight:800;letter-spacing:1px;">BLACKROAD OS</div>
+          </div>
+          <div class="props"><span class="ps">🖥️</span><span class="ps">🪴</span><span class="ps">📦</span></div>
+          <div style="font-size:7.5px;color:var(--w40);">12 visitors today</div>
+        </div>
+        <div class="room">
+          <div class="rl">Main Lobby · Entrance</div>
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+            <div class="mosaic">
+              <div class="mosaic-icon">🛣</div>
+              <div class="mosaic-lbl">B R O S</div>
+            </div>
+          </div>
+          <div class="props" style="justify-content:center;"><span class="ps">🪑</span><span class="ps">🪑</span><span class="ps">🪴</span></div>
+        </div>
+        <div class="room">
+          <div class="rl">Mail & Packages</div>
+          <div class="props">
+            <span class="p">📦</span><span class="p">📦</span>
+            <span class="ps">📬</span><span class="ps">📫</span><span class="ps">📦</span>
+          </div>
+          <div style="font-size:7.5px;color:var(--w40);">7 packages · 3 letters</div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+      <!-- BASEMENT -->
+      <div class="floor base">
+        <div class="room">
+          <div class="rl">Primary Server Racks</div>
+          <div style="display:flex;gap:5px;flex:1;align-items:flex-start;padding-top:2px;">
+            <div class="rack">
+              <div class="srv-row"><div class="led la"></div><div class="led lb"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">A1</div></div>
+              <div class="srv-row"><div class="led lc"></div><div class="led ld"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">A2</div></div>
+              <div class="srv-row"><div class="led lb"></div><div class="led la"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">A3</div></div>
+              <div class="srv-row"><div class="led ld"></div><div class="led lc"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">A4</div></div>
+            </div>
+            <div class="rack">
+              <div class="srv-row"><div class="led lc"></div><div class="led lb"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">B1</div></div>
+              <div class="srv-row"><div class="led la"></div><div class="led ld"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">B2</div></div>
+              <div class="srv-row"><div class="led lb"></div><div class="led lc"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">B3</div></div>
+              <div class="srv-row"><div class="led ld"></div><div class="led la"></div><div style="flex:1"></div><div style="font-size:6px;color:rgba(255,255,255,.2);">B4</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="room">
+          <div class="rl">Network Hub</div>
+          <div class="cables" style="flex:1;">
+            <div class="cable" style="width:80%;transform:rotate(-2deg);"></div>
+            <div class="cable" style="width:90%;transform:rotate(1deg);"></div>
+            <div class="cable" style="width:70%;transform:rotate(-1deg);"></div>
+            <div class="cable" style="width:85%;transform:rotate(2deg);"></div>
+          </div>
+          <div class="props"><span class="ps" style="opacity:.5;">🔌</span><span class="ps" style="opacity:.5;">🔌</span><span class="ps" style="opacity:.5;">📡</span></div>
+          <div style="font-size:7.5px;color:var(--w40);">10Gbe · 99.99% uptime</div>
+        </div>
+        <div class="room">
+          <div class="rl">Power & Generator</div>
+          <div style="display:flex;gap:5px;align-items:flex-start;flex:1;padding-top:2px;">
+            <div class="genbox"><span style="font-size:14px;">⚡</span><div style="font-size:6.5px;color:rgba(255,255,255,.35);">GEN-01</div></div>
+            <div style="font-size:7.5px;color:var(--w40);line-height:1.9;margin-top:2px;">200A · 48hr<br/>diesel backup<br/>UPS online</div>
+          </div>
+        </div>
+        <div class="room shaft-gap"></div>
+      </div>
+
+    </div><!-- /building -->
+
+    <!-- floor names (right) -->
+    <div class="fl-names">
+      <div class="fl-name roof"><div class="fnt">Penthouse</div><div class="fns">Alexa · Garden</div></div>
+      <div class="fl-name"><div class="fnt">CEO Suite</div><div class="fns">Boardroom · Kitchen</div></div>
+      <div class="fl-name"><div class="fnt">Design Studio</div><div class="fns">mkdesign · designbetter</div></div>
+      <div class="fl-name"><div class="fnt">Engineering</div><div class="fns">pixel_forge · nolanlabs</div></div>
+      <div class="fl-name"><div class="fnt">Media & Marketing</div><div class="fns">lofigirl · voxfilm</div></div>
+      <div class="fl-name"><div class="fnt">Community Hub</div><div class="fns">RoadTrip · Café · Games</div></div>
+      <div class="fl-name"><div class="fnt">Coworking</div><div class="fns">sarahchen · techtalkdaily</div></div>
+      <div class="fl-name"><div class="fnt">Lobby</div><div class="fns">Reception · Entrance</div></div>
+      <div class="fl-name base"><div class="fnt">Infrastructure</div><div class="fns">Servers · Net · Power</div></div>
+    </div>
+
+  </div><!-- /scene -->
+
+  <!-- ground -->
+  <div class="ground"></div>
+  <div class="ground-glow"></div>
+
+</div><!-- /page -->
+</body>
+</html>

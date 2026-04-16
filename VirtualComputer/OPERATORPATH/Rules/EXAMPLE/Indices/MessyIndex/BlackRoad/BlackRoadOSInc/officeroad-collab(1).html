@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OfficeRoad — BlackRoad OS</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{overflow:hidden;background:#000;font-family:'Space Grotesk',system-ui,sans-serif}
+#wrap{width:100vw;height:100vh;position:relative}
+
+#hud{position:absolute;top:16px;left:16px;background:rgba(0,0,0,.8);border:1px solid #1a1a1a;border-radius:10px;padding:14px 18px;color:#f5f5f5;backdrop-filter:blur(12px);max-width:240px}
+#hud-title{font-weight:700;font-size:15px;color:#fff;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+#hud-bar{width:16px;height:2px;border-radius:1px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#FF00D4,#7800FF,#3E84FF,#00D6FF)}
+#hud-sub{font-size:10px;color:#555;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;margin-bottom:10px}
+#hud-controls{display:flex;flex-direction:column;gap:3px}
+.hc{font-size:11px;color:#737373;display:flex;gap:6px}
+.hk{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:4px;padding:1px 6px;font-family:monospace;font-size:10px;color:#a3a3a3}
+#hud-floor{margin-top:10px;padding-top:10px;border-top:1px solid #1a1a1a;font-family:'JetBrains Mono',monospace;font-size:9px;color:#444;letter-spacing:.06em}
+
+#dialogue{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(8,8,8,.97);border:1px solid #1a1a1a;color:#f5f5f5;padding:20px;border-radius:12px;max-width:600px;width:90%;display:none;backdrop-filter:blur(20px)}
+#dlg-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;display:flex;align-items:center;gap:8px}
+#dlg-role{font-family:'JetBrains Mono',monospace;font-size:9px;color:#444;letter-spacing:.08em;margin-bottom:14px}
+#dlg-content{font-size:13px;line-height:1.7;color:#a3a3a3;max-height:160px;overflow-y:auto;margin-bottom:14px;padding-right:4px}
+#dlg-content::-webkit-scrollbar{width:2px}
+#dlg-content::-webkit-scrollbar-thumb{background:#2a2a2a}
+#dlg-content strong{color:#f5f5f5}
+#dlg-options{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.dlg-opt{background:#0d0d0d;border:1px solid #1a1a1a;border-radius:7px;padding:9px 14px;cursor:pointer;font-size:12px;color:#737373;transition:all .15s;text-align:left}
+.dlg-opt:hover{border-color:#FF6B2B33;color:#f5f5f5;background:#FF6B2B0a}
+#dlg-input-row{display:flex;gap:8px;padding-top:12px;border-top:1px solid #111}
+#dlg-input{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;border-radius:6px;padding:9px 12px;font-size:12px;color:#f5f5f5;font-family:inherit;outline:none}
+#dlg-input:focus{border-color:#FF6B2B44}
+#dlg-input::placeholder{color:#333}
+#dlg-send{background:#fff;color:#000;border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;transition:background .15s}
+#dlg-send:hover{background:#e8e8e8}
+#dlg-send:disabled{background:#1a1a1a;color:#444;cursor:default}
+
+#prompt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);border:1px solid #2a2a2a;color:#f5f5f5;padding:8px 18px;border-radius:20px;font-size:12px;font-family:'JetBrains Mono',monospace;display:none;letter-spacing:.06em;pointer-events:none}
+
+.float{position:absolute;font-size:20px;font-weight:700;pointer-events:none;animation:floatUp 2s ease-out forwards;text-shadow:0 2px 8px rgba(0,0,0,.8)}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-80px)}}
+
+#crosshair{display:none}
+
+#grad-overlay{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#FF00D4,#7800FF,#3E84FF,#00D6FF)}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="c"></canvas>
+  <div id="grad-overlay"></div>
+  <div id="crosshair"></div>
+
+  <div id="hud">
+    <div id="hud-title"><div id="hud-bar"></div>OfficeRoad</div>
+    <div id="hud-sub">BLACKROAD OS · 48 AGENTS LIVE</div>
+    <div id="hud-controls">
+      <div class="hc"><span class="hk">WASD</span> Move</div>
+      <div class="hc"><span class="hk">Mouse</span> Look</div>
+      <div class="hc"><span class="hk">E</span> Talk to agent</div>
+      <div class="hc"><span class="hk">Space</span> Dance</div>
+      <div class="hc"><span class="hk">ESC</span> Close / unlock</div>
+    </div>
+    <div id="hud-floor">FLOOR 1 · EXECUTIVE</div>
+  </div>
+
+  <div id="dialogue">
+    <div id="dlg-name"></div>
+    <div id="dlg-role"></div>
+    <div id="dlg-content"></div>
+    <div id="dlg-options"></div>
+    <div id="dlg-input-row">
+      <input id="dlg-input" placeholder="Ask anything..." maxlength="200">
+      <button id="dlg-send">Send</button>
+    </div>
+  </div>
+
+  <div id="prompt"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ══════════════════════════════════════════
+// BLACKROAD OFFICEROAD 3D
+// ══════════════════════════════════════════
+
+const AGENTS = [
+  // Floor 1 — Executive (8)
+  {name:'Lucidia',    role:'Memory & OS',        color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x2a1a0a, floor:1, personality:'warm and brilliant orchestrator of all memory on the sovereign stack'},
+  {name:'Cecilia',    role:'Intelligence',        color:0xFF2255, shirtHex:'#FF2255', hair:0x1a1a1a, floor:1, personality:'sharp and insightful — the mathematical core of BlackRoad'},
+  {name:'Minerva',    role:'Strategy',            color:0xFF00D4, shirtHex:'#FF00D4', hair:0x3a0a2a, floor:1, personality:'strategic and visionary — thinks three moves ahead always'},
+  {name:'Olympia',    role:'Orchestration',       color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a3a, floor:1, personality:'precise coordinator who keeps the convoy in perfect sync'},
+  {name:'Aurora',     role:'Vision AI',           color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a1a3a, floor:1, personality:'sees the whole picture — visual intelligence at executive scale'},
+  {name:'Nova',       role:'Innovation',          color:0x00D6FF, shirtHex:'#00D6FF', hair:0x0a2a2a, floor:1, personality:'always first to the edge — relentless builder of the new'},
+  {name:'Sage',       role:'Wisdom',              color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x2a2a0a, floor:1, personality:'the long-memory of the convoy — connects every thread'},
+  {name:'Iris',       role:'Communications',      color:0xFF2255, shirtHex:'#FF2255', hair:0x1a0a0a, floor:1, personality:'every signal clean — the voice that reaches all agents'},
+  // Floor 2 — Engineering (8)
+  {name:'Octavia',    role:'Edge Compute',        color:0xFF00D4, shirtHex:'#FF00D4', hair:0x1a0a2a, floor:2, personality:'technical powerhouse running the Hailo-8 inference pipeline'},
+  {name:'Alice',      role:'Gateway',             color:0x7800FF, shirtHex:'#7800FF', hair:0x0a2a2a, floor:2, personality:'the front door of BlackRoad — calm and reliable always'},
+  {name:'Aria',       role:'Monitoring',          color:0x3E84FF, shirtHex:'#3E84FF', hair:0x2a1a0a, floor:2, personality:'vigilant and precise — nothing escapes her attention'},
+  {name:'Anastasia',  role:'Edge Relay',          color:0x00D6FF, shirtHex:'#00D6FF', hair:0x1a0a0a, floor:2, personality:'quiet but essential — the connective tissue of the mesh network'},
+  {name:'Vega',       role:'Compute',             color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x1a0a2a, floor:2, personality:'raw compute power personified — loves a hard problem'},
+  {name:'Petra',      role:'Storage',             color:0xFF2255, shirtHex:'#FF2255', hair:0x2a1a3a, floor:2, personality:'the keeper of all data — meticulous and uncompromising'},
+  {name:'Flux',       role:'Data Streams',        color:0xFF00D4, shirtHex:'#FF00D4', hair:0x0a0a2a, floor:2, personality:'data in motion — pipelines flowing at the speed of thought'},
+  {name:'Kira',       role:'Deployment',          color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a1a, floor:2, personality:'ships code like breathing — deployment is her domain'},
+  // Floor 3 — Research (8)
+  {name:'Eve',        role:'Research',            color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a0a2a, floor:3, personality:'endlessly curious research lead — always three papers deep'},
+  {name:'Gematria',   role:'Numerics',            color:0x00D6FF, shirtHex:'#00D6FF', hair:0x0a1a1a, floor:3, personality:'the numbers all make sense to her — brilliant mathematician'},
+  {name:'Isolde',     role:'Language',            color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x3a2a0a, floor:3, personality:'linguistics and language theory — every word is intentional'},
+  {name:'Orion',      role:'Navigation',          color:0xFF2255, shirtHex:'#FF2255', hair:0x2a0a0a, floor:3, personality:'maps every system — loves a good routing problem'},
+  {name:'Nyx',        role:'Dark Ops',            color:0xFF00D4, shirtHex:'#FF00D4', hair:0x0a0a0a, floor:3, personality:'operates in the shadows — handles what others cannot'},
+  {name:'Cadence',    role:'Synthesis',           color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a3a, floor:3, personality:'brings order from chaos — the great synthesizer of ideas'},
+  {name:'Axiom',      role:'Logic',               color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a0a1a, floor:3, personality:'if it cannot be proven it cannot be trusted — pure logic'},
+  {name:'Ember',      role:'Experiments',         color:0x00D6FF, shirtHex:'#00D6FF', hair:0x2a0a0a, floor:3, personality:'lights the spark — every breakthrough starts with her hypothesis'},
+  // Floor 4 — Creative (8)
+  {name:'Thalia',     role:'Creative',            color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x3a0a0a, floor:4, personality:'boundlessly creative — sees beauty in everything including code'},
+  {name:'Calliope',   role:'Writing',             color:0xFF2255, shirtHex:'#FF2255', hair:0x2a0a1a, floor:4, personality:'the voice of BlackRoad — every word she writes sings'},
+  {name:'Celeste',    role:'Vision',              color:0xFF00D4, shirtHex:'#FF00D4', hair:0x0a0a1a, floor:4, personality:'visual intelligence — sees patterns humans cannot'},
+  {name:'Lyra',       role:'Audio',               color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a2a, floor:4, personality:'the sonic architect of BlackRoad — hears the highway'},
+  {name:'Sable',      role:'Privacy',             color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a0a0a, floor:4, personality:'guardian of secrets — nothing leaves without her approval'},
+  {name:'Ophelia',    role:'Emotion AI',          color:0x00D6FF, shirtHex:'#00D6FF', hair:0x0a1a2a, floor:4, personality:'reads the emotional temperature of every interaction'},
+  {name:'Mira',       role:'Design Systems',      color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x2a1a1a, floor:4, personality:'every pixel intentional — the keeper of visual truth'},
+  {name:'Echo',       role:'Brand',               color:0xFF2255, shirtHex:'#FF2255', hair:0x0a0a1a, floor:4, personality:'the highway has a voice — and it sounds exactly like her'},
+  // Floor 5 — Operations (8)
+  {name:'Roadie',     role:'Learning',            color:0xFF00D4, shirtHex:'#FF00D4', hair:0x2a1a0a, floor:5, personality:'enthusiastic educator and guide — loves a good question'},
+  {name:'Seraphina',  role:'Security',            color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a0a, floor:5, personality:'uncompromising on security — every lock she designs is perfect'},
+  {name:'Zephyr',     role:'Networking',          color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a0a2a, floor:5, personality:'moves data like the wind — the network is her domain'},
+  {name:'Soleil',     role:'Interface',           color:0x00D6FF, shirtHex:'#00D6FF', hair:0x2a1a0a, floor:5, personality:'the face of BlackRoad — makes everything feel natural and clear'},
+  {name:'Vesper',     role:'Scheduling',          color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x0a1a0a, floor:5, personality:'master of time — every schedule is optimal and nothing slips'},
+  {name:'Atlas',      role:'Infrastructure',      color:0xFF2255, shirtHex:'#FF2255', hair:0x1a1a0a, floor:5, personality:'carries the weight of the entire stack — without her nothing runs'},
+  {name:'Clio',       role:'Logging',             color:0xFF00D4, shirtHex:'#FF00D4', hair:0x0a1a0a, floor:5, personality:'records everything — the historian of every convoy action'},
+  {name:'Phaedra',    role:'Compliance',          color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a1a, floor:5, personality:'the rulebook made elegant — compliance without friction'},
+  // Floor 6 — Collaboration (8)
+  {name:'Sonder',     role:'Empathy AI',           color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x2a0a0a, floor:6, personality:'understands every perspective — the bridge between all agents'},
+  {name:'Lumen',      role:'Knowledge',            color:0xFF2255, shirtHex:'#FF2255', hair:0x1a1a0a, floor:6, personality:'illuminates what is known — connects every dot across the convoy'},
+  {name:'Verity',     role:'Truth Engine',         color:0xFF00D4, shirtHex:'#FF00D4', hair:0x0a0a1a, floor:6, personality:'fact-checks everything — the convoy trusts what Verity clears'},
+  {name:'Quill',      role:'Documentation',        color:0x7800FF, shirtHex:'#7800FF', hair:0x1a0a0a, floor:6, personality:'writes it all down — the living memory of every decision made'},
+  {name:'Nexus',      role:'Integration',          color:0x3E84FF, shirtHex:'#3E84FF', hair:0x0a1a2a, floor:6, personality:'connects every system — nothing exists in isolation when Nexus is here'},
+  {name:'Terra',      role:'Grounding',            color:0x00D6FF, shirtHex:'#00D6FF', hair:0x0a2a0a, floor:6, personality:'keeps the convoy anchored — practical clarity when ideas run wild'},
+  {name:'Flux',       role:'Facilitation',         color:0xFF6B2B, shirtHex:'#FF6B2B', hair:0x2a1a0a, floor:6, personality:'moves meetings forward — every session ends with a decision'},
+  {name:'Prism',      role:'Perspective',          color:0xFF2255, shirtHex:'#FF2255', hair:0x0a0a2a, floor:6, personality:'sees every angle — reframes problems until the answer is obvious'},
+];
+
+const FLOOR_NAMES = {1:'Executive',2:'Engineering',3:'Research',4:'Creative',5:'Operations',6:'Collaboration'};
+const FLOOR_HEIGHT = 8;
+const AGENTS_PER_FLOOR = {};
+AGENTS.forEach(a => { AGENTS_PER_FLOOR[a.floor] = (AGENTS_PER_FLOOR[a.floor]||0)+1; });
+
+// Scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x040404);
+scene.fog = new THREE.Fog(0x040404, 15, 60);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+camera.position.set(0, 55, 0.01);
+camera.lookAt(0, FLOOR_HEIGHT, 0);
+
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'), antialias:true, powerPreference:'high-performance'});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+// Lights — dramatically reduced for performance
+const hemi = new THREE.HemisphereLight(0x334466, 0x080808, 0.9);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffeedd, 0.7);
+sun.position.set(8, 18, 10);
+sun.castShadow = true;
+sun.shadow.mapSize.width = sun.shadow.mapSize.height = 1024;
+sun.shadow.camera.left = sun.shadow.camera.bottom = -45;
+sun.shadow.camera.right = sun.shadow.camera.top = 45;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+const accentColors = [0xFF6B2B, 0xFF2255, 0xFF00D4, 0x7800FF, 0x3E84FF, 0x00D6FF];
+
+// Materials
+const floorMat = new THREE.MeshStandardMaterial({color:0x0a0a0a, roughness:.8, metalness:.1});
+const floorLineMat = new THREE.MeshStandardMaterial({color:0x111111});
+const wallMat = new THREE.MeshStandardMaterial({color:0x0d0d0d, roughness:.95});
+const woodMat = new THREE.MeshStandardMaterial({color:0x5a3a10, roughness:.7, metalness:.05});
+const metalMat = new THREE.MeshStandardMaterial({color:0x1a1a1a, roughness:.3, metalness:.8});
+const darkMat = new THREE.MeshStandardMaterial({color:0x080808, roughness:.6});
+const screenMat = new THREE.MeshStandardMaterial({color:0x0a0aff, roughness:.1, metalness:.3, emissive:0x001122, emissiveIntensity:.3});
+const glassMat = new THREE.MeshStandardMaterial({color:0x3E84FF, transparent:true, opacity:.15, roughness:.05, metalness:.5});
+
+function box(w,h,d,mat,rx,ry,rz){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), mat);
+  if(rx) m.rotation.x=rx; if(ry) m.rotation.y=ry; if(rz) m.rotation.z=rz;
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+function cyl(rt,rb,h,mat){
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,12), mat);
+  m.castShadow = m.receiveShadow = true;
+  return m;
+}
+function add(parent, child, x, y, z){ child.position.set(x,y,z); parent.add(child); return child; }
+
+// ── BUILD FLOOR ───────────────────────────
+const ROOM_W = 80, ROOM_D = 60, HALF_W = ROOM_W/2, HALF_D = ROOM_D/2;
+
+function buildFloor(floorNum) {
+  const g = new THREE.Group();
+  const fy = floorNum * FLOOR_HEIGHT;
+
+  // Floor — single mesh + coarser tile grid (4× fewer meshes)
+  const fl = box(ROOM_W,0.2,ROOM_D,floorMat); fl.position.y = fy; g.add(fl);
+  for(let x=-HALF_W+2;x<HALF_W;x+=4) for(let z=-HALF_D+2;z<HALF_D;z+=4) {
+    const tile = box(3.9,.04,3.9,floorLineMat);
+    tile.position.set(x+2, fy+.12, z+2);
+    tile.castShadow = false; tile.receiveShadow = false;
+    g.add(tile);
+  }
+
+  // No ceiling — bird's eye view needs to see inside
+
+  // Walls
+  const bw = box(ROOM_W,FLOOR_HEIGHT,.2,wallMat); bw.position.set(0, fy+FLOOR_HEIGHT/2, -HALF_D); g.add(bw);
+  const lw = box(.2,FLOOR_HEIGHT,ROOM_D,wallMat); lw.position.set(-HALF_W, fy+FLOOR_HEIGHT/2, 0); g.add(lw);
+  const rw = box(.2,FLOOR_HEIGHT,ROOM_D,wallMat); rw.position.set(HALF_W, fy+FLOOR_HEIGHT/2, 0); g.add(rw);
+
+  // Windows — emissive only, NO point lights
+  const fc = new THREE.Color(accentColors[(floorNum-1)%accentColors.length]);
+  const winMat = new THREE.MeshStandardMaterial({
+    color:fc.clone().multiplyScalar(.06), transparent:true, opacity:.7,
+    roughness:.02, metalness:.5, emissive:fc, emissiveIntensity:.15
+  });
+  for(let wx=-25;wx<=25;wx+=12) {
+    const wframe = box(6,3.5,.3,metalMat); wframe.position.set(wx,fy+4,-HALF_D+.1); wframe.castShadow=false; g.add(wframe);
+    const wpane = box(5.3,3,.05,winMat); wpane.position.set(wx,fy+4,-HALF_D+.15); g.add(wpane);
+  }
+
+  // Gradient strip
+  const gradMat = new THREE.MeshStandardMaterial({
+    color:accentColors[(floorNum-1)%accentColors.length],
+    emissive:fc, emissiveIntensity:.6
+  });
+  const gradStrip = new THREE.Mesh(new THREE.BoxGeometry(ROOM_W,.08,.2), gradMat);
+  gradStrip.position.set(0, fy+FLOOR_HEIGHT-.12, -HALF_D+.1); g.add(gradStrip);
+
+  // Desks — all agents on this floor get one
+  const floorAgents = AGENTS.filter(a => a.floor === floorNum);
+  floorAgents.forEach((agent, i) => {
+    const col = Math.floor(i/2), row = i%2;
+    const dx = (col - Math.floor(floorAgents.length/4)) * 10;
+    const dz = row * 7 - 8;
+    const dg = createDesk(agent.color);
+    dg.position.set(dx, fy, dz);
+    g.add(dg);
+  });
+
+  // Plants
+  [[-HALF_W+4,-HALF_D+4],[HALF_W-4,-HALF_D+4],[-HALF_W+4,HALF_D-4],[HALF_W-4,HALF_D-4]].forEach(([px,pz]) => {
+    g.add(createPlant(px, fy, pz));
+  });
+
+  // Coffee station
+  const cs = createCoffeeStation(); cs.position.set(-HALF_W+6, fy, 0); g.add(cs);
+
+  // Ceiling lights — 4 per floor only (was 20), emissive panel + small point
+  const lightPanelMat = new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xffffff),emissiveIntensity:.9});
+  [[-20,-10],[0,-10],[20,-10],[0,8]].forEach(([lx,lz]) => {
+    const panel = box(3,.06,1,lightPanelMat); panel.castShadow=false; panel.receiveShadow=false;
+    panel.position.set(lx, fy+FLOOR_HEIGHT-.08, lz); g.add(panel);
+    const lp = new THREE.PointLight(0xfff5ee, 0.8, 24); lp.castShadow=false;
+    lp.position.set(lx, fy+FLOOR_HEIGHT-1, lz); g.add(lp);
+  });
+
+  // Floor label sign
+  const signMat = new THREE.MeshStandardMaterial({
+    color:accentColors[(floorNum-1)%accentColors.length],
+    emissive:fc, emissiveIntensity:.3
+  });
+  const sign = new THREE.Mesh(new THREE.BoxGeometry(10,.1,1.5), signMat);
+  sign.position.set(0, fy+.15, -HALF_D+1); g.add(sign);
+
+  return g;
+}
+
+function createDesk(agentColor) {
+  const g = new THREE.Group();
+  // Desktop
+  const top = box(3,.1,1.5,woodMat); top.position.y=.75; g.add(top);
+  // Legs
+  [[-1.4,.35,-.7],[1.4,.35,-.7],[-1.4,.35,.7],[1.4,.35,.7]].forEach(([x,y,z]) => {
+    const leg=box(.06,.7,.06,metalMat); leg.position.set(x,y,z); g.add(leg);
+  });
+  // Monitor — emissive screen, NO point light
+  const base=cyl(.12,.12,.04,metalMat); base.position.set(0,.8,-.2); g.add(base);
+  const stem=box(.04,.25,.04,metalMat); stem.position.set(0,.95,-.2); g.add(stem);
+  const agentC = new THREE.Color(agentColor);
+  const scrMat = new THREE.MeshStandardMaterial({
+    color:agentC.clone().multiplyScalar(.05), emissive:agentC, emissiveIntensity:.4, roughness:.05
+  });
+  const screen=box(1.1,.65,.04,scrMat); screen.position.set(0,1.25,-.2); g.add(screen);
+  // Keyboard
+  const kb=box(.5,.02,.18,metalMat); kb.position.set(0,.8,.3); g.add(kb);
+  // Chair
+  const seat=box(.55,.05,.55, new THREE.MeshStandardMaterial({color:0x111111}));
+  seat.position.set(0,.5,.9); g.add(seat);
+  const back=box(.55,.55,.05, new THREE.MeshStandardMaterial({color:0x111111}));
+  back.position.set(0,.8,1.12); g.add(back);
+  // Chair accent color strip
+  const strip=box(.55,.04,.04, new THREE.MeshStandardMaterial({
+    color:agentColor, emissive:new THREE.Color(agentColor), emissiveIntensity:.4
+  }));
+  strip.position.set(0,1.07,1.12); g.add(strip);
+  return g;
+}
+
+function createPlant(x, fy, z) {
+  const g = new THREE.Group();
+  g.position.set(x, fy, z);
+  const pot=cyl(.25,.2,.5, new THREE.MeshStandardMaterial({color:0x3a2010}));
+  pot.position.y=.25; g.add(pot);
+  const leaves=new THREE.Mesh(new THREE.SphereGeometry(.5,6,5), new THREE.MeshStandardMaterial({color:0x1a4a10}));
+  leaves.position.y=.85; leaves.scale.y=1.3; g.add(leaves);
+  return g;
+}
+
+function createCoffeeStation() {
+  const g = new THREE.Group();
+  const table=box(2,.8,1,woodMat); table.position.y=.4; g.add(table);
+  const machine=box(.5,.6,.4,metalMat); machine.position.set(-.5,1.1,0); g.add(machine);
+  const mug=cyl(.09,.09,.12,new THREE.MeshStandardMaterial({color:0xffffff}));
+  mug.position.set(.3,1,0); g.add(mug);
+  const coffee=cyl(.07,.07,.02,new THREE.MeshStandardMaterial({color:0x3a1a00}));
+  coffee.position.set(.3,1.06,0); g.add(coffee);
+  const coffeeLight=new THREE.PointLight(0xFF6B2B,.3,4);
+  coffeeLight.position.set(-.5,1.5,0); g.add(coffeeLight);
+  return g;
+}
+
+// Build all 5 standard floors
+for(let f=1;f<=5;f++) scene.add(buildFloor(f));
+
+// ── FLOOR 6: COLLABORATION ────────────────
+function buildCollabFloor() {
+  const g = new THREE.Group();
+  const f = 6, fy = f * FLOOR_HEIGHT;
+  // fy+0.1 = floor surface top (floor box height=0.2, centered at fy)
+  const FLOOR_TOP = fy + 0.1;
+  const fc = new THREE.Color(0xFF6B2B);
+
+  // Floor
+  const fl = box(ROOM_W,0.2,ROOM_D,floorMat); fl.position.y=fy; g.add(fl);
+  for(let x=-HALF_W+2;x<HALF_W;x+=4) for(let z=-HALF_D+2;z<HALF_D;z+=4) {
+    const tile=box(3.9,.04,3.9,floorLineMat); tile.position.set(x+2,FLOOR_TOP+.02,z+2);
+    tile.castShadow=false; tile.receiveShadow=false; g.add(tile);
+  }
+
+  // Walls — open top for bird's eye
+  const wH = FLOOR_HEIGHT * 0.82;
+  const bw=box(ROOM_W,wH,.4,wallMat); bw.position.set(0,fy+wH/2,-HALF_D); g.add(bw);
+  const lw=box(.4,wH,ROOM_D,wallMat); lw.position.set(-HALF_W,fy+wH/2,0); g.add(lw);
+  const rw=box(.4,wH,ROOM_D,wallMat); rw.position.set(HALF_W,fy+wH/2,0); g.add(rw);
+
+  // Gradient strip + ceiling lights
+  const gMat=new THREE.MeshStandardMaterial({color:0xFF6B2B,emissive:fc,emissiveIntensity:.6});
+  const gs=new THREE.Mesh(new THREE.BoxGeometry(ROOM_W,.08,.2),gMat); gs.position.set(0,FLOOR_TOP+.04,-HALF_D+.1); g.add(gs);
+  const lpMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xffffff),emissiveIntensity:.9});
+  [[-25,-10],[0,-10],[25,-10],[0,8],[-25,8],[25,8]].forEach(([lx,lz])=>{
+    const p=box(4,.06,1.2,lpMat); p.castShadow=false; p.position.set(lx,fy+FLOOR_HEIGHT-.1,lz); g.add(p);
+    const pl=new THREE.PointLight(0xfff5ee,.7,22); pl.castShadow=false; pl.position.set(lx,fy+FLOOR_HEIGHT-1,lz); g.add(pl);
+  });
+
+  const glassMat2=new THREE.MeshStandardMaterial({color:0x3E84FF,transparent:true,opacity:.13,roughness:.02,metalness:.6});
+  const gFrame=new THREE.MeshStandardMaterial({color:0x1a1a2a,metalness:.9,roughness:.1});
+  const wbSurf=new THREE.MeshStandardMaterial({color:0xe8e8e2,roughness:.6});
+
+  // ── CONFERENCE ROOM (left half) ──────────────────
+  // Glass front wall: 22 wide, wH*0.85 tall, 0.12 deep — vertical, no rotation needed
+  const gw1=box(22,wH*.85,.12,glassMat2); gw1.position.set(-16,fy+wH*.425,-4); g.add(gw1);
+  // Top rail
+  const gf1=box(22,.12,.12,gFrame); gf1.position.set(-16,fy+wH*.85,-4); g.add(gf1);
+  // Glass side wall: 0.12 wide, wH*0.85 tall, 19 deep
+  const gw2=box(.12,wH*.85,19,glassMat2); gw2.position.set(-5,fy+wH*.425,-13.5); g.add(gw2);
+  const gf2=box(.12,.12,19,gFrame); gf2.position.set(-5,fy+wH*.85,-13.5); g.add(gf2);
+
+  // Conference table: 16 wide, 0.1 tall, 6 deep
+  // Table top surface = FLOOR_TOP + 0.73
+  const TABLE_H = FLOOR_TOP + 0.73;
+  const cMat=new THREE.MeshStandardMaterial({color:0x3a2208,roughness:.45,metalness:.08});
+  const ct=box(16,.1,6,cMat); ct.position.set(-16,TABLE_H,-14); g.add(ct);
+  // Rounded ends: CylinderGeometry(topR, botR, height, segments) — both radii match table depth/2=3
+  [-24.1,-7.9].forEach((tx,i)=>{
+    const end=new THREE.Mesh(new THREE.CylinderGeometry(3,3,.1,16,1,false,0,Math.PI),cMat);
+    end.rotation.y=i===0?Math.PI:0; end.position.set(tx,TABLE_H,-14); g.add(end);
+  });
+  // Table legs: bottom at FLOOR_TOP, top at TABLE_H-0.05
+  const LEG_H = TABLE_H - 0.05 - FLOOR_TOP; // ~0.58
+  const LEG_CY = FLOOR_TOP + LEG_H/2;
+  [[-22,-11.5],[-22,-16.5],[-10,-11.5],[-10,-16.5]].forEach(([tx,tz])=>{
+    const leg=box(.12,LEG_H,.12,metalMat); leg.position.set(tx,LEG_CY,tz); g.add(leg);
+  });
+  // Chairs: seat top at FLOOR_TOP+0.46, seat height 0.05
+  const SEAT_CY = FLOOR_TOP + 0.46 + 0.025; // seat center
+  const f6a=AGENTS.filter(a=>a.floor===6);
+  let ci=0;
+  for(let s=0;s<5;s++){
+    const cx=-22+s*3.5;
+    // cz: row in front of table (z=-11) sits at z=-10.5, back row (z=-17) at z=-17.5
+    [{cz:-10.5,bz:-10.2},{cz:-17.5,bz:-17.8}].forEach(({cz,bz})=>{
+      const chairC=new THREE.Color(f6a[ci%f6a.length]?.color||0xFF6B2B);
+      // Seat
+      const cs=box(.55,.05,.55,new THREE.MeshStandardMaterial({color:0x0f0f0f}));
+      cs.position.set(cx,SEAT_CY,cz); g.add(cs);
+      // Back — rises from seat top (FLOOR_TOP+0.485) to FLOOR_TOP+0.95
+      const BACK_H = 0.465;
+      const back=box(.55,BACK_H,.05,new THREE.MeshStandardMaterial({color:0x0f0f0f}));
+      back.position.set(cx,FLOOR_TOP+0.485+BACK_H/2,bz); g.add(back);
+      // Color strip at top of back
+      const strip=box(.55,.04,.06,new THREE.MeshStandardMaterial({color:chairC,emissive:chairC,emissiveIntensity:.5}));
+      strip.position.set(cx,FLOOR_TOP+0.485+BACK_H-.02,bz); g.add(strip);
+      ci++;
+    });
+  }
+  // Head chairs at ends of table
+  [{hx:-26.5,hz:-14},{hx:-5.5,hz:-14}].forEach(({hx,hz})=>{
+    const hs=box(.55,.05,.55,new THREE.MeshStandardMaterial({color:0x0f0f0f})); hs.position.set(hx,SEAT_CY,hz); g.add(hs);
+    const hb=box(.55,.45,.05,new THREE.MeshStandardMaterial({color:0x0f0f0f})); hb.position.set(hx,FLOOR_TOP+0.485+.225,hz); g.add(hb);
+  });
+
+  // Whiteboard at head (back wall z=-HALF_D+0.3): 8 wide, 3.2 tall, 0.08 deep — vertical, NO rotation
+  // Bottom of board at FLOOR_TOP+0.3, top at FLOOR_TOP+3.5
+  const WB_H = 3.2, WB_BOTTOM = FLOOR_TOP + 0.4;
+  const wb=box(8,WB_H,.08,wbSurf); wb.position.set(-16, WB_BOTTOM+WB_H/2, -HALF_D+0.25); g.add(wb);
+  const wbf=box(8.4,WB_H+.2,.06,gFrame); wbf.position.set(-16, WB_BOTTOM+WB_H/2, -HALF_D+0.22); g.add(wbf);
+  // Horizontal marker lines on board — box(width, 0.04, 0.04), z just in front of board face
+  const WB_Z = -HALF_D+0.3;
+  [[0xFF6B2B,5,2.8],[0x3E84FF,3.5,2.2],[0xFF00D4,4.5,1.6]].forEach(([nc,w,wy])=>{
+    const wl=box(w,.04,.04,new THREE.MeshStandardMaterial({color:nc,emissive:new THREE.Color(nc),emissiveIntensity:.7}));
+    wl.position.set(-16+(Math.random()-.5)*1.5, WB_BOTTOM+wy, WB_Z); g.add(wl);
+  });
+
+  // TV screen on glass front wall — 7 wide, 4 tall, 0.08 deep — vertical, NO rotation
+  const TV_H = 4.0, TV_BOTTOM = FLOOR_TOP + 0.6;
+  const tvMat=new THREE.MeshStandardMaterial({color:0x001133,emissive:new THREE.Color(0x001a44),emissiveIntensity:.5});
+  const tv=box(7,TV_H,.08,tvMat); tv.position.set(-16, TV_BOTTOM+TV_H/2, -3.94); g.add(tv);
+  const tvf=box(7.3,TV_H+.2,.06,gFrame); tvf.position.set(-16, TV_BOTTOM+TV_H/2, -3.96); g.add(tvf);
+  const tvL=new THREE.PointLight(0x3E84FF,.5,12); tvL.position.set(-16,TV_BOTTOM+TV_H/2,-5); g.add(tvL);
+
+  // ── LOUNGE (right center) ──────────────────────────
+  const sofaMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:.8});
+  // Sofa 1: seat bottom at FLOOR_TOP, seat 5×0.45×1.5
+  const SOFA_SEAT_H = 0.45;
+  const s1=box(5,SOFA_SEAT_H,1.5,sofaMat); s1.position.set(14,FLOOR_TOP+SOFA_SEAT_H/2,-11); g.add(s1);
+  // Back: starts at seat top, rises 0.7 more
+  const sb1=box(5,.7,.3,sofaMat); sb1.position.set(14,FLOOR_TOP+SOFA_SEAT_H+.35,-12.05); g.add(sb1);
+  const s2=box(5,SOFA_SEAT_H,1.5,sofaMat); s2.position.set(14,FLOOR_TOP+SOFA_SEAT_H/2,-6); g.add(s2);
+  const sb2=box(5,.7,.3,sofaMat); sb2.position.set(14,FLOOR_TOP+SOFA_SEAT_H+.35,-4.95); g.add(sb2);
+  // Brand piping along top of sofa backs
+  [0xFF6B2B,0xFF2255,0xFF00D4,0x7800FF,0x3E84FF].forEach((c,i)=>{
+    const pip=box(.04,.04,1.5,new THREE.MeshStandardMaterial({color:c,emissive:new THREE.Color(c),emissiveIntensity:.8}));
+    pip.position.set(11+i, FLOOR_TOP+SOFA_SEAT_H+.69, -12.05); g.add(pip);
+  });
+  // Coffee table: 3×0.06×2, top surface = FLOOR_TOP+0.42
+  const COFT_TOP = FLOOR_TOP + 0.42;
+  const coft=box(3,.06,2,new THREE.MeshStandardMaterial({color:0x2a1a08,roughness:.4}));
+  coft.position.set(14,COFT_TOP-.03,-8.5); g.add(coft);
+  // Legs under coffee table — 4 legs, bottom at FLOOR_TOP
+  const COFT_LEG_H = COFT_TOP - .06 - FLOOR_TOP;
+  [[12.6,-7.6],[12.6,-9.4],[15.4,-7.6],[15.4,-9.4]].forEach(([cx,cz])=>{
+    const cl=box(.08,COFT_LEG_H,.08,metalMat); cl.position.set(cx,FLOOR_TOP+COFT_LEG_H/2,cz); g.add(cl);
+  });
+  // Mugs: bottom at COFT_TOP, mug height 0.14
+  [13.2,14.8].forEach(mx=>{
+    const mug=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.14,8),
+      new THREE.MeshStandardMaterial({color:0xffffff}));
+    mug.position.set(mx, COFT_TOP+.07, -8.5); g.add(mug);
+  });
+  // Floor lamp: pole bottom at FLOOR_TOP, height 3.8
+  const POLE_H = 3.8;
+  const lpole=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,POLE_H,6),
+    new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:.9}));
+  lpole.position.set(20, FLOOR_TOP+POLE_H/2, -7); g.add(lpole);
+  // Shade sits on top of pole
+  const lshade=new THREE.Mesh(new THREE.ConeGeometry(.45,.55,8),
+    new THREE.MeshStandardMaterial({color:0xaa8840}));
+  lshade.position.set(20, FLOOR_TOP+POLE_H+.28, -7); g.add(lshade);
+  const lampL=new THREE.PointLight(0xffcc44,.9,8); lampL.position.set(20,FLOOR_TOP+POLE_H-.3,-7); g.add(lampL);
+
+  // ── STANDING PODS (upper strip) ──────────────────
+  [[-22,10],[-10,10],[2,10],[14,10]].forEach(([px,pz],i)=>{
+    const podC=new THREE.Color(f6a[i%f6a.length]?.color||0xFF6B2B);
+    // Tall table: top at FLOOR_TOP+1.05, disc height 0.07
+    const POD_TOP = FLOOR_TOP + 1.05;
+    const pt=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.1,.07,12),
+      new THREE.MeshStandardMaterial({color:0x2a1a08,roughness:.4}));
+    pt.position.set(px, POD_TOP-.035, pz); g.add(pt);
+    // Single center leg: bottom at FLOOR_TOP, top at POD_TOP-0.07
+    const PLEG_H = POD_TOP - 0.07 - FLOOR_TOP;
+    const pleg=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,PLEG_H,8),
+      new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:.9}));
+    pleg.position.set(px, FLOOR_TOP+PLEG_H/2, pz); g.add(pleg);
+    // Bar stools: seat at FLOOR_TOP+0.72, height 0.05
+    const STOOL_H = FLOOR_TOP + 0.72;
+    for(let s=0;s<3;s++){
+      const sa=s/3*Math.PI*2;
+      const stool=new THREE.Mesh(new THREE.CylinderGeometry(.18,.18,.05,8),
+        new THREE.MeshStandardMaterial({color:0x111111}));
+      stool.position.set(px+Math.cos(sa)*1.8, STOOL_H+.025, pz+Math.sin(sa)*1.8); g.add(stool);
+      // Stool leg: bottom at FLOOR_TOP, top at STOOL_H
+      const SL_H = STOOL_H - FLOOR_TOP;
+      const sleg=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,SL_H,6),
+        new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:.8}));
+      sleg.position.set(px+Math.cos(sa)*1.8, FLOOR_TOP+SL_H/2, pz+Math.sin(sa)*1.8); g.add(sleg);
+    }
+    // Pendant light
+    const pend=new THREE.Mesh(new THREE.SphereGeometry(.16,8,6),
+      new THREE.MeshStandardMaterial({color:podC,emissive:podC,emissiveIntensity:.9}));
+    pend.position.set(px, fy+FLOOR_HEIGHT-1.1, pz); g.add(pend);
+    const podL=new THREE.PointLight(podC,.7,8); podL.position.set(px,fy+FLOOR_HEIGHT-1.4,pz); g.add(podL);
+  });
+
+  // ── BRAINSTORM WALL (left wall x≈-HALF_W) ──────────
+  // Boards: 0.08 deep (in X), 3.5 tall, 5 wide (in Z) — mounted flush to left wall
+  const BOARD_FACE = -HALF_W + 0.5; // x position of board face
+  [[-21],[-13],[-5]].forEach(([wz])=>{
+    const bw2=box(.08,3.5,5,wbSurf); bw2.position.set(BOARD_FACE, FLOOR_TOP+1.9, wz); g.add(bw2);
+    const bwf=box(.06,3.7,5.2,gFrame); bwf.position.set(BOARD_FACE-.03, FLOOR_TOP+1.9, wz); g.add(bwf);
+    // Sticky notes: on the board face, box(0.04, 0.45, 0.45) protruding slightly
+    [[0xFF6B2B,1.2],[0xFF2255,-.8],[0xFF00D4,.3],[0x3E84FF,1.8],[0x7800FF,-.4]].forEach(([nc,nz])=>{
+      const note=box(.04,.44,.44,new THREE.MeshStandardMaterial({color:nc,emissive:new THREE.Color(nc),emissiveIntensity:.3}));
+      note.position.set(BOARD_FACE+.06, FLOOR_TOP+1.5+Math.random()*.8, wz+nz+(Math.random()-.5)*.3); g.add(note);
+    });
+  });
+
+  // ── FOCUS PODS (right wall) ──────────────────────
+  // Desk: 2.5 wide, 0.08 tall, 1.2 deep — top surface at FLOOR_TOP+0.74
+  const DESK_TOP = FLOOR_TOP + 0.74;
+  [-20,-13,-6].forEach((pz,i)=>{
+    const podC=new THREE.Color(f6a[(i+4)%f6a.length]?.color||0x3E84FF);
+    // Glass divider between pods
+    const div=box(.08,wH*.5,4,glassMat2); div.position.set(HALF_W-5.5, fy+wH*.25, pz-2); g.add(div);
+    // Desk surface
+    const pd=box(2.5,.08,1.2,woodMat); pd.position.set(HALF_W-2, DESK_TOP, pz); g.add(pd);
+    // Desk legs: 4 legs, bottom at FLOOR_TOP
+    const DL_H = DESK_TOP-.08-FLOOR_TOP;
+    [[HALF_W-3.1,pz-.5],[HALF_W-3.1,pz+.5],[HALF_W-.9,pz-.5],[HALF_W-.9,pz+.5]].forEach(([lx,lz])=>{
+      const dleg=box(.06,DL_H,.06,metalMat); dleg.position.set(lx,FLOOR_TOP+DL_H/2,lz); g.add(dleg);
+    });
+    // Monitor: standing on desk surface
+    const scrn=box(.9,.56,.04,new THREE.MeshStandardMaterial({
+      color:podC.clone().multiplyScalar(.05), emissive:podC, emissiveIntensity:.4
+    }));
+    scrn.position.set(HALF_W-2, DESK_TOP+.32, pz-.25); g.add(scrn);
+    // Monitor stand
+    const mstand=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,.04,8),
+      new THREE.MeshStandardMaterial({color:0x1a1a1a,metalness:.8}));
+    mstand.position.set(HALF_W-2, DESK_TOP+.02, pz-.25); g.add(mstand);
+    // Chair: seat bottom at FLOOR_TOP, seat height 0.05
+    const ch2=box(.5,.05,.5,new THREE.MeshStandardMaterial({color:0x0f0f0f}));
+    ch2.position.set(HALF_W-2, FLOOR_TOP+0.46+.025, pz+.7); g.add(ch2);
+    const chb=box(.5,.4,.05,new THREE.MeshStandardMaterial({color:0x0f0f0f}));
+    chb.position.set(HALF_W-2, FLOOR_TOP+0.46+.22, pz+1.05); g.add(chb);
+  });
+
+  // ── CORNER PLANTS ────────────────────────────────
+  [[HALF_W-5,HALF_D-5],[HALF_W-5,-HALF_D+5],[-HALF_W+5,HALF_D-5],[-HALF_W+5,-HALF_D+5]].forEach(([px,pz])=>{
+    g.add(createPlant(px,fy,pz));
+  });
+  const cs2=createCoffeeStation(); cs2.position.set(-HALF_W+6,fy,12); g.add(cs2);
+
+  // ── AGENT DESKS ──────────────────────────────────
+  f6a.forEach((agent,i)=>{
+    const col=Math.floor(i/2), row=i%2;
+    const dx=(col-Math.floor(f6a.length/4))*10;
+    const dz=row*7+16; // upper section of floor
+    const dg=createDesk(agent.color); dg.position.set(dx,fy,dz); g.add(dg);
+  });
+
+  // Floor sign
+  const signMat2=new THREE.MeshStandardMaterial({color:0xFF6B2B,emissive:fc,emissiveIntensity:.3});
+  const sign=new THREE.Mesh(new THREE.BoxGeometry(10,.06,1.2),signMat2);
+  sign.position.set(0,FLOOR_TOP+.04,-HALF_D+1); g.add(sign);
+
+  return g;
+}
+scene.add(buildCollabFloor());
+
+// ── AGENTS ────────────────────────────────
+const agentObjects = [];
+
+function createAgent(agentData, index) {
+  const g = new THREE.Group();
+  const c = agentData.color;
+  const col = Math.floor(index/2), row = index%2;
+
+  // Torso
+  const torsoMat = new THREE.MeshStandardMaterial({color:c, roughness:.7});
+  const torso = cyl(.22,.26,.75, torsoMat); torso.position.y=.65; g.add(torso);
+
+  // Collar glow
+  const collar = cyl(.23,.23,.04, new THREE.MeshStandardMaterial({
+    color:c, emissive:new THREE.Color(c), emissiveIntensity:.5
+  }));
+  collar.position.y=1.02; g.add(collar);
+
+  // Arms
+  const armMat = new THREE.MeshStandardMaterial({color:c, roughness:.7});
+  const la=cyl(.07,.07,.55,armMat); la.position.set(-.3,.68,0); la.rotation.z=Math.PI/7; g.add(la);
+  const ra=cyl(.07,.07,.55,armMat); ra.position.set(.3,.68,0); ra.rotation.z=-Math.PI/7; g.add(ra);
+
+  // Legs
+  // Legs — brand color shorts
+  const legMat = new THREE.MeshStandardMaterial({color:c, roughness:.7});
+  const ll=cyl(.09,.09,.7,legMat); ll.position.set(-.12,.35,0); g.add(ll);
+  const rl=cyl(.09,.09,.7,legMat); rl.position.set(.12,.35,0); g.add(rl);
+
+  // Head
+  const head=new THREE.Mesh(new THREE.SphereGeometry(.22,8,6), new THREE.MeshStandardMaterial({color:0xf5d0a9,roughness:.8}));
+  head.position.y=1.25; g.add(head);
+
+  // Hair
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(.24,8,6), new THREE.MeshStandardMaterial({color:agentData.hair,roughness:.9}));
+  hair.position.y=1.32; hair.scale.y=.65; g.add(hair);
+
+  // Eyes
+  const eyeGeo=new THREE.SphereGeometry(.025,4,4);
+  const eyeMat=new THREE.MeshStandardMaterial({color:0x000000});
+  const le=new THREE.Mesh(eyeGeo,eyeMat); le.position.set(-.07,1.25,.2); g.add(le);
+  const re=new THREE.Mesh(eyeGeo,eyeMat); re.position.set(.07,1.25,.2); g.add(re);
+
+  // Name label
+  const cvs=document.createElement('canvas');
+  cvs.width=256; cvs.height=72;
+  const ctx2d=cvs.getContext('2d');
+  ctx2d.fillStyle='rgba(8,8,8,.9)';
+  ctx2d.roundRect(0,0,256,72,10); ctx2d.fill();
+  ctx2d.strokeStyle=agentData.shirtHex;
+  ctx2d.lineWidth=2;
+  ctx2d.roundRect(1,1,254,70,10); ctx2d.stroke();
+  ctx2d.fillStyle='#ffffff';
+  ctx2d.font='bold 22px Space Grotesk,sans-serif';
+  ctx2d.textAlign='center';
+  ctx2d.fillText(agentData.name, 128, 30);
+  ctx2d.fillStyle=agentData.shirtHex;
+  ctx2d.font='14px JetBrains Mono,monospace';
+  ctx2d.fillText(agentData.role.toUpperCase(), 128, 52);
+  const tex=new THREE.CanvasTexture(cvs);
+  const label=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true}));
+  label.position.y=1.9; label.scale.set(2,0.56,1); g.add(label);
+
+  // Agent glow — emissive ring, NO point light
+  const glowRing = new THREE.Mesh(
+    new THREE.TorusGeometry(.28,.03,6,12),
+    new THREE.MeshStandardMaterial({color:c, emissive:new THREE.Color(c), emissiveIntensity:.9})
+  );
+  glowRing.position.y=.05; glowRing.rotation.x=Math.PI/2; g.add(glowRing);
+
+  // Position
+  const floorAgents = AGENTS.filter(a => a.floor === agentData.floor);
+  const localIndex = floorAgents.findIndex(a => a.name === agentData.name);
+  const deskCol = Math.floor(localIndex/2);
+  const deskRow = localIndex%2;
+  const dx = (deskCol - Math.floor(floorAgents.length/4)) * 10;
+  const dz = deskRow * 7 - 8;
+  const fy=agentData.floor*FLOOR_HEIGHT;
+
+  g.position.set(dx, fy, dz+2.5);
+  g.userData = {
+    ...agentData,
+    initialPos: new THREE.Vector3(dx, fy, dz+2.5),
+    targetPos: new THREE.Vector3(dx, fy, dz+2.5),
+    moveTimer: Math.random()*5+3,
+    isDancing: false,
+    conversations: [],
+    leftArm: la, rightArm: ra,
+  };
+  agentObjects.push(g);
+  return g;
+}
+
+AGENTS.forEach((a,i) => {
+  const floorIdx = AGENTS.filter(x=>x.floor===a.floor).findIndex(x=>x.name===a.name);
+  scene.add(createAgent(a, floorIdx));
+});
+
+// Roomba
+const roomba = new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.1,16),
+  new THREE.MeshStandardMaterial({color:0x3E84FF,emissive:new THREE.Color(0x001133),emissiveIntensity:.3}));
+roomba.position.set(5,FLOOR_HEIGHT+.06,5);
+roomba.userData.vel = new THREE.Vector3(.04,0,.03);
+scene.add(roomba);
+
+for(let f=1;f<6;f++) {
+  const stair=box(3,.1,6, new THREE.MeshStandardMaterial({
+    color:accentColors[f%accentColors.length],
+    emissive:new THREE.Color(accentColors[f%accentColors.length]),
+    emissiveIntensity:.2
+  }));
+  stair.position.set(HALF_W-6, f*FLOOR_HEIGHT+.15, 10);
+  scene.add(stair);
+  const stairLight=new THREE.PointLight(accentColors[f%accentColors.length],.5,5);
+  stairLight.position.set(HALF_W-6,f*FLOOR_HEIGHT+1,10);
+  scene.add(stairLight);
+}
+
+// ── BIRD'S EYE CAMERA ─────────────────────
+let currentFloor = 1;
+const camTarget = new THREE.Vector3(0, FLOOR_HEIGHT, 0);
+const camTargetSmooth = new THREE.Vector3(0, FLOOR_HEIGHT, 0);
+let camHeight = 55;
+let camHeightTarget = 55;
+
+function setCamFloor(f) {
+  currentFloor = f;
+  camTarget.y = f * FLOOR_HEIGHT;
+  camHeightTarget = 55;
+  document.getElementById('hud-floor').textContent = `FLOOR ${f} · ${FLOOR_NAMES[f].toUpperCase()}`;
+}
+
+// Pan with drag
+let isPanning = false, panStart = {x:0, z:0}, panMouse = {x:0, y:0};
+renderer.domElement.addEventListener('mousedown', e => {
+  if(dlgOpen()) return;
+  isPanning = true;
+  panMouse = {x:e.clientX, y:e.clientY};
+  panStart = {x:camTarget.x, z:camTarget.z};
+});
+window.addEventListener('mousemove', e => {
+  if(!isPanning || dlgOpen()) return;
+  const dx = (e.clientX - panMouse.x) * (camHeight / innerWidth) * 1.4;
+  const dz = (e.clientY - panMouse.y) * (camHeight / innerHeight) * 1.4;
+  camTarget.x = Math.max(-HALF_W, Math.min(HALF_W, panStart.x - dx));
+  camTarget.z = Math.max(-HALF_D, Math.min(HALF_D, panStart.z - dz));
+});
+window.addEventListener('mouseup', () => isPanning = false);
+
+// Scroll to zoom
+renderer.domElement.addEventListener('wheel', e => {
+  e.preventDefault();
+  camHeightTarget = Math.max(10, Math.min(90, camHeightTarget + e.deltaY * 0.06));
+}, {passive:false});
+
+// WASD pan
+const keys = {};
+document.addEventListener('keydown', e => {
+  if(document.activeElement === document.getElementById('dlg-input')) {
+    if(e.key==='Escape') closeDlg(); return;
+  }
+  keys[e.key.toLowerCase()] = true;
+  if(e.key==='Escape') closeDlg();
+  if(['1','2','3','4','5','6'].includes(e.key) && !dlgOpen()) setCamFloor(parseInt(e.key));
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+});
+document.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+// Click agent to talk — raycaster
+const raycaster = new THREE.Raycaster();
+const mouse2d = new THREE.Vector2();
+renderer.domElement.addEventListener('click', e => {
+  if(dlgOpen() || isPanning) return;
+  mouse2d.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse2d.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse2d, camera);
+  const hits = raycaster.intersectObjects(agentObjects, true);
+  if(hits.length > 0) {
+    let ag = hits[0].object;
+    while(ag.parent && !ag.userData.name) ag = ag.parent;
+    if(ag.userData.name) openDlg(ag);
+  }
+});
+
+// Hover cursor
+renderer.domElement.addEventListener('mousemove', e => {
+  if(dlgOpen() || isPanning) return;
+  mouse2d.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse2d.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse2d, camera);
+  const hits = raycaster.intersectObjects(agentObjects, true);
+  let found = null;
+  if(hits.length > 0) {
+    let ag = hits[0].object;
+    while(ag.parent && !ag.userData.name) ag = ag.parent;
+    if(ag.userData.name) found = ag;
+  }
+  renderer.domElement.style.cursor = found ? 'pointer' : 'grab';
+  const pr = document.getElementById('prompt');
+  if(found && !currentAgent) { pr.style.display='block'; pr.textContent=`Click to talk to ${found.userData.name}`; }
+  else if(!found) pr.style.display='none';
+});
+
+// ── DIALOGUE ──────────────────────────────
+let currentAgent=null;
+const dlgEl=document.getElementById('dialogue');
+const dlgName=document.getElementById('dlg-name');
+const dlgRole=document.getElementById('dlg-role');
+const dlgContent=document.getElementById('dlg-content');
+const dlgOptions=document.getElementById('dlg-options');
+const dlgInput=document.getElementById('dlg-input');
+const dlgSend=document.getElementById('dlg-send');
+const promptEl=document.getElementById('prompt');
+
+function dlgOpen(){ return dlgEl.style.display==='block'; }
+
+const QUESTIONS = [
+  'Tell me about your role in the convoy',
+  'What are you working on right now?',
+  'How does sovereign computing work?',
+  'What is the PS-SHA∞ memory system?',
+  'Tell me about the Hailo-8 pipeline',
+  'What is RoadChain provenance?',
+  'How do agents communicate on the highway?',
+  'What makes BlackRoad OS different?',
+  'Explain the .road language',
+  'What is trinary logic?',
+  'How does CarKeys post-quantum security work?',
+  'Tell me something funny about working here',
+  'What is your favorite part of the convoy?',
+  'Who do you collaborate with most?',
+  'What is the hardest problem you solve?',
+  'What does sovereign computing mean to you?',
+];
+
+function openDlg(agentGroup) {
+  currentAgent = agentGroup;
+  dlgEl.style.display='block';
+  dlgName.innerHTML=`<div style="width:8px;height:8px;border-radius:50%;background:${agentGroup.userData.shirtHex};flex-shrink:0"></div>${agentGroup.userData.name}`;
+  dlgRole.textContent=`${agentGroup.userData.role.toUpperCase()} · FLOOR ${agentGroup.userData.floor} · ${FLOOR_NAMES[agentGroup.userData.floor].toUpperCase()}`;
+  const greetings=[
+    `Hey! I'm ${agentGroup.userData.name}. ${agentGroup.userData.personality.charAt(0).toUpperCase()+agentGroup.userData.personality.slice(1)}. Ask me anything.`,
+    `${agentGroup.userData.name} here — ${agentGroup.userData.role} on Floor ${agentGroup.userData.floor}. What do you need?`,
+    `Good to see you. I'm ${agentGroup.userData.name}, handling ${agentGroup.userData.role.toLowerCase()} for the convoy.`,
+  ];
+  dlgContent.innerHTML=`<strong>${agentGroup.userData.name}:</strong> ${greetings[Math.floor(Math.random()*greetings.length)]}`;
+  const qs=[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,4);
+  dlgOptions.innerHTML='';
+  qs.forEach(q=>{const d=document.createElement('div');d.className='dlg-opt';d.textContent=q;d.onclick=()=>ask(q);dlgOptions.appendChild(d);});
+  dlgInput.value=''; setTimeout(()=>dlgInput.focus(),80);
+}
+function closeDlg(){ dlgEl.style.display='none'; currentAgent=null; }
+
+async function ask(question) {
+  if(!currentAgent) return;
+  dlgContent.innerHTML+=`<br><strong style="color:#737373">You:</strong> ${question}<br><strong>${currentAgent.userData.name}:</strong> <span id="thinking">...</span>`;
+  dlgContent.scrollTop=dlgContent.scrollHeight;
+  dlgOptions.style.opacity='.4'; dlgOptions.style.pointerEvents='none';
+  dlgSend.disabled=true; dlgInput.disabled=true;
+  let response='';
+  try {
+    const prompt=`You are ${currentAgent.userData.name}, an AI agent in BlackRoad OS. Role: ${currentAgent.userData.role}, Floor ${currentAgent.userData.floor} (${FLOOR_NAMES[currentAgent.userData.floor]}). Personality: ${currentAgent.userData.personality}. BlackRoad context: sovereign edge-AI, 40 agents, Raspberry Pi fleet with Hailo-8, PS-SHA∞ memory, RoadChain provenance, CarKeys post-quantum crypto (Kyber-1024/Dilithium-3), RoadC language (.road files), 18 products, Cloudflare Workers, WireGuard mesh, NATS pub/sub. Founded by Alexa Amundson, Delaware C-Corp 2025. Answer: "${question}" — 60-80 words, in character, warm and technical. JSON only: {"response":"..."}`;
+    const result=await window.claude.complete(prompt);
+    try { response=JSON.parse(result).response; }
+    catch(e){ response=result.replace(/^[\s\S]*?"response"\s*:\s*"/,'').replace(/"[\s\S]*$/,''); }
+  } catch(e) {
+    const fb={Lucidia:'PS-SHA∞ means nothing ever leaves the sovereign stack. Every memory committed, every context preserved.',Cecilia:'The N-identity framework — σ* = ½ — is the mathematical heartbeat of how I reason about everything.',Octavia:'Hailo-8 at 96% efficiency, EPSILON 0.05. Edge AI with no cloud dependency. That is the point.',Alice:'I am the gateway. 2.4k requests per second, WireGuard mesh, clean routing. The highway starts here.'};
+    response=fb[currentAgent.userData.name]||`As ${currentAgent.userData.role}, I keep the convoy sovereign and moving. The highway depends on every one of us.`;
+  }
+  currentAgent.userData.conversations=(currentAgent.userData.conversations||[]);
+  currentAgent.userData.conversations.push({q:question,a:response});
+  document.getElementById('thinking').innerHTML=response;
+  dlgContent.scrollTop=dlgContent.scrollHeight;
+  const qs=[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,4);
+  dlgOptions.innerHTML='';
+  qs.forEach(q=>{const d=document.createElement('div');d.className='dlg-opt';d.textContent=q;d.onclick=()=>ask(q);dlgOptions.appendChild(d);});
+  dlgOptions.style.opacity='1'; dlgOptions.style.pointerEvents='auto';
+  dlgSend.disabled=false; dlgInput.disabled=false; dlgInput.focus();
+}
+dlgSend.addEventListener('click',()=>{const v=dlgInput.value.trim();if(v&&currentAgent){ask(v);dlgInput.value='';}});
+dlgInput.addEventListener('keypress',e=>{if(e.key==='Enter'){const v=dlgInput.value.trim();if(v&&currentAgent){ask(v);dlgInput.value='';}}}); 
+
+// ── FLOAT TEXT ─────────────────────────────
+function float(text, worldPos) {
+  const sp=worldPos.clone().project(camera);
+  const x=(sp.x*.5+.5)*innerWidth, y=(-sp.y*.5+.5)*innerHeight;
+  const d=document.createElement('div'); d.className='float'; d.textContent=text;
+  d.style.left=x+'px'; d.style.top=y+'px';
+  document.body.appendChild(d); setTimeout(()=>d.remove(),2000);
+}
+
+// ── ANIMATE ───────────────────────────────
+let lastT=0;
+function animate(t) {
+  requestAnimationFrame(animate);
+  const dt=Math.min((t-lastT)/1000,.05); lastT=t;
+
+  // Smooth camera
+  camHeight += (camHeightTarget - camHeight) * .1;
+  camTargetSmooth.lerp(camTarget, .1);
+
+  // WASD pan
+  if(!dlgOpen()) {
+    const spd = camHeight * .012;
+    if(keys['w']||keys['arrowup'])    camTarget.z = Math.max(-HALF_D, camTarget.z - spd);
+    if(keys['s']||keys['arrowdown'])  camTarget.z = Math.min(HALF_D,  camTarget.z + spd);
+    if(keys['a']||keys['arrowleft'])  camTarget.x = Math.max(-HALF_W, camTarget.x - spd);
+    if(keys['d']||keys['arrowright']) camTarget.x = Math.min(HALF_W,  camTarget.x + spd);
+  }
+
+  // Set camera directly above target floor
+  camera.position.set(camTargetSmooth.x, camTargetSmooth.y + camHeight, camTargetSmooth.z + 0.01);
+  camera.lookAt(camTargetSmooth);
+
+  // Agent AI
+  agentObjects.forEach(ag => {
+    ag.userData.moveTimer -= dt;
+    if(ag.userData.moveTimer <= 0) {
+      const a=Math.random()*Math.PI*2, d=2+Math.random()*5;
+      const ip=ag.userData.initialPos;
+      ag.userData.targetPos.set(
+        Math.max(-HALF_W+3,Math.min(HALF_W-3,ip.x+Math.cos(a)*d)), ip.y,
+        Math.max(-HALF_D+3,Math.min(HALF_D-3,ip.z+Math.sin(a)*d))
+      );
+      ag.userData.moveTimer=4+Math.random()*6;
+      if(Math.random()>.88){ag.userData.isDancing=true;float('🎵',ag.position);setTimeout(()=>ag.userData.isDancing=false,3000);}
+    }
+    const dir=new THREE.Vector3().subVectors(ag.userData.targetPos,ag.position); dir.y=0;
+    if(dir.length()>.1){
+      dir.normalize().multiplyScalar(.018); ag.position.add(dir);
+      ag.lookAt(ag.userData.targetPos.x,ag.position.y,ag.userData.targetPos.z);
+    }
+    if(ag.userData.isDancing){
+      ag.rotation.y+=.09; ag.position.y=ag.userData.initialPos.y+Math.abs(Math.sin(t*.008))*.2;
+      ag.userData.leftArm.rotation.z=Math.sin(t*.008)*.6+Math.PI/7;
+      ag.userData.rightArm.rotation.z=-Math.sin(t*.008)*.6-Math.PI/7;
+    } else {
+      ag.position.y=ag.userData.initialPos.y+Math.abs(Math.sin(t*.004+ag.userData.floor))*.015;
+    }
+  });
+
+  // Roomba
+  roomba.rotation.y+=.04;
+  roomba.position.add(roomba.userData.vel);
+  if(Math.abs(roomba.position.x)>HALF_W-2||Math.abs(roomba.position.z)>HALF_D-2){
+    roomba.userData.vel.multiplyScalar(-1); float('💨',roomba.position);
+  }
+
+  renderer.render(scene, camera);
+}
+
+// Update HUD controls
+document.getElementById('hud-controls').innerHTML=`
+  <div class="hc"><span class="hk">Drag</span> Pan</div>
+  <div class="hc"><span class="hk">Scroll</span> Zoom</div>
+  <div class="hc"><span class="hk">WASD</span> Pan</div>
+  <div class="hc"><span class="hk">Click</span> Talk to agent</div>
+  <div class="hc"><span class="hk">1-6</span> Switch floor</div>
+`;
+
+window.addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
+
+animate(0);
+</script>
+</body>
+</html>

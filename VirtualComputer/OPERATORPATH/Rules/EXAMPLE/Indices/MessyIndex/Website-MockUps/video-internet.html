@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Right Now on the Internet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Mono',monospace;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#0a0a0a;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.9);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-size:11px;letter-spacing:4px;color:#333;text-transform:uppercase;}
+
+/* Header */
+#header{
+  position:absolute;top:52px;left:0;right:0;text-align:center;
+  pointer-events:none;z-index:10;
+  opacity:0;transition:opacity .7s;
+}
+#header.in{opacity:1;}
+#hdr-eyebrow{font-size:10px;letter-spacing:8px;color:#222;text-transform:uppercase;margin-bottom:6px;}
+#hdr-title{font-size:28px;font-weight:700;color:#fff;letter-spacing:6px;}
+
+/* Grid of stats */
+#stats-grid{
+  position:absolute;
+  top:130px;bottom:80px;left:64px;right:64px;
+  display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  gap:2px;
+  pointer-events:none;z-index:10;
+}
+.stat-cell{
+  display:flex;flex-direction:column;justify-content:center;padding:24px 28px;
+  border:1px solid #080808;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s,transform .5s;
+}
+.stat-cell.in{opacity:1;transform:translateY(0);}
+.sc-icon{font-size:11px;letter-spacing:4px;color:#1a1a1a;text-transform:uppercase;margin-bottom:10px;}
+.sc-num{
+  font-size:56px;font-weight:700;color:#fff;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-1px;
+}
+.sc-label{font-size:9px;letter-spacing:4px;color:#2a2a2a;text-transform:uppercase;margin-top:10px;}
+.sc-rate{font-size:9px;letter-spacing:2px;color:#161616;margin-top:4px;}
+
+/* Footer */
+#footer{
+  position:absolute;bottom:24px;left:0;right:0;text-align:center;
+  font-size:10px;letter-spacing:6px;color:#181818;text-transform:uppercase;
+  pointer-events:none;z-index:10;
+  opacity:0;transition:opacity .8s;
+}
+#footer.in{opacity:1;}
+
+/* "EVERY 10 SECONDS" freeze card */
+#freeze-card{
+  position:absolute;inset:0;background:rgba(0,0,0,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  pointer-events:none;z-index:20;
+  opacity:0;transition:opacity .8s;
+}
+#freeze-card.in{opacity:1;}
+#fc-eyebrow{font-size:10px;letter-spacing:8px;color:#2a2a2a;}
+#fc-main{font-size:56px;font-weight:700;color:#fff;letter-spacing:8px;}
+#fc-sub{font-size:11px;letter-spacing:6px;color:#222;margin-top:4px;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+
+  <div id="play-overlay">
+    <div id="play-btn">
+      <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg>
+    </div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <div id="header">
+    <div id="hdr-eyebrow">While You Watched This Video</div>
+    <div id="hdr-title">RIGHT NOW ON THE INTERNET</div>
+  </div>
+
+  <div id="stats-grid">
+    <!-- Row 1 -->
+    <div class="stat-cell" id="c0">
+      <div class="sc-icon">✉ Email</div>
+      <div class="sc-num" id="n0">0</div>
+      <div class="sc-label">Emails Sent</div>
+      <div class="sc-rate">3,500,000 / sec</div>
+    </div>
+    <div class="stat-cell" id="c1">
+      <div class="sc-icon">⌕ Search</div>
+      <div class="sc-num" id="n1">0</div>
+      <div class="sc-label">Google Searches</div>
+      <div class="sc-rate">100,000 / sec</div>
+    </div>
+    <div class="stat-cell" id="c2">
+      <div class="sc-icon">▶ Video</div>
+      <div class="sc-num" id="n2">0</div>
+      <div class="sc-label">YouTube Hours Watched</div>
+      <div class="sc-rate">1,000 hrs / sec</div>
+    </div>
+    <!-- Row 2 -->
+    <div class="stat-cell" id="c3">
+      <div class="sc-icon">◈ Social</div>
+      <div class="sc-num" id="n3">0</div>
+      <div class="sc-label">Tweets Posted</div>
+      <div class="sc-rate">6,000 / sec</div>
+    </div>
+    <div class="stat-cell" id="c4">
+      <div class="sc-icon">⬡ Apps</div>
+      <div class="sc-num" id="n4">0</div>
+      <div class="sc-label">App Downloads</div>
+      <div class="sc-rate">800 / sec</div>
+    </div>
+    <div class="stat-cell" id="c5">
+      <div class="sc-icon">◻ Web</div>
+      <div class="sc-num" id="n5">0</div>
+      <div class="sc-label">GB of Internet Traffic</div>
+      <div class="sc-rate">127,000 GB / sec</div>
+    </div>
+  </div>
+
+  <div id="footer">Source: ITU · Statista · Google · YouTube · Meta · 2024</div>
+
+  <div id="freeze-card">
+    <div id="fc-eyebrow">In the last 10 seconds</div>
+    <div id="fc-main">EVERY 10 SECONDS</div>
+    <div id="fc-sub">This happens. All of it. Every second of every day.</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280; stage.style.transform=`scale(${sc})`; shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+// Rates per second (real approximate figures)
+const RATES=[
+  3500000,  // emails/sec
+  100000,   // google searches/sec
+  1000,     // youtube hours/sec
+  6000,     // tweets/sec
+  800,      // app downloads/sec
+  127000,   // GB traffic/sec
+];
+
+let counters=new Float64Array(6); // running totals
+let running=new Array(6).fill(false);
+let startTimes=new Array(6).fill(0);
+let globalStartT=null;
+let lastT=null;
+
+function fmt(n, i){
+  if(n>=1e9) return (n/1e9).toFixed(1)+'B';
+  if(n>=1e6) return (n/1e6).toFixed(2)+'M';
+  if(n>=1e3) return (n/1e3).toFixed(1)+'K';
+  return Math.round(n).toString();
+}
+
+const DURATION=18;
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[]; function at(sec,fn){timeline.push({sec,fn});}
+
+at(0.0,()=>{
+  document.getElementById('header').classList.add('in');
+});
+
+// Counters appear staggered
+[0,1,2,3,4,5].forEach(i=>{
+  at(1.0 + i*0.8, ()=>{
+    document.getElementById('c'+i).classList.add('in');
+    running[i]=true;
+    startTimes[i]=null; // will be set on first tick
+  });
+});
+
+at(1.5,()=>{ document.getElementById('footer').classList.add('in'); });
+
+at(16.0,()=>{
+  document.getElementById('freeze-card').classList.add('in');
+});
+
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  const dt=lastT===null?0.016:t-lastT; lastT=t;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+
+  // Update counters
+  for(let i=0;i<6;i++){
+    if(running[i]){
+      if(startTimes[i]===null) startTimes[i]=t;
+      const elapsed=t-startTimes[i];
+      counters[i]=RATES[i]*elapsed;
+      document.getElementById('n'+i).textContent=fmt(counters[i],i);
+    }
+  }
+
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); lastT=null; counters.fill(0); running.fill(false); startTimes.fill(null);
+  resetAll(); raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  document.getElementById('header').classList.remove('in');
+  document.getElementById('footer').classList.remove('in');
+  document.getElementById('freeze-card').classList.remove('in');
+  for(let i=0;i<6;i++){
+    document.getElementById('c'+i).classList.remove('in');
+    document.getElementById('n'+i).textContent='0';
+  }
+  document.getElementById('prog-fill').style.width='0';
+}
+</script>
+</body>
+</html>

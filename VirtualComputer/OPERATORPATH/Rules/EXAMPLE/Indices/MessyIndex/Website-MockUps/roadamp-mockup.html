@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadAmp 5.0 — BlackRoad</title>
+<link rel="stylesheet" href="mockup-base.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── Page canvas ────────────────────────────────────────────── */
+body {
+  min-height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px 80px;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+/* ─── Window chrome ───────────────────────────────────────────── */
+.amp-window {
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  border-radius: 6px;
+  overflow: hidden;
+  user-select: none;
+  position: relative;
+}
+
+.amp-window::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,107,43,.25), rgba(136,68,255,.15), rgba(0,212,255,.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.amp-titlebar {
+  background: #111;
+  border-bottom: 1px solid #1a1a1a;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: move;
+}
+
+.amp-dots { display: flex; gap: 5px; }
+.amp-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.amp-dot.close  { background: #ff453a; }
+.amp-dot.min    { background: #ffcc00; }
+.amp-dot.expand { background: #28ca41; }
+
+.amp-title {
+  font-family: var(--jb);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--sub);
+  flex: 1;
+  text-align: center;
+  margin-right: 25px;
+}
+
+.amp-title span {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Layout columns ───────────────────────────────────────────── */
+.col-left  { display: flex; flex-direction: column; gap: 2px; }
+.col-right { margin-left: 2px; }
+
+/* ─── Panel 1 — Main Player ───────────────────────────────────── */
+#player { width: 280px; }
+
+.player-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+
+/* Track info + LCD */
+.lcd-display {
+  background: #000;
+  border: 1px solid #1a1a1a;
+  border-radius: 3px;
+  padding: 7px 9px 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.lcd-marquee-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 4px;
+}
+
+.lcd-marquee {
+  display: inline-block;
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--text);
+  animation: marquee 18s linear infinite;
+  padding-right: 60px;
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.lcd-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.lcd-playing {
+  font-family: var(--jb);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  border: 1px solid transparent;
+  background-clip: text, padding-box;
+  padding: 1px 5px;
+  border-radius: 2px;
+  position: relative;
+}
+
+.lcd-playing::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  padding: 1px;
+  background: var(--g);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.lcd-time {
+  font-family: var(--jb);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .04em;
+  line-height: 1;
+  /* LED-style glow */
+  text-shadow: 0 0 12px rgba(255,107,43,.4), 0 0 24px rgba(204,0,170,.2);
+}
+
+.lcd-info {
+  font-family: var(--jb);
+  font-size: 8px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  margin-top: 2px;
+}
+
+/* Visualizer */
+.visualizer {
+  height: 36px;
+  background: #000;
+  border: 1px solid #1a1a1a;
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-end;
+  padding: 3px 4px;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.viz-bar {
+  flex: 1;
+  border-radius: 0px 1px 0 0;
+  background: linear-gradient(180deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  animation: vizBounce 0s ease-in-out infinite alternate;
+  min-height: 2px;
+}
+
+/* Staggered heights — classic Winamp V curve (tallest in middle) */
+.viz-bar:nth-child(1)  { --h: 28%; animation-duration: .9s;  animation-delay: 0s; }
+.viz-bar:nth-child(2)  { --h: 38%; animation-duration: .7s;  animation-delay: .1s; }
+.viz-bar:nth-child(3)  { --h: 52%; animation-duration: .85s; animation-delay: .05s; }
+.viz-bar:nth-child(4)  { --h: 64%; animation-duration: .65s; animation-delay: .2s; }
+.viz-bar:nth-child(5)  { --h: 75%; animation-duration: .8s;  animation-delay: .15s; }
+.viz-bar:nth-child(6)  { --h: 84%; animation-duration: .6s;  animation-delay: .08s; }
+.viz-bar:nth-child(7)  { --h: 90%; animation-duration: .75s; animation-delay: .18s; }
+.viz-bar:nth-child(8)  { --h: 95%; animation-duration: .55s; animation-delay: .03s; }
+.viz-bar:nth-child(9)  { --h: 100%; animation-duration: .7s; animation-delay: .12s; }
+.viz-bar:nth-child(10) { --h: 96%; animation-duration: .62s; animation-delay: .07s; }
+.viz-bar:nth-child(11) { --h: 92%; animation-duration: .78s; animation-delay: .22s; }
+.viz-bar:nth-child(12) { --h: 85%; animation-duration: .58s; animation-delay: .04s; }
+.viz-bar:nth-child(13) { --h: 76%; animation-duration: .82s; animation-delay: .14s; }
+.viz-bar:nth-child(14) { --h: 65%; animation-duration: .68s; animation-delay: .19s; }
+.viz-bar:nth-child(15) { --h: 55%; animation-duration: .73s; animation-delay: .09s; }
+.viz-bar:nth-child(16) { --h: 44%; animation-duration: .88s; animation-delay: .16s; }
+.viz-bar:nth-child(17) { --h: 35%; animation-duration: .63s; animation-delay: .06s; }
+.viz-bar:nth-child(18) { --h: 26%; animation-duration: .77s; animation-delay: .21s; }
+.viz-bar:nth-child(19) { --h: 20%; animation-duration: .91s; animation-delay: .11s; }
+.viz-bar:nth-child(20) { --h: 14%; animation-duration: .69s; animation-delay: .17s; }
+
+@keyframes vizBounce {
+  0%   { height: calc(var(--h) * 0.3); }
+  100% { height: var(--h); }
+}
+
+.visualizer.paused .viz-bar { animation-play-state: paused; }
+
+/* Transport controls */
+.controls-row {
+  display: flex;
+  gap: 3px;
+}
+
+.ctrl-btn {
+  font-family: var(--jb);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  color: var(--sub);
+  border-radius: 2px;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+
+.ctrl-btn:hover {
+  border-color: #444;
+  color: var(--text);
+  background: #1a1a1a;
+}
+
+.ctrl-btn.primary {
+  padding: 4px 10px;
+  background: #111;
+}
+
+.ctrl-btn.active-grad {
+  position: relative;
+  color: var(--text);
+  border-color: transparent;
+  background: #0a0a0a;
+}
+
+.ctrl-btn.active-grad::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  padding: 1px;
+  background: var(--g);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.controls-row.secondary { margin-top: -1px; }
+
+/* Sliders */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.slider-lbl {
+  font-family: var(--jb);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--muted);
+  width: 22px;
+  flex-shrink: 0;
+}
+
+.slider-track {
+  flex: 1;
+  height: 4px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  position: relative;
+  cursor: pointer;
+}
+
+.slider-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--g);
+}
+
+.slider-knob {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--text);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(255,107,43,.5);
+  cursor: grab;
+}
+
+/* Progress bar */
+.progress-wrap {
+  position: relative;
+}
+
+.progress-bar {
+  height: 5px;
+  background: #1a1a1a;
+  border-radius: 3px;
+  cursor: pointer;
+  overflow: visible;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--g);
+  transition: width .9s linear;
+}
+
+.progress-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #f5f5f5;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(255,107,43,.7), 0 0 16px rgba(204,0,170,.3);
+  cursor: grab;
+}
+
+/* Toggle buttons row */
+.toggles-row {
+  display: flex;
+  gap: 3px;
+}
+
+/* ─── Panel 2 — Equalizer ──────────────────────────────────────── */
+#equalizer { width: 280px; }
+
+.eq-body { padding: 8px; }
+
+.eq-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.eq-title {
+  font-family: var(--jb);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--sub);
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.eq-sliders {
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+  height: 80px;
+  padding: 0 2px;
+  margin-bottom: 6px;
+}
+
+.eq-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.eq-slider-wrap {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  position: relative;
+}
+
+.eq-track {
+  width: 3px;
+  height: 60px;
+  background: #1a1a1a;
+  border-radius: 2px;
+  position: relative;
+  cursor: ns-resize;
+  overflow: visible;
+}
+
+.eq-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--g);
+  transition: height .3s ease;
+}
+
+.eq-knob {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 7px;
+  height: 7px;
+  background: var(--text);
+  border-radius: 50%;
+  cursor: ns-resize;
+  box-shadow: 0 0 5px rgba(136,68,255,.6);
+}
+
+.eq-label {
+  font-family: var(--jb);
+  font-size: 6.5px;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+.eq-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.eq-preset {
+  font-family: var(--jb);
+  font-size: 8px;
+  color: var(--sub);
+  flex: 1;
+}
+
+.eq-preset span {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Panel 3 — Playlist ──────────────────────────────────────── */
+#playlist { width: 380px; }
+
+.pl-body { padding: 0; }
+
+.pl-header-bar {
+  padding: 7px 10px 6px;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: #111;
+}
+
+.pl-header-title {
+  font-family: var(--jb);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--sub);
+  text-transform: uppercase;
+}
+
+.pl-meta {
+  font-family: var(--jb);
+  font-size: 8px;
+  color: var(--muted);
+  margin-left: auto;
+}
+
+.pl-list {
+  height: 320px;
+  overflow-y: auto;
+  padding: 2px 0;
+}
+
+.pl-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background .1s;
+  border-left: 2px solid transparent;
+}
+
+.pl-item:hover { background: #111111; }
+
+.pl-item.active {
+  background: #111111;
+  border-left: 2px solid transparent;
+  border-image: var(--g) 1;
+  position: relative;
+}
+
+.pl-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--g);
+  border-radius: 0 1px 1px 0;
+}
+
+.pl-num {
+  font-family: var(--jb);
+  font-size: 9px;
+  color: var(--muted);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pl-item.active .pl-num {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pl-track {
+  flex: 1;
+  font-family: var(--sg);
+  font-size: 11px;
+  color: var(--sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pl-item.active .pl-track { color: var(--text); }
+
+.pl-duration {
+  font-family: var(--jb);
+  font-size: 9px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.pl-item.active .pl-duration {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.pl-footer {
+  border-top: 1px solid #1a1a1a;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: #111;
+  flex-wrap: wrap;
+}
+
+/* ─── Panel 4 — FM Browser ─────────────────────────────────────── */
+#fmbrowser { width: 280px; margin-top: 2px; }
+
+.fm-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+.fm-skin-line {
+  font-family: var(--jb);
+  font-size: 9px;
+  color: var(--sub);
+  letter-spacing: .03em;
+}
+
+.fm-skin-line span {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fm-ai-box {
+  background: #000;
+  border: 1px solid #1a1a1a;
+  border-radius: 3px;
+  padding: 7px 9px;
+  position: relative;
+  overflow: hidden;
+}
+
+.fm-ai-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 3px;
+  padding: 1px;
+  background: var(--g);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .25;
+}
+
+.fm-ai-label {
+  font-family: var(--jb);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  margin-bottom: 3px;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.fm-ai-text {
+  font-family: var(--sg);
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.fm-history-title {
+  font-family: var(--jb);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.fm-history-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  border-bottom: 1px solid #111;
+}
+
+.fm-hist-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--g);
+  flex-shrink: 0;
+}
+
+.fm-hist-text {
+  font-family: var(--sg);
+  font-size: 10px;
+  color: var(--sub);
+  flex: 1;
+}
+
+.fm-hist-time {
+  font-family: var(--jb);
+  font-size: 8px;
+  color: var(--muted);
+}
+
+/* Llama easter egg */
+.llama-egg {
+  margin-top: 4px;
+  font-family: var(--jb);
+  font-size: 7px;
+  color: #222;
+  text-align: center;
+  letter-spacing: .06em;
+  transition: color .3s;
+  cursor: default;
+}
+.llama-egg:hover { color: var(--muted); }
+
+/* ─── Gradient text utility ────────────────────────────────────── */
+.g-text {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Tiny blinking cursor in time ────────────────────────────── */
+@keyframes blink { 50% { opacity: 0; } }
+.blink { animation: blink 1s step-end infinite; }
+
+/* ─── Drag hint on window ──────────────────────────────────────── */
+.amp-titlebar:active { cursor: grabbing; }
+
+/* ─── Pulse on active/playing dot ─────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,34,85,.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(255,34,85,0); }
+}
+.dot-playing { animation: pulse 1.4s ease-in-out infinite; }
+
+/* ─── EQ ON glow ───────────────────────────────────────────────── */
+@keyframes eq-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(136,68,255,.3); }
+  50%       { box-shadow: 0 0 10px rgba(136,68,255,.7); }
+}
+
+/* ─── Page title ───────────────────────────────────────────────── */
+.page-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.page-header h1 {
+  font-family: var(--jb);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+.page-header p {
+  font-family: var(--jb);
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .1em;
+}
+
+/* ─── Misc ─────────────────────────────────────────────────────── */
+.gap2 { display: flex; flex-direction: column; gap: 2px; }
+.spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>RoadAmp 5.0 — BlackRoad</h1>
+  <p>WINAMP REIMAGINED · SOVEREIGN AUDIO · AI-POWERED</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  LEFT COLUMN  —  Main Player + Equalizer                   -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="col-left">
+
+  <!-- ── Panel 1: Main Player ──────────────────────────────── -->
+  <div class="amp-window" id="player">
+    <div class="amp-titlebar">
+      <div class="amp-dots">
+        <div class="amp-dot close"></div>
+        <div class="amp-dot min"></div>
+        <div class="amp-dot expand"></div>
+      </div>
+      <div class="amp-title"><span>RoadAmp 5.0</span></div>
+    </div>
+
+    <div class="player-body">
+
+      <!-- LCD Display -->
+      <div class="lcd-display">
+        <div class="lcd-marquee-wrap">
+          <span class="lcd-marquee" id="marqueeText">
+            Cassidy · Neon Highway (Extended Mix) · 6:42 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Cassidy · Neon Highway (Extended Mix) · 6:42 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          </span>
+        </div>
+        <div class="lcd-row">
+          <div class="lcd-playing">PLAYING</div>
+          <div class="lcd-time" id="timeDisplay">3:21 <span class="blink" style="color:#444">/</span> 6:42</div>
+        </div>
+        <div class="lcd-info">320kbps · 44.1kHz · STEREO</div>
+      </div>
+
+      <!-- Visualizer -->
+      <div class="visualizer" id="visualizer">
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+        <div class="viz-bar"></div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar">
+          <div class="progress-fill" id="progressFill" style="width:50%"></div>
+          <div class="progress-dot" id="progressDot" style="left:50%"></div>
+        </div>
+      </div>
+
+      <!-- Main transport controls -->
+      <div class="controls-row">
+        <button class="ctrl-btn" title="Previous" onclick="prevTrack()">⏮ PREV</button>
+        <button class="ctrl-btn" title="Rewind">⏪ REW</button>
+        <button class="ctrl-btn primary active-grad" id="playPauseBtn" title="Play/Pause" onclick="togglePlay()">⏸ PAUSE</button>
+        <button class="ctrl-btn" title="Fast Forward">⏩ FFW</button>
+        <button class="ctrl-btn" title="Next" onclick="nextTrack()">⏭ NEXT</button>
+      </div>
+
+      <div class="controls-row secondary">
+        <button class="ctrl-btn" title="Open file">⏏ OPEN</button>
+        <button class="ctrl-btn" title="Stop" onclick="stopPlay()">⏹ STOP</button>
+        <div class="spacer"></div>
+        <div style="display:flex;align-items:center;gap:3px;">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--g);flex-shrink:0;" class="dot-playing" id="playDot"></div>
+        </div>
+      </div>
+
+      <!-- Volume slider -->
+      <div class="slider-row">
+        <div class="slider-lbl">VOL</div>
+        <div class="slider-track" id="volTrack">
+          <div class="slider-fill" id="volFill" style="width:78%"></div>
+          <div class="slider-knob" id="volKnob" style="left:78%"></div>
+        </div>
+      </div>
+
+      <!-- Balance slider -->
+      <div class="slider-row">
+        <div class="slider-lbl">BAL</div>
+        <div class="slider-track">
+          <div class="slider-fill" style="width:50%; margin-left:25%; background: linear-gradient(90deg,rgba(255,107,43,.3),rgba(136,68,255,.8),rgba(0,212,255,.3))"></div>
+          <div class="slider-knob" style="left:50%"></div>
+        </div>
+      </div>
+
+      <!-- Toggle buttons -->
+      <div class="toggles-row">
+        <button class="ctrl-btn active-grad" id="eqBtn" onclick="document.getElementById('equalizer').style.display=document.getElementById('equalizer').style.display==='none'?'block':'block'">EQ</button>
+        <button class="ctrl-btn active-grad" id="plBtn">PL</button>
+        <button class="ctrl-btn" id="shufBtn" onclick="this.classList.toggle('active-grad')">SHUF</button>
+        <button class="ctrl-btn active-grad" id="repBtn" onclick="this.classList.toggle('active-grad')">REPEAT</button>
+        <div class="spacer"></div>
+        <button class="ctrl-btn" style="font-size:7px;color:#222;cursor:default;" title="Winamp... it really whips the llama's... road">🦙</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Panel 2: Equalizer ─────────────────────────────────── -->
+  <div class="amp-window" id="equalizer">
+    <div class="amp-titlebar">
+      <div class="amp-dots">
+        <div class="amp-dot close"></div>
+        <div class="amp-dot min"></div>
+        <div class="amp-dot expand"></div>
+      </div>
+      <div class="amp-title">EQUALIZER</div>
+    </div>
+
+    <div class="eq-body">
+      <div class="eq-header">
+        <div class="eq-title">Graphic EQ</div>
+        <button class="ctrl-btn active-grad" style="font-size:8px;padding:3px 7px;">ON</button>
+        <button class="ctrl-btn" style="font-size:8px;padding:3px 7px;" onclick="resetEQ()">RESET</button>
+      </div>
+
+      <!-- EQ sliders — V-curve: boost lows/highs, dip mids -->
+      <div class="eq-sliders" id="eqSliders">
+        <!-- 60Hz -->
+        <div class="eq-col" data-freq="60Hz" data-val="82">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:82%"></div>
+              <div class="eq-knob" style="bottom:82%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">60</div>
+        </div>
+        <!-- 170Hz -->
+        <div class="eq-col" data-freq="170Hz" data-val="72">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:72%"></div>
+              <div class="eq-knob" style="bottom:72%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">170</div>
+        </div>
+        <!-- 310Hz -->
+        <div class="eq-col" data-freq="310Hz" data-val="58">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:58%"></div>
+              <div class="eq-knob" style="bottom:58%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">310</div>
+        </div>
+        <!-- 600Hz -->
+        <div class="eq-col" data-freq="600Hz" data-val="44">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:44%"></div>
+              <div class="eq-knob" style="bottom:44%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">600</div>
+        </div>
+        <!-- 1kHz -->
+        <div class="eq-col" data-freq="1kHz" data-val="36">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:36%"></div>
+              <div class="eq-knob" style="bottom:36%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">1k</div>
+        </div>
+        <!-- 3kHz -->
+        <div class="eq-col" data-freq="3kHz" data-val="40">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:40%"></div>
+              <div class="eq-knob" style="bottom:40%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">3k</div>
+        </div>
+        <!-- 6kHz -->
+        <div class="eq-col" data-freq="6kHz" data-val="50">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:50%"></div>
+              <div class="eq-knob" style="bottom:50%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">6k</div>
+        </div>
+        <!-- 12kHz -->
+        <div class="eq-col" data-freq="12kHz" data-val="63">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:63%"></div>
+              <div class="eq-knob" style="bottom:63%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">12k</div>
+        </div>
+        <!-- 14kHz -->
+        <div class="eq-col" data-freq="14kHz" data-val="74">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:74%"></div>
+              <div class="eq-knob" style="bottom:74%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">14k</div>
+        </div>
+        <!-- 16kHz -->
+        <div class="eq-col" data-freq="16kHz" data-val="80">
+          <div class="eq-slider-wrap">
+            <div class="eq-track">
+              <div class="eq-fill" style="height:80%"></div>
+              <div class="eq-knob" style="bottom:80%; transform:translate(-50%,50%)"></div>
+            </div>
+          </div>
+          <div class="eq-label">16k</div>
+        </div>
+      </div>
+
+      <div class="eq-footer">
+        <button class="ctrl-btn" style="font-size:8px;padding:3px 7px;">PRESETS</button>
+        <div class="eq-preset">Preset: <span>Road Party Mix</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /col-left -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  RIGHT COLUMN  —  Playlist + FM Browser                    -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="col-right">
+  <div class="gap2">
+
+    <!-- ── Panel 3: Playlist ───────────────────────────────── -->
+    <div class="amp-window" id="playlist">
+      <div class="amp-titlebar">
+        <div class="amp-dots">
+          <div class="amp-dot close"></div>
+          <div class="amp-dot min"></div>
+          <div class="amp-dot expand"></div>
+        </div>
+        <div class="amp-title">PLAYLIST EDITOR</div>
+      </div>
+
+      <div class="pl-body">
+        <div class="pl-header-bar">
+          <div class="pl-header-title">Now Playing</div>
+          <div class="pl-meta">24 tracks · 1:47:32 total</div>
+        </div>
+
+        <div class="pl-list" id="playlistEl">
+          <!-- populated by JS -->
+        </div>
+
+        <div class="pl-footer">
+          <button class="ctrl-btn" style="font-size:8px;padding:3px 6px;">ADD</button>
+          <button class="ctrl-btn" style="font-size:8px;padding:3px 6px;">REM</button>
+          <button class="ctrl-btn" style="font-size:8px;padding:3px 6px;">SEL</button>
+          <button class="ctrl-btn" style="font-size:8px;padding:3px 6px;">MISC</button>
+          <button class="ctrl-btn" style="font-size:8px;padding:3px 6px;">LIST OPTS</button>
+          <div class="spacer"></div>
+          <button class="ctrl-btn" id="plShuf" style="font-size:8px;padding:3px 6px;" onclick="this.classList.toggle('active-grad')">SHUFFLE</button>
+          <button class="ctrl-btn active-grad" id="plRep" style="font-size:8px;padding:3px 6px;" onclick="this.classList.toggle('active-grad')">REPEAT ALL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Panel 4: RoadAmp.FM ──────────────────────────────── -->
+    <div class="amp-window" id="fmbrowser">
+      <div class="amp-titlebar">
+        <div class="amp-dots">
+          <div class="amp-dot close"></div>
+          <div class="amp-dot min"></div>
+          <div class="amp-dot expand"></div>
+        </div>
+        <div class="amp-title"><span>ROADAMP.FM</span></div>
+      </div>
+
+      <div class="fm-body">
+
+        <div class="fm-skin-line">
+          Skin: <span>BlackRoad Dark v1.0</span> by <span>@alexa</span>
+        </div>
+
+        <div class="fm-ai-box">
+          <div class="fm-ai-label">CASSIDY AI DJ</div>
+          <div class="fm-ai-text">Now generating: <strong style="color:#f5f5f5">Neon Highway Vol. 2</strong><br>
+          <span style="font-size:10px;color:var(--sub)">Analyzing vibe · building stem sequence · ETA 4s…</span></div>
+        </div>
+
+        <div>
+          <div class="fm-history-title">Recently Played</div>
+          <div class="fm-history-item">
+            <div class="fm-hist-dot"></div>
+            <div class="fm-hist-text">Road · Electric Dreams</div>
+            <div class="fm-hist-time">3:58</div>
+          </div>
+          <div class="fm-history-item">
+            <div class="fm-hist-dot" style="background:linear-gradient(135deg,#CC00AA,#8844FF)"></div>
+            <div class="fm-hist-text">Lucidia · Vector Flow</div>
+            <div class="fm-hist-time">5:12</div>
+          </div>
+          <div class="fm-history-item">
+            <div class="fm-hist-dot" style="background:linear-gradient(135deg,#4488FF,#00D4FF)"></div>
+            <div class="fm-hist-text">Ghost Protocol · Parallax</div>
+            <div class="fm-hist-time">4:30</div>
+          </div>
+        </div>
+
+        <div class="llama-egg" title="Winamp... it really whips the llama's ass">
+          Winamp… it really whips the llama's… road 🦙
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /gap2 -->
+</div><!-- /col-right -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  JS                                                         -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script>
+/* ── Track data ──────────────────────────────────────────────── */
+const tracks = [
+  { a: 'Cassidy',        t: 'Neon Highway (Extended Mix)',    d: '6:42' },
+  { a: 'Road',           t: 'Electric Dreams',                d: '3:58' },
+  { a: 'Lucidia',        t: 'Vector Flow',                    d: '5:12' },
+  { a: 'Ghost Protocol', t: 'Parallax',                       d: '4:30' },
+  { a: 'Synthwave 88',   t: 'Midnight Drive',                 d: '4:55' },
+  { a: 'Neon Cartel',    t: 'Chromatic',                      d: '3:44' },
+  { a: 'Axis Point',     t: 'Orbital Loop',                   d: '6:01' },
+  { a: 'Cassidy',        t: 'Road Signal (Dub Mix)',          d: '7:22' }, // track 8 — active
+  { a: 'Zero Kelvin',    t: 'Freeze Frame',                   d: '4:11' },
+  { a: 'Lucidia',        t: 'Superposition',                  d: '5:38' },
+  { a: 'Roadie Rex',     t: 'Lo-Fi Horizon',                  d: '3:22' },
+  { a: 'Ghost Protocol', t: 'Dark Matter Beat',               d: '4:47' },
+  { a: 'Tempo Thief',    t: 'Sample Drift',                   d: '3:15' },
+  { a: 'Road',           t: 'City Pulse',                     d: '4:28' },
+  { a: 'Synthwave 88',   t: 'Retrograde',                     d: '5:50' },
+  { a: 'Neon Cartel',    t: 'Glitch Garden',                  d: '4:03' },
+  { a: 'Lucidia',        t: 'Recursive (feat. Cassidy)',       d: '6:15' },
+  { a: 'Axis Point',     t: 'Singularity',                    d: '5:05' },
+  { a: 'Zero Kelvin',    t: 'Heat Death of Monday',           d: '3:59' },
+  { a: 'Roadie Rex',     t: 'Tape Machine',                   d: '4:20' },
+  { a: 'Ghost Protocol', t: 'Signal Ghost',                   d: '5:33' },
+  { a: 'Cassidy',        t: 'After Hours (Instrumental)',     d: '6:08' },
+  { a: 'Tempo Thief',    t: 'BPM Unknown',                    d: '4:44' },
+  { a: 'Road',           t: 'Departure (Outro)',               d: '2:58' },
+];
+
+let currentTrack = 7; // 0-indexed → track 8
+let isPlaying = true;
+
+/* ── Render playlist ─────────────────────────────────────────── */
+function renderPlaylist() {
+  const el = document.getElementById('playlistEl');
+  el.innerHTML = tracks.map((tr, i) => `
+    <div class="pl-item ${i === currentTrack ? 'active' : ''}" onclick="selectTrack(${i})">
+      <div class="pl-num">${String(i + 1).padStart(2, '0')}</div>
+      <div class="pl-track">${tr.a} — ${tr.t}</div>
+      <div class="pl-duration">${tr.d}</div>
+    </div>
+  `).join('');
+  /* Scroll active track into view */
+  const active = el.querySelector('.active');
+  if (active) active.scrollIntoView({ block: 'nearest' });
+}
+
+function selectTrack(i) {
+  currentTrack = i;
+  isPlaying = true;
+  renderPlaylist();
+  updateMarquee();
+  resetProgress();
+  setPlayBtn(true);
+}
+
+/* ── Progress tracking ───────────────────────────────────────── */
+const TOTAL_SECS = 402; // 6:42 for track 1
+let elapsed = 201;      // start at 3:21
+let progressInterval = null;
+
+function fmt(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
+}
+
+function totalFor(track) {
+  const [m, s] = track.d.split(':').map(Number);
+  return m * 60 + s;
+}
+
+function updateProgress() {
+  const total = totalFor(tracks[currentTrack]);
+  const pct = (elapsed / total) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressDot').style.left = pct + '%';
+  document.getElementById('timeDisplay').innerHTML =
+    `${fmt(elapsed)} <span class="blink" style="color:#444">/</span> ${tracks[currentTrack].d}`;
+}
+
+function resetProgress() {
+  elapsed = 0;
+  updateProgress();
+}
+
+function startProgress() {
+  clearInterval(progressInterval);
+  progressInterval = setInterval(() => {
+    if (!isPlaying) return;
+    const total = totalFor(tracks[currentTrack]);
+    elapsed++;
+    if (elapsed >= total) {
+      elapsed = 0;
+      currentTrack = (currentTrack + 1) % tracks.length;
+      renderPlaylist();
+      updateMarquee();
+    }
+    updateProgress();
+  }, 1000);
+}
+
+/* ── Play / Pause ────────────────────────────────────────────── */
+function setPlayBtn(playing) {
+  const btn = document.getElementById('playPauseBtn');
+  const viz = document.getElementById('visualizer');
+  const dot = document.getElementById('playDot');
+  if (playing) {
+    btn.textContent = '⏸ PAUSE';
+    btn.classList.add('active-grad');
+    viz.classList.remove('paused');
+    dot.style.animation = 'pulse 1.4s ease-in-out infinite';
+  } else {
+    btn.textContent = '▶ PLAY';
+    btn.classList.remove('active-grad');
+    viz.classList.add('paused');
+    dot.style.animation = 'none';
+    dot.style.background = 'var(--muted)';
+  }
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  setPlayBtn(isPlaying);
+  if (isPlaying) {
+    document.getElementById('playDot').style.background = 'var(--g)';
+  }
+}
+
+function stopPlay() {
+  isPlaying = false;
+  elapsed = 0;
+  setPlayBtn(false);
+  updateProgress();
+}
+
+function prevTrack() {
+  currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+  elapsed = 0;
+  isPlaying = true;
+  renderPlaylist();
+  updateMarquee();
+  updateProgress();
+  setPlayBtn(true);
+}
+
+function nextTrack() {
+  currentTrack = (currentTrack + 1) % tracks.length;
+  elapsed = 0;
+  isPlaying = true;
+  renderPlaylist();
+  updateMarquee();
+  updateProgress();
+  setPlayBtn(true);
+}
+
+/* ── Marquee text ────────────────────────────────────────────── */
+function updateMarquee() {
+  const tr = tracks[currentTrack];
+  const txt = `${tr.a} · ${tr.t} · ${tr.d}`;
+  const full = `${txt}\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0${txt}\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0`;
+  document.getElementById('marqueeText').textContent = full;
+}
+
+/* ── Progress bar click ──────────────────────────────────────── */
+document.getElementById('progressBar').addEventListener('click', function(e) {
+  const rect = this.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  elapsed = Math.floor(pct * totalFor(tracks[currentTrack]));
+  updateProgress();
+});
+
+/* ── Volume slider drag ──────────────────────────────────────── */
+(function() {
+  const track = document.getElementById('volTrack');
+  const fill  = document.getElementById('volFill');
+  const knob  = document.getElementById('volKnob');
+  let dragging = false;
+
+  track.addEventListener('mousedown', start);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', () => dragging = false);
+
+  function start(e) {
+    dragging = true;
+    update(e);
+  }
+  function move(e) {
+    if (dragging) update(e);
+  }
+  function update(e) {
+    const rect = track.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    fill.style.width = pct + '%';
+    knob.style.left  = pct + '%';
+  }
+})();
+
+/* ── EQ draggable sliders ────────────────────────────────────── */
+document.querySelectorAll('.eq-track').forEach(track => {
+  let dragging = false;
+
+  track.addEventListener('mousedown', start);
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', () => dragging = false);
+
+  function start(e) { dragging = true; update(e); }
+  function move(e) { if (dragging) update(e); }
+  function update(e) {
+    const rect = track.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, 100 - ((e.clientY - rect.top) / rect.height) * 100));
+    const fill = track.querySelector('.eq-fill');
+    const knob = track.querySelector('.eq-knob');
+    fill.style.height = pct + '%';
+    knob.style.bottom = pct + '%';
+  }
+});
+
+function resetEQ() {
+  document.querySelectorAll('.eq-track').forEach(track => {
+    const fill = track.querySelector('.eq-fill');
+    const knob = track.querySelector('.eq-knob');
+    fill.style.height = '50%';
+    knob.style.bottom = '50%';
+  });
+}
+
+/* ── Init ────────────────────────────────────────────────────── */
+renderPlaylist();
+updateProgress();
+startProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RoadBook mockup for the BlackRoad digital library, reader, highlights, and shared study flows." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='4' width='24' height='24' rx='8' fill='%23ffffff'/><text x='16' y='21' text-anchor='middle' font-size='11' font-family='Arial' fill='%23000'>RB</text></svg>">
+  <title>RoadBook — Digital Library and Reader Mockup</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { background: radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), var(--bg); color: var(--text); font-family: var(--sg); display: flex; flex-direction: column; }
+    .grad { height: 3px; background: var(--g); flex-shrink: 0; }
+    .topbar { height: 56px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.95); backdrop-filter: blur(16px); display: flex; align-items: center; gap: 14px; padding: 0 18px; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 220px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--white); color: #000; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.05; }
+    .brand-title { font-size: 15px; font-weight: 700; }
+    .brand-sub { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .search { flex: 1; max-width: 500px; height: 38px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; gap: 10px; padding: 0 12px; color: var(--sub); font-size: 13px; font-family: var(--in); }
+    .top-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .btn { padding: 8px 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 12px; font-weight: 600; }
+    .btn.primary { background: var(--white); color: #000; border-color: transparent; }
+    .shell { display: grid; grid-template-columns: 84px 270px 1fr 320px; flex: 1; min-height: 0; }
+    .rail, .library, .context { min-height: 0; }
+    .rail { background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; }
+    .rail-btn { width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--sub); background: var(--elevated); border: 1px solid transparent; }
+    .rail-btn.active { color: var(--white); border-color: #323232; background: var(--hover); }
+    .library { background: radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 28%), #050505; border-right: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 8px; }
+    .card, .list-item, .shelf-card, .note-card, .metric { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .card { padding: 16px; }
+    .library-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .library-copy, .note-card p, .people-copy span { color: var(--sub); font-size: 12px; line-height: 1.6; font-family: var(--in); }
+    .mini-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .tag { padding: 5px 9px; border-radius: 999px; background: var(--elevated); border: 1px solid var(--border); font-family: var(--jb); font-size: 10px; color: var(--sub); }
+    .stack { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+    .list-item { padding: 12px; }
+    .list-item strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .list-item span { color: var(--sub); font-size: 12px; line-height: 1.5; font-family: var(--in); }
+    .main { background: linear-gradient(180deg, rgba(10,10,10,.96), rgba(0,0,0,1)); display: grid; grid-template-rows: auto auto 1fr; min-height: 0; }
+    .hero { padding: 18px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1.2fr .85fr; gap: 16px; }
+    .hero-panel { background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 18px; box-shadow: 0 28px 72px rgba(0,0,0,.32); }
+    .hero h1 { font-size: 28px; line-height: 1.06; letter-spacing: -.04em; margin-bottom: 10px; }
+    .hero p { color: var(--sub); line-height: 1.7; max-width: 640px; font-family: var(--in); }
+    .hero-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .metric { padding: 12px; }
+    .metric-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .metric-value { font-size: 22px; font-weight: 700; margin-top: 8px; }
+    .metric-note { font-size: 12px; color: var(--sub); margin-top: 4px; }
+    .reader-card { background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03)); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 18px; box-shadow: 0 28px 72px rgba(0,0,0,.28); }
+    .reader-card h2 { font-size: 18px; margin-bottom: 8px; }
+    .reader-card p { font-size: 13px; color: var(--sub); line-height: 1.6; font-family: var(--in); }
+    .reader-page { margin-top: 14px; min-height: 220px; border-radius: 14px; background: #f6f2e8; color: #1a1a1a; padding: 20px 22px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05); }
+    .reader-page h3 { font-size: 20px; margin-bottom: 12px; }
+    .reader-page p { color: #3a342b; line-height: 1.75; font-size: 14px; }
+    .tabs { display: flex; gap: 18px; padding: 0 18px; height: 48px; align-items: center; border-bottom: 1px solid var(--border); background: var(--card); }
+    .tab { font-size: 13px; color: var(--sub); font-weight: 500; padding-bottom: 11px; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--white); border-color: #fff; }
+    .content { padding: 18px; display: grid; grid-template-columns: 1.2fr .9fr; gap: 16px; min-height: 0; }
+    .study-strip { padding: 0 18px 18px; display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .shelf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .shelf-card { padding: 16px; min-height: 170px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 18px 38px rgba(0,0,0,.18); transition: transform .18s ease, border-color .18s ease; }
+    .shelf-card:hover { transform: translateY(-2px); border-color: #2f2f2f; }
+    .shelf-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .shelf-card p { font-size: 12px; color: var(--sub); line-height: 1.6; font-family: var(--in); }
+    .shelf-meta { display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-family: var(--jb); font-size: 10px; }
+    .note-card, .study-card { padding: 14px; }
+    .note-card h4 { font-size: 14px; margin-bottom: 8px; }
+    .study-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 18px 38px rgba(0,0,0,.16); }
+    .study-card h4 { font-size: 14px; margin-bottom: 8px; }
+    .study-card p { color: var(--sub); font-size: 12px; line-height: 1.6; font-family: var(--in); }
+    .study-meta { display:flex; justify-content:space-between; margin-top: 12px; color: var(--muted); font-family: var(--jb); font-size: 10px; }
+    .context { background: var(--card); border-left: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; overflow: auto; }
+    .people-row, .progress-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--border); background: #090909; }
+    .avatar { width: 36px; height: 36px; border-radius: 11px; background: var(--elevated); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0; }
+    .people-copy strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .mono { font-family: var(--jb); font-size: 10px; color: var(--muted); }
+    .bar { width: 96px; height: 6px; border-radius: 999px; background: #1d1d1d; overflow: hidden; margin-top: 8px; }
+    .bar span { display: block; height: 100%; background: var(--g); }
+  </style>
+</head>
+<body>
+  <div class="grad"></div>
+  <header class="topbar"><div class="brand"><div class="brand-mark">RB</div><div class="brand-copy"><div class="brand-title">RoadBook</div><div class="brand-sub">Digital library and reader</div></div></div><div class="search">Search books, references, highlights, authors, and study spaces...</div><div class="top-actions"><button class="btn">Collections</button><button class="btn">Import EPUB</button><button class="btn primary">Continue Reading</button></div></header>
+  <div class="shell">
+    <aside class="rail"><div class="rail-btn active">📚</div><div class="rail-btn">⌕</div><div class="rail-btn">✎</div><div class="rail-btn">⎘</div><div class="rail-btn">☰</div><div class="rail-btn">★</div></aside>
+    <aside class="library">
+      <div><div class="section-label">Library focus</div><div class="card"><div class="library-title">Founder archive</div><div class="library-copy">Canonical papers, product docs, notebooks, and reading lists organized as searchable shelves with annotation sync.</div><div class="mini-tags"><div class="tag">EPUB</div><div class="tag">PDF</div><div class="tag">NOTES</div></div></div></div>
+      <div><div class="section-label">Shelves</div><div class="stack">
+        <div class="list-item"><strong>BlackRoad Foundations</strong><span>Operating docs, architecture guides, and reference materials pinned for every Roadie.</span></div>
+        <div class="list-item"><strong>Math + research</strong><span>Amundson mathematics, proofs, exploratory notebooks, and concept sketches.</span></div>
+        <div class="list-item"><strong>Launch library</strong><span>Playbooks, scripts, product stories, and public-facing explainers for shipping work.</span></div>
+        <div class="list-item"><strong>Reading circles</strong><span>Shared lists for study groups, annotations, and chapter-by-chapter commentary.</span></div>
+      </div></div>
+    </aside>
+    <main class="main">
+      <section class="hero">
+        <div class="hero-panel"><div class="section-label">Featured collection</div><h1>Read, annotate, and cross-reference the whole BlackRoad library.</h1><p>RoadBook is a digital library, e-reader, and reference system. It combines shelves, synced reading sessions, notes, and persistent citation trails so teams can move from archive to active work without losing context.</p><div class="hero-metrics"><div class="metric"><div class="metric-label">Titles indexed</div><div class="metric-value">18,290</div><div class="metric-note">Books, memos, guides, and docs</div></div><div class="metric"><div class="metric-label">Highlights synced</div><div class="metric-value">84.6k</div><div class="metric-note">Cross-device reading memory</div></div><div class="metric"><div class="metric-label">Reading rooms</div><div class="metric-value">24</div><div class="metric-note">Live sessions and shared study spaces</div></div></div></div>
+        <div class="reader-card"><div class="section-label">Open reader</div><h2>BLACKROAD_OPERATING_MODEL.md</h2><p>Reference mode with inline notes, chapter jump navigation, and connected citations.</p><div class="reader-page"><h3>Section 301 — Product Services</h3><p>The products operate as interfaces to domains, agent roles, and public surfaces. Each entry defines its canonical purpose, host, Roadie, and positioning inside the wider BlackRoad stack.</p><p>RoadBook keeps those references readable and linkable, making it easy to move from a highlighted passage into related products like BlackBoard, Docs, Backlog, or RoadTrip.</p></div></div>
+      </section>
+      <div class="tabs"><div class="tab active">Browse</div><div class="tab">Reader</div><div class="tab">Notes</div><div class="tab">Highlights</div><div class="tab">Study rooms</div></div>
+      <section class="content">
+        <div><div class="section-label">Recommended shelves</div><div class="shelf-grid">
+          <div class="shelf-card"><div><h3>Architecture shelf</h3><p>Platform maps, registries, deployment guides, and systems thinking references for build sessions.</p></div><div class="shelf-meta"><span>124 items</span><span>UPDATED TODAY</span></div></div>
+          <div class="shelf-card"><div><h3>Founder notebook</h3><p>Personal essays, memos, launch ideas, and long-form drafts with synced highlights and excerpts.</p></div><div class="shelf-meta"><span>82 items</span><span>PRIVATE</span></div></div>
+          <div class="shelf-card"><div><h3>Education track</h3><p>Tutorials, study guides, classroom references, and product explainers grouped for guided learning.</p></div><div class="shelf-meta"><span>211 items</span><span>SHARED</span></div></div>
+          <div class="shelf-card"><div><h3>Launch binder</h3><p>Brand system, launch checklists, messaging docs, and supporting references used during release windows.</p></div><div class="shelf-meta"><span>67 items</span><span>PINNED</span></div></div>
+        </div></div>
+        <div><div class="section-label">Active note stack</div><div class="stack"><div class="note-card"><h4>Cross-reference trail</h4><p>Jump from a product description to the registry entry, related domain doc, and any matching BlackBoard article in one tap.</p></div><div class="note-card"><h4>Shared highlight</h4><p>RoadBook turns archives into live operational memory — saved to the product positioning collection.</p></div><div class="note-card"><h4>Reading session</h4><p>The Design room is midway through the RoadWorld worldbuilding binder with comments synced to the scene glossary.</p></div></div></div>
+      </section>
+      <section class="study-strip"><div class="study-card"><div class="section-label">Reading path</div><h4>From docs to product work</h4><p>Move from a canonical section into related products, then save the high-signal passages back into active launch or implementation lanes.</p><div class="study-meta"><span>CROSS-LINKED</span><span>12 STEPS</span></div></div><div class="study-card"><div class="section-label">Seminar mode</div><h4>Shared reading rooms</h4><p>Support guided sessions with synchronized pages, facilitator notes, and lane-specific highlight capture for teams or classes.</p><div class="study-meta"><span>LIVE</span><span>24 ROOMS</span></div></div><div class="study-card"><div class="section-label">Reference exports</div><h4>Citations as workflow fuel</h4><p>Export selected passages into Docs, BlackBoard, or support content so research turns into reusable system truth faster.</p><div class="study-meta"><span>EXPORT</span><span>READY</span></div></div></section>
+    </main>
+    <aside class="context">
+      <div><div class="section-label">Reading circles</div><div class="stack"><div class="people-row"><div style="display:flex;gap:10px;align-items:center"><div class="avatar">AA</div><div class="people-copy"><strong>Alexa</strong><span>Curating canonical docs and founder reading lists.</span></div></div><div class="mono">OWNER</div></div><div class="people-row"><div style="display:flex;gap:10px;align-items:center"><div class="avatar">BK</div><div class="people-copy"><strong>book-roadie</strong><span>Suggesting related passages and high-signal reference links.</span></div></div><div class="mono">LIVE</div></div><div class="people-row"><div style="display:flex;gap:10px;align-items:center"><div class="avatar">BB</div><div class="people-copy"><strong>blackboard</strong><span>Pulling published summaries and connected knowledge pages into note threads.</span></div></div><div class="mono">SYNC</div></div></div></div>
+      <div><div class="section-label">Reading progress</div><div class="stack"><div class="progress-row"><div class="people-copy"><strong>Operating model</strong><span>Sections 101-401 complete with highlight export ready.</span><div class="bar"><span style="width: 76%"></span></div></div><div class="mono">76%</div></div><div class="progress-row"><div class="people-copy"><strong>Launch playbook</strong><span>Final chapter open in the release room with collaborator notes.</span><div class="bar"><span style="width: 91%"></span></div></div><div class="mono">91%</div></div><div class="progress-row"><div class="people-copy"><strong>Math foundation</strong><span>Proof annotations synced, glossary cards still being reviewed.</span><div class="bar"><span style="width: 58%"></span></div></div><div class="mono">58%</div></div></div></div>
+      <div><div class="section-label">Quick actions</div><div class="stack"><div class="list-item"><strong>Export citations</strong><span>Generate a clean packet of references for product briefs, classes, or launch notes.</span></div><div class="list-item"><strong>Open study room</strong><span>Start a shared reading room with synchronized pages, notes, and highlight capture.</span></div><div class="list-item"><strong>Publish to BlackBoard</strong><span>Turn a highlighted reading path into a polished knowledge page or collection.</span></div></div></div>
+    </aside>
+  </div>
+</body>
+</html>

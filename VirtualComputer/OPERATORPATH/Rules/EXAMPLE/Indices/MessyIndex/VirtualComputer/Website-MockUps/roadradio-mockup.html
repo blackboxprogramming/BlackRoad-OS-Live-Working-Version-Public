@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>RoadRadio — ROAD.FM · Sovereign Internet Radio</title>
+<link rel="stylesheet" href="mockup-base.css">
+<style>
+
+/* ── Layout shell ─────────────────────────────────────────────────── */
+html, body {
+  height: 100vh;
+  overflow: hidden;
+  font-family: var(--sg);
+  background: var(--bg);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────── */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px;
+  height: 48px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+}
+.topbar-logo {
+  font-family: var(--jb);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.topbar-sep { width: 1px; height: 20px; background: var(--border); }
+.topbar-nav {
+  display: flex;
+  gap: 4px;
+}
+.topbar-nav a {
+  font-size: .78rem;
+  font-weight: 500;
+  color: var(--sub);
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: color .15s, background .15s;
+}
+.topbar-nav a:hover { color: var(--text); background: var(--elevated); }
+.topbar-nav a.active { color: var(--text); }
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.topbar-listeners {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--jb);
+  font-size: .7rem;
+  color: var(--sub);
+}
+.listeners-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #00FF87;
+  box-shadow: 0 0 6px #00FF8780;
+  animation: pulse-green 2s ease-in-out infinite;
+}
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 0 6px #00FF8780; opacity: 1; }
+  50% { box-shadow: 0 0 12px #00FF87cc; opacity: .7; }
+}
+.topbar-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; color: var(--sub);
+}
+
+/* ── NOW PLAYING HERO (top 40vh) ─────────────────────────────────── */
+.hero {
+  height: 40vh;
+  min-height: 280px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 0 32px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ambient glow behind */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 200px;
+  background: radial-gradient(ellipse at center, rgba(136,68,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Station art ──────────────────────────────────────────────────── */
+.station-art {
+  flex-shrink: 0;
+  width: 180px; height: 180px;
+  position: relative;
+}
+.station-art-border {
+  width: 100%; height: 100%;
+  border-radius: 16px;
+  padding: 2px;
+  background: var(--g);
+  position: relative;
+}
+.station-art-inner {
+  width: 100%; height: 100%;
+  border-radius: 12px;
+  background: var(--elevated);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px;
+  position: relative;
+  overflow: hidden;
+}
+.station-art-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 120%, rgba(136,68,255,.25) 0%, transparent 65%);
+}
+.station-art-label {
+  font-family: var(--jb);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative; z-index: 1;
+}
+.station-art-sub {
+  font-family: var(--jb);
+  font-size: .6rem;
+  font-weight: 400;
+  color: var(--sub);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  position: relative; z-index: 1;
+}
+.station-art-glow {
+  position: absolute;
+  bottom: -20px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 60px;
+  background: radial-gradient(ellipse, rgba(136,68,255,.5) 0%, transparent 70%);
+  filter: blur(8px);
+}
+
+/* ── Hero info column ─────────────────────────────────────────────── */
+.hero-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.on-air-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--jb);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--sub);
+  width: fit-content;
+}
+.on-air-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF2255, #FF6B2B);
+  box-shadow: 0 0 8px rgba(255,34,85,.6);
+  animation: pulse-air 1.4s ease-in-out infinite;
+}
+@keyframes pulse-air {
+  0%,100% { transform: scale(1); box-shadow: 0 0 8px rgba(255,34,85,.6); }
+  50%      { transform: scale(1.3); box-shadow: 0 0 14px rgba(255,34,85,.9); }
+}
+
+.station-name {
+  font-family: var(--jb);
+  font-size: 3.2rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.track-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-artist {
+  font-size: .82rem;
+  color: var(--sub);
+  display: flex; align-items: center; gap: 6px;
+}
+.cassidy-badge {
+  font-family: var(--jb);
+  font-size: .62rem;
+  letter-spacing: .08em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    var(--g) border-box;
+  background: var(--card);
+  border: 1px solid rgba(136,68,255,.4);
+  color: var(--sub);
+}
+
+/* ── Waveform ─────────────────────────────────────────────────────── */
+.waveform-wrap {
+  width: 100%;
+  height: 52px;
+  position: relative;
+}
+#waveform {
+  width: 100%;
+  height: 52px;
+  display: block;
+}
+
+/* ── Player controls ──────────────────────────────────────────────── */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.ctrl-btn {
+  background: none;
+  border: none;
+  color: var(--sub);
+  font-size: 1.1rem;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .15s, background .15s;
+}
+.ctrl-btn:hover { color: var(--text); background: var(--elevated); }
+
+.ctrl-play {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: none;
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    var(--g) border-box;
+  color: var(--text);
+  font-size: 1.3rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  flex-shrink: 0;
+}
+.ctrl-play:hover { transform: scale(1.06); }
+
+.progress-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.progress-times {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--jb);
+  font-size: .65rem;
+  color: var(--muted);
+}
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--elevated);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  width: 38%;
+  background: var(--g);
+  border-radius: 2px;
+  position: relative;
+}
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 50%;
+  transform: translateY(-50%);
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 0 4px rgba(255,255,255,.5);
+}
+
+.volume-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.vol-icon { font-size: .95rem; color: var(--sub); }
+.volume-bar-wrap {
+  width: 72px; height: 3px;
+  background: var(--elevated);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.volume-fill {
+  height: 100%;
+  width: 70%;
+  background: var(--g);
+  border-radius: 2px;
+}
+
+.ctrl-action {
+  background: none;
+  border: none;
+  color: var(--sub);
+  font-size: 1rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.ctrl-action:hover { color: var(--text); background: var(--elevated); }
+
+/* ── Bottom grid ──────────────────────────────────────────────────── */
+.grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 30% 40% 30%;
+  overflow: hidden;
+}
+.grid-col {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+.grid-col:last-child { border-right: none; }
+
+/* ── Section header ───────────────────────────────────────────────── */
+.sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sec-title {
+  font-family: var(--jb);
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sec-badge {
+  font-family: var(--jb);
+  font-size: .62rem;
+  color: var(--sub);
+}
+.sec-badge.online {
+  display: flex; align-items: center; gap: 5px;
+  color: var(--text);
+}
+.sec-badge.online::before {
+  content: '';
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #00FF87;
+  box-shadow: 0 0 6px #00FF8780;
+}
+
+/* ── Stations list (left) ─────────────────────────────────────────── */
+.stations-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.station-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background .15s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+.station-card:hover { background: var(--card); }
+.station-card.active {
+  background: var(--card);
+  border-left: 3px solid transparent;
+  border-image: var(--g) 1;
+}
+.station-card.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--g);
+  border-radius: 0 2px 2px 0;
+}
+.station-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  width: 28px; text-align: center;
+}
+.station-meta { flex: 1; min-width: 0; }
+.station-sname {
+  font-size: .82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.station-card.active .station-sname {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.station-genre {
+  font-size: .72rem;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.station-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+.live-badge {
+  font-family: var(--jb);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: rgba(255,34,85,.15);
+  color: var(--sub);
+  border: 1px solid rgba(255,34,85,.3);
+}
+.station-count {
+  font-family: var(--jb);
+  font-size: .62rem;
+  color: var(--muted);
+}
+
+/* ── Queue / Up Next (center) ─────────────────────────────────────── */
+.queue-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+.queue-track {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px 9px 16px;
+  cursor: pointer;
+  transition: background .15s;
+  border-left: 3px solid transparent;
+  position: relative;
+}
+.queue-track:hover { background: var(--card); }
+.queue-track.playing {
+  background: var(--card);
+}
+.queue-track.playing::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--g);
+  border-radius: 0 2px 2px 0;
+}
+.drag-handle {
+  color: var(--muted);
+  font-size: .85rem;
+  flex-shrink: 0;
+  opacity: .5;
+  cursor: grab;
+}
+.track-num {
+  font-family: var(--jb);
+  font-size: .65rem;
+  color: var(--muted);
+  width: 18px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.queue-track.playing .track-num {
+  display: none;
+}
+.playing-bars {
+  display: none;
+  width: 18px;
+  height: 14px;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.queue-track.playing .playing-bars { display: flex; }
+.pbar {
+  flex: 1;
+  background: var(--g);
+  border-radius: 0px;
+  animation: pbar-bounce .7s ease-in-out infinite alternate;
+}
+.pbar:nth-child(2) { animation-delay: .15s; animation-duration: .9s; }
+.pbar:nth-child(3) { animation-delay: .3s; animation-duration: .6s; }
+@keyframes pbar-bounce {
+  from { height: 3px; }
+  to   { height: 12px; }
+}
+.track-info { flex: 1; min-width: 0; }
+.track-qname {
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.queue-track.playing .track-qname {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 600;
+}
+.track-qartist {
+  font-size: .71rem;
+  color: var(--sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-dur {
+  font-family: var(--jb);
+  font-size: .65rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+/* ── Chat / Listeners (right) ─────────────────────────────────────── */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.chat-user {
+  font-size: .73rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.chat-user.cassidy {
+  display: inline-block;
+  font-family: var(--jb);
+  font-size: .68rem;
+  background: none;
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--bg), var(--bg)) padding-box,
+    var(--g) border-box;
+  color: var(--sub);
+  width: fit-content;
+}
+.chat-text {
+  font-size: .78rem;
+  color: var(--sub);
+  line-height: 1.4;
+}
+.chat-time {
+  font-family: var(--jb);
+  font-size: .6rem;
+  color: var(--muted);
+  display: inline-block;
+  margin-top: 1px;
+}
+.chat-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 2px 0;
+}
+
+.chat-input-wrap {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+}
+.chat-input {
+  flex: 1;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--sg);
+  font-size: .78rem;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color .15s;
+}
+.chat-input::placeholder { color: var(--muted); }
+.chat-input:focus { border-color: rgba(136,68,255,.5); }
+.chat-send {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--sub);
+  font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.chat-send:hover { color: var(--text); background: var(--elevated); border-color: rgba(255,255,255,.1); }
+
+/* ── Waveform SVG bars ────────────────────────────────────────────── */
+.bar { transform-origin: bottom center; }
+
+@keyframes wave1  { 0%,100%{transform:scaleY(.15)} 50%{transform:scaleY(1)} }
+@keyframes wave2  { 0%,100%{transform:scaleY(.3)}  50%{transform:scaleY(.75)} }
+@keyframes wave3  { 0%,100%{transform:scaleY(.5)}  50%{transform:scaleY(.2)} }
+@keyframes wave4  { 0%,100%{transform:scaleY(.6)}  50%{transform:scaleY(.9)} }
+@keyframes wave5  { 0%,100%{transform:scaleY(.2)}  50%{transform:scaleY(.55)} }
+@keyframes wave6  { 0%,100%{transform:scaleY(.8)}  50%{transform:scaleY(.35)} }
+@keyframes wave7  { 0%,100%{transform:scaleY(.4)}  50%{transform:scaleY(.95)} }
+@keyframes wave8  { 0%,100%{transform:scaleY(.7)}  50%{transform:scaleY(.2)} }
+@keyframes wave9  { 0%,100%{transform:scaleY(.25)} 50%{transform:scaleY(.8)} }
+@keyframes wave10 { 0%,100%{transform:scaleY(.9)}  50%{transform:scaleY(.4)} }
+
+.waveform-playing .bar { animation-play-state: running !important; }
+.waveform-paused  .bar { animation-play-state: paused  !important; }
+
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Top bar ─────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <span class="topbar-logo">RoadRadio</span>
+    <div class="topbar-sep"></div>
+    <nav class="topbar-nav">
+      <a href="#" class="active">Radio</a>
+      <a href="#">Discover</a>
+      <a href="#">Library</a>
+      <a href="#">Charts</a>
+    </nav>
+    <div class="topbar-right">
+      <div class="topbar-listeners">
+        <div class="listeners-dot"></div>
+        47 listening now
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-avatar">A</div>
+    </div>
+  </header>
+
+  <!-- ── NOW PLAYING HERO ────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+
+    <!-- Station art -->
+    <div class="station-art">
+      <div class="station-art-border">
+        <div class="station-art-inner">
+          <span class="station-art-label">ROAD.FM</span>
+          <span class="station-art-sub">Live · Internet Radio</span>
+          <div class="station-art-glow"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info + controls -->
+    <div class="hero-info">
+      <div class="on-air-tag">
+        <span class="on-air-dot"></span>
+        ON AIR
+      </div>
+      <div class="station-name">ROAD.FM</div>
+      <div class="track-title">Synthwave Cruiser Mix Vol. 4</div>
+      <div class="track-artist">
+        Curated by Cassidy · Road's AI DJ
+        <span class="cassidy-badge">AI DJ</span>
+      </div>
+
+      <!-- Waveform -->
+      <div class="waveform-wrap">
+        <svg id="waveform" viewBox="0 0 640 52" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="wg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"    stop-color="#FF6B2B"/>
+              <stop offset="20%"   stop-color="#FF2255"/>
+              <stop offset="40%"   stop-color="#CC00AA"/>
+              <stop offset="60%"   stop-color="#8844FF"/>
+              <stop offset="80%"   stop-color="#4488FF"/>
+              <stop offset="100%"  stop-color="#00D4FF"/>
+            </linearGradient>
+          </defs>
+          <!-- 44 bars, each 8px wide, 6px gap, centered in 52px tall viewBox -->
+          <!-- bar height max = 48, min via animation. y = 52 - height (bottom-anchored) -->
+          <!-- We'll generate bars with JS below for cleaner code -->
+        </svg>
+      </div>
+
+      <!-- Controls row -->
+      <div class="controls-row">
+        <button class="ctrl-btn" title="Previous">⏮</button>
+        <button class="ctrl-play" id="playBtn" title="Play / Pause">⏸</button>
+        <button class="ctrl-btn" title="Next">⏭</button>
+
+        <!-- Progress -->
+        <div class="progress-area">
+          <div class="progress-bar-wrap">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-times">
+            <span id="currentTime">18:42</span>
+            <span>49:08</span>
+          </div>
+        </div>
+
+        <!-- Volume -->
+        <div class="volume-area">
+          <span class="vol-icon">🔊</span>
+          <div class="volume-bar-wrap">
+            <div class="volume-fill"></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <button class="ctrl-action" title="Like">♡</button>
+        <button class="ctrl-action" title="Share">⬆</button>
+        <button class="ctrl-action" title="Queue">☰</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── Bottom grid ─────────────────────────────────────────────── -->
+  <div class="grid">
+
+    <!-- LEFT — Stations -->
+    <div class="grid-col">
+      <div class="sec-header">
+        <span class="sec-title">Live Stations</span>
+        <span class="sec-badge">6 stations</span>
+      </div>
+      <div class="stations-list" id="stationsList">
+
+        <div class="station-card active" data-station="road-fm">
+          <div class="station-icon">🎵</div>
+          <div class="station-meta">
+            <div class="station-sname">ROAD.FM</div>
+            <div class="station-genre">Synthwave &amp; Future</div>
+          </div>
+          <div class="station-right">
+            <span class="live-badge">LIVE</span>
+            <span class="station-count">47 listeners</span>
+          </div>
+        </div>
+
+        <div class="station-card" data-station="city-grid">
+          <div class="station-icon">🏙️</div>
+          <div class="station-meta">
+            <div class="station-sname">City Grid</div>
+            <div class="station-genre">Lo-fi Hip Hop</div>
+          </div>
+          <div class="station-right">
+            <span class="live-badge">LIVE</span>
+            <span class="station-count">31 listeners</span>
+          </div>
+        </div>
+
+        <div class="station-card" data-station="electric-highway">
+          <div class="station-icon">⚡</div>
+          <div class="station-meta">
+            <div class="station-sname">Electric Highway</div>
+            <div class="station-genre">EDM &amp; House</div>
+          </div>
+          <div class="station-right">
+            <span class="live-badge">LIVE</span>
+            <span class="station-count">88 listeners</span>
+          </div>
+        </div>
+
+        <div class="station-card" data-station="midnight-road">
+          <div class="station-icon">🌙</div>
+          <div class="station-meta">
+            <div class="station-sname">Midnight Road</div>
+            <div class="station-genre">Ambient &amp; Chill</div>
+          </div>
+          <div class="station-right">
+            <span class="live-badge">LIVE</span>
+            <span class="station-count">22 listeners</span>
+          </div>
+        </div>
+
+        <div class="station-card" data-station="road-rock">
+          <div class="station-icon">🎸</div>
+          <div class="station-meta">
+            <div class="station-sname">Road Rock</div>
+            <div class="station-genre">Indie &amp; Alternative</div>
+          </div>
+          <div class="station-right">
+            <span class="station-count">4 listeners</span>
+          </div>
+        </div>
+
+        <div class="station-card" data-station="ai-radio">
+          <div class="station-icon">🤖</div>
+          <div class="station-meta">
+            <div class="station-sname">AI Radio</div>
+            <div class="station-genre">AI-generated music</div>
+          </div>
+          <div class="station-right">
+            <span class="live-badge">LIVE</span>
+            <span class="station-count">19 listeners</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CENTER — Queue -->
+    <div class="grid-col">
+      <div class="sec-header">
+        <span class="sec-title">Up Next</span>
+        <span class="sec-badge">8 tracks</span>
+      </div>
+      <div class="queue-list">
+
+        <div class="queue-track playing">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">1</span>
+          <span class="playing-bars">
+            <span class="pbar"></span>
+            <span class="pbar"></span>
+            <span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Synthwave Cruiser Mix Vol. 4</div>
+            <div class="track-qartist">Cassidy AI · Road.FM Originals</div>
+          </div>
+          <span class="track-dur">49:08</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">2</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Neon Highway</div>
+            <div class="track-qartist">Midnight Grid · Vapor Collective</div>
+          </div>
+          <span class="track-dur">5:44</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">3</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Midnight Cruiser</div>
+            <div class="track-qartist">Neon Drift · Outrun Archives</div>
+          </div>
+          <span class="track-dur">4:12</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">4</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Electric Dreams</div>
+            <div class="track-qartist">Cassidy AI · Road.FM Originals</div>
+          </div>
+          <span class="track-dur">6:01</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">5</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Chrome & Velvet</div>
+            <div class="track-qartist">The Circuits · Future Noir</div>
+          </div>
+          <span class="track-dur">3:58</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">6</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Infrared City</div>
+            <div class="track-qartist">Static Nova · Neon Horizons</div>
+          </div>
+          <span class="track-dur">5:27</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">7</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Solar Overdrive</div>
+            <div class="track-qartist">Volt & Haze · Cassidy Mix</div>
+          </div>
+          <span class="track-dur">4:33</span>
+        </div>
+
+        <div class="queue-track">
+          <span class="drag-handle">⠿</span>
+          <span class="track-num">8</span>
+          <span class="playing-bars">
+            <span class="pbar"></span><span class="pbar"></span><span class="pbar"></span>
+          </span>
+          <div class="track-info">
+            <div class="track-qname">Ghost Protocol</div>
+            <div class="track-qartist">Dark Phase · Sovereign Records</div>
+          </div>
+          <span class="track-dur">7:14</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT — Chat -->
+    <div class="grid-col">
+      <div class="sec-header">
+        <span class="sec-title">Listeners</span>
+        <span class="sec-badge online">47 online</span>
+      </div>
+      <div class="chat-area" id="chatArea">
+
+        <div class="chat-msg">
+          <span class="chat-user">roadie_fan</span>
+          <span class="chat-text">🔥 this track is absolute fire</span>
+          <span class="chat-time">2m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user cassidy">Cassidy</span>
+          <span class="chat-text">Now playing: Synthwave Cruiser Mix Vol. 4 — 49 min mix</span>
+          <span class="chat-time">3m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user">alexa</span>
+          <span class="chat-text">banging set tonight 🙌</span>
+          <span class="chat-time">5m ago</span>
+        </div>
+
+        <div class="chat-divider"></div>
+
+        <div class="chat-msg">
+          <span class="chat-user">nightrider</span>
+          <span class="chat-text">vibes are immaculate rn</span>
+          <span class="chat-time">6m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user cassidy">Cassidy</span>
+          <span class="chat-text">Tune request incoming: Electric Dreams? Voting open 🎵</span>
+          <span class="chat-time">8m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user">velvetsynth</span>
+          <span class="chat-text">yes!! electric dreams 🗳️</span>
+          <span class="chat-time">9m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user">grid_walker</span>
+          <span class="chat-text">found this station last week, haven't left since lol</span>
+          <span class="chat-time">11m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user cassidy">Cassidy</span>
+          <span class="chat-text">Up next after this mix: Neon Highway by Midnight Grid ✦</span>
+          <span class="chat-time">12m ago</span>
+        </div>
+
+        <div class="chat-msg">
+          <span class="chat-user">chrome_wave</span>
+          <span class="chat-text">road.fm is the only radio that matters</span>
+          <span class="chat-time">14m ago</span>
+        </div>
+
+      </div>
+      <div class="chat-input-wrap">
+        <input class="chat-input" type="text" placeholder="Say something to the room…">
+        <button class="chat-send">↑</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── Waveform SVG generation ───────────────────────────────────── */
+(function buildWaveform() {
+  const svg = document.getElementById('waveform')
+  const ns  = 'http://www.w3.org/2000/svg'
+  const N   = 44
+  const W   = 640
+  const H   = 52
+  const gap = 2
+  const bw  = Math.floor((W - gap * (N - 1)) / N)
+
+  // Animation names cycle through wave1–wave10
+  const anims = ['wave1','wave2','wave3','wave4','wave5','wave6','wave7','wave8','wave9','wave10']
+  // Duration range: 0.5s – 1.4s
+  const durations = [0.55,0.7,0.85,0.65,1.0,0.75,0.9,0.6,1.1,0.8,0.95,0.7,0.65,1.3,0.55,0.8,0.75,0.9,1.0,0.6,
+                     0.85,0.7,1.2,0.65,0.9,0.75,0.55,1.1,0.8,0.6,0.95,0.7,0.85,0.65,1.0,0.75,0.9,0.6,1.15,0.8,
+                     0.7,0.85,0.55,0.95]
+
+  const g = document.createElementNS(ns, 'g')
+  g.setAttribute('id', 'waveBars')
+  g.classList.add('waveform-playing')
+
+  for (let i = 0; i < N; i++) {
+    const x = i * (bw + gap)
+    const anim = anims[i % anims.length]
+    const dur  = (durations[i] || 0.7) + 's'
+    const delay = (i * 0.038 % 0.6).toFixed(3) + 's'
+
+    const rect = document.createElementNS(ns, 'rect')
+    rect.setAttribute('class', 'bar')
+    rect.setAttribute('x', x)
+    rect.setAttribute('y', 2)         // stays within 0→52 when scaled
+    rect.setAttribute('width', bw)
+    rect.setAttribute('height', H - 4)
+    rect.setAttribute('rx', 1)
+    rect.setAttribute('fill', 'url(#wg)')
+    rect.style.animation     = `${anim} ${dur} ${delay} ease-in-out infinite alternate`
+    rect.style.transformOrigin = `${x + bw/2}px ${H}px`
+
+    g.appendChild(rect)
+  }
+
+  svg.appendChild(g)
+})()
+
+/* ── Play / Pause toggle ───────────────────────────────────────── */
+let playing = true
+const playBtn   = document.getElementById('playBtn')
+const waveBars  = () => document.getElementById('waveBars')
+
+playBtn.addEventListener('click', () => {
+  playing = !playing
+  playBtn.textContent = playing ? '⏸' : '▶'
+  const wb = waveBars()
+  if (wb) {
+    wb.classList.toggle('waveform-playing',  playing)
+    wb.classList.toggle('waveform-paused',  !playing)
+  }
+})
+
+/* ── Station switcher ──────────────────────────────────────────── */
+const stationData = {
+  'road-fm':         { name: 'ROAD.FM',            track: 'Synthwave Cruiser Mix Vol. 4',  artist: 'Curated by Cassidy · Road\'s AI DJ' },
+  'city-grid':       { name: 'CITY GRID',           track: 'Late Night Grid Sessions',      artist: 'Lo-fi House Mix · Auto-DJ' },
+  'electric-highway':{ name: 'ELECTRIC HWY',        track: 'Highway Rush Hour — Peak Mix',  artist: 'Curated by Cassidy · Road\'s AI DJ' },
+  'midnight-road':   { name: 'MIDNIGHT RD',         track: 'Deep Space Drift Vol. 2',       artist: 'Ambient Collective · Auto-curated' },
+  'road-rock':       { name: 'ROAD ROCK',            track: 'Indie Road Hits',               artist: 'Community Playlist · 4 listeners' },
+  'ai-radio':        { name: 'AI RADIO',             track: 'Infinite AI Session #1091',     artist: 'Cassidy AI · Generative' },
+}
+
+document.getElementById('stationsList').addEventListener('click', e => {
+  const card = e.target.closest('.station-card')
+  if (!card) return
+
+  // Update active
+  document.querySelectorAll('.station-card').forEach(c => c.classList.remove('active'))
+  card.classList.add('active')
+
+  const id   = card.dataset.station
+  const data = stationData[id] || stationData['road-fm']
+
+  // Update hero display
+  document.querySelector('.station-art-label').textContent = data.name
+  document.querySelector('.station-name').textContent      = data.name
+  document.querySelector('.track-title').textContent       = data.track
+  document.querySelector('.track-artist').childNodes[0].textContent = data.artist + ' '
+
+  // Reset progress bar
+  document.getElementById('progressFill').style.width = '0%'
+  document.getElementById('currentTime').textContent  = '0:00'
+
+  // Ensure playing after switch
+  playing = true
+  playBtn.textContent = '⏸'
+  const wb = waveBars()
+  if (wb) {
+    wb.classList.add('waveform-playing')
+    wb.classList.remove('waveform-paused')
+  }
+
+  // Inject a Cassidy chat message
+  addChatMsg('Cassidy', `Switched to ${data.name} — ${data.track} 🎵`, true)
+})
+
+/* ── Live chat ticker ──────────────────────────────────────────── */
+function addChatMsg(user, text, isCassidy) {
+  const area = document.getElementById('chatArea')
+  const div  = document.createElement('div')
+  div.className = 'chat-msg'
+  div.innerHTML = `
+    <span class="chat-user${isCassidy ? ' cassidy' : ''}">${user}</span>
+    <span class="chat-text">${text}</span>
+    <span class="chat-time">just now</span>
+  `
+  area.appendChild(div)
+  area.scrollTop = area.scrollHeight
+}
+
+const liveMessages = [
+  ['roadie_fan', '🔊 sound quality is top'],
+  ['neonwave_x', 'this mix goes so hard'],
+  ['cruiser88',  'where can i download this??'],
+  ['Cassidy',    'Share link: road.fm/mix/synthwave-4 ✦', true],
+  ['midnight_r', 'been here 3 hours lol'],
+  ['velvetsynth','cassidy actually knows my taste 🤖❤️'],
+]
+
+let msgIdx = 0
+setInterval(() => {
+  if (msgIdx < liveMessages.length) {
+    const [u, t, c] = liveMessages[msgIdx++]
+    addChatMsg(u, t, !!c)
+  }
+}, 14000)
+
+/* ── Progress bar simulation ───────────────────────────────────── */
+let progressPct  = 38    // start at 38%
+let totalSeconds = 49 * 60 + 8  // 49:08
+let elapsed      = Math.floor(progressPct / 100 * totalSeconds)
+
+setInterval(() => {
+  if (!playing) return
+  elapsed++
+  if (elapsed > totalSeconds) elapsed = 0
+  progressPct = (elapsed / totalSeconds) * 100
+  document.getElementById('progressFill').style.width = progressPct.toFixed(2) + '%'
+  const m = Math.floor(elapsed / 60)
+  const s = (elapsed % 60).toString().padStart(2,'0')
+  document.getElementById('currentTime').textContent = `${m}:${s}`
+}, 1000)
+
+/* ── Queue track click ─────────────────────────────────────────── */
+document.querySelector('.queue-list').addEventListener('click', e => {
+  const track = e.target.closest('.queue-track')
+  if (!track) return
+  document.querySelectorAll('.queue-track').forEach(t => t.classList.remove('playing'))
+  track.classList.add('playing')
+  const name = track.querySelector('.track-qname').textContent
+  document.querySelector('.track-title').textContent = name
+  elapsed = 0
+})
+</script>
+</body>
+</html>

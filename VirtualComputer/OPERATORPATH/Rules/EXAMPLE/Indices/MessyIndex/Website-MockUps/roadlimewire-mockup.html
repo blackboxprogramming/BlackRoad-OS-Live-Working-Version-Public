@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadLimewire — BlackRoad OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup-base.css">
+<style>
+  :root {
+    --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --bg: #000;
+    --card: #0a0a0a;
+    --elevated: #111;
+    --hover: #181818;
+    --border: #1a1a1a;
+    --text: #f5f5f5;
+    --sub: #737373;
+    --muted: #444;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  /* ── GRAD BAR ── */
+  .grad-bar {
+    height: 3px;
+    background: var(--g);
+    flex-shrink: 0;
+  }
+
+  /* ── TOP NAV ── */
+  .topnav {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+
+  .brand-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 16px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    font-weight: 700;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .brand-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--g);
+    flex-shrink: 0;
+  }
+
+  .brand-name {
+    background: var(--g);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-tab {
+    padding: 6px 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    color: var(--sub);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    background: transparent;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .nav-tab:hover { color: var(--text); background: var(--elevated); border-color: var(--border); }
+
+  .nav-tab.active {
+    color: var(--text);
+    background: var(--elevated);
+    border-color: var(--border);
+    position: relative;
+  }
+
+  .nav-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: var(--g);
+    border-radius: 0px;
+  }
+
+  .nav-spacer { flex: 1; }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-sm {
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--elevated);
+    color: var(--sub);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .btn-sm:hover { color: var(--text); border-color: var(--muted); }
+
+  /* ── NETWORK STATS BAR ── */
+  .stats-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 7px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--sub);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .stats-bar span { white-space: nowrap; }
+  .stats-bar .highlight { color: var(--text); }
+
+  .modem-anim {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+  }
+
+  .modem-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 12px;
+  }
+
+  .modem-bar {
+    width: 3px;
+    background: var(--muted);
+    border-radius: 0px;
+    transition: height 0.3s ease;
+  }
+
+  .modem-bar.active {
+    background: var(--g);
+    background: linear-gradient(180deg, #4488FF, #00D4FF);
+  }
+
+  /* ── MAIN 3-PANEL LAYOUT ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    gap: 0;
+  }
+
+  /* ── LEFT PANEL ── */
+  .panel-left {
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 14px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sub);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .folder-tree {
+    flex: 1;
+    padding: 8px 0;
+    overflow-y: auto;
+  }
+
+  .folder-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+    color: var(--sub);
+    font-size: 12px;
+    border-radius: 0;
+    transition: all 0.12s;
+    position: relative;
+  }
+
+  .folder-item:hover { background: var(--hover); color: var(--text); }
+
+  .folder-item.active {
+    background: var(--elevated);
+    color: var(--text);
+  }
+
+  .folder-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--g);
+  }
+
+  .folder-icon { font-size: 13px; flex-shrink: 0; }
+
+  .folder-name { flex: 1; }
+
+  .folder-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--elevated);
+    padding: 1px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .panel-left-footer {
+    border-top: 1px solid var(--border);
+    padding: 12px 14px;
+  }
+
+  .sharing-status {
+    font-size: 11px;
+    color: var(--sub);
+    margin-bottom: 10px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .sharing-status .count {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .conn-quality {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--sub);
+  }
+
+  .conn-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--g);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(68,136,255,0.6);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 4px rgba(68,136,255,0.4); }
+    50% { box-shadow: 0 0 10px rgba(68,136,255,0.8); }
+  }
+
+  /* ── CENTER PANEL ── */
+  .panel-center {
+    flex: 1;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .search-zone {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .search-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-input:focus { border-color: #4488FF; }
+  .search-input::placeholder { color: var(--muted); }
+
+  .search-select {
+    padding: 8px 10px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    min-width: 100px;
+  }
+
+  .search-select option { background: var(--elevated); }
+
+  .btn-search {
+    padding: 8px 16px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-search::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--g);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .btn-search:hover::before { opacity: 0.12; }
+  .btn-search span { position: relative; z-index: 1; }
+
+  .search-options {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .safe-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--sub);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .toggle {
+    width: 30px;
+    height: 16px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toggle.on { background: linear-gradient(90deg, #4488FF, #00D4FF); border-color: transparent; }
+
+  .toggle-thumb {
+    width: 10px;
+    height: 10px;
+    background: var(--muted);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: all 0.2s;
+  }
+
+  .toggle.on .toggle-thumb { left: 16px; background: var(--bg); }
+
+  .search-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--sub);
+    margin-left: auto;
+  }
+
+  .search-status .found { color: var(--text); }
+
+  /* ── RESULTS TABLE ── */
+  .results-area {
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .results-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .results-table thead th {
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .results-table thead th:hover { color: var(--sub); }
+
+  .results-table tbody tr {
+    border-bottom: 1px solid #0a0a0a;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+
+  .results-table tbody tr:hover { background: var(--hover); }
+
+  .results-table tbody tr.selected { background: #0d1a2a; }
+
+  .results-table td {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
+  }
+
+  .results-table td:first-child { color: var(--text); max-width: 300px; }
+
+  .td-filename {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+  }
+
+  .file-icon { font-size: 13px; flex-shrink: 0; }
+
+  .file-name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  .warn-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255,34,85,0.15);
+    border: 1px solid rgba(255,34,85,0.3);
+    color: var(--sub);
+    flex-shrink: 0;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .tr-suspicious { background: rgba(255,34,85,0.04); }
+  .tr-suspicious:hover { background: rgba(255,34,85,0.08) !important; }
+
+  .speed-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  .speed-slow { color: var(--text); }
+  .speed-na { color: var(--muted); }
+  .speed-ok { color: var(--text); }
+
+  /* ── RIGHT PANEL ── */
+  .panel-right {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--card);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .transfer-section {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .transfer-section-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-count {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--sub);
+  }
+
+  .transfer-item {
+    margin-bottom: 10px;
+  }
+
+  .transfer-item:last-child { margin-bottom: 0; }
+
+  .transfer-name {
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .transfer-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 5px;
+  }
+
+  .progress-track {
+    height: 3px;
+    background: var(--elevated);
+    border-radius: 2px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--g);
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .transfer-status {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .transfer-status.busy { color: var(--text); }
+  .transfer-status.connecting { color: var(--text); }
+  .transfer-status.retrying { color: var(--sub); animation: blink 1.2s ease-in-out infinite; }
+
+  @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+
+  .complete-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .complete-item:last-child { border-bottom: none; }
+
+  .check-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--g);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    flex-shrink: 0;
+  }
+
+  .complete-name {
+    font-size: 11px;
+    color: var(--sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  .complete-size {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .btn-more-sources {
+    width: 100%;
+    padding: 7px 10px;
+    margin: 10px 0 0;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .btn-more-sources:hover { color: var(--text); border-color: var(--muted); }
+
+  .upload-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .upload-item:last-child { border-bottom: none; }
+
+  .upload-name {
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .upload-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── BOTTOM STATUS BAR ── */
+  .status-bar {
+    height: 28px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--sub);
+  }
+
+  .status-bar .sep {
+    color: var(--border);
+    font-size: 14px;
+  }
+
+  #statusText { color: var(--text); }
+
+  .status-bar-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .speed-counter { color: var(--text); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.visible { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 380px;
+    width: 90%;
+    position: relative;
+  }
+
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--g);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .modal-icon { font-size: 36px; margin-bottom: 14px; text-align: center; }
+
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .modal-body {
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .modal-filename {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--sub);
+    background: rgba(255,34,85,0.08);
+    border: 1px solid rgba(255,34,85,0.2);
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+    word-break: break-all;
+  }
+
+  .modal-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .btn-cancel {
+    padding: 8px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-cancel:hover { color: var(--text); }
+
+  .btn-danger {
+    padding: 8px 16px;
+    background: rgba(255,34,85,0.1);
+    border: 1px solid rgba(255,34,85,0.3);
+    border-radius: 8px;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-danger:hover { background: rgba(255,34,85,0.2); border-color: rgba(255,34,85,0.5); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 48px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── SEARCHING OVERLAY ── */
+  .searching-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .spin {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: #4488FF;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SCROLLBARS ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── GRAD TEXT UTIL ── */
+  .grad-text {
+    background: var(--g);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── PANEL SCROLLABLE ── */
+  .panel-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 12px;
+  }
+
+  /* ── LIVE TRANSFER ANIMATION ── */
+  @keyframes progress-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .progress-fill.active {
+    animation: progress-pulse 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<!-- GRAD BAR -->
+<div class="grad-bar"></div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="brand-pill">
+    <div class="brand-dot"></div>
+    <span class="brand-name">RoadWire</span>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab(this,'search')">Search</button>
+    <button class="nav-tab" onclick="switchTab(this,'library')">Library</button>
+    <button class="nav-tab" onclick="switchTab(this,'transfers')">Transfers</button>
+    <button class="nav-tab" onclick="switchTab(this,'network')">Network</button>
+    <button class="nav-tab" onclick="switchTab(this,'chat')">Chat</button>
+  </div>
+
+  <div class="nav-spacer"></div>
+
+  <div class="nav-right">
+    <button class="btn-sm">⚙ Settings</button>
+    <button class="btn-sm">👤 Profile</button>
+  </div>
+</nav>
+
+<!-- NETWORK STATS BAR -->
+<div class="stats-bar">
+  <span>🟢 <span class="highlight">Connected</span></span>
+  <span>· <span class="highlight" id="hostCount">847,293</span> hosts ·</span>
+  <span><span class="highlight">14.2M</span> files shared ·</span>
+  <span>⬆ Upload: <span class="highlight" id="uploadSpeed">12 KB/s</span> ·</span>
+  <span>⬇ Download: <span class="highlight" id="downloadSpeed">847 KB/s</span></span>
+  <div class="modem-anim">
+    <div class="modem-bars" id="modemBars">
+      <div class="modem-bar" style="height:4px"></div>
+      <div class="modem-bar" style="height:7px"></div>
+      <div class="modem-bar" style="height:10px"></div>
+      <div class="modem-bar" style="height:6px"></div>
+      <div class="modem-bar" style="height:9px"></div>
+    </div>
+    <span style="font-size:10px;color:var(--muted)">56K</span>
+  </div>
+</div>
+
+<!-- MAIN 3-PANEL -->
+<div class="main">
+
+  <!-- LEFT PANEL: MY LIBRARY -->
+  <aside class="panel-left">
+    <div class="panel-header">My Library</div>
+
+    <div class="folder-tree">
+      <div class="folder-item active" onclick="selectFolder(this,'All')">
+        <span class="folder-icon">📁</span>
+        <span class="folder-name">Shared Files</span>
+        <span class="folder-count">234</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Music')">
+        <span class="folder-icon">🎵</span>
+        <span class="folder-name">Music</span>
+        <span class="folder-count">147</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Video')">
+        <span class="folder-icon">🎬</span>
+        <span class="folder-name">Videos</span>
+        <span class="folder-count">31</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Images')">
+        <span class="folder-icon">🖼</span>
+        <span class="folder-name">Images</span>
+        <span class="folder-count">19</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Documents')">
+        <span class="folder-icon">📄</span>
+        <span class="folder-name">Documents</span>
+        <span class="folder-count">28</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Incomplete')">
+        <span class="folder-icon">⏳</span>
+        <span class="folder-name">Incomplete</span>
+        <span class="folder-count">9</span>
+      </div>
+      <div style="padding:10px 14px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-top:6px;">Recent</div>
+      <div class="folder-item" onclick="selectFolder(this,'Recent')">
+        <span class="folder-icon">🕐</span>
+        <span class="folder-name">Downloaded Today</span>
+        <span class="folder-count">4</span>
+      </div>
+      <div class="folder-item" onclick="selectFolder(this,'Shared')">
+        <span class="folder-icon">📤</span>
+        <span class="folder-name">Sharing Now</span>
+        <span class="folder-count">7</span>
+      </div>
+    </div>
+
+    <div class="panel-left-footer">
+      <div class="sharing-status">Sharing <span class="count">234</span> files</div>
+      <div class="conn-quality">
+        <div class="conn-dot"></div>
+        <span>Excellent</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CENTER PANEL: SEARCH RESULTS -->
+  <main class="panel-center">
+
+    <!-- Search Zone -->
+    <div class="search-zone">
+      <div class="search-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="searchInput" type="text"
+            placeholder="Search for music, videos, software..."
+            oninput="onSearchInput()"
+            onkeydown="if(event.key==='Enter')triggerSearch()">
+        </div>
+        <select class="search-select" id="fileTypeSelect">
+          <option value="All">All Types</option>
+          <option value="Music">Music</option>
+          <option value="Video">Video</option>
+          <option value="Images">Images</option>
+          <option value="Documents">Documents</option>
+          <option value="Software">Software</option>
+        </select>
+        <button class="btn-search" onclick="triggerSearch()">
+          <span>Search</span>
+        </button>
+      </div>
+      <div class="search-options">
+        <div class="safe-search-wrap" onclick="toggleSafeSearch()">
+          <div class="toggle" id="safeToggle"></div>
+          <span id="safeLabel">Safe Search</span>
+        </div>
+        <div class="search-status">
+          <span id="statusText">Ready</span> · <span class="found" id="resultCount">0 results</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Area -->
+    <div class="results-area" id="resultsArea">
+      <div class="searching-row" id="emptyState">
+        <span style="color:var(--muted);font-size:12px">Enter a search term and press Search or double-click a result to download</span>
+      </div>
+      <table class="results-table" id="resultsTable" style="display:none">
+        <thead>
+          <tr>
+            <th style="width:44%">Filename ↕</th>
+            <th style="width:10%">Size ↕</th>
+            <th style="width:10%">Type</th>
+            <th style="width:14%">Speed ↕</th>
+            <th style="width:12%">Users ↕</th>
+            <th style="width:10%">Avail</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL: TRANSFERS -->
+  <aside class="panel-right">
+    <div class="panel-header" style="display:flex;align-items:center;gap:6px;">
+      Transfers
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--elevated);padding:1px 5px;border-radius:4px;border:1px solid var(--border);" id="totalTransfers">8</span>
+    </div>
+
+    <div class="panel-scroll" id="transfersPanel">
+
+      <!-- DOWNLOADING -->
+      <div class="transfer-section-title">
+        ⬇ Downloading
+        <span class="section-count">3</span>
+      </div>
+
+      <div class="transfer-item" id="dl1">
+        <div class="transfer-name">Eminem - Lose Yourself.mp3</div>
+        <div class="transfer-meta">
+          <span id="dl1speed">14.4 KB/s</span>
+          <span id="dl1pct">23%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill active" id="dl1bar" style="width:23%"></div>
+        </div>
+        <div class="transfer-status connecting" id="dl1status">↓ Active</div>
+      </div>
+
+      <div class="transfer-item" id="dl2">
+        <div class="transfer-name">Shrek_2_FULL_MOVIE.avi</div>
+        <div class="transfer-meta">
+          <span id="dl2speed">2.1 KB/s</span>
+          <span id="dl2pct">4%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill active" id="dl2bar" style="width:4%"></div>
+        </div>
+        <div class="transfer-status retrying" id="dl2status">⟳ Host busy, retrying...</div>
+      </div>
+
+      <div class="transfer-item" id="dl3">
+        <div class="transfer-name">MetallicA_Master_of_Puppets.mp3</div>
+        <div class="transfer-meta">
+          <span id="dl3speed">—</span>
+          <span id="dl3pct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill active" id="dl3bar" style="width:0%"></div>
+        </div>
+        <div class="transfer-status connecting" id="dl3status">⟳ Connecting to host...</div>
+      </div>
+
+      <button class="btn-more-sources" id="moreSourcesBtn" onclick="moreSourcesClick()">
+        🔗 More Sources
+      </button>
+
+      <!-- UPLOADING -->
+      <div class="transfer-section-title" style="margin-top:14px">
+        ⬆ Uploading
+        <span class="section-count">2</span>
+      </div>
+
+      <div class="upload-item">
+        <div class="upload-name">eminem_lose_yourself_REAL.mp3</div>
+        <div class="upload-meta">
+          <span>→ 187.42.x.x</span>
+          <span style="color:#4488FF">9.6 KB/s</span>
+        </div>
+        <div class="progress-track" style="height:2px;">
+          <div class="progress-fill" style="width:67%;background:linear-gradient(90deg,#4488FF,#00D4FF)"></div>
+        </div>
+      </div>
+
+      <div class="upload-item">
+        <div class="upload-name">Beyonce - Crazy In Love.mp3</div>
+        <div class="upload-meta">
+          <span>→ 24.58.x.x</span>
+          <span style="color:#4488FF">4.8 KB/s</span>
+        </div>
+        <div class="progress-track" style="height:2px;">
+          <div class="progress-fill" style="width:33%;background:linear-gradient(90deg,#4488FF,#00D4FF)"></div>
+        </div>
+      </div>
+
+      <!-- COMPLETE -->
+      <div class="transfer-section-title" style="margin-top:14px">
+        ✓ Complete
+        <span class="section-count" id="completeCount">3</span>
+      </div>
+
+      <div id="completeList">
+        <div class="complete-item">
+          <div class="check-icon">✓</div>
+          <div class="complete-name">Beyonce - CrazyInLove.mp3</div>
+          <div class="complete-size">3.8M</div>
+        </div>
+        <div class="complete-item">
+          <div class="check-icon">✓</div>
+          <div class="complete-name">SpiderMan2_trailer.avi</div>
+          <div class="complete-size">14M</div>
+        </div>
+        <div class="complete-item">
+          <div class="check-icon">✓</div>
+          <div class="complete-name">winamp5.exe</div>
+          <div class="complete-size">2.1M</div>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+</div>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span>🖥 RoadWire v2.6.1</span>
+  <span class="sep">|</span>
+  <span id="statusText2">Idle</span>
+  <span class="sep">|</span>
+  <span>⬇ <span class="speed-counter" id="dlCounter">847 KB/s</span></span>
+  <span>⬆ <span class="speed-counter" id="ulCounter">12 KB/s</span></span>
+  <div class="status-bar-right">
+    <span id="searchStatus" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--sub)">Searching... found <span style="color:var(--text)" id="bottomResultCount">0</span> results</span>
+  </div>
+</div>
+
+<!-- MODAL: VIRUS WARNING -->
+<div class="modal-overlay" id="virusModal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-icon">☣️</div>
+    <div class="modal-title">Security Warning</div>
+    <div class="modal-body">
+      The file you are about to download may contain <strong style="color:#FF2255">viruses, malware, spyware, trojans, worms, adware, ransomware, keyloggers, rootkits, or other potentially unwanted programs</strong>.<br><br>
+      Filename:
+      <div class="modal-filename" id="modalFilename">virus.exe</div>
+      Safe Search was <span style="color:#FF2255">unable to verify</span> this file. (Safe Search is always unable to verify anything.)
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModalDirect()">No Thanks</button>
+      <button class="btn-danger" onclick="downloadAnywayClick()">Download Anyway 💀</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════════
+const ALL_FILES = [
+  { name:'Eminem - Lose Yourself (REAL).mp3',            size:'4.2 MB',  type:'Music',    speed:'28 KB/s',  users:43,  avail:'100%',  sus:false },
+  { name:'eminem_lose_yourself_REAL_REAL.mp3',           size:'4.2 MB',  type:'Music',    speed:'14 KB/s',  users:31,  avail:'97%',   sus:false },
+  { name:'eminem lose yourself.mp3.exe',                 size:'847 KB',  type:'Software', speed:'Modem',    users:2,   avail:'12%',   sus:true  },
+  { name:'Eminem - Lose Yourself (radio edit clean).mp3',size:'4.1 MB',  type:'Music',    speed:'N/A',      users:8,   avail:'45%',   sus:false },
+  { name:'Shrek_2_FULL_MOVIE_HD.avi',                    size:'1.4 GB',  type:'Video',    speed:'2 KB/s',   users:167, avail:'88%',   sus:false },
+  { name:'Free_Microsoft_Office_2003_crack_serial.zip',  size:'2.1 MB',  type:'Software', speed:'Modem',    users:5,   avail:'34%',   sus:true  },
+  { name:'Beyonce - Crazy In Love.mp3',                  size:'3.8 MB',  type:'Music',    speed:'56 KB/s',  users:89,  avail:'100%',  sus:false },
+  { name:'beyonce crazy in love CLEAN VERSION.mp3',      size:'3.8 MB',  type:'Music',    speed:'28 KB/s',  users:52,  avail:'99%',   sus:false },
+  { name:'beyonce crazy in love DIRTY VERSION.mp3',      size:'3.9 MB',  type:'Music',    speed:'14 KB/s',  users:74,  avail:'95%',   sus:false },
+  { name:'how_to_get_free_robux_2003_working.exe',       size:'1.3 MB',  type:'Software', speed:'N/A',      users:1,   avail:'8%',    sus:true  },
+  { name:'MetallicA_-_Master_of_Puppets_(FULL_ALBUM).mp3',size:'52 MB', type:'Music',    speed:'4 KB/s',   users:19,  avail:'72%',   sus:false },
+  { name:'OutKast - Hey Ya! (HQ).mp3',                   size:'5.1 MB',  type:'Music',    speed:'28 KB/s',  users:63,  avail:'100%',  sus:false },
+  { name:'Nelly - Hot In Herre.mp3',                     size:'4.4 MB',  type:'Music',    speed:'14 KB/s',  users:48,  avail:'94%',   sus:false },
+  { name:'50cent_in_da_club_REAL_NOT_FAKE.mp3',          size:'3.7 MB',  type:'Music',    speed:'Modem',    users:27,  avail:'67%',   sus:false },
+  { name:'50cent in da club.mp3.exe',                    size:'512 KB',  type:'Software', speed:'N/A',      users:1,   avail:'5%',    sus:true  },
+  { name:'The_Matrix_Reloaded_DVDRIP.avi',               size:'1.1 GB',  type:'Video',    speed:'1 KB/s',   users:94,  avail:'81%',   sus:false },
+  { name:'britney_spears_toxic.mp3',                     size:'3.5 MB',  type:'Music',    speed:'28 KB/s',  users:71,  avail:'100%',  sus:false },
+  { name:'Linkin Park - Numb.mp3',                       size:'4.0 MB',  type:'Music',    speed:'56 KB/s',  users:58,  avail:'99%',   sus:false },
+  { name:'kazaa_lite_k++_noads_nospyware_CLEAN.exe',     size:'3.2 MB',  type:'Software', speed:'Modem',    users:3,   avail:'22%',   sus:true  },
+  { name:'evanescence_bring_me_to_life_amy_lee.mp3',     size:'4.6 MB',  type:'Music',    speed:'14 KB/s',  users:44,  avail:'91%',   sus:false },
+  { name:'Finding_Nemo_2003_FULL.avi',                   size:'1.6 GB',  type:'Video',    speed:'2 KB/s',   users:112, avail:'76%',   sus:false },
+  { name:'Coldplay - The Scientist.mp3',                 size:'5.3 MB',  type:'Music',    speed:'28 KB/s',  users:36,  avail:'98%',   sus:false },
+  { name:'adobe_photoshop_7_full_cracked_nocd.zip',      size:'187 MB',  type:'Software', speed:'N/A',      users:4,   avail:'19%',   sus:true  },
+  { name:'Radiohead - Creep.mp3',                        size:'4.8 MB',  type:'Music',    speed:'14 KB/s',  users:29,  avail:'87%',   sus:false },
+];
+
+let currentFile = null;
+let searchTimeout = null;
+let safeSearchOn = false;
+let completeFiles = [];
+
+// ══════════════════════════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════════════════════════
+function switchTab(el, tab) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (tab === 'search') {
+    document.getElementById('resultsArea').parentElement.style.display = 'flex';
+  }
+  showToast(`Switched to ${tab.charAt(0).toUpperCase()+tab.slice(1)}`);
+}
+
+function selectFolder(el, folder) {
+  document.querySelectorAll('.folder-item').forEach(f => f.classList.remove('active'));
+  el.classList.add('active');
+  showToast(`Browsing: ${folder}`);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SEARCH
+// ══════════════════════════════════════════════════════════════
+function onSearchInput() {
+  clearTimeout(searchTimeout);
+  const q = document.getElementById('searchInput').value.trim();
+  if (!q) return;
+  setStatus('Searching...');
+  searchTimeout = setTimeout(triggerSearch, 1500);
+}
+
+function triggerSearch() {
+  clearTimeout(searchTimeout);
+  const q = document.getElementById('searchInput').value.trim();
+  const typeFilter = document.getElementById('fileTypeSelect').value;
+
+  if (!q) return;
+
+  // Show searching spinner
+  document.getElementById('emptyState').innerHTML = `
+    <div class="spin"></div>
+    <span>Searching for "${q}"...</span>`;
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('resultsTable').style.display = 'none';
+  setStatus('Searching...');
+
+  setTimeout(() => {
+    let results = ALL_FILES.filter(f => {
+      const matchQuery = f.name.toLowerCase().includes(q.toLowerCase()) || q.length < 2;
+      const matchType = typeFilter === 'All' || f.type === typeFilter;
+      return matchQuery && matchType;
+    });
+
+    // Always show all files if no matches (LimeWire was bad at filtering)
+    if (results.length === 0) results = ALL_FILES;
+
+    renderResults(results);
+    const count = results.length;
+    document.getElementById('resultCount').textContent = `${count} results`;
+    document.getElementById('bottomResultCount').textContent = count;
+    setStatus(`Found ${count} results`);
+    document.getElementById('statusText2').textContent = `Searching... found ${count} results`;
+  }, 1500);
+}
+
+function renderResults(files) {
+  const tbody = document.getElementById('resultsBody');
+  tbody.innerHTML = '';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsTable').style.display = 'table';
+
+  files.forEach((f, i) => {
+    const tr = document.createElement('tr');
+    if (f.sus) tr.classList.add('tr-suspicious');
+
+    const fileIcon = getFileIcon(f.type, f.name);
+    const speedClass = f.speed === 'N/A' ? 'speed-na' : (f.speed === 'Modem' ? 'speed-slow' : 'speed-ok');
+    const availColor = parseInt(f.avail) > 70 ? 'var(--text)' : (parseInt(f.avail) > 30 ? '#FF6B2B' : '#FF2255');
+
+    tr.innerHTML = `
+      <td>
+        <div class="td-filename">
+          <span class="file-icon">${fileIcon}</span>
+          <span class="file-name-text" title="${f.name}">${f.name}</span>
+          ${f.sus ? '<span class="warn-badge">⚠ EXE</span>' : ''}
+        </div>
+      </td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${f.size}</td>
+      <td style="color:var(--muted);font-size:11px">${f.type}</td>
+      <td><span class="speed-badge ${speedClass}">${f.speed}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px">${f.users}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:${availColor}">${f.avail}</td>
+    `;
+
+    // Single click: select
+    tr.addEventListener('click', () => {
+      document.querySelectorAll('#resultsBody tr').forEach(r => r.classList.remove('selected'));
+      tr.classList.add('selected');
+    });
+
+    // Double click: initiate download (or warn if suspicious)
+    tr.addEventListener('dblclick', () => {
+      if (f.sus) {
+        showVirusModal(f.name);
+      } else {
+        startDownload(f);
+      }
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function getFileIcon(type, name) {
+  if (name.endsWith('.exe')) return '⚠️';
+  if (name.endsWith('.zip')) return '🗜';
+  if (type === 'Music') return '🎵';
+  if (type === 'Video') return '🎬';
+  if (type === 'Images') return '🖼';
+  if (type === 'Documents') return '📄';
+  return '📦';
+}
+
+function setStatus(txt) {
+  document.getElementById('statusText').textContent = txt;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SAFE SEARCH TOGGLE
+// ══════════════════════════════════════════════════════════════
+function toggleSafeSearch() {
+  safeSearchOn = !safeSearchOn;
+  const tog = document.getElementById('safeToggle');
+  const lbl = document.getElementById('safeLabel');
+  tog.classList.toggle('on', safeSearchOn);
+  lbl.textContent = safeSearchOn ? 'Safe Search ✓' : 'Safe Search';
+  showToast(safeSearchOn ? '🛡 Safe Search enabled (results unchanged)' : '⚠ Safe Search disabled');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DOWNLOAD / TRANSFERS
+// ══════════════════════════════════════════════════════════════
+let downloadQueue = [];
+let activeDownloadCount = 3;
+
+function startDownload(file) {
+  showToast(`⬇ Starting download: ${file.name.substring(0,30)}...`);
+  addToTransferPanel(file);
+}
+
+function addToTransferPanel(file) {
+  activeDownloadCount++;
+  document.getElementById('totalTransfers').textContent = activeDownloadCount + 5;
+  const completeList = document.getElementById('completeList');
+
+  const item = document.createElement('div');
+  item.className = 'transfer-item';
+  const shortName = file.name.length > 28 ? file.name.substring(0,28)+'…' : file.name;
+  const dlId = 'dl_' + Date.now();
+  item.innerHTML = `
+    <div class="transfer-name">${shortName}</div>
+    <div class="transfer-meta">
+      <span id="${dlId}_speed">Connecting...</span>
+      <span id="${dlId}_pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill active" id="${dlId}_bar" style="width:0%"></div>
+    </div>
+    <div class="transfer-status connecting" id="${dlId}_status">⟳ Connecting to host...</div>
+  `;
+
+  const panel = document.getElementById('transfersPanel');
+  // Insert after the third download item
+  const btn = document.getElementById('moreSourcesBtn');
+  btn.before(item);
+
+  // Simulate slow download
+  let pct = 0;
+  let speed = Math.floor(Math.random() * 20) + 4;
+  const interval = setInterval(() => {
+    pct += Math.random() * 3;
+    if (pct > 100) pct = 100;
+    const bar = document.getElementById(`${dlId}_bar`);
+    const pctEl = document.getElementById(`${dlId}_pct`);
+    const speedEl = document.getElementById(`${dlId}_speed`);
+    const statusEl = document.getElementById(`${dlId}_status`);
+    if (!bar) { clearInterval(interval); return; }
+    speed += (Math.random() - 0.5) * 4;
+    if (speed < 1) speed = 1;
+    bar.style.width = pct + '%';
+    pctEl.textContent = Math.floor(pct) + '%';
+    speedEl.textContent = speed.toFixed(1) + ' KB/s';
+    if (pct < 5) {
+      statusEl.textContent = '⟳ Connecting to host...';
+      statusEl.className = 'transfer-status connecting';
+    } else if (Math.random() < 0.1) {
+      statusEl.textContent = '⟳ Host busy, retrying...';
+      statusEl.className = 'transfer-status retrying';
+    } else {
+      statusEl.textContent = '↓ Active';
+      statusEl.className = 'transfer-status connecting';
+    }
+    if (pct >= 100) {
+      clearInterval(interval);
+      item.remove();
+      activeDownloadCount--;
+      addComplete(file.name, file.size);
+    }
+  }, 800);
+}
+
+function addComplete(name, size) {
+  const shortName = name.length > 24 ? name.substring(0,24)+'…' : name;
+  const completeList = document.getElementById('completeList');
+  const div = document.createElement('div');
+  div.className = 'complete-item';
+  div.innerHTML = `
+    <div class="check-icon">✓</div>
+    <div class="complete-name">${shortName}</div>
+    <div class="complete-size">${size}</div>
+  `;
+  completeList.prepend(div);
+  const cnt = completeList.querySelectorAll('.complete-item').length;
+  document.getElementById('completeCount').textContent = cnt;
+  showToast(`✓ Download complete: ${shortName}`);
+}
+
+function moreSourcesClick() {
+  const btn = document.getElementById('moreSourcesBtn');
+  btn.textContent = '⟳ Connecting to 3 more hosts...';
+  btn.disabled = true;
+  setTimeout(() => {
+    showToast('❌ No additional sources found');
+    btn.textContent = '🔗 More Sources';
+    btn.disabled = false;
+  }, 2000);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  VIRUS MODAL
+// ══════════════════════════════════════════════════════════════
+function showVirusModal(filename) {
+  currentFile = filename;
+  document.getElementById('modalFilename').textContent = filename;
+  document.getElementById('virusModal').classList.add('visible');
+}
+
+function closeModal(e) {
+  if (e.target.id === 'virusModal') closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('virusModal').classList.remove('visible');
+  currentFile = null;
+}
+
+function downloadAnywayClick() {
+  const f = ALL_FILES.find(x => x.name === currentFile) || { name: currentFile, size:'? MB', type:'Software' };
+  closeModalDirect();
+  showToast('💀 Downloading anyway. Brave (or foolish).');
+  startDownload(f);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════════════
+let toastTimer = null;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MODEM SPEED ANIMATION
+// ══════════════════════════════════════════════════════════════
+let dlSpeed = 847;
+let ulSpeed = 12;
+
+function animateModem() {
+  const bars = document.querySelectorAll('.modem-bar');
+  const heights = [4,7,10,6,9,5,8,3,11,6];
+  bars.forEach((bar, i) => {
+    const h = heights[Math.floor(Math.random() * heights.length)];
+    bar.style.height = h + 'px';
+    bar.classList.toggle('active', Math.random() > 0.4);
+  });
+}
+
+function updateSpeeds() {
+  dlSpeed += (Math.random() - 0.5) * 80;
+  ulSpeed += (Math.random() - 0.5) * 5;
+  if (dlSpeed < 100) dlSpeed = 100;
+  if (dlSpeed > 1400) dlSpeed = 1400;
+  if (ulSpeed < 3) ulSpeed = 3;
+  if (ulSpeed > 30) ulSpeed = 30;
+
+  const dlK = dlSpeed > 1024 ? (dlSpeed/1024).toFixed(1)+' MB/s' : Math.floor(dlSpeed)+' KB/s';
+  const ulK = Math.floor(ulSpeed)+' KB/s';
+
+  document.getElementById('downloadSpeed').textContent = dlK;
+  document.getElementById('uploadSpeed').textContent = ulK;
+  document.getElementById('dlCounter').textContent = dlK;
+  document.getElementById('ulCounter').textContent = ulK;
+}
+
+function animateExistingDownloads() {
+  // DL1
+  const dl1bar = document.getElementById('dl1bar');
+  const dl1pct = document.getElementById('dl1pct');
+  const dl1speed = document.getElementById('dl1speed');
+  if (dl1bar) {
+    let cur = parseFloat(dl1bar.style.width) || 23;
+    cur += Math.random() * 1.5;
+    if (cur > 100) cur = 100;
+    dl1bar.style.width = cur + '%';
+    dl1pct.textContent = Math.floor(cur) + '%';
+    let spd = 14.4 + (Math.random()-0.5)*4;
+    if (spd < 0.5) spd = 0.5;
+    dl1speed.textContent = spd.toFixed(1) + ' KB/s';
+  }
+  // DL2
+  const dl2bar = document.getElementById('dl2bar');
+  const dl2pct = document.getElementById('dl2pct');
+  const dl2speed = document.getElementById('dl2speed');
+  const dl2status = document.getElementById('dl2status');
+  if (dl2bar) {
+    let cur = parseFloat(dl2bar.style.width) || 4;
+    if (Math.random() > 0.7) {
+      cur += Math.random() * 0.3;
+      dl2status.textContent = '↓ Active';
+      dl2status.className = 'transfer-status connecting';
+      let spd = 2.1 + (Math.random()-0.5)*1;
+      if (spd < 0.2) spd = 0.2;
+      dl2speed.textContent = spd.toFixed(1) + ' KB/s';
+    } else {
+      dl2status.textContent = '⟳ Host busy, retrying...';
+      dl2status.className = 'transfer-status retrying';
+      dl2speed.textContent = '—';
+    }
+    if (cur > 100) cur = 100;
+    dl2bar.style.width = cur + '%';
+    dl2pct.textContent = Math.floor(cur) + '%';
+  }
+  // DL3
+  const dl3status = document.getElementById('dl3status');
+  const dl3speed = document.getElementById('dl3speed');
+  if (dl3status) {
+    if (Math.random() > 0.8) {
+      dl3status.textContent = '↓ Active';
+      dl3status.className = 'transfer-status connecting';
+      dl3speed.textContent = '1.2 KB/s';
+      const dl3bar = document.getElementById('dl3bar');
+      if (dl3bar) {
+        let c = parseFloat(dl3bar.style.width) || 0;
+        c += 0.2;
+        dl3bar.style.width = c + '%';
+        document.getElementById('dl3pct').textContent = c.toFixed(1) + '%';
+      }
+    } else {
+      dl3status.textContent = '⟳ Connecting to host...';
+      dl3status.className = 'transfer-status connecting';
+      dl3speed.textContent = '—';
+    }
+  }
+}
+
+function updateHostCount() {
+  let hosts = parseInt(document.getElementById('hostCount').textContent.replace(/,/g,''));
+  hosts += Math.floor((Math.random()-0.5) * 100);
+  document.getElementById('hostCount').textContent = hosts.toLocaleString();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════
+setInterval(animateModem, 400);
+setInterval(updateSpeeds, 1800);
+setInterval(animateExistingDownloads, 900);
+setInterval(updateHostCount, 3000);
+
+// Pre-populate with a default search result on load
+setTimeout(() => {
+  document.getElementById('searchInput').value = 'eminem';
+  triggerSearch();
+}, 800);
+</script>
+</body>
+</html>

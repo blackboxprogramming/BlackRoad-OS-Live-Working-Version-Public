@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Showdown — BlackRoad OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Grotesk',sans-serif;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#0a0a0a;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.88);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.4);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#333;text-transform:uppercase;}
+
+@keyframes bot-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes bot-celebrate{0%,100%{transform:translateY(0)}25%{transform:translateY(-16px)}75%{transform:translateY(-8px)}}
+@keyframes stomp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes vs-slam{0%{opacity:0;transform:scale(3) rotate(-5deg)}60%{transform:scale(.95) rotate(0deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
+@keyframes flash{0%,100%{opacity:0}40%,60%{opacity:1}}
+@keyframes puff{0%{opacity:.7;transform:scale(.5)}100%{opacity:0;transform:scale(2.5)}}
+@keyframes twist-end{0%{opacity:0;transform:translateY(20px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes scan-line{0%{top:0}100%{top:100%}}
+@keyframes spotlight-pulse{0%,100%{opacity:.03}50%{opacity:.07}}
+@keyframes dust{0%{opacity:.6;transform:translate(0,0) scale(.3)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.5)}}
+
+/* ─── Background ─── */
+#bg-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+
+/* ─── Floor ─── */
+#floor{position:absolute;left:0;right:0;bottom:80px;z-index:2;}
+
+/* ─── Robots ─── */
+.rwrap{
+  position:absolute;width:160px;z-index:10;
+  transition:transform .9s cubic-bezier(.16,1,.3,1), left .9s cubic-bezier(.16,1,.3,1), opacity .5s;
+}
+#rl{left:-180px;top:370px;transform:scale(1.8);opacity:0;}
+#rr{left:1300px;top:370px;transform:scale(1.8) scaleX(-1);opacity:0;}
+
+/* ─── VS stamp ─── */
+#vs-wrap{
+  position:absolute;inset:0;z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;opacity:0;
+}
+#vs-text{
+  font-size:180px;font-weight:700;letter-spacing:-8px;color:#fff;
+  animation:vs-slam .5s cubic-bezier(.16,1,.3,1) forwards;
+  line-height:1;
+}
+#vs-sub{
+  font-family:'Space Mono',monospace;font-size:12px;letter-spacing:12px;color:#222;
+  text-transform:uppercase;margin-top:8px;
+  opacity:0;transition:opacity .5s .3s;
+}
+#vs-rule-l{position:absolute;left:0;top:50%;height:1px;background:#111;width:0;transition:width .6s .3s;}
+#vs-rule-r{position:absolute;right:0;top:50%;height:1px;background:#111;width:0;transition:width .6s .3s;}
+
+/* ─── Flash overlay ─── */
+#flash{position:absolute;inset:0;z-index:50;background:#fff;opacity:0;pointer-events:none;transition:opacity .08s;}
+
+/* ─── Charge particles (dust puffs on stomp) ─── */
+#dust-wrap{position:absolute;inset:0;z-index:15;pointer-events:none;}
+.puff{
+  position:absolute;width:20px;height:20px;border-radius:50%;
+  background:radial-gradient(circle,#1a1a1a,transparent);
+  opacity:0;
+}
+
+/* ─── Twist ending text ─── */
+#twist-wrap{
+  position:absolute;inset:0;z-index:30;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  pointer-events:none;opacity:0;transition:opacity .6s;
+}
+#twist-main{
+  font-size:56px;font-weight:700;letter-spacing:12px;color:#fff;
+  text-transform:uppercase;
+  animation:twist-end .6s cubic-bezier(.16,1,.3,1) forwards;
+  opacity:0;
+}
+#twist-main.in{opacity:1;}
+#twist-sub{
+  font-family:'Space Mono',monospace;font-size:12px;letter-spacing:8px;color:#1e1e1e;
+  text-transform:uppercase;opacity:0;transition:opacity .7s .3s;
+}
+#twist-sub.in{opacity:1;}
+
+/* ─── End card ─── */
+#end-card{
+  position:absolute;inset:0;z-index:60;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  background:rgba(0,0,0,.92);opacity:0;transition:opacity .8s;pointer-events:none;
+}
+#ec-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:8px;color:#1a1a1a;text-transform:uppercase;}
+#ec-main{font-size:52px;font-weight:700;color:#fff;letter-spacing:8px;opacity:0;transform:scale(.93);transition:opacity .7s .2s,transform .7s .2s cubic-bezier(.16,1,.3,1);}
+#ec-main.in{opacity:1;transform:scale(1);}
+#ec-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:6px;color:#1c1c1c;margin-top:8px;opacity:0;transition:opacity .7s .5s;}
+#ec-sub.in{opacity:1;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="play-overlay">
+    <div id="play-btn"><svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg></div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <!-- Background -->
+  <svg id="bg-svg" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="spot-center" cx="50%" cy="100%" r="50%">
+        <stop offset="0%" stop-color="#fff" stop-opacity="0.035"/>
+        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="spot-l" cx="25%" cy="100%" r="40%">
+        <stop offset="0%" stop-color="#fff" stop-opacity="0.03"/>
+        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="spot-r" cx="75%" cy="100%" r="40%">
+        <stop offset="0%" stop-color="#fff" stop-opacity="0.03"/>
+        <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1280" height="720" fill="#000"/>
+    <rect width="1280" height="720" fill="url(#spot-center)" style="animation:spotlight-pulse 3s ease-in-out infinite"/>
+    <rect width="1280" height="720" fill="url(#spot-l)"/>
+    <rect width="1280" height="720" fill="url(#spot-r)"/>
+    <!-- Grid lines on floor -->
+    <line id="fl-main" x1="0" y1="641" x2="1280" y2="641" stroke="#0d0d0d" stroke-width="1" opacity="0"/>
+    <line id="fl-back" x1="0" y1="641" x2="1280" y2="641" stroke="#080808" stroke-width="1" opacity="0"/>
+    <!-- Shadow ellipses -->
+    <ellipse id="shadow-l" cx="330" cy="643" rx="0" ry="0" fill="#0d0d0d"/>
+    <ellipse id="shadow-r" cx="950" cy="643" rx="0" ry="0" fill="#0d0d0d"/>
+    <!-- Title badge -->
+    <text id="title-txt" x="640" y="56" text-anchor="middle" font-family="Space Mono,monospace" font-size="10" letter-spacing="8" fill="#111" opacity="0">THE SHOWDOWN</text>
+  </svg>
+
+  <!-- Flash -->
+  <div id="flash"></div>
+  <div id="dust-wrap"></div>
+
+  <!-- LEFT robot (Walk Bot) -->
+  <div class="rwrap" id="rl">
+    <svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg" style="display:block" id="rl-svg">
+      <!-- walk-idle stance -->
+      <ellipse cx="80" cy="205" rx="28" ry="4" fill="#111"/>
+      <rect x="52" y="192" width="26" height="12" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+      <rect x="84" y="192" width="26" height="12" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+      <!-- idle walk alternating legs -->
+      <g id="rl-leg-l"><animateTransform attributeName="transform" type="rotate" values="-8 65 150;8 65 150;-8 65 150" dur=".8s" repeatCount="indefinite" id="rl-leg-l-anim"/>
+        <rect x="54" y="150" width="22" height="44" fill="#222" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <g id="rl-leg-r"><animateTransform attributeName="transform" type="rotate" values="8 95 150;-8 95 150;8 95 150" dur=".8s" repeatCount="indefinite" id="rl-leg-r-anim"/>
+        <rect x="86" y="150" width="22" height="44" fill="#222" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <rect x="46" y="88" width="68" height="64" fill="#111" stroke="#444" stroke-width="2"/>
+      <rect x="54" y="96" width="52" height="50" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="65" cy="110" r="4" fill="#fff"/>
+      <circle cx="95" cy="110" r="4" fill="#fff"/>
+      <rect x="57" y="114" width="8" height="8" fill="#000"/>
+      <rect x="93" y="114" width="8" height="8" fill="#000"/>
+      <!-- frown / aggressive face -->
+      <polyline points="60,130 80,124 100,130" fill="none" stroke="#555" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="56" y1="121" x2="104" y2="121" stroke="#222" stroke-width="1"/>
+      <g id="rl-arm-l"><animateTransform attributeName="transform" type="rotate" values="12 37 92;-12 37 92;12 37 92" dur=".8s" repeatCount="indefinite"/>
+        <rect x="28" y="88" width="18" height="48" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+        <rect x="30" y="136" width="16" height="12" fill="#222" stroke="#2a2a2a" stroke-width="1"/>
+      </g>
+      <g id="rl-arm-r"><animateTransform attributeName="transform" type="rotate" values="-12 123 92;12 123 92;-12 123 92" dur=".8s" repeatCount="indefinite"/>
+        <rect x="114" y="88" width="18" height="48" fill="#1a1a1a" stroke="#444" stroke-width="1.5"/>
+        <rect x="114" y="136" width="16" height="12" fill="#222" stroke="#333" stroke-width="1"/>
+      </g>
+      <rect x="66" y="74" width="28" height="16" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1"/>
+      <rect x="36" y="18" width="88" height="58" fill="#111" stroke="#555" stroke-width="2.5"/>
+      <rect x="42" y="24" width="76" height="46" fill="#080808" stroke="#333" stroke-width="1"/>
+      <rect x="46" y="27" width="68" height="40" fill="#000"/>
+      <rect x="52" y="32" width="20" height="18" rx="1" fill="#fff" opacity=".95"/>
+      <rect x="88" y="32" width="20" height="18" rx="1" fill="#fff" opacity=".95"/>
+      <rect x="57" y="36" width="10" height="10" fill="#000"/>
+      <rect x="93" y="36" width="10" height="10" fill="#000"/>
+      <rect x="78" y="5" width="4" height="15" fill="#333"/>
+      <circle cx="80" cy="1" r="3.5" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- RIGHT robot (Walk Bot mirrored via scaleX in CSS) -->
+  <div class="rwrap" id="rr">
+    <svg viewBox="0 0 160 210" xmlns="http://www.w3.org/2000/svg" style="display:block" id="rr-svg">
+      <!-- identical walk bot, mirrored by scaleX(-1) on parent -->
+      <ellipse cx="80" cy="205" rx="28" ry="4" fill="#111"/>
+      <rect x="52" y="192" width="26" height="12" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+      <rect x="84" y="192" width="26" height="12" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+      <g><animateTransform attributeName="transform" type="rotate" values="8 65 150;-8 65 150;8 65 150" dur=".8s" repeatCount="indefinite"/>
+        <rect x="54" y="150" width="22" height="44" fill="#222" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <g><animateTransform attributeName="transform" type="rotate" values="-8 95 150;8 95 150;-8 95 150" dur=".8s" repeatCount="indefinite"/>
+        <rect x="86" y="150" width="22" height="44" fill="#222" stroke="#333" stroke-width="1.5"/>
+      </g>
+      <rect x="46" y="88" width="68" height="64" fill="#111" stroke="#444" stroke-width="2"/>
+      <rect x="54" y="96" width="52" height="50" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+      <circle cx="65" cy="110" r="4" fill="#fff"/>
+      <circle cx="95" cy="110" r="4" fill="#fff"/>
+      <rect x="57" y="114" width="8" height="8" fill="#000"/>
+      <rect x="93" y="114" width="8" height="8" fill="#000"/>
+      <polyline points="60,130 80,124 100,130" fill="none" stroke="#555" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="56" y1="121" x2="104" y2="121" stroke="#222" stroke-width="1"/>
+      <g><animateTransform attributeName="transform" type="rotate" values="-12 37 92;12 37 92;-12 37 92" dur=".8s" repeatCount="indefinite"/>
+        <rect x="28" y="88" width="18" height="48" fill="#1a1a1a" stroke="#333" stroke-width="1.5"/>
+        <rect x="30" y="136" width="16" height="12" fill="#222" stroke="#2a2a2a" stroke-width="1"/>
+      </g>
+      <g><animateTransform attributeName="transform" type="rotate" values="12 123 92;-12 123 92;12 123 92" dur=".8s" repeatCount="indefinite"/>
+        <rect x="114" y="88" width="18" height="48" fill="#1a1a1a" stroke="#444" stroke-width="1.5"/>
+        <rect x="114" y="136" width="16" height="12" fill="#222" stroke="#333" stroke-width="1"/>
+      </g>
+      <rect x="66" y="74" width="28" height="16" fill="#0d0d0d" stroke="#2a2a2a" stroke-width="1"/>
+      <rect x="36" y="18" width="88" height="58" fill="#111" stroke="#555" stroke-width="2.5"/>
+      <rect x="42" y="24" width="76" height="46" fill="#080808" stroke="#333" stroke-width="1"/>
+      <rect x="46" y="27" width="68" height="40" fill="#000"/>
+      <rect x="52" y="32" width="20" height="18" rx="1" fill="#fff" opacity=".95"/>
+      <rect x="88" y="32" width="20" height="18" rx="1" fill="#fff" opacity=".95"/>
+      <rect x="57" y="36" width="10" height="10" fill="#000"/>
+      <rect x="93" y="36" width="10" height="10" fill="#000"/>
+      <rect x="78" y="5" width="4" height="15" fill="#333"/>
+      <circle cx="80" cy="1" r="3.5" fill="#fff"/>
+    </svg>
+  </div>
+
+  <!-- VS stamp -->
+  <div id="vs-wrap">
+    <div id="vs-rule-l"></div>
+    <div id="vs-rule-r"></div>
+    <div id="vs-text">VS</div>
+    <div id="vs-sub">BLACKROAD · SHOWDOWN</div>
+  </div>
+
+  <!-- Twist ending -->
+  <div id="twist-wrap">
+    <div id="twist-main">ACTUALLY FRIENDS</div>
+    <div id="twist-sub">Every Roadie is on the same team</div>
+  </div>
+
+  <!-- End card -->
+  <div id="end-card">
+    <div id="ec-eyebrow">BlackRoad OS</div>
+    <div id="ec-main">ONE TEAM</div>
+    <div id="ec-sub">69+ agents · always shipping together</div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280; stage.style.transform=`scale(${sc})`; shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const DURATION=18;
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[]; function at(sec,fn){timeline.push({sec,fn});}
+
+function flash(dur=120){
+  const f=document.getElementById('flash');
+  f.style.transition='none'; f.style.opacity='1';
+  setTimeout(()=>{f.style.transition=`opacity ${dur}ms`; f.style.opacity='0';},16);
+}
+function spawnDust(x,y){
+  const wrap=document.getElementById('dust-wrap');
+  for(let i=0;i<8;i++){
+    const d=document.createElement('div');
+    d.className='puff';
+    const angle=Math.random()*360, dist=30+Math.random()*60;
+    const dx=Math.cos(angle*Math.PI/180)*dist, dy=-Math.abs(Math.sin(angle*Math.PI/180)*dist);
+    d.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px;animation:dust .6s ease-out forwards;width:${12+Math.random()*16}px;height:${12+Math.random()*16}px;`;
+    wrap.appendChild(d);
+    setTimeout(()=>d.remove(),700);
+  }
+}
+
+// title fade in
+at(0.2,()=>{
+  const t=document.getElementById('title-txt');
+  t.style.transition='opacity 1s'; t.setAttribute('opacity','1');
+  const fl=document.getElementById('fl-main');
+  fl.style.transition='opacity .8s'; fl.setAttribute('opacity','1');
+});
+
+// LEFT robot enters
+at(1.0,()=>{
+  const rl=document.getElementById('rl');
+  rl.style.opacity='1';
+  // walk in from left
+  rl.style.transition='left 1.8s cubic-bezier(.25,.46,.45,.94), opacity .4s';
+  rl.style.left='170px';
+  // shadow
+  const sh=document.getElementById('shadow-l');
+  sh.style.transition='rx 1.8s,ry 1.8s'; sh.setAttribute('rx','56'); sh.setAttribute('ry','7');
+});
+
+// RIGHT robot enters
+at(1.8,()=>{
+  const rr=document.getElementById('rr');
+  rr.style.opacity='1';
+  rr.style.transition='left 1.8s cubic-bezier(.25,.46,.45,.94), opacity .4s';
+  rr.style.left='790px';
+  const sh=document.getElementById('shadow-r');
+  sh.style.transition='rx 1.8s,ry 1.8s'; sh.setAttribute('rx','56'); sh.setAttribute('ry','7');
+});
+
+// Stomp arrivals + dust
+at(3.7,()=>{spawnDust(252,530);});
+at(4.2,()=>{spawnDust(1020,530);});
+
+// VS flash!
+at(4.5,()=>{
+  flash(200);
+  const vs=document.getElementById('vs-wrap');
+  vs.style.opacity='1'; vs.style.pointerEvents='none';
+  // make bots face each other (they already do by default via scaleX(-1))
+  // dramatic stomp
+  const rl=document.getElementById('rl'), rr=document.getElementById('rr');
+  rl.style.transition='transform .15s ease-out'; rl.style.transform='scale(1.8) translateY(-8px)';
+  rr.style.transition='transform .15s ease-out'; rr.style.transform='scale(1.8) scaleX(-1) translateY(-8px)';
+  setTimeout(()=>{
+    rl.style.transform='scale(1.8)'; rr.style.transform='scale(1.8) scaleX(-1)';
+    document.getElementById('vs-sub').style.opacity='1';
+    document.getElementById('vs-rule-l').style.width='420px';
+    document.getElementById('vs-rule-r').style.width='420px';
+  },150);
+});
+
+// Tension: robots step toward each other
+at(6.5,()=>{
+  const rl=document.getElementById('rl'), rr=document.getElementById('rr');
+  rl.style.transition='left 1.2s cubic-bezier(.25,.46,.45,.94)';
+  rl.style.left='310px';
+  rr.style.transition='left 1.2s cubic-bezier(.25,.46,.45,.94)';
+  rr.style.left='720px';
+});
+at(7.5,()=>{flash(100);});
+
+// TWIST — they wave!
+at(8.0,()=>{
+  flash(300);
+  // Swap arm animations to waving
+  document.getElementById('vs-wrap').style.opacity='0';
+  // Replace aggressive faces with smiles via class
+  swapToWave('rl');
+  swapToWave('rr');
+});
+at(8.5,()=>{
+  const tw=document.getElementById('twist-wrap');
+  tw.style.opacity='1';
+  document.getElementById('twist-main').classList.add('in');
+  document.getElementById('twist-sub').classList.add('in');
+});
+
+// Robots bounce-celebrate
+at(9.0,()=>{
+  document.getElementById('rl').style.transition='transform .3s';
+  document.getElementById('rl').style.transform='scale(1.8) translateY(-16px)';
+  document.getElementById('rr').style.transition='transform .3s';
+  document.getElementById('rr').style.transform='scale(1.8) scaleX(-1) translateY(-16px)';
+  setTimeout(()=>{
+    document.getElementById('rl').style.transform='scale(1.8)';
+    document.getElementById('rr').style.transform='scale(1.8) scaleX(-1)';
+  },300);
+});
+
+at(15.5,()=>{
+  const ec=document.getElementById('end-card');
+  ec.style.opacity='1'; ec.style.pointerEvents='auto';
+  setTimeout(()=>{
+    document.getElementById('ec-main').classList.add('in');
+    document.getElementById('ec-sub').classList.add('in');
+  },100);
+});
+
+function swapToWave(id){
+  const svg=document.getElementById(id+'-svg');
+  if(!svg) return;
+  // Replace frown with smile
+  const frowns=svg.querySelectorAll('polyline');
+  frowns.forEach(f=>{
+    f.setAttribute('points','52,134 80,126 108,134');
+    f.setAttribute('stroke','#fff');
+  });
+  // Flip arm to wave for right arm of left robot
+  const anims=svg.querySelectorAll('animateTransform');
+  if(id==='rl' && anims[3]){
+    anims[3].setAttribute('values','-60 123 92;-80 123 92;-60 123 92');
+    anims[3].setAttribute('dur','.9s');
+  }
+  if(id==='rr' && anims[2]){
+    anims[2].setAttribute('values','60 37 92;80 37 92;60 37 92');
+    anims[2].setAttribute('dur','.9s');
+  }
+  // Change eyes to happy
+  const eyes=svg.querySelectorAll('rect[ry]');
+  // light up top antenna
+  const circles=svg.querySelectorAll('circle');
+  circles.forEach(c=>c.setAttribute('fill','#fff'));
+}
+
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); resetAll(); raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  document.getElementById('dust-wrap').innerHTML='';
+  // robots
+  const rl=document.getElementById('rl'); rl.style.transition='none'; rl.style.left='-180px'; rl.style.opacity='0'; rl.style.transform='scale(1.8)';
+  const rr=document.getElementById('rr'); rr.style.transition='none'; rr.style.left='1300px'; rr.style.opacity='0'; rr.style.transform='scale(1.8) scaleX(-1)';
+  // shadows
+  ['shadow-l','shadow-r'].forEach(id=>{const e=document.getElementById(id);e.style.transition='none';e.setAttribute('rx','0');e.setAttribute('ry','0');});
+  // title
+  const t=document.getElementById('title-txt'); t.style.transition='none'; t.setAttribute('opacity','0');
+  const fl=document.getElementById('fl-main'); fl.style.transition='none'; fl.setAttribute('opacity','0');
+  // vs
+  const vs=document.getElementById('vs-wrap'); vs.style.opacity='0';
+  document.getElementById('vs-sub').style.opacity='0';
+  document.getElementById('vs-rule-l').style.transition='none'; document.getElementById('vs-rule-l').style.width='0';
+  document.getElementById('vs-rule-r').style.transition='none'; document.getElementById('vs-rule-r').style.width='0';
+  // twist
+  document.getElementById('twist-wrap').style.opacity='0';
+  document.getElementById('twist-main').classList.remove('in');
+  document.getElementById('twist-sub').classList.remove('in');
+  // end
+  const ec=document.getElementById('end-card'); ec.style.opacity='0'; ec.style.pointerEvents='none';
+  document.getElementById('ec-main').classList.remove('in'); document.getElementById('ec-sub').classList.remove('in');
+  document.getElementById('prog-fill').style.width='0';
+  document.getElementById('flash').style.opacity='0';
+}
+</script>
+</body>
+</html>

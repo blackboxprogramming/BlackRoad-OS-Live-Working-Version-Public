@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+  <title>RoadTok — TikTok-style Mockup</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:     #000000;
+      --s1:     #0a0a0a;
+      --s2:     #111111;
+      --s3:     #1a1a1a;
+      --s4:     #222222;
+      --s5:     #333333;
+      --border: #2a2a2a;
+      --text:   #ffffff;
+      --muted:  #737373;
+      --dim:    #525252;
+      --white:  #ffffff;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'TikTok Sans', 'Noto Sans', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    
+    
+    
+
+    /* ══════════════════════════════
+       TOP NAV
+    ══════════════════════════════ */
+    .topnav {
+      height: 60px; flex-shrink: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 12px;
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 6px;
+      cursor: pointer; flex-shrink: 0; margin-right: 8px;
+    }
+    .nav-logo-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #000;
+    }
+    .nav-logo-text {
+      font-size: 20px; font-weight: 900; color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-search {
+      flex: 1; max-width: 360px;
+      display: flex; align-items: center;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+    .nav-search:focus-within { border-color: var(--white); }
+    .nav-search input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-size: 14px; padding: 9px 16px;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+    .nav-search-divider { width: 1px; height: 20px; background: var(--border); }
+    .nav-search-btn {
+      padding: 0 14px; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: var(--muted); cursor: pointer;
+    }
+    .nav-search-btn:hover { color: var(--text); }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-actions { display: flex; align-items: center; gap: 8px; }
+
+    .nav-upload-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 4px;
+      border: 1px solid var(--s5); background: none;
+      color: var(--text); font-size: 15px; font-weight: 600; cursor: pointer;
+    }
+    .nav-upload-btn:hover { background: var(--s3); }
+
+    .nav-btn {
+      padding: 8px 18px; border-radius: 4px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+    }
+    .nav-btn.outline { border: 1px solid var(--white); color: var(--white); background: none; }
+    .nav-btn.outline:hover { background: var(--s3); }
+    .nav-btn.solid { background: var(--white); color: #000; border: none; }
+    .nav-btn.solid:hover { background: #e5e5e5; }
+
+    .nav-icon-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: var(--muted); cursor: pointer;
+      position: relative;
+    }
+    .nav-icon-btn:hover { background: var(--s3); color: var(--text); }
+    .nav-badge {
+      position: absolute; top: 2px; right: 2px;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      background: var(--white); color: #000;
+      font-size: 9px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 3px; border: 2px solid var(--bg);
+    }
+
+    /* ══════════════════════════════
+       BODY
+    ══════════════════════════════ */
+    .body {
+      flex: 1; overflow: hidden;
+      display: flex;
+    }
+
+    /* ══════════════════════════════
+       LEFT NAV
+    ══════════════════════════════ */
+    .leftnav {
+      width: 240px; flex-shrink: 0;
+      padding: 16px 8px;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+
+    .ln-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 16px; border-radius: 8px;
+      cursor: pointer; color: var(--muted);
+      font-size: 16px; font-weight: 500;
+      transition: background 0.1s, color 0.1s;
+      margin-bottom: 2px;
+    }
+    .ln-item:hover { background: var(--s3); color: var(--text); }
+    .ln-item.active { color: var(--white); font-weight: 700; }
+    .ln-item.active .ln-icon { filter: brightness(1.3); }
+    .ln-icon { font-size: 22px; flex-shrink: 0; width: 24px; text-align: center; }
+    .ln-label { font-size: 16px; }
+
+    .ln-divider { height: 1px; background: var(--border); margin: 12px 8px; }
+
+    .ln-section-title {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); padding: 4px 16px 6px;
+    }
+
+    .ln-account {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 16px; border-radius: 8px;
+      cursor: pointer; margin-bottom: 2px;
+      transition: background 0.1s;
+    }
+    .ln-account:hover { background: var(--s3); }
+    .ln-acc-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--muted);
+    }
+    .ln-acc-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .ln-acc-handle { font-size: 12px; color: var(--muted); }
+
+    .ln-show-more {
+      padding: 8px 16px; font-size: 14px; color: var(--muted);
+      cursor: pointer; font-weight: 600;
+    }
+    .ln-show-more:hover { color: var(--text); }
+
+    .ln-footer {
+      margin-top: auto; padding: 12px 16px;
+      font-size: 11px; color: var(--dim); line-height: 1.8;
+    }
+    .ln-footer a { cursor: pointer; }
+    .ln-footer a:hover { text-decoration: underline; color: var(--muted); }
+
+    /* ══════════════════════════════
+       MAIN FEED
+    ══════════════════════════════ */
+    .main {
+      flex: 1; overflow-y: auto;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 40px 40px;
+    }
+
+    /* Feed tabs */
+    .feed-tabs {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 24px; position: sticky; top: 0;
+      background: var(--bg); z-index: 10;
+      padding: 12px 0 0; width: 100%; max-width: 700px;
+      border-bottom: 1px solid var(--border);
+    }
+    .feed-tab {
+      flex: 1; text-align: center;
+      padding: 12px 20px;
+      font-size: 17px; font-weight: 700;
+      color: var(--muted); cursor: pointer;
+      position: relative;
+    }
+    .feed-tab:hover { color: var(--text); }
+    .feed-tab.active {
+      color: var(--white);
+    }
+    .feed-tab.active::after {
+      content: '';
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 3px;
+      background: var(--white); border-radius: 2px;
+    }
+
+    /* ── Video Card ── */
+    .video-card {
+      display: flex; gap: 16px;
+      width: 100%; max-width: 700px;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .video-card:last-child { border-bottom: none; }
+
+    /* left: avatar col */
+    .vc-avatar-col { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+    .vc-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--s4); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--muted);
+      border: 2px solid var(--s5); position: relative;
+    }
+    .vc-avatar:hover { border-color: var(--white); }
+    .vc-follow-dot {
+      position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--white); color: #000;
+      font-size: 14px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg); cursor: pointer;
+    }
+
+    /* right: content */
+    .vc-content { flex: 1; min-width: 0; }
+    .vc-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 6px;
+    }
+    .vc-username {
+      font-size: 16px; font-weight: 700; color: var(--white);
+      cursor: pointer;
+    }
+    .vc-username:hover { text-decoration: underline; }
+    .vc-display {
+      font-size: 14px; color: var(--muted);
+    }
+    .vc-verified { font-size: 14px; }
+    .vc-follow-btn {
+      margin-left: auto;
+      padding: 5px 14px; border-radius: 4px;
+      border: 1px solid var(--white); color: var(--white);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      background: none; white-space: nowrap;
+    }
+    .vc-follow-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .vc-caption {
+      font-size: 15px; color: var(--text);
+      line-height: 1.5; margin-bottom: 6px;
+    }
+    .vc-caption .hashtag { font-weight: 700; cursor: pointer; }
+    .vc-caption .hashtag:hover { text-decoration: underline; }
+
+    .vc-sound {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 14px; color: var(--text); cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .vc-sound:hover .vc-sound-name { text-decoration: underline; }
+    .vc-sound-icon { font-size: 15px; animation: spin 3s linear infinite; display: inline-block; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    /* video thumbnail */
+    .vc-video-row {
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .vc-video {
+      width: 200px; flex-shrink: 0;
+      aspect-ratio: 9/16;
+      background: var(--s3);
+      border-radius: 8px; overflow: hidden;
+      position: relative; cursor: pointer;
+    }
+    .vc-video-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 10px, var(--s4) 10px, var(--s4) 20px
+      );
+    }
+    .vc-video-icon {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 48px; opacity: 0.15;
+    }
+    .vc-video-duration {
+      position: absolute; bottom: 8px; right: 8px;
+      font-size: 12px; font-weight: 700; color: var(--white);
+      background: rgba(0,0,0,0.6); padding: 2px 6px; border-radius: 3px;
+    }
+    .vc-video-play {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0);
+      transition: background 0.15s;
+    }
+    .vc-video:hover .vc-video-play { background: rgba(0,0,0,0.25); }
+    .vc-video-play-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: #000; opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .vc-video:hover .vc-video-play-btn { opacity: 1; }
+
+    /* action buttons beside video */
+    .vc-actions {
+      display: flex; flex-direction: column; gap: 14px;
+      align-items: center; padding-top: 8px;
+    }
+    .vca-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      cursor: pointer;
+    }
+    .vca-icon-wrap {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--s3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; transition: background 0.1s;
+    }
+    .vca-btn:hover .vca-icon-wrap { background: var(--s4); }
+    .vca-btn.liked .vca-icon-wrap { background: rgba(255,255,255,0.12); }
+    .vca-count {
+      font-size: 12px; font-weight: 600; color: var(--muted);
+    }
+    .vca-btn.liked .vca-count { color: var(--white); }
+
+    /* music disc for actions */
+    .vca-music {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--s4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer;
+      border: 3px solid var(--s5);
+      animation: spin 4s linear infinite;
+    }
+
+    /* ══════════════════════════════
+       RIGHT PANEL — Suggestions
+    ══════════════════════════════ */
+    .rightpanel {
+      width: 310px; flex-shrink: 0;
+      padding: 20px 16px;
+      overflow-y: auto;
+      border-left: 1px solid var(--border);
+    }
+
+    .rp-section-title {
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.07em;
+      margin-bottom: 12px;
+    }
+
+    .rp-account {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; margin-bottom: 4px;
+      cursor: pointer;
+    }
+    .rp-account:hover .rp-acc-name { text-decoration: underline; }
+
+    .rp-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--muted);
+    }
+    .rp-info { flex: 1; min-width: 0; }
+    .rp-acc-name {
+      font-size: 14px; font-weight: 700; color: var(--white);
+      display: flex; align-items: center; gap: 4px;
+    }
+    .rp-acc-handle { font-size: 12px; color: var(--muted); }
+    .rp-acc-followers { font-size: 11px; color: var(--dim); margin-top: 1px; }
+
+    .rp-follow-btn {
+      padding: 5px 14px; border-radius: 4px;
+      border: 1px solid var(--white); color: var(--white);
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      background: none; white-space: nowrap; flex-shrink: 0;
+    }
+    .rp-follow-btn:hover { background: rgba(255,255,255,0.1); }
+
+    .rp-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    .rp-show-more {
+      font-size: 14px; color: var(--muted); cursor: pointer; font-weight: 600;
+      padding: 4px 0;
+    }
+    .rp-show-more:hover { color: var(--text); }
+
+    /* trending hashtags */
+    .rp-hashtag {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0; cursor: pointer;
+    }
+    .rp-hashtag:hover .rp-ht-tag { text-decoration: underline; }
+    .rp-ht-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .rp-ht-info { flex: 1; }
+    .rp-ht-tag { font-size: 14px; font-weight: 700; color: var(--white); }
+    .rp-ht-views { font-size: 12px; color: var(--muted); }
+
+    .rp-footer {
+      margin-top: 16px;
+      font-size: 11px; color: var(--dim); line-height: 2;
+    }
+    .rp-footer a { cursor: pointer; }
+    .rp-footer a:hover { text-decoration: underline; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════════════ TOP NAV ══════════════════════ -->
+  <div class="topnav">
+
+    <div class="nav-logo">
+      <div class="nav-logo-icon">♪</div>
+      <div class="nav-logo-text">RoadTok</div>
+    </div>
+
+    <div class="nav-search">
+      <input type="text" placeholder="Search" />
+      <div class="nav-search-divider"></div>
+      <div class="nav-search-btn">🔍</div>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-actions">
+      <div class="nav-upload-btn">⊕ Upload</div>
+      <div class="nav-btn outline">Log in</div>
+      <div class="nav-btn solid">Sign up</div>
+      <div class="nav-icon-btn">⋯</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════ BODY ══════════════════════ -->
+  <div class="body">
+
+    <!-- ══════════════════════ LEFT NAV ══════════════════════ -->
+    <div class="leftnav">
+
+      <div class="ln-item active">
+        <span class="ln-icon">🏠</span>
+        <span class="ln-label">For You</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">🔍</span>
+        <span class="ln-label">Explore</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">👥</span>
+        <span class="ln-label">Following</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">🔴</span>
+        <span class="ln-label">LIVE</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">👤</span>
+        <span class="ln-label">Profile</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">🔔</span>
+        <span class="ln-label">Inbox</span>
+      </div>
+      <div class="ln-item">
+        <span class="ln-icon">⋯</span>
+        <span class="ln-label">More</span>
+      </div>
+
+      <div class="ln-divider"></div>
+
+      <div class="ln-section-title">Following</div>
+
+      <div class="ln-account">
+        <div class="ln-acc-avatar">AR</div>
+        <div>
+          <div class="ln-acc-name">alexa_road</div>
+          <div class="ln-acc-handle">@alexa_road</div>
+        </div>
+      </div>
+      <div class="ln-account">
+        <div class="ln-acc-avatar">PF</div>
+        <div>
+          <div class="ln-acc-name">pixel_forge</div>
+          <div class="ln-acc-handle">@pixel_forge</div>
+        </div>
+      </div>
+      <div class="ln-account">
+        <div class="ln-acc-avatar">MK</div>
+        <div>
+          <div class="ln-acc-name">mkdesign</div>
+          <div class="ln-acc-handle">@mkdesign_studio</div>
+        </div>
+      </div>
+      <div class="ln-account">
+        <div class="ln-acc-avatar">LG</div>
+        <div>
+          <div class="ln-acc-name">lofigirl</div>
+          <div class="ln-acc-handle">@lofigirl</div>
+        </div>
+      </div>
+      <div class="ln-account">
+        <div class="ln-acc-avatar">NL</div>
+        <div>
+          <div class="ln-acc-name">nolanlabs</div>
+          <div class="ln-acc-handle">@nolanlabs</div>
+        </div>
+      </div>
+
+      <div class="ln-show-more">+ 22 more</div>
+
+      <div class="ln-divider"></div>
+
+      <div class="ln-footer">
+        <a>About</a> · <a>Newsroom</a> · <a>Contact</a><br>
+        <a>Privacy Policy</a> · <a>Terms</a><br>
+        <a>Accessibility</a> · <a>Safety Center</a><br>
+        © 2026 RoadTok Inc.
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ MAIN FEED ══════════════════════ -->
+    <div class="main">
+
+      <!-- Feed Tabs -->
+      <div class="feed-tabs">
+        <div class="feed-tab active">For You</div>
+        <div class="feed-tab">Following</div>
+        <div class="feed-tab">Explore</div>
+        <div class="feed-tab">🔴 LIVE</div>
+      </div>
+
+      <!-- ── Video 1 ── -->
+      <div class="video-card">
+        <div class="vc-avatar-col">
+          <div class="vc-avatar">
+            AR
+            <div class="vc-follow-dot">+</div>
+          </div>
+        </div>
+        <div class="vc-content">
+          <div class="vc-header">
+            <span class="vc-username">alexa_road</span>
+            <span class="vc-verified">✓</span>
+            <span class="vc-display">Alexa Amundson</span>
+            <div class="vc-follow-btn">Follow</div>
+          </div>
+          <div class="vc-caption">
+            built a physics engine in rust from scratch. it only exploded 4 times 🔥
+            <span class="hashtag">#rustlang</span> <span class="hashtag">#gamedev</span> <span class="hashtag">#programming</span> <span class="hashtag">#buildinpublic</span>
+          </div>
+          <div class="vc-sound">
+            <span class="vc-sound-icon">♪</span>
+            <span class="vc-sound-name">original sound — alexa_road</span>
+          </div>
+          <div class="vc-video-row">
+            <div class="vc-video">
+              <div class="vc-video-pattern"></div>
+              <div class="vc-video-icon">🦀</div>
+              <div class="vc-video-duration">2:14</div>
+              <div class="vc-video-play">
+                <div class="vc-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="vc-actions">
+              <div class="vca-btn liked">
+                <div class="vca-icon-wrap">♥</div>
+                <div class="vca-count">284K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">💬</div>
+                <div class="vca-count">14.2K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">🔖</div>
+                <div class="vca-count">38.9K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">↗</div>
+                <div class="vca-count">Share</div>
+              </div>
+              <div class="vca-music">♪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Video 2 ── -->
+      <div class="video-card">
+        <div class="vc-avatar-col">
+          <div class="vc-avatar">
+            PF
+            <div class="vc-follow-dot">+</div>
+          </div>
+        </div>
+        <div class="vc-content">
+          <div class="vc-header">
+            <span class="vc-username">pixel_forge</span>
+            <span class="vc-verified">✓</span>
+            <span class="vc-display">Pixel Forge</span>
+            <div class="vc-follow-btn">Follow</div>
+          </div>
+          <div class="vc-caption">
+            3 years of solo dev in 60 seconds. this is what shipping actually looks like 🏙️
+            <span class="hashtag">#indiedev</span> <span class="hashtag">#gamedev</span> <span class="hashtag">#solodev</span> <span class="hashtag">#devlog</span>
+          </div>
+          <div class="vc-sound">
+            <span class="vc-sound-icon">♪</span>
+            <span class="vc-sound-name">Daylight — David Kushner</span>
+          </div>
+          <div class="vc-video-row">
+            <div class="vc-video">
+              <div class="vc-video-pattern"></div>
+              <div class="vc-video-icon">🏙️</div>
+              <div class="vc-video-duration">0:58</div>
+              <div class="vc-video-play">
+                <div class="vc-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="vc-actions">
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">♥</div>
+                <div class="vca-count">1.2M</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">💬</div>
+                <div class="vca-count">42.1K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">🔖</div>
+                <div class="vca-count">188K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">↗</div>
+                <div class="vca-count">Share</div>
+              </div>
+              <div class="vc-sound-icon" style="font-size:26px;cursor:pointer;">♪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Video 3 ── -->
+      <div class="video-card">
+        <div class="vc-avatar-col">
+          <div class="vc-avatar">
+            MK
+            <div class="vc-follow-dot">+</div>
+          </div>
+        </div>
+        <div class="vc-content">
+          <div class="vc-header">
+            <span class="vc-username">mkdesign_studio</span>
+            <span class="vc-display">mkdesign</span>
+            <div class="vc-follow-btn">Follow</div>
+          </div>
+          <div class="vc-caption">
+            client said "make it pop." I said "pop how?" they said "you know." I did not know. 😭
+            <span class="hashtag">#designlife</span> <span class="hashtag">#uxdesign</span> <span class="hashtag">#freelance</span> <span class="hashtag">#relatable</span>
+          </div>
+          <div class="vc-sound">
+            <span class="vc-sound-icon">♪</span>
+            <span class="vc-sound-name">original sound — mkdesign_studio</span>
+          </div>
+          <div class="vc-video-row">
+            <div class="vc-video">
+              <div class="vc-video-pattern"></div>
+              <div class="vc-video-icon">🎨</div>
+              <div class="vc-video-duration">0:31</div>
+              <div class="vc-video-play">
+                <div class="vc-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="vc-actions">
+              <div class="vca-btn liked">
+                <div class="vca-icon-wrap">♥</div>
+                <div class="vca-count">847K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">💬</div>
+                <div class="vca-count">29.4K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">🔖</div>
+                <div class="vca-count">112K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">↗</div>
+                <div class="vca-count">Share</div>
+              </div>
+              <div class="vc-sound-icon" style="font-size:26px;cursor:pointer;">♪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Video 4 ── -->
+      <div class="video-card">
+        <div class="vc-avatar-col">
+          <div class="vc-avatar">
+            SC
+            <div class="vc-follow-dot">+</div>
+          </div>
+        </div>
+        <div class="vc-content">
+          <div class="vc-header">
+            <span class="vc-username">sarahchen.creates</span>
+            <span class="vc-verified">✓</span>
+            <span class="vc-display">sarahchen</span>
+            <div class="vc-follow-btn">Follow</div>
+          </div>
+          <div class="vc-caption">
+            POV: you just shipped your first product after 14 months of "almost done" 🥲
+            <span class="hashtag">#founder</span> <span class="hashtag">#buildinpublic</span> <span class="hashtag">#startuplife</span> <span class="hashtag">#productdesign</span>
+          </div>
+          <div class="vc-sound">
+            <span class="vc-sound-icon">♪</span>
+            <span class="vc-sound-name">good 4 u — Olivia Rodrigo (sped up)</span>
+          </div>
+          <div class="vc-video-row">
+            <div class="vc-video">
+              <div class="vc-video-pattern"></div>
+              <div class="vc-video-icon">🚀</div>
+              <div class="vc-video-duration">1:02</div>
+              <div class="vc-video-play">
+                <div class="vc-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="vc-actions">
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">♥</div>
+                <div class="vca-count">2.4M</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">💬</div>
+                <div class="vca-count">88.1K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">🔖</div>
+                <div class="vca-count">341K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">↗</div>
+                <div class="vca-count">Share</div>
+              </div>
+              <div class="vc-sound-icon" style="font-size:26px;cursor:pointer;">♪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Video 5 ── -->
+      <div class="video-card">
+        <div class="vc-avatar-col">
+          <div class="vc-avatar">
+            NL
+            <div class="vc-follow-dot">+</div>
+          </div>
+        </div>
+        <div class="vc-content">
+          <div class="vc-header">
+            <span class="vc-username">nolanlabs</span>
+            <span class="vc-verified">✓</span>
+            <span class="vc-display">Nolan Labs</span>
+            <div class="vc-follow-btn">Following</div>
+          </div>
+          <div class="vc-caption">
+            the JavaScript ecosystem in 2026. a tragedy in 4 parts. 💀
+            <span class="hashtag">#javascript</span> <span class="hashtag">#webdev</span> <span class="hashtag">#coding</span> <span class="hashtag">#programmerhumor</span>
+          </div>
+          <div class="vc-sound">
+            <span class="vc-sound-icon">♪</span>
+            <span class="vc-sound-name">Dramatic Chipmunk Theme — (8bit remix)</span>
+          </div>
+          <div class="vc-video-row">
+            <div class="vc-video">
+              <div class="vc-video-pattern"></div>
+              <div class="vc-video-icon">💻</div>
+              <div class="vc-video-duration">0:47</div>
+              <div class="vc-video-play">
+                <div class="vc-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="vc-actions">
+              <div class="vca-btn liked">
+                <div class="vca-icon-wrap">♥</div>
+                <div class="vca-count">3.8M</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">💬</div>
+                <div class="vca-count">144K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">🔖</div>
+                <div class="vca-count">620K</div>
+              </div>
+              <div class="vca-btn">
+                <div class="vca-icon-wrap">↗</div>
+                <div class="vca-count">Share</div>
+              </div>
+              <div class="vc-sound-icon" style="font-size:26px;cursor:pointer;">♪</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ RIGHT PANEL ══════════════════════ -->
+    <div class="rightpanel">
+
+      <div class="rp-section-title">Suggested Accounts</div>
+
+      <div class="rp-account">
+        <div class="rp-avatar">JK</div>
+        <div class="rp-info">
+          <div class="rp-acc-name">jordank_ ✓</div>
+          <div class="rp-acc-handle">@jordank_live</div>
+          <div class="rp-acc-followers">4.2M followers</div>
+        </div>
+        <div class="rp-follow-btn">Follow</div>
+      </div>
+
+      <div class="rp-account">
+        <div class="rp-avatar">LG</div>
+        <div class="rp-info">
+          <div class="rp-acc-name">lofigirl ✓</div>
+          <div class="rp-acc-handle">@lofigirl</div>
+          <div class="rp-acc-followers">12.8M followers</div>
+        </div>
+        <div class="rp-follow-btn">Follow</div>
+      </div>
+
+      <div class="rp-account">
+        <div class="rp-avatar">TT</div>
+        <div class="rp-info">
+          <div class="rp-acc-name">TechTalkDaily ✓</div>
+          <div class="rp-acc-handle">@techtalkdaily</div>
+          <div class="rp-acc-followers">8.1M followers</div>
+        </div>
+        <div class="rp-follow-btn">Follow</div>
+      </div>
+
+      <div class="rp-account">
+        <div class="rp-avatar">VF</div>
+        <div class="rp-info">
+          <div class="rp-acc-name">voxfilm</div>
+          <div class="rp-acc-handle">@voxfilm</div>
+          <div class="rp-acc-followers">914K followers</div>
+        </div>
+        <div class="rp-follow-btn">Follow</div>
+      </div>
+
+      <div class="rp-account">
+        <div class="rp-avatar">DB</div>
+        <div class="rp-info">
+          <div class="rp-acc-name">DesignBetter ✓</div>
+          <div class="rp-acc-handle">@designbetter</div>
+          <div class="rp-acc-followers">3.3M followers</div>
+        </div>
+        <div class="rp-follow-btn">Follow</div>
+      </div>
+
+      <div class="rp-show-more">See all →</div>
+
+      <div class="rp-divider"></div>
+
+      <div class="rp-section-title">Trending Hashtags</div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">🦀</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#rustlang</div>
+          <div class="rp-ht-views">482M views</div>
+        </div>
+      </div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">🎮</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#gamedev</div>
+          <div class="rp-ht-views">2.1B views</div>
+        </div>
+      </div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">🚀</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#buildinpublic</div>
+          <div class="rp-ht-views">318M views</div>
+        </div>
+      </div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">🎨</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#uxdesign</div>
+          <div class="rp-ht-views">1.4B views</div>
+        </div>
+      </div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">💻</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#programmerhumor</div>
+          <div class="rp-ht-views">4.7B views</div>
+        </div>
+      </div>
+
+      <div class="rp-hashtag">
+        <div class="rp-ht-icon">🏙️</div>
+        <div class="rp-ht-info">
+          <div class="rp-ht-tag">#indiedev</div>
+          <div class="rp-ht-views">890M views</div>
+        </div>
+      </div>
+
+      <div class="rp-show-more">See all →</div>
+
+      <div class="rp-divider"></div>
+
+      <div class="rp-footer">
+        <a>About</a> · <a>Newsroom</a> · <a>Store</a><br>
+        <a>Contact</a> · <a>Careers</a> · <a>ByteDance</a><br>
+        <a>Privacy Policy</a> · <a>Terms of Service</a><br>
+        <a>Accessibility</a> · <a>Safety Center</a><br>
+        © 2026 RoadTok Inc.
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

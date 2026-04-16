@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roster — Team Directory and Member Management Mockup</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { background: radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), var(--bg); color: var(--text); font-family: var(--sg); display: flex; flex-direction: column; }
+    .grad { height: 3px; background: var(--g); flex-shrink: 0; }
+    .topbar { height: 58px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.95); backdrop-filter: blur(16px); display: flex; align-items: center; gap: 14px; padding: 0 18px; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 240px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--g135); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #fff; }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.05; }
+    .brand-title { font-size: 15px; font-weight: 700; }
+    .brand-sub { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .search { flex: 1; max-width: 440px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 13px; color: var(--sub); font-family: var(--in); }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .btn { padding: 8px 12px; border-radius: 9px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 12px; font-weight: 600; }
+    .btn.primary { background: var(--white); color: #000; border-color: transparent; }
+    .shell { display: grid; grid-template-columns: 80px 290px 1fr 330px; flex: 1; min-height: 0; }
+    .rail, .sidebar, .context { min-height: 0; }
+    .rail { background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; }
+    .rail-btn { width: 46px; height: 46px; border-radius: 14px; background: var(--elevated); border: 1px solid transparent; display: flex; align-items: center; justify-content: center; color: var(--sub); font-size: 16px; }
+    .rail-btn.active { color: var(--white); background: var(--hover); border-color: #323232; }
+    .sidebar { background: radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 28%), #050505; border-right: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 8px; }
+    .card, .nav-item, .member-card, .team-card, .detail-card, .metric, .status-tile { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .card { padding: 16px; }
+    .card h2 { font-size: 16px; margin-bottom: 6px; }
+    .card p, .member-copy, .team-card p, .detail-card p, .row-copy span { color: var(--sub); font-size: 12px; line-height: 1.6; font-family: var(--in); }
+    .stack { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+    .nav-item { padding: 12px; }
+    .nav-item strong { display: block; font-size: 13px; margin-bottom: 5px; }
+    .nav-item span { color: var(--sub); font-size: 12px; line-height: 1.5; }
+    .main { background: linear-gradient(180deg, rgba(12,12,12,.96), rgba(0,0,0,1)); display: grid; grid-template-rows: auto auto 1fr; min-height: 0; }
+    .hero { padding: 18px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1.2fr .85fr; gap: 16px; }
+    .hero-panel { background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 18px; }
+    .hero h1 { font-size: 28px; line-height: 1.08; margin-bottom: 10px; }
+    .hero p { color: var(--sub); line-height: 1.7; max-width: 640px; font-family: var(--in); }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .metric { padding: 12px; }
+    .metric-label { font-family: var(--jb); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+    .metric-value { font-size: 22px; font-weight: 700; margin-top: 8px; }
+    .metric-note { font-size: 12px; color: var(--sub); margin-top: 4px; }
+    .snapshot { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 18px; }
+    .snapshot h2 { font-size: 18px; margin-bottom: 10px; }
+    .snapshot p { color: var(--sub); font-size: 13px; line-height: 1.6; font-family: var(--in); }
+    .status-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .status-tile { padding: 12px; }
+    .status-tile strong { display: block; font-size: 16px; margin-bottom: 4px; }
+    .status-tile span { color: var(--sub); font-size: 12px; }
+    .tabs { height: 48px; display: flex; gap: 18px; align-items: center; padding: 0 18px; border-bottom: 1px solid var(--border); background: var(--card); }
+    .tab { font-size: 13px; color: var(--sub); padding-bottom: 11px; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--white); border-color: #fff; }
+    .content { padding: 18px; display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; min-height: 0; }
+    .member-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .member-card { padding: 14px; }
+    .member-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .member-main { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 38px; height: 38px; border-radius: 12px; background: var(--elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--white); flex-shrink: 0; }
+    .member-name { font-size: 14px; font-weight: 700; }
+    .member-role { font-size: 12px; color: var(--sub); }
+    .badge { font-family: var(--jb); font-size: 10px; color: var(--muted); padding: 4px 8px; border-radius: 999px; background: var(--elevated); border: 1px solid var(--border); }
+    .member-meta { display: flex; justify-content: space-between; margin-top: 12px; color: var(--muted); font-family: var(--jb); font-size: 10px; }
+    .org-strip { padding: 0 18px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .org-card { padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .org-card h3 { font-size: 15px; margin-bottom: 8px; }
+    .org-card p { color: var(--sub); font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+    .org-meta { display: flex; justify-content: space-between; gap: 10px; font-family: var(--jb); font-size: 10px; color: var(--muted); }
+    .team-card, .detail-card { padding: 14px; }
+    .team-card h3, .detail-card h3, .row-copy strong { font-size: 15px; margin-bottom: 8px; display:block; }
+    .context { background: var(--card); border-left: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; overflow: auto; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 12px; background: #090909; border: 1px solid var(--border); }
+    .mono { font-family: var(--jb); font-size: 10px; color: var(--muted); }
+    .bar { width: 96px; height: 6px; border-radius: 999px; background: #1d1d1d; overflow: hidden; margin-top: 8px; }
+    .bar span { display: block; height: 100%; background: var(--g); }
+    @media (max-width: 1080px) { .hero, .content, .org-strip { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="grad"></div>
+  <header class="topbar"><div class="brand"><div class="brand-mark">RO</div><div class="brand-copy"><div class="brand-title">Roster</div><div class="brand-sub">Team registry and member management</div></div></div><div class="search">Search people, Roadies, orgs, teams, permissions, and profiles...</div><div class="top-actions"><button class="btn">Import CSV</button><button class="btn">Directory sync</button><button class="btn primary">Add member</button></div></header>
+  <div class="shell">
+    <aside class="rail"><div class="rail-btn active">👥</div><div class="rail-btn">⌕</div><div class="rail-btn">⌘</div><div class="rail-btn">⚑</div><div class="rail-btn">☰</div><div class="rail-btn">✓</div></aside>
+    <aside class="sidebar">
+      <div><div class="section-label">Directory scope</div><div class="card"><h2>BlackRoad org graph</h2><p>Roster centralizes members, Roadies, divisions, and permissions so every product can resolve the same canonical org structure.</p></div></div>
+      <div><div class="section-label">Views</div><div class="stack"><div class="nav-item"><strong>All members</strong><span>Browse every person, Roadie, and org assignment in one searchable directory.</span></div><div class="nav-item"><strong>Teams</strong><span>See pods, divisions, and product groups with ownership and staffing status.</span></div><div class="nav-item"><strong>Invites</strong><span>Track onboarding progress, pending approvals, and provisioning state.</span></div><div class="nav-item"><strong>Permissions</strong><span>Review role coverage, risk flags, and access changes across the stack.</span></div></div></div>
+    </aside>
+    <main class="main">
+      <section class="hero">
+        <div class="hero-panel"><div class="section-label">Org overview</div><h1>Manage every team, member, and Roadie from one canonical registry.</h1><p>Roster is the governance layer for team directories, org charts, member records, and assignment state. It keeps products aligned on identity, ownership, staffing, and the shape of the organization itself.</p><div class="metrics"><div class="metric"><div class="metric-label">Members tracked</div><div class="metric-value">412</div><div class="metric-note">Human and agent contributors</div></div><div class="metric"><div class="metric-label">Active teams</div><div class="metric-value">38</div><div class="metric-note">Across products and divisions</div></div><div class="metric"><div class="metric-label">Pending invites</div><div class="metric-value">14</div><div class="metric-note">Waiting on access or profile setup</div></div></div></div>
+        <div class="snapshot"><div class="section-label">Coverage snapshot</div><h2>Role and ownership health</h2><p>Quickly spot unowned teams, overloaded contributors, and Roadie clusters that need clearer operating boundaries.</p><div class="status-grid"><div class="status-tile"><strong>97%</strong><span>Teams with named owner</span></div><div class="status-tile"><strong>29</strong><span>Roadies online now</span></div><div class="status-tile"><strong>6</strong><span>Profiles missing metadata</span></div><div class="status-tile"><strong>3</strong><span>Access reviews due today</span></div></div></div>
+      </section>
+      <div class="tabs"><div class="tab active">Members</div><div class="tab">Teams</div><div class="tab">Permissions</div><div class="tab">Invites</div><div class="tab">Org map</div></div>
+      <section class="org-strip"><div class="org-card"><div class="section-label">Ownership map</div><h3>Teams resolve to products</h3><p>Roster now reads more like the operating map behind BlackRoad, showing how owners, Roadies, and divisions align to actual product surfaces.</p><div class="org-meta"><span>CANONICAL</span><span>38 TEAMS</span></div></div><div class="org-card"><div class="section-label">Provisioning lane</div><h3>Invites become workflow</h3><p>Onboarding, metadata completion, and permission review behave like visible stages instead of hidden admin chores.</p><div class="org-meta"><span>14 PENDING</span><span>REVIEWABLE</span></div></div><div class="org-card"><div class="section-label">Roadie registry</div><h3>Agents belong in the org graph too</h3><p>Roadies, human teammates, and product operators share one directory language so the system can explain who does what and where.</p><div class="org-meta"><span>HYBRID</span><span>LIVE SYNC</span></div></div></section>
+      <section class="content">
+        <div><div class="section-label">Featured members</div><div class="member-grid">
+          <div class="member-card"><div class="member-top"><div class="member-main"><div class="avatar">AA</div><div><div class="member-name">Alexa Amundson</div><div class="member-role">Founder / canonical owner</div></div></div><div class="badge">ROOT</div></div><div class="member-copy">Sets canonical direction, product truth, and cross-org routing decisions for BlackRoad.</div><div class="member-meta"><span>ORG BLACKROAD</span><span>14 DIRECT TEAMS</span></div></div>
+          <div class="member-card"><div class="member-top"><div class="member-main"><div class="avatar">RT</div><div><div class="member-name">road-trip</div><div class="member-role">Agent hub operator</div></div></div><div class="badge">ROADIE</div></div><div class="member-copy">Coordinates active agents, host routing, and dispatch visibility across devices and services.</div><div class="member-meta"><span>PRODUCT ROADTRIP</span><span>LIVE NOW</span></div></div>
+          <div class="member-card"><div class="member-top"><div class="member-main"><div class="avatar">RC</div><div><div class="member-name">road-code</div><div class="member-role">Developer copiloting lane</div></div></div><div class="badge">AGENT</div></div><div class="member-copy">Supports coding, review, and implementation workflows with linked ownership in RoadCode and Backlog.</div><div class="member-meta"><span>TEAM ENGINEERING</span><span>2 OWNERS</span></div></div>
+          <div class="member-card"><div class="member-top"><div class="member-main"><div class="avatar">BK</div><div><div class="member-name">book-roadie</div><div class="member-role">Reference + reading assistant</div></div></div><div class="badge">AGENT</div></div><div class="member-copy">Connects RoadBook reading rooms to knowledge collections, highlights, and study support.</div><div class="member-meta"><span>TEAM EDUCATION</span><span>SYNCED</span></div></div>
+        </div></div>
+        <div><div class="section-label">Team cards</div><div class="stack"><div class="team-card"><h3>Product platform</h3><p>RoadCode, RoadChat, RoundTrip, and Stats operators with shared engineering ownership and release privileges.</p></div><div class="team-card"><h3>Brand + launch</h3><p>Design, marketing, and storytelling contributors coordinating public-facing surfaces and campaign timing.</p></div><div class="team-card"><h3>Knowledge systems</h3><p>RoadBook, BlackBoard, Docs, and Memory Gate collaborators managing archives and published truth.</p></div></div></div>
+      </section>
+    </main>
+    <aside class="context">
+      <div><div class="section-label">Provisioning queue</div><div class="stack"><div class="row"><div class="row-copy"><strong>road-world</strong><span>Needs final team assignment and environment group confirmation.</span></div><div class="mono">PENDING</div></div><div class="row"><div class="row-copy"><strong>new design intern</strong><span>Email verified, waiting on BlackRoad visual source access.</span></div><div class="mono">REVIEW</div></div><div class="row"><div class="row-copy"><strong>stats analyst</strong><span>Profile complete, KPI workspace still missing permissions.</span></div><div class="mono">TODAY</div></div></div></div>
+      <div><div class="section-label">Access health</div><div class="stack"><div class="detail-card"><h3>Owner coverage</h3><p>Thirty-seven of thirty-eight teams have an explicit owner recorded and cross-linked to products.</p><div class="bar"><span style="width: 97%"></span></div></div><div class="detail-card"><h3>Profile completeness</h3><p>Bio, division, host, and product metadata is filled for most active members.</p><div class="bar"><span style="width: 89%"></span></div></div><div class="detail-card"><h3>Roadie roster sync</h3><p>Active agent registry is in sync with RoadTrip and the canonical operating docs.</p><div class="bar"><span style="width: 94%"></span></div></div></div></div>
+      <div><div class="section-label">Quick actions</div><div class="stack"><div class="nav-item"><strong>Run access review</strong><span>Compare product roles against current owners, approvers, and invite state.</span></div><div class="nav-item"><strong>Open org map</strong><span>See divisions, products, and Roadies rendered as one navigable graph.</span></div><div class="nav-item"><strong>Publish directory card</strong><span>Share a clean profile, team page, or public-safe staff listing.</span></div></div></div>
+    </aside>
+  </div>
+</body>
+</html>

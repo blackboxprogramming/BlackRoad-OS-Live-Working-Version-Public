@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vital Signs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#050505;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#040404;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#0a0a0a;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(4,4,4,.92);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.35);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#2a2a2a;text-transform:uppercase;}
+
+/* ECG grid paper */
+#grid-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+
+/* ECG waveform canvas */
+#ecg-svg{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;}
+
+/* Vitals HUD */
+#hud{position:absolute;inset:0;z-index:10;pointer-events:none;}
+
+/* BPM display — top right */
+#bpm-wrap{
+  position:absolute;top:48px;right:72px;text-align:right;
+}
+#bpm-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#1f1f1f;text-transform:uppercase;}
+#bpm-val{font-family:'Space Mono',monospace;font-size:96px;font-weight:700;color:#fff;line-height:1;
+  opacity:0;transition:opacity .8s;}
+#bpm-val.in{opacity:1;}
+#bpm-unit{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:4px;color:#2a2a2a;margin-top:2px;}
+
+/* Secondary vitals */
+#vitals-wrap{
+  position:absolute;bottom:64px;right:72px;text-align:right;
+}
+.vital-row{
+  margin-bottom:20px;
+  opacity:0;transform:translateX(10px);
+  transition:opacity .6s,transform .6s;
+}
+.vital-row.in{opacity:1;transform:translateX(0);}
+.vr-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#1a1a1a;text-transform:uppercase;margin-bottom:4px;}
+.vr-val{font-family:'Space Mono',monospace;font-size:32px;color:#fff;line-height:1;}
+.vr-unit{font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;margin-left:4px;}
+
+/* Lead labels */
+#lead-label{
+  position:absolute;left:72px;top:120px;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:#1a1a1a;
+  z-index:10;pointer-events:none;
+}
+#lead2-label{
+  position:absolute;left:72px;top:430px;
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:#1a1a1a;
+  z-index:10;pointer-events:none;opacity:0;transition:opacity .6s;
+}
+
+/* Status message */
+#status-msg{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:6px;color:#1f1f1f;
+  text-transform:uppercase;z-index:10;pointer-events:none;
+  opacity:0;transition:opacity .5s;
+}
+#status-msg.in{opacity:1;}
+
+/* Nominal card */
+#nominal-card{
+  position:absolute;bottom:60px;left:72px;
+  z-index:10;pointer-events:none;
+  opacity:0;transition:opacity .8s;
+}
+#nc-main{font-family:'Space Mono',monospace;font-size:14px;letter-spacing:6px;color:#fff;text-transform:uppercase;}
+#nc-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:4px;color:#1a1a1a;margin-top:6px;}
+
+/* Flatline indicator */
+#flatline-msg{
+  position:absolute;left:72px;top:50%;transform:translateY(-50%);
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:4px;color:#1c1c1c;
+  z-index:10;pointer-events:none;
+  opacity:0;transition:opacity .4s;
+}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+
+  <div id="play-overlay">
+    <div id="play-btn">
+      <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg>
+    </div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <!-- ECG paper grid -->
+  <svg id="grid-svg" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="small-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#070707" stroke-width="0.5"/>
+      </pattern>
+      <pattern id="big-grid" width="100" height="100" patternUnits="userSpaceOnUse">
+        <rect width="100" height="100" fill="url(#small-grid)"/>
+        <path d="M 100 0 L 0 0 0 100" fill="none" stroke="#090909" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <rect width="1280" height="720" fill="url(#big-grid)"/>
+    <!-- Lead divider line -->
+    <line id="lead-divider" x1="0" y1="450" x2="1280" y2="450" stroke="#0a0a0a" stroke-width="1" opacity="0"/>
+  </svg>
+
+  <!-- ECG waveform SVG -->
+  <svg id="ecg-svg" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+    <!-- Lead 1: centered at y=270 -->
+    <polyline id="ecg-line1" points="" fill="none" stroke="#fff" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <!-- Lead 2: centered at y=570 (appears later) -->
+    <polyline id="ecg-line2" points="" fill="none" stroke="#888" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" opacity="0"/>
+  </svg>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="lead-label">LEAD I · HR</div>
+    <div id="lead2-label">LEAD II</div>
+
+    <div id="bpm-wrap">
+      <div id="bpm-label">Heart Rate</div>
+      <div id="bpm-val">0</div>
+      <div id="bpm-unit">bpm</div>
+    </div>
+
+    <div id="vitals-wrap">
+      <div class="vital-row" id="vr-spo2">
+        <div class="vr-lbl">SpO₂</div>
+        <div class="vr-val">98<span class="vr-unit">%</span></div>
+      </div>
+      <div class="vital-row" id="vr-bp">
+        <div class="vr-lbl">Blood Pressure</div>
+        <div class="vr-val">120<span class="vr-unit">/80 mmHg</span></div>
+      </div>
+      <div class="vital-row" id="vr-temp">
+        <div class="vr-lbl">Temperature</div>
+        <div class="vr-val">98.6<span class="vr-unit">°F</span></div>
+      </div>
+    </div>
+
+    <div id="flatline-msg">NO SIGNAL DETECTED</div>
+    <div id="nominal-card">
+      <div id="nc-main">ALL VITALS NOMINAL</div>
+      <div id="nc-sub">PATIENT STABLE · MONITORING ACTIVE</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280;
+  stage.style.transform=`scale(${sc})`;
+  shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+// ─── PQRST Waveform ────────────────────────────────────────────────
+// Normalized time 0-1, amplitude -1 to 1 (R peak = +1)
+const WAVE=[
+  [0.00, 0.00],
+  [0.07, 0.00],
+  [0.10, 0.07],  // P start
+  [0.14, 0.16],  // P peak
+  [0.18, 0.07],  // P end
+  [0.22, 0.00],
+  [0.245,-0.10], // Q
+  [0.265, 1.00], // R peak
+  [0.285,-0.30], // S
+  [0.31, 0.00],
+  [0.38, 0.00],
+  [0.43, 0.10],  // T start
+  [0.50, 0.22],  // T peak
+  [0.57, 0.10],  // T end
+  [0.64, 0.00],
+  [1.00, 0.00],
+];
+
+function waveAt(t){
+  // t: 0-1 within one beat
+  for(let i=1;i<WAVE.length;i++){
+    if(t<=WAVE[i][0]){
+      const t0=WAVE[i-1][0], t1=WAVE[i][0];
+      const v0=WAVE[i-1][1], v1=WAVE[i][1];
+      const p=(t-t0)/(t1-t0);
+      return v0+(v1-v0)*p;
+    }
+  }
+  return 0;
+}
+
+// ─── ECG buffer ───────────────────────────────────────────────────
+const WIDTH=1280;
+const BUFLEN=WIDTH;
+const buf1=new Float32Array(BUFLEN); // lead 1
+const buf2=new Float32Array(BUFLEN); // lead 2 (slight phase offset)
+let bufPos=0;
+
+const ECG_Y1=270; // lead 1 center y
+const ECG_Y2=580; // lead 2 center y
+const AMP1=110;   // amplitude px for lead 1
+const AMP2=70;    // amplitude px for lead 2
+
+let heartBeating=false;
+let beatPhase=0;    // 0-1 within current beat
+const BPM_TARGET=72;
+let currentBPM=0;
+let bpmDisplayed=0;
+
+// ─── Timeline ─────────────────────────────────────────────────────
+const DURATION=16;
+let playing=false,startTime=null,raf=null,fired=new Set();
+const timeline=[];
+function at(sec,fn){timeline.push({sec,fn});}
+let lastT=null;
+
+at(0.0,()=>{
+  document.getElementById('flatline-msg').style.opacity='1';
+  document.getElementById('bpm-val').classList.add('in');
+});
+at(2.5,()=>{
+  document.getElementById('flatline-msg').style.opacity='0';
+  heartBeating=true;
+  currentBPM=BPM_TARGET;
+});
+at(4.5,()=>{
+  // BPM counter climbs
+  countUp('bpm-val', BPM_TARGET, 600);
+});
+at(5.5,()=>{
+  document.getElementById('vr-spo2').classList.add('in');
+});
+at(6.5,()=>{
+  document.getElementById('vr-bp').classList.add('in');
+});
+at(7.5,()=>{
+  document.getElementById('vr-temp').classList.add('in');
+});
+at(9.5,()=>{
+  // Lead 2 appears
+  document.getElementById('lead-divider').setAttribute('opacity','1');
+  document.getElementById('ecg-line2').setAttribute('opacity','1');
+  document.getElementById('lead2-label').style.opacity='1';
+});
+at(13.5,()=>{
+  document.getElementById('nominal-card').style.opacity='1';
+});
+
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  const dt=lastT===null?0:t-lastT;
+  lastT=t;
+
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+  timeline.forEach((ev,i)=>{if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();}});
+
+  // Advance beat phase
+  if(heartBeating && dt>0){
+    const beatsPerSec=currentBPM/60;
+    beatPhase+=dt*beatsPerSec;
+    if(beatPhase>=1) beatPhase-=Math.floor(beatPhase);
+  }
+
+  // Fill buffer
+  const v=heartBeating?waveAt(beatPhase):0;
+  // Lead 1
+  buf1[bufPos]=v;
+  // Lead 2: slightly different morphology (inverted P, taller R)
+  buf2[bufPos]=heartBeating?waveAt((beatPhase+0.02)%1)*0.85:0;
+  bufPos=(bufPos+1)%BUFLEN;
+
+  // Build polyline points from rolling buffer
+  const pts1=[]; const pts2=[];
+  for(let i=0;i<BUFLEN;i++){
+    const idx=(bufPos+i)%BUFLEN;
+    const x=i;
+    pts1.push(`${x},${ECG_Y1-buf1[idx]*AMP1}`);
+    pts2.push(`${x},${ECG_Y2-buf2[idx]*AMP2}`);
+  }
+  document.getElementById('ecg-line1').setAttribute('points',pts1.join(' '));
+  document.getElementById('ecg-line2').setAttribute('points',pts2.join(' '));
+
+  if(t<DURATION+1) raf=requestAnimationFrame(tick); else onEnd();
+}
+
+function handleClick(){if(!playing)startVideo();}
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); heartBeating=false; beatPhase=0; lastT=null;
+  buf1.fill(0); buf2.fill(0); bufPos=0;
+  resetAll();
+  raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  document.getElementById('ecg-line1').setAttribute('points','');
+  document.getElementById('ecg-line2').setAttribute('points','');
+  document.getElementById('ecg-line2').setAttribute('opacity','0');
+  document.getElementById('lead-divider').setAttribute('opacity','0');
+  document.getElementById('lead2-label').style.opacity='0';
+  document.getElementById('bpm-val').textContent='0';
+  document.getElementById('bpm-val').classList.remove('in');
+  document.getElementById('flatline-msg').style.opacity='0';
+  document.getElementById('nominal-card').style.opacity='0';
+  ['vr-spo2','vr-bp','vr-temp'].forEach(id=>document.getElementById(id).classList.remove('in'));
+  document.getElementById('prog-fill').style.width='0';
+}
+
+function countUp(id, target, dur){
+  const el=document.getElementById(id);
+  const t0=performance.now();
+  function frame(now){
+    const p=Math.min((now-t0)/dur,1);
+    const ease=1-Math.pow(1-p,3);
+    el.textContent=Math.round(ease*target);
+    if(p<1)requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>

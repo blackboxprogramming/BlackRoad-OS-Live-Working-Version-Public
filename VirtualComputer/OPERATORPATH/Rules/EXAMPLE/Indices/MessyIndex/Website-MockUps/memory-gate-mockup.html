@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memory Gate — Persistent Agent Memory API Mockup</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height:100%; overflow:hidden; }
+    body { background:radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), var(--bg); color:var(--text); font-family:var(--sg); display:flex; flex-direction:column; }
+    .grad { height:3px; background:var(--g); }
+    .topbar { height:58px; border-bottom:1px solid var(--border); background:rgba(0,0,0,.95); backdrop-filter:blur(16px); display:flex; align-items:center; gap:14px; padding:0 18px; }
+    .brand { display:flex; align-items:center; gap:10px; min-width:250px; }
+    .brand-mark { width:34px; height:34px; border-radius:10px; background:var(--g135); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
+    .brand-copy { display:flex; flex-direction:column; line-height:1.05; }
+    .brand-title { font-size:15px; font-weight:700; }
+    .brand-sub { font-family:var(--jb); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+    :root{--in:'Inter',sans-serif}
+    .search { flex:1; max-width:520px; height:38px; border-radius:10px; border:1px solid var(--border); background:var(--card); display:flex; align-items:center; padding:0 12px; color:var(--sub); font-size:13px; font-family:var(--in); }
+    .top-actions { margin-left:auto; display:flex; gap:10px; }
+    .chip { padding:8px 12px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--sub); font-size:11px; font-family:var(--jb); }
+    .btn { padding:8px 12px; border:none; border-radius:9px; background:var(--white); color:#000; font-size:12px; font-weight:700; }
+    .shell { display:grid; grid-template-columns:80px 290px 1fr 330px; flex:1; min-height:0; }
+    .rail { background:var(--card); border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 0; }
+    .rail-btn { width:46px; height:46px; border-radius:14px; background:var(--elevated); border:1px solid transparent; display:flex; align-items:center; justify-content:center; color:var(--sub); font-size:16px; }
+    .rail-btn.active { color:var(--white); background:var(--hover); border-color:#323232; }
+    .sidebar, .context { padding:18px 16px; overflow:auto; }
+    .sidebar { background:radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 28%), #050505; border-right:1px solid var(--border); }
+    .context { background:var(--card); border-left:1px solid var(--border); }
+    .section-label { font-family:var(--jb); font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px; }
+    .card, .node-card, .api-card, .query-card, .context-row, .metric { background:var(--card); border:1px solid var(--border); border-radius:12px; }
+    .card, .node-card, .api-card, .query-card, .context-row, .metric { padding:14px; }
+    .card h2, .node-card h3, .api-card h3 { font-size:16px; margin-bottom:6px; }
+    .card p, .node-card p, .api-card p, .query-card p, .row-copy span { color:var(--sub); font-size:12px; line-height:1.6; font-family:var(--in); }
+    .stack { display:flex; flex-direction:column; gap:10px; }
+    .main { background:linear-gradient(180deg, rgba(12,12,12,.96), rgba(0,0,0,1)); display:grid; grid-template-rows:auto auto 1fr; min-height:0; }
+    .hero { padding:18px; border-bottom:1px solid var(--border); display:grid; grid-template-columns:1.15fr .85fr; gap:16px; }
+    .hero-panel, .snapshot { background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:18px; }
+    .hero h1 { font-size:28px; line-height:1.08; margin-bottom:10px; }
+    .hero p, .snapshot p { color:var(--sub); font-size:13px; line-height:1.7; font-family:var(--in); }
+    .metrics { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .metric-label { font-family:var(--jb); font-size:10px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+    .metric-value { font-size:22px; font-weight:700; margin-top:8px; }
+    .metric-note { color:var(--sub); font-size:12px; margin-top:4px; }
+    .tabs { height:48px; display:flex; gap:18px; align-items:center; padding:0 18px; border-bottom:1px solid var(--border); background:var(--card); }
+    .tab { font-size:13px; color:var(--sub); padding-bottom:11px; border-bottom:2px solid transparent; }
+    .tab.active { color:var(--white); border-color:#fff; }
+    .memory-strip { padding:0 18px 18px; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; } .memory-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; } .memory-card h3 { font-size:15px; margin-bottom:8px; } .memory-card p { color:var(--sub); font-size:12px; line-height:1.6; margin-bottom:12px; } .memory-meta { display:flex; justify-content:space-between; gap:10px; font-family:var(--jb); font-size:10px; color:var(--muted); } .content { padding:18px; display:grid; grid-template-columns:1.1fr .9fr; gap:16px; min-height:0; }
+    .query-board { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; }
+    .query-card { margin-top:12px; background:#090909; }
+    .mono { font-family:var(--jb); font-size:10px; color:var(--muted); }
+    .context-row { display:flex; justify-content:space-between; gap:10px; }
+    .row-copy strong { display:block; font-size:13px; margin-bottom:4px; }
+  </style>
+</head>
+<body>
+  <div class="grad"></div>
+  <header class="topbar"><div class="brand"><div class="brand-mark">MG</div><div class="brand-copy"><div class="brand-title">Memory Gate</div><div class="brand-sub">Persistent memory API and graph gateway</div></div></div><div class="search">Search memories, entities, links, traces, sessions, and codex entries...</div><div class="top-actions"><div class="chip">GRAPH ONLINE</div><div class="chip">SESSION LINKED</div><button class="btn">Open Query</button></div></header>
+  <div class="shell">
+    <aside class="rail"><div class="rail-btn active">◎</div><div class="rail-btn">⌕</div><div class="rail-btn">⌘</div><div class="rail-btn">◫</div><div class="rail-btn">☰</div><div class="rail-btn">⌬</div></aside>
+    <aside class="sidebar"><div><div class="section-label">Memory fabric</div><div class="card"><h2>Persistence for Roadies</h2><p>Memory Gate stores context, links entities, and exposes memory as a durable API layer for agents, products, and collaborative workflows.</p></div></div><div><div class="section-label">Memory surfaces</div><div class="stack"><div class="node-card"><h3>Session memory</h3><p>Track work, checkpoints, and active assumptions for current execution lanes.</p></div><div class="node-card"><h3>Codex memory</h3><p>Capture durable solutions, patterns, and reusable operational knowledge.</p></div><div class="node-card"><h3>Graph memory</h3><p>Connect people, products, files, and tasks into traversable relationship maps.</p></div></div></div></aside>
+    <main class="main"><section class="hero"><div class="hero-panel"><div class="section-label">Persistent context</div><h1>Store, search, and route memory across agents, sessions, and products.</h1><p>Memory Gate is the API and graph layer behind durable agent memory. It keeps context available across sessions while making relationships queryable instead of hidden in isolated logs.</p><div class="metrics"><div class="metric"><div class="metric-label">Memory nodes</div><div class="metric-value">248k</div><div class="metric-note">Sessions, entities, patterns, and links</div></div><div class="metric"><div class="metric-label">Graph edges</div><div class="metric-value">1.9M</div><div class="metric-note">Connected relationships and traces</div></div><div class="metric"><div class="metric-label">Active agents</div><div class="metric-value">69+</div><div class="metric-note">Reading and writing shared memory</div></div></div></div><div class="snapshot"><div class="section-label">Gateway health</div><h2>Memory sync snapshot</h2><p>Watch ingestion, retrieval, and graph consistency so autonomous systems keep their context clean and useful.</p><div class="stack" style="margin-top:14px"><div class="context-row"><div class="row-copy"><strong>Session writes stable</strong><span>Checkpoints and plan updates are flowing into the current memory lane.</span></div><div class="mono">GOOD</div></div><div class="context-row"><div class="row-copy"><strong>Graph backfill running</strong><span>Legacy docs and archives are still being normalized into entity links.</span></div><div class="mono">SYNC</div></div><div class="context-row"><div class="row-copy"><strong>Codex retrieval hot</strong><span>Recent problem-solving patterns are ranking high for repeated workflows.</span></div><div class="mono">FAST</div></div></div></div></section><div class="tabs"><div class="tab active">Queries</div><div class="tab">Graph</div><div class="tab">Sessions</div><div class="tab">Codex</div><div class="tab">Ingestion</div></div><section class="memory-strip"><div class="memory-card"><div class="section-label">Session continuity</div><h3>Current work survives resets</h3><p>Memory Gate feels strongest when session state, checkpoints, and linked file context read as durable working memory instead of disposable chat history.</p><div class="memory-meta"><span>CHECKPOINTS</span><span>LIVE</span></div></div><div class="memory-card"><div class="section-label">Codex value</div><h3>Solutions compound over time</h3><p>Patterns, fixes, and repeated workflows become reusable assets once they move from solved once to searchable memory primitives.</p><div class="memory-meta"><span>RETRIEVAL</span><span>HIGH-SIGNAL</span></div></div><div class="memory-card"><div class="section-label">Graph utility</div><h3>Relationships become visible</h3><p>People, products, docs, and tasks gain extra value once their edges are navigable and queryable in one shared memory fabric.</p><div class="memory-meta"><span>GRAPHED</span><span>1.9M EDGES</span></div></div></section><section class="content"><div class="query-board"><div class="section-label">Query console</div><div class="api-card"><h3>Find prior solutions</h3><p>Search for patterns, comparable tasks, and relevant checkpoints before solving a problem from scratch.</p></div><div class="query-card"><div class="mono">POST /memory/search</div><p>query: "roadtrip dispatch patterns"<br>scope: codex + session + graph<br>top_k: 8</p></div><div class="query-card"><div class="mono">POST /memory/graph/traverse</div><p>start: roadtrip<br>depth: 2<br>include: products, roadies, docs, hosts</p></div><div class="query-card"><div class="mono">POST /memory/checkpoint</div><p>Capture the current work state, changed files, and execution notes as a durable handoff.</p></div></div><div><div class="section-label">API surfaces</div><div class="stack"><div class="api-card"><h3>Session API</h3><p>Read and persist live working context, checklists, and checkpoint summaries.</p></div><div class="api-card"><h3>Graph gateway</h3><p>Traverse linked products, entities, docs, and Roadies through one structured edge model.</p></div><div class="api-card"><h3>Broadcast lane</h3><p>Promote learnings into codex and shared memory so future sessions benefit immediately.</p></div></div></div></section></main>
+    <aside class="context"><div><div class="section-label">Recent memory events</div><div class="stack"><div class="context-row"><div class="row-copy"><strong>Checkpoint stored</strong><span>Product mockup batch checkpoint indexed with file links and milestone notes.</span></div><div class="mono">+03m</div></div><div class="context-row"><div class="row-copy"><strong>Codex hit</strong><span>Prior Stripe integration guidance reused in a current implementation lane.</span></div><div class="mono">+12m</div></div><div class="context-row"><div class="row-copy"><strong>Graph edge added</strong><span>RoadBook and BlackBoard linked through shared knowledge publishing workflows.</span></div><div class="mono">+21m</div></div></div></div><div><div class="section-label">Quick actions</div><div class="stack"><div class="node-card"><h3>Open entity graph</h3><p>Render related products, docs, and agents around a chosen node.</p></div><div class="node-card"><h3>Compare sessions</h3><p>See how current work relates to older checkpoints and learnings.</p></div><div class="node-card"><h3>Promote to codex</h3><p>Turn a solved problem into durable shared knowledge for future agents.</p></div></div></div></aside>
+  </div>
+</body>
+</html>

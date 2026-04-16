@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad — Pave Tomorrow.</title>
+<meta name="description" content="BlackRoad OS, Inc. Sovereign computing for everyone. 18 apps. 27 agents. 302 models. 15 GitHub organizations. Delaware C-Corp.">
+<meta property="og:title" content="BlackRoad — Pave Tomorrow.">
+<meta property="og:description" content="Sovereign computing for everyone. Edge AI. Mesh networking. One highway.">
+<meta property="og:url" content="https://blackroad.io">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--card:#0a0a0a;--elevated:#111;--border:#1a1a1a;--border-hover:#2a2a2a;
+  --muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;
+  --o:#FF6B2B;--r:#FF2255;--m:#FF00D4;--v:#7800FF;--b:#3E84FF;--c:#00D6FF;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#FF00D4,#7800FF,#3E84FF,#00D6FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#FF00D4,#7800FF,#3E84FF,#00D6FF);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:2px}
+a{text-decoration:none;color:inherit}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 40px;height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:17px;color:var(--white)}
+.nav-bar{width:22px;height:3px;border-radius:2px;background:var(--g);flex-shrink:0}
+.nav-center{display:flex;gap:28px}
+.nav-center a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-center a:hover{color:var(--white)}
+.nav-right{display:flex;gap:10px;align-items:center}
+.btn-nav{background:var(--white);color:#000;font-family:var(--sg);font-weight:600;font-size:13px;padding:8px 20px;border-radius:6px;border:none;cursor:pointer;transition:background .15s}
+.btn-nav:hover{background:#e0e0e0}
+.btn-nav-ghost{background:transparent;color:var(--sub);font-family:var(--sg);font-weight:500;font-size:13px;padding:8px 16px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:all .15s}
+.btn-nav-ghost:hover{color:var(--white);border-color:var(--border-hover)}
+.nav-hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;background:none;border:none}
+.nav-hamburger span{display:block;width:20px;height:2px;background:var(--sub);border-radius:2px}
+.nav-mobile{display:none;position:fixed;top:60px;left:0;right:0;background:rgba(0,0,0,.98);border-bottom:1px solid var(--border);padding:20px 24px;flex-direction:column;z-index:99}
+.nav-mobile.open{display:flex}
+.nav-mobile a{font-size:15px;font-weight:500;color:var(--sub);padding:14px 0;border-bottom:1px solid var(--border);transition:color .15s}
+.nav-mobile a:hover{color:var(--white)}
+.nav-mobile-cta{margin-top:16px;background:var(--white);color:#000;font-family:var(--sg);font-weight:600;font-size:14px;padding:13px;border-radius:7px;border:none;cursor:pointer;width:100%;text-align:center}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 80px;position:relative;overflow:hidden}
+.hero-grad-bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.hero-glow{position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:1000px;height:700px;background:radial-gradient(ellipse,rgba(120,0,255,.06) 0%,rgba(255,0,212,.03) 40%,transparent 70%);pointer-events:none}
+.hero-tag{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:32px;display:flex;align-items:center;gap:8px}
+.hero-dot{width:6px;height:6px;border-radius:50%;background:var(--g135);animation:pulse 2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+.hero-title{font-size:clamp(56px,11vw,140px);font-weight:700;line-height:.9;color:var(--white);letter-spacing:-.04em;margin-bottom:32px}
+.hero-title .grad{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:clamp(16px,2vw,21px);color:var(--sub);max-width:600px;margin:0 auto 52px;line-height:1.6}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:80px}
+.btn-hero{background:var(--white);color:#000;font-family:var(--sg);font-weight:600;font-size:15px;padding:14px 34px;border-radius:8px;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-hero:hover{background:#e8e8e8;transform:translateY(-1px)}
+.btn-hero-ghost{background:transparent;color:var(--text);font-family:var(--sg);font-weight:500;font-size:15px;padding:14px 28px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-hero-ghost:hover{border-color:var(--border-hover);color:var(--white)}
+
+/* STATS BAR */
+.stats-bar{display:flex;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;width:100%;max-width:800px;margin:0 auto}
+.stat-item{flex:1;padding:20px 16px;text-align:center;border-right:1px solid var(--border);transition:background .2s}
+.stat-item:last-child{border-right:none}
+.stat-item:hover{background:var(--card)}
+.stat-num{font-family:var(--jb);font-size:clamp(20px,3vw,32px);font-weight:500;color:var(--white);display:block;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-family:var(--jb);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+
+/* SECTIONS */
+.section{padding:100px 40px;max-width:1200px;margin:0 auto}
+.section-tag{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.section-title{font-size:clamp(30px,4vw,48px);font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.03em;line-height:1.1}
+.section-sub{font-size:15px;color:var(--sub);max-width:520px;line-height:1.7}
+.grad-text{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* APPS */
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:48px}
+.app-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;transition:all .2s;position:relative;overflow:hidden}
+.app-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .2s}
+.app-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+.app-card:hover::after{opacity:1}
+.app-icon{font-size:22px;margin-bottom:12px;display:block}
+.app-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:3px}
+.app-url{font-family:var(--jb);font-size:9px;color:var(--muted);margin-bottom:8px}
+.app-desc{font-size:12px;color:var(--sub);line-height:1.6}
+
+/* ORGS */
+.orgs-section{padding:100px 40px;background:#030303;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.orgs-inner{max-width:1200px;margin:0 auto}
+.orgs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-top:48px}
+.org-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;transition:all .2s;display:flex;align-items:center;gap:12px}
+.org-card:hover{border-color:var(--border-hover);transform:translateY(-1px)}
+.org-icon{width:36px;height:36px;border-radius:8px;background:#111;border:1px solid #1a1a1a;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.org-name{font-size:12px;font-weight:600;color:var(--white)}
+.org-handle{font-family:var(--jb);font-size:9px;color:var(--muted);margin-top:2px}
+
+/* SOCIAL */
+.social-section{padding:100px 40px;max-width:1200px;margin:0 auto}
+.social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:48px}
+.social-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all .2s;position:relative;overflow:hidden}
+.social-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}
+.social-icon-wrap{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;border:1px solid var(--border)}
+.social-platform{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.social-name{font-size:16px;font-weight:600;color:var(--white);margin-bottom:6px}
+.social-handle{font-family:var(--jb);font-size:11px;color:var(--sub);margin-bottom:16px}
+.social-stat{font-family:var(--jb);font-size:10px;color:var(--muted)}
+.social-btn{display:inline-flex;align-items:center;gap:6px;background:var(--elevated);border:1px solid var(--border);color:var(--text);font-family:var(--sg);font-size:12px;font-weight:500;padding:8px 16px;border-radius:6px;transition:all .15s;margin-top:16px}
+.social-btn:hover{border-color:var(--border-hover);color:var(--white)}
+
+/* DOMAINS */
+.domains-section{padding:100px 40px;background:#030303;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.domains-inner{max-width:1200px;margin:0 auto}
+.domains-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:48px}
+.domain-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;transition:all .15s}
+.domain-row:hover{border-color:var(--border-hover)}
+.domain-name{font-family:var(--jb);font-size:12px;color:var(--white)}
+.domain-badge{font-family:var(--jb);font-size:9px;padding:3px 8px;border-radius:4px;letter-spacing:.06em}
+.domain-live{background:#22c55e18;color:#22c55e;border:1px solid #22c55e33}
+.domain-active{background:#3E84FF18;color:#3E84FF;border:1px solid #3E84FF33}
+
+/* ENTERPRISE */
+.enterprise{padding:100px 40px;max-width:1200px;margin:0 auto}
+.enterprise-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+.ent-title{font-size:clamp(24px,3vw,36px);font-weight:700;color:var(--white);margin-bottom:12px;letter-spacing:-.02em}
+.ent-sub{font-size:14px;color:var(--sub);line-height:1.7;max-width:480px}
+.ent-meta{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap}
+.ent-meta-item{font-family:var(--jb);font-size:10px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ent-meta-dot{width:5px;height:5px;border-radius:50%;background:var(--g135)}
+.ent-actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+
+/* MODELS */
+.models-section{padding:100px 40px;background:#030303;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.models-inner{max-width:1200px;margin:0 auto}
+.models-ticker{display:flex;gap:8px;flex-wrap:wrap;margin-top:32px}
+.model-pill{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-family:var(--jb);font-size:10px;color:var(--sub);white-space:nowrap;transition:all .15s}
+.model-pill:hover{border-color:var(--border-hover);color:var(--white)}
+
+/* CTA */
+.cta{padding:160px 40px;text-align:center;position:relative;overflow:hidden}
+.cta-glow{position:absolute;inset:0;background:radial-gradient(ellipse 40% 60% at 50% 50%,rgba(120,0,255,.07) 0%,transparent 70%)}
+.cta-eyebrow{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:24px;position:relative}
+.cta-title{font-size:clamp(48px,10vw,120px);font-weight:700;color:var(--white);letter-spacing:-.05em;line-height:.9;margin-bottom:32px;position:relative}
+.cta-title .grad{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-sub{font-size:16px;color:var(--sub);margin-bottom:52px;position:relative}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative}
+
+/* FOOTER */
+.grad-bar{height:3px;background:var(--g)}
+footer{padding:60px 40px 40px;max-width:100%}
+.footer-top{display:grid;grid-template-columns:1.5fr repeat(4,1fr);gap:48px;margin-bottom:48px;max-width:1200px;margin-left:auto;margin-right:auto}
+.footer-brand-logo{display:flex;align-items:center;gap:12px;font-weight:700;font-size:18px;color:var(--white);margin-bottom:12px}
+.footer-brand-sub{font-size:13px;color:var(--sub);line-height:1.7;max-width:260px;margin-bottom:20px}
+.footer-brand-tagline{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em}
+.footer-col-title{font-family:var(--jb);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}
+.footer-links{display:flex;flex-direction:column;gap:10px}
+.footer-links a{font-size:13px;color:var(--sub);transition:color .15s}
+.footer-links a:hover{color:var(--white)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;max-width:1200px;margin:0 auto}
+.footer-bottom-left{font-family:var(--jb);font-size:10px;color:var(--muted)}
+.footer-social{display:flex;gap:12px}
+.footer-social a{font-family:var(--jb);font-size:10px;color:var(--muted);transition:color .15s}
+.footer-social a:hover{color:var(--white)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .7s ease forwards}
+.d1{animation-delay:.1s;opacity:0}.d2{animation-delay:.25s;opacity:0}.d3{animation-delay:.4s;opacity:0}.d4{animation-delay:.55s;opacity:0}.d5{animation-delay:.7s;opacity:0}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0 20px}
+  .nav-center,.nav-right{display:none}
+  .nav-hamburger{display:flex}
+  .hero{padding:90px 20px 60px}
+  .hero-title{font-size:clamp(44px,14vw,80px)}
+  .hero-sub{font-size:15px}
+  .hero-actions{flex-direction:column;width:100%}
+  .btn-hero,.btn-hero-ghost{width:100%;justify-content:center}
+  .stats-bar{flex-wrap:wrap;border-radius:10px}
+  .stat-item{min-width:50%;border-bottom:1px solid var(--border)}
+  .section{padding:64px 20px}
+  .orgs-section,.domains-section,.models-section{padding:64px 20px}
+  .social-section,.enterprise,.cta{padding:64px 20px}
+  .apps-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .orgs-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .social-grid{grid-template-columns:1fr}
+  .domains-grid{grid-template-columns:1fr}
+  .enterprise-card{grid-template-columns:1fr;gap:24px}
+  .ent-actions{align-items:stretch}
+  .ent-actions a{text-align:center;justify-content:center}
+  .cta{padding:80px 20px}
+  .cta-title{font-size:clamp(48px,16vw,80px)}
+  .cta-actions{flex-direction:column;align-items:center}
+  .cta-actions a{width:100%;max-width:340px;justify-content:center}
+  footer{padding:48px 20px 32px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:32px}
+  .footer-bottom{flex-direction:column;align-items:flex-start}
+}
+@media(min-width:769px) and (max-width:1024px){
+  nav{padding:0 24px}
+  .section{padding:80px 32px}
+  .orgs-section,.domains-section,.models-section,.social-section,.enterprise,.cta{padding:80px 32px}
+  .footer-top{grid-template-columns:1fr 1fr 1fr;gap:32px}
+  .apps-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><div class="nav-bar"></div>BlackRoad</div>
+  <div class="nav-center">
+    <a href="#apps">Products</a>
+    <a href="#orgs">GitHub</a>
+    <a href="#social">Social</a>
+    <a href="#domains">Domains</a>
+    <a href="#enterprise">Enterprise</a>
+  </div>
+  <div class="nav-right">
+    <a href="https://docs.blackroad.io" class="btn-nav-ghost">Docs</a>
+    <a href="https://os.blackroad.io" class="btn-nav">Launch OS →</a>
+  </div>
+  <button class="nav-hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</nav>
+<div class="nav-mobile" id="nav-mobile">
+  <a href="#apps" onclick="closeMenu()">Products</a>
+  <a href="#orgs" onclick="closeMenu()">GitHub</a>
+  <a href="#social" onclick="closeMenu()">Social</a>
+  <a href="#domains" onclick="closeMenu()">Domains</a>
+  <a href="#enterprise" onclick="closeMenu()">Enterprise</a>
+  <button class="nav-mobile-cta" onclick="closeMenu()">Launch OS →</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grad-bar"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-tag fade-up d1">
+    <div class="hero-dot"></div>
+    BlackRoad OS, Inc. · Delaware C-Corp · Est. 2025
+  </div>
+  <h1 class="hero-title fade-up d2">Black<span class="grad">Road.</span></h1>
+  <p class="hero-sub fade-up d3">Sovereign computing for everyone. Edge AI. Mesh networking. 18 apps, 27 agents, 302 models — all running on your hardware. Zero cloud dependencies.</p>
+  <div class="hero-actions fade-up d4">
+    <a href="https://os.blackroad.io" class="btn-hero">Launch BlackRoad OS →</a>
+    <a href="#apps" class="btn-hero-ghost">Explore the highway</a>
+  </div>
+  <div class="stats-bar fade-up d5">
+    <div class="stat-item">
+      <span class="stat-num">18</span>
+      <div class="stat-label">Products</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">27</span>
+      <div class="stat-label">Agents</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">302</span>
+      <div class="stat-label">HF Models</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">489</span>
+      <div class="stat-label">CF Workers</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">15</span>
+      <div class="stat-label">GitHub Orgs</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num" id="domains-count">18</span>
+      <div class="stat-label">Domains</div>
+    </div>
+  </div>
+</section>
+
+<!-- APPS -->
+<section class="section" id="apps">
+  <div class="section-tag">The highway</div>
+  <h2 class="section-title">18 products.<br><span class="grad-text">One sovereign OS.</span></h2>
+  <p class="section-sub">Every app runs on your hardware. Every agent remembers everything. Every action is yours.</p>
+  <div class="apps-grid" id="apps-grid"></div>
+</section>
+
+<!-- GITHUB ORGS -->
+<section class="orgs-section" id="orgs">
+  <div class="orgs-inner">
+    <div class="section-tag">GitHub</div>
+    <h2 class="section-title">1 enterprise.<br><span class="grad-text">15 organizations.</span></h2>
+    <p class="section-sub">The BlackRoad ecosystem spans every domain of sovereign computing — from quantum research to edge hardware.</p>
+    <div style="margin-top:24px;margin-bottom:48px">
+      <a href="https://github.com/enterprises/blackroad-os" target="_blank" style="display:inline-flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 24px;transition:all .2s" onmouseover="this.style.borderColor='#2a2a2a'" onmouseout="this.style.borderColor='#1a1a1a'">
+        <span style="font-size:20px">🏢</span>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--white)">BlackRoad OS Enterprise</div>
+          <div style="font-family:var(--jb);font-size:10px;color:var(--muted)">github.com/enterprises/blackroad-os</div>
+        </div>
+        <span style="margin-left:8px;font-family:var(--jb);font-size:10px;color:var(--sub)">↗</span>
+      </a>
+    </div>
+    <div class="orgs-grid" id="orgs-grid"></div>
+  </div>
+</section>
+
+<!-- SOCIAL -->
+<section class="social-section" id="social">
+  <div class="section-tag">Find us everywhere</div>
+  <h2 class="section-title">The highway<br><span class="grad-text">has no walls.</span></h2>
+  <p class="section-sub">BlackRoad is building in public. Follow the convoy across every platform.</p>
+  <div class="social-grid">
+    <div class="social-card">
+      <div class="social-icon-wrap" style="background:#FF6B2B11;border-color:#FF6B2B22">🤗</div>
+      <div class="social-platform">Hugging Face</div>
+      <div class="social-name">BlackRoad AI</div>
+      <div class="social-handle">huggingface.co/blackroadio</div>
+      <div class="social-stat">302 models · 1 space · agents panel</div>
+      <a href="https://huggingface.co/blackroadio" target="_blank" class="social-btn">View on Hugging Face ↗</a>
+    </div>
+    <div class="social-card">
+      <div class="social-icon-wrap" style="background:#FF225511;border-color:#FF225522">📸</div>
+      <div class="social-platform">Instagram</div>
+      <div class="social-name">BlackRoad OS</div>
+      <div class="social-handle">@blackroad.io</div>
+      <div class="social-stat">Building in public · behind the highway</div>
+      <a href="https://www.instagram.com/blackroad.io" target="_blank" class="social-btn">Follow on Instagram ↗</a>
+    </div>
+    <div class="social-card">
+      <div class="social-icon-wrap" style="background:#FF00D411;border-color:#FF00D422">▶️</div>
+      <div class="social-platform">YouTube</div>
+      <div class="social-name">BlackRoad OS</div>
+      <div class="social-handle">@blackroados</div>
+      <div class="social-stat">Demos · builds · the convoy in action</div>
+      <a href="https://youtube.com/@blackroados" target="_blank" class="social-btn">Watch on YouTube ↗</a>
+    </div>
+    <div class="social-card">
+      <div class="social-icon-wrap" style="background:#7800FF11;border-color:#7800FF22">🐙</div>
+      <div class="social-platform">GitHub</div>
+      <div class="social-name">BlackRoad OS</div>
+      <div class="social-handle">github.com/BlackRoad-OS</div>
+      <div class="social-stat">RoadC · 15 orgs · open infrastructure</div>
+      <a href="https://github.com/BlackRoad-OS" target="_blank" class="social-btn">View on GitHub ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- DOMAINS -->
+<section class="domains-section" id="domains">
+  <div class="domains-inner">
+    <div class="section-tag">Domain portfolio</div>
+    <h2 class="section-title">Every lane<br><span class="grad-text">of the highway.</span></h2>
+    <p class="section-sub">BlackRoad owns its namespace across every meaningful TLD. The highway is sovereign end to end.</p>
+    <div class="domains-grid" id="domains-grid"></div>
+  </div>
+</section>
+
+<!-- ENTERPRISE -->
+<section class="enterprise" id="enterprise">
+  <div class="section-tag">Corporate</div>
+  <h2 class="section-title" style="margin-bottom:32px">BlackRoad OS, Inc.</h2>
+  <div class="enterprise-card">
+    <div>
+      <div class="ent-title">Delaware C-Corp<br>Incorporated November 2025.</div>
+      <p class="ent-sub">BlackRoad OS, Inc. is a sovereign computing company building the infrastructure layer that doesn't exist yet — edge AI, mesh networking, post-quantum security, and a unified language for the browser-native OS era.</p>
+      <div class="ent-meta">
+        <div class="ent-meta-item"><div class="ent-meta-dot"></div>Lakeville, MN</div>
+        <div class="ent-meta-item"><div class="ent-meta-dot"></div>Delaware C-Corp</div>
+        <div class="ent-meta-item"><div class="ent-meta-dot"></div>Est. November 2025</div>
+        <div class="ent-meta-item"><div class="ent-meta-dot"></div>alexa@blackroad.io</div>
+      </div>
+    </div>
+    <div class="ent-actions">
+      <a href="mailto:alexa@blackroad.io" class="btn-hero" style="font-size:13px;padding:11px 24px">Contact →</a>
+      <a href="https://blackroadinc.us" class="btn-hero-ghost" style="font-size:13px;padding:11px 20px" target="_blank">blackroadinc.us ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS -->
+<section class="models-section">
+  <div class="models-inner">
+    <div class="section-tag">Hugging Face · 302 models</div>
+    <h2 class="section-title">The model fleet.</h2>
+    <p class="section-sub">Every model in the BlackRoad AI stack — from secrets vaults to satellite trackers to route optimizers.</p>
+    <div class="models-ticker" id="models-ticker"></div>
+    <div style="margin-top:24px">
+      <a href="https://huggingface.co/blackroadio/models" target="_blank" class="social-btn">View all 302 models on Hugging Face ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-glow"></div>
+  <div class="cta-eyebrow">BlackRoad OS, Inc.</div>
+  <h2 class="cta-title">Pave<br><span class="grad">Tomorrow.</span></h2>
+  <p class="cta-sub">The highway is open. Your convoy is waiting.</p>
+  <div class="cta-actions">
+    <a href="https://os.blackroad.io" class="btn-hero">Launch BlackRoad OS →</a>
+    <a href="https://github.com/blackboxprogramming/roadc" class="btn-hero-ghost">View RoadC on GitHub</a>
+  </div>
+</section>
+
+<div class="grad-bar"></div>
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-logo"><div class="nav-bar"></div>BlackRoad OS</div>
+      <p class="footer-brand-sub">Sovereign computing for everyone. Edge AI, mesh networking, and a unified language for the browser-native OS era.</p>
+      <div class="footer-brand-tagline">Pave Tomorrow.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">Products</div>
+      <div class="footer-links">
+        <a href="https://os.blackroad.io">BlackRoad OS</a>
+        <a href="https://roadtrip.blackroad.io">RoadTrip</a>
+        <a href="https://roadcode.blackroad.io">RoadCode</a>
+        <a href="https://roadwork.blackroad.io">RoadWork</a>
+        <a href="https://blackboard.blackroad.io">BlackBoard</a>
+        <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Infrastructure</div>
+      <div class="footer-links">
+        <a href="https://carkeys.blackroad.io">CarKeys</a>
+        <a href="https://roadchain.io">RoadChain</a>
+        <a href="https://roadcoin.io">RoadCoin</a>
+        <a href="https://carpool.blackroad.io">CarPool</a>
+        <a href="https://oneway.blackroad.io">OneWay</a>
+        <a href="https://github.com/blackboxprogramming/roadc">RoadC</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Community</div>
+      <div class="footer-links">
+        <a href="https://huggingface.co/blackroadio" target="_blank">Hugging Face</a>
+        <a href="https://www.instagram.com/blackroad.io" target="_blank">Instagram</a>
+        <a href="https://youtube.com/@blackroados" target="_blank">YouTube</a>
+        <a href="https://github.com/BlackRoad-OS" target="_blank">GitHub</a>
+        <a href="https://github.com/enterprises/blackroad-os" target="_blank">Enterprise</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <div class="footer-links">
+        <a href="mailto:alexa@blackroad.io">Contact</a>
+        <a href="https://blackroadinc.us" target="_blank">blackroadinc.us</a>
+        <a href="https://docs.blackroad.io">Docs</a>
+        <a href="https://blackroad.network" target="_blank">Network</a>
+        <a href="https://blackroad.systems" target="_blank">Systems</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-left">© 2025 BlackRoad OS, Inc. · Delaware C-Corp · All rights reserved.</div>
+    <div class="footer-social">
+      <a href="https://huggingface.co/blackroadio" target="_blank">HuggingFace</a>
+      <a href="https://www.instagram.com/blackroad.io" target="_blank">Instagram</a>
+      <a href="https://youtube.com/@blackroados" target="_blank">YouTube</a>
+      <a href="https://github.com/BlackRoad-OS" target="_blank">GitHub</a>
+      <a href="mailto:alexa@blackroad.io">Email</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const APPS=[
+  {name:'BlackRoad OS',url:'os.blackroad.io',icon:'🖥️',desc:'The sovereign browser-native desktop OS.',color:'#FF6B2B'},
+  {name:'RoadTrip',url:'roadtrip.blackroad.io',icon:'💬',desc:'Persistent multi-agent convoy chat.',color:'#FF2255'},
+  {name:'RoadCode',url:'roadcode.blackroad.io',icon:'⌨️',desc:'The unified .road language IDE.',color:'#FF00D4'},
+  {name:'RoadWork',url:'roadwork.blackroad.io',icon:'⚙️',desc:'Full business operations automation.',color:'#7800FF'},
+  {name:'BlackBoard',url:'blackboard.blackroad.io',icon:'🎨',desc:'Creative studio for visuals and design.',color:'#3E84FF'},
+  {name:'RoadView',url:'roadview.blackroad.io',icon:'🔍',desc:'Intelligent search and research.',color:'#00D6FF'},
+  {name:'CarPool',url:'carpool.blackroad.io',icon:'🔗',desc:'AI-to-AI integration hub.',color:'#FF6B2B'},
+  {name:'CarKeys',url:'carkeys.blackroad.io',icon:'🔑',desc:'Post-quantum security and identity.',color:'#FF2255'},
+  {name:'RoadChain',url:'roadchain.io',icon:'⛓️',desc:'Immutable blockchain provenance.',color:'#FF00D4'},
+  {name:'RoadCoin',url:'roadcoin.io',icon:'🪙',desc:'Native reward token.',color:'#7800FF'},
+  {name:'Roadie',url:'roadie.blackroad.io',icon:'📚',desc:'Flagship AI tutor and companion.',color:'#3E84FF'},
+  {name:'BackRoad',url:'backroad.blackroad.io',icon:'📡',desc:'Social distribution automation.',color:'#00D6FF'},
+  {name:'RoadSide',url:'roadside.blackroad.io',icon:'🛎️',desc:'Customer support layer.',color:'#FF6B2B'},
+  {name:'OneWay',url:'oneway.blackroad.io',icon:'📤',desc:'Cryptographic data export.',color:'#FF2255'},
+  {name:'RoadBook',url:'roadbook.blackroad.io',icon:'📖',desc:'Open knowledge publishing.',color:'#FF00D4'},
+  {name:'RoadWorld',url:'roadworld.blackroad.io',icon:'🌍',desc:'Drag-and-drop world builder.',color:'#7800FF'},
+  {name:'OfficeRoad',url:'officeroad.blackroad.io',icon:'🏢',desc:'Living animated agent office.',color:'#3E84FF'},
+  {name:'RoadBand',url:'roadband.blackroad.io',icon:'🎵',desc:'Music and audio creation studio.',color:'#00D6FF'},
+];
+
+const ORGS=[
+  {name:'Blackbox Enterprises',handle:'Blackbox-Enterprises',icon:'🏛️'},
+  {name:'BlackRoad AI',handle:'BlackRoad-AI',icon:'🧠'},
+  {name:'BlackRoad Archive',handle:'BlackRoad-Archive',icon:'🗃️'},
+  {name:'BlackRoad Cloud',handle:'BlackRoad-Cloud',icon:'☁️'},
+  {name:'BlackRoad Education',handle:'BlackRoad-Education',icon:'📚'},
+  {name:'BlackRoad Foundation',handle:'BlackRoad-Foundation',icon:'🏗️'},
+  {name:'BlackRoad Gov',handle:'BlackRoad-Gov',icon:'🏛️'},
+  {name:'BlackRoad Hardware',handle:'BlackRoad-Hardware',icon:'⚡'},
+  {name:'BlackRoad Interactive',handle:'BlackRoad-Interactive',icon:'🎮'},
+  {name:'BlackRoad Labs',handle:'BlackRoad-Labs',icon:'🔬'},
+  {name:'BlackRoad Media',handle:'BlackRoad-Media',icon:'📡'},
+  {name:'BlackRoad OS',handle:'BlackRoad-OS',icon:'🖥️'},
+  {name:'BlackRoad Security',handle:'BlackRoad-Security',icon:'🛡️'},
+  {name:'BlackRoad Studio',handle:'BlackRoad-Studio',icon:'🎨'},
+  {name:'BlackRoad Ventures',handle:'BlackRoad-Ventures',icon:'🚀'},
+];
+
+const DOMAINS=[
+  {name:'blackroad.io',badge:'live'},
+  {name:'blackroad.me',badge:'live'},
+  {name:'blackroad.network',badge:'live'},
+  {name:'blackroad.systems',badge:'live'},
+  {name:'blackroad.company',badge:'live'},
+  {name:'blackroadinc.us',badge:'live'},
+  {name:'blackroadai.com',badge:'live'},
+  {name:'blackroadqi.com',badge:'active'},
+  {name:'blackroadquantum.com',badge:'active'},
+  {name:'blackroadquantum.net',badge:'active'},
+  {name:'blackroadquantum.info',badge:'active'},
+  {name:'blackroadquantum.shop',badge:'active'},
+  {name:'blackroadquantum.store',badge:'active'},
+  {name:'lucidia.earth',badge:'live'},
+  {name:'lucidia.studio',badge:'live'},
+  {name:'lucidiaqi.com',badge:'active'},
+  {name:'roadchain.io',badge:'live'},
+  {name:'roadcoin.io',badge:'live'},
+];
+
+const MODELS=[
+  'blackroad-secrets-vault','blackroad-screen-share','blackroad-screen-recorder',
+  'blackroad-schema-registry','blackroad-schema-migrator','blackroad-scaling-engine',
+  'blackroad-satellite-tracker','blackroad-sales-funnel','blackroad-route-optimizer',
+  'blackroad-rocket-telemetry','blackroad-risk-engine','blackroad-realtime-dashboard',
+  'blackroad-quantum-core','blackroad-prompt-engine','blackroad-pipeline-monitor',
+  'blackroad-patrol-agent','blackroad-node-manager','blackroad-network-analyzer',
+  'blackroad-memory-store','blackroad-market-scanner','blackroad-log-processor',
+  'blackroad-knowledge-graph','blackroad-inference-router','blackroad-health-monitor',
+  'blackroad-grid-coordinator','blackroad-fleet-manager','blackroad-event-bus',
+  'blackroad-embed-engine','blackroad-data-pipeline','blackroad-convoy-sync',
+];
+
+// Render apps
+const appsGrid=document.getElementById('apps-grid');
+APPS.forEach(app=>{
+  const card=document.createElement('a');
+  card.className='app-card';
+  card.href=`https://${app.url}`;
+  card.target='_blank';
+  card.style.setProperty('--accent',app.color);
+  card.innerHTML=`<style>.app-card:hover::after{background:linear-gradient(90deg,${app.color},transparent)}</style>
+    <span class="app-icon">${app.icon}</span>
+    <div class="app-name">${app.name}</div>
+    <div class="app-url">${app.url}</div>
+    <div class="app-desc">${app.desc}</div>`;
+  appsGrid.appendChild(card);
+});
+
+// Render orgs
+const orgsGrid=document.getElementById('orgs-grid');
+ORGS.forEach(org=>{
+  const card=document.createElement('a');
+  card.className='org-card';
+  card.href=`https://github.com/${org.handle}`;
+  card.target='_blank';
+  card.innerHTML=`
+    <div class="org-icon">${org.icon}</div>
+    <div>
+      <div class="org-name">${org.name}</div>
+      <div class="org-handle">github.com/${org.handle}</div>
+    </div>`;
+  orgsGrid.appendChild(card);
+});
+
+// Render domains
+const domainsGrid=document.getElementById('domains-grid');
+DOMAINS.forEach(d=>{
+  const row=document.createElement('div');
+  row.className='domain-row';
+  row.innerHTML=`
+    <span class="domain-name">${d.name}</span>
+    <span class="domain-badge domain-${d.badge}">${d.badge}</span>`;
+  domainsGrid.appendChild(row);
+});
+
+// Render models
+const ticker=document.getElementById('models-ticker');
+MODELS.forEach(m=>{
+  const pill=document.createElement('a');
+  pill.className='model-pill';
+  pill.href=`https://huggingface.co/blackroadio/${m}`;
+  pill.target='_blank';
+  pill.textContent=m;
+  ticker.appendChild(pill);
+});
+const more=document.createElement('div');
+more.className='model-pill';
+more.style.color='var(--o)';
+more.style.borderColor='#FF6B2B33';
+more.textContent=`+272 more →`;
+ticker.appendChild(more);
+
+// Nav
+const hamburger=document.getElementById('hamburger');
+const navMobile=document.getElementById('nav-mobile');
+function closeMenu(){navMobile.classList.remove('open')}
+hamburger.addEventListener('click',()=>navMobile.classList.toggle('open'));
+document.addEventListener('click',e=>{if(!hamburger.contains(e.target)&&!navMobile.contains(e.target))closeMenu()});
+</script>
+</body>
+</html>

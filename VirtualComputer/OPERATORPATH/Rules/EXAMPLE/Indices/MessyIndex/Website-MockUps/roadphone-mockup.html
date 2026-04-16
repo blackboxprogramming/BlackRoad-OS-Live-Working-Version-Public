@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadPhone — BlackRoad OS Mobile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+  <style>
+    /* ─── CSS Variables ───────────────────────────────────────── */
+    :root {
+      --bg-base:        #000000;
+      --bg-surface:     #0a0a0a;
+      --bg-raised:      #111111;
+      --bg-card:        #1a1a1a;
+      --bg-deep:        #0a0a0a;
+
+      --text-primary:   #f5f5f5;
+      --text-secondary: #737373;
+      --text-muted:     #444444;
+      --text-white:     #ffffff;
+
+      --grad: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+      --grad-diag: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+      --grad-vert: linear-gradient(180deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+
+      --font-ui:   'Space Grotesk', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --phone-w: 390px;
+      --phone-h: 844px;
+      --phone-radius: 52px;
+      --border-w: 3px;
+    }
+
+    /* ─── Reset & Base ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg-base);
+      font-family: var(--font-ui);
+      color: var(--text-primary);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ─── Stage ───────────────────────────────────────────────── */
+    .stage {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      position: relative;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(136,68,255,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 80%, rgba(255,34,85,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 35% at 80% 60%, rgba(0,212,255,0.05) 0%, transparent 60%),
+        var(--bg-base);
+    }
+
+    /* ─── Navigation row ──────────────────────────────────────── */
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-btn {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      border: 1px solid #222;
+      background: #0a0a0a;
+      color: var(--text-secondary);
+      font-size: 22px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    }
+    .nav-btn:hover {
+      border-color: #444;
+      color: var(--text-primary);
+      transform: scale(1.08);
+    }
+    .nav-btn:active { transform: scale(0.95); }
+
+    .screen-labels {
+      display: flex;
+      gap: 8px;
+    }
+    .screen-label {
+      padding: 6px 14px;
+      border-radius: 16px;
+      border: 1px solid #222;
+      background: var(--bg-surface);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .screen-label.active {
+      background: var(--bg-raised);
+      border-color: #444;
+      color: var(--text-primary);
+    }
+
+    /* ─── Phone shell ─────────────────────────────────────────── */
+    .phone-wrap {
+      position: relative;
+      width: calc(var(--phone-w) + var(--border-w) * 2);
+      height: calc(var(--phone-h) + var(--border-w) * 2);
+      border-radius: calc(var(--phone-radius) + var(--border-w));
+    }
+
+    /* gradient border via pseudo-element */
+    .phone-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: calc(var(--phone-radius) + var(--border-w));
+      padding: var(--border-w);
+      background: var(--grad);
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* subtle glow */
+    .phone-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: calc(var(--phone-radius) + 10px);
+      background: var(--grad);
+      opacity: 0.12;
+      filter: blur(18px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .phone {
+      width: var(--phone-w);
+      height: var(--phone-h);
+      background: var(--bg-deep);
+      border-radius: var(--phone-radius);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      margin: var(--border-w);
+    }
+
+    /* ─── Dynamic Island ──────────────────────────────────────── */
+    .dynamic-island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 34px;
+      background: #000;
+      border-radius: 16px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 0 0 1px #111;
+    }
+    .di-cam {
+      width: 10px; height: 10px;
+      background: #0a0a0a;
+      border-radius: 50%;
+      border: 1px solid #1a1a1a;
+      position: relative;
+    }
+    .di-cam::after {
+      content: '';
+      position: absolute;
+      width: 4px; height: 4px;
+      background: #111;
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 3px rgba(68,136,255,0.3);
+    }
+    .di-sensor {
+      width: 6px; height: 6px;
+      background: #0a0a0a;
+      border-radius: 50%;
+    }
+
+    /* ─── Home indicator ──────────────────────────────────────── */
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 134px;
+      height: 5px;
+      background: rgba(245,245,245,0.25);
+      border-radius: 3px;
+      z-index: 100;
+    }
+
+    /* ─── Screen container ────────────────────────────────────── */
+    .screens {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ─── Gradient text utility ───────────────────────────────── */
+    .grad-text {
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ─── Glass card utility ──────────────────────────────────── */
+    .glass {
+      background: rgba(26,26,26,0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       SCREEN 1 — LOCK SCREEN
+    ══════════════════════════════════════════════════════════ */
+    #screen-lock {
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(136,68,255,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(0,212,255,0.08) 0%, transparent 50%),
+        var(--bg-deep);
+    }
+
+    .lock-top {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 60px;
+      gap: 6px;
+    }
+
+    .lock-time {
+      font-size: 88px;
+      font-weight: 700;
+      letter-spacing: -4px;
+      line-height: 1;
+      background: var(--grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: var(--font-ui);
+    }
+
+    .lock-date {
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+    }
+
+    .lock-notifications {
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .notif-card {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: notif-in 0.4s ease both;
+    }
+    .notif-card:nth-child(1) { animation-delay: 0.1s; }
+    .notif-card:nth-child(2) { animation-delay: 0.2s; }
+    .notif-card:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes notif-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .notif-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      background: var(--bg-raised);
+      position: relative;
+      overflow: hidden;
+    }
+    .notif-icon::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0.18;
+    }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-app  { font-size: 11px; font-weight: 600; color: var(--text-secondary); letter-spacing: 0.06em; text-transform: uppercase; }
+    .notif-msg  { font-size: 13px; font-weight: 400; color: var(--text-primary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .notif-time { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+
+    .lock-bottom {
+      padding: 0 32px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .swipe-hint {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: swipe-pulse 2.2s ease-in-out infinite;
+      cursor: pointer;
+    }
+    .swipe-hint:hover { color: var(--text-secondary); }
+
+    @keyframes swipe-pulse {
+      0%, 100% { opacity: 0.45; transform: translateX(0); }
+      50%       { opacity: 0.85; transform: translateX(4px); }
+    }
+
+    .lock-actions {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lock-action-btn {
+      width: 52px; height: 52px;
+      border-radius: 50%;
+      background: rgba(26,26,26,0.8);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      backdrop-filter: blur(12px);
+    }
+    .lock-action-btn:hover  { background: rgba(40,40,40,0.9); transform: scale(1.06); }
+    .lock-action-btn:active { transform: scale(0.94); }
+
+    /* ══════════════════════════════════════════════════════════
+       SCREEN 2 — HOME SCREEN
+    ══════════════════════════════════════════════════════════ */
+    #screen-home {
+      background:
+        radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,34,85,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 35% at 10% 70%, rgba(68,136,255,0.06) 0%, transparent 50%),
+        var(--bg-deep);
+    }
+
+    .status-bar {
+      height: 54px;
+      padding: 14px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .status-time {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sig-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+    .sig-bar {
+      width: 3px;
+      background: var(--text-secondary);
+      border-radius: 0px;
+    }
+    .sig-bar:nth-child(1) { height: 4px; }
+    .sig-bar:nth-child(2) { height: 7px; }
+    .sig-bar:nth-child(3) { height: 10px; }
+    .sig-bar:nth-child(4) { height: 12px; background: var(--text-primary); }
+
+    .wifi-icon { font-size: 13px; color: var(--text-primary); }
+
+    .battery {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .battery-body {
+      width: 22px; height: 12px;
+      border: 1.5px solid var(--text-secondary);
+      border-radius: 3px;
+      padding: 2px;
+      position: relative;
+    }
+    .battery-fill {
+      height: 100%;
+      width: 80%;
+      border-radius: 0px;
+      background: var(--grad);
+    }
+    .battery-tip {
+      width: 3px; height: 6px;
+      background: var(--text-secondary);
+      border-radius: 0 2px 2px 0;
+    }
+
+    .home-greeting {
+      padding: 12px 24px 4px;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .home-subtext {
+      padding: 0 24px 20px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+    }
+
+    .app-grid {
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .app-icon-face {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .app-icon-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0.12;
+      transition: opacity 0.2s;
+    }
+    .app-icon:hover  .app-icon-face { transform: scale(1.06); box-shadow: 0 4px 20px rgba(136,68,255,0.2); }
+    .app-icon:hover  .app-icon-face::before { opacity: 0.22; }
+    .app-icon:active .app-icon-face { transform: scale(0.92); }
+
+    .app-icon-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .page-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 0 8px;
+    }
+    .page-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: all 0.2s;
+    }
+    .page-dot.active {
+      width: 18px;
+      border-radius: 3px;
+      background: var(--grad);
+      background-size: 200%;
+    }
+
+    .dock {
+      margin: 0 20px 40px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: rgba(26,26,26,0.85);
+      border: 1px solid rgba(255,255,255,0.07);
+      backdrop-filter: blur(24px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .dock-app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    }
+
+    .dock-app-face {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: var(--bg-raised);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: transform 0.15s;
+    }
+    .dock-app-face::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0.15;
+    }
+    .dock-app:hover  .dock-app-face { transform: translateY(-4px) scale(1.06); }
+    .dock-app:active .dock-app-face { transform: scale(0.92); }
+
+    .dock-app-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       SCREEN 3 — ROADCHAT APP
+    ══════════════════════════════════════════════════════════ */
+    #screen-app {
+      background: var(--bg-deep);
+    }
+
+    .app-topbar {
+      height: 54px;
+      padding: 14px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .app-topbar-time {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .app-header {
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      flex-shrink: 0;
+    }
+
+    .app-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .app-subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+      font-family: var(--font-mono);
+    }
+
+    .app-search {
+      margin: 12px 20px;
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      font-size: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .chat-list {
+      flex: 1;
+      overflow: hidden;
+      padding: 0 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .chat-item:hover { background: rgba(26,26,26,0.8); }
+    .chat-item + .chat-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 60px; right: 12px;
+      height: 1px;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .chat-avatar {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .chat-avatar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0.28;
+    }
+    .chat-avatar span { position: relative; z-index: 1; color: var(--text-white); }
+
+    .chat-online {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 11px; height: 11px;
+      background: #22c55e;
+      border-radius: 50%;
+      border: 2px solid var(--bg-deep);
+      z-index: 2;
+    }
+
+    .chat-body { flex: 1; min-width: 0; }
+
+    .chat-name-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .chat-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .chat-ts {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .chat-preview {
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-badge {
+      min-width: 20px; height: 20px;
+      padding: 0 6px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-white);
+      background: var(--grad);
+      flex-shrink: 0;
+    }
+
+    .app-tabbar {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0 38px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .tab-item:hover { background: rgba(255,255,255,0.04); }
+
+    .tab-icon { font-size: 22px; line-height: 1; }
+    .tab-label { font-size: 10px; color: var(--text-muted); font-weight: 500; }
+    .tab-item.active .tab-label { color: transparent; background: var(--grad); -webkit-background-clip: text; background-clip: text; }
+    .tab-item.active .tab-icon { filter: drop-shadow(0 0 4px rgba(136,68,255,0.6)); }
+
+    /* ══════════════════════════════════════════════════════════
+       SCREEN 4 — CONTROL CENTER
+    ══════════════════════════════════════════════════════════ */
+    #screen-controls {
+      background: rgba(5,5,5,0.97);
+    }
+
+    .cc-statusbar {
+      height: 54px;
+      padding: 14px 24px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .cc-handle {
+      width: 36px; height: 4px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      margin: 8px auto 0;
+      flex-shrink: 0;
+    }
+
+    .cc-body {
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .cc-network {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(26,26,26,0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .cc-network-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #22c55e, #4ade80);
+    }
+    .cc-network-label {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .cc-network-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .cc-toggles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .cc-toggle {
+      padding: 14px 10px 12px;
+      border-radius: 16px;
+      background: rgba(26,26,26,0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
+    }
+    .cc-toggle::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .cc-toggle.on::before { opacity: 0.15; }
+    .cc-toggle.on { border-color: rgba(255,255,255,0.15); }
+    .cc-toggle:hover { transform: scale(1.03); }
+    .cc-toggle:active { transform: scale(0.96); }
+
+    .cc-toggle-icon { font-size: 22px; position: relative; z-index: 1; }
+    .cc-toggle-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      position: relative; z-index: 1;
+    }
+    .cc-toggle.on .cc-toggle-label { color: var(--text-primary); }
+
+    .cc-sliders {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .cc-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cc-slider-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .slider-track {
+      flex: 1;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 3px;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .slider-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--grad);
+      transition: width 0.2s;
+    }
+
+    .cc-bottom-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .cc-media-card {
+      flex: 1;
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(26,26,26,0.8);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .media-art {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: var(--bg-raised);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .media-art::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--grad-diag);
+      opacity: 0.2;
+    }
+
+    .media-info { flex: 1; min-width: 0; }
+    .media-title { font-size: 13px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .media-artist { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    .media-controls { display: flex; align-items: center; gap: 8px; }
+    .media-btn { font-size: 18px; cursor: pointer; color: var(--text-secondary); transition: color 0.15s; }
+    .media-btn:hover { color: var(--text-primary); }
+
+    /* ─── Animated background particles ──────────────────────── */
+    .particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: var(--phone-radius);
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0;
+      animation: float-particle linear infinite;
+    }
+    @keyframes float-particle {
+      0%   { opacity: 0; transform: translateY(100%) scale(0.5); }
+      10%  { opacity: 0.4; }
+      90%  { opacity: 0.15; }
+      100% { opacity: 0; transform: translateY(-200%) scale(1.2); }
+    }
+
+    /* ─── Transition animations ───────────────────────────────── */
+    @keyframes screen-in {
+      from { opacity: 0; transform: scale(0.97) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .screen.active { animation: screen-in 0.4s cubic-bezier(0.4,0,0.2,1) both; }
+
+    /* ─── Misc utility ────────────────────────────────────────── */
+    .spacer { flex: 1; }
+
+    .grad-border-line {
+      height: 1px;
+      background: var(--grad);
+      opacity: 0.15;
+      margin: 0;
+    }
+
+    /* Version watermark */
+    .version-tag {
+      position: absolute;
+      bottom: 16px;
+      right: 20px;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ── Navigation ─────────────────────────────────────────── -->
+  <div class="nav-row">
+    <button class="nav-btn" id="btn-prev" aria-label="Previous screen">&#8592;</button>
+    <div class="screen-labels">
+      <span class="screen-label active" data-screen="0">Lock</span>
+      <span class="screen-label"        data-screen="1">Home</span>
+      <span class="screen-label"        data-screen="2">App</span>
+      <span class="screen-label"        data-screen="3">Controls</span>
+    </div>
+    <button class="nav-btn" id="btn-next" aria-label="Next screen">&#8594;</button>
+  </div>
+
+  <!-- ── Phone shell ────────────────────────────────────────── -->
+  <div class="phone-wrap">
+    <div class="phone">
+
+      <!-- Dynamic Island -->
+      <div class="dynamic-island">
+        <div class="di-sensor"></div>
+        <div class="di-cam"></div>
+        <div class="di-sensor"></div>
+      </div>
+
+      <!-- Home Indicator -->
+      <div class="home-indicator"></div>
+
+      <!-- Screens -->
+      <div class="screens">
+
+        <!-- ════════════════════════════════════════════════════
+             SCREEN 1 — LOCK SCREEN
+        ════════════════════════════════════════════════════ -->
+        <div class="screen active" id="screen-lock">
+
+          <!-- Ambient particles -->
+          <div class="particles" id="lock-particles"></div>
+
+          <!-- Time & Date -->
+          <div class="lock-top">
+            <div class="lock-time" id="lock-time-display">10:47</div>
+            <div class="lock-date" id="lock-date-display">Friday, April 11</div>
+          </div>
+
+          <!-- Notifications -->
+          <div class="lock-notifications">
+
+            <div class="notif-card glass">
+              <div class="notif-icon">💬</div>
+              <div class="notif-body">
+                <div class="notif-app">RoadChat</div>
+                <div class="notif-msg">orion: deployment complete ✓</div>
+              </div>
+              <div class="notif-time">now</div>
+            </div>
+
+            <div class="notif-card glass">
+              <div class="notif-icon">📬</div>
+              <div class="notif-body">
+                <div class="notif-app">RoadMail</div>
+                <div class="notif-msg">2 new messages</div>
+              </div>
+              <div class="notif-time">3m</div>
+            </div>
+
+            <div class="notif-card glass">
+              <div class="notif-icon">📰</div>
+              <div class="notif-body">
+                <div class="notif-app">RoadNews</div>
+                <div class="notif-msg">5 new stories for you</div>
+              </div>
+              <div class="notif-time">12m</div>
+            </div>
+
+          </div>
+
+          <!-- Bottom actions -->
+          <div class="lock-bottom">
+            <div class="swipe-hint" id="swipe-hint">
+              <span>swipe up to unlock</span>
+              <span>→</span>
+            </div>
+            <div class="lock-actions">
+              <div class="lock-action-btn" title="Camera">📷</div>
+              <div class="lock-action-btn" title="Flashlight">🔦</div>
+            </div>
+          </div>
+
+        </div><!-- /screen-lock -->
+
+
+        <!-- ════════════════════════════════════════════════════
+             SCREEN 2 — HOME SCREEN
+        ════════════════════════════════════════════════════ -->
+        <div class="screen" id="screen-home">
+
+          <!-- Status bar -->
+          <div class="status-bar">
+            <span class="status-time" id="home-time-display">10:47</span>
+            <div class="status-icons">
+              <div class="sig-bars">
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+              </div>
+              <span class="wifi-icon">&#x1F4F6;</span>
+              <div class="battery">
+                <div class="battery-body"><div class="battery-fill"></div></div>
+                <div class="battery-tip"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Greeting -->
+          <div class="home-greeting">
+            <span class="grad-text">Good morning, alexa ✨</span>
+          </div>
+          <div class="home-subtext">BlackRoad OS · v2.4.1</div>
+
+          <!-- App grid -->
+          <div class="app-grid">
+            <div class="app-icon">
+              <div class="app-icon-face">💬</div>
+              <span class="app-icon-label">RoadChat</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">📬</div>
+              <span class="app-icon-label">RoadMail</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">⌨️</div>
+              <span class="app-icon-label">RoadCode</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">💳</div>
+              <span class="app-icon-label">RoadPay</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">🔐</div>
+              <span class="app-icon-label">RoadVault</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">📅</div>
+              <span class="app-icon-label">RoadCal</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">📰</div>
+              <span class="app-icon-label">RoadNews</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">🗺️</div>
+              <span class="app-icon-label">RoadMaps</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">🎵</div>
+              <span class="app-icon-label">RoadMusic</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">📷</div>
+              <span class="app-icon-label">RoadCam</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">📁</div>
+              <span class="app-icon-label">RoadFiles</span>
+            </div>
+            <div class="app-icon">
+              <div class="app-icon-face">⚙️</div>
+              <span class="app-icon-label">RoadSettings</span>
+            </div>
+          </div>
+
+          <!-- Page dots -->
+          <div class="page-dots">
+            <div class="page-dot active"></div>
+            <div class="page-dot"></div>
+            <div class="page-dot"></div>
+          </div>
+
+          <!-- Dock -->
+          <div class="dock">
+            <div class="dock-app">
+              <div class="dock-app-face">💬</div>
+              <span class="dock-app-label">Chat</span>
+            </div>
+            <div class="dock-app">
+              <div class="dock-app-face">📬</div>
+              <span class="dock-app-label">Mail</span>
+            </div>
+            <div class="dock-app">
+              <div class="dock-app-face">📞</div>
+              <span class="dock-app-label">Phone</span>
+            </div>
+            <div class="dock-app">
+              <div class="dock-app-face">⚙️</div>
+              <span class="dock-app-label">Settings</span>
+            </div>
+          </div>
+
+        </div><!-- /screen-home -->
+
+
+        <!-- ════════════════════════════════════════════════════
+             SCREEN 3 — ROADCHAT APP
+        ════════════════════════════════════════════════════ -->
+        <div class="screen" id="screen-app">
+
+          <!-- Status bar -->
+          <div class="app-topbar">
+            <span class="app-topbar-time" id="app-time-display">10:47</span>
+            <div class="status-icons">
+              <div class="sig-bars">
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+              </div>
+              <div class="battery">
+                <div class="battery-body"><div class="battery-fill"></div></div>
+                <div class="battery-tip"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- App header -->
+          <div class="app-header">
+            <div class="app-title"><span class="grad-text">RoadChat</span></div>
+            <div class="app-subtitle">5 conversations · 3 unread</div>
+          </div>
+
+          <!-- Search bar -->
+          <div class="app-search">
+            <span>🔍</span>
+            <span>Search conversations…</span>
+          </div>
+
+          <!-- Chat list -->
+          <div class="chat-list">
+
+            <div class="chat-item">
+              <div class="chat-avatar">
+                <span>O</span>
+                <div class="chat-online"></div>
+              </div>
+              <div class="chat-body">
+                <div class="chat-name-row">
+                  <span class="chat-name">orion</span>
+                  <span class="chat-ts">now</span>
+                </div>
+                <div class="chat-preview">deployment complete ✓ all systems nominal</div>
+              </div>
+              <div class="chat-badge">3</div>
+            </div>
+
+            <div class="chat-item">
+              <div class="chat-avatar"><span>A</span></div>
+              <div class="chat-body">
+                <div class="chat-name-row">
+                  <span class="chat-name">alice</span>
+                  <span class="chat-ts">4m</span>
+                </div>
+                <div class="chat-preview">Pi fleet is healthy, all 6 nodes up</div>
+              </div>
+              <div class="chat-badge">1</div>
+            </div>
+
+            <div class="chat-item">
+              <div class="chat-avatar"><span>🛣️</span></div>
+              <div class="chat-body">
+                <div class="chat-name-row">
+                  <span class="chat-name">Team Roadies</span>
+                  <span class="chat-ts">18m</span>
+                </div>
+                <div class="chat-preview">atlas: pushed the new analytics worker</div>
+              </div>
+              <div class="chat-badge">7</div>
+            </div>
+
+            <div class="chat-item">
+              <div class="chat-avatar"><span>⚡</span></div>
+              <div class="chat-body">
+                <div class="chat-name-row">
+                  <span class="chat-name">atlas</span>
+                  <span class="chat-ts">1h</span>
+                </div>
+                <div class="chat-preview">KPI snapshot recorded — leakage down 12%</div>
+              </div>
+            </div>
+
+            <div class="chat-item">
+              <div class="chat-avatar"><span>🛟</span></div>
+              <div class="chat-body">
+                <div class="chat-name-row">
+                  <span class="chat-name">Road Support</span>
+                  <span class="chat-ts">3h</span>
+                </div>
+                <div class="chat-preview">Your ticket #4291 has been resolved</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab bar -->
+          <div class="app-tabbar">
+            <div class="tab-item active">
+              <span class="tab-icon">💬</span>
+              <span class="tab-label">Chats</span>
+            </div>
+            <div class="tab-item">
+              <span class="tab-icon">👥</span>
+              <span class="tab-label">People</span>
+            </div>
+            <div class="tab-item">
+              <span class="tab-icon">📡</span>
+              <span class="tab-label">Feeds</span>
+            </div>
+            <div class="tab-item">
+              <span class="tab-icon">🔔</span>
+              <span class="tab-label">Alerts</span>
+            </div>
+          </div>
+
+        </div><!-- /screen-app -->
+
+
+        <!-- ════════════════════════════════════════════════════
+             SCREEN 4 — CONTROL CENTER
+        ════════════════════════════════════════════════════ -->
+        <div class="screen" id="screen-controls">
+
+          <!-- Status bar -->
+          <div class="cc-statusbar">
+            <span class="status-time" id="cc-time-display">10:47</span>
+            <div class="status-icons">
+              <div class="sig-bars">
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+                <div class="sig-bar"></div>
+              </div>
+              <div class="battery">
+                <div class="battery-body"><div class="battery-fill"></div></div>
+                <div class="battery-tip"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cc-handle"></div>
+
+          <div class="cc-body">
+
+            <!-- Network status -->
+            <div class="cc-network">
+              <div class="cc-network-dot"></div>
+              <span class="cc-network-label">Connected to</span>
+              <span class="cc-network-name">BlackRoad HQ</span>
+            </div>
+
+            <!-- Toggle grid -->
+            <div class="cc-toggles">
+              <div class="cc-toggle on" data-toggle>
+                <span class="cc-toggle-icon">📶</span>
+                <span class="cc-toggle-label">WiFi</span>
+              </div>
+              <div class="cc-toggle on" data-toggle>
+                <span class="cc-toggle-icon">🔵</span>
+                <span class="cc-toggle-label">Bluetooth</span>
+              </div>
+              <div class="cc-toggle" data-toggle>
+                <span class="cc-toggle-icon">✈️</span>
+                <span class="cc-toggle-label">Airplane</span>
+              </div>
+              <div class="cc-toggle on" data-toggle>
+                <span class="cc-toggle-icon">🌙</span>
+                <span class="cc-toggle-label">Do Not Disturb</span>
+              </div>
+              <div class="cc-toggle" data-toggle>
+                <span class="cc-toggle-icon">🔦</span>
+                <span class="cc-toggle-label">Flashlight</span>
+              </div>
+              <div class="cc-toggle on" data-toggle>
+                <span class="cc-toggle-icon">🌑</span>
+                <span class="cc-toggle-label">Dark Mode</span>
+              </div>
+            </div>
+
+            <!-- Sliders -->
+            <div class="cc-sliders">
+              <div class="cc-slider-row">
+                <span class="cc-slider-icon">☀️</span>
+                <div class="slider-track" data-slider>
+                  <div class="slider-fill" style="width: 70%"></div>
+                </div>
+              </div>
+              <div class="cc-slider-row">
+                <span class="cc-slider-icon">🔊</span>
+                <div class="slider-track" data-slider>
+                  <div class="slider-fill" style="width: 55%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Media card -->
+            <div class="cc-bottom-row">
+              <div class="cc-media-card">
+                <div class="media-art">🎵</div>
+                <div class="media-info">
+                  <div class="media-title">Sovereign Signal</div>
+                  <div class="media-artist">BlackRoad Audio</div>
+                </div>
+                <div class="media-controls">
+                  <span class="media-btn">⏮</span>
+                  <span class="media-btn">⏸</span>
+                  <span class="media-btn">⏭</span>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /cc-body -->
+
+        </div><!-- /screen-controls -->
+
+      </div><!-- /screens -->
+
+    </div><!-- /phone -->
+  </div><!-- /phone-wrap -->
+
+  <div class="version-tag">RoadPhone OS v2.4.1 · BlackRoad</div>
+
+</div><!-- /stage -->
+
+<script>
+  /* ─── Screen navigation ──────────────────────────────────── */
+  const screens  = Array.from(document.querySelectorAll('.screen'))
+  const labels   = Array.from(document.querySelectorAll('.screen-label'))
+  let   current  = 0
+
+  function goTo(idx) {
+    screens[current].classList.remove('active')
+    labels[current].classList.remove('active')
+    current = (idx + screens.length) % screens.length
+    screens[current].classList.add('active')
+    labels[current].classList.add('active')
+  }
+
+  document.getElementById('btn-prev').addEventListener('click', () => goTo(current - 1))
+  document.getElementById('btn-next').addEventListener('click', () => goTo(current + 1))
+
+  labels.forEach(label => {
+    label.addEventListener('click', () => goTo(parseInt(label.dataset.screen)))
+  })
+
+  // Swipe hint → unlock (lock → home)
+  document.getElementById('swipe-hint').addEventListener('click', () => goTo(1))
+
+  /* ─── Live clock ─────────────────────────────────────────── */
+  function updateClocks() {
+    const now  = new Date()
+    const h    = String(now.getHours()).padStart(2, '0')
+    const m    = String(now.getMinutes()).padStart(2, '0')
+    const time = `${h}:${m}`
+    document.getElementById('lock-time-display').textContent = time
+    document.getElementById('home-time-display').textContent = time
+    document.getElementById('app-time-display').textContent  = time
+    document.getElementById('cc-time-display').textContent   = time
+
+    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
+    const dateStr = `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`
+    document.getElementById('lock-date-display').textContent = dateStr
+  }
+  updateClocks()
+  setInterval(updateClocks, 10000)
+
+  /* ─── CC toggle interaction ──────────────────────────────── */
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.addEventListener('click', () => el.classList.toggle('on'))
+  })
+
+  /* ─── Slider drag interaction ────────────────────────────── */
+  document.querySelectorAll('[data-slider]').forEach(track => {
+    const fill = track.querySelector('.slider-fill')
+    let dragging = false
+
+    function setFromEvent(e) {
+      const rect = track.getBoundingClientRect()
+      const cx   = (e.clientX || (e.touches && e.touches[0].clientX))
+      const pct  = Math.max(0, Math.min(1, (cx - rect.left) / rect.width))
+      fill.style.width = `${pct * 100}%`
+    }
+
+    track.addEventListener('mousedown',  e => { dragging = true; setFromEvent(e) })
+    track.addEventListener('touchstart', e => { dragging = true; setFromEvent(e) }, { passive: true })
+    document.addEventListener('mousemove',  e => { if (dragging) setFromEvent(e) })
+    document.addEventListener('touchmove',  e => { if (dragging) setFromEvent(e) }, { passive: true })
+    document.addEventListener('mouseup',   () => { dragging = false })
+    document.addEventListener('touchend',  () => { dragging = false })
+  })
+
+  /* ─── Ambient particles for lock screen ─────────────────── */
+  const colors = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF']
+  const container = document.getElementById('lock-particles')
+
+  function createParticle() {
+    const p   = document.createElement('div')
+    const sz  = Math.random() * 4 + 2
+    const col = colors[Math.floor(Math.random() * colors.length)]
+    const dur = Math.random() * 8 + 6
+
+    p.className = 'particle'
+    p.style.cssText = `
+      width: ${sz}px;
+      height: ${sz}px;
+      left: ${Math.random() * 100}%;
+      background: ${col};
+      animation-duration: ${dur}s;
+      animation-delay: ${Math.random() * dur}s;
+      filter: blur(1px);
+      opacity: 0;
+    `
+    container.appendChild(p)
+    setTimeout(() => p.remove(), (dur + 2) * 1000)
+  }
+
+  // Seed initial particles
+  for (let i = 0; i < 12; i++) {
+    setTimeout(createParticle, i * 300)
+  }
+  setInterval(createParticle, 800)
+
+  /* ─── Keyboard navigation ────────────────────────────────── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goTo(current + 1)
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goTo(current - 1)
+  })
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+<title>RoadBeats – Music for the Road</title>
+<style>
+  :root {
+    --s1: #0a0a0a;
+    --s2: #111111;
+    --s3: #1a1a1a;
+    --s4: #222222;
+    --s5: #2a2a2a;
+    --s6: #333333;
+    --radius: 4px;
+    --sidebar-w: 240px;
+    --nowplaying-h: 90px;
+    --font: -apple-system, BlinkMacSystemFont, 'Circular', 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 14px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── LAYOUT SHELL ── */
+  .shell {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    margin-bottom: var(--nowplaying-h);
+  }
+
+  /* ── LEFT SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sidebar-top {
+    padding: 24px 12px 8px;
+    flex-shrink: 0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    margin-bottom: 24px;
+    cursor: pointer;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--white);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    color: var(--white60);
+    font-weight: 600;
+    font-size: 14px;
+    transition: color 0.15s;
+  }
+  .nav-item:hover { color: var(--white); }
+  .nav-item.active { color: var(--white); }
+  .nav-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* Library section */
+  .library {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+  }
+  .library-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px 8px 24px;
+    flex-shrink: 0;
+  }
+  .library-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--white60);
+    cursor: pointer;
+  }
+  .library-title:hover { color: var(--white); }
+  .library-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .lib-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--white60);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .lib-btn:hover { background: var(--white10); color: var(--white); }
+
+  /* Filter pills */
+  .filter-pills {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px 12px;
+    flex-shrink: 0;
+    overflow-x: hidden;
+  }
+  .pill {
+    background: var(--s3);
+    border: none;
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--white);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .pill:hover { background: var(--s5); }
+  .pill.active { background: var(--white); color: var(--bg); }
+
+  /* Playlist list */
+  .playlist-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 8px;
+  }
+  .playlist-list
+  .playlist-list
+  .playlist-list
+
+  .playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .playlist-item:hover { background: var(--white10); }
+  .playlist-item.active { background: var(--s3); }
+  .playlist-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 4px, var(--s3) 4px, var(--s3) 8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .playlist-thumb-emoji {
+    position: relative;
+    z-index: 1;
+    opacity: 0.9;
+  }
+  .playlist-info { flex: 1; min-width: 0; }
+  .playlist-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .playlist-meta {
+    font-size: 12px;
+    color: var(--white60);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .playlist-item.now-playing .playlist-name { color: var(--white); }
+  .now-playing-eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .eq-bar {
+    width: 3px;
+    background: var(--white);
+    border-radius: 0px;
+    animation: eq-bounce 0.8s ease-in-out infinite alternate;
+  }
+  .eq-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .eq-bar:nth-child(2) { height: 14px; animation-delay: 0.2s; }
+  .eq-bar:nth-child(3) { height: 6px; animation-delay: 0.4s; }
+  @keyframes eq-bounce {
+    from { transform: scaleY(0.4); }
+    to { transform: scaleY(1); }
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    flex: 1;
+    background: var(--s1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .main
+  .main
+  .main
+
+  /* Top bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to bottom, var(--s2) 60%, transparent);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .topbar-nav {
+    display: flex;
+    gap: 8px;
+  }
+  .nav-arrow {
+    width: 32px;
+    height: 32px;
+    background: var(--s4);
+    border: none;
+    border-radius: 50%;
+    color: var(--white80);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+  }
+  .nav-arrow:hover { background: var(--s5); }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .install-btn {
+    background: var(--white);
+    color: var(--bg);
+    border: none;
+    border-radius: 16px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .install-btn:hover { transform: scale(1.04); }
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--s3);
+    border: none;
+    border-radius: 16px;
+    padding: 4px 8px 4px 4px;
+    cursor: pointer;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 700;
+    transition: background 0.15s;
+  }
+  .user-chip:hover { background: var(--s5); }
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: repeating-linear-gradient(-45deg, #333 0px, #333 3px, #222 3px, #222 6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  /* Greeting section */
+  .greeting {
+    padding: 0 32px 24px;
+  }
+  .greeting h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .quick-card {
+    background: var(--s3);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    cursor: pointer;
+    overflow: hidden;
+    transition: background 0.15s;
+    height: 64px;
+  }
+  .quick-card:hover { background: var(--s5); }
+  .quick-card-img {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 4px, var(--s3) 4px, var(--s3) 8px);
+  }
+  .quick-card-name {
+    padding: 0 16px;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .quick-card-play {
+    margin-left: auto;
+    margin-right: 16px;
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--bg);
+    opacity: 0;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .quick-card:hover .quick-card-play { opacity: 1; }
+
+  /* Section rows */
+  .section {
+    padding: 24px 32px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .section-title:hover { text-decoration: underline; }
+  .see-all {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white60);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .see-all:hover { color: var(--white); text-decoration: underline; }
+
+  /* Album/playlist card grid */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+  }
+  .card-grid.artists {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .music-card {
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--s2);
+    transition: background 0.2s;
+    position: relative;
+  }
+  .music-card:hover { background: var(--s4); }
+  .music-card-art {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 5px, var(--s3) 5px, var(--s3) 10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .music-card-art.circle { border-radius: 50%; }
+  .music-card-art-emoji {
+    position: relative;
+    z-index: 1;
+  }
+  .card-play-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--bg);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .music-card:hover .card-play-btn { opacity: 1; transform: translateY(0); }
+  .music-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .music-card-sub {
+    font-size: 13px;
+    color: var(--white60);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Featured section (editorial card) */
+  .featured-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0 32px 32px;
+  }
+  .featured-card {
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--s2);
+    display: flex;
+    height: 160px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.15s;
+  }
+  .featured-card:hover { background: var(--s4); }
+  .featured-card-img {
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 6px, var(--s3) 6px, var(--s3) 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+  }
+  .featured-card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .featured-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--white60);
+  }
+  .featured-card-title {
+    font-size: 20px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 6px 0;
+  }
+  .featured-card-sub {
+    font-size: 13px;
+    color: var(--white60);
+  }
+  .featured-card-play {
+    width: 52px;
+    height: 52px;
+    background: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--bg);
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .featured-card:hover .featured-card-play { opacity: 1; }
+
+  /* Charts section */
+  .charts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .chart-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .chart-row:hover { background: var(--white10); }
+  .chart-num {
+    width: 24px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--white60);
+    flex-shrink: 0;
+  }
+  .chart-art {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 4px, var(--s3) 4px, var(--s3) 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .chart-info { flex: 1; min-width: 0; }
+  .chart-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .chart-artist {
+    font-size: 13px;
+    color: var(--white60);
+    margin-top: 2px;
+  }
+  .chart-explicit {
+    background: var(--s5);
+    color: var(--white60);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 6px;
+  }
+  .chart-duration {
+    font-size: 13px;
+    color: var(--white60);
+    flex-shrink: 0;
+  }
+  .chart-options {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--white60);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .chart-row:hover .chart-options { opacity: 1; }
+  .chart-options:hover { background: var(--white10); color: var(--white); }
+
+  /* ── NOW PLAYING BAR ── */
+  .now-playing-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--nowplaying-h);
+    background: var(--s2);
+    border-top: 1px solid var(--white10);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 0;
+    z-index: 100;
+  }
+
+  /* Track info */
+  .np-track {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 300px;
+    flex-shrink: 0;
+  }
+  .np-art {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius);
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 4px, var(--s3) 4px, var(--s3) 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .np-info { min-width: 0; }
+  .np-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .np-title:hover { text-decoration: underline; }
+  .np-artist {
+    font-size: 12px;
+    color: var(--white60);
+    margin-top: 2px;
+    cursor: pointer;
+  }
+  .np-artist:hover { color: var(--white); text-decoration: underline; }
+  .np-like {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: none;
+    border: none;
+    color: var(--white60);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s;
+  }
+  .np-like:hover { color: var(--white); }
+  .np-like.liked { color: var(--white); }
+
+  /* Center controls */
+  .np-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .np-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--white60);
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.15s;
+  }
+  .ctrl-btn:hover { color: var(--white); }
+  .ctrl-btn.active { color: var(--white); }
+  .play-pause-btn {
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border: none;
+    border-radius: 50%;
+    color: var(--bg);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s;
+  }
+  .play-pause-btn:hover { transform: scale(1.06); }
+
+  /* Progress bar */
+  .np-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .progress-time {
+    font-size: 11px;
+    color: var(--white60);
+    width: 36px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--s5);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--white);
+    border-radius: 2px;
+    width: 34%;
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: var(--white);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .progress-track:hover .progress-fill { background: var(--white); }
+  .progress-track:hover .progress-fill::after { opacity: 1; }
+
+  /* Right side extras */
+  .np-extras {
+    width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .extra-btn {
+    background: none;
+    border: none;
+    color: var(--white60);
+    font-size: 18px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.15s;
+  }
+  .extra-btn:hover { color: var(--white); }
+  .extra-btn.active { color: var(--white); }
+  .volume-area {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .volume-track {
+    width: 80px;
+    height: 4px;
+    background: var(--s5);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+  }
+  .volume-fill {
+    height: 100%;
+    background: var(--white);
+    border-radius: 2px;
+    width: 72%;
+  }
+
+  /* ── RIGHT PANEL (queue/lyrics) ── */
+  .right-panel {
+    width: 300px;
+    background: var(--s1);
+    border-left: 1px solid var(--white10);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .rp-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--white10);
+    flex-shrink: 0;
+  }
+  .rp-tab {
+    flex: 1;
+    padding: 16px 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--white60);
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s;
+  }
+  .rp-tab:hover { color: var(--white); }
+  .rp-tab.active {
+    color: var(--white);
+    border-bottom-color: var(--white);
+  }
+  .rp-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+  }
+  .rp-content
+  .rp-content
+  .rp-content
+
+  .queue-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--white60);
+    margin-bottom: 12px;
+  }
+  .queue-now {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-radius: var(--radius);
+    background: var(--white10);
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+  .queue-art {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(-45deg, var(--s4) 0px, var(--s4) 4px, var(--s3) 4px, var(--s3) 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .queue-info .queue-title { font-size: 13px; font-weight: 600; }
+  .queue-info .queue-artist { font-size: 12px; color: var(--white60); margin-top: 2px; }
+
+  .queue-track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .queue-track:hover { background: var(--white10); }
+  .queue-track .queue-art { width: 36px; height: 36px; font-size: 16px; }
+  .queue-track .queue-title { font-size: 13px; font-weight: 500; }
+  .queue-track-dur { margin-left: auto; font-size: 12px; color: var(--white60); flex-shrink: 0; }
+
+  /* Lyrics panel */
+  .lyrics-panel {
+    padding: 8px 0;
+  }
+  .lyric-line {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.8;
+    color: var(--white40);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 2px 0;
+  }
+  .lyric-line.active { color: var(--white); font-size: 18px; }
+  .lyric-line:hover { color: var(--white80); }
+</style>
+</head>
+<body>
+
+<!-- ─────────── SHELL ─────────── -->
+<div class="shell">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-mark">🎵</div>
+        <span class="logo-text">RoadBeats</span>
+      </div>
+      <div class="nav-item active">
+        <div class="nav-icon">🏠</div>
+        <span>Home</span>
+      </div>
+      <div class="nav-item">
+        <div class="nav-icon">🔍</div>
+        <span>Search</span>
+      </div>
+    </div>
+
+    <div class="library">
+      <div class="library-header">
+        <div class="library-title">
+          <span>📚</span>
+          <span>Your Library</span>
+        </div>
+        <div class="library-actions">
+          <button class="lib-btn">＋</button>
+          <button class="lib-btn">▶</button>
+        </div>
+      </div>
+
+      <div class="filter-pills">
+        <button class="pill active">Playlists</button>
+        <button class="pill">Albums</button>
+        <button class="pill">Artists</button>
+      </div>
+
+      <div class="playlist-list">
+        <div class="playlist-item now-playing active">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🚗</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Road Mode</div>
+            <div class="playlist-meta">Playlist • alexa_road</div>
+          </div>
+          <div class="now-playing-eq">
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+            <div class="eq-bar"></div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🌃</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Late Night Code</div>
+            <div class="playlist-meta">Playlist • pixel_forge</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">⚡</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Build Season Hype</div>
+            <div class="playlist-meta">Playlist • nolanlabs</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">☕</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Morning Focus</div>
+            <div class="playlist-meta">Playlist • sarahchen</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🎹</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Liked Songs</div>
+            <div class="playlist-meta">Playlist • 847 songs</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🌊</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Chill Waves</div>
+            <div class="playlist-meta">Playlist • lofigirl</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🎬</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Film Scores</div>
+            <div class="playlist-meta">Playlist • voxfilm</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🔥</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Top Hits 2026</div>
+            <div class="playlist-meta">Playlist • RoadBeats</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🖤</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Dark Aesthetic</div>
+            <div class="playlist-meta">Playlist • mkdesign</div>
+          </div>
+        </div>
+        <div class="playlist-item">
+          <div class="playlist-thumb"><span class="playlist-thumb-emoji">🚀</span></div>
+          <div class="playlist-info">
+            <div class="playlist-name">Launchpad Jams</div>
+            <div class="playlist-meta">Album • The Roadies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-nav">
+        <button class="nav-arrow">‹</button>
+        <button class="nav-arrow">›</button>
+      </div>
+      <div class="topbar-right">
+        <button class="install-btn">Install App</button>
+        <button class="user-chip">
+          <div class="user-avatar">🛣</div>
+          alexa_road
+          <span style="color:var(--white60); font-size:11px;">▼</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Greeting + quick access grid -->
+    <div class="greeting">
+      <h1>Good evening</h1>
+      <div class="quick-grid">
+        <div class="quick-card">
+          <div class="quick-card-img">🚗</div>
+          <span class="quick-card-name">Road Mode</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-img">🎹</div>
+          <span class="quick-card-name">Liked Songs</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-img">🔥</div>
+          <span class="quick-card-name">Top Hits 2026</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-img">🌃</div>
+          <span class="quick-card-name">Late Night Code</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-img">⚡</div>
+          <span class="quick-card-name">Build Season Hype</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+        <div class="quick-card">
+          <div class="quick-card-img">🖤</div>
+          <span class="quick-card-name">Daily Mix 1</span>
+          <div class="quick-card-play">▶</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured editorial -->
+    <div class="featured-row">
+      <div class="featured-card">
+        <div class="featured-card-img">🎤</div>
+        <div class="featured-card-body">
+          <div>
+            <div class="featured-card-label">New Release</div>
+            <div class="featured-card-title">Black Asphalt</div>
+            <div class="featured-card-sub">The Roadies · Album · 2026</div>
+          </div>
+          <div style="font-size:13px; color:var(--white40);">12 tracks · 41 min</div>
+        </div>
+        <div class="featured-card-play">▶</div>
+      </div>
+      <div class="featured-card">
+        <div class="featured-card-img">🏙</div>
+        <div class="featured-card-body">
+          <div>
+            <div class="featured-card-label">Editor's Pick</div>
+            <div class="featured-card-title">Urban Frequencies</div>
+            <div class="featured-card-sub">RoadBeats · Playlist · 2026</div>
+          </div>
+          <div style="font-size:13px; color:var(--white40);">58 songs · Updated daily</div>
+        </div>
+        <div class="featured-card-play">▶</div>
+      </div>
+    </div>
+
+    <!-- Made for alexa_road -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Made for alexa_road</div>
+        <div class="see-all">Show all</div>
+      </div>
+      <div class="card-grid">
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🛣</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Daily Mix 1</div>
+          <div class="music-card-sub">The Roadies, pixel_forge, nolanlabs and more</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🌙</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Daily Mix 2</div>
+          <div class="music-card-sub">Lo-fi Beats, lofigirl, sarahchen and more</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">⚡</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Energy Mix</div>
+          <div class="music-card-sub">Based on your recent listening</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🎧</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Discover Weekly</div>
+          <div class="music-card-sub">Your weekly mixtape of fresh music</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🗓</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Release Radar</div>
+          <div class="music-card-sub">New drops from artists you follow</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recently played -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Recently played</div>
+        <div class="see-all">Show all</div>
+      </div>
+      <div class="card-grid">
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🚗</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Road Mode</div>
+          <div class="music-card-sub">Playlist · alexa_road</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🌊</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Chill Waves</div>
+          <div class="music-card-sub">Playlist · lofigirl</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🎬</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Daedalos OST</div>
+          <div class="music-card-sub">Album · voxfilm</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🔮</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Void Signal</div>
+          <div class="music-card-sub">Album · pixel_forge</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art"><span class="music-card-art-emoji">🏙</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Midnight Grid</div>
+          <div class="music-card-sub">Single · nolanlabs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Charts -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">RoadBeats Charts · Global Top 50</div>
+        <div class="see-all">Show all</div>
+      </div>
+      <div class="charts-list">
+        <div class="chart-row">
+          <div class="chart-num">1</div>
+          <div class="chart-art">🔥</div>
+          <div class="chart-info">
+            <div class="chart-title">Start The Engine <span class="chart-explicit">E</span></div>
+            <div class="chart-artist">The Roadies</div>
+          </div>
+          <div class="chart-duration">3:24</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">2</div>
+          <div class="chart-art">🌃</div>
+          <div class="chart-info">
+            <div class="chart-title">Black Asphalt</div>
+            <div class="chart-artist">The Roadies</div>
+          </div>
+          <div class="chart-duration">4:01</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">3</div>
+          <div class="chart-art">⚡</div>
+          <div class="chart-info">
+            <div class="chart-title">Pixel Surge <span class="chart-explicit">E</span></div>
+            <div class="chart-artist">pixel_forge</div>
+          </div>
+          <div class="chart-duration">2:58</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">4</div>
+          <div class="chart-art">🌊</div>
+          <div class="chart-info">
+            <div class="chart-title">Shore Protocol</div>
+            <div class="chart-artist">lofigirl</div>
+          </div>
+          <div class="chart-duration">3:47</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">5</div>
+          <div class="chart-art">🔮</div>
+          <div class="chart-info">
+            <div class="chart-title">Void Signal</div>
+            <div class="chart-artist">pixel_forge</div>
+          </div>
+          <div class="chart-duration">5:12</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">6</div>
+          <div class="chart-art">🏙</div>
+          <div class="chart-info">
+            <div class="chart-title">Midnight Grid <span class="chart-explicit">E</span></div>
+            <div class="chart-artist">nolanlabs</div>
+          </div>
+          <div class="chart-duration">3:33</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">7</div>
+          <div class="chart-art">🎹</div>
+          <div class="chart-info">
+            <div class="chart-title">Morning Architecture</div>
+            <div class="chart-artist">sarahchen</div>
+          </div>
+          <div class="chart-duration">4:20</div>
+          <button class="chart-options">···</button>
+        </div>
+        <div class="chart-row">
+          <div class="chart-num">8</div>
+          <div class="chart-art">🎬</div>
+          <div class="chart-info">
+            <div class="chart-title">Daedalos Theme</div>
+            <div class="chart-artist">voxfilm</div>
+          </div>
+          <div class="chart-duration">6:44</div>
+          <button class="chart-options">···</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artists you might like -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Artists you might like</div>
+        <div class="see-all">Show all</div>
+      </div>
+      <div class="card-grid artists">
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">🎤</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">The Roadies</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">🔮</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">pixel_forge</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">🌊</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">lofigirl</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">⚡</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">nolanlabs</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">🎬</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">voxfilm</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+        <div class="music-card" style="text-align:center;">
+          <div class="music-card-art circle"><span class="music-card-art-emoji">🎹</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name" style="text-align:center;">sarahchen</div>
+          <div class="music-card-sub" style="text-align:center;">Artist</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Podcasts -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">Podcasts & Shows</div>
+        <div class="see-all">Show all</div>
+      </div>
+      <div class="card-grid">
+        <div class="music-card">
+          <div class="music-card-art" style="border-radius:8px;"><span class="music-card-art-emoji">🎙</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">BlackRoad Tech Hour</div>
+          <div class="music-card-sub">alexa_road · Weekly deep dives into the future of OS tech</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art" style="border-radius:8px;"><span class="music-card-art-emoji">🧠</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Pixel & Sound</div>
+          <div class="music-card-sub">pixel_forge · Where design meets music production</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art" style="border-radius:8px;"><span class="music-card-art-emoji">🌐</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Road Report</div>
+          <div class="music-card-sub">techtalkdaily · News from the BlackRoad ecosystem</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art" style="border-radius:8px;"><span class="music-card-art-emoji">🎞</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Frame & Score</div>
+          <div class="music-card-sub">voxfilm · Film scores analyzed</div>
+        </div>
+        <div class="music-card">
+          <div class="music-card-art" style="border-radius:8px;"><span class="music-card-art-emoji">🛠</span></div>
+          <div class="card-play-btn">▶</div>
+          <div class="music-card-name">Build Log</div>
+          <div class="music-card-sub">nolanlabs · Startup war stories</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 32px;"></div>
+  </main>
+
+  <!-- RIGHT PANEL: Queue + Lyrics -->
+  <aside class="right-panel">
+    <div class="rp-tabs">
+      <div class="rp-tab">Queue</div>
+      <div class="rp-tab active">Lyrics</div>
+      <div class="rp-tab">Related</div>
+    </div>
+    <div class="rp-content">
+      <!-- Lyrics panel (active) -->
+      <div class="lyrics-panel">
+        <div style="margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--white10);">
+          <div style="font-size:12px; color:var(--white60); text-transform:uppercase; letter-spacing:1px; font-weight:700; margin-bottom:8px;">Now Playing</div>
+          <div style="font-size:16px; font-weight:800;">Start The Engine</div>
+          <div style="font-size:13px; color:var(--white60); margin-top:4px;">The Roadies</div>
+        </div>
+        <div class="lyric-line">Burning down the midnight road</div>
+        <div class="lyric-line">Every pixel lit in code</div>
+        <div class="lyric-line active">Start the engine, feel it roar</div>
+        <div class="lyric-line">BlackRoad opening every door</div>
+        <div class="lyric-line">&nbsp;</div>
+        <div class="lyric-line">We built this from the ground up</div>
+        <div class="lyric-line">Zero to a hundred, nonstop</div>
+        <div class="lyric-line">Digital city, neon lights</div>
+        <div class="lyric-line">On the asphalt every night</div>
+        <div class="lyric-line">&nbsp;</div>
+        <div class="lyric-line">Ride or die, we ride the wave</div>
+        <div class="lyric-line">No one said this would be safe</div>
+        <div class="lyric-line">But the road goes on and on</div>
+        <div class="lyric-line">Till the break of dawn</div>
+        <div class="lyric-line">&nbsp;</div>
+        <div class="lyric-line">Start the engine (start it up)</div>
+        <div class="lyric-line">Feel the thunder in your blood</div>
+        <div class="lyric-line">BlackRoad running through the night</div>
+        <div class="lyric-line">We were built to find the light</div>
+        <div style="margin-top:32px; font-size:12px; color:var(--white40); text-align:center;">Lyrics provided by RoadBeats</div>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- end shell -->
+
+<!-- ─────────── NOW PLAYING BAR ─────────── -->
+<div class="now-playing-bar">
+
+  <!-- Track info -->
+  <div class="np-track">
+    <div class="np-art">🔥</div>
+    <div class="np-info">
+      <div class="np-title">Start The Engine</div>
+      <div class="np-artist">The Roadies</div>
+    </div>
+    <button class="np-like liked">♥</button>
+    <button class="np-like" style="font-size:14px;">⊞</button>
+  </div>
+
+  <!-- Center controls -->
+  <div class="np-controls">
+    <div class="np-buttons">
+      <button class="ctrl-btn" title="Shuffle">⇌</button>
+      <button class="ctrl-btn" title="Previous">⏮</button>
+      <button class="play-pause-btn" title="Pause">⏸</button>
+      <button class="ctrl-btn" title="Next">⏭</button>
+      <button class="ctrl-btn active" title="Repeat">↺</button>
+    </div>
+    <div class="np-progress">
+      <span class="progress-time">1:09</span>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+      <span class="progress-time">3:24</span>
+    </div>
+  </div>
+
+  <!-- Extra controls -->
+  <div class="np-extras">
+    <button class="extra-btn active" title="Now Playing View">🎵</button>
+    <button class="extra-btn active" title="Lyrics">📄</button>
+    <button class="extra-btn" title="Queue">☰</button>
+    <button class="extra-btn" title="Connect Devices">📡</button>
+    <div class="volume-area">
+      <button class="extra-btn" title="Volume">🔊</button>
+      <div class="volume-track">
+        <div class="volume-fill"></div>
+      </div>
+    </div>
+    <button class="extra-btn" title="Fullscreen">⛶</button>
+  </div>
+
+</div>
+
+</body>
+</html>

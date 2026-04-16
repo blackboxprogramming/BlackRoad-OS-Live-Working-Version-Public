@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stats — Analytics and KPI Dashboard Mockup</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { background: radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), var(--bg); color: var(--text); font-family: var(--sg); display: flex; flex-direction: column; }
+    .grad { height: 3px; background: var(--g); flex-shrink: 0; }
+    .topbar { height: 58px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.95); backdrop-filter: blur(16px); display: flex; align-items: center; gap: 14px; padding: 0 18px; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 220px; }
+    .brand-mark { width: 34px; height: 34px; border-radius: 10px; background: var(--white); color: #000; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; }
+    .brand-copy { display: flex; flex-direction: column; line-height: 1.05; }
+    .brand-title { font-size: 15px; font-weight: 700; }
+    .brand-sub { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .search { flex: 1; max-width: 440px; height: 38px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); display: flex; align-items: center; gap: 10px; padding: 0 12px; font-size: 13px; color: var(--sub); font-family: var(--in); }
+    .top-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    .chip { padding: 8px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); color: var(--sub); font-size: 11px; font-family: var(--jb); }
+    .btn { padding: 8px 12px; border-radius: 9px; border: 1px solid transparent; background: var(--white); color: #000; font-size: 12px; font-weight: 700; }
+    .shell { display: grid; grid-template-columns: 80px 280px 1fr 330px; flex: 1; min-height: 0; }
+    .rail, .sidebar, .context { min-height: 0; }
+    .rail { background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; }
+    .rail-btn { width: 46px; height: 46px; border-radius: 14px; background: var(--elevated); border: 1px solid transparent; display: flex; align-items: center; justify-content: center; color: var(--sub); font-size: 16px; }
+    .rail-btn.active { color: var(--white); background: var(--hover); border-color: #323232; }
+    .sidebar { background: radial-gradient(circle at top right, rgba(255,255,255,.03), transparent 28%), #050505; border-right: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 8px; }
+    .card, .report-card, .alert-card, .table-row, .metric-card, .mini-chart, .chart-board { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .card { padding: 16px; }
+    .card h2 { font-size: 16px; margin-bottom: 6px; }
+    .card p, .report-card span, .table-row span, .alert-card span, .row-copy span { color: var(--sub); font-size: 12px; line-height: 1.6; font-family: var(--in); }
+    .stack { display: flex; flex-direction: column; gap: 10px; overflow: auto; }
+    .report-card, .alert-card, .table-row { padding: 12px; }
+    .report-card strong, .alert-card strong, .table-row strong, .row-copy strong { display: block; font-size: 13px; margin-bottom: 4px; }
+    .main { background: linear-gradient(180deg, rgba(12,12,12,.97), rgba(0,0,0,1)); display: grid; grid-template-rows: auto auto 1fr; min-height: 0; }
+    .hero { padding: 18px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1.2fr .85fr; gap: 16px; }
+    .hero-panel, .monitor { background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 18px; }
+    .hero h1 { font-size: 28px; line-height: 1.08; margin-bottom: 10px; }
+    .hero p, .monitor p { color: var(--sub); line-height: 1.7; max-width: 640px; font-size: 13px; font-family: var(--in); }
+    .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+    .metric-card { padding: 12px; }
+    .metric-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+    .metric-value { font-size: 22px; font-weight: 700; margin-top: 8px; }
+    .metric-note { font-size: 12px; color: var(--sub); margin-top: 4px; }
+    .monitor h2, .chart-header h3 { font-size: 18px; margin-bottom: 10px; }
+    .mini-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
+    .mini-chart { padding: 12px; min-height: 104px; position: relative; overflow: hidden; }
+    .mini-chart::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 16px; height: 46px; background: linear-gradient(180deg, rgba(255,255,255,.08), transparent), linear-gradient(90deg, rgba(255,107,43,.9), rgba(0,212,255,.9)); clip-path: polygon(0 80%, 18% 58%, 36% 66%, 52% 36%, 70% 54%, 84% 20%, 100% 42%, 100% 100%, 0 100%); opacity: .85; }
+    .mini-chart strong { font-size: 13px; }
+    .tabs { height: 48px; display: flex; gap: 18px; align-items: center; padding: 0 18px; border-bottom: 1px solid var(--border); background: var(--card); }
+    .tab { font-size: 13px; color: var(--sub); padding-bottom: 11px; border-bottom: 2px solid transparent; }
+    .tab.active { color: var(--white); border-color: #fff; }
+    .content { padding: 18px; display: grid; grid-template-columns: 1.18fr .82fr; gap: 16px; min-height: 0; }
+    .chart-board { padding: 16px; min-height: 380px; display: grid; grid-template-rows: auto 1fr auto; gap: 14px; border-radius: 16px; }
+    .chart-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .chart-header p { color: var(--sub); font-size: 12px; line-height: 1.6; max-width: 520px; }
+    .chart-canvas { position: relative; border-radius: 14px; background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); overflow: hidden; border: 1px solid rgba(255,255,255,.05); }
+    .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px); background-size: 56px 56px; opacity: .5; }
+    .line { position: absolute; left: 18px; right: 18px; bottom: 18px; top: 18px; background: linear-gradient(180deg, rgba(255,107,43,.22), rgba(0,212,255,.06)); clip-path: polygon(0 74%, 10% 68%, 21% 56%, 32% 61%, 44% 46%, 56% 52%, 68% 28%, 80% 36%, 90% 20%, 100% 24%, 100% 100%, 0 100%); }
+    .line.secondary { background: linear-gradient(180deg, rgba(204,0,170,.15), rgba(136,68,255,.04)); clip-path: polygon(0 84%, 12% 74%, 25% 72%, 36% 62%, 49% 56%, 62% 42%, 73% 48%, 84% 32%, 100% 36%, 100% 100%, 0 100%); opacity: .8; }
+    .legend { display: flex; gap: 18px; font-size: 11px; color: var(--sub); font-family: var(--jb); }
+    .legend span::before { content: ''; display: inline-block; width: 10px; height: 10px; border-radius: 999px; margin-right: 8px; vertical-align: middle; }
+    .legend .orange::before { background: #ff6b2b; } .legend .violet::before { background: #8844ff; }
+    .table-card { display: flex; flex-direction: column; gap: 10px; }
+    .signal-strip { padding: 0 18px 18px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .signal-card { padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+    .signal-card h3 { font-size: 15px; margin-bottom: 8px; }
+    .signal-card p { color: var(--sub); font-size: 12px; line-height: 1.6; margin-bottom: 12px; }
+    .signal-meta { display: flex; justify-content: space-between; gap: 10px; font-family: var(--jb); font-size: 10px; color: var(--muted); }
+    .context { background: var(--card); border-left: 1px solid var(--border); padding: 18px 16px; display: flex; flex-direction: column; gap: 16px; overflow: auto; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-radius: 12px; background: #090909; border: 1px solid var(--border); }
+    .mono { font-family: var(--jb); font-size: 10px; color: var(--muted); }
+    .bar { width: 96px; height: 6px; border-radius: 999px; background: #1d1d1d; overflow: hidden; margin-top: 8px; }
+    .bar span { display: block; height: 100%; background: var(--g); }
+    @media (max-width: 1080px) { .hero, .content, .signal-strip { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="grad"></div>
+  <header class="topbar"><div class="brand"><div class="brand-mark">ST</div><div class="brand-copy"><div class="brand-title">Stats</div><div class="brand-sub">Analytics, telemetry, and KPI dashboards</div></div></div><div class="search">Search metrics, reports, hosts, funnels, and telemetry streams...</div><div class="top-actions"><div class="chip">LIVE KPI MODE</div><div class="chip">12 SOURCES</div><button class="btn">Refresh Snapshot</button></div></header>
+  <div class="shell">
+    <aside class="rail"><div class="rail-btn active">◔</div><div class="rail-btn">⌕</div><div class="rail-btn">⌗</div><div class="rail-btn">⇄</div><div class="rail-btn">⚠</div><div class="rail-btn">☰</div></aside>
+    <aside class="sidebar"><div><div class="section-label">Report stack</div><div class="card"><h2>BlackRoad performance board</h2><p>Stats consolidates analytics, telemetry, and KPI reporting so operators can compare product health, traffic patterns, and infrastructure quality in one place.</p></div></div><div><div class="section-label">Pinned reports</div><div class="stack"><div class="report-card"><strong>Product traffic</strong><span>Daily visitors, activation paths, and canonical redirect leakage across public surfaces.</span></div><div class="report-card"><strong>Fleet health</strong><span>Host uptime, sync latency, and live Roadie coverage across devices and zones.</span></div><div class="report-card"><strong>Launch board</strong><span>Campaign conversion, retention, and content performance by channel and release.</span></div><div class="report-card"><strong>Finance pulse</strong><span>RoadPay payment volume, payout status, and invoice lifecycle monitoring.</span></div></div></div></aside>
+    <main class="main">
+      <section class="hero"><div class="hero-panel"><div class="section-label">KPI center</div><h1>Track product performance, telemetry, and operational truth from one dashboard.</h1><p>Stats is the analytics layer for BlackRoad. It brings together traffic, conversion, reliability, and fleet metrics so decisions can be based on signal instead of fragmented snapshots.</p><div class="metrics"><div class="metric-card"><div class="metric-label">Sessions</div><div class="metric-value">184.2k</div><div class="metric-note">Across product surfaces this week</div></div><div class="metric-card"><div class="metric-label">Conversion</div><div class="metric-value">8.4%</div><div class="metric-note">Visitor to meaningful action</div></div><div class="metric-card"><div class="metric-label">Uptime</div><div class="metric-value">99.94%</div><div class="metric-note">Critical surfaces and APIs</div></div><div class="metric-card"><div class="metric-label">Alerts</div><div class="metric-value">3</div><div class="metric-note">Two warnings, one urgent</div></div></div></div><div class="monitor"><div class="section-label">Realtime monitor</div><h2>Signal summary</h2><p>Watch traffic quality, host status, and campaign lift at a glance while the deeper boards keep trend detail and root-cause context one step away.</p><div class="mini-grid"><div class="mini-chart"><strong>Traffic quality</strong></div><div class="mini-chart"><strong>Retention curve</strong></div><div class="mini-chart"><strong>Host response</strong></div><div class="mini-chart"><strong>Revenue lift</strong></div></div></div></section>
+      <div class="tabs"><div class="tab active">Overview</div><div class="tab">Funnels</div><div class="tab">Infrastructure</div><div class="tab">Campaigns</div><div class="tab">Finance</div></div>
+      <section class="signal-strip"><div class="signal-card"><div class="section-label">Attribution trust</div><h3>Quality of the numbers</h3><p>Stats now communicates not just raw growth, but whether the underlying redirects, hosts, and event streams are trustworthy enough to act on.</p><div class="signal-meta"><span>CONFIDENCE</span><span>87%</span></div></div><div class="signal-card"><div class="section-label">Ops crossover</div><h3>Metrics that feed RoadTrip</h3><p>Important alerts and fleet signals are shaped to move upstream into mission control instead of remaining stranded in analytics-only views.</p><div class="signal-meta"><span>PINNABLE</span><span>LIVE</span></div></div><div class="signal-card"><div class="section-label">Decision layer</div><h3>Trend boards with operational context</h3><p>Traffic, retention, latency, and payout movement all read as product decisions with visible causes, not just decorative charts.</p><div class="signal-meta"><span>ROOT CAUSE</span><span>VISIBLE</span></div></div></section>
+      <section class="content"><div class="chart-board"><div class="chart-header"><div><h3>Product performance trend</h3><p>Combined view of visits, meaningful actions, and retained users across the canonical product stack.</p></div><div class="chip">LAST 30 DAYS</div></div><div class="chart-canvas"><div class="grid"></div><div class="line"></div><div class="line secondary"></div></div><div class="legend"><span class="orange">Traffic + activations</span><span class="violet">Retention + quality</span></div></div><div class="table-card"><div class="section-label">Notable movements</div><div class="table-row"><strong>RoadTrip dispatch completion +12%</strong><span>Mission routing improvements and cleaner queue handling increased successful handoffs.</span></div><div class="table-row"><strong>RoadBook study rooms trending up</strong><span>Reading-room launches and shared highlight flows are raising return visits.</span></div><div class="table-row"><strong>Alias leakage detected on two hosts</strong><span>Redirect cleanup priority remains visible until canonical host behavior stabilizes.</span></div><div class="table-row"><strong>RoadPay payout latency down</strong><span>Stripe sync timing improved after queue tuning and reduced payout retry volume.</span></div></div></section>
+    </main>
+    <aside class="context"><div><div class="section-label">Alerts</div><div class="stack"><div class="alert-card"><strong>Urgent: redirect drift</strong><span>Two legacy aliases are still receiving direct traffic and should redirect to canonical targets.</span></div><div class="alert-card"><strong>Warning: host saturation</strong><span>One fleet preview node is above comfortable CPU thresholds during launch rehearsals.</span></div><div class="alert-card"><strong>Watch: funnel softness</strong><span>Public landing traffic is rising faster than downstream signups on one campaign path.</span></div></div></div><div><div class="section-label">Health bars</div><div class="stack"><div class="row"><div class="row-copy"><strong>Canonical coverage</strong><span>Share of traffic landing on correct host and path.</span><div class="bar"><span style="width: 94%"></span></div></div><div class="mono">94%</div></div><div class="row"><div class="row-copy"><strong>Fleet availability</strong><span>Roadie-serving nodes healthy and reachable.</span><div class="bar"><span style="width: 98%"></span></div></div><div class="mono">98%</div></div><div class="row"><div class="row-copy"><strong>Conversion confidence</strong><span>Confidence score on current attribution and event quality.</span><div class="bar"><span style="width: 87%"></span></div></div><div class="mono">87%</div></div></div></div><div><div class="section-label">Quick actions</div><div class="stack"><div class="report-card"><strong>Export board</strong><span>Create a shareable KPI packet for stakeholders, launches, or product reviews.</span></div><div class="report-card"><strong>Open anomaly trace</strong><span>Drill into the exact source, host, or event stream causing a spike or regression.</span></div><div class="report-card"><strong>Pin to RoadTrip</strong><span>Surface the most important operational metrics inside mission control.</span></div></div></div></aside>
+  </div>
+</body>
+</html>
