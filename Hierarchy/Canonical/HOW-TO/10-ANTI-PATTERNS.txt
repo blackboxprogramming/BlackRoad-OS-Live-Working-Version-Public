@@ -1,0 +1,119 @@
+Anti-patterns
+=============
+
+This file describes common mistakes that weaken the Canonical hierarchy.
+Avoid these patterns when extending or using the system.
+
+1. Mixing taxonomy with workflow state
+--------------------------------------
+Bad example:
+Creating a new taxonomy layer called `In-Review` or `Ready`.
+
+Why it is wrong:
+State belongs inside `Workflow/`.
+Taxonomy layers should describe meaning, not progress.
+
+Better pattern:
+Keep the layer stable and move the item to `Workflow/18-Review/` or `Workflow/23-Ready-to-Move/`.
+
+2. Skipping handoff visibility
+------------------------------
+Bad example:
+Jumping directly from active work in one layer to active work in another layer with no trace of `24-Conveyor-Belt` or `25-Transfer`.
+
+Why it is wrong:
+The crossing becomes invisible and hard to audit.
+
+Better pattern:
+Use the explicit bridge:
+`23-Ready-to-Move -> 24-Conveyor-Belt -> 25-Transfer -> next layer 01-Intake`
+
+3. Creating one-off workflow states
+-----------------------------------
+Bad example:
+Adding folders like `Almost-Done`, `Urgent-Review`, or `Wait-A-Second`.
+
+Why it is wrong:
+The system stops being shared and predictable.
+
+Better pattern:
+Map the need onto the existing 27-step model and use item metadata for extra nuance.
+
+4. Letting metadata drift from file location
+--------------------------------------------
+Bad example:
+An item lives in `Workflow/18-Review/` but still says `Current Step: 12-Prepare`.
+
+Why it is wrong:
+The file becomes untrustworthy.
+
+Better pattern:
+Update `Layer`, `Current Step`, `Current Path`, and `Last Updated` whenever the item moves.
+Use `move-item.sh` when possible.
+
+5. Duplicating without purpose
+------------------------------
+Bad example:
+Making multiple copies across steps with no explanation.
+
+Why it is wrong:
+The directory fills with confusing parallel versions.
+
+Better pattern:
+Copy only when you want an audit trail or a deliberate cross-layer handoff.
+Otherwise, move the item.
+
+6. Treating every note as a new layer
+-------------------------------------
+Bad example:
+Creating new taxonomy directories for every subtopic, person, or temporary idea.
+
+Why it is wrong:
+The tree becomes deep in random ways and loses clarity.
+
+Better pattern:
+Store changing context inside item files, trace files, or reference states unless the meaning truly changes.
+
+7. Using non-shell-safe names in canonical paths
+------------------------------------------------
+Bad example:
+Creating folders with spaces or inconsistent numbering in the Canonical tree.
+
+Why it is wrong:
+The system becomes harder to script, sort, and maintain.
+
+Better pattern:
+Use numeric prefixes and hyphenated names.
+
+8. Treating Archive-and-Reference like a trash bin
+--------------------------------------------------
+Bad example:
+Dumping unfinished or low-quality material into step 27 just to get it out of the way.
+
+Why it is wrong:
+The reference layer loses trust and becomes cluttered.
+
+Better pattern:
+Use `27-Archive-and-Reference` only for durable context worth preserving.
+
+9. Rebuilding the structure for every project
+---------------------------------------------
+Bad example:
+Changing the model each time a new workflow idea appears.
+
+Why it is wrong:
+People and tools cannot learn a moving target.
+
+Better pattern:
+Preserve the structure and adapt usage through items, examples, guides, and recipes.
+
+10. Relying on memory instead of documentation
+----------------------------------------------
+Bad example:
+Assuming people will remember what `Conveyor-Belt` means without writing it down.
+
+Why it is wrong:
+Systems that depend on memory become fragile.
+
+Better pattern:
+Extend the HOW-TO hub whenever the meaning of the system needs clarification.
