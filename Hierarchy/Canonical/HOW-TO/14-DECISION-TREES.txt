@@ -1,0 +1,109 @@
+Decision trees
+==============
+
+This file helps you decide what to do next in the Canonical hierarchy.
+Use these trees when you are unsure whether to move, copy, hand off, archive, or document.
+
+Tree 1: Move or copy?
+---------------------
+Question:
+Should the item leave its current location by move or by copy?
+
+Decision:
+- If only one live version should exist -> move
+- If you want an upstream audit trail and a downstream live version -> copy
+- If you are only correcting a misplaced item -> move
+- If the history of the crossing matters -> copy
+
+Rule:
+Use `move-item.sh` for both, and use `--copy` only when the extra history is intentional.
+
+Tree 2: Same layer or different layer?
+--------------------------------------
+Question:
+Has the meaning of the item changed, or only its state?
+
+Decision:
+- If only the state changed -> stay in the same taxonomy layer
+- If the meaning changed -> hand off to a different layer
+
+Examples:
+- repository work moving from build to review -> same layer
+- repository work becoming a pull request concern -> different layer
+- pull request review creating a tracked issue -> different layer
+
+Rule:
+Meaning changes by layer.
+State changes by workflow step.
+
+Tree 3: Is it ready for handoff?
+--------------------------------
+Question:
+Should this item leave its current layer now?
+
+Decision:
+- If it is still incomplete -> keep working in the current layer
+- If it has been approved for crossing -> move to `23-Ready-to-Move`
+- If it is waiting in the handoff lane -> place it in `24-Conveyor-Belt`
+- If it is actively crossing -> place it in `25-Transfer`
+- If the downstream layer has received it -> start at `01-Intake`
+
+Rule:
+Do not skip visible handoff steps unless you are intentionally using a simplified path and accept lower traceability.
+
+Tree 4: Archive or continue working?
+------------------------------------
+Question:
+Is this item still active work, or has it become durable reference?
+
+Decision:
+- If active work remains -> continue in workflow states below 27
+- If the item is stable, useful, and mainly for future understanding -> index then archive
+- If the item is unfinished, low quality, or temporary -> do not archive yet
+
+Rule:
+`27-Archive-and-Reference` is for durable knowledge, not cleanup.
+
+Tree 5: Add a new doc or reuse an existing one?
+-----------------------------------------------
+Question:
+Does the HOW-TO hub need another document?
+
+Decision:
+- If the concept is already explained -> reuse and link existing docs
+- If the term is new and recurring -> add to `08-GLOSSARY.txt`
+- If the action is recurring -> add or extend a recipe or checklist
+- If the reasoning is structural -> update principles or anti-patterns
+- If the question is "what do I do now?" -> add to decision trees
+
+Rule:
+Prefer extending the manual over creating scattered side documents.
+
+Tree 6: Change the structure or change the usage?
+-------------------------------------------------
+Question:
+Is the problem with the hierarchy itself, or with how it is being used?
+
+Decision:
+- If users are skipping steps -> improve docs, examples, or checklists
+- If metadata keeps drifting -> use the script and reinforce operator practice
+- If a case fits the existing model with better discipline -> change usage, not structure
+- If the meaning truly cannot be represented -> consider a structural change
+
+Rule:
+Change the structure only when the model cannot honestly express the meaning.
+Otherwise, improve the way people use it.
+
+Tree 7: Should this become a trace file?
+----------------------------------------
+Question:
+Does this item need a separate trace companion?
+
+Decision:
+- If the item crosses multiple layers and the history matters -> yes
+- If multiple copies exist for audit trail -> yes
+- If the path is simple and obvious -> maybe not
+- If an auditor or teacher would benefit from a summarized path list -> yes
+
+Rule:
+Use a trace file when lineage is important enough to deserve one glance comprehension.

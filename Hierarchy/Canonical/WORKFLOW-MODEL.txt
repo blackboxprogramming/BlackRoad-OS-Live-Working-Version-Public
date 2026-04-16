@@ -1,0 +1,80 @@
+Workflow model
+==============
+
+Every taxonomy layer has the same 27-step atomic state machine:
+
+01-Intake
+02-Register
+03-Identify
+04-Classify
+05-Scope
+06-Decompose
+07-Prioritize
+08-Assign
+09-Queue
+10-Pull-Into-Work
+11-Contextualize
+12-Prepare
+13-Source
+14-Inspect
+15-Shape
+16-Build
+17-Verify
+18-Review
+19-Refine
+20-Approve
+21-Package
+22-Stage
+23-Ready-to-Move
+24-Conveyor-Belt
+25-Transfer
+26-Index
+27-Archive-and-Reference
+
+Template pattern
+----------------
+Every Workflow/ directory now includes TEMPLATE-ITEM.txt.
+Use it as the canonical artifact pattern for items moving through that layer.
+Copy it, rename it, and place the live item in the step folder that matches its current state.
+
+Interpretation
+--------------
+01-05   arrival, naming, classification, and boundaries
+06-10   atomic breakdown and work commitment
+11-16   context gathering and active production
+17-20   quality control and decision
+21-25   packaging, staging, conveyor handoff, and transfer
+26-27   memory, traceability, and durable reference
+
+Conveyor logic
+--------------
+The conveyor belt is step 24.
+It is the queue point before a completed item is transferred into the next taxonomy layer.
+
+Example
+-------
+A repository artifact may move like this:
+05-Repository/Workflow/TEMPLATE-ITEM.txt
+05-Repository/Workflow/01-Intake/20260415-example.item.txt
+05-Repository/Workflow/06-Decompose/20260415-example.item.txt
+05-Repository/Workflow/16-Build/20260415-example.item.txt
+05-Repository/Workflow/20-Approve/20260415-example.item.txt
+05-Repository/Workflow/24-Conveyor-Belt/20260415-example.item.txt
+05-Repository/Workflow/25-Transfer/20260415-example.item.txt
+13-Pull-Request/Workflow/01-Intake/20260415-example.item.txt
+
+Design principle
+----------------
+Keep taxonomy stable.
+Move items through atomic workflow states.
+Scale by reusing the same motion model at every layer.
+
+Automation
+----------
+Use `Canonical/move-item.sh` to advance an item to another step.
+
+Examples:
+- same layer move:
+  `./Canonical/move-item.sh Canonical/01-Enterprise/Workflow/01-Intake/example.item.txt 02-Register`
+- cross-layer handoff with audit trail:
+  `./Canonical/move-item.sh --copy Canonical/.../24-Conveyor-Belt/example.item.txt 01-Intake Canonical/.../13-Pull-Request/Workflow`

@@ -1,0 +1,112 @@
+Recipes
+=======
+
+This file contains practical playbooks for common actions in the Canonical hierarchy.
+
+Recipe 1: Create a new item
+---------------------------
+Use this when a new unit of work or reference enters a layer.
+
+Example layer:
+/Applications/Hierarchy/Canonical/01-Enterprise/02-Organization/03-User/04-Application/05-Repository/Workflow
+
+Commands:
+cd /Applications/Hierarchy/Canonical/01-Enterprise/02-Organization/03-User/04-Application/05-Repository/Workflow
+cp TEMPLATE-ITEM.txt 01-Intake/20260415-new-feature.item.txt
+
+Then edit:
+- Item ID
+- Title
+- Layer
+- Source
+- Destination Layer
+- Intent
+- Priority
+
+Recipe 2: Advance an item inside one layer
+------------------------------------------
+Use this when the meaning of the item stays the same but its state changes.
+
+Commands:
+./../../../../../../move-item.sh 01-Intake/20260415-new-feature.item.txt 02-Register
+./../../../../../../move-item.sh 02-Register/20260415-new-feature.item.txt 03-Identify
+./../../../../../../move-item.sh 03-Identify/20260415-new-feature.item.txt 04-Classify
+
+Rule:
+Do not change the taxonomy layer for normal internal progress.
+Only change the workflow step.
+
+Recipe 3: Handoff from repository to pull request
+-------------------------------------------------
+Use this when a repository item is ready to become a pull request artifact.
+
+Source pattern:
+05-Repository/Workflow/24-Conveyor-Belt/20260415-new-feature.item.txt
+
+Destination pattern:
+13-Pull-Request/Workflow/01-Intake/20260415-new-feature.item.txt
+
+Command shape:
+/Applications/Hierarchy/Canonical/move-item.sh --copy \
+  /Applications/Hierarchy/Canonical/01-Enterprise/02-Organization/03-User/04-Application/05-Repository/Workflow/24-Conveyor-Belt/20260415-new-feature.item.txt \
+  01-Intake \
+  /Applications/Hierarchy/Canonical/01-Enterprise/02-Organization/03-User/04-Application/05-Repository/06-Operations/07-Fetch/08-Get/09-Push/10-Check/11-Workflows/12-Dependencies/13-Pull-Request/Workflow
+
+Why copy here:
+The upstream file remains as an audit trail while the downstream layer starts a live intake copy.
+
+Recipe 4: Handoff from pull request to issue
+--------------------------------------------
+Use this when review work creates a tracked issue or defect.
+
+Command shape:
+/Applications/Hierarchy/Canonical/move-item.sh --copy \
+  /Applications/Hierarchy/Canonical/.../13-Pull-Request/Workflow/18-Review/20260415-new-feature.item.txt \
+  01-Intake \
+  /Applications/Hierarchy/Canonical/.../13-Pull-Request/14-Issue/Workflow
+
+Rule:
+The issue layer receives the item as a new intake, even if the upstream review was already advanced.
+
+Recipe 5: Preserve a terminal reference
+---------------------------------------
+Use this when the item has become durable knowledge.
+
+Same-layer example:
+/Applications/Hierarchy/Canonical/archive-item.sh \
+  /Applications/Hierarchy/Canonical/.../15-Comment/Workflow/18-Review/20260415-new-feature.item.txt
+
+Meaning:
+The item is no longer primarily active work.
+It is now long-term context or memory.
+
+What happens:
+- the item is moved into `26-Index` if needed
+- a structured `*.index.txt` sidecar is created or refreshed
+- both the item and the sidecar move into `27-Archive-and-Reference`
+
+Recipe 6: Build an audit trail across layers
+--------------------------------------------
+Use copy mode repeatedly at major handoffs.
+
+Pattern:
+- keep one upstream copy in a late handoff state
+- create one downstream intake copy
+- optionally add a trace file listing every path
+
+Good companions:
+- EXAMPLE-TRACE.txt
+- TEMPLATE-ITEM.txt
+- move-item.sh
+
+Recipe 7: Recover an item that was placed in the wrong step
+-----------------------------------------------------------
+If the item is in the wrong workflow folder but the taxonomy layer is still correct, just move it to the correct step.
+
+Example:
+/Applications/Hierarchy/Canonical/move-item.sh \
+  /Applications/Hierarchy/Canonical/.../Workflow/18-Review/misplaced.item.txt \
+  17-Verify
+
+Rule:
+Correct the state first; do not create a new copy unless you explicitly want history.
