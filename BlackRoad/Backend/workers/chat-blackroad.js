@@ -1,1 +1,0 @@
-/Users/alexa/chat-blackroad/src/worker.js

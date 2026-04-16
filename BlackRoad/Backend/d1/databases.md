@@ -1,1 +1,0 @@
-/Applications/untitled folder/VirtualComputer/codex/d1-databases.md

@@ -1,1 +1,0 @@
-/Users/alexa/analytics-blackroad/src/worker.js
