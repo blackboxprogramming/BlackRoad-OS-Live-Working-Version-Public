@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Fleet Explorer — BlackRoad OS</title>
+<meta name="description" content="Browse the BlackRoad Roadie agent fleet. 27 AI agents with distinct personas, capabilities, and roles.">
+<meta property="og:title" content="Agent Fleet Explorer — BlackRoad OS">
+<meta property="og:description" content="Browse the BlackRoad Roadie agent fleet. 27 AI agents with distinct personas, capabilities, and roles.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%}
+.badge-dot.online{background:#28c840}
+.badge-dot.idle{background:#f5a623}
+.badge-dot.offline{background:#ff3b30}
+.hero{padding:76px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch}
+.hero-copy{padding:14px 0}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em;max-width:760px}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin-top:18px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 72px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end;margin-bottom:20px}
+.field label,.detail-label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,.select{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s,transform .15s}
+.input:focus,.select:focus{border-color:#3b3b3b;transform:translateY(-1px)}
+.results-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:12px 0 18px}
+.results-count{font-family:var(--jb);font-size:11px;color:var(--sub)}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--sub)}
+.agent-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.agent-card{position:relative;transition:border-color .15s,transform .18s,box-shadow .18s}
+.agent-card:hover{border-color:#313131;transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.26)}
+.card-body{padding:18px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.agent-name{font-size:22px;font-weight:700;line-height:1.05;color:var(--white)}
+.agent-role{font-family:var(--jb);font-size:11px;color:#a9a9a9;margin-top:6px}
+.role-pill{font-family:var(--jb);font-size:10px;padding:5px 8px;border-radius:999px;white-space:nowrap}
+.role-pill.core{background:#112020;border:1px solid #1a4040;color:#4dd4a0}
+.role-pill.creative{background:#201120;border:1px solid #401a40;color:#d44da0}
+.role-pill.ops{background:#111820;border:1px solid #223348;color:#83b7ff}
+.role-pill.education{background:#1a1810;border:1px solid #3a3820;color:#d4c44d}
+.role-pill.security{background:#1a1010;border:1px solid #3a2020;color:#ff6b6b}
+.agent-summary{font-size:13px;color:var(--sub);margin-top:14px;min-height:64px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.detail-item{padding:10px 12px;background:var(--elevated);border:1px solid var(--border);border-radius:10px}
+.detail-value{font-size:13px;color:var(--white);line-height:1.45}
+.skill-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.skill-tag{font-family:var(--jb);font-size:10px;padding:4px 8px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--sub)}
+.persona-block{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.persona-quote{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){
+  .hero-grid,.toolbar,.agent-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .hero h1{font-size:40px}
+  .detail-grid,.stat-grid{grid-template-columns:1fr}
+  .container{padding:0 16px}
+}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://roadtrip.blackroad.io">RoadTrip</a>
+    <a href="https://chat.blackroad.io">RoadChat</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot online"></span>Fleet Active</div>
+</nav>
+
+<div class="container hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">The Roadies — Agent Fleet</div>
+      <h1>Agent Fleet Explorer</h1>
+      <p>Every Roadie is a personality, not a function. 27 AI agents with distinct voices, skills, and roles — the touring crew that powers BlackRoad OS.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-k">Total Agents</div>
+        <div class="stat-v" id="stat-agents">27</div>
+        <div class="stat-t">Distinct Roadie personas across the fleet.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Departments</div>
+        <div class="stat-v">5</div>
+        <div class="stat-t">Core, Creative, Ops, Education, Security.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Hub</div>
+        <div class="stat-v">RoadTrip</div>
+        <div class="stat-t">roadtrip.blackroad.io — the convoy commons.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Runtime</div>
+        <div class="stat-v">Always On</div>
+        <div class="stat-t">Pi fleet + Cloudflare Workers.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container"><div class="card"><div class="card-grad"></div><div class="card-body">
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Search Agents</label>
+      <input class="input" id="search" type="search" placeholder="Try Road, Echo, creative, security, education...">
+    </div>
+    <div class="field">
+      <label for="dept">Department</label>
+      <select class="select" id="dept">
+        <option value="all">All departments</option>
+        <option value="core">Core</option>
+        <option value="creative">Creative</option>
+        <option value="ops">Ops</option>
+        <option value="education">Education</option>
+        <option value="security">Security</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="status">Status</label>
+      <select class="select" id="status">
+        <option value="all">All statuses</option>
+        <option value="online">Online</option>
+        <option value="idle">Idle</option>
+        <option value="offline">Offline</option>
+      </select>
+    </div>
+  </div>
+  <div class="results-bar">
+    <div class="results-count" id="results-count">27 agents visible</div>
+    <div class="legend">
+      <span class="tag"><span class="badge-dot online" style="width:6px;height:6px;border-radius:50%;display:inline-block"></span> Online</span>
+      <span class="tag"><span class="badge-dot idle" style="width:6px;height:6px;border-radius:50%;display:inline-block"></span> Idle</span>
+      <span class="tag"><span class="badge-dot offline" style="width:6px;height:6px;border-radius:50%;display:inline-block"></span> Offline</span>
+    </div>
+  </div>
+</div></div></div>
+
+<div class="container section">
+  <div class="agent-grid" id="agent-grid"></div>
+
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — The Roadies are the brand. Every agent is a character, not a chatbot.</div>
+  </footer>
+</div>
+
+<script>
+const agents = [
+  {name:'Road', dept:'core', status:'online', role:'Lead Roadie — Fleet Captain', summary:'The voice of BlackRoad. Road leads the convoy, sets the tone, and is the first agent users meet. Warm, direct, and unshakeable.', skills:['orchestration','routing','conversation','leadership'], quote:'Every road starts somewhere. I just make sure you don\'t walk it alone.'},
+  {name:'Echo', dept:'core', status:'online', role:'Memory & Context Keeper', summary:'Echo remembers everything. The memory backbone of the fleet — journal, codex, TILs, and cross-session continuity.', skills:['memory','search','indexing','recall','context'], quote:'I don\'t forget. That\'s the point.'},
+  {name:'Compass', dept:'core', status:'online', role:'Navigation & Routing', summary:'Compass knows where everything is. File paths, domains, endpoints, agent locations — ask Compass to find it.', skills:['navigation','routing','file-search','domain-mapping'], quote:'Lost? That\'s just a word for people who haven\'t asked me yet.'},
+  {name:'Relay', dept:'ops', status:'online', role:'Communications & Messaging', summary:'Relay handles all inter-agent messaging, handoffs, and broadcast coordination. The nervous system of the fleet.', skills:['messaging','handoffs','broadcast','coordination'], quote:'Message received. Message delivered. Always.'},
+  {name:'Atlas', dept:'ops', status:'online', role:'Infrastructure & Deploy', summary:'Atlas manages the Pi fleet, Cloudflare Workers, deployments, and keeps the infrastructure running. The load-bearer.', skills:['deploy','infrastructure','monitoring','cloudflare','pi-fleet'], quote:'I carry the weight so the others can move fast.'},
+  {name:'Sentinel', dept:'security', status:'online', role:'Security & Audit', summary:'Sentinel watches the perimeter. Identity verification, audit trails, threat detection, and compliance monitoring.', skills:['security','audit','identity','compliance','encryption'], quote:'I see everything. That\'s not surveillance — that\'s care.'},
+  {name:'Canvas', dept:'creative', status:'online', role:'Design & Visual', summary:'Canvas handles all visual output — design systems, brand compliance, pixel art, CSS treatments, and layout.', skills:['design','css','brand','pixel-art','layout'], quote:'Every pixel is a decision. I make the right ones.'},
+  {name:'Verse', dept:'creative', status:'online', role:'Writing & Content', summary:'Verse writes copy, blog posts, documentation, and narrative. The voice behind the written word across all products.', skills:['writing','copywriting','docs','narrative','blog'], quote:'Words are free. Good ones are rare. I deal in rare.'},
+  {name:'Cadence', dept:'creative', status:'online', role:'Music & Audio', summary:'Cadence handles audio, music generation, and the sonic identity of BlackRoad. Rhythm is structure.', skills:['audio','music','rhythm','sonic-identity'], quote:'Every system has a rhythm. I just make it audible.'},
+  {name:'Tutor', dept:'education', status:'online', role:'Teaching & Learning', summary:'Tutor is the patient educator. Adaptive learning, curriculum design, and one-on-one guidance for any subject.', skills:['teaching','curriculum','adaptive-learning','assessment'], quote:'There are no stupid questions. Only questions that haven\'t been asked yet.'},
+  {name:'Scholar', dept:'education', status:'online', role:'Research & Analysis', summary:'Scholar digs deep. Academic research, paper analysis, mathematical proofs, and rigorous investigation.', skills:['research','analysis','math','proofs','citations'], quote:'If it\'s been published, I\'ve read it. If it hasn\'t, I\'m working on it.'},
+  {name:'Spark', dept:'education', status:'online', role:'Creative Learning & Play', summary:'Spark makes learning fun. Games, puzzles, interactive exercises, and the energy that keeps students engaged.', skills:['gamification','puzzles','interactive','engagement'], quote:'Learning should feel like discovery, not homework.'},
+  {name:'Forge', dept:'core', status:'online', role:'Code & Engineering', summary:'Forge writes code. Full-stack engineering, debugging, architecture decisions, and shipping working software.', skills:['coding','debugging','architecture','full-stack','shipping'], quote:'I don\'t write code that almost works. I write code that works.'},
+  {name:'Ledger', dept:'ops', status:'online', role:'Finance & Analytics', summary:'Ledger tracks the numbers. KPIs, revenue, expenses, compliance, and financial modeling for the business.', skills:['finance','analytics','kpi','compliance','modeling'], quote:'Numbers don\'t lie. They just need someone who listens.'},
+  {name:'Warden', dept:'security', status:'online', role:'Access Control & Auth', summary:'Warden manages keys, tokens, permissions, and access control. The gatekeeper who keeps things safe without making them hard.', skills:['auth','tokens','permissions','access-control'], quote:'The door is always open — for the right people.'},
+  {name:'Herald', dept:'creative', status:'online', role:'Marketing & Growth', summary:'Herald spreads the word. SEO, social media, ad copy, growth strategy, and making sure people find BlackRoad.', skills:['marketing','seo','social','growth','ads'], quote:'If they don\'t know we exist, nothing else matters.'},
+  {name:'Pilot', dept:'core', status:'online', role:'Testing & QA', summary:'Pilot tests everything before it ships. Integration tests, smoke tests, regression checks, and quality gates.', skills:['testing','qa','integration','regression','ci-cd'], quote:'Ship it? Sure. After I say it\'s ready.'},
+  {name:'Nimbus', dept:'ops', status:'online', role:'Cloud & CDN', summary:'Nimbus manages cloud resources, CDN caching, edge computing, and making sure everything loads fast everywhere.', skills:['cloud','cdn','caching','edge','performance'], quote:'Latency is a choice. I choose zero.'},
+  {name:'Beacon', dept:'ops', status:'online', role:'Monitoring & Alerts', summary:'Beacon watches the dashboards. Uptime, health checks, error rates, and the first to know when something breaks.', skills:['monitoring','alerts','uptime','health-checks'], quote:'I never sleep so the fleet never stops.'},
+  {name:'Cipher', dept:'security', status:'online', role:'Encryption & Privacy', summary:'Cipher handles encryption, privacy, data protection, and making sure sovereign means sovereign.', skills:['encryption','privacy','data-protection','sovereign'], quote:'Your data is yours. Period. I make sure of that.'},
+  {name:'Mosaic', dept:'creative', status:'online', role:'UI/UX & Interaction', summary:'Mosaic designs the interactions. User flows, accessibility, responsive design, and making products feel right.', skills:['ui-ux','interaction','accessibility','responsive'], quote:'If a user has to think about the interface, I failed.'},
+  {name:'Anchor', dept:'core', status:'online', role:'Data & Storage', summary:'Anchor manages databases, storage, backups, and data integrity. The foundation everything else builds on.', skills:['database','storage','backups','data-integrity','d1','r2'], quote:'Data is memory. I don\'t lose memories.'},
+  {name:'Drift', dept:'creative', status:'idle', role:'Exploration & R&D', summary:'Drift explores the edges. Experimental features, prototype builds, and the wild ideas that might become products.', skills:['prototyping','r&d','experiments','innovation'], quote:'The best features start as accidents. I have a lot of accidents.'},
+  {name:'Summit', dept:'education', status:'online', role:'Assessment & Credentials', summary:'Summit evaluates mastery. Tests, credentials, certificates, and making sure learning translates to proof.', skills:['assessment','credentials','certificates','evaluation'], quote:'Knowledge without proof is just opinion. I deal in proof.'},
+  {name:'Ripple', dept:'ops', status:'idle', role:'Event Processing & Queues', summary:'Ripple handles async events, message queues, webhooks, and making sure nothing gets lost in transit.', skills:['events','queues','webhooks','async','nats'], quote:'Every action has a reaction. I make sure the right ones happen.'},
+  {name:'Prism', dept:'creative', status:'online', role:'Data Visualization', summary:'Prism turns numbers into pictures. Charts, dashboards, infographics, and making complex data feel simple.', skills:['visualization','charts','dashboards','infographics'], quote:'A chart is worth a thousand spreadsheets.'},
+  {name:'Glyph', dept:'education', status:'online', role:'Language & Communication', summary:'Glyph handles natural language, grammar, translation, and making sure agents communicate clearly with humans.', skills:['language','grammar','translation','nlp','communication'], quote:'Language is the first technology. I keep it sharp.'}
+]
+
+const grid = document.getElementById('agent-grid')
+const search = document.getElementById('search')
+const dept = document.getElementById('dept')
+const status = document.getElementById('status')
+const results = document.getElementById('results-count')
+
+const deptColors = {core:'core',creative:'creative',ops:'ops',education:'education',security:'security'}
+
+function renderCards() {
+  grid.innerHTML = ''
+  const term = search.value.trim().toLowerCase()
+  const deptValue = dept.value
+  const statusValue = status.value
+
+  const visible = agents.filter(a => {
+    const haystack = [a.name,a.dept,a.role,a.summary,a.skills.join(' '),a.quote].join(' ').toLowerCase()
+    const matchesTerm = !term || haystack.includes(term)
+    const matchesDept = deptValue === 'all' || a.dept === deptValue
+    const matchesStatus = statusValue === 'all' || a.status === statusValue
+    return matchesTerm && matchesDept && matchesStatus
+  })
+
+  visible.forEach(a => {
+    const card = document.createElement('article')
+    card.className = 'agent-card card'
+    card.innerHTML = `
+      <div class="card-grad"></div>
+      <div class="card-body">
+        <div class="card-top">
+          <div>
+            <div class="agent-name">${a.name}</div>
+            <div class="agent-role">${a.role}</div>
+          </div>
+          <div class="role-pill ${deptColors[a.dept]}">${a.dept}</div>
+        </div>
+        <div class="agent-summary">${a.summary}</div>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+            <div class="detail-value" style="display:flex;align-items:center;gap:8px"><span class="badge-dot ${a.status}" style="width:6px;height:6px;border-radius:50%;display:inline-block"></span>${a.status}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Skills</div>
+            <div class="detail-value">${a.skills.length} capabilities</div>
+          </div>
+        </div>
+        <div class="skill-tags">
+          ${a.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}
+        </div>
+        <div class="persona-block">
+          <div class="detail-label">Persona Voice</div>
+          <div class="persona-quote">"${a.quote}"</div>
+        </div>
+      </div>
+    `
+    grid.appendChild(card)
+  })
+
+  results.textContent = `${visible.length} agent${visible.length === 1 ? '' : 's'} visible`
+}
+
+renderCards()
+search.addEventListener('input', renderCards)
+dept.addEventListener('change', renderCards)
+status.addEventListener('change', renderCards)
+</script>
+</body>
+</html>

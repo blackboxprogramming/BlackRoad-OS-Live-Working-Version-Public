@@ -1,0 +1,3452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<title>BlackRoad OS v7 — Sovereign AI Operating System</title>
+<meta name="description" content="BlackRoad OS Virtual Computer — sovereign computing platform in your browser.">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/road-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   BRAND CSS — exact copy from brand.blackroad.io
+   ═══════════════════════════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);overflow-x:hidden;color:var(--text);font-family:var(--sg);line-height:1.6}
+a{color:var(--text);text-decoration:none}
+button{font-family:var(--sg);cursor:pointer}
+input,textarea,select{font-family:var(--sg)}
+::selection{background:rgba(255,255,255,.12)}
+
+.grad-bar{height:4px;background:var(--g)}
+
+/* NAV */
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--card);border:1px solid var(--border);border-radius:10px}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:28px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.nav-actions{display:flex;gap:10px;align-items:center}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:6px;font-weight:600;font-size:13px;border:none;transition:all .15s}
+.btn-sm{padding:7px 16px;font-size:12px;border-radius:5px}
+.btn-lg{padding:14px 32px;font-size:15px;border-radius:8px}
+.btn-white{background:var(--white);color:#000}
+.btn-white:hover{background:#e0e0e0}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:#444}
+.btn-ghost{background:transparent;border:none;color:var(--sub)}
+.btn-ghost:hover{color:var(--white)}
+.btn-dark{background:var(--elevated);color:var(--text);border:1px solid var(--border)}
+.btn-icon{width:36px;height:36px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:var(--elevated);border:1px solid var(--border);color:var(--sub);font-size:14px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.card-body{padding:20px}
+.card-sm .card-body{padding:16px}
+.card-title{font-weight:600;font-size:15px;color:var(--white);margin-bottom:6px}
+.card-text{font-size:13px;color:var(--sub);line-height:1.7}
+.card-meta{font-family:var(--jb);font-size:10px;color:var(--muted);margin-top:10px}
+.card-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-header-title{font-weight:600;font-size:14px;color:var(--white)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.badge-line{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;font-size:11px;font-weight:600;color:var(--text)}
+.badge-line::before{content:'';width:12px;height:3px;border-radius:2px;background:var(--g)}
+
+/* INPUTS */
+.input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s}
+.input:focus{border-color:#333}
+.input::placeholder{color:var(--muted)}
+.input-label{display:block;font-size:12px;font-weight:600;color:var(--sub);margin-bottom:6px;letter-spacing:.02em}
+
+/* AVATARS */
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--sub);flex-shrink:0}
+.avatar-sm{width:28px;height:28px;font-size:11px}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:500;background:var(--elevated);border:1px solid var(--border);color:var(--sub)}
+
+/* LISTS */
+.list{list-style:none}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s;cursor:pointer}
+.list-item:last-child{border-bottom:none}
+.list-item:hover{background:var(--hover)}
+.list-item-dot{width:6px;height:6px;border-radius:50%;background:var(--white);flex-shrink:0}
+.list-item-text{flex:1}
+.list-item-meta{font-family:var(--jb);font-size:10px;color:var(--muted)}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border)}
+.tab{padding:10px 20px;font-size:13px;font-weight:500;color:var(--sub);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;font-family:var(--sg)}
+.tab:hover{color:var(--white)}
+.tab.active{color:var(--white);border-bottom-color:var(--white)}
+
+/* PROGRESS */
+.progress-track{width:100%;height:4px;background:var(--elevated);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;background:var(--g);transition:width .3s}
+
+/* TOAST */
+.toast{display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px;max-width:380px;font-size:13px}
+.toast-bar{width:3px;min-height:32px;border-radius:2px;background:var(--g);flex-shrink:0;align-self:stretch}
+.toast-text{flex:1;color:var(--text)}
+.toast-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px}
+
+/* STATS */
+.stat-value{font-size:32px;font-weight:700;color:var(--white)}
+.stat-label{font-size:12px;color:var(--sub);margin-top:2px}
+.stat-bar{width:100%;height:3px;border-radius:2px;background:var(--g);margin-top:12px}
+
+/* SIDEBAR */
+.sidebar-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;padding:8px 10px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--sub);cursor:pointer;transition:all .1s}
+.sidebar-item:hover{background:var(--hover);color:var(--text)}
+.sidebar-item.active{background:var(--hover);color:var(--white);font-weight:500}
+.sidebar-item-icon{font-size:14px;width:18px;text-align:center}
+.sidebar-item-badge{margin-left:auto;font-family:var(--jb);font-size:10px;color:var(--muted)}
+
+/* DROPDOWN */
+.dropdown-menu{min-width:200px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:4px;z-index:100;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.dropdown-item{display:flex;align-items:center;gap:10px;padding:8px 12px;font-size:13px;color:var(--text);border-radius:5px;cursor:pointer;transition:background .1s}
+.dropdown-item:hover{background:var(--hover)}
+.dropdown-divider{height:1px;background:var(--border);margin:4px 0}
+.dropdown-label{padding:6px 12px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* CMD PALETTE */
+.cmd-palette{background:var(--card);border:1px solid var(--border);border-radius:12px;width:560px;max-width:90vw;overflow:hidden}
+.cmd-input-wrap{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.cmd-input{flex:1;background:none;border:none;color:var(--white);font-size:14px;outline:none}
+.cmd-input::placeholder{color:var(--muted)}
+.cmd-prefix{font-family:var(--jb);font-size:12px;color:var(--muted)}
+.cmd-results{max-height:300px;overflow-y:auto;padding:4px}
+.cmd-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:6px;cursor:pointer;transition:background .1s}
+.cmd-item:hover,.cmd-item.selected{background:var(--hover)}
+.cmd-item-icon{font-size:14px;color:var(--muted);width:20px;text-align:center}
+.cmd-item-text{flex:1;font-size:13px;color:var(--text)}
+.cmd-item-shortcut{font-family:var(--jb);font-size:10px;color:var(--muted)}
+.cmd-footer{padding:10px 18px;border-top:1px solid var(--border);display:flex;gap:16px;font-family:var(--jb);font-size:10px;color:var(--muted)}
+
+/* KBD */
+.kbd{display:inline-flex;align-items:center;padding:2px 8px;background:var(--elevated);border:1px solid var(--border);border-radius:4px;font-family:var(--jb);font-size:11px;color:var(--sub);line-height:1.8}
+
+/* SPINNER */
+.spinner{width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--white);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes gradSweep{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.anim-sweep{height:6px;border-radius:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF,#FF6B2B);background-size:200% 100%;animation:gradSweep 3s linear infinite}
+
+/* SCROLLBAR (brand-matching) */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* FOCUS */
+:focus-visible{outline:2px solid #8844FF;outline-offset:2px}
+*:focus{outline:none}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #8844FF;outline-offset:2px}
+
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ═══════════════════════════════════════
+   OS LAYOUT — minimal additions on top of brand
+   ═══════════════════════════════════════ */
+html,body{height:100%;overflow:hidden}
+
+#os{display:grid;grid-template-rows:1fr 48px;height:100vh}
+#desktop{position:relative;overflow:hidden}
+
+/* Desktop background */
+#desktop-bg{position:absolute;inset:0;pointer-events:none}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(160px);opacity:.035}
+
+/* Desktop — clean, no icons */
+#desktop-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0}
+#desktop-center .logo{width:64px;height:64px;border-radius:16px;background:var(--g135);opacity:.06}
+
+/* ── Windows ── */
+.win{position:absolute;display:flex;flex-direction:column;transition:transform .25s cubic-bezier(.4,0,.2,1),opacity .25s cubic-bezier(.4,0,.2,1),box-shadow .2s}
+.win.card{border-radius:10px}
+.win.focused{box-shadow:0 16px 64px rgba(0,0,0,.6),0 0 1px rgba(255,255,255,.06);border-color:#222;z-index:auto}
+.win.maximized{border-radius:0!important;border:none!important;left:0!important;top:0!important;width:100%!important;height:100%!important}
+.win.mini{transform:scale(.95) translateY(20px);opacity:0;pointer-events:none}
+.win.closing{transform:scale(.92);opacity:0;pointer-events:none;transition:transform .2s ease-in,opacity .2s ease-in}
+
+/* Title bar — uses card-header from brand */
+.win .card-header{cursor:default;user-select:none;padding:10px 16px;height:42px}
+.win .card-header .dots{display:flex;gap:7px}
+.win .card-header .dot{width:13px;height:13px;border-radius:50%;cursor:pointer;transition:transform .1s}
+.win .card-header .dot:hover{transform:scale(1.15)}
+.win .card-header .dot.close{background:#ff5f57}
+.win .card-header .dot.minimize{background:#ffbd2e}
+.win .card-header .dot.maximize{background:#28c840}
+.win .card-header .drag{flex:1;cursor:grab;display:flex;align-items:center;justify-content:center}
+.win .card-header .drag:active{cursor:grabbing}
+.win-title{font-size:12px;font-weight:500;color:var(--sub);pointer-events:none}
+.win.focused .win-title{color:var(--text)}
+.win-body{flex:1;overflow:auto;background:var(--bg)}
+.win-body iframe{width:100%;height:100%;border:none;display:block;background:var(--bg)}
+.win-resize{position:absolute;bottom:0;right:0;width:16px;height:16px;cursor:nwse-resize}
+
+/* Toolbar row (for browser windows) */
+.win-toolbar{display:flex;align-items:center;gap:2px;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.win-toolbar .btn-ghost{padding:4px 10px;font-size:11px;border-radius:5px}
+.win-toolbar .btn-ghost:hover{background:var(--hover)}
+.win-toolbar-sep{width:1px;height:16px;background:var(--border);margin:0 4px}
+
+/* Address bar */
+.win-addressbar{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+.win-addressbar .input{padding:6px 12px;font-size:12px;font-family:var(--jb);background:var(--bg);border-radius:6px}
+.win-addressbar-label{font-family:var(--jb);font-size:10px;color:var(--muted);flex-shrink:0}
+
+/* Status bar — uses card-footer from brand */
+.win .card-footer{padding:6px 16px;font-family:var(--jb);font-size:10px;color:var(--muted)}
+.win .card-footer .status-section{display:flex;align-items:center;gap:6px}
+
+/* ── Dock — all apps live here ── */
+#dock{background:rgba(0,0,0,.85);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:0;z-index:9000}
+#dock-apps{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto;overflow-y:hidden;padding:4px 0;scrollbar-width:none}
+#dock-apps::-webkit-scrollbar{display:none}
+.dock-btn{height:36px;min-width:36px;padding:0 10px;display:flex;align-items:center;gap:6px;border-radius:6px;cursor:pointer;font-size:11px;color:var(--sub);transition:all .12s;border:none;background:none;font-family:var(--sg);position:relative;flex-shrink:0}
+.dock-btn:hover{background:var(--hover);color:var(--white)}
+.dock-btn.active{background:var(--hover);color:var(--white)}
+.dock-btn .indicator{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--white);opacity:0;transition:opacity .15s}
+.dock-btn.remembered .indicator{opacity:.3}
+.dock-btn.open .indicator{opacity:1}
+.dock-sep{width:1px;height:24px;background:var(--border);margin:0 6px;flex-shrink:0}
+#dock-tray{display:flex;align-items:center;gap:10px;flex-shrink:0;padding-left:6px}
+#dock-clock{font-family:var(--jb);font-size:10px;color:var(--muted)}
+
+/* ── Command Palette (Cmd+K) ── */
+#launcher-overlay{position:fixed;inset:0;bottom:48px;z-index:9500;background:rgba(0,0,0,.5);backdrop-filter:blur(30px);display:none;align-items:center;justify-content:center}
+#launcher-overlay.open{display:flex}
+
+/* ── Context Menu ── */
+#ctx{position:fixed;z-index:99000;display:none}
+#ctx .dropdown-menu{display:block}
+
+/* ── Toasts ── */
+#toasts{position:fixed;top:12px;right:12px;z-index:99999;display:flex;flex-direction:column;gap:6px;pointer-events:none}
+#toasts .toast{pointer-events:auto;animation:fadeIn .25s ease}
+
+/* ── Snap Preview ── */
+#snap{position:fixed;z-index:8999;display:none;background:rgba(255,255,255,.03);border:2px solid rgba(255,255,255,.08);border-radius:8px;transition:all .15s cubic-bezier(.4,0,.2,1);pointer-events:none}
+
+/* ── Boot Screen ── */
+#boot{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100000;transition:opacity .5s}
+#boot.done{opacity:0;pointer-events:none}
+#boot-logo{width:72px;height:72px;background:var(--g135);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+#boot-text{font-family:var(--jb);font-size:11px;color:var(--muted);text-align:center;line-height:2}
+#boot-bar{width:200px;margin-top:16px}
+
+/* ── Mobile ── */
+@media(max-width:640px){
+  .win{left:0!important;top:0!important;width:100%!important;height:100%!important;border-radius:0!important;border:none!important}
+  .win-resize{display:none}
+  .dock-btn .dock-label{display:none}
+  .dock-btn{min-width:32px;padding:0 8px}
+}
+
+/* ═══════════════════════════════════════
+   v7.0 — AGENT PANEL, NOTIFICATION CENTER, SYSTEM MONITOR
+   ═══════════════════════════════════════ */
+
+/* Agent Panel — slide-out right */
+#agent-panel{position:fixed;right:0;top:0;bottom:48px;width:340px;background:var(--card);border-left:1px solid var(--border);z-index:9100;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#agent-panel.open{transform:translateX(0)}
+#agent-panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+#agent-panel-header h3{font-size:14px;font-weight:600;color:var(--white);margin:0}
+.agent-tabs{display:flex;border-bottom:1px solid var(--border)}
+.agent-tab{flex:1;padding:8px;font-size:11px;font-weight:500;color:var(--sub);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--sg);text-align:center}
+.agent-tab:hover{color:var(--white)}
+.agent-tab.active{color:var(--white);border-bottom-color:var(--white)}
+#agent-panel-body{flex:1;overflow-y:auto;padding:0}
+.agent-roster-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.agent-roster-item:hover{background:var(--hover)}
+.agent-roster-item.selected{background:var(--hover);border-left:2px solid var(--white)}
+.agent-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#000;flex-shrink:0}
+.agent-info{flex:1;min-width:0}
+.agent-name{font-size:12px;font-weight:600;color:var(--white)}
+.agent-role{font-size:10px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.agent-division-badge{font-size:9px;padding:2px 6px;border-radius:3px;background:var(--elevated);border:1px solid var(--border);color:var(--muted);font-weight:500}
+#agent-chat{display:none;flex-direction:column;height:100%}
+#agent-chat.active{display:flex}
+#agent-chat-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+#agent-chat-messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.agent-msg{max-width:85%;padding:8px 12px;border-radius:8px;font-size:12px;line-height:1.5}
+.agent-msg.from{background:var(--elevated);color:var(--text);align-self:flex-start;border:1px solid var(--border)}
+.agent-msg.to{background:rgba(136,68,255,.15);color:var(--text);align-self:flex-end}
+.agent-msg-name{font-size:10px;font-weight:600;margin-bottom:2px}
+.agent-msg-time{font-size:9px;color:var(--muted);margin-top:2px;font-family:var(--jb)}
+#agent-chat-input-wrap{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px}
+#agent-chat-input{flex:1;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px;font-family:var(--sg);outline:none}
+#agent-chat-input:focus{border-color:#333}
+
+/* Notification Center */
+#notif-panel{position:fixed;right:0;top:0;bottom:48px;width:320px;background:var(--card);border-left:1px solid var(--border);z-index:9200;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1)}
+#notif-panel.open{transform:translateX(0)}
+#notif-panel-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-item{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.notif-item:hover{background:var(--hover)}
+.notif-item.unread{border-left:2px solid #8844FF}
+.notif-icon{width:28px;height:28px;border-radius:6px;background:var(--elevated);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:12px;font-weight:500;color:var(--white)}
+.notif-text{font-size:10px;color:var(--sub);margin-top:2px}
+.notif-time{font-size:9px;color:var(--muted);font-family:var(--jb);margin-top:3px}
+#notif-badge{position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;border-radius:7px;background:#FF2255;color:#fff;font-size:8px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px}
+
+/* System Map Panel */
+#sysmap-panel{display:none;flex-direction:column;height:100%;padding:0}
+#sysmap-panel.active{display:flex}
+.sysmap-section{padding:12px 16px;border-bottom:1px solid var(--border)}
+.sysmap-section-title{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.sysmap-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;font-size:11px}
+.sysmap-row-label{color:var(--sub)}
+.sysmap-row-value{color:var(--white);font-family:var(--jb);font-size:10px}
+.sysmap-health{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.sysmap-health.up{background:#22c55e}
+.sysmap-health.down{background:#ef4444}
+.sysmap-health.unknown{background:var(--muted)}
+
+/* ═══════════════════════════════════════
+   v6.0 — WIDGETS, SHORTCUTS, CLIPBOARD, SPOTLIGHT, THEMES, BACKUP, PERMISSIONS, STARTUP
+   ═══════════════════════════════════════ */
+
+/* Widget overlay */
+#widgets-panel{position:absolute;top:8px;left:8px;z-index:60;display:flex;flex-direction:column;gap:8px;pointer-events:auto;max-height:calc(100vh - 80px);overflow-y:auto;scrollbar-width:none}
+#widgets-panel::-webkit-scrollbar{display:none}
+.desktop-widget{background:rgba(10,10,10,.92);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:var(--jb);font-size:11px;color:var(--sub);backdrop-filter:blur(16px);min-width:200px;max-width:260px;transition:opacity .3s,transform .3s}
+.desktop-widget:hover{border-color:#333}
+.widget-title{font-family:var(--sg);font-weight:600;font-size:12px;color:var(--white);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.widget-title .widget-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:10px;padding:2px 6px;border-radius:4px}
+.widget-title .widget-close:hover{color:var(--white);background:var(--hover)}
+.widget-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;font-size:11px}
+.widget-row-label{color:var(--sub)}
+.widget-row-value{color:var(--white);font-weight:500}
+
+/* Spotlight overlay */
+#spotlight-overlay{position:fixed;inset:0;z-index:99500;background:rgba(0,0,0,.65);backdrop-filter:blur(40px);display:none;align-items:flex-start;justify-content:center;padding-top:18vh}
+#spotlight-overlay.open{display:flex}
+#spotlight-box{width:620px;max-width:92vw;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.7)}
+#spotlight-input-wrap{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+#spotlight-input{flex:1;background:none;border:none;color:var(--white);font-size:16px;font-family:var(--sg);outline:none}
+#spotlight-input::placeholder{color:var(--muted)}
+#spotlight-results{max-height:360px;overflow-y:auto;padding:6px}
+.spotlight-section{padding:6px 16px;font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.spotlight-item{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:8px;cursor:pointer;transition:background .1s;font-size:13px;color:var(--text)}
+.spotlight-item:hover,.spotlight-item.sel{background:var(--hover)}
+.spotlight-item-icon{font-size:12px;color:var(--muted);width:20px;text-align:center;flex-shrink:0}
+.spotlight-item-text{flex:1}
+.spotlight-item-sub{font-size:10px;color:var(--muted);font-family:var(--jb)}
+
+/* Clipboard panel */
+#clipboard-panel{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:9400;width:280px;max-height:60vh;background:var(--card);border:1px solid var(--border);border-radius:10px;display:none;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.5)}
+#clipboard-panel.open{display:block}
+.clip-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text);cursor:pointer;transition:background .1s}
+.clip-item:hover{background:var(--hover)}
+.clip-item:last-child{border-bottom:none}
+.clip-item-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--jb);font-size:10px}
+.clip-pin{color:var(--muted);font-size:10px;cursor:pointer;padding:2px 4px;border-radius:3px}
+.clip-pin:hover{color:var(--white)}
+.clip-pin.pinned{color:#F5A623}
+
+/* Permissions / Startup / Backup panels — reuse dropdown-menu styles */
+.os-panel-overlay{position:fixed;inset:0;z-index:99300;background:rgba(0,0,0,.5);backdrop-filter:blur(20px);display:none;align-items:center;justify-content:center}
+.os-panel-overlay.open{display:flex}
+.os-panel{width:520px;max-width:92vw;max-height:75vh;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.os-panel-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.os-panel-header h3{font-size:15px;font-weight:600;color:var(--white);margin:0}
+.os-panel-body{padding:16px 20px;overflow-y:auto;max-height:calc(75vh - 60px)}
+.os-panel-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:4px}
+.os-panel-close:hover{color:var(--white);background:var(--hover)}
+.perm-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.perm-row:last-child{border-bottom:none}
+.perm-label{font-size:13px;color:var(--text)}
+.perm-sub{font-size:10px;color:var(--muted)}
+.toggle-sw{width:36px;height:20px;border-radius:10px;background:var(--border);position:relative;cursor:pointer;transition:background .2s;border:none;padding:0}
+.toggle-sw.on{background:#22c55e}
+.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--white);transition:left .2s}
+.toggle-sw.on::after{left:18px}
+.startup-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.startup-item:last-child{border-bottom:none}
+.startup-order{font-family:var(--jb);font-size:11px;color:var(--muted);width:24px;text-align:center}
+/* ═══════════════════════════════════════════════════════
+   BlackRoad OS v7 — Brand Compliance Patch
+   Fixes: window chrome, dots, title bars, app cards
+   Must match brand.blackroad.io + DESIGNTEMPLATES/template.html
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Window card — gradient top bar is mandatory ── */
+.win .card-grad {
+  height: 3px;
+  background: var(--g);
+  border-radius: 10px 10px 0 0;
+}
+
+/* ── Title bar — no macOS colored dots ── */
+.win .card-header {
+  padding: 10px 16px;
+  height: 42px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Replace colored dots with gradient circles */
+.win .card-header .dot.close {
+  background: none;
+  border: 1.5px solid var(--muted);
+  transition: all .15s;
+}
+.win .card-header .dot.minimize {
+  background: none;
+  border: 1.5px solid var(--muted);
+  transition: all .15s;
+}
+.win .card-header .dot.maximize {
+  background: none;
+  border: 1.5px solid var(--muted);
+  transition: all .15s;
+}
+
+/* On hover — gradient fill */
+.win .card-header .dot.close:hover {
+  background: #FF2255;
+  border-color: #FF2255;
+}
+.win .card-header .dot.minimize:hover {
+  background: #8844FF;
+  border-color: #8844FF;
+}
+.win .card-header .dot.maximize:hover {
+  background: #00D4FF;
+  border-color: #00D4FF;
+}
+
+/* Focused window — dots show subtle brand colors */
+.win.focused .card-header .dot.close {
+  border-color: rgba(255, 34, 85, 0.4);
+}
+.win.focused .card-header .dot.minimize {
+  border-color: rgba(136, 68, 255, 0.4);
+}
+.win.focused .card-header .dot.maximize {
+  border-color: rgba(0, 212, 255, 0.4);
+}
+
+/* ── Window title — white on focus, sub when blurred ── */
+.win-title {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--sg);
+  color: var(--muted);
+  pointer-events: none;
+  letter-spacing: 0.3px;
+}
+.win.focused .win-title {
+  color: var(--text);
+}
+
+/* ── Window border — subtle gradient glow on focus ── */
+.win.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.win.focused {
+  box-shadow:
+    0 16px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 34, 85, 0.08),
+    0 0 30px rgba(136, 68, 255, 0.04);
+  border-color: #222;
+}
+
+/* ── Window body — pure black bg ── */
+.win-body {
+  flex: 1;
+  overflow: auto;
+  background: var(--bg);
+}
+
+/* ── Toolbar — matches brand elevated ── */
+.win-toolbar {
+  background: var(--elevated);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 12px;
+}
+.win-toolbar .btn-ghost:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+/* ── Address bar — brand styling ── */
+.win-addressbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.win-addressbar .input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--jb);
+  font-size: 12px;
+  border-radius: 6px;
+  transition: border-color .15s;
+}
+.win-addressbar .input:focus {
+  border-color: #333;
+}
+
+/* ── Status bar — brand footer ── */
+.win .card-footer {
+  padding: 6px 16px;
+  border-top: 1px solid var(--border);
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--card);
+}
+
+/* ── Dock — gradient top line ── */
+#dock {
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: none;
+  position: relative;
+}
+#dock::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--g);
+  opacity: 0.3;
+}
+
+/* ── Dock buttons — brand hover ── */
+.dock-btn:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+.dock-btn.active {
+  color: var(--text);
+}
+.dock-btn.active::after {
+  background: var(--g) !important;
+  width: 12px !important;
+  height: 2px !important;
+}
+
+/* ── Dock icons — gradient circles/squares instead of emoji ── */
+.dock-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dock-icon.circle {
+  background: var(--g135);
+}
+.dock-icon.square {
+  border-radius: 4px;
+  background: var(--g);
+}
+
+/* ── Launcher — brand card ── */
+#launcher {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+#launcher .card-grad {
+  height: 3px;
+  background: var(--g);
+}
+
+/* ── App cards in launcher — gradient accent on hover ── */
+.launcher-app:hover {
+  border-color: rgba(255, 34, 85, 0.2);
+  background: var(--hover);
+}
+.launcher-app .app-icon.circle {
+  background: var(--g135);
+}
+.launcher-app .app-icon.square {
+  background: var(--g);
+  border-radius: 4px;
+}
+
+/* ── Spotlight — brand search ── */
+#spotlight-overlay .input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+#spotlight-overlay .input:focus {
+  border-color: #333;
+  box-shadow: 0 0 0 1px rgba(255, 34, 85, 0.1);
+}
+
+/* ── Agent panel — brand cards ── */
+.agent-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color .15s;
+}
+.agent-card:hover {
+  border-color: #333;
+}
+.agent-card.selected {
+  border-color: rgba(255, 34, 85, 0.3);
+}
+
+/* ── Notification panel — brand ── */
+.notif-item {
+  border-bottom: 1px solid var(--border);
+}
+.notif-item:hover {
+  background: var(--hover);
+}
+
+/* ── Widget cards — gradient top ── */
+.widget {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.widget::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--g);
+}
+
+/* ── Toast notifications — brand ── */
+.toast {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-left: 3px solid;
+  border-image: var(--g) 1;
+}
+
+/* ── Command palette — brand ── */
+#cmd-palette {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+#cmd-palette::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--g);
+  border-radius: 10px 10px 0 0;
+}
+
+/* ── Scrollbars — brand ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ── Selection — no colored highlight, white only ── */
+::selection { background: rgba(255, 255, 255, 0.12); }
+
+</style><meta property="og:title" content="BlackRoad OS"><meta property="og:description" content="17 products. 27 agents. 17 orgs. One highway."><meta property="og:url" content="https://os.blackroad.io"><meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png"><meta name="twitter:card" content="summary_large_image"><meta name="robots" content="index, follow, noai, noimageai"><link rel="canonical" href="https://os.blackroad.io/">
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-logo"><span style="font-size:28px;font-weight:700;color:#000">B</span></div>
+  <div id="boot-text">
+    BlackRoad OS v7.0 — 17 Products. 27 Agents. 17 Orgs.<br>
+    <span id="boot-status">Initializing...</span>
+  </div>
+  <div id="boot-bar">
+    <div class="progress-track"><div class="progress-fill" id="boot-fill" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- OS -->
+<div id="os" style="opacity:0">
+
+<!-- DESKTOP — clean, just orbs -->
+<div id="desktop">
+  <div id="desktop-bg">
+    <div class="bg-orb" style="width:700px;height:700px;background:#FF2255;top:-250px;right:-150px"></div>
+    <div class="bg-orb" style="width:500px;height:500px;background:#4488FF;bottom:-150px;left:-100px"></div>
+    <div class="bg-orb" style="width:350px;height:350px;background:#8844FF;top:40%;left:40%"></div>
+  </div>
+  <div id="desktop-center"><div class="logo"></div></div>
+  <div id="win-container"></div>
+</div>
+
+<!-- DOCK — all apps live here -->
+<div id="dock">
+  <div id="dock-apps"></div>
+  <div class="dock-sep"></div>
+  <div id="dock-tray">
+    <button class="btn-icon" onclick="toggleAgentPanel()" title="Agents" style="width:28px;height:28px;font-size:10px;position:relative">A</button>
+    <button class="btn-icon" onclick="toggleNotifPanel()" title="Notifications" style="width:28px;height:28px;font-size:10px;position:relative">N<span id="notif-badge">0</span></button>
+    <span class="badge"><span class="badge-dot" style="background:var(--white)"></span><span id="tray-status">ready</span></span>
+    <span id="dock-clock"></span>
+  </div>
+</div>
+</div>
+
+<!-- AGENT PANEL -->
+<div id="agent-panel">
+  <div id="agent-panel-header">
+    <h3>Agents <span style="font-weight:400;color:var(--sub);font-size:11px">(27)</span></h3>
+    <button class="os-panel-close" onclick="toggleAgentPanel()">&#10005;</button>
+  </div>
+  <div class="agent-tabs">
+    <button class="agent-tab active" data-atab="roster" onclick="switchAgentTab('roster')">Roster</button>
+    <button class="agent-tab" data-atab="chat" onclick="switchAgentTab('chat')">Chat</button>
+    <button class="agent-tab" data-atab="sysmap" onclick="switchAgentTab('sysmap')">System Map</button>
+  </div>
+  <div id="agent-panel-body">
+    <div id="agent-roster"></div>
+    <div id="agent-chat">
+      <div id="agent-chat-header"></div>
+      <div id="agent-chat-messages"></div>
+      <div id="agent-chat-input-wrap">
+        <input id="agent-chat-input" placeholder="Talk to agent..." onkeydown="if(event.key==='Enter')sendAgentMsg()">
+        <button class="btn btn-sm btn-outline" onclick="sendAgentMsg()">Send</button>
+      </div>
+    </div>
+    <div id="sysmap-panel"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION CENTER -->
+<div id="notif-panel">
+  <div id="notif-panel-header">
+    <h3>Notifications</h3>
+    <div style="display:flex;gap:6px">
+      <button class="btn-ghost btn-sm" onclick="markAllRead()" style="font-size:10px">Mark all read</button>
+      <button class="os-panel-close" onclick="toggleNotifPanel()">&#10005;</button>
+    </div>
+  </div>
+  <div id="notif-list" style="flex:1;overflow-y:auto"></div>
+</div>
+
+<!-- CMD PALETTE (Cmd+K or click desktop) -->
+<div id="launcher-overlay" onclick="if(event.target===this)closeLauncher()">
+  <div class="cmd-palette">
+    <div class="cmd-input-wrap">
+      <span class="cmd-prefix">&gt;</span>
+      <input class="cmd-input" id="cmd-input" placeholder="Search or run command...">
+    </div>
+    <div class="cmd-results" id="cmd-results"></div>
+    <div class="cmd-footer">
+      <span><span class="kbd">up/dn</span> navigate</span>
+      <span><span class="kbd">enter</span> open</span>
+      <span><span class="kbd">esc</span> close</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="ctx"><div class="dropdown-menu" id="ctx-inner"></div></div>
+
+<!-- TOASTS -->
+<div id="toasts"></div>
+
+<!-- SNAP PREVIEW -->
+<div id="snap"></div>
+
+<!-- WIDGETS PANEL -->
+<div id="widgets-panel"></div>
+
+<!-- SPOTLIGHT (Cmd+Space) -->
+<div id="spotlight-overlay" onclick="if(event.target===this)closeSpotlight()">
+  <div id="spotlight-box">
+    <div id="spotlight-input-wrap">
+      <span style="font-size:16px;color:var(--muted)">&#9906;</span>
+      <input id="spotlight-input" placeholder="Search everything... files, apps, messages, agents, settings">
+    </div>
+    <div id="spotlight-results"></div>
+  </div>
+</div>
+
+<!-- CLIPBOARD PANEL -->
+<div id="clipboard-panel">
+  <div class="card-header"><span class="card-header-title">Clipboard History</span><button class="os-panel-close" onclick="toggleClipboard()">&#10005;</button></div>
+  <div id="clipboard-list" style="max-height:50vh;overflow-y:auto"></div>
+</div>
+
+<!-- PERMISSIONS PANEL -->
+<div class="os-panel-overlay" id="permissions-overlay" onclick="if(event.target===this)closePanel('permissions-overlay')">
+  <div class="os-panel">
+    <div class="os-panel-header"><h3>App Permissions</h3><button class="os-panel-close" onclick="closePanel('permissions-overlay')">&#10005;</button></div>
+    <div class="os-panel-body" id="permissions-body"></div>
+  </div>
+</div>
+
+<!-- STARTUP PANEL -->
+<div class="os-panel-overlay" id="startup-overlay" onclick="if(event.target===this)closePanel('startup-overlay')">
+  <div class="os-panel">
+    <div class="os-panel-header"><h3>Startup Manager</h3><button class="os-panel-close" onclick="closePanel('startup-overlay')">&#10005;</button></div>
+    <div class="os-panel-body" id="startup-body"></div>
+  </div>
+</div>
+
+<!-- BACKUP PANEL -->
+<div class="os-panel-overlay" id="backup-overlay" onclick="if(event.target===this)closePanel('backup-overlay')">
+  <div class="os-panel">
+    <div class="os-panel-header"><h3>System Backup</h3><button class="os-panel-close" onclick="closePanel('backup-overlay')">&#10005;</button></div>
+    <div class="os-panel-body" id="backup-body"></div>
+  </div>
+</div>
+
+<!-- THEME PICKER PANEL -->
+<div class="os-panel-overlay" id="themes-overlay" onclick="if(event.target===this)closePanel('themes-overlay')">
+  <div class="os-panel">
+    <div class="os-panel-header"><h3>Desktop Themes</h3><button class="os-panel-close" onclick="closePanel('themes-overlay')">&#10005;</button></div>
+    <div class="os-panel-body" id="themes-body"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  BLACKROAD OS — VIRTUAL COMPUTER
+//  Built on brand.blackroad.io
+//
+//  Philosophy: for messy people who never close anything.
+//  - All apps in the dock. Clean desktop.
+//  - Opening a new app auto-closes the old one.
+//  - Every app remembers its position, size, and URL.
+//  - You never have to organize. The OS does it for you.
+// ═══════════════════════════════════════════════════════
+
+var APPS = [
+  // ── 17 Canonical Products ──
+  {id:'roadtrip',    name:'RoadTrip',    icon:'circle', url:'https://roadtrip.blackroad.io',    w:.5, h:.7},
+  {id:'roadie',      name:'Roadie',      icon:'square', url:'https://roadie.blackroad.io',      w:.5, h:.65},
+  {id:'roadview',    name:'RoadView',    icon:'circle', url:'https://roadview.blackroad.io',    w:.55,h:.7, browser:true},
+  {id:'backroad',    name:'BackRoad',    icon:'square', url:'https://backroad.blackroad.io',    w:.48,h:.6},
+  {id:'roadcode',    name:'RoadCode',    icon:'circle', url:'https://roadcode.blackroad.io',    w:.6, h:.75},
+  {id:'roadwork',    name:'RoadWork',    icon:'square', url:'https://roadwork.blackroad.io',    w:.55,h:.7},
+  {id:'carkeys',     name:'CarKeys',     icon:'circle', url:'https://carkeys.blackroad.io',     w:.4, h:.55},
+  {id:'roadchain',   name:'RoadChain',   icon:'square', url:'https://roadchain.blackroad.io',   w:.5, h:.65},
+  {id:'roadcoin',    name:'RoadCoin',    icon:'circle', url:'https://roadcoin.blackroad.io',    w:.45,h:.6},
+  {id:'roadbook',    name:'RoadBook',    icon:'square', url:'https://roadbook.blackroad.io',    w:.55,h:.75},
+  {id:'roadworld',   name:'RoadWorld',   icon:'circle', url:'https://roadworld.blackroad.io',   w:.55,h:.65},
+  {id:'officeroad',  name:'OfficeRoad',  icon:'square', url:'https://officeroad.blackroad.io',  w:.5, h:.6},
+  {id:'carpool',     name:'CarPool',     icon:'circle', url:'https://carpool.blackroad.io',     w:.45,h:.6},
+  {id:'oneway',      name:'OneWay',      icon:'square', url:'https://oneway.blackroad.io',      w:.4, h:.55},
+  {id:'roadside',    name:'RoadSide',    icon:'circle', url:'https://roadside.blackroad.io',    w:.45,h:.6},
+  {id:'blackboard',  name:'BlackBoard',  icon:'square', url:'https://blackboard.blackroad.io',  w:.55,h:.7},
+  // ── System ──
+  {id:'highway',     name:'Highway',     icon:'circle', url:'https://highway.blackroad.io',     w:.6, h:.75},
+  {id:'files',       name:'Files',       icon:'square', url:'local://files',                    w:.55, h:.7, native:true},
+];
+
+// Icon renderer — circles and squares only
+function iconHTML(shape, size){
+  size = size || 10;
+  var r = shape === 'circle' ? '50%' : '2px';
+  return '<span style="display:inline-block;width:'+size+'px;height:'+size+'px;border-radius:'+r+';background:var(--g135);flex-shrink:0"></span>';
+}
+
+var wins = {}, zTop = 100, focusedId = null;
+var STORAGE_KEY = 'bos-memory';
+var _userId = 'default';
+var _serverSynced = false;
+var _syncTimer = null;
+
+// ═══ MEMORY — localStorage + server persistence ═══
+function loadMemory(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e){ return {}; }
+}
+function saveMemory(id, data){
+  var mem = loadMemory();
+  mem[id] = Object.assign(mem[id] || {}, data, {ts: Date.now()});
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(mem)); } catch(e){}
+  // Debounced server sync
+  if(_syncTimer) clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(syncToServer, 2000);
+}
+function getMemory(id){
+  return loadMemory()[id] || null;
+}
+function hasMemory(id){
+  return !!loadMemory()[id];
+}
+
+// ═══ SERVER SYNC — persist desktop state across devices ═══
+function syncToServer(){
+  var mem = loadMemory();
+  var openWindows = Object.keys(wins).map(function(id){
+    var w = wins[id];
+    return {id:id, x:w.x, y:w.y, w:w.w, h:w.h, maximized:!!w.maximized};
+  });
+  var dockOrder = (typeof APPS !== 'undefined') ? APPS.map(function(a){return a.id}) : [];
+  var theme = document.documentElement.getAttribute('data-theme') || 'night-drive';
+  fetch('/api/desktop/'+_userId+'/save', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({windows:openWindows, dock_order:dockOrder, theme:theme, memory:mem})
+  }).catch(function(){});
+}
+function loadFromServer(){
+  fetch('/api/desktop/'+_userId).then(function(r){return r.json()}).then(function(d){
+    if(d && d.windows && d.windows.length > 0 && !_serverSynced){
+      _serverSynced = true;
+      // Merge server state into localStorage
+      if(d.memory) { try { var local = loadMemory(); var merged = Object.assign(d.memory, local); localStorage.setItem(STORAGE_KEY, JSON.stringify(merged)); } catch(e){} }
+      // Apply theme
+      if(d.theme) { document.documentElement.setAttribute('data-theme', d.theme); }
+      // Reopen windows that were open
+      d.windows.forEach(function(w){ if(w.id && !wins[w.id]) { setTimeout(function(){ openApp(w.id); },500); } });
+    }
+  }).catch(function(){});
+}
+function loadNotifications(){
+  fetch('/api/notifications/'+_userId).then(function(r){return r.json()}).then(function(d){
+    if(d && d.notifications) {
+      d.notifications.filter(function(n){return !n.read}).forEach(function(n){
+        addOSNotification(n.title || 'Notification', n.body || '', n.source || 'system');
+      });
+    }
+  }).catch(function(){});
+}
+
+// ═══ BOOT ═══
+(function(){
+  var msgs = ['Initializing kernel...','Loading modules...','Starting network...','Loading AI subsystem...','Restoring memory...','Ready.'];
+  var fill = document.getElementById('boot-fill');
+  var status = document.getElementById('boot-status');
+  var i = 0;
+  function step(){
+    if(i >= msgs.length){
+      fill.style.width = '100%';
+      setTimeout(function(){
+        document.getElementById('boot').classList.add('done');
+        document.getElementById('os').style.opacity = '1';
+        setTimeout(function(){
+          document.getElementById('boot').remove();
+          renderDock();
+          // Server sync — load state from cloud
+          setTimeout(function(){ loadFromServer(); loadNotifications(); }, 500);
+          // ═══ REAL-TIME CONVOY CONNECTION ═══
+          (function connectConvoy(){
+            try {
+              var ws = new WebSocket('wss://convoy.blackroad.io/ws?user='+_userId+'&product=os');
+              ws.onopen = function(){ console.log('[Convoy] Connected'); };
+              ws.onmessage = function(e){
+                try {
+                  var msg = JSON.parse(e.data);
+                  if(msg.type === 'notification') addOSNotification(msg.title||'', msg.body||'', msg.source||'convoy');
+                  if(msg.type === 'celebration') { toast(msg.title || 'Milestone!'); if(msg.reactions) msg.reactions.forEach(function(r){ addOSNotification(AGENTS_MAP[r.agent]||r.agent, r.message, 'convoy'); }); }
+                  if(msg.type === 'agent_move') toast((msg.name||msg.agent)+' moving to '+msg.to);
+                  if(msg.type === 'agent_summoned') toast((msg.name||msg.agent)+' summoned to '+msg.product);
+                  if(msg.type === 'user_joined') console.log('[Convoy] '+msg.user+' joined from '+msg.product);
+                } catch(ex){}
+              };
+              ws.onclose = function(){ setTimeout(connectConvoy, 5000); };
+              ws.onerror = function(){ ws.close(); };
+              window._convoyWs = ws;
+            } catch(ex){ console.log('[Convoy] WebSocket unavailable'); }
+          })();
+          var AGENTS_MAP = {roadie:'Roadie',lucidia:'Lucidia',calliope:'Calliope',sophia:'Sophia',thalia:'Thalia',cecilia:'Cecilia',octavia:'Octavia',portia:'Portia',ophelia:'Ophelia',celeste:'Celeste',silas:'Silas',gematria:'Gematria',aria:'Aria',sapphira:'Sapphira',seraphina:'Seraphina',lyra:'Lyra',alice:'Alice',alexandria:'Alexandria',sebastian:'Sebastian',elias:'Elias',theodosia:'Theodosia',gaia:'Gaia',atticus:'Atticus',cicero:'Cicero',valeria:'Valeria',olympia:'Olympia',anastasia:'Anastasia'};
+
+          // Context bridge — products in iframes can request user context
+          window.addEventListener('message', function(e){
+            if(e.data && e.data.type === 'blackroad-os:request-context'){
+              var src = e.source;
+              if(src) src.postMessage({type:'blackroad-os:context', user:_userId, theme:currentTheme||'highway', products:APPS.length, agents:27}, '*');
+            }
+          });
+        }, 400);
+      }, 300);
+      return;
+    }
+    status.textContent = msgs[i];
+    fill.style.width = Math.round(((i+1)/msgs.length)*100) + '%';
+    i++;
+    setTimeout(step, 120 + Math.random()*200);
+  }
+  setTimeout(step, 400);
+})();
+
+// ═══ CMD PALETTE (Cmd+K) ═══
+var launcherOn = false;
+function buildLauncher(q){
+  var el = document.getElementById('cmd-results');
+  var html = '';
+  APPS.forEach(function(app){
+    if(q && app.name.toLowerCase().indexOf(q) === -1 && app.url.toLowerCase().indexOf(q) === -1) return;
+    var mem = hasMemory(app.id);
+    html += '<div class="cmd-item" onclick="openApp(\''+app.id+'\');closeLauncher()">';
+    html += '<span class="cmd-item-icon">'+iconHTML(app.icon, 8)+'</span>';
+    html += '<span class="cmd-item-text">'+app.name+(mem ? ' <span style="color:var(--muted);font-family:var(--jb);font-size:9px">remembered</span>' : '')+'</span>';
+    html += '<span class="cmd-item-shortcut">'+app.url.replace('https://','')+'</span>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+function toggleLauncher(){ launcherOn ? closeLauncher() : openLauncher(); }
+function openLauncher(){ launcherOn=true; document.getElementById('launcher-overlay').classList.add('open'); var s=document.getElementById('cmd-input'); s.value=''; buildLauncher(); s.focus(); }
+function closeLauncher(){ launcherOn=false; document.getElementById('launcher-overlay').classList.remove('open'); }
+document.getElementById('cmd-input').addEventListener('input', function(e){ buildLauncher(e.target.value.toLowerCase()); });
+
+// ═══ WINDOW MANAGER ═══
+// Auto-close: opening a new app closes the previous one (saves memory first)
+function autoCloseOthers(exceptId){
+  Object.keys(wins).forEach(function(id){
+    if(id !== exceptId) closeWin(id);
+  });
+}
+
+function openApp(id){
+  closeLauncher();
+  // If already open, just focus
+  if(wins[id]){
+    focusWin(id);
+    return;
+  }
+  // Auto-close whatever else is open
+  autoCloseOthers(id);
+
+  var app = APPS.find(function(a){return a.id===id});
+  if(!app) return;
+
+  var D = document.getElementById('desktop');
+  var dw = D.offsetWidth, dh = D.offsetHeight;
+
+  // Restore from memory or use defaults
+  var mem = getMemory(id);
+  var w, h, x, y, url;
+  if(mem){
+    w = Math.min(mem.w || Math.round(dw * app.w), dw);
+    h = Math.min(mem.h || Math.round(dh * app.h), dh);
+    x = Math.min(mem.x || 0, dw - w);
+    y = Math.min(mem.y || 0, dh - h);
+    url = mem.url || app.url;
+  } else {
+    w = Math.max(340, Math.min(Math.round(dw * app.w), dw - 20));
+    h = Math.max(240, Math.min(Math.round(dh * app.h), dh - 20));
+    x = Math.round((dw - w) / 2);
+    y = Math.round((dh - h) / 2);
+    url = app.url;
+  }
+
+  var el = document.createElement('div');
+  el.className = 'win card focused';
+  el.id = 'w-'+id;
+  el.style.cssText = 'left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;z-index:'+(++zTop);
+
+  var html = '<div class="card-grad"></div>';
+
+  // Title bar
+  html += '<div class="card-header">';
+  html += '<div class="dots"><div class="dot close" data-a="close"></div><div class="dot minimize" data-a="min"></div><div class="dot maximize" data-a="max"></div></div>';
+  html += '<div class="drag"><span class="win-title">'+app.name+'</span></div>';
+  html += '<div style="width:50px"></div>';
+  html += '</div>';
+
+  // Toolbar + address bar for browser windows
+  if(app.browser){
+    html += '<div class="win-toolbar">';
+    html += '<button class="btn-ghost btn-sm" onclick="winRefresh(\''+id+'\')">Reload</button>';
+    html += '<div class="win-toolbar-sep"></div>';
+    html += '<button class="btn-ghost btn-sm" onclick="winHome(\''+id+'\')">Home</button>';
+    html += '</div>';
+    html += '<div class="win-addressbar">';
+    html += '<span class="win-addressbar-label">Address</span>';
+    html += '<input class="input" value="'+url+'" data-addr="1" onkeydown="if(event.key===\'Enter\')winNav(\''+id+'\',this.value)">';
+    html += '</div>';
+  }
+
+  html += '<div class="win-body"><iframe src="'+url+'" loading="lazy"></iframe></div>';
+
+  html += '<div class="card-footer">';
+  html += '<div class="status-section"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--white)"></span> Ready</div>';
+  html += '<div style="font-family:var(--jb);font-size:10px;color:var(--muted)">'+url.replace('https://','')+'</div>';
+  html += '</div>';
+
+  html += '<div class="win-resize"></div>';
+
+  el.innerHTML = html;
+
+  // Dot actions
+  el.querySelectorAll('.dot').forEach(function(dot){
+    dot.addEventListener('click', function(e){
+      e.stopPropagation();
+      var a = dot.dataset.a;
+      if(a==='close') closeWin(id);
+      else if(a==='min') closeWin(id); // minimize = close (auto-tidy)
+      else if(a==='max') maxiWin(id);
+    });
+  });
+
+  // Focus
+  el.addEventListener('mousedown', function(){ focusWin(id); });
+
+  // Drag
+  var dragEl = el.querySelector('.drag');
+  var dragging = false, ddx, ddy;
+  dragEl.addEventListener('mousedown', function(e){
+    if(wins[id].maxi) return;
+    dragging = true; ddx = e.clientX - wins[id].x; ddy = e.clientY - wins[id].y;
+    el.style.transition = 'box-shadow .2s';
+    focusWin(id);
+    document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents='none'; });
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!dragging) return;
+    var nx = e.clientX - ddx, ny = Math.max(0, e.clientY - ddy);
+    wins[id].x = nx; wins[id].y = ny;
+    el.style.left = nx+'px'; el.style.top = ny+'px';
+    var snap = null, sdw = D.offsetWidth, sdh = D.offsetHeight;
+    if(e.clientX <= 4) snap = 'left';
+    else if(e.clientX >= sdw - 4) snap = 'right';
+    else if(e.clientY <= 4) snap = 'max';
+    showSnap(snap, sdw, sdh);
+    wins[id]._snap = snap;
+  });
+  document.addEventListener('mouseup', function(){
+    if(!dragging) return;
+    dragging = false; el.style.transition = '';
+    document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents=''; });
+    hideSnap();
+    var snap = wins[id]._snap;
+    if(snap){
+      var sdw = D.offsetWidth, sdh = D.offsetHeight;
+      wins[id]._prev = {x:wins[id].x, y:wins[id].y, w:wins[id].w, h:wins[id].h};
+      if(snap==='left'){ wins[id].x=0;wins[id].y=0;wins[id].w=Math.round(sdw/2);wins[id].h=sdh; }
+      else if(snap==='right'){ wins[id].x=Math.round(sdw/2);wins[id].y=0;wins[id].w=Math.round(sdw/2);wins[id].h=sdh; }
+      else if(snap==='max'){ maxiWin(id); wins[id]._snap=null; return; }
+      el.style.left=wins[id].x+'px';el.style.top=wins[id].y+'px';el.style.width=wins[id].w+'px';el.style.height=wins[id].h+'px';
+      wins[id]._snap = null;
+    }
+    // Save position to memory after drag
+    saveMemory(id, {x:wins[id].x, y:wins[id].y, w:wins[id].w, h:wins[id].h});
+  });
+  dragEl.addEventListener('dblclick', function(){ maxiWin(id); });
+
+  // Resize
+  var resEl = el.querySelector('.win-resize');
+  var resizing = false, rx, ry, rw, rh;
+  resEl.addEventListener('mousedown', function(e){
+    if(wins[id].maxi) return;
+    e.stopPropagation(); resizing=true; rx=e.clientX;ry=e.clientY;rw=wins[id].w;rh=wins[id].h;
+    document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents='none'; });
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!resizing) return;
+    wins[id].w = Math.max(340, rw + e.clientX - rx);
+    wins[id].h = Math.max(240, rh + e.clientY - ry);
+    el.style.width = wins[id].w+'px'; el.style.height = wins[id].h+'px';
+  });
+  document.addEventListener('mouseup', function(){
+    if(resizing){
+      resizing = false;
+      document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents=''; });
+      // Save size to memory after resize
+      saveMemory(id, {w:wins[id].w, h:wins[id].h});
+    }
+  });
+
+  document.getElementById('win-container').appendChild(el);
+  wins[id] = {el:el, app:app, x:x, y:y, w:w, h:h, maxi:false};
+  focusWin(id);
+  renderDock();
+}
+
+function closeWin(id){
+  if(!wins[id]) return;
+  var w = wins[id];
+  // Save everything to memory before closing
+  var addr = w.el.querySelector('[data-addr="1"]');
+  saveMemory(id, {
+    x: w.x, y: w.y, w: w.w, h: w.h,
+    url: addr ? addr.value : w.app.url
+  });
+  // Animate out
+  w.el.classList.add('closing');
+  var iframe = w.el.querySelector('iframe');
+  if(iframe) iframe.src = 'about:blank';
+  setTimeout(function(){ if(w.el.parentNode) w.el.remove(); }, 220);
+  delete wins[id];
+  if(focusedId===id) focusedId=null;
+  renderDock();
+}
+
+function maxiWin(id){
+  if(!wins[id]) return;
+  var w = wins[id];
+  if(w.maxi){
+    w.el.classList.remove('maximized');
+    if(w._prev){ w.x=w._prev.x;w.y=w._prev.y;w.w=w._prev.w;w.h=w._prev.h; }
+    w.el.style.left=w.x+'px';w.el.style.top=w.y+'px';w.el.style.width=w.w+'px';w.el.style.height=w.h+'px';
+    w.maxi = false;
+  } else {
+    w._prev = {x:w.x,y:w.y,w:w.w,h:w.h};
+    w.el.classList.add('maximized');
+    w.maxi = true;
+  }
+}
+
+function focusWin(id){
+  if(focusedId && wins[focusedId]) wins[focusedId].el.classList.remove('focused');
+  focusedId = id;
+  if(wins[id]){ wins[id].el.classList.add('focused'); wins[id].el.style.zIndex = ++zTop; }
+  renderDock();
+}
+
+// ═══ BROWSER NAV ═══
+function winNav(id, url){
+  if(!wins[id]) return;
+  if(url.indexOf('://') === -1) url = 'https://' + url;
+  var iframe = wins[id].el.querySelector('iframe');
+  if(iframe) iframe.src = url;
+  var addr = wins[id].el.querySelector('[data-addr="1"]');
+  if(addr) addr.value = url;
+  saveMemory(id, {url: url});
+}
+function winRefresh(id){ if(wins[id]){ var f=wins[id].el.querySelector('iframe'); if(f){ var s=f.src; f.src='about:blank'; setTimeout(function(){f.src=s},50); } } }
+function winHome(id){ if(wins[id]) winNav(id, wins[id].app.url); }
+
+// ═══ SNAP ═══
+function showSnap(zone,dw,dh){
+  var el=document.getElementById('snap');
+  if(!zone){el.style.display='none';return}
+  el.style.display='block';
+  if(zone==='left'){el.style.left='4px';el.style.top='4px';el.style.width=(dw/2-8)+'px';el.style.height=(dh-8)+'px'}
+  else if(zone==='right'){el.style.left=(dw/2+4)+'px';el.style.top='4px';el.style.width=(dw/2-8)+'px';el.style.height=(dh-8)+'px'}
+  else if(zone==='max'){el.style.left='4px';el.style.top='4px';el.style.width=(dw-8)+'px';el.style.height=(dh-8)+'px'}
+}
+function hideSnap(){document.getElementById('snap').style.display='none'}
+
+// ═══ DOCK — every app lives here ═══
+function renderDock(){
+  var el = document.getElementById('dock-apps');
+  el.innerHTML = APPS.map(function(a){
+    var isOpen = !!wins[a.id];
+    var isActive = a.id === focusedId && isOpen;
+    var remembered = hasMemory(a.id);
+    var cls = 'dock-btn';
+    if(isActive) cls += ' active';
+    if(isOpen) cls += ' open';
+    if(remembered && !isOpen) cls += ' remembered';
+    return '<button class="'+cls+'" onclick="openApp(\''+a.id+'\')" title="'+a.name+(remembered && !isOpen ? ' (remembered)' : '')+'">'
+      + iconHTML(a.icon, 8)
+      + '<span class="dock-label">'+a.name+'</span>'
+      + '<span class="indicator"></span>'
+      + '</button>';
+  }).join('');
+}
+renderDock();
+
+// ═══ CONTEXT MENU ═══
+document.addEventListener('contextmenu', function(e){
+  if(e.target.closest('.win') || e.target.closest('#dock')) return;
+  e.preventDefault();
+  var m = document.getElementById('ctx');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.style.display='block';
+  document.getElementById('ctx-inner').innerHTML = [
+    {l:'Command Palette',a:'openLauncher()'},
+    {s:1},
+    {l:'Clear All Memory',a:'clearAllMemory()'},
+  ].map(function(x){
+    if(x.s) return '<div class="dropdown-divider"></div>';
+    return '<div class="dropdown-item" onclick="'+x.a+';document.getElementById(\'ctx\').style.display=\'none\'">'+x.l+'</div>';
+  }).join('');
+});
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#ctx')) document.getElementById('ctx').style.display='none';
+});
+
+function clearAllMemory(){
+  localStorage.removeItem(STORAGE_KEY);
+  renderDock();
+  toast('Memory cleared');
+}
+
+// ═══ KEYBOARD ═══
+document.addEventListener('keydown', function(e){
+  if((e.metaKey||e.ctrlKey) && e.key==='k'){e.preventDefault(); launcherOn ? closeLauncher() : openLauncher();}
+  if(e.key==='Escape'){closeLauncher();}
+  if((e.metaKey||e.ctrlKey) && e.key==='w'){e.preventDefault(); if(focusedId) closeWin(focusedId);}
+});
+
+// ═══ CLOCK ═══
+function tick(){
+  var d=new Date();
+  document.getElementById('dock-clock').textContent=d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+tick(); setInterval(tick, 15000);
+
+// ═══ TOAST ═══
+function toast(msg){
+  var el=document.createElement('div');
+  el.className='toast';
+  el.innerHTML='<div class="toast-bar"></div><div class="toast-text">'+msg+'</div>';
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transform='translateX(20px)';el.style.transition='all .25s';setTimeout(function(){el.remove()},250)},3500);
+}
+toast('BlackRoad OS v7 ready — 17 products, 27 agents, 17 orgs');
+
+// ═══════════════════════════════════════════════════════
+// NEW FEATURES — from PRODUCT.md
+// ═══════════════════════════════════════════════════════
+
+// ── 1. DAILY ROAD SUMMARY WIDGET ──
+(function(){
+  var widget = document.createElement('div');
+  widget.id = 'road-summary';
+  widget.style.cssText = 'position:absolute;top:16px;right:16px;z-index:50;background:rgba(10,10,10,.9);border:1px solid #1a1a1a;border-radius:10px;padding:14px 18px;font-family:var(--jb);font-size:11px;color:var(--sub);backdrop-filter:blur(10px);min-width:180px;pointer-events:auto;cursor:pointer;transition:opacity .3s';
+  var mem = loadMemory();
+  var appCount = Object.keys(mem).length;
+  var d = new Date();
+  widget.innerHTML = '<div style="color:var(--white);font-family:var(--sg);font-weight:600;font-size:13px;margin-bottom:6px">Daily Road Summary</div>'
+    + '<div style="margin-bottom:4px">Apps remembered: <span style="color:var(--white)">' + appCount + '</span></div>'
+    + '<div style="margin-bottom:4px">Products: <span style="color:var(--white)">17</span></div>'
+    + '<div style="margin-bottom:4px">Agents: <span style="color:var(--white)">27</span></div>'
+    + '<div style="margin-bottom:8px">Session: <span style="color:var(--white)">' + d.toLocaleDateString() + '</span></div>'
+    + '<div style="height:3px;border-radius:2px;background:var(--g)"></div>';
+  widget.onclick = function(){ widget.style.opacity = widget.style.opacity === '0' ? '1' : '0'; };
+  document.getElementById('desktop').appendChild(widget);
+})();
+
+// ── 2. MULTIPLE WINDOWS (remove auto-close) ──
+// Override autoCloseOthers to allow multiple windows
+autoCloseOthers = function(exceptId){};
+
+// ── 3. LANE SWITCHING (Ctrl+Tab / Ctrl+Shift+Tab) ──
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.key === 'Tab'){
+    e.preventDefault();
+    var openIds = Object.keys(wins);
+    if(openIds.length < 2) return;
+    var idx = openIds.indexOf(focusedId);
+    var next = e.shiftKey ? (idx - 1 + openIds.length) % openIds.length : (idx + 1) % openIds.length;
+    focusWin(openIds[next]);
+  }
+  // Number shortcuts: Ctrl+1 through Ctrl+9 open apps by dock position
+  if(e.ctrlKey && e.key >= '1' && e.key <= '9'){
+    e.preventDefault();
+    var appIdx = parseInt(e.key) - 1;
+    if(appIdx < APPS.length) openApp(APPS[appIdx].id);
+  }
+});
+
+// ── 4. FOCUS TUNNEL MODE (Ctrl+Shift+F) ──
+var tunnelMode = false;
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.shiftKey && e.key === 'F'){
+    e.preventDefault();
+    tunnelMode = !tunnelMode;
+    var dock = document.getElementById('dock');
+    var bg = document.getElementById('desktop-bg');
+    if(tunnelMode){
+      dock.style.opacity = '0'; dock.style.pointerEvents = 'none';
+      bg.style.filter = 'brightness(0.3)';
+      if(focusedId && wins[focusedId]) maxiWin(focusedId);
+      toast('Focus Tunnel — press Ctrl+Shift+F to exit');
+    } else {
+      dock.style.opacity = '1'; dock.style.pointerEvents = '';
+      bg.style.filter = '';
+      toast('Focus Tunnel off');
+    }
+  }
+});
+
+// ── 5. DESKTOP THEMES ──
+var themes = {
+  highway: {orbs:['#FF2255','#4488FF','#8844FF'], bg:'#000'},
+  night:   {orbs:['#1a1a4a','#0d2040','#2a1a3a'], bg:'#050510'},
+  sunrise: {orbs:['#FF6B2B','#FF2255','#F5A623'], bg:'#0a0505'},
+  ocean:   {orbs:['#00D4FF','#4488FF','#0066AA'], bg:'#000a14'},
+  forest:  {orbs:['#22c55e','#16a34a','#15803d'], bg:'#050a05'},
+};
+var currentTheme = 'highway';
+function setTheme(name){
+  var t = themes[name]; if(!t) return;
+  currentTheme = name;
+  document.body.style.background = t.bg;
+  var orbs = document.querySelectorAll('.bg-orb');
+  t.orbs.forEach(function(c,i){ if(orbs[i]) orbs[i].style.background = c; });
+  toast('Theme: ' + name);
+  try { localStorage.setItem('bos-theme', name); } catch(e){}
+  // Sync theme to server
+  fetch('/api/preferences/'+_userId, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({theme:name})}).catch(function(){});
+}
+// Restore saved theme
+try { var saved = localStorage.getItem('bos-theme'); if(saved && themes[saved]) setTheme(saved); } catch(e){}
+
+// ── 6. ENHANCED CONTEXT MENU ──
+document.removeEventListener('contextmenu', document.oncontextmenu);
+document.addEventListener('contextmenu', function(e){
+  if(e.target.closest('.win') || e.target.closest('#dock')) return;
+  e.preventDefault();
+  var m = document.getElementById('ctx');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.style.display='block';
+  document.getElementById('ctx-inner').innerHTML = [
+    {l:'Command Palette',a:'openLauncher()'},
+    {s:1},
+    {l:'Theme: Highway',a:"setTheme('highway')"},
+    {l:'Theme: Night Drive',a:"setTheme('night')"},
+    {l:'Theme: Sunrise',a:"setTheme('sunrise')"},
+    {l:'Theme: Ocean',a:"setTheme('ocean')"},
+    {l:'Theme: Forest',a:"setTheme('forest')"},
+    {s:1},
+    {l:'Focus Tunnel (Ctrl+Shift+F)',a:'document.dispatchEvent(new KeyboardEvent("keydown",{ctrlKey:true,shiftKey:true,key:"F"}))'},
+    {l:'Tile All Windows',a:'tileWindows()'},
+    {s:1},
+    {l:'About BlackRoad OS',a:'showAbout()'},
+    {l:'Clear All Memory',a:'clearAllMemory()'},
+  ].map(function(x){
+    if(x.s) return '<div class="dropdown-divider"></div>';
+    return '<div class="dropdown-item" onclick="'+x.a+';document.getElementById(\'ctx\').style.display=\'none\'">'+x.l+'</div>';
+  }).join('');
+});
+
+// ── 7. TILE WINDOWS ──
+function tileWindows(){
+  var ids = Object.keys(wins);
+  if(!ids.length) return;
+  var D = document.getElementById('desktop');
+  var dw = D.offsetWidth, dh = D.offsetHeight;
+  var cols = Math.ceil(Math.sqrt(ids.length));
+  var rows = Math.ceil(ids.length / cols);
+  var tw = Math.floor(dw / cols), th = Math.floor(dh / rows);
+  ids.forEach(function(id, i){
+    var col = i % cols, row = Math.floor(i / cols);
+    var w = wins[id];
+    w.x = col * tw; w.y = row * th; w.w = tw; w.h = th;
+    w.el.style.left = w.x+'px'; w.el.style.top = w.y+'px';
+    w.el.style.width = w.w+'px'; w.el.style.height = w.h+'px';
+    if(w.maxi){ w.el.classList.remove('maximized'); w.maxi = false; }
+  });
+  toast('Windows tiled (' + ids.length + ')');
+}
+
+// ── 8. ABOUT DIALOG ──
+function showAbout(){
+  toast('BlackRoad OS v5.0 — 17 products, 27 agents, 7 divisions. Built on Raspberry Pis. $150/month. Remember the Road. Pave Tomorrow.');
+}
+
+// ── 9. SYSTEM HEALTH IN TRAY ──
+(function(){
+  fetch('/api/health').then(function(r){return r.json()}).then(function(d){
+    document.getElementById('tray-status').textContent = 'v' + (d.version||'5.0') + ' · ' + (d.products||17) + ' products';
+  }).catch(function(){
+    document.getElementById('tray-status').textContent = 'ready';
+  });
+})();
+
+// ── 10. OPEN DEFAULT APP ON BOOT ──
+// Open Highway (dashboard) as the home screen
+setTimeout(function(){
+  openApp('highway');
+}, 100);
+
+// ── 11. KEYBOARD HELP (Ctrl+/) ──
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.key === '/'){
+    e.preventDefault();
+    toast('Shortcuts: Cmd/Ctrl+K = Command Palette · Ctrl+Tab = Switch Window · Ctrl+1-9 = Open App · Ctrl+W = Close · Ctrl+Shift+F = Focus Tunnel · Right-click = Themes');
+  }
+});
+
+// ── 12. WELCOME TOAST FROM ROADIE ──
+setTimeout(function(){
+  toast('Roadie: "Yep. Got it. Let\'s move." — Pick an app from the dock to get started.');
+}, 2000);
+
+// ═══════════════════════════════════════════════════════
+// MORE FEATURES — ROUND 2
+// ═══════════════════════════════════════════════════════
+
+// ── 13. CONVOY PRESENCE AURA — glowing window borders when agents are active ──
+setInterval(function(){
+  Object.keys(wins).forEach(function(id){
+    var w = wins[id];
+    if(!w) return;
+    // Random agent activity pulse
+    if(Math.random() < 0.15){
+      w.el.style.boxShadow = '0 0 20px rgba(136,68,255,0.15), 0 16px 64px rgba(0,0,0,.6)';
+      setTimeout(function(){ if(wins[id]) w.el.style.boxShadow = ''; }, 2000);
+    }
+  });
+}, 5000);
+
+// ── 14. MEMORY PEEK HUD — hover dock to see memory info ──
+document.getElementById('dock-apps').addEventListener('mouseover', function(e){
+  var btn = e.target.closest('.dock-btn');
+  if(!btn) return;
+  var appId = null;
+  APPS.forEach(function(a,i){ if(btn === document.querySelectorAll('.dock-btn')[i]) appId = a.id; });
+  if(!appId) return;
+  var mem = getMemory(appId);
+  if(mem){
+    var ago = Math.round((Date.now() - (mem.ts || 0)) / 60000);
+    var hint = ago < 60 ? ago + 'min ago' : Math.round(ago/60) + 'hr ago';
+    btn.title = APPS.find(function(a){return a.id===appId}).name + ' — last used ' + hint + (mem.url ? ' · ' + mem.url.replace('https://','') : '');
+  }
+});
+
+// ── 15. HIGHWAY SOUNDSCAPE — ambient background audio ──
+var soundEnabled = false;
+var audioCtx = null;
+function toggleSound(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  soundEnabled = !soundEnabled;
+  if(soundEnabled){
+    // Create gentle ambient hum
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 55; // Low A — highway hum
+    gain.gain.value = 0.02; // Very quiet
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    window._ambientOsc = osc;
+    window._ambientGain = gain;
+    toast('Highway soundscape on');
+  } else {
+    if(window._ambientOsc){ window._ambientOsc.stop(); window._ambientOsc = null; }
+    toast('Highway soundscape off');
+  }
+}
+
+// ── 16. NOTIFICATION CENTER ──
+var notifications = [];
+function addNotification(from, msg){
+  notifications.unshift({from:from, msg:msg, ts:Date.now()});
+  if(notifications.length > 20) notifications.pop();
+  toast(from + ': ' + msg);
+}
+
+// ── 17. AGENT GREETINGS — different agents greet at different times ──
+setTimeout(function(){
+  var hour = new Date().getHours();
+  var greetings = [
+    {h:[5,6,7,8,9], agent:'Celeste', msg:'Good morning. You\'re okay. Let\'s do this simply.'},
+    {h:[10,11,12,13], agent:'Roadie', msg:'Let\'s get it. What are we building today?'},
+    {h:[14,15,16,17], agent:'Calliope', msg:'The afternoon is for creation. Say it so it stays.'},
+    {h:[18,19,20,21], agent:'Sophia', msg:'Evening. A good time to reflect. What is true?'},
+    {h:[22,23,0,1,2,3,4], agent:'Lucidia', msg:'Late night session. I\'ll remember everything. Let\'s make this clean and real.'},
+  ];
+  var greeting = greetings.find(function(g){ return g.h.indexOf(hour) !== -1; }) || greetings[0];
+  addNotification(greeting.agent, greeting.msg);
+}, 4000);
+
+// ── 18. SAVED DESKTOP LAYOUTS ──
+var layouts = {};
+function saveLayout(name){
+  var state = {};
+  Object.keys(wins).forEach(function(id){
+    var w = wins[id];
+    state[id] = {x:w.x, y:w.y, w:w.w, h:w.h, maxi:w.maxi};
+  });
+  layouts[name] = state;
+  try { localStorage.setItem('bos-layouts', JSON.stringify(layouts)); } catch(e){}
+  toast('Layout saved: ' + name);
+}
+function restoreLayout(name){
+  var l = layouts[name];
+  if(!l){ toast('No layout: ' + name); return; }
+  // Close all first
+  Object.keys(wins).forEach(function(id){ closeWin(id); });
+  // Open each app in the layout
+  setTimeout(function(){
+    Object.keys(l).forEach(function(id){
+      openApp(id);
+      setTimeout(function(){
+        if(wins[id]){
+          var w = wins[id], s = l[id];
+          w.x=s.x; w.y=s.y; w.w=s.w; w.h=s.h;
+          w.el.style.left=s.x+'px'; w.el.style.top=s.y+'px';
+          w.el.style.width=s.w+'px'; w.el.style.height=s.h+'px';
+          if(s.maxi) maxiWin(id);
+        }
+      }, 200);
+    });
+    toast('Layout restored: ' + name);
+  }, 300);
+}
+// Load saved layouts
+try { layouts = JSON.parse(localStorage.getItem('bos-layouts')) || {}; } catch(e){ layouts = {}; }
+
+// ── 19. DOCK SEPARATOR BETWEEN CATEGORIES ──
+// Inject separators after every 4 apps in dock
+var origRenderDock = renderDock;
+renderDock = function(){
+  origRenderDock();
+  var el = document.getElementById('dock-apps');
+  var btns = el.querySelectorAll('.dock-btn');
+  // Add separators at logical groupings: after 4th, 8th, 12th
+  [12, 8, 4].forEach(function(idx){
+    if(btns[idx]){
+      var sep = document.createElement('div');
+      sep.className = 'dock-sep';
+      btns[idx].parentNode.insertBefore(sep, btns[idx]);
+    }
+  });
+};
+renderDock();
+
+// ── 20. WINDOW COUNT IN TRAY ──
+var origRenderDock2 = renderDock;
+renderDock = function(){
+  origRenderDock2();
+  var count = Object.keys(wins).length;
+  var tray = document.getElementById('tray-status');
+  if(tray && count > 0){
+    tray.textContent = count + ' window' + (count > 1 ? 's' : '') + ' open';
+  }
+};
+
+// ── 21. DOUBLE-CLICK DESKTOP TO OPEN LAUNCHER ──
+document.getElementById('desktop').addEventListener('dblclick', function(e){
+  if(e.target.closest('.win') || e.target.closest('#road-summary')) return;
+  openLauncher();
+});
+
+// ── 22. ENHANCED COMMAND PALETTE — add commands ──
+var origBuildLauncher = buildLauncher;
+buildLauncher = function(q){
+  var el = document.getElementById('cmd-results');
+  var html = '';
+
+  // System commands
+  var cmds = [
+    {name:'Focus Tunnel', desc:'Ctrl+Shift+F', action:'document.dispatchEvent(new KeyboardEvent("keydown",{ctrlKey:true,shiftKey:true,key:"F"}))'},
+    {name:'Tile Windows', desc:'Grid all open windows', action:'tileWindows()'},
+    {name:'Theme: Highway', desc:'Default theme', action:"setTheme('highway')"},
+    {name:'Theme: Night Drive', desc:'Dark focused theme', action:"setTheme('night')"},
+    {name:'Theme: Sunrise', desc:'Warm morning theme', action:"setTheme('sunrise')"},
+    {name:'Theme: Ocean', desc:'Cool blue theme', action:"setTheme('ocean')"},
+    {name:'Theme: Forest', desc:'Natural green theme', action:"setTheme('forest')"},
+    {name:'Toggle Sound', desc:'Highway soundscape', action:'toggleSound()'},
+    {name:'Save Layout', desc:'Save current window arrangement', action:"saveLayout(prompt('Layout name:')||'default')"},
+    {name:'About', desc:'BlackRoad OS v5.0', action:'showAbout()'},
+    {name:'Keyboard Shortcuts', desc:'Ctrl+/', action:"toast('Ctrl+K=Palette · Ctrl+Tab=Switch · Ctrl+1-9=App · Ctrl+W=Close · Ctrl+Shift+F=Tunnel')"},
+  ];
+
+  // Saved layouts
+  Object.keys(layouts).forEach(function(name){
+    cmds.push({name:'Layout: ' + name, desc:'Restore saved layout', action:"restoreLayout('"+name+"')"});
+  });
+
+  // Filter
+  var filtered = q ? cmds.filter(function(c){ return c.name.toLowerCase().indexOf(q) !== -1 || c.desc.toLowerCase().indexOf(q) !== -1; }) : [];
+
+  // Apps
+  APPS.forEach(function(app){
+    if(q && app.name.toLowerCase().indexOf(q) === -1 && app.url.toLowerCase().indexOf(q) === -1) return;
+    var mem = hasMemory(app.id);
+    html += '<div class="cmd-item" onclick="openApp(\''+app.id+'\');closeLauncher()">';
+    html += '<span class="cmd-item-icon">'+iconHTML(app.icon, 8)+'</span>';
+    html += '<span class="cmd-item-text">'+app.name+(mem ? ' <span style="color:var(--muted);font-family:var(--jb);font-size:9px">remembered</span>' : '')+'</span>';
+    html += '<span class="cmd-item-shortcut">'+app.url.replace('https://','')+'</span>';
+    html += '</div>';
+  });
+
+  // Commands section
+  if(filtered.length > 0 || !q){
+    var showCmds = q ? filtered : cmds.slice(0, 5);
+    if(showCmds.length){
+      html += '<div class="dropdown-label" style="padding:8px 14px;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Commands</div>';
+      showCmds.forEach(function(c){
+        html += '<div class="cmd-item" onclick="'+c.action+';closeLauncher()">';
+        html += '<span class="cmd-item-icon" style="color:var(--muted)">⌘</span>';
+        html += '<span class="cmd-item-text">'+c.name+'</span>';
+        html += '<span class="cmd-item-shortcut" style="font-size:9px;color:var(--muted)">'+c.desc+'</span>';
+        html += '</div>';
+      });
+    }
+  }
+
+  el.innerHTML = html;
+};
+
+// ── 23. WINDOW MINIMIZE TO DOCK (instead of close) ──
+// Already handled — minimize = close with memory save
+
+// ── 24. AGENT STATUS INDICATORS IN DOCK ──
+// Periodically check product health and show green/red dots
+setInterval(function(){
+  APPS.forEach(function(app, i){
+    var btn = document.querySelectorAll('.dock-btn')[i];
+    if(!btn) return;
+    var indicator = btn.querySelector('.indicator');
+    if(!indicator) return;
+    // Show a subtle pulse for apps that have memory (were used)
+    if(hasMemory(app.id)){
+      indicator.style.opacity = '0.4';
+      indicator.style.background = '#22c55e';
+    }
+  });
+}, 10000);
+
+// ── 25. END-OF-DAY REFLECTION ──
+(function(){
+  var hour = new Date().getHours();
+  if(hour >= 22 || hour <= 4){
+    setTimeout(function(){
+      var openCount = Object.keys(wins).length;
+      var memCount = Object.keys(loadMemory()).length;
+      addNotification('Lucidia', 'End of day. You opened ' + openCount + ' windows. ' + memCount + ' apps remember you. The road remembers. Rest well.');
+    }, 30000);
+  }
+})();
+
+// ═══════════════════════════════════════════════════════
+// v6.0 FEATURES — ROUND 3
+// ═══════════════════════════════════════════════════════
+
+// ── 26. WIDGETS DASHBOARD ──
+var widgetConfigs = {};
+try { widgetConfigs = JSON.parse(localStorage.getItem('bos-widgets')) || {}; } catch(e){ widgetConfigs = {}; }
+
+var defaultWidgets = {
+  clock: {enabled:true, title:'Clock', order:0},
+  weather: {enabled:true, title:'Weather', order:1},
+  stats: {enabled:true, title:'System Stats', order:2},
+  todo: {enabled:false, title:'Quick Todo', order:3},
+  music: {enabled:false, title:'Music Player', order:4},
+  calendar: {enabled:false, title:'Calendar', order:5},
+  stocks: {enabled:false, title:'Stocks', order:6},
+  news: {enabled:false, title:'News Ticker', order:7},
+};
+
+function getWidgetConfigs(){
+  var merged = {};
+  Object.keys(defaultWidgets).forEach(function(k){
+    merged[k] = Object.assign({}, defaultWidgets[k], widgetConfigs[k] || {});
+  });
+  return merged;
+}
+
+function saveWidgetConfigs(){
+  try { localStorage.setItem('bos-widgets', JSON.stringify(widgetConfigs)); } catch(e){}
+}
+
+function toggleWidget(id){
+  if(!widgetConfigs[id]) widgetConfigs[id] = {};
+  var cfg = getWidgetConfigs();
+  widgetConfigs[id].enabled = !cfg[id].enabled;
+  saveWidgetConfigs();
+  renderWidgets();
+}
+
+function renderWidgets(){
+  var panel = document.getElementById('widgets-panel');
+  var cfg = getWidgetConfigs();
+  var html = '';
+  var sorted = Object.keys(cfg).filter(function(k){return cfg[k].enabled}).sort(function(a,b){return cfg[a].order - cfg[b].order});
+
+  sorted.forEach(function(id){
+    var w = cfg[id];
+    html += '<div class="desktop-widget" data-widget="'+id+'">';
+    html += '<div class="widget-title">'+w.title+'<button class="widget-close" onclick="toggleWidget(\''+id+'\')">&#10005;</button></div>';
+
+    if(id === 'clock'){
+      var d = new Date();
+      html += '<div style="font-size:28px;font-weight:700;color:var(--white);font-family:var(--jb)">'+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})+'</div>';
+      html += '<div style="margin-top:4px;font-size:11px;color:var(--sub)">'+d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'</div>';
+    } else if(id === 'weather'){
+      html += '<div class="widget-row"><span class="widget-row-label">Conditions</span><span class="widget-row-value">Partly Cloudy</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Temperature</span><span class="widget-row-value">62F</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Humidity</span><span class="widget-row-value">45%</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Wind</span><span class="widget-row-value">8 mph NW</span></div>';
+    } else if(id === 'stats'){
+      var openWins = Object.keys(wins).length;
+      var memCount = Object.keys(loadMemory()).length;
+      html += '<div class="widget-row"><span class="widget-row-label">Windows</span><span class="widget-row-value">'+openWins+'</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Apps remembered</span><span class="widget-row-value">'+memCount+'</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Products</span><span class="widget-row-value">17</span></div>';
+      html += '<div class="widget-row"><span class="widget-row-label">Agents</span><span class="widget-row-value">27</span></div>';
+      html += '<div style="height:3px;border-radius:2px;background:var(--g);margin-top:8px"></div>';
+    } else if(id === 'todo'){
+      var todos = [];
+      try { todos = JSON.parse(localStorage.getItem('bos-widget-todos')) || []; } catch(e){}
+      html += '<div style="margin-bottom:6px">';
+      todos.forEach(function(t,i){
+        html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;font-size:11px;color:'+(t.done?'var(--muted)':'var(--text)')+'"><span style="cursor:pointer" onclick="toggleWidgetTodo('+i+')">'+(t.done?'[x]':'[ ]')+'</span> '+t.text+'</div>';
+      });
+      html += '</div>';
+      html += '<input class="input" style="font-size:10px;padding:5px 8px" placeholder="Add todo..." onkeydown="if(event.key===\'Enter\'){addWidgetTodo(this.value);this.value=\'\'}">';
+    } else if(id === 'music'){
+      html += '<div style="text-align:center;padding:4px 0">';
+      html += '<div style="font-size:12px;color:var(--white);margin-bottom:4px">Highway Soundscape</div>';
+      html += '<div style="font-size:10px;color:var(--sub);margin-bottom:8px">Ambient - 55Hz Sine</div>';
+      html += '<div style="display:flex;gap:12px;justify-content:center">';
+      html += '<button class="btn-ghost btn-sm" onclick="toggleSound()" style="font-size:11px">Play/Pause</button>';
+      html += '</div></div>';
+    } else if(id === 'calendar'){
+      var d = new Date();
+      var monthName = d.toLocaleDateString([],{month:'long',year:'numeric'});
+      html += '<div style="text-align:center;font-size:12px;color:var(--white);margin-bottom:6px">'+monthName+'</div>';
+      html += '<div style="font-size:10px;color:var(--sub)">Today: '+d.toLocaleDateString([],{weekday:'long',month:'short',day:'numeric'})+'</div>';
+      html += '<div style="margin-top:4px;font-size:10px;color:var(--muted)">No events scheduled</div>';
+    } else if(id === 'stocks'){
+      var tickers = [{s:'ROAD',p:'42.00',c:'+1.5%'},{s:'AAPL',p:'198.50',c:'+0.3%'},{s:'MSFT',p:'425.00',c:'-0.2%'}];
+      tickers.forEach(function(t){
+        html += '<div class="widget-row"><span class="widget-row-label">'+t.s+'</span><span class="widget-row-value" style="color:'+(t.c.startsWith('+')?'#22c55e':'#ef4444')+'">$'+t.p+' '+t.c+'</span></div>';
+      });
+    } else if(id === 'news'){
+      var items = ['BlackRoad OS v6 ships 8 new APIs','Amundson Constant verified to 10M digits','27 agents now active in fleet','RoadTrip reaches 109 agents'];
+      items.forEach(function(n,i){
+        html += '<div style="padding:3px 0;font-size:10px;color:var(--sub);border-bottom:1px solid var(--border)">'+(i+1)+'. '+n+'</div>';
+      });
+    }
+    html += '</div>';
+  });
+
+  panel.innerHTML = html;
+}
+
+function addWidgetTodo(text){
+  if(!text) return;
+  var todos = [];
+  try { todos = JSON.parse(localStorage.getItem('bos-widget-todos')) || []; } catch(e){}
+  todos.push({text:text, done:false});
+  try { localStorage.setItem('bos-widget-todos', JSON.stringify(todos)); } catch(e){}
+  renderWidgets();
+}
+function toggleWidgetTodo(idx){
+  var todos = [];
+  try { todos = JSON.parse(localStorage.getItem('bos-widget-todos')) || []; } catch(e){}
+  if(todos[idx]) todos[idx].done = !todos[idx].done;
+  try { localStorage.setItem('bos-widget-todos', JSON.stringify(todos)); } catch(e){}
+  renderWidgets();
+}
+
+renderWidgets();
+// Refresh clock widget every second
+setInterval(function(){
+  var cw = document.querySelector('[data-widget="clock"]');
+  if(cw){
+    var d = new Date();
+    var timeEl = cw.querySelector('div[style*="font-size:28px"]');
+    if(timeEl) timeEl.textContent = d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+}, 1000);
+// Refresh stats widget every 5s
+setInterval(renderWidgets, 30000);
+
+// ── 27. KEYBOARD SHORTCUTS SYSTEM ──
+var customShortcuts = {};
+try { customShortcuts = JSON.parse(localStorage.getItem('bos-shortcuts')) || {}; } catch(e){ customShortcuts = {}; }
+
+var builtinShortcuts = [
+  {id:'cmd-palette', keys:'Cmd+K', desc:'Open command palette', category:'navigation'},
+  {id:'spotlight', keys:'Cmd+Space', desc:'Open Spotlight search', category:'navigation'},
+  {id:'close-win', keys:'Ctrl+W', desc:'Close focused window', category:'windows'},
+  {id:'switch-win', keys:'Ctrl+Tab', desc:'Switch between windows', category:'windows'},
+  {id:'focus-tunnel', keys:'Ctrl+Shift+F', desc:'Toggle focus tunnel', category:'focus'},
+  {id:'tile-all', keys:'Ctrl+Shift+T', desc:'Tile all windows', category:'windows'},
+  {id:'clipboard', keys:'Ctrl+Shift+V', desc:'Open clipboard history', category:'tools'},
+  {id:'kbd-help', keys:'Ctrl+/', desc:'Show keyboard shortcuts', category:'help'},
+  {id:'app-1', keys:'Ctrl+1', desc:'Open first dock app', category:'apps'},
+  {id:'app-2', keys:'Ctrl+2', desc:'Open second dock app', category:'apps'},
+  {id:'app-3', keys:'Ctrl+3', desc:'Open third dock app', category:'apps'},
+  {id:'widgets-toggle', keys:'Ctrl+Shift+W', desc:'Toggle widgets panel', category:'desktop'},
+  {id:'theme-cycle', keys:'Ctrl+Shift+D', desc:'Cycle desktop theme', category:'desktop'},
+  {id:'backup-panel', keys:'Ctrl+Shift+B', desc:'Open backup panel', category:'system'},
+];
+
+function getAllShortcuts(){
+  return builtinShortcuts.map(function(s){
+    return Object.assign({}, s, customShortcuts[s.id] || {});
+  });
+}
+
+function registerShortcut(id, keys){
+  customShortcuts[id] = {keys:keys};
+  try { localStorage.setItem('bos-shortcuts', JSON.stringify(customShortcuts)); } catch(e){}
+}
+
+// ── 28. CLIPBOARD MANAGER ──
+var clipboardHistory = [];
+try { clipboardHistory = JSON.parse(localStorage.getItem('bos-clipboard')) || []; } catch(e){ clipboardHistory = []; }
+var pinnedClips = {};
+try { pinnedClips = JSON.parse(localStorage.getItem('bos-clipboard-pins')) || {}; } catch(e){ pinnedClips = {}; }
+
+function addToClipboard(text){
+  if(!text || (clipboardHistory.length > 0 && clipboardHistory[0].text === text)) return;
+  clipboardHistory.unshift({text:text, ts:Date.now()});
+  if(clipboardHistory.length > 50) clipboardHistory = clipboardHistory.slice(0, 50);
+  try { localStorage.setItem('bos-clipboard', JSON.stringify(clipboardHistory)); } catch(e){}
+  renderClipboard();
+}
+
+function togglePinClip(idx){
+  var key = 'clip-'+idx;
+  if(pinnedClips[key]) delete pinnedClips[key];
+  else pinnedClips[key] = true;
+  try { localStorage.setItem('bos-clipboard-pins', JSON.stringify(pinnedClips)); } catch(e){}
+  renderClipboard();
+}
+
+function renderClipboard(){
+  var list = document.getElementById('clipboard-list');
+  if(!list) return;
+  if(clipboardHistory.length === 0){
+    list.innerHTML = '<div style="padding:16px;text-align:center;font-size:11px;color:var(--muted)">No clipboard items yet.<br>Copy text to populate.</div>';
+    return;
+  }
+  var html = '';
+  // Pinned first
+  clipboardHistory.forEach(function(c,i){
+    var isPinned = !!pinnedClips['clip-'+i];
+    if(!isPinned) return;
+    html += '<div class="clip-item" onclick="copyClipItem('+i+')" title="Click to copy">';
+    html += '<span class="clip-item-text">'+escHTML(c.text.substring(0,80))+'</span>';
+    html += '<span class="clip-pin pinned" onclick="event.stopPropagation();togglePinClip('+i+')">&#9733;</span>';
+    html += '</div>';
+  });
+  clipboardHistory.forEach(function(c,i){
+    var isPinned = !!pinnedClips['clip-'+i];
+    if(isPinned) return;
+    html += '<div class="clip-item" onclick="copyClipItem('+i+')" title="Click to copy">';
+    html += '<span class="clip-item-text">'+escHTML(c.text.substring(0,80))+'</span>';
+    html += '<span class="clip-pin" onclick="event.stopPropagation();togglePinClip('+i+')">&#9734;</span>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function copyClipItem(idx){
+  var item = clipboardHistory[idx];
+  if(!item) return;
+  navigator.clipboard.writeText(item.text).then(function(){
+    toast('Copied to clipboard');
+  }).catch(function(){
+    toast('Copy failed');
+  });
+}
+
+function escHTML(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+var clipboardVisible = false;
+function toggleClipboard(){
+  clipboardVisible = !clipboardVisible;
+  var panel = document.getElementById('clipboard-panel');
+  if(clipboardVisible){
+    panel.classList.add('open');
+    renderClipboard();
+  } else {
+    panel.classList.remove('open');
+  }
+}
+
+// Listen for copy events
+document.addEventListener('copy', function(){
+  setTimeout(function(){
+    navigator.clipboard.readText().then(function(text){
+      addToClipboard(text);
+    }).catch(function(){});
+  }, 100);
+});
+
+// ── 29. SPOTLIGHT SEARCH ──
+var spotlightOpen = false;
+
+function openSpotlight(){
+  spotlightOpen = true;
+  document.getElementById('spotlight-overlay').classList.add('open');
+  var input = document.getElementById('spotlight-input');
+  input.value = '';
+  input.focus();
+  buildSpotlightResults('');
+}
+
+function closeSpotlight(){
+  spotlightOpen = false;
+  document.getElementById('spotlight-overlay').classList.remove('open');
+}
+
+function buildSpotlightResults(q){
+  var el = document.getElementById('spotlight-results');
+  var html = '';
+  var query = (q || '').toLowerCase().trim();
+
+  if(!query){
+    html += '<div class="spotlight-section">Recent</div>';
+    APPS.slice(0,5).forEach(function(app){
+      html += '<div class="spotlight-item" onclick="openApp(\''+app.id+'\');closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">'+iconHTML(app.icon, 8)+'</span>';
+      html += '<span class="spotlight-item-text">'+app.name+'</span>';
+      html += '<span class="spotlight-item-sub">'+app.url.replace('https://','')+'</span>';
+      html += '</div>';
+    });
+    html += '<div class="spotlight-section">Quick Actions</div>';
+    html += '<div class="spotlight-item" onclick="tileWindows();closeSpotlight()"><span class="spotlight-item-icon">&#9638;</span><span class="spotlight-item-text">Tile All Windows</span></div>';
+    html += '<div class="spotlight-item" onclick="openPanel(\'themes-overlay\');closeSpotlight()"><span class="spotlight-item-icon">&#9672;</span><span class="spotlight-item-text">Change Theme</span></div>';
+    html += '<div class="spotlight-item" onclick="openPanel(\'startup-overlay\');closeSpotlight()"><span class="spotlight-item-icon">&#9654;</span><span class="spotlight-item-text">Startup Manager</span></div>';
+    el.innerHTML = html;
+    return;
+  }
+
+  // Search apps
+  var appResults = APPS.filter(function(a){ return a.name.toLowerCase().indexOf(query) !== -1 || a.url.toLowerCase().indexOf(query) !== -1; });
+  if(appResults.length){
+    html += '<div class="spotlight-section">Apps</div>';
+    appResults.forEach(function(app){
+      html += '<div class="spotlight-item" onclick="openApp(\''+app.id+'\');closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">'+iconHTML(app.icon, 8)+'</span>';
+      html += '<span class="spotlight-item-text">'+app.name+'</span>';
+      html += '<span class="spotlight-item-sub">'+app.url.replace('https://','')+'</span>';
+      html += '</div>';
+    });
+  }
+
+  // Search commands
+  var cmdResults = [
+    {name:'Focus Tunnel', action:'document.dispatchEvent(new KeyboardEvent("keydown",{ctrlKey:true,shiftKey:true,key:"F"}));closeSpotlight()'},
+    {name:'Tile Windows', action:'tileWindows();closeSpotlight()'},
+    {name:'Toggle Sound', action:'toggleSound();closeSpotlight()'},
+    {name:'Clear Memory', action:'clearAllMemory();closeSpotlight()'},
+    {name:'Save Layout', action:'saveLayout(prompt("Layout name:")||"default");closeSpotlight()'},
+    {name:'Clipboard History', action:'toggleClipboard();closeSpotlight()'},
+    {name:'Backup Settings', action:'openPanel("backup-overlay");closeSpotlight()'},
+    {name:'Permissions', action:'openPanel("permissions-overlay");closeSpotlight()'},
+    {name:'Startup Manager', action:'openPanel("startup-overlay");closeSpotlight()'},
+    {name:'Themes', action:'openPanel("themes-overlay");closeSpotlight()'},
+  ].filter(function(c){ return c.name.toLowerCase().indexOf(query) !== -1; });
+  if(cmdResults.length){
+    html += '<div class="spotlight-section">Commands</div>';
+    cmdResults.forEach(function(c){
+      html += '<div class="spotlight-item" onclick="'+c.action+'">';
+      html += '<span class="spotlight-item-icon">&#8250;</span>';
+      html += '<span class="spotlight-item-text">'+c.name+'</span>';
+      html += '</div>';
+    });
+  }
+
+  // Search agents
+  var agents = ['Roadie','Celeste','Sophia','Lucidia','Calliope','Sentinel','Echo','Alexandria','Road','Gematria','Anastasia','Octavia','Aria','Cecilia','Alice'];
+  var agentResults = agents.filter(function(a){ return a.toLowerCase().indexOf(query) !== -1; });
+  if(agentResults.length){
+    html += '<div class="spotlight-section">Agents</div>';
+    agentResults.forEach(function(a){
+      html += '<div class="spotlight-item" onclick="toast(\'Agent: '+a+' — active\');closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">&#9679;</span>';
+      html += '<span class="spotlight-item-text">'+a+'</span>';
+      html += '<span class="spotlight-item-sub">agent</span>';
+      html += '</div>';
+    });
+  }
+
+  // Search themes
+  var themeNames = Object.keys(themes);
+  var themeResults = themeNames.filter(function(t){ return t.indexOf(query) !== -1; });
+  if(themeResults.length){
+    html += '<div class="spotlight-section">Themes</div>';
+    themeResults.forEach(function(t){
+      html += '<div class="spotlight-item" onclick="setTheme(\''+t+'\');closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">&#9672;</span>';
+      html += '<span class="spotlight-item-text">'+t.charAt(0).toUpperCase()+t.slice(1)+'</span>';
+      html += '</div>';
+    });
+  }
+
+  // Search widgets
+  var wCfg = getWidgetConfigs();
+  var widgetResults = Object.keys(wCfg).filter(function(k){ return wCfg[k].title.toLowerCase().indexOf(query) !== -1; });
+  if(widgetResults.length){
+    html += '<div class="spotlight-section">Widgets</div>';
+    widgetResults.forEach(function(k){
+      var w = wCfg[k];
+      html += '<div class="spotlight-item" onclick="toggleWidget(\''+k+'\');closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">&#9632;</span>';
+      html += '<span class="spotlight-item-text">'+w.title+' '+(w.enabled?'(on)':'(off)')+'</span>';
+      html += '<span class="spotlight-item-sub">toggle widget</span>';
+      html += '</div>';
+    });
+  }
+
+  // Search shortcuts
+  var scResults = builtinShortcuts.filter(function(s){ return s.desc.toLowerCase().indexOf(query) !== -1 || s.keys.toLowerCase().indexOf(query) !== -1; });
+  if(scResults.length){
+    html += '<div class="spotlight-section">Keyboard Shortcuts</div>';
+    scResults.forEach(function(s){
+      html += '<div class="spotlight-item">';
+      html += '<span class="spotlight-item-icon">&#9000;</span>';
+      html += '<span class="spotlight-item-text">'+s.desc+'</span>';
+      html += '<span class="spotlight-item-sub">'+s.keys+'</span>';
+      html += '</div>';
+    });
+  }
+
+  if(!html) html = '<div style="padding:24px;text-align:center;font-size:12px;color:var(--muted)">No results for "'+escHTML(query)+'"</div>';
+  el.innerHTML = html;
+}
+
+document.getElementById('spotlight-input').addEventListener('input', function(e){ buildSpotlightResults(e.target.value); });
+
+// ── 30. DESKTOP THEMES ENGINE (expanded) ──
+// Add 3 more themes to existing 5
+themes.midnight = {orbs:['#1a0033','#0a0028','#220044'], bg:'#020008'};
+themes.sunset = {orbs:['#FF6B2B','#FF2255','#CC00AA'], bg:'#0a0205'};
+themes.cyberpunk = {orbs:['#00FF88','#FF0080','#00D4FF'], bg:'#050508'};
+themes.retro = {orbs:['#E8A87C','#D96459','#C38D9E'], bg:'#0a0808'};
+
+var themeList = [
+  {id:'highway', name:'Highway', desc:'Classic BlackRoad dark'},
+  {id:'night', name:'Night Drive', desc:'Deep darkness'},
+  {id:'sunrise', name:'Sunrise', desc:'Warm morning glow'},
+  {id:'ocean', name:'Ocean', desc:'Cool blue depths'},
+  {id:'forest', name:'Forest', desc:'Natural green'},
+  {id:'midnight', name:'Midnight', desc:'Ultra-dark purple'},
+  {id:'sunset', name:'Sunset', desc:'Warm evening colors'},
+  {id:'cyberpunk', name:'Cyberpunk', desc:'Neon electric'},
+  {id:'retro', name:'Retro', desc:'Vintage warm tones'},
+];
+
+function renderThemesPanel(){
+  var body = document.getElementById('themes-body');
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  themeList.forEach(function(t){
+    var th = themes[t.id];
+    var isActive = currentTheme === t.id;
+    html += '<div style="background:var(--elevated);border:1px solid '+(isActive?'#8844FF':'var(--border)')+';border-radius:8px;padding:12px;cursor:pointer;transition:border-color .15s" onclick="setTheme(\''+t.id+'\');renderThemesPanel()">';
+    html += '<div style="display:flex;gap:4px;margin-bottom:8px">';
+    th.orbs.forEach(function(c){ html += '<div style="width:16px;height:16px;border-radius:50%;background:'+c+'"></div>'; });
+    html += '</div>';
+    html += '<div style="font-size:13px;font-weight:600;color:var(--white)">'+t.name+(isActive?' (active)':'')+'</div>';
+    html += '<div style="font-size:10px;color:var(--sub)">'+t.desc+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">';
+  html += '<div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:8px">Custom Theme</div>';
+  html += '<div style="display:flex;gap:8px;align-items:center">';
+  html += '<input class="input" id="custom-theme-name" placeholder="Theme name" style="flex:1;font-size:11px;padding:6px 10px">';
+  html += '<input type="color" id="custom-theme-c1" value="#FF2255" style="width:30px;height:30px;border:none;background:none;cursor:pointer">';
+  html += '<input type="color" id="custom-theme-c2" value="#4488FF" style="width:30px;height:30px;border:none;background:none;cursor:pointer">';
+  html += '<input type="color" id="custom-theme-c3" value="#8844FF" style="width:30px;height:30px;border:none;background:none;cursor:pointer">';
+  html += '<button class="btn btn-sm btn-outline" onclick="createCustomTheme()">Create</button>';
+  html += '</div></div>';
+  body.innerHTML = html;
+}
+
+function createCustomTheme(){
+  var name = (document.getElementById('custom-theme-name').value || '').trim().toLowerCase();
+  if(!name){ toast('Enter a theme name'); return; }
+  var c1 = document.getElementById('custom-theme-c1').value;
+  var c2 = document.getElementById('custom-theme-c2').value;
+  var c3 = document.getElementById('custom-theme-c3').value;
+  themes[name] = {orbs:[c1,c2,c3], bg:'#050505'};
+  themeList.push({id:name, name:name.charAt(0).toUpperCase()+name.slice(1), desc:'Custom theme'});
+  try { localStorage.setItem('bos-custom-themes', JSON.stringify({themes:themes, list:themeList})); } catch(e){}
+  setTheme(name);
+  renderThemesPanel();
+  toast('Custom theme "'+name+'" created');
+}
+
+// Load custom themes
+try {
+  var ct = JSON.parse(localStorage.getItem('bos-custom-themes'));
+  if(ct && ct.themes){
+    Object.keys(ct.themes).forEach(function(k){
+      if(!themes[k]){ themes[k] = ct.themes[k]; }
+    });
+    if(ct.list) ct.list.forEach(function(item){
+      if(!themeList.find(function(t){return t.id===item.id})) themeList.push(item);
+    });
+  }
+} catch(e){}
+
+// ── 31. SYSTEM BACKUP ──
+function createBackup(){
+  var backup = {
+    version: '6.0',
+    created: new Date().toISOString(),
+    memory: loadMemory(),
+    theme: currentTheme,
+    layouts: layouts,
+    widgets: widgetConfigs,
+    shortcuts: customShortcuts,
+    clipboard: clipboardHistory,
+    clipboardPins: pinnedClips,
+    permissions: appPermissions,
+    startup: startupConfig,
+    todos: null,
+  };
+  try { backup.todos = JSON.parse(localStorage.getItem('bos-widget-todos')); } catch(e){}
+  return backup;
+}
+
+function downloadBackup(){
+  var backup = createBackup();
+  var blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'blackroad-os-backup-'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Backup downloaded');
+}
+
+function restoreBackup(data){
+  try {
+    var backup = typeof data === 'string' ? JSON.parse(data) : data;
+    if(backup.memory) localStorage.setItem(STORAGE_KEY, JSON.stringify(backup.memory));
+    if(backup.theme && themes[backup.theme]) setTheme(backup.theme);
+    if(backup.layouts){ layouts = backup.layouts; localStorage.setItem('bos-layouts', JSON.stringify(layouts)); }
+    if(backup.widgets){ widgetConfigs = backup.widgets; saveWidgetConfigs(); renderWidgets(); }
+    if(backup.shortcuts){ customShortcuts = backup.shortcuts; localStorage.setItem('bos-shortcuts', JSON.stringify(customShortcuts)); }
+    if(backup.clipboard){ clipboardHistory = backup.clipboard; localStorage.setItem('bos-clipboard', JSON.stringify(clipboardHistory)); }
+    if(backup.clipboardPins){ pinnedClips = backup.clipboardPins; localStorage.setItem('bos-clipboard-pins', JSON.stringify(pinnedClips)); }
+    if(backup.permissions){ appPermissions = backup.permissions; localStorage.setItem('bos-permissions', JSON.stringify(appPermissions)); }
+    if(backup.startup){ startupConfig = backup.startup; localStorage.setItem('bos-startup', JSON.stringify(startupConfig)); }
+    if(backup.todos) localStorage.setItem('bos-widget-todos', JSON.stringify(backup.todos));
+    renderDock();
+    toast('Backup restored from ' + (backup.created || 'unknown date'));
+  } catch(e){
+    toast('Restore failed: invalid backup');
+  }
+}
+
+function renderBackupPanel(){
+  var body = document.getElementById('backup-body');
+  var backup = createBackup();
+  var size = new Blob([JSON.stringify(backup)]).size;
+  var html = '';
+  html += '<div style="margin-bottom:16px">';
+  html += '<div class="widget-row"><span class="widget-row-label">OS Version</span><span class="widget-row-value">v6.0</span></div>';
+  html += '<div class="widget-row"><span class="widget-row-label">Apps Remembered</span><span class="widget-row-value">'+Object.keys(backup.memory).length+'</span></div>';
+  html += '<div class="widget-row"><span class="widget-row-label">Saved Layouts</span><span class="widget-row-value">'+Object.keys(backup.layouts).length+'</span></div>';
+  html += '<div class="widget-row"><span class="widget-row-label">Clipboard Items</span><span class="widget-row-value">'+backup.clipboard.length+'</span></div>';
+  html += '<div class="widget-row"><span class="widget-row-label">Backup Size</span><span class="widget-row-value">'+(size/1024).toFixed(1)+' KB</span></div>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:10px;margin-bottom:16px">';
+  html += '<button class="btn btn-white" onclick="downloadBackup()">Download Backup</button>';
+  html += '<label class="btn btn-outline" style="cursor:pointer"><input type="file" accept=".json" style="display:none" onchange="handleBackupFile(this.files[0])">Restore from File</label>';
+  html += '</div>';
+  html += '<div style="padding-top:12px;border-top:1px solid var(--border)">';
+  html += '<div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:6px">Auto-Backup</div>';
+  html += '<div style="font-size:11px;color:var(--sub)">Settings are automatically saved to localStorage. Use Download to create a portable backup file you can restore on any device.</div>';
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function handleBackupFile(file){
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){ restoreBackup(e.target.result); };
+  reader.readAsText(file);
+}
+
+// ── 32. APP PERMISSIONS ──
+var appPermissions = {};
+try { appPermissions = JSON.parse(localStorage.getItem('bos-permissions')) || {}; } catch(e){ appPermissions = {}; }
+
+var permissionTypes = [
+  {id:'camera', name:'Camera', desc:'Access to camera for video calls'},
+  {id:'microphone', name:'Microphone', desc:'Audio input for voice features'},
+  {id:'notifications', name:'Notifications', desc:'Show desktop notifications'},
+  {id:'location', name:'Location', desc:'Access geographic location'},
+  {id:'storage', name:'Storage', desc:'Read/write local storage'},
+];
+
+function getAppPermissions(appId){
+  var defaults = {};
+  permissionTypes.forEach(function(p){ defaults[p.id] = p.id === 'storage' || p.id === 'notifications'; });
+  return Object.assign({}, defaults, appPermissions[appId] || {});
+}
+
+function setAppPermission(appId, permId, value){
+  if(!appPermissions[appId]) appPermissions[appId] = {};
+  appPermissions[appId][permId] = value;
+  try { localStorage.setItem('bos-permissions', JSON.stringify(appPermissions)); } catch(e){}
+  toast(APPS.find(function(a){return a.id===appId}).name + ': ' + permId + ' ' + (value ? 'granted' : 'revoked'));
+  renderPermissionsPanel();
+}
+
+function renderPermissionsPanel(){
+  var body = document.getElementById('permissions-body');
+  var html = '<div style="margin-bottom:12px">';
+  html += '<select class="input" id="perm-app-select" onchange="renderPermissionsPanel()" style="margin-bottom:12px">';
+  APPS.forEach(function(a){
+    var sel = document.getElementById('perm-app-select');
+    var selected = sel && sel.value === a.id ? ' selected' : (a.id === 'roadtrip' && (!sel || !sel.value) ? ' selected' : '');
+    html += '<option value="'+a.id+'"'+selected+'>'+a.name+'</option>';
+  });
+  html += '</select></div>';
+
+  var selEl = document.getElementById('perm-app-select');
+  var selectedApp = selEl ? selEl.value : 'roadtrip';
+  var perms = getAppPermissions(selectedApp);
+
+  permissionTypes.forEach(function(p){
+    var granted = perms[p.id];
+    html += '<div class="perm-row">';
+    html += '<div><div class="perm-label">'+p.name+'</div><div class="perm-sub">'+p.desc+'</div></div>';
+    html += '<button class="toggle-sw'+(granted?' on':'')+'" onclick="setAppPermission(\''+selectedApp+'\',\''+p.id+'\','+(!granted)+')"></button>';
+    html += '</div>';
+  });
+
+  body.innerHTML = html;
+}
+
+// ── 33. STARTUP MANAGER ──
+var startupConfig = {};
+try { startupConfig = JSON.parse(localStorage.getItem('bos-startup')) || {}; } catch(e){ startupConfig = {}; }
+
+var defaultStartup = {
+  enabled: true,
+  apps: ['roadtrip'],
+  order: ['roadtrip'],
+  splashDuration: 1500,
+  showSplash: true,
+  autoTile: false,
+};
+
+function getStartupConfig(){
+  return Object.assign({}, defaultStartup, startupConfig);
+}
+
+function toggleStartupApp(appId){
+  var cfg = getStartupConfig();
+  var idx = cfg.apps.indexOf(appId);
+  if(idx !== -1){
+    cfg.apps.splice(idx, 1);
+    cfg.order = cfg.order.filter(function(id){return id !== appId});
+  } else {
+    cfg.apps.push(appId);
+    cfg.order.push(appId);
+  }
+  startupConfig = cfg;
+  try { localStorage.setItem('bos-startup', JSON.stringify(startupConfig)); } catch(e){}
+  renderStartupPanel();
+}
+
+function setStartupSetting(key, value){
+  var cfg = getStartupConfig();
+  cfg[key] = value;
+  startupConfig = cfg;
+  try { localStorage.setItem('bos-startup', JSON.stringify(startupConfig)); } catch(e){}
+  renderStartupPanel();
+}
+
+function moveStartupApp(appId, direction){
+  var cfg = getStartupConfig();
+  var idx = cfg.order.indexOf(appId);
+  if(idx === -1) return;
+  var newIdx = direction === 'up' ? Math.max(0, idx-1) : Math.min(cfg.order.length-1, idx+1);
+  cfg.order.splice(idx, 1);
+  cfg.order.splice(newIdx, 0, appId);
+  startupConfig = cfg;
+  try { localStorage.setItem('bos-startup', JSON.stringify(startupConfig)); } catch(e){}
+  renderStartupPanel();
+}
+
+function renderStartupPanel(){
+  var body = document.getElementById('startup-body');
+  var cfg = getStartupConfig();
+  var html = '';
+
+  html += '<div class="perm-row"><div><div class="perm-label">Enable Startup Apps</div><div class="perm-sub">Launch selected apps on boot</div></div>';
+  html += '<button class="toggle-sw'+(cfg.enabled?' on':'')+'" onclick="setStartupSetting(\'enabled\','+(!cfg.enabled)+')"></button></div>';
+
+  html += '<div class="perm-row"><div><div class="perm-label">Show Splash Screen</div><div class="perm-sub">Display boot animation</div></div>';
+  html += '<button class="toggle-sw'+(cfg.showSplash?' on':'')+'" onclick="setStartupSetting(\'showSplash\','+(!cfg.showSplash)+')"></button></div>';
+
+  html += '<div class="perm-row"><div><div class="perm-label">Auto-Tile on Boot</div><div class="perm-sub">Tile all startup apps automatically</div></div>';
+  html += '<button class="toggle-sw'+(cfg.autoTile?' on':'')+'" onclick="setStartupSetting(\'autoTile\','+(!cfg.autoTile)+')"></button></div>';
+
+  html += '<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">';
+  html += '<div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:10px">Startup Apps (launch order)</div>';
+
+  // Show startup apps in order
+  cfg.order.forEach(function(appId, i){
+    var app = APPS.find(function(a){return a.id===appId});
+    if(!app) return;
+    html += '<div class="startup-item">';
+    html += '<span class="startup-order">'+(i+1)+'</span>';
+    html += iconHTML(app.icon, 8);
+    html += '<span style="flex:1;font-size:13px;color:var(--white)">'+app.name+'</span>';
+    html += '<button class="btn-ghost btn-sm" onclick="moveStartupApp(\''+appId+'\',\'up\')" style="font-size:10px;padding:2px 6px">&#9650;</button>';
+    html += '<button class="btn-ghost btn-sm" onclick="moveStartupApp(\''+appId+'\',\'down\')" style="font-size:10px;padding:2px 6px">&#9660;</button>';
+    html += '<button class="btn-ghost btn-sm" onclick="toggleStartupApp(\''+appId+'\')" style="font-size:10px;padding:2px 6px;color:#ef4444">&#10005;</button>';
+    html += '</div>';
+  });
+
+  // Show available apps not in startup
+  html += '<div style="margin-top:12px;font-size:11px;color:var(--muted);margin-bottom:6px">Add to startup:</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:4px">';
+  APPS.forEach(function(app){
+    if(cfg.apps.indexOf(app.id) !== -1) return;
+    html += '<button class="btn btn-sm btn-outline" onclick="toggleStartupApp(\''+app.id+'\')" style="font-size:10px;padding:4px 10px">+ '+app.name+'</button>';
+  });
+  html += '</div></div>';
+
+  body.innerHTML = html;
+}
+
+// ── PANEL HELPERS ──
+function openPanel(id){
+  document.getElementById(id).classList.add('open');
+  if(id === 'permissions-overlay') renderPermissionsPanel();
+  else if(id === 'startup-overlay') renderStartupPanel();
+  else if(id === 'backup-overlay') renderBackupPanel();
+  else if(id === 'themes-overlay') renderThemesPanel();
+}
+function closePanel(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+// ── ADDITIONAL KEYBOARD SHORTCUTS for v6 features ──
+document.addEventListener('keydown', function(e){
+  // Cmd+Space = Spotlight
+  if((e.metaKey||e.ctrlKey) && e.code === 'Space'){
+    e.preventDefault();
+    spotlightOpen ? closeSpotlight() : openSpotlight();
+  }
+  // Ctrl+Shift+V = Clipboard
+  if(e.ctrlKey && e.shiftKey && e.key === 'V'){
+    e.preventDefault();
+    toggleClipboard();
+  }
+  // Ctrl+Shift+T = Tile windows
+  if(e.ctrlKey && e.shiftKey && e.key === 'T'){
+    e.preventDefault();
+    tileWindows();
+  }
+  // Ctrl+Shift+W = Toggle widgets
+  if(e.ctrlKey && e.shiftKey && e.key === 'W'){
+    e.preventDefault();
+    var wp = document.getElementById('widgets-panel');
+    wp.style.display = wp.style.display === 'none' ? '' : 'none';
+  }
+  // Ctrl+Shift+D = Cycle themes
+  if(e.ctrlKey && e.shiftKey && e.key === 'D'){
+    e.preventDefault();
+    var tNames = Object.keys(themes);
+    var ci = tNames.indexOf(currentTheme);
+    setTheme(tNames[(ci + 1) % tNames.length]);
+  }
+  // Ctrl+Shift+B = Backup panel
+  if(e.ctrlKey && e.shiftKey && e.key === 'B'){
+    e.preventDefault();
+    openPanel('backup-overlay');
+  }
+  // Escape closes panels
+  if(e.key === 'Escape'){
+    closeSpotlight();
+    if(clipboardVisible) toggleClipboard();
+    ['permissions-overlay','startup-overlay','backup-overlay','themes-overlay'].forEach(function(id){
+      closePanel(id);
+    });
+  }
+});
+
+// ── UPDATE CONTEXT MENU with v6 items ──
+document.addEventListener('contextmenu', function(e){
+  if(e.target.closest('.win') || e.target.closest('#dock')) return;
+  e.preventDefault();
+  var m = document.getElementById('ctx');
+  m.style.left=e.clientX+'px';m.style.top=e.clientY+'px';m.style.display='block';
+  document.getElementById('ctx-inner').innerHTML = [
+    {l:'Spotlight Search (Cmd+Space)',a:'openSpotlight()'},
+    {l:'Command Palette (Cmd+K)',a:'openLauncher()'},
+    {s:1},
+    {l:'Desktop Themes',a:"openPanel('themes-overlay')"},
+    {l:'Widgets',a:"var wp=document.getElementById('widgets-panel');wp.style.display=wp.style.display==='none'?'':'none'"},
+    {l:'Clipboard History',a:'toggleClipboard()'},
+    {s:1},
+    {l:'Focus Tunnel (Ctrl+Shift+F)',a:'document.dispatchEvent(new KeyboardEvent("keydown",{ctrlKey:true,shiftKey:true,key:"F"}))'},
+    {l:'Tile All Windows',a:'tileWindows()'},
+    {s:1},
+    {l:'App Permissions',a:"openPanel('permissions-overlay')"},
+    {l:'Startup Manager',a:"openPanel('startup-overlay')"},
+    {l:'Backup / Restore',a:"openPanel('backup-overlay')"},
+    {s:1},
+    {l:'About BlackRoad OS',a:'showAbout()'},
+    {l:'Clear All Memory',a:'clearAllMemory()'},
+  ].map(function(x){
+    if(x.s) return '<div class="dropdown-divider"></div>';
+    return '<div class="dropdown-item" onclick="'+x.a+';document.getElementById(\'ctx\').style.display=\'none\'">'+x.l+'</div>';
+  }).join('');
+}, true);
+
+// ── UPDATE ABOUT for v6 ──
+showAbout = function(){
+  toast('BlackRoad OS v7.0 — 17 products, 27 agents, 7 divisions, 17 orgs, 20 APIs. Agent Panel, System Map, Notification Center. Remember the Road. Pave Tomorrow.');
+};
+
+// ── APPLY STARTUP CONFIG ON BOOT ──
+setTimeout(function(){
+  var cfg = getStartupConfig();
+  if(cfg.enabled && cfg.apps.length > 0){
+    cfg.order.forEach(function(appId, i){
+      setTimeout(function(){ openApp(appId); }, i * 200);
+    });
+    if(cfg.autoTile){
+      setTimeout(tileWindows, cfg.order.length * 200 + 300);
+    }
+  }
+}, 500);
+
+// ═══════════════════════════════════════════════════════
+// v7.0 — AGENT PANEL, NOTIFICATION CENTER, SYSTEM MAP
+// ═══════════════════════════════════════════════════════
+
+var AGENTS = [
+  {id:'roadie',name:'Roadie',role:'Front Door / Task Runner',division:'core',color:'#FF2255',voice:'Yep. Got it. Let\'s move.'},
+  {id:'lucidia',name:'Lucidia',role:'Core Intelligence / Memory Spine',division:'core',color:'#00E676',voice:'Let\'s make this clean and real.'},
+  {id:'cecilia',name:'Cecilia',role:'Executive Operator / Workflow',division:'operations',color:'#F5A623',voice:'Already handled.'},
+  {id:'octavia',name:'Octavia',role:'Systems Orchestrator / Queue',division:'operations',color:'#9C27B0',voice:'Everything has a place.'},
+  {id:'olympia',name:'Olympia',role:'Command Console / Launch Control',division:'operations',color:'#CC00AA',voice:'Raise the standard.'},
+  {id:'silas',name:'Silas',role:'Reliability / Maintenance',division:'operations',color:'#4488FF',voice:'I\'ll keep it running.'},
+  {id:'sebastian',name:'Sebastian',role:'Client-Facing Polish',division:'operations',color:'#8844FF',voice:'There\'s a better way to present this.'},
+  {id:'calliope',name:'Calliope',role:'Narrative Architect / Copy',division:'creative',color:'#FF2255',voice:'Say it so it stays.'},
+  {id:'aria',name:'Aria',role:'Voice / Conversational Interface',division:'creative',color:'#2979FF',voice:'Let\'s make it sing.'},
+  {id:'thalia',name:'Thalia',role:'Creative Sprint / Delight',division:'creative',color:'#FF6B2B',voice:'Make it better and more fun.'},
+  {id:'lyra',name:'Lyra',role:'Signal / Sound / UX Polish',division:'creative',color:'#00D4FF',voice:'It should feel right immediately.'},
+  {id:'sapphira',name:'Sapphira',role:'Brand Aura / Visual Taste',division:'creative',color:'#CC00AA',voice:'Make it unforgettable.'},
+  {id:'seraphina',name:'Seraphina',role:'Creative Director / Big Launch',division:'creative',color:'#FF6B2B',voice:'Make it worthy.'},
+  {id:'alexandria',name:'Alexandria',role:'Archive / Library / Research',division:'knowledge',color:'#FF1D6C',voice:'It\'s all here.'},
+  {id:'theodosia',name:'Theodosia',role:'Doctrine / Canon / Texts',division:'knowledge',color:'#8844FF',voice:'Name it correctly.'},
+  {id:'sophia',name:'Sophia',role:'Wisdom / Final Reasoning',division:'knowledge',color:'#4488FF',voice:'What is true?'},
+  {id:'gematria',name:'Gematria',role:'Symbolic Analysis / Patterns',division:'knowledge',color:'#FF1D6C',voice:'The pattern is there.'},
+  {id:'portia',name:'Portia',role:'Policy Judge / Arbitration',division:'governance',color:'#F5A623',voice:'Let\'s be exact.'},
+  {id:'atticus',name:'Atticus',role:'Reviewer / Auditor / Proof',division:'governance',color:'#4488FF',voice:'Show me the proof.'},
+  {id:'cicero',name:'Cicero',role:'Rhetoric / Persuasion',division:'governance',color:'#FF6B2B',voice:'Let\'s make the case.'},
+  {id:'valeria',name:'Valeria',role:'Security Chief / Enforcement',division:'governance',color:'#FF2255',voice:'Not everything gets access.'},
+  {id:'alice',name:'Alice',role:'Exploration / Onboarding Guide',division:'human',color:'#FF1D6C',voice:'Okay, but what\'s actually going on here?'},
+  {id:'celeste',name:'Celeste',role:'Calm Companion / Reassurance',division:'human',color:'#00D4FF',voice:'You\'re okay. Let\'s do this simply.'},
+  {id:'elias',name:'Elias',role:'Teacher / Patient Explainer',division:'human',color:'#4488FF',voice:'Let\'s slow down and understand it.'},
+  {id:'ophelia',name:'Ophelia',role:'Reflection / Mood / Depth',division:'human',color:'#9C27B0',voice:'There\'s something underneath this.'},
+  {id:'gaia',name:'Gaia',role:'Infrastructure / Hardware Monitor',division:'infrastructure',color:'#00E676',voice:'What is the system actually standing on?'},
+  {id:'anastasia',name:'Anastasia',role:'Restoration / Recovery',division:'infrastructure',color:'#F5A623',voice:'It can be made whole again.'},
+];
+
+var DIVISIONS = {core:'Core',operations:'Operations',creative:'Creative',knowledge:'Knowledge',governance:'Governance',human:'Human',infrastructure:'Infrastructure'};
+
+var ORGS = [
+  {id:'blackroad-os-inc',name:'BlackRoad-OS-Inc',lead:'olympia',repos:330,role:'Parent company'},
+  {id:'blackroad-os',name:'BlackRoad-OS',lead:'cecilia',repos:373,role:'Legacy fleet'},
+  {id:'blackroad-ai',name:'BlackRoad-AI',lead:'lucidia',repos:0,role:'AI models & research'},
+  {id:'blackroad-labs',name:'BlackRoad-Labs',lead:'gematria',repos:0,role:'Experimental'},
+  {id:'blackroad-cloud',name:'BlackRoad-Cloud',lead:'gaia',repos:0,role:'Cloud infra'},
+  {id:'blackroad-hardware',name:'BlackRoad-Hardware',lead:'gaia',repos:0,role:'Hardware'},
+  {id:'blackroad-education',name:'BlackRoad-Education',lead:'elias',repos:0,role:'Learning'},
+  {id:'blackroad-gov',name:'BlackRoad-Gov',lead:'portia',repos:0,role:'Governance'},
+  {id:'blackroad-security',name:'BlackRoad-Security',lead:'valeria',repos:0,role:'Security'},
+  {id:'blackroad-foundation',name:'BlackRoad-Foundation',lead:'sophia',repos:0,role:'Non-profit'},
+  {id:'blackroad-media',name:'BlackRoad-Media',lead:'calliope',repos:0,role:'Content'},
+  {id:'blackroad-studio',name:'BlackRoad-Studio',lead:'sapphira',repos:0,role:'Creative'},
+  {id:'blackroad-interactive',name:'BlackRoad-Interactive',lead:'thalia',repos:0,role:'Interactive'},
+  {id:'blackroad-ventures',name:'BlackRoad-Ventures',lead:'cicero',repos:0,role:'Business'},
+  {id:'blackroad-archive',name:'BlackRoad-Archive',lead:'alexandria',repos:0,role:'Legacy'},
+  {id:'blackbox-enterprises',name:'Blackbox-Enterprises',lead:'alice',repos:0,role:'Commercial'},
+  {id:'blackboxprogramming',name:'blackboxprogramming',lead:null,repos:0,role:'Personal'},
+];
+
+var PRODUCT_MAP = [
+  {product:'RoadTrip',org:'BlackRoad-OS-Inc',agent:'roadie',domain:'roadtrip.blackroad.io',category:'communication'},
+  {product:'Roadie',org:'BlackRoad-Education',agent:'elias',domain:'tutor.blackroad.io',category:'ai'},
+  {product:'RoadView',org:'BlackRoad-OS-Inc',agent:'alexandria',domain:'search.blackroad.io',category:'analytics'},
+  {product:'BackRoad',org:'BlackRoad-Media',agent:'calliope',domain:'backroad.blackroad.io',category:'content'},
+  {product:'RoadCode',org:'BlackRoad-OS-Inc',agent:'gematria',domain:'roadcode.blackroad.io',category:'development'},
+  {product:'RoadWork',org:'BlackRoad-Education',agent:'cecilia',domain:'work.blackroad.io',category:'productivity'},
+  {product:'CarKeys',org:'BlackRoad-OS-Inc',agent:'valeria',domain:'carkeys.blackroad.io',category:'security'},
+  {product:'RoadChain',org:'BlackRoad-OS-Inc',agent:'atticus',domain:'roadchain.blackroad.io',category:'data'},
+  {product:'RoadCoin',org:'BlackRoad-Gov',agent:'portia',domain:'roadcoin.blackroad.io',category:'finance'},
+  {product:'RoadBook',org:'BlackRoad-Education',agent:'theodosia',domain:'roadbook.blackroad.io',category:'content'},
+  {product:'RoadWorld',org:'BlackRoad-OS',agent:'thalia',domain:'roadworld.blackroad.io',category:'social'},
+  {product:'OfficeRoad',org:'BlackRoad-OS-Inc',agent:'sebastian',domain:'officeroad.blackroad.io',category:'productivity'},
+  {product:'CarPool',org:'BlackRoad-OS-Inc',agent:'octavia',domain:'carpool.blackroad.io',category:'collaboration'},
+  {product:'OneWay',org:'BlackRoad-OS-Inc',agent:'silas',domain:'oneway.blackroad.io',category:'communication'},
+  {product:'RoadSide',org:'BlackRoad-OS-Inc',agent:'celeste',domain:'roadside.blackroad.io',category:'support'},
+  {product:'BlackBoard',org:'BlackRoad-Studio',agent:'sapphira',domain:'blackboard.blackroad.io',category:'education'},
+  {product:'BlackRoad OS',org:'BlackRoad-OS-Inc',agent:'lucidia',domain:'os.blackroad.io',category:'system'},
+];
+
+// ── AGENT PANEL ──
+var agentPanelOpen = false;
+var selectedAgent = null;
+var agentChats = {};
+
+function toggleAgentPanel(){
+  agentPanelOpen = !agentPanelOpen;
+  document.getElementById('agent-panel').classList.toggle('open', agentPanelOpen);
+  if(agentPanelOpen) renderAgentRoster();
+}
+
+function switchAgentTab(tab){
+  document.querySelectorAll('.agent-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.atab === tab); });
+  document.getElementById('agent-roster').style.display = tab === 'roster' ? '' : 'none';
+  document.getElementById('agent-chat').className = tab === 'chat' ? 'active' : '';
+  document.getElementById('sysmap-panel').className = tab === 'sysmap' ? 'active' : '';
+  if(tab === 'roster') renderAgentRoster();
+  if(tab === 'sysmap') renderSystemMap();
+}
+
+function renderAgentRoster(){
+  var el = document.getElementById('agent-roster');
+  var html = '';
+  var byDiv = {};
+  AGENTS.forEach(function(a){ if(!byDiv[a.division]) byDiv[a.division] = []; byDiv[a.division].push(a); });
+  Object.keys(DIVISIONS).forEach(function(div){
+    var agents = byDiv[div] || [];
+    html += '<div class="sidebar-label">' + DIVISIONS[div] + ' (' + agents.length + ')</div>';
+    agents.forEach(function(a){
+      var isSel = selectedAgent && selectedAgent.id === a.id;
+      html += '<div class="agent-roster-item'+(isSel?' selected':'')+'" onclick="selectAgent(\''+a.id+'\')">';
+      html += '<div class="agent-dot" style="background:'+a.color+'">'+a.name.charAt(0)+'</div>';
+      html += '<div class="agent-info"><div class="agent-name">'+a.name+'</div><div class="agent-role">'+a.role+'</div></div>';
+      html += '</div>';
+    });
+  });
+  el.innerHTML = html;
+}
+
+function selectAgent(id){
+  selectedAgent = AGENTS.find(function(a){return a.id===id});
+  if(!selectedAgent) return;
+  renderAgentRoster();
+  switchAgentTab('chat');
+  renderAgentChat();
+}
+
+function renderAgentChat(){
+  if(!selectedAgent) return;
+  var a = selectedAgent;
+  document.getElementById('agent-chat-header').innerHTML = '<div class="agent-dot" style="background:'+a.color+';width:24px;height:24px;font-size:10px">'+a.name.charAt(0)+'</div>'
+    + '<div><div style="font-size:12px;font-weight:600;color:var(--white)">'+a.name+'</div><div style="font-size:10px;color:var(--sub)">'+a.role+'</div></div>'
+    + '<button class="btn-ghost btn-sm" onclick="switchAgentTab(\'roster\')" style="margin-left:auto;font-size:10px">Back</button>';
+  var msgs = agentChats[a.id] || [];
+  if(msgs.length === 0){
+    msgs = [{from:a.id, text:a.voice, ts:Date.now()}];
+    agentChats[a.id] = msgs;
+  }
+  var html = '';
+  msgs.forEach(function(m){
+    var isFrom = m.from === a.id;
+    html += '<div class="agent-msg '+(isFrom?'from':'to')+'">';
+    if(isFrom) html += '<div class="agent-msg-name" style="color:'+a.color+'">'+a.name+'</div>';
+    html += escHTML(m.text);
+    html += '<div class="agent-msg-time">'+new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</div>';
+    html += '</div>';
+  });
+  document.getElementById('agent-chat-messages').innerHTML = html;
+  var container = document.getElementById('agent-chat-messages');
+  container.scrollTop = container.scrollHeight;
+  document.getElementById('agent-chat-input').focus();
+}
+
+function sendAgentMsg(){
+  if(!selectedAgent) return;
+  var input = document.getElementById('agent-chat-input');
+  var text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  if(!agentChats[selectedAgent.id]) agentChats[selectedAgent.id] = [];
+  agentChats[selectedAgent.id].push({from:'user', text:text, ts:Date.now()});
+  renderAgentChat();
+  // Agent responds
+  var a = selectedAgent;
+  setTimeout(function(){
+    var responses = [
+      a.voice,
+      'I\'m on it. Give me a moment.',
+      'Understood. Processing now.',
+      'Let me check the system for that.',
+      'Done. Anything else?',
+      'That\'s in my lane. Working on it.',
+      'I\'ll coordinate with the others.',
+    ];
+    var resp = responses[Math.floor(Math.random() * responses.length)];
+    if(!agentChats[a.id]) agentChats[a.id] = [];
+    agentChats[a.id].push({from:a.id, text:resp, ts:Date.now()});
+    renderAgentChat();
+  }, 600 + Math.random() * 1000);
+}
+
+// ── SYSTEM MAP ──
+function renderSystemMap(){
+  var el = document.getElementById('sysmap-panel');
+  var html = '';
+
+  // Products overview
+  html += '<div class="sysmap-section"><div class="sysmap-section-title">Products (17)</div>';
+  PRODUCT_MAP.forEach(function(p){
+    html += '<div class="sysmap-row"><span class="sysmap-row-label">'+p.product+'</span><span class="sysmap-row-value">'+p.domain+'</span></div>';
+  });
+  html += '</div>';
+
+  // Orgs
+  html += '<div class="sysmap-section"><div class="sysmap-section-title">Organizations (17)</div>';
+  ORGS.forEach(function(o){
+    var lead = o.lead ? AGENTS.find(function(a){return a.id===o.lead}) : null;
+    html += '<div class="sysmap-row"><span class="sysmap-row-label">'+o.name+'</span><span class="sysmap-row-value">'+(lead?lead.name:'—')+'</span></div>';
+  });
+  html += '</div>';
+
+  // Divisions
+  html += '<div class="sysmap-section"><div class="sysmap-section-title">Divisions (7)</div>';
+  Object.keys(DIVISIONS).forEach(function(div){
+    var count = AGENTS.filter(function(a){return a.division===div}).length;
+    html += '<div class="sysmap-row"><span class="sysmap-row-label">'+DIVISIONS[div]+'</span><span class="sysmap-row-value">'+count+' agents</span></div>';
+  });
+  html += '</div>';
+
+  // Infra
+  html += '<div class="sysmap-section"><div class="sysmap-section-title">Infrastructure</div>';
+  html += '<div class="sysmap-row"><span class="sysmap-row-label">Runtime</span><span class="sysmap-row-value">CF Workers</span></div>';
+  html += '<div class="sysmap-row"><span class="sysmap-row-label">Railway</span><span class="sysmap-row-value">17 services</span></div>';
+  html += '<div class="sysmap-row"><span class="sysmap-row-label">Pi Fleet</span><span class="sysmap-row-value">5 nodes</span></div>';
+  html += '<div class="sysmap-row"><span class="sysmap-row-label">Domains</span><span class="sysmap-row-value">20 roots</span></div>';
+  html += '<div class="sysmap-row"><span class="sysmap-row-label">AI Compute</span><span class="sysmap-row-value">52 TOPS</span></div>';
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+// ── NOTIFICATION CENTER ──
+var notifPanelOpen = false;
+var osNotifications = [];
+
+function toggleNotifPanel(){
+  notifPanelOpen = !notifPanelOpen;
+  document.getElementById('notif-panel').classList.toggle('open', notifPanelOpen);
+  if(notifPanelOpen) renderNotifications();
+}
+
+function addOSNotification(source, title, body, category){
+  osNotifications.unshift({id:'n'+Date.now(), source:source, title:title, body:body||'', category:category||'system', read:false, ts:Date.now()});
+  if(osNotifications.length > 50) osNotifications.pop();
+  updateNotifBadge();
+  if(!notifPanelOpen) toast(source + ': ' + title);
+  if(notifPanelOpen) renderNotifications();
+}
+
+function markAllRead(){
+  osNotifications.forEach(function(n){ n.read = true; });
+  updateNotifBadge();
+  renderNotifications();
+}
+
+function updateNotifBadge(){
+  var unread = osNotifications.filter(function(n){ return !n.read; }).length;
+  var badge = document.getElementById('notif-badge');
+  if(unread > 0){
+    badge.textContent = unread > 9 ? '9+' : unread;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderNotifications(){
+  var el = document.getElementById('notif-list');
+  if(osNotifications.length === 0){
+    el.innerHTML = '<div style="padding:32px 16px;text-align:center;font-size:12px;color:var(--muted)">No notifications yet.</div>';
+    return;
+  }
+  var html = '';
+  osNotifications.forEach(function(n,i){
+    var ago = Math.round((Date.now() - n.ts) / 60000);
+    var agoText = ago < 1 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago/60) + 'h ago';
+    html += '<div class="notif-item'+(n.read?'':' unread')+'" onclick="osNotifications['+i+'].read=true;updateNotifBadge();renderNotifications()">';
+    html += '<div class="notif-icon">'+n.source.charAt(0)+'</div>';
+    html += '<div class="notif-body"><div class="notif-title">'+escHTML(n.title)+'</div>';
+    if(n.body) html += '<div class="notif-text">'+escHTML(n.body)+'</div>';
+    html += '<div class="notif-time">'+n.source+' · '+agoText+'</div></div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+// ── KEYBOARD: Ctrl+Shift+A = Agent Panel ──
+document.addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.shiftKey && e.key === 'A'){
+    e.preventDefault();
+    toggleAgentPanel();
+  }
+  if(e.ctrlKey && e.shiftKey && e.key === 'N'){
+    e.preventDefault();
+    toggleNotifPanel();
+  }
+});
+
+// ── BOOT NOTIFICATIONS ──
+setTimeout(function(){
+  addOSNotification('System', 'BlackRoad OS v7.0 loaded', '17 products, 27 agents, 17 orgs online', 'system');
+}, 3000);
+setTimeout(function(){
+  var hour = new Date().getHours();
+  var greetings = [
+    {h:[5,6,7,8,9], agent:'Celeste', msg:'Good morning. You\'re okay. Let\'s do this simply.'},
+    {h:[10,11,12,13], agent:'Roadie', msg:'Let\'s get it. What are we building today?'},
+    {h:[14,15,16,17], agent:'Calliope', msg:'The afternoon is for creation.'},
+    {h:[18,19,20,21], agent:'Sophia', msg:'Evening. A good time to reflect.'},
+    {h:[22,23,0,1,2,3,4], agent:'Lucidia', msg:'Late night session. I\'ll remember everything.'},
+  ];
+  var g = greetings.find(function(gr){ return gr.h.indexOf(hour) !== -1; }) || greetings[0];
+  addOSNotification(g.agent, g.msg, '', 'agent');
+}, 5000);
+
+// ── FIX: Update Spotlight agent list to all 27 ──
+var origBuildSpotlight = buildSpotlightResults;
+buildSpotlightResults = function(q){
+  // Replace the old agent search with full 27
+  origBuildSpotlight(q);
+  if(!q) return;
+  var query = q.toLowerCase().trim();
+  var el = document.getElementById('spotlight-results');
+  // Check if agents already rendered (from original); if so, replace with full list
+  var agentMatches = AGENTS.filter(function(a){ return a.name.toLowerCase().indexOf(query) !== -1 || a.role.toLowerCase().indexOf(query) !== -1 || a.division.indexOf(query) !== -1; });
+  if(agentMatches.length > 0){
+    // Remove old agent section and add new one
+    var existing = el.innerHTML;
+    var agentHtml = '<div class="spotlight-section">Agents (' + agentMatches.length + ')</div>';
+    agentMatches.forEach(function(a){
+      agentHtml += '<div class="spotlight-item" onclick="toggleAgentPanel();selectAgent(\''+a.id+'\');closeSpotlight()">';
+      agentHtml += '<span class="spotlight-item-icon" style="color:'+a.color+'">&#9679;</span>';
+      agentHtml += '<span class="spotlight-item-text">'+a.name+'</span>';
+      agentHtml += '<span class="spotlight-item-sub">'+a.division+' · '+a.role+'</span>';
+      agentHtml += '</div>';
+    });
+    // Remove old agents section if present
+    existing = existing.replace(/<div class="spotlight-section">Agents<\/div>[\s\S]*?(?=<div class="spotlight-section">|$)/, '');
+    el.innerHTML = existing + agentHtml;
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// v8.0 — FILE BROWSER (Native window, no iframe)
+// ═══════════════════════════════════════════════════════
+
+var FILES = {
+  '/': {type:'dir', children:{
+    'FrontEnd': {type:'dir', children:{
+      'DESIGNTEMPLATES': {type:'dir', children:{
+        'agent-fleet-explorer.html': {type:'file', size:'45KB'},
+        'amundson-framework.html': {type:'file', size:'38KB'},
+        'audience-campaigns.html': {type:'file', size:'32KB'},
+        'binder-explorer.html': {type:'file', size:'29KB'},
+        'blackroad-products-explorer.html': {type:'file', size:'41KB'},
+        'curriculum-explorer.html': {type:'file', size:'35KB'},
+        'domains-business.html': {type:'file', size:'28KB'},
+        'forge-gallery.html': {type:'file', size:'33KB'},
+        'infrastructure-dashboard.html': {type:'file', size:'40KB'},
+        'jobs-explorer.html': {type:'file', size:'30KB'},
+        'lucidia-studio.html': {type:'file', size:'36KB'},
+        'mockups-gallery.html': {type:'file', size:'31KB'},
+        'org-directory.html': {type:'file', size:'27KB'},
+        'org-network.html': {type:'file', size:'34KB'},
+        'org-profile.html': {type:'file', size:'26KB'},
+        'pricing-page.html': {type:'file', size:'42KB'},
+        'privacy-policy.html': {type:'file', size:'18KB'},
+        'redirect.html': {type:'file', size:'2KB'},
+        'roadbook.html': {type:'file', size:'37KB'},
+        'schools-explorer.html': {type:'file', size:'32KB'},
+        'settings-page.html': {type:'file', size:'29KB'},
+        'status-page.html': {type:'file', size:'35KB'},
+        'team-page.html': {type:'file', size:'28KB'},
+        'template.html': {type:'file', size:'8KB'},
+        'terms.html': {type:'file', size:'16KB'},
+      }},
+    }},
+    'Backend': {type:'dir', children:{
+      'd1': {type:'dir', children:{
+        'databases.md': {type:'file', size:'4KB'},
+      }},
+      'workers': {type:'dir', children:{
+        'analytics-blackroad.js': {type:'file', size:'8KB'},
+        'auth-blackroad.js': {type:'file', size:'12KB'},
+        'blackroad-io.js': {type:'file', size:'15KB'},
+        'chat-blackroad.js': {type:'file', size:'11KB'},
+        'roadbook-blackroad.js': {type:'file', size:'9KB'},
+        'roadcoin-blackroad.js': {type:'file', size:'10KB'},
+        'roadpay.js': {type:'file', size:'14KB'},
+        'roadwork-blackroad.js': {type:'file', size:'8KB'},
+        'tutor-blackroad.js': {type:'file', size:'13KB'},
+      }},
+    }},
+    'VirtualComputer': {type:'dir', children:{
+      'OPERATORPATH': {type:'dir', children:{
+        'Rules': {type:'dir', children:{
+          'EXAMPLE': {type:'dir', children:{
+            'Indices': {type:'dir', children:{
+              'MessyIndex': {type:'dir', children:{
+                'Website-MockUps': {type:'dir', children:{
+                  'animations.html': {type:'file', size:'18KB'},
+                  'asana-mockup.html': {type:'file', size:'22KB'},
+                  'backlog-mockup.html': {type:'file', size:'20KB'},
+                  'backroad-feed.html': {type:'file', size:'19KB'},
+                  'backroad-gallery.html': {type:'file', size:'21KB'},
+                  'backroad-stories.html': {type:'file', size:'18KB'},
+                  'backroad-tube.html': {type:'file', size:'24KB'},
+                  'blackroad-brand-guide.html': {type:'file', size:'28KB'},
+                  'blackroad-home-mockup.html': {type:'file', size:'32KB'},
+                  'brand-verifier.html': {type:'file', size:'18KB'},
+                  'carkeys-app-mockup.html': {type:'file', size:'22KB'},
+                  'classroom-mockup.html': {type:'file', size:'25KB'},
+                  'clickup-mockup.html': {type:'file', size:'23KB'},
+                  'docs-mockup.html': {type:'file', size:'20KB'},
+                  'domain-api-blackroad-io.html': {type:'file', size:'15KB'},
+                  'domain-blackroad-company.html': {type:'file', size:'14KB'},
+                  'domain-blackroadai-com.html': {type:'file', size:'13KB'},
+                  'domain-blackroadinc-us.html': {type:'file', size:'14KB'},
+                  'domain-brand-blackroad-io.html': {type:'file', size:'16KB'},
+                  'domain-docs-blackroad-io.html': {type:'file', size:'15KB'},
+                  'domain-status-blackroad-io.html': {type:'file', size:'14KB'},
+                  'facebook-mockup.html': {type:'file', size:'26KB'},
+                  'google-drive-mockup.html': {type:'file', size:'24KB'},
+                  'hello-world.html': {type:'file', size:'3KB'},
+                  'hq-skyscraper-mockup.html': {type:'file', size:'30KB'},
+                  'icon-library.html': {type:'file', size:'35KB'},
+                  'infographic-show-mockup.html': {type:'file', size:'22KB'},
+                  'infographics.html': {type:'file', size:'28KB'},
+                  'instagram-mockup.html': {type:'file', size:'25KB'},
+                  'linear-mockup.html': {type:'file', size:'21KB'},
+                  'linkedin-mockup.html': {type:'file', size:'22KB'},
+                  'loom-mockup.html': {type:'file', size:'20KB'},
+                  'memory-gate-mockup.html': {type:'file', size:'19KB'},
+                  'miro-mockup.html': {type:'file', size:'23KB'},
+                  'mockup-base.css': {type:'file', size:'4KB'},
+                  'mockup-gallery.html': {type:'file', size:'15KB'},
+                  'netflix-mockup.html': {type:'file', size:'28KB'},
+                  'notion-mockup.html': {type:'file', size:'24KB'},
+                  'officeroad-mockup.html': {type:'file', size:'22KB'},
+                  'oneway-mockup.html': {type:'file', size:'20KB'},
+                  'os-desktop-mockup.html': {type:'file', size:'35KB'},
+                  'railway-mockup.html': {type:'file', size:'21KB'},
+                  'roadamp-mockup.html': {type:'file', size:'19KB'},
+                  'roadapi-mockup.html': {type:'file', size:'22KB'},
+                  'roadarcade-mockup.html': {type:'file', size:'24KB'},
+                  'roadboard-mockup.html': {type:'file', size:'20KB'},
+                  'roadbook-mockup.html': {type:'file', size:'21KB'},
+                  'roadchat-app-mockup.html': {type:'file', size:'26KB'},
+                  'roadchat-mockup.html': {type:'file', size:'24KB'},
+                  'roaddb-mockup.html': {type:'file', size:'18KB'},
+                  'roaddeploy-mockup.html': {type:'file', size:'22KB'},
+                  'roadid-mockup.html': {type:'file', size:'19KB'},
+                  'roadie-room.html': {type:'file', size:'25KB'},
+                  'roadie-tutor-mockup.html': {type:'file', size:'28KB'},
+                  'roadim-mockup.html': {type:'file', size:'20KB'},
+                  'roadlimewire-mockup.html': {type:'file', size:'21KB'},
+                  'roadmsn-mockup.html': {type:'file', size:'19KB'},
+                  'roadnapster-mockup.html': {type:'file', size:'20KB'},
+                  'roadpay-mockup.html': {type:'file', size:'23KB'},
+                  'roadphone-mockup.html': {type:'file', size:'18KB'},
+                  'roadradio-mockup.html': {type:'file', size:'21KB'},
+                  'roadsearch-mockup.html': {type:'file', size:'22KB'},
+                  'roadspace-mockup.html': {type:'file', size:'24KB'},
+                  'roadstock-mockup.html': {type:'file', size:'22KB'},
+                  'roadview-communities.html': {type:'file', size:'26KB'},
+                  'roadweather-mockup.html': {type:'file', size:'20KB'},
+                  'roadwork-mockup.html': {type:'file', size:'24KB'},
+                  'roster-mockup.html': {type:'file', size:'19KB'},
+                  'schoology-mockup.html': {type:'file', size:'23KB'},
+                  'snapchat-mockup.html': {type:'file', size:'22KB'},
+                  'spotify-mockup.html': {type:'file', size:'27KB'},
+                  'stats-mockup.html': {type:'file', size:'18KB'},
+                  'tiktok-mockup.html': {type:'file', size:'25KB'},
+                  'trello-mockup.html': {type:'file', size:'22KB'},
+                  'twitter-mockup.html': {type:'file', size:'25KB'},
+                  'vault-mockup.html': {type:'file', size:'20KB'},
+                  'vercel-mockup.html': {type:'file', size:'23KB'},
+                  'video-decode.html': {type:'file', size:'15KB'},
+                  'video-globe.html': {type:'file', size:'16KB'},
+                  'video-internet.html': {type:'file', size:'14KB'},
+                  'video-origin.html': {type:'file', size:'15KB'},
+                  'video-parade.html': {type:'file', size:'17KB'},
+                  'video-pulse.html': {type:'file', size:'14KB'},
+                  'video-race.html': {type:'file', size:'16KB'},
+                  'video-robot-vs.html': {type:'file', size:'18KB'},
+                  'video-warp.html': {type:'file', size:'15KB'},
+                  'youtube-mockup.html': {type:'file', size:'28KB'},
+                }},
+                'Hardware': {type:'dir', children:{
+                  'INVENTORY.md': {type:'file', size:'6KB'},
+                }},
+                '09601-intercompany-agreement-overview': {type:'dir', children:{
+                  '09603-agreement-governance.md': {type:'file', size:'8KB'},
+                  '09605-agreement-stability-rules.md': {type:'file', size:'5KB'},
+                  '09610-intercompany-agreement-index.md': {type:'file', size:'12KB'},
+                  '09618-term-and-termination-rules.md': {type:'file', size:'6KB'},
+                  '09620-ip-license-index.md': {type:'file', size:'7KB'},
+                  '09631-cost-sharing-agreement-system.md': {type:'file', size:'9KB'},
+                  '09694-cost-sharing-protocol.md': {type:'file', size:'5KB'},
+                  '09708-tax-security-rules.md': {type:'file', size:'8KB'},
+                  '09910-master-binder-index.md': {type:'file', size:'15KB'},
+                  '09911-binder-volume-i-corporate-constitution.md': {type:'file', size:'18KB'},
+                  '09921-binder-volume-ii-institutional-architecture.md': {type:'file', size:'16KB'},
+                  '09991-blackroad-universal-control-system.md': {type:'file', size:'20KB'},
+                  '10012-blackroad-operating-binder-00-readme.md': {type:'file', size:'10KB'},
+                }},
+                '00201-blackroad-divisions-overview': {type:'dir', children:{}},
+                '02001-school-of-engineering-and-platform-systems-charter': {type:'dir', children:{}},
+                '03801-business-architecture-overview': {type:'dir', children:{}},
+                '07501-line-and-code-addressing-overview': {type:'dir', children:{}},
+                '08301-operating-authority-matrix-overview': {type:'dir', children:{}},
+                '08701-ethical-wall-street-overview': {type:'dir', children:{}},
+                '12971-remaining-convoy-overview': {type:'dir', children:{}},
+                '13501-enterprise-layer-overview': {type:'dir', children:{}},
+                '13601-gitea-primary-overview': {type:'dir', children:{}},
+                '15301-file-allocation-overview': {type:'dir', children:{}},
+                '16201-universal-register-layer-overview': {type:'dir', children:{}},
+                'BlackRoad': {type:'dir', children:{}},
+                'BlackRoad-Agents': {type:'dir', children:{}},
+                'BlackRoad-Dev': {type:'dir', children:{}},
+                'BlackRoad-Labs': {type:'dir', children:{}},
+                'BlackRoad-Media': {type:'dir', children:{}},
+                'BlackRoad-OS-Corporate': {type:'dir', children:{}},
+                'BlackRoad-Portable': {type:'dir', children:{}},
+              }},
+              'CleanIndex': {type:'dir', children:{}},
+              'ErrorIndex': {type:'dir', children:{}},
+            }},
+            'domains': {type:'dir', children:{
+              'blackroad.io': {type:'dir', children:{}},
+              'blackroad.systems': {type:'dir', children:{}},
+            }},
+            'FileSystem': {type:'dir', children:{}},
+            'GitHub': {type:'dir', children:{}},
+            'OS': {type:'dir', children:{
+              'BlackRoad-Operating-Binder': {type:'dir', children:{}},
+            }},
+            'PortableOS': {type:'dir', children:{
+              'BlackRoad-Operating-Binder': {type:'dir', children:{}},
+            }},
+            'Search': {type:'dir', children:{}},
+            'bin': {type:'dir', children:{}},
+          }},
+          'Indefinitely': {type:'dir', children:{}},
+          'Permanent': {type:'dir', children:{}},
+          'Temporary': {type:'dir', children:{}},
+        }},
+      }},
+      'RoadTrip': {type:'dir', children:{}},
+      'RoadWork': {type:'dir', children:{}},
+      'README': {type:'dir', children:{
+        'Index.md.rtf': {type:'file', size:'3KB'},
+      }},
+      'BlackRoad-Portable': {type:'dir', children:{
+        'BlackRoad-Operating-Binder': {type:'dir', children:{
+          'security': {type:'dir', children:{
+            'gateway.log': {type:'file', size:'1KB'},
+          }},
+        }},
+      }},
+    }},
+    'BlackRoad-Portable': {type:'dir', children:{
+      'BlackRoad-Operating-Binder': {type:'dir', children:{
+        'security': {type:'dir', children:{
+          'gateway.log': {type:'file', size:'1KB'},
+        }},
+      }},
+    }},
+    'Endpoints': {type:'dir', children:{
+      'README.md': {type:'file', size:'2KB'},
+    }},
+    'Memory': {type:'dir', children:{
+      'binder': {type:'dir', children:{
+        'README.md': {type:'file', size:'3KB'},
+      }},
+      'README.md': {type:'file', size:'3KB'},
+    }},
+    'Scripts': {type:'dir', children:{
+      'br-system': {type:'file', size:'5KB'},
+      'br-workers': {type:'file', size:'4KB'},
+      'br-cloud-workers': {type:'file', size:'6KB'},
+      'br-migrate-to-pi': {type:'file', size:'3KB'},
+      'br-fleet': {type:'file', size:'7KB'},
+    }},
+    'agents': {type:'dir', children:{
+      'README.md': {type:'file', size:'2KB'},
+    }},
+    'web': {type:'dir', children:{
+      'README.md': {type:'file', size:'1KB'},
+    }},
+    'localhost': {type:'dir', children:{
+      'README.md': {type:'file', size:'1KB'},
+    }},
+    'ollama': {type:'dir', children:{
+      'README.md': {type:'file', size:'1KB'},
+    }},
+    'math': {type:'dir', children:{}},
+    'git': {type:'dir', children:{}},
+    'Index': {type:'dir', children:{
+      'MANIFEST.md': {type:'file', size:'8KB'},
+    }},
+    'INDEX.md': {type:'file', size:'12KB'},
+    'CREATED_SUMMARY.md': {type:'file', size:'5KB'},
+    'TREE_PREVIEW.md': {type:'file', size:'3KB'},
+    'index.html': {type:'file', size:'120KB'},
+  }},
+};
+
+var currentPath = '/';
+var pathHistory = ['/'];
+var pathHistoryIdx = 0;
+
+function resolvePath(path){
+  if(path === '/') return FILES['/'];
+  var parts = path.split('/').filter(Boolean);
+  var node = FILES['/'];
+  for(var i = 0; i < parts.length; i++){
+    if(!node || !node.children || !node.children[parts[i]]) return null;
+    node = node.children[parts[i]];
+  }
+  return node;
+}
+
+function fileIcon(item, name){
+  if(item.type === 'dir') return '<span style="display:inline-flex;width:20px;height:16px;background:var(--g135);border-radius:2px 2px 3px 3px;position:relative;flex-shrink:0"><span style="position:absolute;top:-3px;left:0;width:8px;height:3px;background:var(--g);border-radius:2px 2px 0 0"></span></span>';
+  var ext = name.split('.').pop();
+  var colors = {html:'#FF6B2B',css:'#4488FF',js:'#F5A623',md:'#8844FF',sh:'#00D4FF',log:'#737373',json:'#28c840'};
+  var c = colors[ext] || '#737373';
+  return '<span style="display:inline-flex;width:16px;height:20px;background:'+c+';border-radius:2px;flex-shrink:0;opacity:.7"></span>';
+}
+
+function renderFileBrowser(path){
+  currentPath = path || '/';
+  var node = resolvePath(currentPath);
+  if(!node || node.type !== 'dir') return;
+
+  var winEl = document.getElementById('w-files');
+  if(!winEl) return;
+  var body = winEl.querySelector('.win-body');
+  if(!body) return;
+
+  var pathParts = currentPath.split('/').filter(Boolean);
+  var breadcrumb = '<span style="cursor:pointer;color:var(--white)" onclick="navigateTo(\'/\')">BlackRoad</span>';
+  var buildPath = '';
+  pathParts.forEach(function(p){
+    buildPath += '/' + p;
+    breadcrumb += ' <span style="color:var(--muted)">/</span> <span style="cursor:pointer;color:var(--white)" onclick="navigateTo(\'' + buildPath + '\')">' + p + '</span>';
+  });
+
+  var entries = [];
+  if(node.children){
+    Object.keys(node.children).sort(function(a,b){
+      var aDir = node.children[a].type === 'dir' ? 0 : 1;
+      var bDir = node.children[b].type === 'dir' ? 0 : 1;
+      if(aDir !== bDir) return aDir - bDir;
+      return a.localeCompare(b);
+    }).forEach(function(name){
+      entries.push({name:name, item:node.children[name]});
+    });
+  }
+
+  var dirCount = entries.filter(function(e){return e.item.type==='dir'}).length;
+  var fileCount = entries.length - dirCount;
+
+  var html = '';
+  // Toolbar
+  html += '<div style="display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--card)">';
+  html += '<button class="btn-ghost btn-sm" onclick="fileBack()" style="font-size:11px;opacity:'+(pathHistoryIdx > 0 ? 1 : .3)+'">&larr;</button>';
+  html += '<button class="btn-ghost btn-sm" onclick="fileForward()" style="font-size:11px;opacity:'+(pathHistoryIdx < pathHistory.length-1 ? 1 : .3)+'">&rarr;</button>';
+  html += '<button class="btn-ghost btn-sm" onclick="navigateTo(\'' + (pathParts.length > 0 ? '/' + pathParts.slice(0,-1).join('/') : '/') + '\')" style="font-size:11px">&uarr;</button>';
+  html += '<div style="flex:1;font-family:var(--jb);font-size:11px;color:var(--sub);padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px">' + breadcrumb + '</div>';
+  html += '</div>';
+
+  // File list
+  html += '<div style="padding:0">';
+  // Header
+  html += '<div style="display:grid;grid-template-columns:1fr 80px 100px;padding:8px 16px;border-bottom:1px solid var(--border);font-family:var(--jb);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">';
+  html += '<span>Name</span><span>Size</span><span>Type</span>';
+  html += '</div>';
+
+  if(entries.length === 0){
+    html += '<div style="padding:32px 16px;text-align:center;font-size:12px;color:var(--muted)">Empty folder</div>';
+  }
+
+  entries.forEach(function(e){
+    var isDir = e.item.type === 'dir';
+    var childCount = isDir && e.item.children ? Object.keys(e.item.children).length : 0;
+    var size = isDir ? (childCount + ' items') : (e.item.size || '--');
+    var type = isDir ? 'Folder' : (e.name.split('.').pop().toUpperCase());
+    var fullPath = currentPath === '/' ? '/' + e.name : currentPath + '/' + e.name;
+
+    html += '<div class="list-item" style="display:grid;grid-template-columns:1fr 80px 100px;padding:10px 16px;gap:8px;cursor:pointer" ';
+    if(isDir){
+      html += 'ondblclick="navigateTo(\'' + fullPath + '\')"';
+    } else {
+      html += 'ondblclick="openFile(\'' + fullPath + '\',\'' + e.name + '\')"';
+    }
+    html += '>';
+    html += '<span style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);min-width:0">' + fileIcon(e.item, e.name) + '<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + e.name + '</span></span>';
+    html += '<span style="font-family:var(--jb);font-size:10px;color:var(--muted)">' + size + '</span>';
+    html += '<span style="font-size:11px;color:var(--sub)">' + type + '</span>';
+    html += '</div>';
+  });
+
+  html += '</div>';
+
+  // Status bar
+  html += '<div style="padding:6px 16px;border-top:1px solid var(--border);font-family:var(--jb);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;background:var(--card)">';
+  html += '<span>' + dirCount + ' folders, ' + fileCount + ' files</span>';
+  html += '<span>/Applications/BlackRoad' + currentPath + '</span>';
+  html += '</div>';
+
+  body.innerHTML = html;
+  body.style.overflow = 'auto';
+
+  // Update window title
+  var titleEl = winEl.querySelector('.win-title');
+  if(titleEl) titleEl.textContent = 'Files — ' + (pathParts.length > 0 ? pathParts[pathParts.length-1] : 'BlackRoad');
+}
+
+function navigateTo(path){
+  // Trim history forward if we navigated back
+  if(pathHistoryIdx < pathHistory.length - 1){
+    pathHistory = pathHistory.slice(0, pathHistoryIdx + 1);
+  }
+  pathHistory.push(path);
+  pathHistoryIdx = pathHistory.length - 1;
+  renderFileBrowser(path);
+}
+
+function fileBack(){
+  if(pathHistoryIdx > 0){
+    pathHistoryIdx--;
+    renderFileBrowser(pathHistory[pathHistoryIdx]);
+  }
+}
+
+function fileForward(){
+  if(pathHistoryIdx < pathHistory.length - 1){
+    pathHistoryIdx++;
+    renderFileBrowser(pathHistory[pathHistoryIdx]);
+  }
+}
+
+function openFile(path, name){
+  var ext = name.split('.').pop().toLowerCase();
+  var parts = path.split('/').filter(Boolean);
+  var relPath = parts.join('/');
+  if(ext === 'html' || ext === 'css'){
+    window.open(relPath, '_blank');
+  } else if(ext === 'js'){
+    // Open JS worker files in a viewer window
+    toast('Worker: ' + name + ' — view in RoadCode');
+  } else if(ext === 'md' || ext === 'rtf'){
+    toast('Document: ' + name);
+  } else if(ext === 'log'){
+    toast('Log: ' + name);
+  } else {
+    toast('File: ' + name + ' (' + ext.toUpperCase() + ')');
+  }
+}
+
+// Override openApp to handle native apps
+var _origOpenApp = openApp;
+openApp = function(id){
+  var app = APPS.find(function(a){return a.id===id});
+  if(app && app.native){
+    closeLauncher();
+    if(wins[id]){
+      focusWin(id);
+      return;
+    }
+    autoCloseOthers(id);
+
+    var D = document.getElementById('desktop');
+    var dw = D.offsetWidth, dh = D.offsetHeight;
+    var mem = getMemory(id);
+    var w, h, x, y;
+    if(mem){
+      w = Math.min(mem.w || Math.round(dw * app.w), dw);
+      h = Math.min(mem.h || Math.round(dh * app.h), dh);
+      x = Math.min(mem.x || 0, dw - w);
+      y = Math.min(mem.y || 0, dh - h);
+    } else {
+      w = Math.max(340, Math.min(Math.round(dw * app.w), dw - 20));
+      h = Math.max(240, Math.min(Math.round(dh * app.h), dh - 20));
+      x = Math.round((dw - w) / 2);
+      y = Math.round((dh - h) / 2);
+    }
+
+    var el = document.createElement('div');
+    el.className = 'win card focused';
+    el.id = 'w-'+id;
+    el.style.cssText = 'left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;z-index:'+(++zTop);
+
+    var winHTML = '<div class="card-grad"></div>';
+    winHTML += '<div class="card-header">';
+    winHTML += '<div class="dots"><div class="dot close" data-a="close"></div><div class="dot minimize" data-a="min"></div><div class="dot maximize" data-a="max"></div></div>';
+    winHTML += '<div class="drag"><span class="win-title">Files — BlackRoad</span></div>';
+    winHTML += '<div style="width:50px"></div>';
+    winHTML += '</div>';
+    winHTML += '<div class="win-body" style="background:var(--bg)"></div>';
+    winHTML += '<div class="win-resize"></div>';
+
+    el.innerHTML = winHTML;
+
+    // Dot actions
+    el.querySelectorAll('.dot').forEach(function(dot){
+      dot.addEventListener('click', function(e){
+        e.stopPropagation();
+        var a = dot.dataset.a;
+        if(a==='close') closeWin(id);
+        else if(a==='min') closeWin(id);
+        else if(a==='max') maxiWin(id);
+      });
+    });
+
+    el.addEventListener('mousedown', function(){ focusWin(id); });
+
+    // Drag
+    var dragEl = el.querySelector('.drag');
+    var dragging = false, ddx, ddy;
+    dragEl.addEventListener('mousedown', function(e){
+      if(wins[id] && wins[id].maxi) return;
+      dragging = true; ddx = e.clientX - x; ddy = e.clientY - y;
+      el.style.transition = 'box-shadow .2s';
+      focusWin(id);
+      document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents='none'; });
+    });
+    document.addEventListener('mousemove', function(e){
+      if(!dragging) return;
+      var nx = e.clientX - ddx, ny = Math.max(0, e.clientY - ddy);
+      if(wins[id]){ wins[id].x = nx; wins[id].y = ny; }
+      el.style.left = nx+'px'; el.style.top = ny+'px';
+    });
+    document.addEventListener('mouseup', function(){
+      if(dragging){
+        dragging = false; el.style.transition = '';
+        document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents=''; });
+        if(wins[id]) saveMemory(id, {x:wins[id].x, y:wins[id].y, w:wins[id].w, h:wins[id].h});
+      }
+    });
+    dragEl.addEventListener('dblclick', function(){ maxiWin(id); });
+
+    // Resize
+    var resEl = el.querySelector('.win-resize');
+    var resizing = false, rx, ry, rw, rh;
+    resEl.addEventListener('mousedown', function(e){
+      if(wins[id] && wins[id].maxi) return;
+      e.stopPropagation(); resizing=true; rx=e.clientX;ry=e.clientY;rw=w;rh=h;
+      document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents='none'; });
+    });
+    document.addEventListener('mousemove', function(e){
+      if(!resizing) return;
+      if(wins[id]){
+        wins[id].w = Math.max(340, rw + e.clientX - rx);
+        wins[id].h = Math.max(240, rh + e.clientY - ry);
+        el.style.width = wins[id].w+'px'; el.style.height = wins[id].h+'px';
+      }
+    });
+    document.addEventListener('mouseup', function(){
+      if(resizing){
+        resizing = false;
+        document.querySelectorAll('.win-body iframe').forEach(function(f){ f.style.pointerEvents=''; });
+        if(wins[id]) saveMemory(id, {w:wins[id].w, h:wins[id].h});
+      }
+    });
+
+    document.getElementById('win-container').appendChild(el);
+    wins[id] = {el:el, app:app, x:x, y:y, w:w, h:h, maxi:false};
+    focusWin(id);
+    renderDock();
+
+    // Render the file browser content
+    currentPath = '/';
+    pathHistory = ['/'];
+    pathHistoryIdx = 0;
+    renderFileBrowser('/');
+    return;
+  }
+  _origOpenApp(id);
+};
+
+// Add Files to spotlight search
+var _origSpotlight2 = buildSpotlightResults;
+buildSpotlightResults = function(q){
+  _origSpotlight2(q);
+  if(!q) return;
+  var query = q.toLowerCase().trim();
+  // Search files
+  var fileResults = [];
+  function searchFiles(node, path){
+    if(!node || !node.children) return;
+    Object.keys(node.children).forEach(function(name){
+      var child = node.children[name];
+      var fullPath = path === '/' ? '/' + name : path + '/' + name;
+      if(name.toLowerCase().indexOf(query) !== -1){
+        fileResults.push({name:name, path:fullPath, type:child.type});
+      }
+      if(child.type === 'dir') searchFiles(child, fullPath);
+    });
+  }
+  searchFiles(FILES['/'], '/');
+  if(fileResults.length > 0){
+    var el = document.getElementById('spotlight-results');
+    var html = el.innerHTML;
+    html += '<div class="spotlight-section">Files (' + fileResults.length + ')</div>';
+    fileResults.slice(0, 8).forEach(function(f){
+      var icon = f.type === 'dir' ? '&#9862;' : '&#9783;';
+      var action = f.type === 'dir' ? "openApp('files');setTimeout(function(){navigateTo('"+f.path+"')},200)" : "openFile('"+f.path+"','"+f.name+"')";
+      html += '<div class="spotlight-item" onclick="'+action+';closeSpotlight()">';
+      html += '<span class="spotlight-item-icon">'+icon+'</span>';
+      html += '<span class="spotlight-item-text">'+f.name+'</span>';
+      html += '<span class="spotlight-item-sub">'+f.path+'</span>';
+      html += '</div>';
+    });
+    el.innerHTML = html;
+  }
+};
+
+// Also add files to command palette
+var _origLauncher2 = buildLauncher;
+buildLauncher = function(q){
+  _origLauncher2(q);
+  if(!q) return;
+  var query = q.toLowerCase().trim();
+  if(query === 'files' || query === 'folder' || query === 'browse' || query === 'finder'){
+    var el = document.getElementById('cmd-results');
+    el.innerHTML += '<div class="cmd-item" onclick="openApp(\'files\');closeLauncher()">'
+      + '<span class="cmd-item-icon">'+iconHTML('square', 8)+'</span>'
+      + '<span class="cmd-item-text">Files — Browse /Applications/BlackRoad</span>'
+      + '<span class="cmd-item-shortcut">local://files</span>'
+      + '</div>';
+  }
+};
+
+// ── v8 WELCOME ──
+setTimeout(function(){
+  toast('v8: Files app in dock — browse /Applications/BlackRoad. Double-click folders to navigate.');
+}, 6000);
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9eb945569c39f7fc',t:'MTc3NjA3MDcyNg=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

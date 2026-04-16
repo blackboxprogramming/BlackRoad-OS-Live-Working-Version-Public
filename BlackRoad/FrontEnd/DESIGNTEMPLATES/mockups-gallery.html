@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Platform Mockups Gallery — BlackRoad OS</title>
+<meta name="description" content="30 platform-grade mockups. What BlackRoad products look like when built to the standard of the world's best apps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#FF2255}
+.hero{padding:76px 0 40px;text-align:center}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin:18px auto 0}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px;max-width:900px;margin-left:auto;margin-right:auto}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px;text-align:center}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:end;margin-bottom:20px}
+.field label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,.select{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s,transform .15s}
+.input:focus,.select:focus{border-color:#3b3b3b;transform:translateY(-1px)}
+.results-bar{display:flex;justify-content:space-between;align-items:center;margin:12px 0 18px}
+.results-count{font-family:var(--jb);font-size:11px;color:var(--sub)}
+.mockup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.mockup-card{position:relative;transition:border-color .15s,transform .18s,box-shadow .18s;cursor:pointer}
+.mockup-card:hover{border-color:#313131;transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.26)}
+.mockup-card.hidden{display:none}
+.card-body{padding:18px}
+.mockup-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.mockup-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.mockup-info{flex:1}
+.mockup-name{font-size:18px;font-weight:700;color:var(--white)}
+.mockup-ref{font-family:var(--jb);font-size:11px;color:var(--sub);margin-top:2px}
+.cat-pill{font-family:var(--jb);font-size:10px;padding:5px 8px;border-radius:999px;white-space:nowrap}
+.mockup-desc{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:14px;min-height:48px}
+.mockup-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meta-item{padding:8px 10px;background:var(--elevated);border:1px solid var(--border);border-radius:8px}
+.meta-label{font-family:var(--jb);font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.meta-value{font-size:12px;color:var(--white);margin-top:2px}
+.mockup-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:12px}
+.mockup-tag{font-family:var(--jb);font-size:9px;padding:3px 7px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--muted)}
+.mockup-file{font-family:var(--jb);font-size:9px;color:var(--muted);margin-top:10px}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){.mockup-grid{grid-template-columns:repeat(2,1fr)}.stat-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.nav-links{display:none}.hero h1{font-size:40px}.mockup-grid,.stat-row,.toolbar{grid-template-columns:1fr}.container{padding:0 16px}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://roadworld.blackroad.io">RoadWorld</a>
+    <a href="https://roadcode.blackroad.io">RoadCode</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>Design Reference</div>
+</nav>
+
+<div class="container hero">
+  <div class="eyebrow">Platform-Grade Design Reference</div>
+  <h1>Mockups Gallery</h1>
+  <p>30 platform mockups showing what BlackRoad products look like when built to the standard of the world's best apps. Each one is a full HTML file with working UI.</p>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-k">Mockups</div><div class="stat-v">30</div><div class="stat-t">Full platform UI references.</div></div>
+    <div class="stat-card"><div class="stat-k">Categories</div><div class="stat-v">8</div><div class="stat-t">Social, music, dev, video, business, creative, edu, gaming.</div></div>
+    <div class="stat-card"><div class="stat-k">Avg Size</div><div class="stat-v">37KB</div><div class="stat-t">Each is a complete standalone page.</div></div>
+    <div class="stat-card"><div class="stat-k">Road Name</div><div class="stat-v">Yes</div><div class="stat-t">Every mockup has a BlackRoad product name.</div></div>
+  </div>
+</div>
+
+<div class="container"><div class="card"><div class="card-grad"></div><div class="card-body">
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Search Mockups</label>
+      <input class="input" id="search" type="search" placeholder="Try &quot;social&quot;, &quot;music&quot;, &quot;video&quot;, &quot;code&quot;, &quot;creative&quot;...">
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select class="select" id="category">
+        <option value="all">All categories</option>
+        <option value="social">Social</option>
+        <option value="music">Music & Audio</option>
+        <option value="dev">Dev & Code</option>
+        <option value="video">Video & Streaming</option>
+        <option value="business">Business & Commerce</option>
+        <option value="creative">Creative & Design</option>
+        <option value="education">Education</option>
+        <option value="gaming">Gaming</option>
+        <option value="productivity">Productivity</option>
+      </select>
+    </div>
+  </div>
+  <div class="results-bar">
+    <div class="results-count" id="results-count">30 mockups visible</div>
+  </div>
+</div></div></div>
+
+<div class="container section">
+  <div class="mockup-grid" id="mockup-grid"></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — Every mockup is a design target. Build to this standard.</div>
+  </footer>
+</div>
+
+<script>
+const catColors = {social:'#4488FF',music:'#28c840',dev:'#8844FF',video:'#FF2255',business:'#f5a623',creative:'#CC00AA',education:'#00D4FF',gaming:'#FF6B2B',productivity:'#4dd4a0'}
+
+const mockups = [
+  {name:'RoadTok',ref:'TikTok',cat:'social',file:'tiktok-mockup.html',desc:'Short-form vertical video feed. Full-screen player, engagement sidebar, creator profiles.',tags:['video','feed','creator'],product:'BackRoad',size:'35KB'},
+  {name:'RoadBeats',ref:'Spotify',cat:'music',file:'spotify-mockup.html',desc:'Music streaming app. Sidebar navigation, playlists, now-playing bar, library management.',tags:['streaming','playlists','player'],product:'Cadence',size:'46KB'},
+  {name:'RoadForge',ref:'GitHub',cat:'dev',file:'github-mockup.html',desc:'Code repository platform. Repo view, file tree, commits, issues, pull requests.',tags:['git','repos','code'],product:'RoadCode',size:'37KB'},
+  {name:'RoadConvoy',ref:'Discord',cat:'social',file:'discord-mockup.html',desc:'Real-time chat with channels, voice rooms, server list, and member sidebar.',tags:['chat','channels','voice'],product:'RoadTrip',size:'40KB'},
+  {name:'RoadStream',ref:'Netflix',cat:'video',file:'netflix-mockup.html',desc:'Video streaming catalog. Hero banner, category rows, continue watching, profiles.',tags:['streaming','catalog','profiles'],product:'RoadBook',size:'34KB'},
+  {name:'RoadConnect',ref:'LinkedIn',cat:'business',file:'linkedin-mockup.html',desc:'Professional network. Feed, profiles, jobs, messaging, company pages.',tags:['professional','jobs','networking'],product:'RoadWork',size:'38KB'},
+  {name:'RoadDrive',ref:'Google Drive',cat:'productivity',file:'google-drive-mockup.html',desc:'Cloud storage UI. File grid, folder tree, sharing controls, storage meter.',tags:['storage','files','sharing'],product:'OneWay',size:'33KB'},
+  {name:'RoadAtlas',ref:'Stripe Atlas',cat:'business',file:'stripe-atlas-mockup.html',desc:'Company formation and treasury dashboard. Incorporation flow, banking, compliance.',tags:['finance','formation','compliance'],product:'RoadChain',size:'44KB'},
+  {name:'RoadAcademy',ref:'Khan Academy',cat:'education',file:'khan-academy-mockup.html',desc:'Learning platform. Course cards, progress tracking, video lessons, mastery system.',tags:['learning','courses','progress'],product:'Roadie',size:'40KB'},
+  {name:'RoadMarket',ref:'Amazon',cat:'business',file:'amazon-mockup.html',desc:'E-commerce marketplace. Product listings, search, cart, checkout flow.',tags:['commerce','products','checkout'],product:'RoadWork',size:'14KB'},
+  {name:'RoadHQ',ref:'Skyscraper HQ',cat:'gaming',file:'hq-skyscraper-mockup.html',desc:'14-floor pixel art headquarters. Interactive floors, agent assignments, room navigation.',tags:['pixel-art','hq','interactive'],product:'OfficeRoad',size:'33KB'},
+  {name:'RoadBrand',ref:'Brand Guide',cat:'creative',file:'blackroad-brand-guide.html',desc:'Brand system reference. Colors, typography, logo usage, voice guidelines.',tags:['brand','design-system','guidelines'],product:'BlackRoad OS',size:'46KB'},
+  {name:'RoadCity',ref:'RoadCity 3D',cat:'gaming',file:'roadcity3d-mockup.html',desc:'3D city environment with buildings, roads, day/night cycle, camera controls.',tags:['3d','city','exploration'],product:'RoadWorld',size:'38KB'},
+  {name:'RoadPlan',ref:'Asana',cat:'productivity',file:'asana-mockup.html',desc:'Project management. Task boards, timelines, team assignments, status tracking.',tags:['tasks','projects','teams'],product:'RoadWork',size:'46KB'},
+  {name:'RoadTube',ref:'YouTube',cat:'video',file:'youtube-mockup.html',desc:'Video platform. Upload, watch, subscribe, comments, recommendations.',tags:['video','creator','community'],product:'BackRoad',size:'41KB'},
+  {name:'RoadSnap',ref:'Snapchat',cat:'social',file:'snapchat-mockup.html',desc:'Camera-first messaging. Stories, map, discover, chat with ephemeral content.',tags:['camera','stories','messaging'],product:'BackRoad',size:'36KB'},
+  {name:'RoadGram',ref:'Instagram',cat:'social',file:'instagram-mockup.html',desc:'Photo and video feed. Stories, reels, explore, direct messages, profiles.',tags:['photos','stories','explore'],product:'BackRoad',size:'29KB'},
+  {name:'RoadPost',ref:'Reddit',cat:'social',file:'reddit-mockup.html',desc:'Community forums. Subreddits, voting, threaded comments, awards.',tags:['forums','community','voting'],product:'BackRoad',size:'38KB'},
+  {name:'RoadLive',ref:'Twitch',cat:'video',file:'twitch-mockup.html',desc:'Live streaming platform. Stream player, chat, emotes, categories, raids.',tags:['live','streaming','chat'],product:'BackRoad',size:'36KB'},
+  {name:'RoadBird',ref:'Twitter/X',cat:'social',file:'twitter-mockup.html',desc:'Microblogging platform. Timeline, threads, trending, spaces, bookmarks.',tags:['microblog','timeline','threads'],product:'BackRoad',size:'37KB'},
+  {name:'RoadFace',ref:'Facebook',cat:'social',file:'facebook-mockup.html',desc:'Social network. News feed, groups, marketplace, events, messenger.',tags:['social','groups','events'],product:'BackRoad',size:'36KB'},
+  {name:'RoadCanvas',ref:'Canva',cat:'creative',file:'canva-mockup.html',desc:'Design tool. Templates, drag-and-drop editor, brand kit, asset library.',tags:['design','templates','editor'],product:'OfficeRoad',size:'37KB'},
+  {name:'RoadDream',ref:'Dreamweaver',cat:'creative',file:'dreamweaver-mockup.html',desc:'Web design IDE. Code view, design view, CSS panels, file management.',tags:['web-design','ide','css'],product:'RoadCode',size:'40KB'},
+  {name:'RoadClass',ref:'Classroom',cat:'education',file:'classroom-mockup.html',desc:'Learning management system. Classes, assignments, grades, announcements.',tags:['classroom','lms','assignments'],product:'Roadie',size:'16KB'},
+  {name:'RoadCRM',ref:'CRM',cat:'business',file:'crm-mockup.html',desc:'Customer relationship management. Contacts, deals, pipeline, activities.',tags:['crm','sales','pipeline'],product:'RoadWork',size:'39KB'},
+  {name:'RoadBlox',ref:'Roblox',cat:'gaming',file:'roblox-mockup.html',desc:'Game platform. Experience catalog, avatar editor, create, social features.',tags:['gaming','platform','creator'],product:'RoadWorld',size:'46KB'},
+  {name:'RoadPets',ref:'Webkinz',cat:'gaming',file:'webkinz-mockup.html',desc:'Virtual pet world. Pet care, room design, games, trading, community.',tags:['virtual-pets','world','games'],product:'RoadWorld',size:'38KB'},
+  {name:'RoadCoin Dashboard',ref:'Stripe',cat:'business',file:'hello-world.html',desc:'Payment dashboard. Transactions, analytics, payouts, product management.',tags:['payments','dashboard','analytics'],product:'RoadCoin',size:'3KB'}
+]
+
+const grid = document.getElementById('mockup-grid')
+const searchInput = document.getElementById('search')
+const categorySelect = document.getElementById('category')
+const resultsCount = document.getElementById('results-count')
+
+function filter() {
+  grid.innerHTML = ''
+  const term = searchInput.value.trim().toLowerCase()
+  const cat = categorySelect.value
+  const visible = mockups.filter(m => {
+    const hay = [m.name,m.ref,m.cat,m.desc,m.tags.join(' '),m.product].join(' ').toLowerCase()
+    return (!term || hay.includes(term)) && (cat === 'all' || m.cat === cat)
+  })
+  visible.forEach(m => {
+    const color = catColors[m.cat] || '#fff'
+    const card = document.createElement('article')
+    card.className = 'mockup-card card'
+    card.onclick = () => window.open(m.file, '_blank')
+    card.innerHTML = `
+      <div class="card-grad"></div>
+      <div class="card-body">
+        <div class="mockup-header">
+          <div class="mockup-icon" style="background:${color}15;border:1px solid ${color}40;color:${color}">${m.name.replace('Road','').charAt(0)}</div>
+          <div class="mockup-info">
+            <div class="mockup-name">${m.name}</div>
+            <div class="mockup-ref">Based on ${m.ref}</div>
+          </div>
+          <div class="cat-pill" style="background:${color}15;border:1px solid ${color}40;color:${color}">${m.cat}</div>
+        </div>
+        <div class="mockup-desc">${m.desc}</div>
+        <div class="mockup-meta">
+          <div class="meta-item"><div class="meta-label">Maps To</div><div class="meta-value">${m.product}</div></div>
+          <div class="meta-item"><div class="meta-label">File Size</div><div class="meta-value">${m.size}</div></div>
+        </div>
+        <div class="mockup-tags">${m.tags.map(t => `<span class="mockup-tag">${t}</span>`).join('')}</div>
+        <div class="mockup-file">${m.file}</div>
+      </div>
+    `
+    grid.appendChild(card)
+  })
+  resultsCount.textContent = `${visible.length} mockup${visible.length === 1 ? '' : 's'} visible`
+}
+
+filter()
+searchInput.addEventListener('input', filter)
+categorySelect.addEventListener('change', filter)
+</script>
+</body>
+</html>

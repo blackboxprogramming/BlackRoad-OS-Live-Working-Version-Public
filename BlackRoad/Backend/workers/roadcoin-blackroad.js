@@ -1,0 +1,1 @@
+/Users/alexa/roadcoin-blackroad/src/worker.js

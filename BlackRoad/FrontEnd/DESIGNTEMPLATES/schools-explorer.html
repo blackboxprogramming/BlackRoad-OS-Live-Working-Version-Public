@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schools Explorer — BlackRoad OS</title>
+<meta name="description" content="The 9 schools of BlackRoad University. Each product is a school. Each school has departments, institutes, labs, agents, and curriculum.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#CC00AA}
+.hero{padding:76px 0 40px;text-align:center}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin:18px auto 0}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px;max-width:900px;margin-left:auto;margin-right:auto}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px;text-align:center}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.school-grid{display:grid;grid-template-columns:1fr;gap:24px}
+.school-card{position:relative;transition:border-color .15s}
+.school-card:hover{border-color:#313131}
+.card-body{padding:24px}
+.school-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+.school-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;flex-shrink:0}
+.school-info{flex:1}
+.school-name{font-size:24px;font-weight:700;color:var(--white);line-height:1.1}
+.school-subtitle{font-family:var(--jb);font-size:11px;color:var(--sub);margin-top:6px}
+.school-binder{font-family:var(--jb);font-size:10px;padding:5px 8px;border-radius:999px;background:var(--elevated);border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+.school-desc{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:20px}
+.school-grid-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.school-stat{padding:12px;background:var(--elevated);border:1px solid var(--border);border-radius:10px;text-align:center}
+.school-stat-label{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+.school-stat-value{font-size:15px;font-weight:700;color:var(--white)}
+.school-section{margin-top:16px}
+.school-section-title{font-family:var(--jb);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-family:var(--jb);font-size:10px;padding:4px 10px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--sub)}
+.product-pills{margin-top:12px}
+.product-pill{font-size:11px;font-weight:600;padding:5px 12px;border-radius:999px;color:var(--text);border:1px solid var(--border);background:var(--elevated)}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){.school-grid-inner{grid-template-columns:repeat(2,1fr)}.stat-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.nav-links{display:none}.hero h1{font-size:40px}.school-grid-inner,.stat-row{grid-template-columns:1fr}.container{padding:0 16px}.school-header{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://tutor.blackroad.io">Roadie</a>
+    <a href="https://roadbook.blackroad.io">RoadBook</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>University Model</div>
+</nav>
+
+<div class="container hero">
+  <div class="eyebrow">Corporation As University</div>
+  <h1>The 9 Schools of BlackRoad</h1>
+  <p>Every product is a school. Every school has departments, institutes, labs, agents, and curriculum. This is the university operating model — the org chart that teaches.</p>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-k">Schools</div><div class="stat-v">9</div><div class="stat-t">Core academic divisions.</div></div>
+    <div class="stat-card"><div class="stat-k">Departments</div><div class="stat-v">30</div><div class="stat-t">Operational units within schools.</div></div>
+    <div class="stat-card"><div class="stat-k">Institutes</div><div class="stat-v">20</div><div class="stat-t">Research and cross-cutting programs.</div></div>
+    <div class="stat-card"><div class="stat-k">Labs</div><div class="stat-v">20</div><div class="stat-t">Experimental and applied research.</div></div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="school-grid" id="school-grid"></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — Products As Schools. Agents As Faculty. Customers As Learners. Advancement As Mastery.</div>
+  </footer>
+</div>
+
+<script>
+const colors = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF','#28c840','#f5a623','#ff6b6b']
+const schools = [
+  {
+    name:'School of Engineering & Platform Systems',
+    abbr:'ENG',
+    binder:'1001-1100',
+    desc:'The builder school. Platform engineering, application engineering, systems architecture, data engineering, security, and infrastructure. This is where the products get made.',
+    products:['BlackRoad OS','RoadCode','CarPool'],
+    agents:['Lucidia','Cecilia','Octavia','Olympia','Silas','Sebastian'],
+    departments:['Platform Engineering','Application Engineering','Systems Architecture','Data Engineering','Security & Identity','Infrastructure Engineering'],
+    institutes:['Convoy Intelligence','Distributed Infrastructure'],
+    labs:['Agent Systems Lab','Infrastructure Lab','Security Lab'],
+    deepDive:'Computer Science, Data Science, Electrical Engineering, Mechanical Engineering, Physics'
+  },
+  {
+    name:'School of AI & Research',
+    abbr:'AI',
+    binder:'1101-1200',
+    desc:'The intelligence school. AI model systems, agent orchestration, research translation, AI safety and alignment. Where the fleet learns to think.',
+    products:['RoadTrip','CarPool','RoadChat'],
+    agents:['Cecilia','Sophia','Seraphina'],
+    departments:['Agent Orchestration','AI Model Systems','Research Translation'],
+    institutes:['Human-AI Collaboration','AI Safety & Alignment'],
+    labs:['Memory Lab','Agent Systems Lab'],
+    deepDive:'Machine Learning, Natural Language Processing, Reinforcement Learning, Neural Architecture'
+  },
+  {
+    name:'School of Design & Creative Systems',
+    abbr:'DES',
+    binder:'1201-1300',
+    desc:'The studio school. UX and interaction design, visual design, brand, narrative and content systems, worldbuilding. Where the products get their soul.',
+    products:['OfficeRoad','RoadWorld','BackRoad'],
+    agents:['Calliope','Aria','Thalia','Lyra'],
+    departments:['UX & Interaction Design','Visual Design & Brand','Narrative & Content Systems'],
+    institutes:['Creator Systems','Design Systems'],
+    labs:['Design Systems Lab','Worldbuilding Lab','Creator Tools Lab'],
+    deepDive:'Architecture, Graphic Design, Product Design, Interaction Design, Apparel & Visual Presentation'
+  },
+  {
+    name:'School of Business & Economic Systems',
+    abbr:'BIZ',
+    binder:'1301-1400',
+    desc:'The operations school. Business operations, economic and market systems, revenue strategy, finance, compliance. Where the institution sustains itself.',
+    products:['RoadWork','RoadChain','RoadCoin'],
+    agents:['Valeria','Portia'],
+    departments:['Business Operations','Economic & Market Systems'],
+    institutes:['Economic Systems','Product Strategy'],
+    labs:['Economic Systems Lab'],
+    deepDive:'Applied Economics, Agricultural Business, Finance, Business Analytics'
+  },
+  {
+    name:'School of Education & Human Development',
+    abbr:'EDU',
+    binder:'1401-1500',
+    desc:'The learning school. Tutoring, curriculum design, learning experience, youth programs, human development, coaching, accessibility. Where people grow.',
+    products:['Roadie','RoadSide'],
+    agents:['Ophelia'],
+    departments:['Learning Design','Tutoring & Curriculum','Human Development Systems'],
+    institutes:['Learning Futures'],
+    labs:['Learning Lab'],
+    deepDive:'Early Childhood, Elementary Education, Family Social Science, Kinesiology, Special Education'
+  },
+  {
+    name:'School of Health & Human Services',
+    abbr:'HHS',
+    binder:'1501-1600',
+    desc:'The care school. Wellness, care systems, human services, clinical operations, nutrition, mental health adjacent roles. Where the institution serves.',
+    products:['RoadSide'],
+    agents:['Gaia'],
+    departments:['Health & Wellness Systems','Community & Social Programs'],
+    institutes:['Health Systems','Social & Community Systems'],
+    labs:['Wellness Systems Lab','Human Support Lab'],
+    deepDive:'Nursing, Dentistry, Public Health, Nutrition, Wellness & Care Systems'
+  },
+  {
+    name:'School of Media, Communication & Culture',
+    abbr:'MCC',
+    binder:'1601-1700',
+    desc:'The voice school. Communications, public narrative, campaign systems, content strategy, journalism, social distribution, localization. Where the story gets told.',
+    products:['BackRoad','RoadBook'],
+    agents:['Cicero','Atticus','Calliope'],
+    departments:['Communications & Public Narrative','Localization & Language'],
+    institutes:['Language & Meaning','Platform Civilization'],
+    labs:['Communications Lab','Language Lab'],
+    deepDive:'Communication & Journalism, Philosophy, Anthropology, Languages & Culture'
+  },
+  {
+    name:'School of Infrastructure & Environmental Systems',
+    abbr:'INF',
+    binder:'1701-1800',
+    desc:'The resilience school. Sustainability, resource systems, fleet operations, network operations, cloud and edge, environmental intelligence. Where the campus runs.',
+    products:['CarPool','OneWay'],
+    agents:['Alice','Gematria','Anastasia','Elias'],
+    departments:['Sustainability & Resource Systems','Infrastructure Operations','Cloud & Edge Systems','Fleet & Network Systems'],
+    institutes:['Environment & Resilience','Distributed Infrastructure'],
+    labs:['Infrastructure Lab','Sustainability Lab'],
+    deepDive:'Environmental Sciences, Sustainability, Construction Management, Agriculture & Food Systems'
+  },
+  {
+    name:'School of Governance, Law & Public Trust',
+    abbr:'GOV',
+    binder:'1801-1900',
+    desc:'The trust school. Legal and compliance systems, governance and policy, institutional accountability, public trust principles. Where the rules get made and kept.',
+    products:['CarKeys','BlackBoard'],
+    agents:['Portia','Sapphira'],
+    departments:['Legal & Compliance Systems','Governance & Policy','Analytics & Intelligence'],
+    institutes:['Trust & Provenance','Governance & Public Trust','Analytics & Decision Systems'],
+    labs:['Provenance Lab','Analytics Lab'],
+    deepDive:'Political Science, Public Policy, Legal Studies, Ethics, Compliance'
+  }
+]
+
+const grid = document.getElementById('school-grid')
+schools.forEach((s, i) => {
+  const color = colors[i % colors.length]
+  const card = document.createElement('article')
+  card.className = 'school-card card'
+  card.innerHTML = `
+    <div class="card-grad"></div>
+    <div class="card-body">
+      <div class="school-header">
+        <div class="school-icon" style="background:${color}15;border:1px solid ${color}40;color:${color}">${s.abbr}</div>
+        <div class="school-info">
+          <div class="school-name">${s.name}</div>
+          <div class="school-subtitle">Binder sections ${s.binder}</div>
+        </div>
+        <div class="school-binder">${s.binder}</div>
+      </div>
+      <div class="school-desc">${s.desc}</div>
+      <div class="school-grid-inner">
+        <div class="school-stat"><div class="school-stat-label">Departments</div><div class="school-stat-value">${s.departments.length}</div></div>
+        <div class="school-stat"><div class="school-stat-label">Institutes</div><div class="school-stat-value">${s.institutes.length}</div></div>
+        <div class="school-stat"><div class="school-stat-label">Labs</div><div class="school-stat-value">${s.labs.length}</div></div>
+        <div class="school-stat"><div class="school-stat-label">Agents</div><div class="school-stat-value">${s.agents.length}</div></div>
+      </div>
+      <div class="school-section">
+        <div class="school-section-title">Departments</div>
+        <div class="pill-row">${s.departments.map(d => `<span class="pill">${d}</span>`).join('')}</div>
+      </div>
+      <div class="school-section">
+        <div class="school-section-title">Institutes</div>
+        <div class="pill-row">${s.institutes.map(d => `<span class="pill">${d}</span>`).join('')}</div>
+      </div>
+      <div class="school-section">
+        <div class="school-section-title">Labs</div>
+        <div class="pill-row">${s.labs.map(d => `<span class="pill">${d}</span>`).join('')}</div>
+      </div>
+      <div class="school-section">
+        <div class="school-section-title">Faculty Agents</div>
+        <div class="pill-row">${s.agents.map(d => `<span class="pill">${d}</span>`).join('')}</div>
+      </div>
+      <div class="school-section product-pills">
+        <div class="school-section-title">Products (Schools)</div>
+        <div class="pill-row">${s.products.map(d => `<span class="product-pill">${d}</span>`).join('')}</div>
+      </div>
+      <div class="school-section">
+        <div class="school-section-title">Academic Crosswalk</div>
+        <div style="font-size:12px;color:var(--sub);line-height:1.6">${s.deepDive}</div>
+      </div>
+    </div>
+  `
+  grid.appendChild(card)
+})
+</script>
+</body>
+</html>

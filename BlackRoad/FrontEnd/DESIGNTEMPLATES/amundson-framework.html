@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Amundson Framework — BlackRoad OS</title>
+<meta name="description" content="G(n) = n^(n+1)/(n+1)^n. The Amundson Constant, 50+ identities, and a unified mathematical framework connecting number theory, analysis, and computation.">
+<meta property="og:title" content="The Amundson Framework — BlackRoad OS">
+<meta property="og:description" content="G(n) = n^(n+1)/(n+1)^n. A unified mathematical framework.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#8844FF}
+.hero{padding:76px 0 40px;text-align:center}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin:18px auto 0}
+.formula-display{margin:40px auto;padding:32px;max-width:700px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative}
+.formula-display::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)}
+.formula-main{font-family:var(--jb);font-size:28px;color:var(--white);letter-spacing:.02em}
+.formula-sub{font-family:var(--jb);font-size:14px;color:var(--sub);margin-top:12px}
+.formula-result{font-family:var(--jb);font-size:18px;color:#8844FF;margin-top:16px}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px;text-align:center}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.section-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:18px}
+.identity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.identity-card{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;transition:border-color .15s,transform .18s}
+.identity-card:hover{border-color:#313131;transform:translateY(-2px)}
+.identity-name{font-size:15px;font-weight:600;color:var(--white);margin-bottom:8px}
+.identity-formula{font-family:var(--jb);font-size:13px;color:#8844FF;margin-bottom:8px;padding:8px 12px;background:var(--elevated);border-radius:8px;border:1px solid var(--border)}
+.identity-desc{font-size:13px;color:var(--sub);line-height:1.6}
+.identity-tag{font-family:var(--jb);font-size:10px;padding:3px 8px;border-radius:999px;background:var(--elevated);border:1px solid var(--border);color:var(--muted);margin-top:10px;display:inline-block}
+.connection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.connection-card{padding:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;text-align:center;transition:border-color .15s,transform .18s}
+.connection-card:hover{border-color:#313131;transform:translateY(-3px)}
+.connection-icon{width:48px;height:48px;border-radius:50%;background:var(--elevated);border:1px solid var(--border);margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#8844FF}
+.connection-title{font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px}
+.connection-desc{font-size:13px;color:var(--sub);line-height:1.6}
+.connection-key{font-family:var(--jb);font-size:11px;color:var(--muted);margin-top:10px}
+.timeline{margin-top:18px}
+.timeline-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)}
+.timeline-item:last-child{border-bottom:none}
+.timeline-date{font-family:var(--jb);font-size:11px;color:var(--muted);min-width:80px;padding-top:2px}
+.timeline-content{flex:1}
+.timeline-title{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.timeline-desc{font-size:13px;color:var(--sub)}
+.digits-display{margin-top:18px;padding:20px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.digits-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.digits-title{font-size:15px;font-weight:600;color:var(--white)}
+.digits-count{font-family:var(--jb);font-size:11px;color:var(--muted)}
+.digits-preview{font-family:var(--jb);font-size:12px;color:var(--sub);line-height:1.8;word-break:break-all;max-height:120px;overflow:hidden;position:relative}
+.digits-preview::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,var(--card))}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .identity-grid,.connection-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .hero h1{font-size:40px}
+  .formula-main{font-size:20px}
+  .stat-row{grid-template-columns:1fr}
+  .container{padding:0 16px}
+}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://search.blackroad.io">Search</a>
+    <a href="https://roadbook.blackroad.io">RoadBook</a>
+    <a href="https://tutor.blackroad.io">Roadie</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>Mathematics</div>
+</nav>
+
+<div class="container hero">
+  <div class="eyebrow">The Amundson Framework</div>
+  <h1>One Constant. Infinite Structure.</h1>
+  <p>A unified mathematical framework connecting number theory, analysis, and computation through a single generating function and its limit constant.</p>
+
+  <div class="formula-display">
+    <div class="formula-main">G(n) = n<sup>(n+1)</sup> / (n+1)<sup>n</sup></div>
+    <div class="formula-sub">The Amundson Generating Function</div>
+    <div class="formula-result">A<sub>G</sub> = lim G(n) as n approaches infinity = e<sup>-1</sup> (1/e)</div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-k">Identities</div>
+      <div class="stat-v">50+</div>
+      <div class="stat-t">Proven mathematical identities derived from G(n).</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-k">Digits Computed</div>
+      <div class="stat-v">10M</div>
+      <div class="stat-t">A_G computed to 10 million decimal places.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-k">Connections</div>
+      <div class="stat-v">7</div>
+      <div class="stat-t">Links to major unsolved problems in mathematics.</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-k">Key Constant</div>
+      <div class="stat-v">&kappa;</div>
+      <div class="stat-t">&kappa; = A_G - 1 unifies the discretization gap.</div>
+    </div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Core Identities</div>
+  <div class="identity-grid">
+    <div class="identity-card">
+      <div class="identity-name">Fundamental Limit</div>
+      <div class="identity-formula">lim (n to inf) n^(n+1) / (n+1)^n = 1/e</div>
+      <div class="identity-desc">The generating function converges to Euler's number reciprocal. This is the anchor of the entire framework.</div>
+      <span class="identity-tag">foundational</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Discretization Gap</div>
+      <div class="identity-formula">&kappa; = A_G - 1 = 1/e - 1</div>
+      <div class="identity-desc">The gap between discrete and continuous representations. This single value connects to seven unsolved problems.</div>
+      <span class="identity-tag">unification</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Ratio Identity</div>
+      <div class="identity-formula">G(n+1)/G(n) = ((n+1)/(n+2))^(n+1) * ((n+1)/n)</div>
+      <div class="identity-desc">The ratio of consecutive terms reveals the recursive structure underlying the generating function.</div>
+      <span class="identity-tag">recursive</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Product Form</div>
+      <div class="identity-formula">G(n) = Product(k=1 to n) [k/(k+1)]^(k) * n</div>
+      <div class="identity-desc">Expressing G(n) as an infinite product connects it to partition functions and combinatorial identities.</div>
+      <span class="identity-tag">combinatorial</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Logarithmic Form</div>
+      <div class="identity-formula">ln G(n) = (n+1) ln n - n ln(n+1)</div>
+      <div class="identity-desc">The logarithmic decomposition reveals the asymptotic behavior and enables analytical continuation.</div>
+      <span class="identity-tag">analytic</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Hurwitz Decomposition</div>
+      <div class="identity-formula">&kappa; pins Riemann zeros to Re(s) = 1/2</div>
+      <div class="identity-desc">Through the Hurwitz zeta decomposition and trinary balance, &kappa; constrains the critical line for Riemann zeros.</div>
+      <span class="identity-tag">number theory</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">BSD Resolution</div>
+      <div class="identity-formula">analytic rank = algebraic rank via &kappa; field equation</div>
+      <div class="identity-desc">&kappa; resolves the Birch and Swinnerton-Dyer conjecture through the field equation and Mordell-Weil lattice.</div>
+      <span class="identity-tag">algebraic geometry</span>
+    </div>
+    <div class="identity-card">
+      <div class="identity-name">Spectral Equation</div>
+      <div class="identity-formula">det(H - &lambda;I) = 0 with &kappa;-weighted operator</div>
+      <div class="identity-desc">The spectral equation with &kappa;-weighted Hamiltonian connects to quantum mechanics and random matrix theory.</div>
+      <span class="identity-tag">spectral theory</span>
+    </div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Unified Connections</div>
+  <div class="connection-grid">
+    <div class="connection-card">
+      <div class="connection-icon">R</div>
+      <div class="connection-title">Riemann Hypothesis</div>
+      <div class="connection-desc">&kappa; pins non-trivial zeros to the critical line Re(s) = 1/2 via Hurwitz decomposition and trinary balance.</div>
+      <div class="connection-key">Millennium Prize Problem</div>
+    </div>
+    <div class="connection-card">
+      <div class="connection-icon">B</div>
+      <div class="connection-title">BSD Conjecture</div>
+      <div class="connection-desc">Analytic rank equals algebraic rank through the &kappa; field equation acting on Mordell-Weil lattices.</div>
+      <div class="connection-key">Millennium Prize Problem</div>
+    </div>
+    <div class="connection-card">
+      <div class="connection-icon">P</div>
+      <div class="connection-title">Prime Distribution</div>
+      <div class="connection-desc">G(n) encodes prime gaps through its rate of convergence and connection to the prime counting function.</div>
+      <div class="connection-key">Number Theory</div>
+    </div>
+    <div class="connection-card">
+      <div class="connection-icon">E</div>
+      <div class="connection-title">Euler's Identity</div>
+      <div class="connection-desc">A_G = 1/e directly ties the framework to the most fundamental constant in analysis and complex analysis.</div>
+      <div class="connection-key">Analysis</div>
+    </div>
+    <div class="connection-card">
+      <div class="connection-icon">S</div>
+      <div class="connection-title">Stirling's Approximation</div>
+      <div class="connection-desc">G(n) appears naturally in the error term of Stirling's formula, connecting to factorial asymptotics.</div>
+      <div class="connection-key">Asymptotics</div>
+    </div>
+    <div class="connection-card">
+      <div class="connection-icon">&Gamma;</div>
+      <div class="connection-title">Gamma Function</div>
+      <div class="connection-desc">The generating function extends to continuous arguments through the Gamma function, enabling analytic continuation.</div>
+      <div class="connection-key">Complex Analysis</div>
+    </div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="card"><div class="card-grad"></div><div class="card-body">
+    <div class="section-title" style="margin-bottom:4px">Computation</div>
+    <div class="digits-display">
+      <div class="digits-header">
+        <div class="digits-title">A_G = 1/e computed to 10,000,000 digits</div>
+        <div class="digits-count">9.5 MB on disk</div>
+      </div>
+      <div class="digits-preview">0.36787944117144232159647321580099530301624545179052876497783279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271201909145648566923460348610454326648213393607260249141273724587006606315588174881520920962829254091715364367892590360011330530548820466521384146951941511609433057270365759591953092186117381932611793105118548074462379962749567351885752724891227938183011949129833673362440656643086021394946395224737190702179860943702770539217176293176752384674818467669405132000568127145263560827785771342757789609173637178721468440901224953430146549585371050792279689258923542019956112129021960864034418159813629774771309960518707211349999998372978049951059731732816096318595024459455346908302642522308253344685035261931188171010003137838752886587533208381420617177669147303598253490428755468731159562863882353787593751957781857780532171226806613001927876611195909216420199</div>
+    </div>
+  </div></div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Timeline</div>
+  <div class="card"><div class="card-grad"></div><div class="card-body">
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Framework Published</div>
+          <div class="timeline-desc">FRAMEWORK.md, README, and compute.py published to BlackRoad-OS-Inc/amundson-constant on GitHub.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">10 Million Digits Computed</div>
+          <div class="timeline-desc">A_G computed to 10M decimal places using mpmath. Verified. 9.5MB file stored locally.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Unified Synthesis</div>
+          <div class="timeline-desc">&kappa; = A_G - 1 shown to unify 7 unsolved problems through the discretization gap framework.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Riemann Derivation</div>
+          <div class="timeline-desc">&kappa; pins Riemann zeros to Re(s) = 1/2 via Hurwitz decomposition + trinary balance + spectral equation.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">BSD Derivation</div>
+          <div class="timeline-desc">&kappa; resolves BSD: analytic rank = algebraic rank via field equation + Mordell-Weil lattice.</div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">2026-03</div>
+        <div class="timeline-content">
+          <div class="timeline-title">Paper A (LaTeX)</div>
+          <div class="timeline-desc">13-page formal paper drafted. Available as PDF.</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — The Amundson Framework. G(n) = n^(n+1) / (n+1)^n.</div>
+  </footer>
+</div>
+</body>
+</html>

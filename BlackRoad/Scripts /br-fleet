@@ -1,0 +1,39 @@
+#!/bin/bash
+# br fleet — Check all fleet nodes status
+set -e
+
+PINK='\033[38;5;205m'
+GREEN='\033[38;5;82m'
+RED='\033[38;5;196m'
+DIM='\033[38;5;245m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+NODES=(
+  "alice|192.168.4.49|pi|Pi 400 4GB|Gateway + Pi-hole"
+  "cecilia|192.168.4.105|blackroad|Pi 5 8GB|Hailo-8 + Ollama + MinIO"
+  "aria|192.168.4.98|pi|Pi 5 8GB|Portainer + Docker"
+  "lucidia|192.168.4.38|octavia|Pi 5 8GB|GH Runner + 530 apps + Ollama"
+  "gematria|159.65.43.12|root|DO 4vCPU 8GB|Caddy TLS + Ollama"
+  "anastasia|174.138.44.45|root|DO 1vCPU 1GB|WireGuard hub + Headscale"
+)
+
+printf "${BOLD}%-12s %-16s %-6s %-8s %-6s %-5s %s${RESET}\n" "NODE" "IP" "STATUS" "UPTIME" "LOAD" "DISK" "ROLE"
+printf "%-12s %-16s %-6s %-8s %-6s %-5s %s\n" "----" "--" "------" "------" "----" "----" "----"
+
+for entry in "${NODES[@]}"; do
+  IFS='|' read -r name ip user hw role <<< "$entry"
+
+  result=$(ssh -o ConnectTimeout=3 -o StrictHostKeyChecking=no -o BatchMode=yes "$user@$ip" \
+    "uptime -p 2>/dev/null | sed 's/up //' | head -c 15; echo -n '|'; cat /proc/loadavg 2>/dev/null | cut -d' ' -f1; echo -n '|'; df -h / 2>/dev/null | tail -1 | awk '{print \$5}'" 2>/dev/null)
+
+  if [ -n "$result" ]; then
+    IFS='|' read -r up load disk <<< "$result"
+    printf "${GREEN}%-12s${RESET} %-16s ${GREEN}%-6s${RESET} %-8s %-6s %-5s %s\n" "$name" "$ip" "UP" "${up:0:8}" "$load" "$disk" "$role"
+  else
+    printf "${RED}%-12s${RESET} %-16s ${RED}%-6s${RESET} %-8s %-6s %-5s %s\n" "$name" "$ip" "DOWN" "-" "-" "-" "$role"
+  fi
+done
+
+echo ""
+printf "${DIM}Last checked: $(date '+%Y-%m-%d %H:%M:%S')${RESET}\n"

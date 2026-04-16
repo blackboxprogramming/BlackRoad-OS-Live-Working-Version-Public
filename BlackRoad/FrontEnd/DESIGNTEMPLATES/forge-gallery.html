@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Forge — App Gallery</title>
+<meta name="description" content="40 mini-apps, simulations, and experiments from the BlackRoad Forge. Games, 3D worlds, desktop environments, and creative tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#FF6B2B}
+.hero{padding:76px 0 40px;text-align:center}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin:18px auto 0}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px;max-width:900px;margin-left:auto;margin-right:auto}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px;text-align:center}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:end;margin-bottom:20px}
+.field label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,.select{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s,transform .15s}
+.input:focus,.select:focus{border-color:#3b3b3b;transform:translateY(-1px)}
+.results-bar{display:flex;justify-content:space-between;align-items:center;margin:12px 0 18px}
+.results-count{font-family:var(--jb);font-size:11px;color:var(--sub)}
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.app-card{position:relative;transition:border-color .15s,transform .18s,box-shadow .18s}
+.app-card:hover{border-color:#313131;transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.26)}
+.app-card.hidden{display:none}
+.card-body{padding:16px}
+.app-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;margin-bottom:12px}
+.app-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px}
+.app-desc{font-size:12px;color:var(--sub);line-height:1.5;min-height:36px}
+.app-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:10px}
+.app-tag{font-family:var(--jb);font-size:9px;padding:3px 7px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--muted)}
+.app-path{font-family:var(--jb);font-size:9px;color:var(--muted);margin-top:8px;word-break:break-all}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.tag{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--sub);cursor:pointer;transition:border-color .15s}
+.tag:hover,.tag.active{border-color:#FF6B2B;color:var(--text)}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){.app-grid{grid-template-columns:repeat(3,1fr)}.stat-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.nav-links{display:none}.hero h1{font-size:40px}.app-grid{grid-template-columns:repeat(2,1fr)}.stat-row,.toolbar{grid-template-columns:1fr}.container{padding:0 16px}}
+@media(max-width:480px){.app-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://roadworld.blackroad.io">RoadWorld</a>
+    <a href="https://roadcode.blackroad.io">RoadCode</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>Forge</div>
+</nav>
+
+<div class="container hero">
+  <div class="eyebrow">BlackRoad Forge — Experimental Apps</div>
+  <h1>The Forge Gallery</h1>
+  <p>40 mini-apps, simulations, games, and experiments. Each one built in the Forge — the place where ideas become playable, testable, and real.</p>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-k">Apps</div><div class="stat-v">40</div><div class="stat-t">Built experiments in the Forge.</div></div>
+    <div class="stat-card"><div class="stat-k">Categories</div><div class="stat-v">7</div><div class="stat-t">Games, sims, tools, desktops, 3D, AI, creative.</div></div>
+    <div class="stat-card"><div class="stat-k">Source</div><div class="stat-v">JS/HTML</div><div class="stat-t">Browser-native, no dependencies.</div></div>
+    <div class="stat-card"><div class="stat-k">Home</div><div class="stat-v">Forge</div><div class="stat-t">BlackRoad-Forge directory.</div></div>
+  </div>
+</div>
+
+<div class="container"><div class="card"><div class="card-grad"></div><div class="card-body">
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Search Apps</label>
+      <input class="input" id="search" type="search" placeholder="Try &quot;city&quot;, &quot;game&quot;, &quot;sim&quot;, &quot;desktop&quot;, &quot;3d&quot;...">
+    </div>
+    <div class="field">
+      <label for="category">Category</label>
+      <select class="select" id="category">
+        <option value="all">All categories</option>
+        <option value="game">Games</option>
+        <option value="sim">Simulations</option>
+        <option value="desktop">Desktop Environments</option>
+        <option value="3d">3D / Worlds</option>
+        <option value="tool">Tools & Editors</option>
+        <option value="ai">AI / Algorithms</option>
+        <option value="creative">Creative</option>
+      </select>
+    </div>
+  </div>
+  <div class="results-bar">
+    <div class="results-count" id="results-count">40 apps visible</div>
+    <div class="legend">
+      <span class="tag" data-cat="game">Games</span>
+      <span class="tag" data-cat="sim">Sims</span>
+      <span class="tag" data-cat="desktop">Desktop</span>
+      <span class="tag" data-cat="3d">3D</span>
+      <span class="tag" data-cat="tool">Tools</span>
+      <span class="tag" data-cat="ai">AI</span>
+      <span class="tag" data-cat="creative">Creative</span>
+    </div>
+  </div>
+</div></div></div>
+
+<div class="container section">
+  <div class="app-grid" id="app-grid"></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — The Forge. Where experiments become products.</div>
+  </footer>
+</div>
+
+<script>
+const catColors = {game:'#FF2255',sim:'#4488FF',desktop:'#CC00AA',['3d']:'#FF6B2B',tool:'#00D4FF',ai:'#8844FF',creative:'#28c840'}
+
+const apps = [
+  {name:'RoadBlockyEditor',cat:'tool',desc:'Voxel block editor — build 3D structures block by block.',tags:['voxel','editor','3d']},
+  {name:'RoadBrowserFS',cat:'desktop',desc:'In-browser file system. Create, read, write, delete files and folders.',tags:['filesystem','browser','storage']},
+  {name:'RoadBuildings',cat:'3d',desc:'Procedural building generator. Skyscrapers and city blocks from parameters.',tags:['procedural','architecture','3d']},
+  {name:'RoadCyberCity',cat:'3d',desc:'Cyberpunk city environment. Neon lights, rain, flying cars.',tags:['cyberpunk','city','atmosphere']},
+  {name:'RoadDroneSim',cat:'sim',desc:'Drone flight simulator. Physics-based controls and camera views.',tags:['drone','physics','flight']},
+  {name:'RoadEngineSim',cat:'sim',desc:'Engine simulation. Pistons, timing, RPM visualization.',tags:['engine','mechanical','physics']},
+  {name:'RoadFarmGame',cat:'game',desc:'Farming game. Plant crops, harvest, manage resources, trade.',tags:['farming','economy','management']},
+  {name:'RoadFarmSim',cat:'sim',desc:'Agricultural simulation. Soil, weather, crop growth models.',tags:['agriculture','science','growth']},
+  {name:'RoadFileExplorer',cat:'desktop',desc:'OS-style file explorer with icons, folders, and navigation.',tags:['files','ui','explorer']},
+  {name:'RoadFoosball',cat:'game',desc:'Foosball table game. Physics-based ball and player controls.',tags:['sports','physics','multiplayer']},
+  {name:'RoadGameOfLife',cat:'ai',desc:'Conway\'s Game of Life. Cellular automata with patterns and speed control.',tags:['cellular-automata','emergence','classic']},
+  {name:'RoadGeneticAlgo',cat:'ai',desc:'Genetic algorithm visualizer. Watch evolution in real-time.',tags:['evolution','optimization','visualization']},
+  {name:'RoadGodotBuilder',cat:'tool',desc:'Godot-inspired scene editor. Node tree, properties, viewport.',tags:['game-engine','editor','scenes']},
+  {name:'RoadHospital',cat:'sim',desc:'Hospital management sim. Patients, staff, rooms, emergencies.',tags:['medical','management','strategy']},
+  {name:'RoadIndexedFS',cat:'tool',desc:'IndexedDB-backed persistent file system for web apps.',tags:['storage','indexeddb','persistent']},
+  {name:'RoadIsoCity-JS',cat:'game',desc:'Isometric city builder. Place roads, buildings, zones.',tags:['isometric','city-builder','strategy']},
+  {name:'RoadIsoMinecraft',cat:'game',desc:'Isometric Minecraft-style voxel world. Mine, build, explore.',tags:['minecraft','isometric','voxel']},
+  {name:'RoadJSWindow',cat:'desktop',desc:'JavaScript window manager. Draggable, resizable, stackable windows.',tags:['window-manager','ui','desktop']},
+  {name:'RoadLegendSolar',cat:'sim',desc:'Solar system simulation. Orbital mechanics and planet data.',tags:['space','planets','physics']},
+  {name:'RoadLogicSim',cat:'tool',desc:'Digital logic gate simulator. AND, OR, NOT, circuits.',tags:['logic','circuits','education']},
+  {name:'RoadMCTS',cat:'ai',desc:'Monte Carlo Tree Search visualizer. Watch AI think through game trees.',tags:['mcts','game-ai','search']},
+  {name:'RoadNakamotoCity',cat:'3d',desc:'Blockchain-themed city. Blocks as buildings, transactions as traffic.',tags:['blockchain','city','metaphor']},
+  {name:'RoadOSjs',cat:'desktop',desc:'Full OS.js desktop environment. Taskbar, apps, settings.',tags:['os','desktop','full-featured']},
+  {name:'RoadOneWorldSDK',cat:'tool',desc:'SDK playground for world-building primitives and scene composition.',tags:['sdk','api','world-building']},
+  {name:'RoadPico3D',cat:'3d',desc:'Tiny 3D engine. Software renderer, no WebGL required.',tags:['renderer','software','minimal']},
+  {name:'RoadRPG',cat:'game',desc:'RPG adventure game. Stats, inventory, quests, turn-based combat.',tags:['rpg','adventure','turn-based']},
+  {name:'RoadRestaurant',cat:'game',desc:'Restaurant management game. Cook, serve, upgrade, expand.',tags:['restaurant','management','cooking']},
+  {name:'RoadSC2K',cat:'game',desc:'SimCity 2000-style city builder. Zones, utilities, budgets.',tags:['simcity','city-builder','classic']},
+  {name:'RoadSimDemo',cat:'sim',desc:'General simulation demo framework. Template for building sims.',tags:['template','framework','demo']},
+  {name:'RoadSkyrim',cat:'game',desc:'Skyrim-inspired RPG. First-person exploration, combat, lore.',tags:['rpg','first-person','adventure']},
+  {name:'RoadSkyrimMod',cat:'creative',desc:'Skyrim modding toolkit. Asset viewer, mod builder, preview.',tags:['modding','tools','assets']},
+  {name:'RoadSolarSystem',cat:'sim',desc:'Solar system model with accurate scales and orbital periods.',tags:['astronomy','orbits','education']},
+  {name:'RoadSurvive',cat:'game',desc:'Survival game. Gather resources, build shelter, manage health.',tags:['survival','crafting','open-world']},
+  {name:'RoadTrafficPredict',cat:'ai',desc:'Traffic prediction using ML models. Route optimization visualizer.',tags:['traffic','ml','prediction']},
+  {name:'RoadWarehouse',cat:'sim',desc:'Warehouse logistics sim. Inventory, routing, automation.',tags:['logistics','automation','management']},
+  {name:'RoadWebDesktop',cat:'desktop',desc:'Web-based desktop environment. Icons, windows, start menu.',tags:['desktop','web','environment']},
+  {name:'RoadWinBox',cat:'desktop',desc:'WinBox-style window manager. Minimal, fast, lightweight.',tags:['windows','minimal','lightweight']},
+  {name:'RoadWorldJS',cat:'3d',desc:'JavaScript world engine. Terrain, entities, day/night cycle.',tags:['world-engine','terrain','entities']},
+  {name:'RoadWorlds',cat:'3d',desc:'Multi-world explorer. Jump between procedural worlds.',tags:['multiverse','procedural','exploration']},
+  {name:'SolidSpace',cat:'3d',desc:'Solid-state 3D space environment. Stars, ships, physics.',tags:['space','3d','exploration']}
+]
+
+const grid = document.getElementById('app-grid')
+const searchInput = document.getElementById('search')
+const categorySelect = document.getElementById('category')
+const resultsCount = document.getElementById('results-count')
+
+document.querySelectorAll('.legend .tag').forEach(t => {
+  t.addEventListener('click', () => { categorySelect.value = t.dataset.cat; filter() })
+})
+
+function filter() {
+  grid.innerHTML = ''
+  const term = searchInput.value.trim().toLowerCase()
+  const cat = categorySelect.value
+  const visible = apps.filter(a => {
+    const hay = [a.name, a.cat, a.desc, a.tags.join(' ')].join(' ').toLowerCase()
+    return (!term || hay.includes(term)) && (cat === 'all' || a.cat === cat)
+  })
+  visible.forEach(a => {
+    const color = catColors[a.cat] || '#fff'
+    const card = document.createElement('article')
+    card.className = 'app-card card'
+    card.innerHTML = `
+      <div class="card-grad"></div>
+      <div class="card-body">
+        <div class="app-icon" style="background:${color}15;border:1px solid ${color}40;color:${color}">${a.name.replace('Road','').charAt(0)}</div>
+        <div class="app-name">${a.name}</div>
+        <div class="app-desc">${a.desc}</div>
+        <div class="app-tags">${a.tags.map(t => `<span class="app-tag">${t}</span>`).join('')}</div>
+        <div class="app-path">BlackRoad-Forge/${a.name}/</div>
+      </div>
+    `
+    grid.appendChild(card)
+  })
+  resultsCount.textContent = `${visible.length} app${visible.length === 1 ? '' : 's'} visible`
+}
+
+filter()
+searchInput.addEventListener('input', filter)
+categorySelect.addEventListener('change', filter)
+</script>
+</body>
+</html>

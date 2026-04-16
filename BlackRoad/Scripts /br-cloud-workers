@@ -1,0 +1,171 @@
+#!/bin/bash
+# br-cloud-workers — Show all 496 Cloudflare Workers as BlackRoad fleet
+# Maps every worker to a division, shows endpoints, and checks health
+
+W='\033[1;37m'; D='\033[0;90m'; G='\033[0;32m'; R='\033[0;31m'; Y='\033[0;33m'; C='\033[0;36m'; M='\033[0;35m'; N='\033[0m'
+
+MODE="${1:-summary}"
+
+printf "\n  ${W}BLACKROAD OS${N}  ${D}CLOUD WORKERS${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n\n"
+
+python3 << 'PYEOF'
+import json, subprocess, sys
+
+# Define all known workers by division
+DIVISIONS = {
+    "product": [
+        "chat-blackroad:chat.blackroad.io",
+        "road-search:search.blackroad.io",
+        "tutor-blackroad:tutor.blackroad.io",
+        "roadtrip-blackroad:roadtrip.blackroad.io",
+        "blackroad-product-proxy:canvas.blackroad.io",
+        "roadview-video:video.blackroad.io",
+        "backroad-social:social.blackroad.io",
+        "blackroad-game:game.blackroad.io",
+        "blackroad-cadence:cadence.blackroad.io",
+        "blackroad-radio:radio.blackroad.io",
+        "hq-blackroad:hq.blackroad.io",
+        "roadpay:pay.blackroad.io",
+        "status-blackroad:status.blackroad.io",
+        "blackroad-io:blackroad.io",
+        "blackroad-io-site:www.blackroad.io",
+        "highway-blackroad:highway.blackroad.io",
+        "roadwork-blackroad:roadwork.blackroad.io",
+        "roadcoin-blackroad:roadcoin.blackroad.io",
+        "roadbook-blackroad:roadbook.blackroad.io",
+        "roadie-blackroad:roadie.blackroad.io",
+        "carkeys-blackroad:carkeys.blackroad.io",
+        "carpool-blackroad:carpool.blackroad.io",
+        "oneway-blackroad:oneway.blackroad.io",
+        "roadside-blackroad:roadside.blackroad.io",
+        "blackboard-blackroad:blackboard.blackroad.io",
+        "roadworld-blackroad:roadworld.blackroad.io",
+        "officeroad-blackroad:officeroad.blackroad.io",
+        "roadcode-blackroad:roadcode.blackroad.io",
+        "roadview-blackroad:roadview.blackroad.io",
+        "roadchain-blackroad:roadchain.blackroad.io",
+    ],
+    "agent": [
+        "agent-alice:", "agent-anastasia:", "agent-aria:", "agent-cadence:",
+        "agent-cecilia:", "agent-cloner:", "agent-cordelia:", "agent-courier:",
+        "agent-echo:", "agent-election:", "agent-eve:", "agent-forge:",
+        "agent-gematria:", "agent-gematria-secondary:", "agent-gossip:",
+        "agent-herald:", "agent-killer:", "agent-lucidia:", "agent-memory-sync:",
+        "agent-migrator:", "agent-nexus:", "agent-octavia:", "agent-oracle:",
+        "agent-profiler:", "agent-registry-ui:", "agent-sage:", "agent-scout:",
+        "agent-spawner:", "agent-updater:", "agent-warden:",
+    ],
+    "ai": [
+        "ai-blackroadio:", "ai-chat:", "ai-classify:", "ai-complete:",
+        "ai-embed:", "ai-extract:", "ai-generate-image:", "ai-rerank:",
+        "ai-safety-check:", "ai-sentiment:", "ai-token-count:",
+        "ai-transcribe:", "ai-translate-api:",
+    ],
+    "auth": [
+        "auth-2fa:", "auth-apikey:", "auth-blackroad:auth.blackroad.io",
+        "auth-jwt:", "auth-magic-link:", "auth-oauth:", "auth-otp:",
+        "auth-passkey:", "auth-session:",
+    ],
+    "analytics": [
+        "analytics-blackroad:analytics.blackroad.io", "analytics-blackroadio:",
+        "analytics-cohort:", "analytics-export:", "analytics-funnel:",
+        "analytics-ingest:", "analytics-query:", "analytics-realtime:",
+        "analytics-retention:", "analytics-revenue:",
+    ],
+    "billing": [
+        "billing-dunning:", "billing-invoices:", "billing-portal:",
+        "billing-proration:", "billing-refunds:", "billing-taxes:",
+        "billing-trial:", "billing-usage:", "billing-webhooks:",
+    ],
+    "fleet": [
+        "fleet-announce:", "fleet-api:", "fleet-cert-rotate:",
+        "fleet-commander:", "fleet-dashboard:", "fleet-decommission:",
+        "fleet-diff:", "fleet-key-rotate:", "fleet-monitor:",
+        "fleet-provision:", "fleet-restore:", "fleet-snapshot:", "fleet-update:",
+    ],
+    "integration": [
+        "integration-airtable:", "integration-calendar:", "integration-discord:",
+        "integration-gitea:", "integration-github:", "integration-hubspot:",
+        "integration-linear:", "integration-make:", "integration-n8n:",
+        "integration-notion:", "integration-salesforce:", "integration-sheets:",
+        "integration-slack:", "integration-zapier:",
+    ],
+    "monitor": [
+        "monitor-cpu:", "monitor-disk:", "monitor-dns:", "monitor-gpu:",
+        "monitor-latency:", "monitor-memory:", "monitor-network:",
+        "monitor-ssl:", "monitor-uptime:",
+    ],
+    "pipeline": [
+        "pipeline-aggregate:", "pipeline-backfill:", "pipeline-export:",
+        "pipeline-ingest:", "pipeline-monitor:", "pipeline-replay:",
+        "pipeline-route:", "pipeline-store:", "pipeline-transform:", "pipeline-validate:",
+    ],
+    "notify": [
+        "notify-alert:", "notify-broadcast:", "notify-digest:", "notify-email:",
+        "notify-push:", "notify-slack-bot:", "notify-sms:", "notify-webhook-out:",
+    ],
+    "domain": [
+        "blackboxprogramming-root:blackboxprogramming.io",
+        "blackroadai-root:blackroadai.com", "blackroadinc-root:blackroadinc.us",
+        "blackroadqi-root:blackroadqi.com", "blackroadquantum-root:blackroadquantum.com",
+        "lucidia-studio-root:lucidia.studio", "roadchain-root:roadchain.io",
+        "blackroad-company:blackroad.company", "blackroad-me:blackroad.me",
+        "blackroad-network:blackroad.network", "blackroad-systems:blackroad.systems",
+        "lucidia-earth:lucidia.earth", "lucidiaqi-com:lucidiaqi.com",
+        "roadcoin-io:roadcoin.io",
+    ],
+    "user": [
+        "users-activity:", "users-avatar:", "users-delete:", "users-export:",
+        "users-invite:", "users-merge:", "users-preferences:", "users-profile:",
+    ],
+    "blockchain": [
+        "roadchain-app:", "roadchain-explorer:", "roadchain-site:",
+        "roadchain-worker:", "roadcoin-app:", "roadcoin-worker:",
+    ],
+    "lucidia": [
+        "lucidia-app:", "lucidia-dashboard:", "lucidia-site:",
+        "lucidia-studio:", "lucidia-studio-app:", "lucidia-studio-worker:",
+    ],
+}
+
+COLORS = {
+    "product": "\033[1;37m", "agent": "\033[0;33m", "ai": "\033[0;33m",
+    "auth": "\033[0;31m", "analytics": "\033[0;35m", "billing": "\033[0;32m",
+    "fleet": "\033[0;36m", "integration": "\033[0;36m", "monitor": "\033[0;36m",
+    "pipeline": "\033[0;32m", "notify": "\033[0;32m", "domain": "\033[0;90m",
+    "user": "\033[0;35m", "blockchain": "\033[0;33m", "lucidia": "\033[1;37m",
+}
+N = "\033[0m"
+W = "\033[1;37m"
+D = "\033[0;90m"
+
+mode = sys.argv[1] if len(sys.argv) > 1 else "summary"
+
+total = 0
+for div, items in sorted(DIVISIONS.items()):
+    c = COLORS.get(div, D)
+    count = len(items)
+    total += count
+
+    if mode == "full":
+        print(f"  {c}[{div}]{N} ({count} workers)")
+        for item in items:
+            parts = item.split(":", 1)
+            name = parts[0]
+            endpoint = parts[1] if len(parts) > 1 and parts[1] else f"{name}.blackroad.workers.dev"
+            print(f"    {c}*{N} {name:40s} {D}{endpoint}{N}")
+        print()
+    else:
+        print(f"  {c}{div:15s}{N} {W}{count:3d}{N} workers")
+
+print()
+print(f"  {D}────────────────────────────────────────────────{N}")
+print(f"  {W}{total} cloud workers{N} across {W}{len(DIVISIONS)} divisions{N}")
+
+# Additional stats
+print(f"  {D}+ ~300 infrastructure/utility workers not listed{N}")
+print(f"  {D}+ 53 D1 databases | 20 domains | 27 agents{N}")
+PYEOF
+
+printf "\n  ${D}Pave Tomorrow.${N}\n\n"

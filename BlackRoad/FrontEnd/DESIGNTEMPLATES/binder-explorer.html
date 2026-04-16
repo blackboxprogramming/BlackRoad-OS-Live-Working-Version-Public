@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corporate Binder Explorer — BlackRoad OS</title>
+<meta name="description" content="Navigate the full BlackRoad OS institutional binder. 2000+ sections covering corporate identity, university model, schools, departments, products, agents, and governance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#28c840}
+.hero{padding:76px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch}
+.hero-copy{padding:14px 0}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin-top:18px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.toolbar{display:grid;grid-template-columns:2fr 1fr;gap:12px;align-items:end;margin-bottom:20px}
+.field label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.input,.select{width:100%;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;outline:none;transition:border-color .15s,transform .15s}
+.input:focus,.select:focus{border-color:#3b3b3b;transform:translateY(-1px)}
+.results-bar{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:12px 0 18px}
+.results-count{font-family:var(--jb);font-size:11px;color:var(--sub)}
+.chapter-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:32px}
+.chapter-card{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .15s,transform .18s}
+.chapter-card:hover{border-color:#313131;transform:translateY(-2px)}
+.chapter-card.active{border-color:#4488FF}
+.chapter-range{font-family:var(--jb);font-size:10px;color:var(--muted);margin-bottom:6px}
+.chapter-name{font-size:16px;font-weight:700;color:var(--white);margin-bottom:4px}
+.chapter-count{font-family:var(--jb);font-size:11px;color:var(--sub)}
+.chapter-desc{font-size:12px;color:var(--sub);margin-top:8px;line-height:1.5}
+.toc-list{list-style:none}
+.toc-item{display:flex;align-items:baseline;gap:14px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text);transition:background .1s}
+.toc-item:last-child{border-bottom:none}
+.toc-item:hover{background:var(--hover)}
+.toc-item.hidden{display:none}
+.toc-num{font-family:var(--jb);font-size:11px;color:var(--muted);min-width:40px;text-align:right}
+.toc-title{flex:1;color:var(--text)}
+.toc-tag{font-family:var(--jb);font-size:10px;padding:3px 8px;border-radius:999px;background:var(--elevated);border:1px solid var(--border);color:var(--sub);white-space:nowrap}
+.card-body{padding:18px}
+.detail-label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--sub);cursor:pointer;transition:border-color .15s}
+.tag:hover,.tag.active{border-color:#4488FF;color:var(--text)}
+@media(max-width:1080px){.hero-grid,.toolbar,.chapter-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.nav-links{display:none}.hero h1{font-size:40px}.stat-grid{grid-template-columns:1fr}.container{padding:0 16px}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://search.blackroad.io">Search</a>
+    <a href="https://roadbook.blackroad.io">RoadBook</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>Institutional Binder</div>
+</nav>
+
+<div class="container hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">Index.md.rtf — The Complete Institution</div>
+      <h1>Corporate Binder Explorer</h1>
+      <p>The full BlackRoad OS institutional document. 2,000+ sections covering corporate identity, university operating model, schools, departments, institutes, labs, products, agents, jobs, curriculum, audiences, domains, and governance.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-k">Sections</div>
+        <div class="stat-v" id="stat-total">2000</div>
+        <div class="stat-t">Numbered entries across 20 chapters.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Chapters</div>
+        <div class="stat-v">20</div>
+        <div class="stat-t">Major thematic blocks of 100 sections each.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Source</div>
+        <div class="stat-v">RTF</div>
+        <div class="stat-t">876KB rich text file by Alexa Amundson.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Model</div>
+        <div class="stat-v">University</div>
+        <div class="stat-t">Corporation-as-University. Products-as-Schools.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container"><div class="card"><div class="card-grad"></div><div class="card-body">
+  <div class="toolbar">
+    <div class="field">
+      <label for="search">Search Sections</label>
+      <input class="input" id="search" type="search" placeholder="Try &quot;school&quot;, &quot;agent&quot;, &quot;product&quot;, &quot;charter&quot;, &quot;curriculum&quot;...">
+    </div>
+    <div class="field">
+      <label for="chapter">Chapter</label>
+      <select class="select" id="chapter">
+        <option value="all">All chapters</option>
+      </select>
+    </div>
+  </div>
+  <div class="results-bar">
+    <div class="results-count" id="results-count">2000 sections visible</div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div></div></div>
+
+<div class="container section">
+  <div class="chapter-grid" id="chapter-grid"></div>
+  <div class="card"><div class="card-grad"></div><div class="card-body" style="padding:0">
+    <ul class="toc-list" id="toc-list"></ul>
+  </div></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — The institutional binder. Every section is a decision, not a placeholder.</div>
+  </footer>
+</div>
+
+<script>
+const chapters = [
+  {id:'corporate', range:'1-100', name:'Corporate Identity & Philosophy', desc:'Mission, vision, principles, narrative, vocabulary, naming discipline.'},
+  {id:'academic', range:'101-200', name:'Academic-Corporate Map', desc:'University source model, college mappings, discipline clusters, career paths.'},
+  {id:'divisions', range:'201-300', name:'Divisions, Departments & Institutes', desc:'14 divisions, 30 departments, 20 institutes, 20 labs, 9 centers.'},
+  {id:'products', range:'301-500', name:'Products Overview', desc:'18 products as schools: BlackRoad OS, RoadTrip, Roadie, RoadChat, RoadCode, BackRoad, RoadBook, RoadWorld, OfficeRoad, CarKeys, CarPool, RoadChain, RoadCoin, RoadWork, RoadSide, OneWay, BlackBoard, RoadView.'},
+  {id:'agents', range:'501-600', name:'Agents & Roles', desc:'27 Roadie agents as institutional personnel: executive, engineering, creative, operations, infrastructure, business. Career ladders.'},
+  {id:'jobs', range:'601-700', name:'Jobs & Role Families', desc:'Job architecture, engineering, design, education, health, business, communications, environment roles.'},
+  {id:'curriculum', range:'701-800', name:'Curriculum & Learning', desc:'Degree programs, certificate tracks, professional pathways, assessment standards, learning outcomes.'},
+  {id:'audience', range:'801-900', name:'Audience & Segments', desc:'User personas, creator segments, enterprise segments, education segments, community types.'},
+  {id:'domains', range:'901-1000', name:'Domains & Routes', desc:'Domain strategy, subdomain logic, routing models, DNS architecture, surface taxonomy.'},
+  {id:'school-eng', range:'1001-1100', name:'School of Engineering', desc:'Platform systems, curriculum depth, faculty assignments, lab structure.'},
+  {id:'school-ai', range:'1101-1200', name:'School of AI & Research', desc:'AI research programs, model systems, safety alignment, agent intelligence.'},
+  {id:'school-design', range:'1201-1300', name:'School of Design & Creative', desc:'Visual design, interaction design, brand systems, creative direction.'},
+  {id:'school-biz', range:'1301-1400', name:'School of Business & Economics', desc:'Business operations, revenue strategy, economic systems, market analysis.'},
+  {id:'school-edu', range:'1401-1500', name:'School of Education', desc:'Human development, tutoring systems, youth programs, accessibility.'},
+  {id:'school-health', range:'1501-1600', name:'School of Health & Human Services', desc:'Wellness, care systems, human services, clinical operations.'},
+  {id:'school-media', range:'1601-1700', name:'School of Media & Communication', desc:'Journalism, content strategy, social distribution, localization.'},
+  {id:'school-infra', range:'1701-1800', name:'School of Infrastructure', desc:'Environmental systems, fleet operations, cloud and edge, sustainability.'},
+  {id:'school-gov', range:'1801-1900', name:'School of Governance & Law', desc:'Policy, compliance, public trust, institutional accountability.'},
+  {id:'integration', range:'1901-2000', name:'Cross-School Integration', desc:'University-wide systems, synthesis models, phase expansion strategy.'},
+  {id:'charters', range:'2001-2100+', name:'School & Department Charters', desc:'Formal charters with purpose, scope, authority, mission, vision, values, responsibilities, boundaries, success definitions.'}
+]
+
+const sections = [
+  {n:1,t:'BlackRoad OS, Inc.',ch:'corporate'},{n:2,t:'Corporate Identity',ch:'corporate'},{n:3,t:'Corporate Overview',ch:'corporate'},{n:4,t:'Corporate Thesis',ch:'corporate'},{n:5,t:'Corporate Mission',ch:'corporate'},{n:6,t:'Corporate Vision',ch:'corporate'},{n:7,t:'Corporate Mandate',ch:'corporate'},{n:8,t:'Corporate Scope',ch:'corporate'},{n:9,t:'Corporate Promise',ch:'corporate'},{n:10,t:'Corporate Responsibility',ch:'corporate'},
+  {n:11,t:'Why BlackRoad Exists',ch:'corporate'},{n:12,t:'The Problem BlackRoad Solves',ch:'corporate'},{n:13,t:'The Opportunity BlackRoad Sees',ch:'corporate'},{n:14,t:'The Future BlackRoad Wants',ch:'corporate'},{n:15,t:'Why This Company Matters',ch:'corporate'},{n:16,t:'Why This Company Now',ch:'corporate'},{n:17,t:'Why People Will Join',ch:'corporate'},{n:18,t:'Why People Will Stay',ch:'corporate'},{n:19,t:'Why People Will Build Here',ch:'corporate'},{n:20,t:'Why The World Will Need It',ch:'corporate'},
+  {n:21,t:'The Meaning Of BlackRoad',ch:'corporate'},{n:22,t:'The BlackRoad Metaphor',ch:'corporate'},{n:23,t:'Remember The Road',ch:'corporate'},{n:24,t:'Pave Tomorrow',ch:'corporate'},{n:25,t:'Creation As A Principle',ch:'corporate'},{n:26,t:'Connection As A Principle',ch:'corporate'},{n:27,t:'Sovereignty As A Principle',ch:'corporate'},{n:28,t:'Learning As A Principle',ch:'corporate'},{n:29,t:'Work As A Principle',ch:'corporate'},{n:30,t:'Stewardship As A Principle',ch:'corporate'},
+  {n:31,t:'University Operating Model',ch:'corporate'},{n:32,t:'Corporation As University',ch:'corporate'},{n:33,t:'Why A University Structure',ch:'corporate'},{n:34,t:'University As Operating System',ch:'corporate'},{n:35,t:'University As Org Chart',ch:'corporate'},{n:36,t:'University As Talent System',ch:'corporate'},{n:37,t:'University As Product System',ch:'corporate'},{n:38,t:'University As Brand System',ch:'corporate'},{n:39,t:'University As Governance System',ch:'corporate'},{n:40,t:'University As Cultural System',ch:'corporate'},
+  {n:41,t:'Institutional Philosophy',ch:'corporate'},{n:42,t:'Knowledge As Infrastructure',ch:'corporate'},{n:43,t:'Creation As Curriculum',ch:'corporate'},{n:44,t:'Work As Study',ch:'corporate'},{n:45,t:'Products As Schools',ch:'corporate'},{n:46,t:'Agents As Faculty',ch:'corporate'},{n:47,t:'Staff As Operators',ch:'corporate'},{n:48,t:'Customers As Learners',ch:'corporate'},{n:49,t:'Partners As Fellows',ch:'corporate'},{n:50,t:'Advancement As Mastery',ch:'corporate'},
+  {n:51,t:'Institutional Constitution',ch:'corporate'},{n:52,t:'Foundational Rules',ch:'corporate'},{n:53,t:'Organizational Principles',ch:'corporate'},{n:54,t:'Decision Rights',ch:'corporate'},{n:55,t:'Responsibility Model',ch:'corporate'},{n:56,t:'Authority Model',ch:'corporate'},{n:57,t:'Institutional Boundaries',ch:'corporate'},{n:58,t:'Institutional Standards',ch:'corporate'},{n:59,t:'Institutional Rituals',ch:'corporate'},{n:60,t:'Institutional Continuity',ch:'corporate'},
+  {n:61,t:'Governance Model',ch:'corporate'},{n:62,t:'Founder Governance',ch:'corporate'},{n:63,t:'Executive Governance',ch:'corporate'},{n:64,t:'School Governance',ch:'corporate'},{n:65,t:'Department Governance',ch:'corporate'},{n:66,t:'Institute Governance',ch:'corporate'},{n:67,t:'Product Governance',ch:'corporate'},{n:68,t:'Agent Governance',ch:'corporate'},{n:69,t:'Policy Governance',ch:'corporate'},{n:70,t:'Crisis Governance',ch:'corporate'},
+  {n:71,t:'Leadership Structure',ch:'corporate'},{n:72,t:'Founder Role',ch:'corporate'},{n:73,t:'Chancellor Model',ch:'corporate'},{n:74,t:'President Model',ch:'corporate'},{n:75,t:'Provost Model',ch:'corporate'},{n:76,t:'Dean Model',ch:'corporate'},{n:77,t:'Director Model',ch:'corporate'},{n:78,t:'Chair Model',ch:'corporate'},{n:79,t:'Lead Model',ch:'corporate'},{n:80,t:'Steward Model',ch:'corporate'},
+  {n:81,t:'Corporate Narrative',ch:'corporate'},{n:82,t:'Founder Narrative',ch:'corporate'},{n:83,t:'BlackRoad Story',ch:'corporate'},{n:84,t:'Origin Story',ch:'corporate'},{n:85,t:'The Personal Thesis',ch:'corporate'},{n:86,t:'The Institutional Thesis',ch:'corporate'},{n:87,t:'The Public Thesis',ch:'corporate'},{n:88,t:'The Emotional Thesis',ch:'corporate'},{n:89,t:'The Historical Thesis',ch:'corporate'},{n:90,t:'The Future Thesis',ch:'corporate'},
+  {n:91,t:'Narrative Vocabulary',ch:'corporate'},{n:92,t:'Canonical Phrases',ch:'corporate'},{n:93,t:'Corporate Language Rules',ch:'corporate'},{n:94,t:'Brand Vocabulary',ch:'corporate'},{n:95,t:'Institutional Vocabulary',ch:'corporate'},{n:96,t:'Academic Vocabulary',ch:'corporate'},{n:97,t:'Product Vocabulary',ch:'corporate'},{n:98,t:'Role Vocabulary',ch:'corporate'},{n:99,t:'Campaign Vocabulary',ch:'corporate'},{n:100,t:'Naming Discipline',ch:'corporate'},
+  // 101-200: Academic-Corporate Map
+  {n:101,t:'Academic-Corporate Map',ch:'academic'},{n:102,t:'University Source Model',ch:'academic'},{n:103,t:'Major To Division Mapping',ch:'academic'},{n:104,t:'Minor To Support Mapping',ch:'academic'},{n:105,t:'Certificate To Skill Mapping',ch:'academic'},{n:106,t:'Program Type Taxonomy',ch:'academic'},{n:107,t:'Discipline Cluster Taxonomy',ch:'academic'},{n:108,t:'Interdisciplinary Program Logic',ch:'academic'},{n:109,t:'Honors And Excellence Tracks',ch:'academic'},{n:110,t:'Non-Degree Learning Paths',ch:'academic'},
+  {n:111,t:'Schools Overview',ch:'academic'},{n:112,t:'School Of Engineering And Platform Systems',ch:'academic'},{n:113,t:'School Of AI And Research',ch:'academic'},{n:114,t:'School Of Design And Creative Systems',ch:'academic'},{n:115,t:'School Of Business And Economic Systems',ch:'academic'},{n:116,t:'School Of Education And Human Development',ch:'academic'},{n:117,t:'School Of Health And Human Services',ch:'academic'},{n:118,t:'School Of Media, Communication, And Culture',ch:'academic'},{n:119,t:'School Of Infrastructure And Environmental Systems',ch:'academic'},{n:120,t:'School Of Governance, Law, And Public Trust',ch:'academic'},
+  // 201-300: Divisions & Departments
+  {n:201,t:'BlackRoad Divisions Overview',ch:'divisions'},{n:202,t:'Division Taxonomy',ch:'divisions'},{n:203,t:'Executive Division',ch:'divisions'},{n:204,t:'Engineering Division',ch:'divisions'},{n:205,t:'AI And Research Division',ch:'divisions'},{n:206,t:'Design And Creative Division',ch:'divisions'},{n:207,t:'Education And Learning Division',ch:'divisions'},{n:208,t:'Health And Human Services Division',ch:'divisions'},{n:209,t:'Community And Social Systems Division',ch:'divisions'},{n:210,t:'Operations And Service Delivery Division',ch:'divisions'},
+  {n:221,t:'Departments Overview',ch:'divisions'},{n:222,t:'Department Of Platform Engineering',ch:'divisions'},{n:223,t:'Department Of Application Engineering',ch:'divisions'},{n:224,t:'Department Of Systems Architecture',ch:'divisions'},{n:225,t:'Department Of Data Engineering',ch:'divisions'},{n:226,t:'Department Of Security And Identity',ch:'divisions'},{n:227,t:'Department Of Agent Orchestration',ch:'divisions'},{n:228,t:'Department Of AI Model Systems',ch:'divisions'},{n:229,t:'Department Of UX And Interaction Design',ch:'divisions'},{n:230,t:'Department Of Visual Design And Brand',ch:'divisions'},
+  {n:251,t:'Institutes Overview',ch:'divisions'},{n:252,t:'Institute For Convoy Intelligence',ch:'divisions'},{n:253,t:'Institute For Shared Memory',ch:'divisions'},{n:254,t:'Institute For Human-AI Collaboration',ch:'divisions'},{n:255,t:'Institute For Trust And Provenance',ch:'divisions'},{n:256,t:'Institute For Creator Systems',ch:'divisions'},{n:257,t:'Institute For Learning Futures',ch:'divisions'},
+  {n:271,t:'Labs Overview',ch:'divisions'},{n:272,t:'Agent Systems Lab',ch:'divisions'},{n:273,t:'Memory Lab',ch:'divisions'},{n:274,t:'Provenance Lab',ch:'divisions'},{n:275,t:'Learning Lab',ch:'divisions'},{n:276,t:'Design Systems Lab',ch:'divisions'},{n:277,t:'Worldbuilding Lab',ch:'divisions'},
+  {n:291,t:'Centers Overview',ch:'divisions'},{n:292,t:'Center For BlackRoad Standards',ch:'divisions'},{n:293,t:'Center For Academic Role Mapping',ch:'divisions'},{n:294,t:'Center For Agent Development',ch:'divisions'},{n:295,t:'Center For Product Excellence',ch:'divisions'},
+  // 301-500: Products
+  {n:301,t:'Products Overview',ch:'products'},{n:302,t:'Product Taxonomy',ch:'products'},{n:303,t:'Products As Institutional Units',ch:'products'},{n:304,t:'Products As Schools',ch:'products'},{n:305,t:'Products As Labs',ch:'products'},{n:306,t:'Products As Studios',ch:'products'},{n:307,t:'Products As Utilities',ch:'products'},{n:308,t:'Products As Platforms',ch:'products'},{n:309,t:'Products As Public Surfaces',ch:'products'},{n:310,t:'Product Portfolio Logic',ch:'products'},
+  {n:311,t:'BlackRoad OS Overview',ch:'products'},{n:321,t:'RoadTrip Overview',ch:'products'},{n:331,t:'Roadie Overview',ch:'products'},{n:341,t:'RoadView Overview',ch:'products'},{n:351,t:'RoadChat Overview',ch:'products'},{n:361,t:'BackRoad Overview',ch:'products'},{n:371,t:'RoadCode Overview',ch:'products'},{n:381,t:'RoadWork Overview',ch:'products'},{n:391,t:'CarKeys Overview',ch:'products'},{n:401,t:'RoadChain Overview',ch:'products'},
+  {n:411,t:'RoadCoin Overview',ch:'products'},{n:421,t:'RoadBook Overview',ch:'products'},{n:431,t:'RoadWorld Overview',ch:'products'},{n:441,t:'OfficeRoad Overview',ch:'products'},{n:451,t:'CarPool Overview',ch:'products'},{n:461,t:'OneWay Overview',ch:'products'},{n:471,t:'RoadSide Overview',ch:'products'},{n:481,t:'BlackBoard Overview',ch:'products'},{n:491,t:'Product-To-School Mapping Overview',ch:'products'},{n:500,t:'Product Portfolio Integration Model',ch:'products'},
+  // 501-600: Agents
+  {n:501,t:'Agents Overview',ch:'agents'},{n:502,t:'The Roadies As Institutional Personnel',ch:'agents'},{n:503,t:'Agents As Faculty Model',ch:'agents'},{n:507,t:'Agent Taxonomy',ch:'agents'},{n:511,t:'Executive Agents Overview',ch:'agents'},{n:512,t:'Roadie As Chief Executive Agent',ch:'agents'},
+  {n:521,t:'Engineering Agents Overview',ch:'agents'},{n:522,t:'Lucidia As Infrastructure Lead',ch:'agents'},{n:523,t:'Cecilia As AI Engineer',ch:'agents'},{n:524,t:'Octavia As DevOps Lead',ch:'agents'},{n:525,t:'Olympia As Performance Analyst',ch:'agents'},{n:526,t:'Silas As Security Engineer',ch:'agents'},{n:527,t:'Sebastian As Backend Engineer',ch:'agents'},
+  {n:531,t:'Creative Agents Overview',ch:'agents'},{n:532,t:'Calliope As Content Creator',ch:'agents'},{n:533,t:'Aria As Voice And Audio Lead',ch:'agents'},{n:534,t:'Thalia As UX Designer',ch:'agents'},{n:535,t:'Lyra As Music And Media Lead',ch:'agents'},
+  {n:541,t:'Operations Agents Overview',ch:'agents'},{n:542,t:'Sapphira As Analytics Lead',ch:'agents'},{n:543,t:'Seraphina As AI Safety Lead',ch:'agents'},{n:544,t:'Alexandria As Knowledge Manager',ch:'agents'},{n:545,t:'Theodosia As QA Engineer',ch:'agents'},{n:546,t:'Sophia As Research Scientist',ch:'agents'},
+  {n:551,t:'Infrastructure Agents Overview',ch:'agents'},{n:552,t:'Alice As Gateway Manager',ch:'agents'},{n:553,t:'Celeste As Frontend Engineer',ch:'agents'},{n:554,t:'Elias As Data Engineer',ch:'agents'},{n:555,t:'Gematria As Edge Computing Lead',ch:'agents'},{n:556,t:'Anastasia As Cloud Architect',ch:'agents'},
+  {n:561,t:'Business Agents Overview',ch:'agents'},{n:562,t:'Portia As Legal And Compliance Lead',ch:'agents'},{n:563,t:'Atticus As Documentation Lead',ch:'agents'},{n:564,t:'Cicero As Communications Lead',ch:'agents'},{n:565,t:'Valeria As Product Manager',ch:'agents'},{n:566,t:'Ophelia As Community Manager',ch:'agents'},{n:567,t:'Gaia As Sustainability Lead',ch:'agents'},
+  {n:581,t:'Roles And Titles Overview',ch:'agents'},{n:591,t:'Career Ladder Overview',ch:'agents'},{n:600,t:'Chancellor-Level Roles',ch:'agents'},
+  // 601-700: Jobs
+  {n:601,t:'Jobs Overview',ch:'jobs'},{n:602,t:'Job Architecture Model',ch:'jobs'},{n:611,t:'Engineering Role Families',ch:'jobs'},{n:621,t:'Design And Creative Role Families',ch:'jobs'},{n:631,t:'Education And Human Development Role Families',ch:'jobs'},{n:641,t:'Health And Human Services Role Families',ch:'jobs'},{n:651,t:'Business And Operations Role Families',ch:'jobs'},{n:661,t:'Communications And Media Role Families',ch:'jobs'},{n:671,t:'Environment And Infrastructure Role Families',ch:'jobs'},
+  // 701-1000: Curriculum, Audience, Domains
+  {n:701,t:'Curriculum Overview',ch:'curriculum'},{n:801,t:'Audience Overview',ch:'audience'},{n:901,t:'Domain Strategy Overview',ch:'domains'},
+  // School deep dives
+  {n:1001,t:'School Of Engineering Deep Dive',ch:'school-eng'},{n:1101,t:'School Of AI Deep Dive',ch:'school-ai'},{n:1201,t:'School Of Design Deep Dive',ch:'school-design'},{n:1301,t:'School Of Business Deep Dive',ch:'school-biz'},{n:1401,t:'School Of Education Deep Dive',ch:'school-edu'},{n:1501,t:'School Of Health Deep Dive',ch:'school-health'},{n:1601,t:'School Of Media Deep Dive',ch:'school-media'},{n:1701,t:'School Of Infrastructure Deep Dive',ch:'school-infra'},{n:1801,t:'School Of Governance Deep Dive',ch:'school-gov'},
+  // Integration & Charters
+  {n:1901,t:'Cross-School Integration Overview',ch:'integration'},{n:1981,t:'University Synthesis Overview',ch:'integration'},{n:1990,t:'BlackRoad-As-Civilization Synthesis',ch:'integration'},{n:2000,t:'Master Institutional Expansion Index',ch:'integration'},
+  {n:2001,t:'School Of Engineering Charter',ch:'charters'},{n:2011,t:'School Of AI Charter',ch:'charters'},{n:2021,t:'School Of Design Charter',ch:'charters'},{n:2031,t:'School Of Business Charter',ch:'charters'},{n:2041,t:'School Of Education Charter',ch:'charters'},{n:2051,t:'School Of Health Charter',ch:'charters'},{n:2061,t:'School Of Media Charter',ch:'charters'},{n:2071,t:'School Of Infrastructure Charter',ch:'charters'},{n:2081,t:'School Of Governance Charter',ch:'charters'},{n:2101,t:'Department Charters Begin',ch:'charters'}
+]
+
+const chapterGrid = document.getElementById('chapter-grid')
+const tocList = document.getElementById('toc-list')
+const searchInput = document.getElementById('search')
+const chapterSelect = document.getElementById('chapter')
+const resultsCount = document.getElementById('results-count')
+const statTotal = document.getElementById('stat-total')
+const legend = document.getElementById('legend')
+
+statTotal.textContent = sections.length
+
+// Build chapter cards
+chapters.forEach(ch => {
+  const opt = document.createElement('option')
+  opt.value = ch.id; opt.textContent = ch.name
+  chapterSelect.appendChild(opt)
+
+  const count = sections.filter(s => s.ch === ch.id).length
+  const card = document.createElement('div')
+  card.className = 'chapter-card'
+  card.dataset.chapter = ch.id
+  card.innerHTML = `
+    <div class="chapter-range">${ch.range}</div>
+    <div class="chapter-name">${ch.name}</div>
+    <div class="chapter-count">${count} sections indexed</div>
+    <div class="chapter-desc">${ch.desc}</div>
+  `
+  card.addEventListener('click', () => {
+    chapterSelect.value = ch.id
+    filter()
+    document.getElementById('toc-list').scrollIntoView({behavior:'smooth'})
+  })
+  chapterGrid.appendChild(card)
+
+  const tag = document.createElement('span')
+  tag.className = 'tag'
+  tag.textContent = ch.range
+  tag.addEventListener('click', () => { chapterSelect.value = ch.id; filter() })
+  legend.appendChild(tag)
+})
+
+// Build TOC
+sections.forEach(s => {
+  const li = document.createElement('li')
+  li.className = 'toc-item'
+  const ch = chapters.find(c => c.id === s.ch)
+  li.innerHTML = `
+    <span class="toc-num">${s.n}</span>
+    <span class="toc-title">${s.t}</span>
+    <span class="toc-tag">${ch ? ch.range : ''}</span>
+  `
+  li.dataset.chapter = s.ch
+  li.dataset.search = (s.n + ' ' + s.t).toLowerCase()
+  tocList.appendChild(li)
+})
+
+function filter() {
+  const term = searchInput.value.trim().toLowerCase()
+  const ch = chapterSelect.value
+  let visible = 0
+  tocList.querySelectorAll('.toc-item').forEach(li => {
+    const matchTerm = !term || li.dataset.search.includes(term)
+    const matchCh = ch === 'all' || li.dataset.chapter === ch
+    const show = matchTerm && matchCh
+    li.classList.toggle('hidden', !show)
+    if (show) visible++
+  })
+  resultsCount.textContent = `${visible} section${visible === 1 ? '' : 's'} visible`
+  chapterGrid.querySelectorAll('.chapter-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.chapter === ch)
+  })
+}
+
+searchInput.addEventListener('input', filter)
+chapterSelect.addEventListener('change', filter)
+</script>
+</body>
+</html>

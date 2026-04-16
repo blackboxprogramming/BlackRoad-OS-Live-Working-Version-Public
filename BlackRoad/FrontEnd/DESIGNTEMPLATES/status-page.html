@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status — BlackRoad OS</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button{font-family:var(--sg);cursor:pointer}
+input,textarea,select{font-family:var(--sg)}
+html{-webkit-font-smoothing:antialiased}
+
+
+.grad-bar{height:4px;background:var(--g)}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-weight:700;font-size:20px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-mark{width:28px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--white);opacity:.4;text-decoration:none;transition:opacity .15s}
+.nav-links a:hover{opacity:.8}
+.container{max-width:800px;margin:0 auto;padding:0 24px}
+
+.status-banner{margin:48px 0 32px;padding:20px 24px;border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;gap:12px}
+.status-indicator{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.status-indicator.operational{background:var(--g135);box-shadow:0 0 12px rgba(136,68,255,.3)}
+.status-indicator.degraded{background:var(--g135);opacity:.5}
+.status-indicator.down{background:none;border:2px solid var(--white);opacity:.3;width:10px;height:10px}
+.status-text{font-size:16px;font-weight:600;color:var(--white)}
+.status-updated{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.3;margin-left:auto}
+
+.service-group{margin-bottom:32px}
+.service-group-title{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.3;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.service{display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
+.service:first-child{border-top:1px solid var(--border)}
+.service-name{font-size:14px;font-weight:500;color:var(--white);flex:1}
+.service-meta{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.3;margin-right:16px}
+.service-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--white);opacity:.6}
+.service-dot{width:6px;height:6px;border-radius:50%}
+.service-dot.up{background:var(--g135)}
+.service-dot.degraded{background:var(--g135);opacity:.5}
+.service-dot.down{background:none;border:1px solid var(--white);opacity:.3;width:5px;height:5px}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:32px 0}
+.stat-card{border:1px solid var(--border);border-radius:8px;padding:16px}
+.stat-label{font-family:var(--jb);font-size:10px;opacity:.3;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:700}
+.stat-sub{font-family:var(--jb);font-size:11px;opacity:.3;margin-top:2px}
+
+.uptime-section{margin:48px 0}
+.uptime-section h2{font-size:18px;font-weight:600;color:var(--white);margin-bottom:24px}
+.uptime-row{margin-bottom:20px}
+.uptime-label{display:flex;justify-content:space-between;margin-bottom:6px}
+.uptime-name{font-size:13px;font-weight:500;color:var(--white)}
+.uptime-pct{font-family:var(--jb);font-size:12px;color:var(--white);opacity:.4}
+.uptime-bar{display:flex;gap:2px;height:28px}
+.uptime-day{flex:1;border-radius:2px;transition:opacity .15s}
+.uptime-day:hover{opacity:.8}
+.uptime-day.good{background:var(--g135)}
+.uptime-day.warn{background:var(--g135);opacity:.4}
+.uptime-day.bad{background:var(--white);opacity:.15}
+.uptime-day.none{background:var(--border)}
+.uptime-legend{display:flex;justify-content:space-between;margin-top:4px}
+.uptime-legend span{font-family:var(--jb);font-size:10px;color:var(--white);opacity:.2}
+
+.incidents{margin:48px 0 80px}
+.incidents h2{font-size:18px;font-weight:600;color:var(--white);margin-bottom:24px}
+.incident{border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:12px}
+.incident-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.incident-title{font-size:14px;font-weight:600;color:var(--white)}
+.incident-date{font-family:var(--jb);font-size:11px;color:var(--white);opacity:.3}
+.incident-body{overflow-x:hidden;font-size:13px;color:var(--white);opacity:.4;line-height:1.7}
+.incident-tag{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border:1px solid var(--border);border-radius:3px;font-size:10px;font-weight:600;color:var(--white);opacity:.5;margin-top:8px}
+.incident-tag::before{content:'';width:6px;height:6px;border-radius:50%}
+.incident-tag.resolved::before{background:var(--g135)}
+.incident-tag.investigating::before{background:var(--g135);opacity:.5}
+.no-incidents{text-align:center;padding:32px;opacity:.3;font-size:13px}
+
+footer{border-top:1px solid var(--border);padding:32px 48px;text-align:center;font-size:12px;color:var(--white);opacity:.3}
+footer a{color:var(--white);opacity:1;text-decoration:none}
+.grad-bar-bottom{height:4px;background:var(--g)}
+
+@media(max-width:768px){nav{padding:14px 20px}.container{padding:0 20px}.stats-row{grid-template-columns:repeat(2,1fr)}}
+
+/* ═══ RESPONSIVE — fit to screen ═══ */
+@media(max-max-width:1024px;width:100%){
+  .metrics-strip{grid-template-columns:repeat(3,1fr)}
+  .org-grid,.grid-4,.tier-grid,.cap-grid,.stat-grid,.shield-grid,.surface-grid,.stats-row{grid-template-columns:repeat(2,1fr)}
+  .node-grid{grid-template-columns:repeat(3,1fr)}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 60px}
+  .hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section,.section-wide{padding:48px 20px}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  .product-featured{grid-template-columns:1fr}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing,.cap-grid,.tier-grid,.shield-grid{grid-template-columns:1fr}
+  .org-grid,.grid-4,.stat-grid,.stats-row,.surface-grid{grid-template-columns:1fr}
+  .node-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .topnav{padding:10px 16px}
+  .topnav-links{gap:8px;flex-wrap:wrap}
+  .topnav-links a{font-size:11px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<meta name="keywords" content="BlackRoad status, service health, uptime, monitoring">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad Status — Service Health Dashboard">
+<meta property="og:description" content="Real-time status of all BlackRoad OS services: Workers, Pi nodes, AI inference, NATS messaging, and fleet health.">
+<meta property="og:url" content="https://status.blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad Status — Service Health Dashboard">
+<meta name="twitter:description" content="Real-time status of all BlackRoad OS services: Workers, Pi nodes, AI inference, NATS messaging, and fleet health.">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://status.blackroad.io">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad Status — Service Health Dashboard",
+  "description": "Real-time status of all BlackRoad OS services: Workers, Pi nodes, AI inference, NATS messaging, and fleet health.",
+  "url": "https://status.blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS",
+  "author": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io",
+    "founder": {
+      "@type": "Person",
+      "name": "Alexa Louise Amundson"
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5.00",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="apple-touch-icon" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav>
+  <div class="nav-logo"><div class="nav-mark"></div> BlackRoad Status</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackroad-dashboard.pages.dev">Dashboard</a>
+    <a href="https://blackroad-docs-hub.pages.dev">Docs</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="status-banner" id="banner">
+    <div class="status-indicator" id="banner-dot"></div>
+    <span class="status-text" id="banner-text">Checking systems...</span>
+    <span class="status-updated" id="banner-updated">connecting</span>
+  </div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-label">Nodes Online</div><div class="stat-value" id="s-online">-</div><div class="stat-sub" id="s-online-sub">of 5</div></div>
+    <div class="stat-card"><div class="stat-label">AI Models</div><div class="stat-value" id="s-models">-</div><div class="stat-sub">fleet total</div></div>
+    <div class="stat-card"><div class="stat-label">Containers</div><div class="stat-value" id="s-containers">-</div><div class="stat-sub">running</div></div>
+    <div class="stat-card"><div class="stat-label">Fleet Temp</div><div class="stat-value" id="s-temp">-</div><div class="stat-sub" id="s-temp-sub">average</div></div>
+  </div>
+
+  <div class="service-group">
+    <div class="service-group-title">Edge Nodes</div>
+    <div id="node-services">
+      <div class="service"><span class="service-name">Loading...</span></div>
+    </div>
+  </div>
+
+  <div class="service-group">
+    <div class="service-group-title">Services</div>
+    <div id="svc-services">
+      <div class="service"><span class="service-name">Loading...</span></div>
+    </div>
+  </div>
+
+  <div class="uptime-section">
+    <h2>Node health (current)</h2>
+    <div id="health-bars"></div>
+  </div>
+
+  <div class="incidents">
+    <h2>Active issues</h2>
+    <div id="incidents-list"></div>
+  </div>
+</div>
+
+<footer>&copy; 2026 <a href="https://blackroad.io">BlackRoad OS, Inc.</a></footer>
+<div class="grad-bar-bottom"></div>
+
+<script>
+const API = 'https://fleet-api.amundsonalexa.workers.dev/fleet';
+const NODES = ['alice','cecilia','octavia','aria','lucidia'];
+const ROLES = {alice:'Gateway',cecilia:'AI / TTS',octavia:'Storage / Git',aria:'Orchestration',lucidia:'APIs / DNS'};
+
+function fmtBytes(b){if(!b)return'—';if(b>1e9)return(b/1e9).toFixed(1)+'G';if(b>1e6)return(b/1e6).toFixed(0)+'M';return b+'B'}
+
+function render(data){
+  if(!data||!data.nodes) return;
+  const nodes = data.nodes;
+  const online = NODES.filter(n=>nodes[n]?.status==='online');
+  const down = NODES.filter(n=>nodes[n]?.status!=='online');
+  const throttled = NODES.filter(n=>nodes[n]?.status==='online'&&nodes[n]?.throttle&&nodes[n].throttle!=='0x0');
+
+  // Timestamp
+  const ts = new Date(data.timestamp);
+  const ago = Math.round((Date.now()-ts.getTime())/60000);
+  document.getElementById('banner-updated').textContent = 'Updated '+(ago<1?'just now':ago+'m ago');
+
+  // Banner status
+  const dot = document.getElementById('banner-dot');
+  const txt = document.getElementById('banner-text');
+  if(down.length===0&&throttled.length===0){
+    dot.className='status-indicator operational';
+    txt.textContent='All systems operational';
+  } else if(down.length===NODES.length){
+    dot.className='status-indicator down';
+    txt.textContent='Major outage';
+  } else if(down.length>0){
+    dot.className='status-indicator degraded';
+    txt.textContent=down.length+' node'+(down.length>1?'s':'')+' down — partial outage';
+  } else {
+    dot.className='status-indicator degraded';
+    txt.textContent=throttled.length+' node'+(throttled.length>1?'s':'')+' throttled';
+  }
+
+  // Stats
+  const totalModels = NODES.reduce((s,n)=>s+(nodes[n]?.models||0),0);
+  const totalContainers = NODES.reduce((s,n)=>s+(nodes[n]?.containers||0),0);
+  const temps = NODES.filter(n=>nodes[n]?.temp).map(n=>nodes[n].temp);
+  const avgTemp = temps.length?(temps.reduce((a,b)=>a+b,0)/temps.length).toFixed(1):'—';
+
+  document.getElementById('s-online').textContent=online.length;
+  document.getElementById('s-online-sub').textContent='of '+NODES.length;
+  document.getElementById('s-models').textContent=totalModels;
+  document.getElementById('s-containers').textContent=totalContainers;
+  document.getElementById('s-temp').textContent=avgTemp+'°C';
+
+  // Node services
+  let nodeHTML='';
+  NODES.forEach(name=>{
+    const n=nodes[name]||{status:'down'};
+    const up=n.status==='online';
+    const warn=up&&n.throttle&&n.throttle!=='0x0';
+    const dotClass=up?(warn?'degraded':'up'):'down';
+    const statusText=up?(warn?'Throttled':'Online'):'Down';
+    const meta=[];
+    if(up&&n.temp)meta.push(n.temp+'°C');
+    if(up&&n.load!==undefined)meta.push('load '+n.load);
+    if(up&&n.ram_used&&n.ram_total)meta.push('RAM '+Math.round(n.ram_used/n.ram_total*100)+'%');
+    nodeHTML+='<div class="service">'
+      +'<span class="service-name" style="text-transform:capitalize">'+name+' <span style="opacity:.3;font-size:12px;font-weight:400">('+ROLES[name]+')</span></span>'
+      +(meta.length?'<span class="service-meta">'+meta.join(' · ')+'</span>':'')
+      +'<span class="service-status"><span class="service-dot '+dotClass+'"></span>'+statusText+'</span>'
+      +'</div>';
+  });
+  document.getElementById('node-services').innerHTML=nodeHTML;
+
+  // Derived service statuses
+  const svcs=[
+    {name:'Cloudflare Tunnels',check:()=>online.length>0},
+    {name:'WireGuard Mesh',check:()=>online.length>=2},
+    {name:'Ollama Inference',check:()=>NODES.some(n=>nodes[n]?.ollama==='active')},
+    {name:'Gitea',check:()=>nodes.octavia?.status==='online'&&nodes.octavia?.containers>0},
+    {name:'Pi-hole DNS',check:()=>nodes.alice?.status==='online'},
+    {name:'Docker Swarm',check:()=>nodes.octavia?.status==='online'},
+    {name:'CECE API',check:()=>nodes.cecilia?.status==='online'},
+    {name:'Lucidia API',check:()=>nodes.lucidia?.status==='online'},
+  ];
+  let svcHTML='';
+  svcs.forEach(s=>{
+    const ok=s.check();
+    svcHTML+='<div class="service">'
+      +'<span class="service-name">'+s.name+'</span>'
+      +'<span class="service-status"><span class="service-dot '+(ok?'up':'down')+'"></span>'+(ok?'Operational':'Down')+'</span>'
+      +'</div>';
+  });
+  document.getElementById('svc-services').innerHTML=svcHTML;
+
+  // Health bars (RAM/Disk/Temp visualization per node)
+  let healthHTML='';
+  NODES.forEach(name=>{
+    const n=nodes[name]||{};
+    if(n.status!=='online') {
+      healthHTML+='<div class="uptime-row">'
+        +'<div class="uptime-label"><span class="uptime-name" style="text-transform:capitalize">'+name+'</span><span class="uptime-pct">Offline</span></div>'
+        +'<div class="uptime-bar">';
+      for(let i=0;i<30;i++) healthHTML+='<div class="uptime-day bad"></div>';
+      healthHTML+='</div><div class="uptime-legend"><span>RAM</span><span>Disk</span><span>Temp</span></div></div>';
+      return;
+    }
+    const ramPct=n.ram_used&&n.ram_total?Math.round(n.ram_used/n.ram_total*100):0;
+    const diskPct=n.disk_pct||0;
+    const tempPct=n.temp?Math.round(n.temp/85*100):0;
+
+    function barClass(pct){return pct>80?'warn':pct>95?'bad':'good'}
+
+    healthHTML+='<div class="uptime-row">'
+      +'<div class="uptime-label"><span class="uptime-name" style="text-transform:capitalize">'+name+'</span>'
+      +'<span class="uptime-pct">RAM '+ramPct+'% · Disk '+diskPct+'% · '+n.temp+'°C</span></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +'<div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden"><div style="height:100%;width:'+ramPct+'%;border-radius:4px;background:var(--g)"></div></div>'
+      +'<div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden"><div style="height:100%;width:'+diskPct+'%;border-radius:4px;background:var(--g)"></div></div>'
+      +'<div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden"><div style="height:100%;width:'+tempPct+'%;border-radius:4px;background:var(--g)"></div></div>'
+      +'</div>'
+      +'<div class="uptime-legend"><span>RAM</span><span>Disk</span><span>Temp</span></div>'
+      +'</div>';
+  });
+  document.getElementById('health-bars').innerHTML=healthHTML;
+
+  // Auto-generated incidents from live data
+  let incidents=[];
+  down.forEach(name=>{
+    incidents.push({title:name.charAt(0).toUpperCase()+name.slice(1)+' is down',body:ROLES[name]+' node is not responding. May require physical reboot.',tag:'investigating'});
+  });
+  throttled.forEach(name=>{
+    const n=nodes[name];
+    incidents.push({title:name.charAt(0).toUpperCase()+name.slice(1)+' undervoltage throttling',body:'Throttle flag: '+(n.throttle||'unknown')+'. Voltage: '+(n.voltage||'—')+'V. PSU may be insufficient.',tag:'investigating'});
+  });
+  NODES.forEach(name=>{
+    const n=nodes[name];
+    if(n&&n.status==='online'&&n.temp&&n.temp>65){
+      incidents.push({title:name.charAt(0).toUpperCase()+name.slice(1)+' high temperature',body:'Current temp: '+n.temp+'°C. Threshold: 65°C. Check cooling and workload.',tag:'investigating'});
+    }
+  });
+  NODES.forEach(name=>{
+    const n=nodes[name];
+    if(n&&n.status==='online'&&n.disk_pct&&n.disk_pct>80){
+      incidents.push({title:name.charAt(0).toUpperCase()+name.slice(1)+' disk usage high',body:'Disk usage at '+n.disk_pct+'%. Free: '+(n.disk_free||'unknown')+'.',tag:'investigating'});
+    }
+  });
+
+  const incEl=document.getElementById('incidents-list');
+  if(incidents.length===0){
+    incEl.innerHTML='<div class="no-incidents">No active issues</div>';
+  } else {
+    incEl.innerHTML=incidents.map(i=>
+      '<div class="incident">'
+      +'<div class="incident-header"><span class="incident-title">'+i.title+'</span><span class="incident-date">Live</span></div>'
+      +'<div class="incident-body">'+i.body+'</div>'
+      +'<span class="incident-tag '+i.tag+'">'+i.tag.charAt(0).toUpperCase()+i.tag.slice(1)+'</span>'
+      +'</div>'
+    ).join('');
+  }
+}
+
+function load(){
+  fetch(API).then(r=>r.json()).then(render).catch(e=>{
+    document.getElementById('banner-text').textContent='Connection failed';
+    document.getElementById('banner-dot').className='status-indicator down';
+    document.getElementById('banner-updated').textContent='API unreachable';
+  });
+}
+load();
+setInterval(load, 60000);
+</script>
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>
