@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infrastructure Dashboard — BlackRoad OS</title>
+<meta name="description" content="Real-time view of the BlackRoad sovereign compute fleet. Raspberry Pi nodes, services, WireGuard mesh, and edge infrastructure.">
+<meta property="og:title" content="Infrastructure Dashboard — BlackRoad OS">
+<meta property="og:description" content="Sovereign compute fleet status. Pi nodes, services, mesh networking.">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;
+  --card:#0a0a0a;
+  --elevated:#111;
+  --hover:#181818;
+  --border:#1a1a1a;
+  --muted:#444;
+  --sub:#737373;
+  --text:#f5f5f5;
+  --white:#fff;
+  --sg:'Space Grotesk',sans-serif;
+  --jb:'JetBrains Mono',monospace
+}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%}
+.online{background:#28c840}
+.degraded{background:#f5a623}
+.offline{background:#ff3b30}
+.hero{padding:76px 0 40px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:stretch}
+.hero-copy{padding:14px 0}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em;max-width:760px}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin-top:18px}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.section-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.section-title .badge-dot{width:8px;height:8px;border-radius:50%}
+.node-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.node-card{position:relative;transition:border-color .15s,transform .18s,box-shadow .18s}
+.node-card:hover{border-color:#313131;transform:translateY(-3px);box-shadow:0 14px 40px rgba(0,0,0,.26)}
+.card-body{padding:18px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.node-name{font-size:22px;font-weight:700;line-height:1.05;color:var(--white)}
+.node-ip{font-family:var(--jb);font-size:11px;color:#a9a9a9;margin-top:6px}
+.status-pill{font-family:var(--jb);font-size:10px;padding:5px 8px;border-radius:999px;white-space:nowrap}
+.status-pill.up{background:#112020;border:1px solid #1a4040;color:#4dd4a0}
+.status-pill.warn{background:#1a1810;border:1px solid #3a3820;color:#d4c44d}
+.status-pill.down{background:#1a1010;border:1px solid #3a2020;color:#ff6b6b}
+.node-desc{font-size:13px;color:var(--sub);margin-top:14px;min-height:48px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.detail-item{padding:10px 12px;background:var(--elevated);border:1px solid var(--border);border-radius:10px}
+.detail-label{display:block;font-family:var(--jb);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.detail-value{font-size:13px;color:var(--white);line-height:1.45}
+.service-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.service-tag{font-family:var(--jb);font-size:10px;padding:4px 8px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--sub)}
+.progress-track{width:100%;height:4px;background:var(--elevated);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-fill{height:100%;border-radius:2px;transition:width .3s}
+.progress-fill.good{background:linear-gradient(90deg,#28c840,#4dd4a0)}
+.progress-fill.warn{background:linear-gradient(90deg,#f5a623,#d4c44d)}
+.progress-fill.crit{background:linear-gradient(90deg,#ff3b30,#ff6b6b)}
+.mesh-section{margin-top:32px}
+.mesh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.mesh-card{padding:16px;border-radius:12px;background:rgba(17,17,17,.9);border:1px solid var(--border)}
+.mesh-card h3{font-size:16px;color:var(--white)}
+.mesh-meta{font-family:var(--jb);font-size:10px;color:var(--muted);margin-top:6px}
+.mesh-desc{font-size:13px;color:var(--sub);margin-top:10px}
+.domain-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+.domain-card{padding:12px;background:var(--elevated);border:1px solid var(--border);border-radius:10px;text-align:center}
+.domain-name{font-family:var(--jb);font-size:11px;color:var(--text);word-break:break-all}
+.domain-status{font-family:var(--jb);font-size:10px;color:var(--muted);margin-top:4px}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){
+  .hero-grid,.node-grid{grid-template-columns:1fr}
+  .mesh-grid{grid-template-columns:1fr}
+  .domain-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .nav-links{display:none}
+  .hero h1{font-size:40px}
+  .detail-grid,.stat-grid{grid-template-columns:1fr}
+  .container{padding:0 16px}
+  .domain-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://blackboard.blackroad.io">BlackBoard</a>
+    <a href="https://carpool.blackroad.io">CarPool</a>
+    <a href="https://officeroad.blackroad.io">OfficeRoad</a>
+  </div>
+  <div class="badge"><span class="badge-dot online"></span>Fleet Operational</div>
+</nav>
+
+<div class="container hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow">Sovereign Compute Fleet</div>
+      <h1>Infrastructure Dashboard</h1>
+      <p>The BlackRoad fleet runs on real hardware you can touch. Raspberry Pi nodes, Hailo-8 accelerators, NVMe storage, and WireGuard mesh — no cloud dependencies.</p>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-k">Pi Nodes</div>
+        <div class="stat-v">6</div>
+        <div class="stat-t">Alice, Aria, Cecilia, Lucidia, Octavia, Alexandria.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Services</div>
+        <div class="stat-v">40+</div>
+        <div class="stat-t">AI models, databases, web servers, mesh agents.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Domains</div>
+        <div class="stat-v">17</div>
+        <div class="stat-t">Root domains with 135 total endpoints.</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-k">Mesh</div>
+        <div class="stat-v">WireGuard</div>
+        <div class="stat-t">Encrypted point-to-point node connectivity.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title"><span class="badge-dot online"></span>Compute Nodes</div>
+  <div class="node-grid" id="node-grid"></div>
+</div>
+
+<div class="container section">
+  <div class="card"><div class="card-grad"></div><div class="card-body">
+    <div class="section-title" style="margin-bottom:14px">Network Topology</div>
+    <div class="mesh-grid">
+      <div class="mesh-card">
+        <h3>WireGuard Mesh</h3>
+        <div class="mesh-meta">10.0.0.0/24 private subnet</div>
+        <div class="mesh-desc">Point-to-point encrypted tunnels between all active nodes. Every Pi can reach every other Pi without traversing the public internet.</div>
+      </div>
+      <div class="mesh-card">
+        <h3>Cloudflare Edge</h3>
+        <div class="mesh-meta">17 root domains, 135 endpoints</div>
+        <div class="mesh-desc">Cloudflare Workers and DNS handle public traffic. Tunnels route requests to the Pi fleet for sovereign processing.</div>
+      </div>
+      <div class="mesh-card">
+        <h3>NATS Mesh</h3>
+        <div class="mesh-meta">v2.12.3, pub/sub messaging</div>
+        <div class="mesh-desc">Inter-agent messaging backbone. 4/5 nodes connected. Agents publish events and subscribe to topics across the fleet.</div>
+      </div>
+      <div class="mesh-card">
+        <h3>Gitea Primary</h3>
+        <div class="mesh-meta">Octavia :3100</div>
+        <div class="mesh-desc">Self-hosted Git. Gitea is the primary repository host. GitHub is the downstream mirror. 383 repos across all orgs.</div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Domain Map</div>
+  <div class="domain-grid" id="domain-grid"></div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — Sovereign compute. Your hardware. Your data. No cloud landlords.</div>
+  </footer>
+</div>
+
+<script>
+const nodes = [
+  {name:'Alice', ip:'192.168.4.30', status:'up', arch:'armhf (32-bit)', model:'Raspberry Pi 3B+', role:'Edge Router', desc:'nginx reverse proxy for all 20 domains. The front door of the fleet. RoadTrip self-hosted fallback on :8094.', cpu:45, mem:62, services:['nginx','roadtrip','cron','node-exporter'], storage:'32GB SD'},
+  {name:'Octavia', ip:'192.168.4.101', status:'up', arch:'arm64', model:'Raspberry Pi 4 (4GB)', role:'Git & Compute', desc:'Gitea primary git host, GitHub Actions runner, and general compute node. The workhorse of the fleet.', cpu:38, mem:55, services:['gitea','actions-runner','nats','ollama','node-exporter'], storage:'256GB NVMe'},
+  {name:'Cecilia', ip:'192.168.4.31', status:'up', arch:'arm64', model:'Raspberry Pi 4 (8GB)', role:'Storage & CDN', desc:'MinIO S3-compatible object storage. Serves as the self-hosted CDN for static assets and backups.', cpu:22, mem:40, services:['minio','nats','backup-agent','node-exporter'], storage:'1TB NVMe'},
+  {name:'Lucidia', ip:'192.168.4.32', status:'up', arch:'arm64', model:'Raspberry Pi 4 (8GB)', role:'DNS & AI', desc:'PowerDNS authoritative resolver. Hailo-8 AI accelerator for local inference. Secondary compute.', cpu:30, mem:48, services:['powerdns','hailo-runtime','ollama','nats','node-exporter'], storage:'256GB NVMe'},
+  {name:'Aria', ip:'192.168.4.33', status:'down', arch:'arm64', model:'Raspberry Pi 4 (4GB)', role:'Backup Node', desc:'Currently offline. Secondary backup and failover node. Needs power cycling and SD card check.', cpu:0, mem:0, services:['offline'], storage:'128GB SD'},
+  {name:'Alexandria', ip:'192.168.4.28', status:'up', arch:'x86_64', model:'Mac (Primary Dev)', role:'Dev Machine & Orchestrator', desc:'Primary development machine. Runs Claude Code, orchestrates fleet deployments, and hosts the memory system.', cpu:28, mem:35, services:['claude-code','wrangler','homebrew','git','node','python'], storage:'1TB SSD'}
+]
+
+const domains = [
+  {name:'blackroad.io', status:'200'},
+  {name:'blackroad.company', status:'200'},
+  {name:'blackroad.dev', status:'200'},
+  {name:'blackroad.cloud', status:'200'},
+  {name:'blackroad.run', status:'200'},
+  {name:'blackroad.app', status:'200'},
+  {name:'blackroad.systems', status:'200'},
+  {name:'blackroad.services', status:'200'},
+  {name:'blackroad.chat', status:'200'},
+  {name:'blackroad.media', status:'200'},
+  {name:'blackroad.tools', status:'200'},
+  {name:'blackroad.codes', status:'200'},
+  {name:'blackroad.engineering', status:'200'},
+  {name:'blackroad.productions', status:'200'},
+  {name:'blackroad.university', status:'200'},
+  {name:'amundsonalexa.com', status:'200'},
+  {name:'blackroados.com', status:'200'}
+]
+
+const nodeGrid = document.getElementById('node-grid')
+const domainGrid = document.getElementById('domain-grid')
+
+nodes.forEach(n => {
+  const cpuClass = n.cpu > 80 ? 'crit' : n.cpu > 60 ? 'warn' : 'good'
+  const memClass = n.mem > 80 ? 'crit' : n.mem > 60 ? 'warn' : 'good'
+  const statusClass = n.status === 'up' ? 'up' : n.status === 'warn' ? 'warn' : 'down'
+  const statusLabel = n.status === 'up' ? 'Online' : n.status === 'warn' ? 'Degraded' : 'Offline'
+
+  const card = document.createElement('article')
+  card.className = 'node-card card'
+  card.innerHTML = `
+    <div class="card-grad"></div>
+    <div class="card-body">
+      <div class="card-top">
+        <div>
+          <div class="node-name">${n.name}</div>
+          <div class="node-ip">${n.ip} — ${n.arch}</div>
+        </div>
+        <div class="status-pill ${statusClass}">${statusLabel}</div>
+      </div>
+      <div class="node-desc">${n.desc}</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">Role</div>
+          <div class="detail-value">${n.role}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Model</div>
+          <div class="detail-value">${n.model}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">CPU</div>
+          <div class="detail-value">${n.cpu}%</div>
+          <div class="progress-track"><div class="progress-fill ${cpuClass}" style="width:${n.cpu}%"></div></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Memory</div>
+          <div class="detail-value">${n.mem}%</div>
+          <div class="progress-track"><div class="progress-fill ${memClass}" style="width:${n.mem}%"></div></div>
+        </div>
+      </div>
+      <div class="service-tags">
+        ${n.services.map(s => `<span class="service-tag">${s}</span>`).join('')}
+      </div>
+    </div>
+  `
+  nodeGrid.appendChild(card)
+})
+
+domains.forEach(d => {
+  const card = document.createElement('div')
+  card.className = 'domain-card'
+  card.innerHTML = `
+    <div class="domain-name">${d.name}</div>
+    <div class="domain-status">${d.status}</div>
+  `
+  domainGrid.appendChild(card)
+})
+</script>
+</body>
+</html>

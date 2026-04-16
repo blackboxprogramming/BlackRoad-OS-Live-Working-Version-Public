@@ -1,0 +1,100 @@
+#!/bin/bash
+# br-workers — Show all running processes as BlackRoad OS workers
+W='\033[1;37m'; D='\033[0;90m'; G='\033[0;32m'; R='\033[0;31m'; Y='\033[0;33m'; C='\033[0;36m'; M='\033[0;35m'; N='\033[0m'
+
+printf "\n  ${W}BLACKROAD OS${N}  ${D}WORKERS${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n\n"
+
+ps -eo pid,rss,args | awk '$2>5120' | sort -k2 -rn | while read pid rss args; do
+  mem=$((rss / 1024))
+
+  # Extract process name from full path
+  proc=$(echo "$args" | awk '{print $1}')
+  base=$(basename "$proc")
+
+  # Map to BlackRoad worker name + division
+  case "$base" in
+    claude)                 name="road-intelligence";    div="core";     c="$W" ;;
+    Terminal)               name="road-terminal";        div="core";     c="$W" ;;
+    firefox|Firefox*)       name="road-browser";         div="core";     c="$W" ;;
+    node)                   name="road-runtime";         div="eng";      c="$C" ;;
+    npm)                    name="road-packages";        div="eng";      c="$C" ;;
+    python*|Python*)        name="road-compute";         div="eng";      c="$C" ;;
+    git)                    name="road-vcs";             div="eng";      c="$C" ;;
+    esbuild)                name="road-bundler";         div="eng";      c="$C" ;;
+    workerd)                name="road-edge-runtime";    div="eng";      c="$C" ;;
+    wrangler)               name="road-deploy";          div="ops";      c="$G" ;;
+    ssh|ssh-agent)          name="road-tunnel";          div="ops";      c="$G" ;;
+    rsync)                  name="road-sync";            div="ops";      c="$G" ;;
+    rclone)                 name="road-cloud-sync";      div="ops";      c="$G" ;;
+    cloudflared)            name="road-edge-tunnel";     div="ops";      c="$G" ;;
+    ollama)                 name="road-inference";       div="ai";       c="$Y" ;;
+    tailscaled|io.tailscale*) name="road-mesh";          div="net";      c="$C" ;;
+    WindowServer)           name="road-compositor";      div="infra";    c="$D" ;;
+    Finder)                 name="road-files";           div="infra";    c="$D" ;;
+    Dock)                   name="road-dock";            div="infra";    c="$D" ;;
+    WindowManager)          name="road-windows";         div="infra";    c="$D" ;;
+    ControlCenter)          name="road-control";         div="infra";    c="$D" ;;
+    NotificationCenter)     name="road-notify";          div="infra";    c="$D" ;;
+    SystemUIServer)         name="road-ui-server";       div="infra";    c="$D" ;;
+    fileproviderd)          name="road-cloud-fs";        div="infra";    c="$D" ;;
+    DesktopServicesHelper)  name="road-volume-scan";     div="infra";    c="$D" ;;
+    mds_stores)             name="road-spotlight-db";    div="search";   c="$M" ;;
+    mdworker_shared)        name="road-spotlight-idx";   div="search";   c="$M" ;;
+    corespotlightd)         name="road-spotlight";       div="search";   c="$M" ;;
+    mds)                    name="road-metadata";        div="search";   c="$M" ;;
+    mdbulkimport)           name="road-bulk-index";      div="search";   c="$M" ;;
+    trustd)                 name="road-trust";           div="sec";      c="$R" ;;
+    secd)                   name="road-keychain";        div="sec";      c="$R" ;;
+    coreauthd|coreautha)    name="road-auth";            div="sec";      c="$R" ;;
+    syspolicyd)             name="road-gatekeeper";      div="sec";      c="$R" ;;
+    tccd)                   name="road-permissions";     div="sec";      c="$R" ;;
+    XprotectService)        name="road-xprotect";        div="sec";      c="$R" ;;
+    loginwindow)            name="road-session";         div="sec";      c="$R" ;;
+    logd)                   name="road-logger";          div="ops";      c="$G" ;;
+    deleted)                name="road-cache-clean";     div="ops";      c="$G" ;;
+    chronod)                name="road-chrono";          div="ops";      c="$G" ;;
+    launchd)                name="road-init";            div="infra";    c="$D" ;;
+    plugin-container)       name="road-browser-tab";     div="core";     c="$W" ;;
+    gpu-helper|*GPU*)       name="road-gpu";             div="core";     c="$W" ;;
+    AppleSpell)             name="road-spellcheck";      div="sys";      c="$D" ;;
+    AMPLibraryAgent)        name="road-music-lib";       div="media";    c="$M" ;;
+    Music)                  name="road-music";           div="media";    c="$M" ;;
+    Safari)                 name="road-safari";          div="core";     c="$W" ;;
+    Messages)               name="road-messages";        div="comms";    c="$C" ;;
+    Mail)                   name="road-mail";            div="comms";    c="$C" ;;
+    Notes)                  name="road-notes";           div="core";     c="$W" ;;
+    PM2)                    name="road-process-mgr";     div="ops";      c="$G" ;;
+    caffeinate)             name="road-awake";           div="ops";      c="$G" ;;
+    bird)                   name="road-icloud-sync";     div="infra";    c="$D" ;;
+    cloudd)                 name="road-cloudkit";        div="infra";    c="$D" ;;
+    airportd)               name="road-wifi";            div="net";      c="$C" ;;
+    bluetoothd)             name="road-bluetooth";       div="net";      c="$C" ;;
+    CommCenter)             name="road-cell";            div="net";      c="$C" ;;
+    mDNSResponder)          name="road-mdns";            div="net";      c="$C" ;;
+    nsurlsessiond)          name="road-http-session";    div="net";      c="$C" ;;
+    PerfPowerServices)      name="road-power";           div="infra";    c="$D" ;;
+    locationd)              name="road-location";        div="infra";    c="$D" ;;
+    assistantd|assistant_service) name="road-siri";      div="ai";       c="$Y" ;;
+    siriactionsd)           name="road-siri-actions";    div="ai";       c="$Y" ;;
+    siriknowledged)         name="road-siri-knowledge";  div="ai";       c="$Y" ;;
+    WeatherWidget)          name="road-weather";         div="sys";      c="$D" ;;
+    StocksWidget)           name="road-stocks";          div="sys";      c="$D" ;;
+    *)
+      clean=$(echo "$base" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | cut -c1-25)
+      name="road-${clean}"
+      div="sys"
+      c="$D"
+      ;;
+  esac
+
+  printf "  ${c}%-10s${N} %-30s ${W}%4d${N}MB  ${D}pid:%-6d${N}\n" "[$div]" "$name" "$mem" "$pid"
+done
+
+echo ""
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+total=$(ps -eo rss | awk '$1>5120 {c++} END {print c}')
+mem=$(ps -eo rss | awk '{s+=$1} END {printf "%d", s/1024}')
+free=$(vm_stat | awk '/Pages free/{gsub(/\./,"",$NF); printf "%d", $NF*16/1024}')
+printf "  ${W}%d workers${N} | ${W}%dMB${N} used | ${G}%dMB${N} free | 8192MB total\n" "$total" "$mem" "$free"
+printf "  ${D}Pave Tomorrow.${N}\n\n"

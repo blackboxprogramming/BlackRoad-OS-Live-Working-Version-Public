@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings — BlackRoad Template</title>
+<meta name="description" content="BlackRoad OS — Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button{font-family:var(--sg);cursor:pointer}
+input,textarea,select{font-family:var(--sg)}
+html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+img,svg{image-rendering:crisp-edges}
+
+
+.grad-bar{height:3px;background:var(--g)}
+
+/* LAYOUT */
+.settings-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.settings-sidebar{border-right:1px solid var(--border);padding:32px 16px}
+.settings-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px;padding:0 12px;margin-bottom:32px}
+.settings-logo-mark{width:24px;height:3px;border-radius:2px;background:var(--g)}
+
+.settings-nav{list-style:none}
+.settings-nav li{margin-bottom:2px}
+.settings-nav a{display:block;padding:8px 12px;border-radius:6px;font-size:13px;font-weight:500;color:var(--white);opacity:.4;text-decoration:none;transition:all .15s}
+.settings-nav a:hover{opacity:.7}
+.settings-nav a.active{opacity:1;border:1px solid var(--border)}
+.settings-nav-sep{height:1px;background:var(--border);margin:16px 12px}
+
+.settings-main{padding:48px}
+.settings-main h1{font-size:24px;font-weight:700;color:var(--white);margin-bottom:8px}
+.settings-main .lead{font-size:14px;color:var(--white);opacity:.4;margin-bottom:40px}
+
+/* SECTIONS */
+.settings-section{margin-bottom:48px}
+.settings-section-title{font-size:16px;font-weight:600;color:var(--white);margin-bottom:4px}
+.settings-section-desc{font-size:12px;color:var(--white);opacity:.3;margin-bottom:20px}
+.settings-section-divider{height:1px;background:var(--border);margin-bottom:20px}
+
+/* FORM ELEMENTS */
+.s-form-group{margin-bottom:20px}
+.s-form-label{display:block;font-size:12px;font-weight:600;color:var(--white);opacity:.5;margin-bottom:6px}
+.s-form-input{width:100%;max-width:400px;padding:10px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-family:var(--sg);outline:none;transition:border-color .2s}
+.s-form-input:focus{border-color:#333}
+.s-form-hint{font-size:11px;color:var(--white);opacity:.25;margin-top:4px}
+
+/* TOGGLE ROW */
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border)}
+.toggle-row:first-child{border-top:1px solid var(--border)}
+.toggle-info h4{font-size:13px;font-weight:500;color:var(--white)}
+.toggle-info p{font-size:12px;color:var(--white);opacity:.3;margin-top:2px}
+.toggle{position:relative;width:40px;height:22px;display:inline-block;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:transparent;border:1px solid var(--border);border-radius:11px;transition:.2s;cursor:pointer}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:var(--white);opacity:.3;border-radius:50%;transition:.2s}
+.toggle input:checked+.toggle-slider{border-color:#444}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px);opacity:1}
+
+/* BUTTONS */
+.btn-save{padding:10px 24px;border:none;border-radius:6px;background:var(--white);color:var(--black);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg)}
+.btn-outline-sm{padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--white);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sg);transition:border-color .2s}
+.btn-outline-sm:hover{border-color:#333}
+.btn-danger{padding:10px 24px;border:1px solid var(--white);border-radius:6px;background:transparent;color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sg);opacity:.6}
+
+.btn-row{display:flex;gap:10px;margin-top:24px}
+
+/* DANGER ZONE */
+.danger-zone{border:1px solid var(--white);border-radius:10px;padding:24px;opacity:.5}
+.danger-zone h3{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.danger-zone p{font-size:12px;color:var(--white);opacity:.4;margin-bottom:16px}
+
+@media(max-width:768px){.settings-layout{grid-template-columns:1fr}.settings-sidebar{display:none}.settings-main{padding:24px 20px}}
+
+/* ═══ RESPONSIVE — fit to screen ═══ */
+@media(max-max-width:1024px;width:100%){
+  .metrics-strip{grid-template-columns:repeat(3,1fr)}
+  .org-grid,.grid-4,.tier-grid,.cap-grid,.stat-grid,.shield-grid,.surface-grid,.stats-row{grid-template-columns:repeat(2,1fr)}
+  .node-grid{grid-template-columns:repeat(3,1fr)}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  nav{padding:14px 20px;flex-wrap:wrap;gap:12px}
+  .nav-links{display:none}
+  .hero{padding:80px 20px 60px}
+  .hero h1{font-size:36px}
+  .hero-cta{flex-direction:column;align-items:center}
+  .section,.section-wide{padding:48px 20px}
+  .metrics-strip{grid-template-columns:repeat(2,1fr)}
+  .product-featured{grid-template-columns:1fr}
+  .product-grid,.features-grid,.focus-grid,.gallery,.team-grid,.pricing,.cap-grid,.tier-grid,.shield-grid{grid-template-columns:1fr}
+  .org-grid,.grid-4,.stat-grid,.stats-row,.surface-grid{grid-template-columns:1fr}
+  .node-grid{grid-template-columns:1fr 1fr}
+  .cloud-grid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:12px;text-align:center}
+  .topnav{padding:10px 16px}
+  .topnav-links{gap:8px;flex-wrap:wrap}
+  .topnav-links a{font-size:11px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<meta name="keywords" content="BlackRoad OS, edge AI, sovereign computing, Raspberry Pi, AI agents">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad OS — Pave Tomorrow">
+<meta property="og:description" content="Sovereign edge AI operating system. 2,700+ repositories, 499 Workers, 27 agents, 5 Pi nodes. Built on hardware you own.">
+<meta property="og:url" content="https://blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad OS — Pave Tomorrow">
+<meta name="twitter:description" content="Sovereign edge AI operating system. 2,700+ repositories, 499 Workers, 27 agents, 5 Pi nodes. Built on hardware you own.">
+<meta name="twitter:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://blackroad.io">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad OS — Pave Tomorrow",
+  "description": "Sovereign edge AI operating system. 2,700+ repositories, 499 Workers, 27 agents, 5 Pi nodes. Built on hardware you own.",
+  "url": "https://blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS",
+  "author": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io",
+    "founder": {
+      "@type": "Person",
+      "name": "Alexa Louise Amundson"
+    }
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5.00",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+<link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png">
+<link rel="apple-touch-icon" href="https://images.blackroad.io/brand/apple-touch-icon.png">
+</head>
+<body>
+<div class="grad-bar"></div>
+<div class="settings-layout">
+  <aside class="settings-sidebar">
+    <div class="settings-logo"><div class="settings-logo-mark"></div> Settings</div>
+    <ul class="settings-nav">
+      <li><a href="#" class="active">General</a></li>
+      <li><a href="#">Profile</a></li>
+      <li><a href="#">Security</a></li>
+      <li><a href="#">Notifications</a></li>
+      <li><div class="settings-nav-sep"></div></li>
+      <li><a href="#">Nodes</a></li>
+      <li><a href="#">Network</a></li>
+      <li><a href="#">API Keys</a></li>
+      <li><div class="settings-nav-sep"></div></li>
+      <li><a href="#">Billing</a></li>
+      <li><a href="#">Team</a></li>
+    </ul>
+  </aside>
+
+  <main class="settings-main">
+    <h1>General Settings</h1>
+    <p class="lead">Manage your account preferences and configuration.</p>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Profile</div>
+      <div class="settings-section-desc">Your public identity and contact information.</div>
+      <div class="settings-section-divider"></div>
+      <div class="s-form-group">
+        <label class="s-form-label">Display Name</label>
+        <input class="s-form-input" type="text" value="Alexa">
+      </div>
+      <div class="s-form-group">
+        <label class="s-form-label">Email</label>
+        <input class="s-form-input" type="email" value="amundsonalexa@gmail.com">
+        <div class="s-form-hint">Used for notifications and account recovery.</div>
+      </div>
+      <div class="s-form-group">
+        <label class="s-form-label">Username</label>
+        <input class="s-form-input" type="text" value="blackroad">
+      </div>
+      <div class="btn-row">
+        <button class="btn-save">Save Changes</button>
+        <button class="btn-outline-sm">Cancel</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Preferences</div>
+      <div class="settings-section-desc">Customize your experience.</div>
+      <div class="settings-section-divider"></div>
+      <div class="toggle-row">
+        <div class="toggle-info"><h4>Dark mode</h4><p>Use dark theme across all pages</p></div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info"><h4>Email notifications</h4><p>Receive alerts for node status changes</p></div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info"><h4>Auto-healing</h4><p>Automatically restart failed services</p></div>
+        <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info"><h4>Usage analytics</h4><p>Share anonymous usage data to improve the platform</p></div>
+        <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Danger Zone</div>
+      <div class="settings-section-desc">Irreversible and destructive actions.</div>
+      <div class="settings-section-divider"></div>
+      <div class="danger-zone">
+        <h3>Delete Account</h3>
+        <p>Once you delete your account, there is no going back. All data will be permanently removed.</p>
+        <button class="btn-danger">Delete Account</button>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="https://blackboard.amundsonalexa.workers.dev/bb.js"></script>
+<!-- BlackRoad Ecosystem Bar -->
+<div style="position:fixed;bottom:0;left:0;right:0;z-index:999;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:8px 0;overflow-x:auto">
+<div style="display:flex;gap:16px;justify-content:center;align-items:center;padding:0 20px;white-space:nowrap">
+<a href="https://blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Home</a>
+<a href="https://portal.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Portal</a>
+<a href="https://search.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Search</a>
+<a href="https://chat.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Chat</a>
+<a href="https://auth.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Auth</a>
+<a href="https://pay.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Pay</a>
+<a href="https://images.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Images</a>
+<a href="https://brand.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Brand</a>
+<a href="https://status.blackroad.io" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">Status</a>
+<a href="https://github.com/BlackRoad-OS-Inc" style="font-family:'JetBrains Mono',monospace;font-size:0.6rem;color:#555;text-decoration:none;transition:color 0.2s">GitHub</a>
+</div>
+</div>
+<div style="height:36px"></div>
+<script>
+// BlackRoad Live Stats
+(function(){
+  const API='https://stats-blackroad.amundsonalexa.workers.dev';
+  async function load(){
+    try{
+      const r=await fetch(API+'/ecosystem');
+      const d=(await r.json())?.data||{};
+      document.querySelectorAll('[data-stat]').forEach(el=>{
+        const v=d[el.dataset.stat];
+        if(v!==undefined)el.textContent=typeof v==='number'?v.toLocaleString():v;
+      });
+    }catch(e){}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);
+  else load();
+  setInterval(load,60000);
+})();
+</script>
+</body>
+</html>

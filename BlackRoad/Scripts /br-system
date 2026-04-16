@@ -1,0 +1,102 @@
+#!/bin/bash
+# br-system — Complete BlackRoad OS system view
+# Shows: local workers + cloud workers + fleet + databases + sessions
+W='\033[1;37m'; D='\033[0;90m'; G='\033[0;32m'; R='\033[0;31m'; Y='\033[0;33m'; C='\033[0;36m'; M='\033[0;35m'; N='\033[0m'
+
+printf "\n  ${W}BLACKROAD OS${N}  ${D}SYSTEM${N}\n"
+printf "  ${D}════════════════════════════════════════════════${N}\n"
+
+# === LOCAL WORKERS ===
+local_count=$(ps -eo rss | awk '$1>5120 {c++} END {print c}')
+local_mem=$(ps -eo rss | awk '{s+=$1} END {printf "%d", s/1024}')
+free_mem=$(vm_stat | awk '/Pages free/{gsub(/\./,"",$NF); printf "%d", $NF*16/1024}')
+printf "\n  ${W}LOCAL WORKERS${N}  ${D}(this Mac)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+printf "  %-20s ${W}%d${N} processes | ${W}%dMB${N} used | ${G}%dMB${N} free\n" "Alexandria (Mac)" "$local_count" "$local_mem" "$free_mem"
+
+# Top 5 by memory
+ps -eo rss,args | sort -k1 -rn | head -5 | while read rss args; do
+  mem=$((rss / 1024))
+  base=$(basename "$(echo "$args" | awk '{print $1}')")
+  case "$base" in
+    claude) name="road-intelligence" ;;
+    Terminal) name="road-terminal" ;;
+    firefox) name="road-browser" ;;
+    node) name="road-runtime" ;;
+    WindowServer) name="road-compositor" ;;
+    Finder) name="road-files" ;;
+    *) name="road-$(echo "$base" | tr '[:upper:]' '[:lower:]' | tr ' .' '-' | cut -c1-20)" ;;
+  esac
+  printf "    ${D}*${N} %-28s %4dMB\n" "$name" "$mem"
+done
+
+# === CLOUD WORKERS ===
+printf "\n  ${W}CLOUD WORKERS${N}  ${D}(Cloudflare edge)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+printf "  %-12s %3d  %-12s %3d  %-12s %3d\n" "product" 30 "agent" 30 "domain" 14
+printf "  %-12s %3d  %-12s %3d  %-12s %3d\n" "ai" 13 "fleet" 13 "integration" 14
+printf "  %-12s %3d  %-12s %3d  %-12s %3d\n" "analytics" 10 "pipeline" 10 "auth" 9
+printf "  %-12s %3d  %-12s %3d  %-12s %3d\n" "billing" 9 "monitor" 9 "notify" 8
+printf "  %-12s %3d  %-12s %3d  %-12s %3d\n" "user" 8 "blockchain" 6 "lucidia" 6
+printf "  ${D}Total: ~496 workers on Cloudflare edge${N}\n"
+
+# === FLEET NODES ===
+printf "\n  ${W}FLEET NODES${N}  ${D}(Pi + cloud)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+for node in alice:192.168.4.49 cecilia:192.168.4.96 lucidia:192.168.4.38 gematria:159.65.43.12 anastasia:174.138.44.45 octavia:192.168.4.101 aria:192.168.4.98; do
+  IFS=: read -r name ip <<< "$node"
+  if ssh -o ConnectTimeout=2 "$name" "echo ok" 2>/dev/null | grep -q ok; then
+    printf "  ${G}*${N} %-12s %-16s UP\n" "$name" "$ip"
+  else
+    printf "  ${R}!${N} %-12s %-16s ${R}DOWN${N}\n" "$name" "$ip"
+  fi
+done
+
+# === D1 DATABASES ===
+printf "\n  ${W}D1 DATABASES${N}  ${D}(Cloudflare D1)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+printf "  53 databases: product(19) auth(2) infra(18) analytics(5) search(3) special(6)\n"
+
+# === ACTIVE SESSIONS ===
+printf "\n  ${W}ACTIVE SESSIONS${N}  ${D}(tokens + connections)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+
+# Check local tokens/sessions
+[ -f ~/.wrangler/config/default.toml ] && printf "  ${G}*${N} Cloudflare    wrangler OAuth\n" || printf "  ${R}!${N} Cloudflare    not authenticated\n"
+git credential-osxkeychain 2>/dev/null && printf "  ${G}*${N} GitHub        keychain (blackboxprogramming)\n" 2>/dev/null || printf "  ${G}*${N} GitHub        keychain\n"
+[ -f ~/.cache/huggingface/token ] && printf "  ${G}*${N} HuggingFace   token (blackroadio)\n" || printf "  ${R}!${N} HuggingFace   no token\n"
+[ -f ~/.ssh/id_ed25519 ] && printf "  ${G}*${N} SSH           ed25519 key\n"
+pgrep -f cloudflared > /dev/null && printf "  ${G}*${N} CF Tunnel     running (Alice)\n" || printf "  ${D}-${N} CF Tunnel     not running locally\n"
+pgrep -f tailscale > /dev/null && printf "  ${G}*${N} Tailscale     mesh active\n" || printf "  ${D}-${N} Tailscale     not running\n"
+
+# CF Worker secrets
+printf "\n  ${D}Worker Secrets:${N}\n"
+printf "    auth-blackroad:    JWT_SECRET, CLERK_*, GITHUB_*, STRIPE_WEBHOOK\n"
+printf "    chat-blackroad:    HF_TOKEN, STRIPE_SECRET, CLERK_*, GITHUB_*\n"
+printf "    tutor-blackroad:   STRIPE_*, HF_TOKEN, CLERK_*, GITHUB_*\n"
+printf "    analytics:         ANALYTICS_KEY, CF_ACCOUNT_ID\n"
+
+# === COOKIES / LOCAL STORAGE ===
+printf "\n  ${W}BROWSER STATE${N}  ${D}(cookies + localStorage)${N}\n"
+printf "  ${D}────────────────────────────────────────────────${N}\n"
+
+# Check Firefox profile for BlackRoad cookies
+PROFILE=$(find ~/Library/Application\ Support/Firefox/Profiles -name "*.default-release*" -maxdepth 1 2>/dev/null | head -1)
+if [ -n "$PROFILE" ] && [ -f "$PROFILE/cookies.sqlite" ]; then
+  br_cookies=$(sqlite3 "$PROFILE/cookies.sqlite" "SELECT COUNT(*) FROM moz_cookies WHERE baseDomain LIKE '%blackroad%'" 2>/dev/null || echo "?")
+  all_cookies=$(sqlite3 "$PROFILE/cookies.sqlite" "SELECT COUNT(*) FROM moz_cookies" 2>/dev/null || echo "?")
+  printf "  Firefox cookies: ${W}%s${N} BlackRoad / %s total\n" "$br_cookies" "$all_cookies"
+
+  # Show BlackRoad cookie domains
+  sqlite3 "$PROFILE/cookies.sqlite" "SELECT DISTINCT baseDomain FROM moz_cookies WHERE baseDomain LIKE '%blackroad%' ORDER BY baseDomain" 2>/dev/null | while read dom; do
+    count=$(sqlite3 "$PROFILE/cookies.sqlite" "SELECT COUNT(*) FROM moz_cookies WHERE baseDomain='$dom'" 2>/dev/null)
+    printf "    ${D}*${N} %-30s %s cookies\n" "$dom" "$count"
+  done
+else
+  printf "  ${D}Firefox profile not found${N}\n"
+fi
+
+# Summary line
+printf "\n  ${D}════════════════════════════════════════════════${N}\n"
+printf "  ${W}BlackRoad OS${N}  %d local + ~496 cloud + 7 fleet + 53 D1\n" "$local_count"
+printf "  ${D}Pave Tomorrow.${N}\n\n"

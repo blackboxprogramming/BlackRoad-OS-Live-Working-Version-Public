@@ -1,0 +1,214 @@
+#!/bin/bash
+# br-migrate-to-pi — Move heavy workloads off Mac onto Pi + SSD
+# Run from Mac. SSD should be plugged into target Pi.
+#
+# Usage:
+#   br-migrate-to-pi setup <pi-host>    — first time: partition SSD, create dirs
+#   br-migrate-to-pi sync <pi-host>     — sync data from Mac to Pi SSD
+#   br-migrate-to-pi status <pi-host>   — check what's on the Pi
+#   br-migrate-to-pi slim               — clean Mac after migration
+
+set -euo pipefail
+
+W='\033[1;37m'; D='\033[0;90m'; R='\033[0;31m'; G='\033[0;32m'; N='\033[0m'
+SSD_MOUNT="/mnt/ssd"
+BR_ROOT="$SSD_MOUNT/blackroad"
+
+header() {
+  echo ""
+  printf "  ${W}BLACKROAD OS${N}  ${D}migrate-to-pi${N}\n"
+  printf "  ${D}────────────────────────────────────────────────${N}\n"
+  echo ""
+}
+
+cmd_setup() {
+  local PI="$1"
+  header
+  echo "  Setting up Pi: $PI"
+  echo "  SSD mount: $SSD_MOUNT"
+  echo ""
+
+  # Check SSH
+  ssh -o ConnectTimeout=5 "$PI" "echo connected" 2>/dev/null || { echo "  ${R}Cannot SSH to $PI${N}"; exit 1; }
+
+  # Create directory structure on SSD
+  ssh "$PI" "
+    # Check if SSD is mounted
+    if ! mountpoint -q $SSD_MOUNT 2>/dev/null; then
+      echo 'SSD not mounted at $SSD_MOUNT'
+      echo 'Looking for drives...'
+      lsblk -o NAME,SIZE,MOUNTPOINT 2>/dev/null || fdisk -l 2>/dev/null | grep 'Disk /dev/sd'
+      echo ''
+      echo 'Mount your SSD:'
+      echo '  sudo mkdir -p $SSD_MOUNT'
+      echo '  sudo mount /dev/sda1 $SSD_MOUNT  (or whatever device)'
+      echo '  # Add to /etc/fstab for auto-mount:'
+      echo '  # /dev/sda1 $SSD_MOUNT ext4 defaults,noatime 0 2'
+      exit 1
+    fi
+
+    echo 'SSD mounted. Creating BlackRoad directory structure...'
+    sudo mkdir -p $BR_ROOT/{data,models,sites,backups,takeout,vault,scrapers}
+    sudo mkdir -p $BR_ROOT/data/{d1-exports,traffic,registry,github}
+    sudo mkdir -p $BR_ROOT/models/ollama
+    sudo mkdir -p $BR_ROOT/sites/{static,workers}
+    sudo mkdir -p $BR_ROOT/backups/{mac,pi,d1}
+    sudo chown -R \$(whoami):\$(whoami) $BR_ROOT
+
+    echo 'Structure created:'
+    find $BR_ROOT -maxdepth 2 -type d | sed 's|$SSD_MOUNT/||'
+  "
+
+  echo ""
+  printf "  ${G}Setup complete.${N} Run: br-migrate-to-pi sync $PI\n"
+}
+
+cmd_sync() {
+  local PI="$1"
+  header
+  echo "  Syncing to Pi: $PI"
+  echo ""
+
+  # 1. VirtualComputer Vault + scrapers
+  echo "  [1/6] Vault + scrapers..."
+  rsync -az --delete \
+    "/Applications/untitled folder/VirtualComputer/Vault/" \
+    "$PI:$BR_ROOT/vault/" 2>/dev/null && printf "  ${G}✓${N} vault\n" || printf "  ${R}✗${N} vault\n"
+
+  # 2. Traffic/registry data exports
+  echo "  [2/6] Data exports..."
+  rsync -az \
+    ~/Desktop/BLACKROADOS/FileSystem/blackroad-traffic-exports/ \
+    "$PI:$BR_ROOT/data/traffic/" 2>/dev/null && printf "  ${G}✓${N} traffic\n" || printf "  ${R}✗${N} traffic\n"
+  rsync -az \
+    ~/Desktop/BLACKROADOS/FileSystem/blackroad-registry-exports/ \
+    "$PI:$BR_ROOT/data/registry/" 2>/dev/null && printf "  ${G}✓${N} registry\n" || printf "  ${R}✗${N} registry\n"
+
+  # 3. Static sites (for nginx serving)
+  echo "  [3/6] Static sites..."
+  rsync -az --exclude='node_modules' --exclude='.git' \
+    ~/blackroad-site/ \
+    "$PI:$BR_ROOT/sites/static/blackroad-site/" 2>/dev/null && printf "  ${G}✓${N} blackroad-site\n" || printf "  ${R}✗${N} blackroad-site\n"
+
+  # 4. Binder (the 4 chapters)
+  echo "  [4/6] Binder..."
+  rsync -az \
+    /Applications/BlackRoadDesktop/BlackRoadOS/sections/ \
+    "$PI:$BR_ROOT/data/binder/" 2>/dev/null && printf "  ${G}✓${N} binder\n" || printf "  ${R}✗${N} binder\n"
+
+  # 5. BR CLI commands
+  echo "  [5/6] BR CLI..."
+  rsync -az ~/bin/br-* ~/bin/blackroad-* \
+    "$PI:$BR_ROOT/bin/" 2>/dev/null && printf "  ${G}✓${N} br-cli (163 commands)\n" || printf "  ${R}✗${N} br-cli\n"
+
+  # 6. Google Takeout (if on SSD locally)
+  echo "  [6/6] Takeout..."
+  if [ -d "/Volumes/Extreme SSD/Google-Takeout" ]; then
+    rsync -az --progress \
+      "/Volumes/Extreme SSD/Google-Takeout/" \
+      "$PI:$BR_ROOT/takeout/" 2>/dev/null && printf "  ${G}✓${N} takeout\n" || printf "  ${R}✗${N} takeout\n"
+  else
+    printf "  ${D}— no takeout data to sync${N}\n"
+  fi
+
+  echo ""
+  printf "  ${G}Sync complete.${N}\n"
+  echo ""
+  echo "  SSD usage on $PI:"
+  ssh "$PI" "df -h $SSD_MOUNT | tail -1; echo; du -sh $BR_ROOT/*/ 2>/dev/null" 2>/dev/null
+}
+
+cmd_status() {
+  local PI="$1"
+  header
+  echo "  Pi: $PI"
+  echo ""
+
+  ssh "$PI" "
+    echo '  Hostname: '\$(hostname)
+    echo '  Uptime:  '\$(uptime -p 2>/dev/null || uptime | awk '{print \$3,\$4}')
+    echo '  Memory:  '\$(free -m 2>/dev/null | awk '/Mem:/{printf \"%dMB / %dMB\",\$3,\$2}')
+    echo '  CPU:     '\$(nproc 2>/dev/null)' cores'
+    echo ''
+
+    if mountpoint -q $SSD_MOUNT 2>/dev/null; then
+      echo '  SSD: mounted at $SSD_MOUNT'
+      df -h $SSD_MOUNT | tail -1 | awk '{printf \"  Disk: %s used / %s total (%s)\\n\",\$3,\$2,\$5}'
+      echo ''
+      echo '  Contents:'
+      du -sh $BR_ROOT/*/ 2>/dev/null | sed 's|$BR_ROOT/|    |'
+    else
+      echo '  SSD: NOT MOUNTED'
+    fi
+
+    echo ''
+    # Ollama
+    if command -v ollama &>/dev/null; then
+      models=\$(curl -s localhost:11434/api/tags 2>/dev/null | python3 -c 'import json,sys;print(len(json.load(sys.stdin).get(\"models\",[])))' 2>/dev/null || echo 0)
+      echo \"  Ollama: \$models models\"
+    fi
+
+    # Services
+    echo '  Services:'
+    for port in 80 3000 8080 8094 11434; do
+      if ss -tlnp 2>/dev/null | grep -q \":\$port \"; then
+        svc=\$(ss -tlnp 2>/dev/null | grep \":\$port \" | awk '{print \$NF}' | head -1)
+        echo \"    :\$port  \$svc\"
+      fi
+    done
+  " 2>/dev/null
+}
+
+cmd_slim() {
+  header
+  echo "  Slimming Mac — removing what's been migrated to Pi"
+  echo ""
+  echo "  These can be removed after confirming Pi has the data:"
+  echo ""
+
+  # Check what's safe to remove
+  items=(
+    "$HOME/.ollama:Ollama models (use Pi fleet instead)"
+    "/Applications/untitled folder/VirtualComputer/BlackRoad:VirtualComputer system mirror (139GB)"
+  )
+
+  total=0
+  for item in "${items[@]}"; do
+    IFS=: read -r path desc <<< "$item"
+    if [ -e "$path" ]; then
+      size=$(du -sh "$path" 2>/dev/null | awk '{print $1}')
+      printf "  ${W}%6s${N}  %s\n" "$size" "$desc"
+      printf "         ${D}%s${N}\n" "$path"
+    fi
+  done
+
+  echo ""
+  echo "  Also disable on Mac:"
+  echo "    - Local Ollama (fleet has 121 models)"
+  echo "    - rclone cron syncs (run from Pi instead)"
+  echo "    - Spotlight indexing of large dirs"
+  echo ""
+  echo "  Run these manually after verifying Pi has your data:"
+  echo "    brew services stop ollama"
+  echo "    sudo mdutil -i off /Applications"
+  echo "    # Remove rclone cron entries"
+}
+
+# Router
+case "${1:-help}" in
+  setup)  cmd_setup "${2:?Usage: br-migrate-to-pi setup <pi-host>}" ;;
+  sync)   cmd_sync "${2:?Usage: br-migrate-to-pi sync <pi-host>}" ;;
+  status) cmd_status "${2:?Usage: br-migrate-to-pi status <pi-host>}" ;;
+  slim)   cmd_slim ;;
+  *)
+    header
+    echo "  Usage:"
+    echo "    br-migrate-to-pi setup <pi-host>   — create SSD dirs on Pi"
+    echo "    br-migrate-to-pi sync <pi-host>    — sync data Mac → Pi"
+    echo "    br-migrate-to-pi status <pi-host>  — check Pi + SSD status"
+    echo "    br-migrate-to-pi slim              — clean Mac after migration"
+    echo ""
+    echo "  Pi hosts: alice, cecilia, octavia, lucidia"
+    echo "  Plug SSD into Pi first, then run setup."
+    ;;
+esac

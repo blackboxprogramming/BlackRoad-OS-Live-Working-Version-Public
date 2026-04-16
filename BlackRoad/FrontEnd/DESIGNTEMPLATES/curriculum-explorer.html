@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curriculum Explorer — BlackRoad OS</title>
+<meta name="description" content="Learning tracks, certifications, and advancement paths at BlackRoad University. Curriculum as workforce design.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+html{scroll-behavior:smooth;overflow-x:hidden;background:var(--bg)}
+body{background:#000;color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+button,input,select{font-family:var(--sg)}
+.grad-bar{height:3px;background:var(--g)}
+.container{max-width:1240px;width:100%;margin:0 auto;padding:0 24px}
+.nav-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-logo-bar{width:24px;height:4px;border-radius:2px;background:var(--g)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;background:var(--elevated);border:1px solid var(--border);color:var(--text)}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#00D4FF}
+.hero{padding:76px 0 40px;text-align:center}
+.eyebrow{font-family:var(--jb);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.hero h1{font-size:56px;line-height:1.02;letter-spacing:-.045em}
+.hero p{font-size:15px;color:var(--sub);max-width:620px;margin:18px auto 0}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:40px;max-width:900px;margin-left:auto;margin-right:auto}
+.stat-card,.card{background:rgba(10,10,10,.88);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-grad{height:3px;background:var(--g)}
+.stat-card{padding:18px;text-align:center}
+.stat-k{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.stat-v{font-size:28px;font-weight:700;color:var(--white);margin-top:6px}
+.stat-t{font-size:12px;color:var(--sub);margin-top:6px}
+.section{padding:22px 0 40px}
+.section-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:18px}
+.card-body{padding:20px}
+.track-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:28px}
+.track-card{padding:18px;background:var(--card);border:1px solid var(--border);border-radius:12px;transition:border-color .15s,transform .18s}
+.track-card:hover{border-color:#313131;transform:translateY(-2px)}
+.track-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.track-name{font-size:15px;font-weight:700;color:var(--white)}
+.track-school{font-family:var(--jb);font-size:10px;padding:4px 8px;border-radius:999px;background:var(--elevated);border:1px solid var(--border);color:var(--sub)}
+.track-desc{font-size:13px;color:var(--sub);line-height:1.6;margin-bottom:12px}
+.track-courses{display:flex;flex-wrap:wrap;gap:4px}
+.course-pill{font-family:var(--jb);font-size:9px;padding:3px 7px;border-radius:999px;background:#0e0e0e;border:1px solid var(--border);color:var(--muted)}
+.ladder-section{margin-top:32px}
+.ladder-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:14px;overflow:hidden}
+.ladder-step{padding:20px 16px;background:var(--card);text-align:center;position:relative}
+.ladder-step::after{content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:8px solid var(--border);z-index:1}
+.ladder-step:last-child::after{display:none}
+.ladder-level{font-family:var(--jb);font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ladder-title{font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px}
+.ladder-desc{font-size:11px;color:var(--sub);line-height:1.5}
+.cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.cert-card{padding:16px;background:var(--card);border:1px solid var(--border);border-radius:12px;text-align:center;transition:border-color .15s,transform .18s}
+.cert-card:hover{border-color:#313131;transform:translateY(-2px)}
+.cert-icon{width:40px;height:40px;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700}
+.cert-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.cert-desc{font-size:11px;color:var(--sub);line-height:1.5}
+.cert-type{font-family:var(--jb);font-size:9px;color:var(--muted);margin-top:8px;text-transform:uppercase;letter-spacing:.08em}
+.assess-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+.assess-card{padding:14px;background:var(--elevated);border:1px solid var(--border);border-radius:10px}
+.assess-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:4px}
+.assess-desc{font-size:11px;color:var(--sub);line-height:1.5}
+.footer{padding:34px 0 48px;border-top:1px solid var(--border);margin-top:24px}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:1080px){.track-grid,.cert-grid,.assess-grid{grid-template-columns:1fr}.ladder-grid{grid-template-columns:1fr}.ladder-step::after{display:none}.stat-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.nav-links{display:none}.hero h1{font-size:40px}.stat-row{grid-template-columns:1fr}.container{padding:0 16px}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav class="nav-bar">
+  <div class="nav-logo"><div class="nav-logo-bar"></div>BlackRoad</div>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://tutor.blackroad.io">Roadie</a>
+    <a href="https://roadbook.blackroad.io">RoadBook</a>
+    <a href="https://roadwork.blackroad.io">RoadWork</a>
+  </div>
+  <div class="badge"><span class="badge-dot"></span>Curriculum</div>
+</nav>
+
+<div class="container hero">
+  <div class="eyebrow">Binder Sections 701-800</div>
+  <h1>Curriculum Explorer</h1>
+  <p>Learning tracks, certifications, and advancement paths. Curriculum as workforce design — every track leads to a role, every role maps to a product.</p>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-k">Tracks</div><div class="stat-v">60+</div><div class="stat-t">Foundational + division-specific learning paths.</div></div>
+    <div class="stat-card"><div class="stat-k">Certifications</div><div class="stat-v">9</div><div class="stat-t">Internal, division, product, role, and mastery credentials.</div></div>
+    <div class="stat-card"><div class="stat-k">Levels</div><div class="stat-v">9</div><div class="stat-t">Apprentice through Chancellor.</div></div>
+    <div class="stat-card"><div class="stat-k">Assessments</div><div class="stat-v">9</div><div class="stat-t">Skills, knowledge, performance, leadership, research, mastery.</div></div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Foundational Tracks (Required)</div>
+  <div class="track-grid">
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">BlackRoad Orientation</div><div class="track-school">Core</div></div>
+      <div class="track-desc">The first track for everyone. Company history, mission, values, how the university model works, and the BlackRoad metaphor.</div>
+      <div class="track-courses"><span class="course-pill">Corp Identity</span><span class="course-pill">University Model</span><span class="course-pill">Product Literacy</span><span class="course-pill">Agent Literacy</span></div>
+    </div>
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">Brand & Narrative</div><div class="track-school">Core</div></div>
+      <div class="track-desc">How BlackRoad speaks, writes, and presents itself. Voice guidelines, canonical phrases, the Roadies as characters, visual identity.</div>
+      <div class="track-courses"><span class="course-pill">Brand Voice</span><span class="course-pill">Naming Rules</span><span class="course-pill">Visual Identity</span><span class="course-pill">Story System</span></div>
+    </div>
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">Security & Trust</div><div class="track-school">Core</div></div>
+      <div class="track-desc">Sovereignty principles, data ownership, audit practices, identity management, and why trust is infrastructure.</div>
+      <div class="track-courses"><span class="course-pill">Sovereignty</span><span class="course-pill">Data Privacy</span><span class="course-pill">Auth Systems</span><span class="course-pill">Audit Logs</span></div>
+    </div>
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">Systems Thinking</div><div class="track-school">Core</div></div>
+      <div class="track-desc">How BlackRoad's parts connect. Products as schools, agents as faculty, the mesh network metaphor, institutional continuity.</div>
+      <div class="track-courses"><span class="course-pill">Org Structure</span><span class="course-pill">Division Map</span><span class="course-pill">Product Map</span><span class="course-pill">Agent Map</span></div>
+    </div>
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">Communication</div><div class="track-school">Core</div></div>
+      <div class="track-desc">Writing, speaking, and collaborating across the institution. Cross-agent coordination, handoffs, documentation standards.</div>
+      <div class="track-courses"><span class="course-pill">Writing</span><span class="course-pill">Collaboration</span><span class="course-pill">Documentation</span><span class="course-pill">Handoffs</span></div>
+    </div>
+    <div class="track-card">
+      <div class="track-header"><div class="track-name">Execution Discipline</div><div class="track-school">Core</div></div>
+      <div class="track-desc">How work gets done. Task claiming, progress logging, memory updates, quality gates, and shipping standards.</div>
+      <div class="track-courses"><span class="course-pill">Task System</span><span class="course-pill">Quality Gates</span><span class="course-pill">Memory Logs</span><span class="course-pill">Ship Cadence</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">Division Learning Tracks</div>
+  <div class="track-grid">
+    <div class="track-card"><div class="track-header"><div class="track-name">Platform Engineering</div><div class="track-school">Engineering</div></div><div class="track-desc">Build and maintain the core platform. Worker architecture, edge computing, deployment pipelines, performance.</div><div class="track-courses"><span class="course-pill">Platform Eng</span><span class="course-pill">Backend</span><span class="course-pill">Frontend</span><span class="course-pill">Data & Analytics</span><span class="course-pill">Security</span><span class="course-pill">AI Systems</span><span class="course-pill">Infra & Cloud</span><span class="course-pill">Performance</span><span class="course-pill">Dev Tools</span></div></div>
+    <div class="track-card"><div class="track-header"><div class="track-name">Design & Creative</div><div class="track-school">Design</div></div><div class="track-desc">Shape the experience. UX flows, visual systems, motion design, brand, writing, audio, worldbuilding, creative direction.</div><div class="track-courses"><span class="course-pill">UX & Interaction</span><span class="course-pill">Visual Design</span><span class="course-pill">Motion</span><span class="course-pill">Brand Systems</span><span class="course-pill">Writing</span><span class="course-pill">Audio & Voice</span><span class="course-pill">Worldbuilding</span><span class="course-pill">Creator Systems</span></div></div>
+    <div class="track-card"><div class="track-header"><div class="track-name">Education & Human Dev</div><div class="track-school">Education</div></div><div class="track-desc">Teach, guide, and develop. Tutoring methods, curriculum design, learning experience, accessibility, coaching.</div><div class="track-courses"><span class="course-pill">Tutoring</span><span class="course-pill">Curriculum Design</span><span class="course-pill">Learning XP</span><span class="course-pill">Youth Dev</span><span class="course-pill">Family Systems</span><span class="course-pill">Accessibility</span><span class="course-pill">Coaching</span><span class="course-pill">Ed Research</span></div></div>
+    <div class="track-card"><div class="track-header"><div class="track-name">Business & Operations</div><div class="track-school">Business</div></div><div class="track-desc">Run the institution. Product strategy, business ops, finance, legal, community, revenue, governance, sustainability.</div><div class="track-courses"><span class="course-pill">Product Strategy</span><span class="course-pill">Biz Ops</span><span class="course-pill">Finance</span><span class="course-pill">Legal</span><span class="course-pill">Community</span><span class="course-pill">Revenue</span><span class="course-pill">Governance</span><span class="course-pill">Sustainability</span></div></div>
+    <div class="track-card"><div class="track-header"><div class="track-name">Health & Human Services</div><div class="track-school">Health</div></div><div class="track-desc">Serve and support. Wellness systems, nutrition, care delivery, intake, clinical ops, community wellbeing.</div><div class="track-courses"><span class="course-pill">Wellness</span><span class="course-pill">Nutrition</span><span class="course-pill">Human Support</span><span class="course-pill">Care Delivery</span><span class="course-pill">Clinical Ops</span><span class="course-pill">Community Wellbeing</span></div></div>
+    <div class="track-card"><div class="track-header"><div class="track-name">Media & Communication</div><div class="track-school">Media</div></div><div class="track-desc">Tell the story. Communications, public narrative, campaigns, content strategy, journalism, social, localization.</div><div class="track-courses"><span class="course-pill">Communications</span><span class="course-pill">Public Narrative</span><span class="course-pill">Campaigns</span><span class="course-pill">Content Strategy</span><span class="course-pill">Journalism</span><span class="course-pill">Localization</span></div></div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Career Ladder</div>
+  <div class="card"><div class="card-grad"></div><div class="card-body">
+    <div class="ladder-grid">
+      <div class="ladder-step"><div class="ladder-level">Level 1</div><div class="ladder-title">Apprentice</div><div class="ladder-desc">Learning the fundamentals. Completing foundational tracks.</div></div>
+      <div class="ladder-step"><div class="ladder-level">Level 2</div><div class="ladder-title">Fellow</div><div class="ladder-desc">Contributing under guidance. Division-specific learning.</div></div>
+      <div class="ladder-step"><div class="ladder-level">Level 3-4</div><div class="ladder-title">Builder</div><div class="ladder-desc">Independent contributor. Shipping product features.</div></div>
+      <div class="ladder-step"><div class="ladder-level">Level 5-6</div><div class="ladder-title">Architect / Lead</div><div class="ladder-desc">System design. Mentoring. Cross-team impact.</div></div>
+      <div class="ladder-step"><div class="ladder-level">Level 7-9</div><div class="ladder-title">Director / Dean / Chancellor</div><div class="ladder-desc">Division/school leadership. Institutional strategy.</div></div>
+    </div>
+  </div></div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Certifications</div>
+  <div class="cert-grid">
+    <div class="cert-card"><div class="cert-icon" style="background:#FF6B2B15;border:1px solid #FF6B2B40;color:#FF6B2B">I</div><div class="cert-name">Internal Certificate</div><div class="cert-desc">Foundational competency across BlackRoad orientation, brand, and systems.</div><div class="cert-type">Foundation</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#4488FF15;border:1px solid #4488FF40;color:#4488FF">D</div><div class="cert-name">Division Certificate</div><div class="cert-desc">Competency within a specific division's learning tracks.</div><div class="cert-type">Division</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#CC00AA15;border:1px solid #CC00AA40;color:#CC00AA">P</div><div class="cert-name">Product Certificate</div><div class="cert-desc">Deep knowledge of a specific product's architecture and purpose.</div><div class="cert-type">Product</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#8844FF15;border:1px solid #8844FF40;color:#8844FF">R</div><div class="cert-name">Role Certificate</div><div class="cert-desc">Validated readiness for a specific role family and level.</div><div class="cert-type">Role</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#28c84015;border:1px solid #28c84040;color:#28c840">S</div><div class="cert-name">Skills Badge</div><div class="cert-desc">Micro-credential for a specific skill or tool proficiency.</div><div class="cert-type">Skill</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#00D4FF15;border:1px solid #00D4FF40;color:#00D4FF">A</div><div class="cert-name">Apprenticeship</div><div class="cert-desc">Structured learning path with mentorship and project milestones.</div><div class="cert-type">Program</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#f5a62315;border:1px solid #f5a62340;color:#f5a623">F</div><div class="cert-name">Fellowship</div><div class="cert-desc">Advanced program with research, cross-division exposure, and independent work.</div><div class="cert-type">Program</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#FF225515;border:1px solid #FF225540;color:#FF2255">M</div><div class="cert-name">Mastery Credential</div><div class="cert-desc">The highest credential. Demonstrates institutional-level expertise and judgment.</div><div class="cert-type">Mastery</div></div>
+    <div class="cert-card"><div class="cert-icon" style="background:#44444415;border:1px solid #44444440;color:#737373">R</div><div class="cert-name">Renewal</div><div class="cert-desc">Credentials require periodic renewal to stay current with the institution.</div><div class="cert-type">Maintenance</div></div>
+  </div>
+</div>
+
+<div class="container section">
+  <div class="section-title">Assessment Framework</div>
+  <div class="assess-grid">
+    <div class="assess-card"><div class="assess-name">Skills Assessment</div><div class="assess-desc">Can you do the work? Tool proficiency, technical execution, craft quality.</div></div>
+    <div class="assess-card"><div class="assess-name">Knowledge Assessment</div><div class="assess-desc">Do you understand why? Domain knowledge, institutional context, theory.</div></div>
+    <div class="assess-card"><div class="assess-name">Performance Assessment</div><div class="assess-desc">How well do you deliver? Quality, speed, reliability, consistency.</div></div>
+    <div class="assess-card"><div class="assess-name">Product Contribution</div><div class="assess-desc">What did you ship? Features built, bugs fixed, products improved.</div></div>
+    <div class="assess-card"><div class="assess-name">Collaboration Assessment</div><div class="assess-desc">How well do you work with others? Handoffs, communication, team impact.</div></div>
+    <div class="assess-card"><div class="assess-name">Leadership Assessment</div><div class="assess-desc">Can you guide others? Mentoring, decision-making, vision, influence.</div></div>
+    <div class="assess-card"><div class="assess-name">Teaching Assessment</div><div class="assess-desc">Can you teach what you know? Curriculum creation, tutoring, documentation.</div></div>
+    <div class="assess-card"><div class="assess-name">Research Assessment</div><div class="assess-desc">Can you discover? Original research, experimentation, evidence-based decisions.</div></div>
+    <div class="assess-card"><div class="assess-name">Mastery Assessment</div><div class="assess-desc">Have you earned it? Comprehensive evaluation across all dimensions.</div></div>
+  </div>
+</div>
+
+<div class="container">
+  <footer class="footer">
+    <div class="footer-copy">BlackRoad OS, Inc. — Curriculum as workforce design. Every track leads to a role. Every role maps to a product.</div>
+  </footer>
+</div>
+</body>
+</html>
