@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="mockup-base.css">
+  <title>RoadGram — Instagram-style Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --g:      linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      --bg:     #000000;
+      --s1:     #0a0a0a;
+      --s2:     #111111;
+      --s3:     #1a1a1a;
+      --s4:     #222222;
+      --border: #222222;
+      --text:   #f5f5f5;
+      --muted:  #a8a8a8;
+      --dim:    #737373;
+      --white:  #ffffff;
+      --sg:     'Space Grotesk',sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sg);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    
+    
+
+    /* ══════════════════════════════
+       LEFT NAV
+    ══════════════════════════════ */
+    .leftnav {
+      width: 244px;
+      height: 100vh;
+      background: var(--bg);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 8px 12px 20px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .nav-logo {
+      padding: 24px 12px 20px;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: var(--white);
+      font-style: italic;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 400;
+      transition: background 0.15s;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--s3); }
+    .nav-item.active { font-weight: 700; }
+    .nav-icon {
+      font-size: 22px;
+      width: 26px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .nav-label { flex: 1; }
+    .nav-badge {
+      background: var(--white);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-more {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 12px; border-radius: 10px;
+      cursor: pointer; color: var(--text); font-size: 15px;
+    }
+    .nav-more:hover { background: var(--s3); }
+
+    /* ══════════════════════════════
+       MAIN SCROLL AREA
+    ══════════════════════════════ */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      padding: 0 24px;
+    }
+
+    .feed-col {
+      width: 100%;
+      max-width: 468px;
+      padding: 20px 0 40px;
+    }
+
+    /* ── Stories ── */
+    .stories-row {
+      display: flex;
+      gap: 14px;
+      padding: 8px 0 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      overflow-x: auto;
+    }
+    .stories-row
+
+    .story {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .story-ring {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      padding: 2px;
+      background: conic-gradient(#fff 0deg, #fff 360deg);
+      position: relative;
+    }
+    .story-ring.unseen {
+      background: conic-gradient(
+        #fff 0deg 90deg,
+        #737373 90deg 180deg,
+        #fff 180deg 270deg,
+        #737373 270deg 360deg
+      );
+    }
+    .story-ring.seen {
+      background: var(--s4);
+    }
+    .story-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: var(--s3);
+      border: 2px solid var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--muted);
+      overflow: hidden;
+      position: relative;
+    }
+    .story-add {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: var(--white);
+      color: #000;
+      font-size: 14px;
+      font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg);
+    }
+    .story-name {
+      font-size: 11px;
+      color: var(--muted);
+      width: 64px;
+      text-align: center;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .story-name.you { color: var(--text); }
+
+    /* ── Post Card ── */
+    .post {
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 0 10px;
+    }
+    .post-avatar-wrap { position: relative; flex-shrink: 0; cursor: pointer; }
+    .post-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: var(--s3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; color: var(--muted);
+    }
+    .post-avatar.ring {
+      outline: 2px solid var(--white);
+      outline-offset: 2px;
+    }
+    .post-meta { flex: 1; }
+    .post-username { font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; }
+    .post-username:hover { text-decoration: underline; }
+    .post-location { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .post-dot { color: var(--dim); margin: 0 4px; font-size: 10px; }
+    .post-time { font-size: 12px; color: var(--dim); }
+    .post-menu { font-size: 20px; color: var(--muted); cursor: pointer; padding: 4px; }
+
+    /* photo area */
+    .post-image {
+      width: 100%;
+      aspect-ratio: 1/1;
+      background: var(--s2);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .post-image.landscape { aspect-ratio: 4/3; }
+    .post-image.portrait  { aspect-ratio: 4/5; }
+
+    .img-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        135deg,
+        var(--s2) 0px, var(--s2) 12px,
+        var(--s3) 12px, var(--s3) 24px
+      );
+    }
+    .img-icon { font-size: 60px; opacity: 0.12; position: relative; z-index: 1; }
+
+    /* multi-image dots */
+    .dot-row {
+      display: flex; justify-content: center; gap: 5px;
+      margin-top: 8px;
+    }
+    .img-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--s4); }
+    .img-dot.active { background: var(--white); width: 6px; }
+
+    /* carousel arrows */
+    .carousel-arrow {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,0.85); color: #000;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; cursor: pointer; z-index: 2;
+    }
+    .carousel-arrow.left { left: 10px; }
+    .carousel-arrow.right { right: 10px; }
+
+    /* actions */
+    .post-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0 6px;
+    }
+    .action-btn {
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--text);
+      transition: transform 0.1s;
+    }
+    .action-btn:hover { transform: scale(1.1); }
+    .action-btn.liked { color: var(--white); }
+    .bookmark-btn { margin-left: auto; font-size: 22px; cursor: pointer; color: var(--text); }
+
+    .post-likes {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      padding: 2px 0;
+    }
+    .post-caption {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      padding: 4px 0;
+    }
+    .post-caption .username { font-weight: 700; cursor: pointer; }
+    .post-caption .username:hover { text-decoration: underline; }
+    .post-caption .hashtag { color: var(--muted); }
+    .more-text { color: var(--dim); cursor: pointer; font-size: 13px; }
+
+    .post-comments-preview {
+      color: var(--dim);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 2px 0;
+    }
+    .post-comment-row {
+      font-size: 13px;
+      color: var(--text);
+      padding: 2px 0;
+      line-height: 1.5;
+    }
+    .post-comment-row .username { font-weight: 700; }
+
+    .add-comment {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0 4px;
+      border-top: none;
+    }
+    .add-comment input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--dim);
+      font-size: 13px;
+    }
+    .emoji-btn { font-size: 16px; cursor: pointer; color: var(--dim); }
+
+    /* reel post */
+    .reel-post .post-image {
+      aspect-ratio: 9/16;
+      max-height: 380px;
+    }
+    .reel-overlay {
+      position: absolute; bottom: 12px; left: 12px; right: 12px;
+      z-index: 2;
+    }
+    .reel-actions {
+      position: absolute; right: 12px; bottom: 60px;
+      display: flex; flex-direction: column; gap: 16px; align-items: center;
+      z-index: 3;
+    }
+    .reel-action { font-size: 22px; cursor: pointer; color: var(--white); text-align: center; }
+    .reel-action-count { font-size: 11px; color: var(--white); text-align: center; margin-top: 2px; }
+
+    /* suggested post label */
+    .suggested-label {
+      font-size: 12px; color: var(--dim); padding: 8px 0 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ══════════════════════════════
+       RIGHT PANEL
+    ══════════════════════════════ */
+    .right-panel {
+      width: 320px;
+      padding: 24px 0 24px 24px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    /* User mini-profile */
+    .user-mini {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .um-avatar {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--s3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: var(--muted);
+      outline: 2px solid var(--white);
+      outline-offset: 2px;
+      flex-shrink: 0; cursor: pointer;
+    }
+    .um-info { flex: 1; }
+    .um-username { font-size: 13px; font-weight: 700; cursor: pointer; }
+    .um-name { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .um-switch { font-size: 12px; font-weight: 700; color: var(--white); cursor: pointer; }
+
+    .rp-section-label {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .rp-label-text { font-size: 13px; font-weight: 700; color: var(--dim); }
+    .rp-see-all { font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer; }
+
+    .suggest-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sug-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      cursor: pointer;
+      position: relative;
+    }
+    .sug-avatar-ring {
+      outline: 1.5px solid var(--white);
+      outline-offset: 1.5px;
+    }
+    .sug-info { flex: 1; min-width: 0; }
+    .sug-username { font-size: 12px; font-weight: 700; color: var(--text); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-sub { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sug-follow { font-size: 12px; font-weight: 700; color: var(--white); cursor: pointer; white-space: nowrap; }
+    .sug-follow:hover { color: var(--muted); }
+
+    .rp-divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    .rp-links {
+      display: flex; flex-wrap: wrap; gap: 4px 8px;
+      font-size: 11px; color: var(--dim); margin-bottom: 10px;
+    }
+    .rp-links a { color: var(--dim); cursor: pointer; }
+    .rp-links a:hover { text-decoration: underline; }
+    .rp-copy { font-size: 11px; color: var(--dim); margin-top: 8px; }
+
+    /* activity feed in right panel */
+    .activity-item {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .act-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--muted);
+    }
+    .act-text { flex: 1; font-size: 12px; color: var(--text); line-height: 1.4; }
+    .act-text .username { font-weight: 700; }
+    .act-time { font-size: 11px; color: var(--dim); }
+    .act-thumb {
+      width: 40px; height: 40px; border-radius: 4px;
+      background: var(--s3); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .act-follow-btn {
+      padding: 5px 12px; border-radius: 8px;
+      border: 1px solid var(--s4);
+      background: var(--s3); color: var(--text);
+      font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+
+  <!-- ── Left Nav ── -->
+  <div class="leftnav">
+    <div class="nav-logo">RoadGram</div>
+
+    <div class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Discover</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🎬</span>
+      <span class="nav-label">Signals</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">📺</span>
+      <span class="nav-label">Channels</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Convoys</span>
+      <div class="nav-badge">4</div>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">🔔</span>
+      <span class="nav-label">Notifications</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon">＋</span>
+      <span class="nav-label">Create</span>
+    </div>
+    <div class="nav-item">
+      <span class="nav-icon" style="font-size:18px;">◎</span>
+      <span class="nav-label">Profile</span>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-more">
+      <span class="nav-icon">☰</span>
+      <span class="nav-label">More</span>
+    </div>
+  </div>
+
+  <!-- ── Main Feed ── -->
+  <div class="main">
+    <div class="feed-col">
+
+      <!-- Stories -->
+      <div class="stories-row">
+        <!-- Your story -->
+        <div class="story">
+          <div class="story-ring seen">
+            <div class="story-avatar" style="position:relative;">
+              AR
+              <div class="story-add">+</div>
+            </div>
+          </div>
+          <div class="story-name you">Your signal</div>
+        </div>
+
+        <div class="story">
+          <div class="story-ring unseen"><div class="story-avatar">LG</div></div>
+          <div class="story-name">roadbook</div>
+        </div>
+        <div class="story">
+          <div class="story-ring unseen"><div class="story-avatar">MK</div></div>
+          <div class="story-name">roadcanvas</div>
+        </div>
+        <div class="story">
+          <div class="story-ring unseen"><div class="story-avatar">TT</div></div>
+          <div class="story-name">roadcode</div>
+        </div>
+        <div class="story">
+          <div class="story-ring"><div class="story-avatar">VF</div></div>
+          <div class="story-name">roadtube</div>
+        </div>
+        <div class="story">
+          <div class="story-ring"><div class="story-avatar">BR</div></div>
+          <div class="story-name">backroad</div>
+        </div>
+        <div class="story">
+          <div class="story-ring unseen"><div class="story-avatar">NL</div></div>
+          <div class="story-name">roadworld</div>
+        </div>
+        <div class="story">
+          <div class="story-ring"><div class="story-avatar">RW</div></div>
+          <div class="story-name">roadwork</div>
+        </div>
+      </div>
+
+      <!-- ── Post 1 ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar-wrap">
+            <div class="post-avatar ring">MK</div>
+          </div>
+          <div class="post-meta">
+            <div><span class="post-username">roadcanvas_studio</span><span class="post-dot">·</span><span class="post-time">2h</span></div>
+            <div class="post-location">BlackRoad Studio</div>
+          </div>
+          <div class="post-menu">···</div>
+        </div>
+        <div class="post-image" style="position:relative;">
+          <div class="img-pattern"></div>
+          <div class="img-icon">🏙</div>
+          <div class="carousel-arrow left">‹</div>
+          <div class="carousel-arrow right">›</div>
+        </div>
+        <div class="dot-row">
+          <div class="img-dot active"></div>
+          <div class="img-dot"></div>
+          <div class="img-dot"></div>
+        </div>
+        <div class="post-actions">
+          <span class="action-btn liked">♡</span>
+          <span class="action-btn">💬</span>
+          <span class="action-btn">✈</span>
+          <span class="bookmark-btn">🔖</span>
+        </div>
+        <div class="post-likes">14,832 likes</div>
+        <div class="post-caption">
+          <span class="username">roadcanvas_studio</span> New launch visuals for the BlackRoad product family. Building a cleaner signal system, one frame at a time.
+          <span class="hashtag">#blackroad #designsystem #productsignal #visualidentity</span>
+        </div>
+        <div class="post-comments-preview">View all 284 comments</div>
+        <div class="post-comment-row"><span class="username">backroad</span> This is the first time the family really reads as one system.</div>
+        <div class="post-comment-row"><span class="username">roadcode</span> Need this same discipline in every launch surface.</div>
+        <div class="add-comment">
+          <span class="emoji-btn">🙂</span>
+          <input type="text" placeholder="Add a comment…" />
+          <span style="font-size:13px;font-weight:700;color:#525252;cursor:pointer;">Post</span>
+        </div>
+      </div>
+
+      <!-- ── Post 2 (Reel) ── -->
+      <div class="post reel-post">
+        <div class="post-header">
+          <div class="post-avatar-wrap">
+            <div class="post-avatar ring">VF</div>
+          </div>
+          <div class="post-meta">
+            <div><span class="post-username">roadtube</span><span class="post-dot">·</span><span class="post-time">5h</span></div>
+          </div>
+          <div class="post-menu">···</div>
+        </div>
+        <div class="post-image" style="position:relative;aspect-ratio:4/5;max-height:400px;">
+          <div class="img-pattern"></div>
+          <div class="img-icon">🎬</div>
+          <div class="reel-actions">
+            <div>
+              <div class="reel-action liked">♡</div>
+              <div class="reel-action-count">48.2K</div>
+            </div>
+            <div>
+              <div class="reel-action">💬</div>
+              <div class="reel-action-count">1,204</div>
+            </div>
+            <div>
+              <div class="reel-action">✈</div>
+              <div class="reel-action-count">Share</div>
+            </div>
+            <div>
+              <div class="reel-action">⋮</div>
+            </div>
+          </div>
+          <div style="position:absolute;bottom:10px;left:12px;right:56px;z-index:2;">
+            <div style="font-size:12px;color:#fff;font-weight:600;line-height:1.4;">RoadTube edit room — shaping a tighter BlackRoad lecture cut</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.7);margin-top:4px;">🎵 Original audio · roadtube</div>
+          </div>
+          <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;color:#fff;letter-spacing:0.5px;">REELS</div>
+        </div>
+        <div class="post-actions">
+          <span class="action-btn liked">♡</span>
+          <span class="action-btn">💬</span>
+          <span class="action-btn">✈</span>
+          <span class="bookmark-btn">🔖</span>
+        </div>
+        <div class="post-likes">48,204 likes</div>
+        <div class="post-caption">
+          <span class="username">roadtube</span> Behind the scenes of a new BlackRoad lecture cut. Signal, pacing, framing, and why the first edit is never the final one.
+          <span class="hashtag">#blackroad #signals #lecturecut #mediastudio</span>
+          <span class="more-text"> more</span>
+        </div>
+        <div class="post-comments-preview">View all 1,204 comments</div>
+        <div class="add-comment">
+          <span class="emoji-btn">🙂</span>
+          <input type="text" placeholder="Add a comment…" />
+        </div>
+      </div>
+
+      <!-- ── Suggested for you label ── -->
+      <div class="suggested-label">── Suggested channels ──</div>
+
+      <!-- ── Post 3 (Suggested) ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar-wrap">
+            <div class="post-avatar">NL</div>
+          </div>
+          <div class="post-meta">
+            <div><span class="post-username">roadworld</span><span class="post-dot">·</span><span class="post-time">1d</span></div>
+            <div class="post-location">OfficeRoad District</div>
+          </div>
+          <div class="post-menu">···</div>
+        </div>
+        <div class="post-image landscape">
+          <div class="img-pattern"></div>
+          <div class="img-icon">⚙️</div>
+        </div>
+        <div class="post-actions">
+          <span class="action-btn">♡</span>
+          <span class="action-btn">💬</span>
+          <span class="action-btn">✈</span>
+          <span class="bookmark-btn">🔖</span>
+        </div>
+        <div class="post-likes">7,441 likes</div>
+        <div class="post-caption">
+          <span class="username">roadworld</span> Environment blockout for the next interactive room. Navigation, depth, and spatial cues are starting to lock in.
+          <span class="hashtag">#blackroad #worldbuilding #interactive #spatialdesign</span>
+        </div>
+        <div class="post-comments-preview">View all 312 comments</div>
+        <div class="post-comment-row"><span class="username">officeroad</span> Spatial cues are finally starting to hold together.</div>
+        <div class="add-comment">
+          <span class="emoji-btn">🙂</span>
+          <input type="text" placeholder="Add a comment…" />
+        </div>
+      </div>
+
+      <!-- ── Post 4 ── -->
+      <div class="post">
+        <div class="post-header">
+          <div class="post-avatar-wrap">
+            <div class="post-avatar ring">DB</div>
+          </div>
+          <div class="post-meta">
+            <div><span class="post-username">blackroad_brand</span><span class="post-dot">·</span><span class="post-time">3d</span></div>
+          </div>
+          <div class="post-menu">···</div>
+        </div>
+        <div class="post-image">
+          <div class="img-pattern"></div>
+          <div class="img-icon">📐</div>
+        </div>
+        <div class="post-actions">
+          <span class="action-btn liked">♡</span>
+          <span class="action-btn">💬</span>
+          <span class="action-btn">✈</span>
+          <span class="bookmark-btn" style="color:var(--white);">🔖</span>
+        </div>
+        <div class="post-likes">22,918 likes</div>
+        <div class="post-caption">
+          <span class="username">blackroad_brand</span> Space is not empty. It is control, signal priority, and confidence. BlackRoad interfaces should never feel crowded or uncertain.
+          <span class="hashtag">#blackroad #brand #productlanguage #typography</span>
+        </div>
+        <div class="post-comments-preview">View all 891 comments</div>
+        <div class="post-comment-row"><span class="username">roadview</span> This should probably become our public search/brand baseline.</div>
+        <div class="post-comment-row"><span class="username">roadtrip</span> Put this straight into the convoy onboarding deck.</div>
+        <div class="add-comment">
+          <span class="emoji-btn">🙂</span>
+          <input type="text" placeholder="Add a comment…" />
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Right Panel ── -->
+  <div class="right-panel">
+
+    <!-- User mini -->
+    <div class="user-mini">
+      <div class="um-avatar">AR</div>
+      <div class="um-info">
+        <div class="um-username">alexa_road</div>
+        <div class="um-name">Alexa Amundson</div>
+      </div>
+        <div class="um-switch">Open</div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="rp-section-label">
+      <span class="rp-label-text">Suggested channels</span>
+      <span class="rp-see-all">See all</span>
+    </div>
+
+    <div class="suggest-row">
+      <div class="sug-avatar sug-avatar-ring">TT</div>
+      <div class="sug-info">
+        <div class="sug-username">roadcode</div>
+        <div class="sug-sub">Suggested for you</div>
+      </div>
+      <div class="sug-follow">Follow</div>
+    </div>
+
+    <div class="suggest-row">
+      <div class="sug-avatar">LG</div>
+      <div class="sug-info">
+        <div class="sug-username">roadbook.official</div>
+        <div class="sug-sub">Followed by roadcanvas_studio</div>
+      </div>
+      <div class="sug-follow">Follow</div>
+    </div>
+
+    <div class="suggest-row">
+      <div class="sug-avatar">SC</div>
+      <div class="sug-info">
+        <div class="sug-username">roadwork</div>
+        <div class="sug-sub">Followed by roadtube + 2 more</div>
+      </div>
+      <div class="sug-follow">Follow</div>
+    </div>
+
+    <div class="suggest-row">
+      <div class="sug-avatar">KD</div>
+      <div class="sug-info">
+        <div class="sug-username">backroad</div>
+        <div class="sug-sub">New to RoadGram</div>
+      </div>
+      <div class="sug-follow">Follow</div>
+    </div>
+
+    <div class="suggest-row">
+      <div class="sug-avatar">RS</div>
+      <div class="sug-info">
+        <div class="sug-username">officeroad</div>
+        <div class="sug-sub">Followed by roadworld</div>
+      </div>
+      <div class="sug-follow">Follow</div>
+    </div>
+
+    <div class="rp-divider"></div>
+
+    <!-- Recent Activity -->
+    <div class="rp-section-label">
+      <span class="rp-label-text">Recent activity</span>
+      <span class="rp-see-all">See all</span>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-avatar">MK</div>
+      <div class="act-text">
+        <span class="username">roadcanvas_studio</span> liked your signal.
+        <span class="act-time"> 12m</span>
+      </div>
+      <div class="act-thumb">🏙</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-avatar">JK</div>
+      <div class="act-text">
+        <span class="username">roadview</span> started following you.
+        <span class="act-time"> 34m</span>
+      </div>
+      <div class="act-follow-btn">Follow</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-avatar">DB</div>
+      <div class="act-text">
+        <span class="username">backroad</span> commented: "This system is starting to lock in."
+        <span class="act-time"> 1h</span>
+      </div>
+      <div class="act-thumb">📐</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-avatar">VF</div>
+      <div class="act-text">
+        <span class="username">roadtube</span> and <span class="username">2 others</span> liked your signal.
+        <span class="act-time"> 2h</span>
+      </div>
+      <div class="act-thumb">🎬</div>
+    </div>
+
+    <div class="activity-item">
+      <div class="act-avatar">NL</div>
+      <div class="act-text">
+        <span class="username">roadworld</span> mentioned you in a comment.
+        <span class="act-time"> 3h</span>
+      </div>
+      <div class="act-thumb">⚙️</div>
+    </div>
+
+    <div class="rp-divider"></div>
+
+    <!-- Footer links -->
+    <div class="rp-links">
+      <a>About</a> <a>Help</a> <a>Press</a> <a>API</a>
+      <a>Jobs</a> <a>Privacy</a> <a>Terms</a>
+      <a>Locations</a> <a>Language</a>
+    </div>
+    <div class="rp-copy">© 2026 ROADGRAM FROM BLACKROAD</div>
+
+  </div>
+
+</body>
+</html>
+    .grad-bar { height: 3px; background: var(--g); flex-shrink: 0; }

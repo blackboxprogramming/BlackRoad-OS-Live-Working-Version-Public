@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadNapster — BlackRoad OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mockup-base.css">
+  <style>
+    :root {
+      --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      --bg: #000;
+      --card: #0a0a0a;
+      --elevated: #111;
+      --hover: #181818;
+      --border: #1a1a1a;
+      --text: #f5f5f5;
+      --sub: #737373;
+      --muted: #444;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      overflow: hidden;
+    }
+
+    /* ── GRAD BAR ── */
+    .grad-bar {
+      height: 3px;
+      background: var(--g);
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 16px;
+    }
+
+    .nav-logo-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--g);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .nav-logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .nav-pill {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 4px 6px;
+      margin-left: 8px;
+    }
+
+    .nav-link {
+      padding: 5px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+      white-space: nowrap;
+    }
+
+    .nav-link:hover { color: var(--text); background: var(--hover); }
+    .nav-link.active {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--g);
+      display: inline-block;
+      margin-right: 6px;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .nav-peers-badge {
+      font-size: 12px;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── LAYOUT ── */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── LEFT SIDEBAR ── */
+    .sidebar-left {
+      width: 200px;
+      flex-shrink: 0;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 14px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .peer-list {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .peer-list::-webkit-scrollbar { width: 3px; }
+    .peer-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .peer-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: background 0.12s;
+      border-bottom: 1px solid #0a0a0a;
+    }
+
+    .peer-item:hover { background: var(--hover); }
+    .peer-item.you { background: #0a0a0a; }
+    .peer-item.active { background: var(--hover); border-left: 2px solid transparent;
+      border-image: var(--g); border-image-slice: 1; }
+
+    .peer-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      position: relative;
+    }
+
+    .peer-info { flex: 1; min-width: 0; }
+    .peer-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .peer-name.you-label { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+    .peer-meta {
+      font-size: 10px;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .online-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--g);
+      flex-shrink: 0;
+      animation: pulse-dot 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    /* ── CENTER MAIN ── */
+    .main-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    /* Search area */
+    .search-area {
+      padding: 16px 20px 0;
+      flex-shrink: 0;
+    }
+
+    .search-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .search-wrap {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px 10px 42px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input::placeholder { color: var(--muted); }
+    .search-input:focus { border-color: var(--muted); }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .lossless-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 14px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--sub);
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .lossless-toggle.on { border-color: var(--muted); color: var(--text); }
+
+    .toggle-switch {
+      width: 28px;
+      height: 16px;
+      border-radius: 16px;
+      background: var(--border);
+      position: relative;
+      transition: background 0.2s;
+    }
+    .toggle-switch.on { background: var(--g); }
+    .toggle-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--bg);
+      transition: left 0.2s;
+    }
+    .toggle-switch.on .toggle-knob { left: 14px; }
+
+    .search-btn {
+      padding: 10px 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .search-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 8px;
+      padding: 1px;
+      background: var(--g);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+    }
+    .search-btn:hover { background: var(--hover); }
+
+    /* Tabs */
+    .tabs-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 12px 20px 0;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .tab {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active {
+      color: var(--text);
+      border-bottom: 2px solid transparent;
+      border-image: var(--g);
+      border-image-slice: 1;
+    }
+
+    .tab-count {
+      margin-left: 6px;
+      font-size: 10px;
+      background: var(--elevated);
+      color: var(--muted);
+      padding: 1px 6px;
+      border-radius: 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Results table */
+    .results-wrap {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .results-wrap::-webkit-scrollbar { width: 4px; }
+    .results-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .results-table thead th {
+      padding: 10px 14px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .results-table tbody tr {
+      border-bottom: 1px solid #0a0a0a;
+      transition: background 0.1s;
+      cursor: pointer;
+    }
+
+    .results-table tbody tr:hover { background: var(--hover); }
+    .results-table tbody tr.playing { background: #0a0a0a; }
+
+    .results-table tbody td {
+      padding: 9px 14px;
+      vertical-align: middle;
+    }
+
+    .song-title {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .song-artist { font-size: 12px; color: var(--sub); margin-top: 1px; }
+
+    .col-artist, .col-album { color: var(--sub); font-size: 12px; }
+    .col-size { color: var(--muted); font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+    .col-peers { color: var(--sub); font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+
+    .quality-badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+      background: var(--elevated);
+      color: var(--sub);
+      border: 1px solid var(--border);
+    }
+
+    .quality-badge.flac {
+      background: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      color: #fff;
+      border: none;
+    }
+
+    .get-btn {
+      padding: 5px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--sub);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .get-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      padding: 1px;
+      background: var(--g);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .get-btn:hover { color: var(--text); }
+    .get-btn:hover::before { opacity: 1; }
+
+    .get-btn.queued {
+      color: var(--muted);
+      cursor: default;
+    }
+
+    /* ── RIGHT SIDEBAR ── */
+    .sidebar-right {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .dl-header {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dl-header-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .dl-active-count {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+      background: var(--elevated);
+      padding: 2px 7px;
+      border-radius: 16px;
+    }
+
+    .dl-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .dl-list::-webkit-scrollbar { width: 3px; }
+    .dl-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .dl-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid #0a0a0a;
+    }
+
+    .dl-item-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .dl-item-meta {
+      font-size: 10px;
+      color: var(--sub);
+      margin-bottom: 7px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .dl-speed {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+    }
+
+    .dl-status {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .dl-status.downloading { color: var(--text); }
+    .dl-status.complete { color: var(--text); }
+    .dl-status.queued { color: var(--muted); }
+
+    .progress-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 16px;
+      background: var(--g);
+      transition: width 0.4s ease;
+    }
+
+    .dl-item.new-dl {
+      animation: slide-in 0.3s ease;
+    }
+
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      height: 28px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+
+    .status-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--g);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    .status-bar-right {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── NOW PLAYING BAR ── */
+    .now-playing {
+      height: 60px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .np-art {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: var(--elevated);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .np-art::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--g);
+      opacity: 0.15;
+    }
+
+    .np-info { min-width: 0; }
+    .np-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .np-artist { font-size: 11px; color: var(--sub); }
+
+    .np-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .np-btn {
+      background: none;
+      border: none;
+      color: var(--sub);
+      cursor: pointer;
+      font-size: 16px;
+      transition: color 0.12s;
+      padding: 4px;
+    }
+    .np-btn:hover { color: var(--text); }
+    .np-btn.play {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .np-progress-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .np-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .np-track {
+      flex: 1;
+      height: 3px;
+      background: var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .np-fill {
+      height: 100%;
+      border-radius: 16px;
+      background: var(--g);
+      width: 38%;
+      transition: width 0.5s linear;
+    }
+
+    .np-vol {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .np-vol-icon { font-size: 14px; color: var(--sub); }
+    .np-vol-track {
+      width: 64px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 16px;
+    }
+    .np-vol-fill {
+      width: 70%;
+      height: 100%;
+      border-radius: 16px;
+      background: var(--g);
+    }
+
+    /* ── PEER BROWSE NOTICE ── */
+    .peer-browse-notice {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin: 16px 20px;
+      padding: 10px 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .peer-browse-notice.visible { display: flex; }
+
+    .peer-browse-notice-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--g);
+      flex-shrink: 0;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    .close-notice {
+      margin-left: auto;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      line-height: 1;
+    }
+    .close-notice:hover { color: var(--text); }
+
+    /* Tooltip for peer cell */
+    .peer-count {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Genre tag on song row */
+    .genre-tag {
+      display: inline-block;
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--elevated);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      gap: 12px;
+      color: var(--muted);
+    }
+    .empty-state.visible { display: flex; }
+    .empty-state-icon { font-size: 40px; }
+    .empty-state-text { font-size: 14px; color: var(--sub); }
+
+    /* Trending / New Releases panels */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 12px;
+      padding: 16px 20px;
+    }
+
+    .music-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .music-card:hover { background: var(--hover); transform: translateY(-2px); }
+
+    .music-card-art {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .music-card-art::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.12;
+    }
+
+    .music-card-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+    .music-card-artist { font-size: 11px; color: var(--sub); }
+    .music-card-meta { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── GRAD BAR ── -->
+  <div class="grad-bar"></div>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <div class="nav-logo-dot">♫</div>
+      <span class="nav-logo-text">RoadNapster</span>
+    </div>
+
+    <div class="nav-pill">
+      <button class="nav-link active" onclick="setNavActive(this)">Search</button>
+      <button class="nav-link" onclick="setNavActive(this)">My Library</button>
+      <button class="nav-link" onclick="setNavActive(this)">Peers</button>
+      <button class="nav-link" onclick="setNavActive(this)">Downloads</button>
+      <button class="nav-link" onclick="setNavActive(this)">Settings</button>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <span class="nav-status-dot"></span>
+    <span class="nav-peers-badge" id="peers-badge">847 peers online</span>
+  </nav>
+
+  <!-- ── APP BODY ── -->
+  <div class="app-body">
+
+    <!-- ── LEFT SIDEBAR: PEERS ── -->
+    <aside class="sidebar-left">
+      <div class="sidebar-header">Connected Peers</div>
+      <div class="peer-list" id="peer-list">
+        <!-- Injected by JS -->
+      </div>
+    </aside>
+
+    <!-- ── CENTER MAIN ── -->
+    <main class="main-center">
+
+      <!-- Search bar -->
+      <div class="search-area">
+        <div class="search-row">
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input
+              type="text"
+              class="search-input"
+              id="search-input"
+              placeholder="Search songs, artists, albums…"
+              oninput="filterSongs()"
+            >
+          </div>
+          <div class="lossless-toggle" id="lossless-toggle" onclick="toggleLossless()">
+            <div class="toggle-switch" id="toggle-sw"><div class="toggle-knob"></div></div>
+            Lossless
+          </div>
+          <button class="search-btn">Search</button>
+        </div>
+      </div>
+
+      <!-- Peer browse notice -->
+      <div class="peer-browse-notice" id="peer-notice">
+        <div class="peer-browse-notice-dot"></div>
+        <span id="peer-notice-text">Browsing peer's library…</span>
+        <button class="close-notice" onclick="closePeerNotice()">×</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-row">
+        <div class="tab active" onclick="switchTab('search',this)">
+          Search Results <span class="tab-count" id="result-count">15</span>
+        </div>
+        <div class="tab" onclick="switchTab('trending',this)">
+          Trending <span class="tab-count">42</span>
+        </div>
+        <div class="tab" onclick="switchTab('new',this)">
+          New Releases <span class="tab-count">28</span>
+        </div>
+      </div>
+
+      <!-- ── TAB: SEARCH RESULTS ── -->
+      <div class="results-wrap tab-panel active" id="panel-search">
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th style="width:32px">#</th>
+              <th>Song</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th>Size</th>
+              <th>Quality</th>
+              <th>Peers</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="songs-tbody">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-state-icon">♫</div>
+          <div class="empty-state-text">No songs match your search</div>
+        </div>
+      </div>
+
+      <!-- ── TAB: TRENDING ── -->
+      <div class="results-wrap tab-panel" id="panel-trending">
+        <div class="card-grid" id="trending-grid"></div>
+      </div>
+
+      <!-- ── TAB: NEW RELEASES ── -->
+      <div class="results-wrap tab-panel" id="panel-new">
+        <div class="card-grid" id="new-grid"></div>
+      </div>
+
+    </main>
+
+    <!-- ── RIGHT SIDEBAR: DOWNLOADS ── -->
+    <aside class="sidebar-right">
+      <div class="dl-header">
+        <span class="dl-header-label">Downloads</span>
+        <span class="dl-active-count" id="dl-count">3 active</span>
+      </div>
+      <div class="dl-list" id="dl-list">
+        <!-- Injected by JS -->
+      </div>
+    </aside>
+
+  </div><!-- /app-body -->
+
+  <!-- ── STATUS BAR ── -->
+  <div class="status-bar">
+    <div class="status-item">
+      <div class="status-dot"></div>
+      <span id="status-peers">847 peers online</span>
+    </div>
+    <div class="status-item">·</div>
+    <div class="status-item">
+      <span id="status-songs">2,341,892 songs shared</span>
+    </div>
+    <div class="status-item">·</div>
+    <div class="status-item">
+      <span id="status-active-dl">3 active downloads</span>
+    </div>
+    <div class="status-bar-right">v3.0.1</div>
+  </div>
+
+  <!-- ── NOW PLAYING BAR ── -->
+  <div class="now-playing">
+    <div class="np-art">♪</div>
+    <div class="np-info" style="width:160px">
+      <div class="np-title" id="np-title">Neon Drift</div>
+      <div class="np-artist" id="np-artist">CHVRCHES · Heaven/Hell</div>
+    </div>
+    <div class="np-controls">
+      <button class="np-btn">⏮</button>
+      <button class="np-btn play" id="play-btn" onclick="togglePlay()">▶</button>
+      <button class="np-btn">⏭</button>
+    </div>
+    <div class="np-progress-wrap">
+      <span class="np-time" id="np-current">1:24</span>
+      <div class="np-track" onclick="scrubTrack(event, this)">
+        <div class="np-fill" id="np-fill"></div>
+      </div>
+      <span class="np-time" id="np-total">3:47</span>
+    </div>
+    <div class="np-vol">
+      <span class="np-vol-icon">🔊</span>
+      <div class="np-vol-track">
+        <div class="np-vol-fill"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+const PEERS = [
+  { name: 'You (alexa_the_dj)', songs: 312, you: true, color: 'linear-gradient(135deg,#FF6B2B,#FF2255)', init: 'AJ' },
+  { name: 'xX_roadie_Xx',       songs: 1842, color: 'linear-gradient(135deg,#CC00AA,#8844FF)', init: 'XR' },
+  { name: 'm3g4_music_fan',     songs: 956, color: 'linear-gradient(135deg,#4488FF,#00D4FF)', init: 'MM' },
+  { name: 'dEaDbeEf_666',       songs: 2201, color: 'linear-gradient(135deg,#FF2255,#CC00AA)', init: 'DB' },
+  { name: 'road_runner_99',     songs: 741, color: 'linear-gradient(135deg,#8844FF,#4488FF)', init: 'RR' },
+  { name: 'l0st_freq_hz',       songs: 488, color: 'linear-gradient(135deg,#00D4FF,#4488FF)', init: 'LF' },
+  { name: 'vIn1l_junK1E',       songs: 3109, color: 'linear-gradient(135deg,#FF6B2B,#CC00AA)', init: 'VJ' },
+  { name: 'B4ssL1ne_K1ng',      songs: 620, color: 'linear-gradient(135deg,#FF2255,#FF6B2B)', init: 'BK' },
+  { name: 'n0ct_urn4l_FM',      songs: 1337, color: 'linear-gradient(135deg,#8844FF,#CC00AA)', init: 'NF' },
+  { name: 'codec_wav3',         songs: 890, color: 'linear-gradient(135deg,#4488FF,#8844FF)', init: 'CW' },
+  { name: 'flux_c4pacit0r',     songs: 2047, color: 'linear-gradient(135deg,#00D4FF,#8844FF)', init: 'FC' },
+  { name: 'rippr_9000',         songs: 1560, color: 'linear-gradient(135deg,#FF6B2B,#4488FF)', init: 'R9' },
+];
+
+const SONGS = [
+  { title: 'Neon Drift',          artist: 'CHVRCHES',          album: 'Heaven/Hell',          size: '8.1 MB',  quality: '320kbps', peers: 24, genre: 'Synth-Pop'  },
+  { title: 'God\'s Plan',         artist: 'Drake',             album: 'Scorpion',             size: '5.9 MB',  quality: '320kbps', peers: 89, genre: 'Hip-Hop'    },
+  { title: 'HUMBLE.',             artist: 'Kendrick Lamar',    album: 'DAMN.',                size: '4.8 MB',  quality: '128kbps', peers: 67, genre: 'Hip-Hop'    },
+  { title: 'Midnight City',       artist: 'M83',               album: 'Hurry Up, We\'re Dreaming', size: '24.7 MB', quality: 'FLAC', peers: 12, genre: 'Electronic' },
+  { title: 'In Bloom',            artist: 'Nirvana',           album: 'Nevermind',            size: '18.3 MB', quality: 'FLAC',    peers: 41, genre: 'Rock'       },
+  { title: 'Blinding Lights',     artist: 'The Weeknd',        album: 'After Hours',          size: '6.2 MB',  quality: '320kbps', peers: 103, genre: 'Pop'       },
+  { title: 'Bad Guy',             artist: 'Billie Eilish',     album: 'WHEN WE ALL FALL ASLEEP', size: '3.2 MB', quality: '128kbps', peers: 78, genre: 'Pop'     },
+  { title: 'Tessellate',          artist: 'Alt-J',             album: 'An Awesome Wave',      size: '21.1 MB', quality: 'FLAC',    peers: 9,  genre: 'Indie'      },
+  { title: 'Alright',             artist: 'Kendrick Lamar',    album: 'To Pimp a Butterfly',  size: '5.5 MB',  quality: '320kbps', peers: 55, genre: 'Hip-Hop'    },
+  { title: 'Get Lucky',           artist: 'Daft Punk',         album: 'Random Access Memories', size: '22.9 MB', quality: 'FLAC',  peers: 33, genre: 'Electronic' },
+  { title: 'Mr. Brightside',      artist: 'The Killers',       album: 'Hot Fuss',             size: '4.1 MB',  quality: '128kbps', peers: 92, genre: 'Rock'       },
+  { title: 'Motion Picture Soundtrack', artist: 'Radiohead',  album: 'Kid A',                size: '19.6 MB', quality: 'FLAC',    peers: 18, genre: 'Indie'      },
+  { title: 'DNA.',                artist: 'Kendrick Lamar',    album: 'DAMN.',                size: '4.4 MB',  quality: '320kbps', peers: 61, genre: 'Hip-Hop'    },
+  { title: 'Strobe',              artist: 'deadmau5',          album: 'For Lack of a Better Name', size: '26.8 MB', quality: 'FLAC', peers: 7, genre: 'Electronic' },
+  { title: 'Do I Wanna Know?',    artist: 'Arctic Monkeys',    album: 'AM',                   size: '7.3 MB',  quality: '320kbps', peers: 44, genre: 'Indie'      },
+];
+
+const DOWNLOADS = [
+  { title: 'Midnight City',   artist: 'M83',          size: '24.7 MB', speed: '847 kb/s',  status: 'downloading', pct: 62 },
+  { title: 'Strobe',          artist: 'deadmau5',     size: '26.8 MB', speed: '1.2 mb/s',  status: 'downloading', pct: 31 },
+  { title: 'In Bloom',        artist: 'Nirvana',      size: '18.3 MB', speed: '640 kb/s',  status: 'downloading', pct: 88 },
+  { title: 'Get Lucky',       artist: 'Daft Punk',    size: '22.9 MB', speed: '—',         status: 'queued',      pct: 0  },
+  { title: 'Tessellate',      artist: 'Alt-J',        size: '21.1 MB', speed: '—',         status: 'complete',    pct: 100 },
+];
+
+const TRENDING_CARDS = [
+  { emoji: '🔥', title: 'As It Was',       artist: 'Harry Styles',    meta: '320kbps · 4.9 MB'  },
+  { emoji: '⚡', title: 'Flowers',          artist: 'Miley Cyrus',     meta: 'FLAC · 22.1 MB'    },
+  { emoji: '🎸', title: 'Starman',          artist: 'David Bowie',     meta: 'FLAC · 19.3 MB'    },
+  { emoji: '🌙', title: 'Anti-Hero',        artist: 'Taylor Swift',    meta: '320kbps · 5.7 MB'  },
+  { emoji: '🎹', title: 'Unholy',           artist: 'Sam Smith',       meta: '128kbps · 3.4 MB'  },
+  { emoji: '🔊', title: 'Bad Habit',        artist: 'Steve Lacy',      meta: '320kbps · 5.1 MB'  },
+  { emoji: '💿', title: 'Run to the Hills', artist: 'Iron Maiden',     meta: 'FLAC · 18.7 MB'    },
+  { emoji: '🌊', title: 'Pursuit of Happiness', artist: 'Kid Cudi',   meta: '320kbps · 6.3 MB'  },
+];
+
+const NEW_CARDS = [
+  { emoji: '🆕', title: 'Cruel Summer',     artist: 'Taylor Swift',    meta: '320kbps · 5.5 MB'  },
+  { emoji: '🎵', title: 'Lavender Haze',    artist: 'Taylor Swift',    meta: 'FLAC · 23.8 MB'    },
+  { emoji: '🌟', title: 'Calm Down',        artist: 'Rema & Selena',   meta: '320kbps · 6.1 MB'  },
+  { emoji: '🔮', title: 'About Damn Time',  artist: 'Lizzo',           meta: '128kbps · 3.8 MB'  },
+  { emoji: '🎤', title: 'Break My Soul',    artist: 'Beyoncé',         meta: 'FLAC · 21.6 MB'    },
+  { emoji: '🚀', title: 'Under the Influence', artist: 'Chris Brown',  meta: '320kbps · 5.9 MB'  },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER: PEERS
+═══════════════════════════════════════════════════════════ */
+function renderPeers() {
+  const list = document.getElementById('peer-list');
+  list.innerHTML = PEERS.map((p, i) => `
+    <div class="peer-item${p.you ? ' you' : ''}" onclick="browsePeer('${p.name}', ${i})">
+      <div class="peer-avatar" style="background:${p.color}">${p.init}</div>
+      <div class="peer-info">
+        <div class="peer-name${p.you ? ' you-label' : ''}">${p.name.split(' ')[0]}</div>
+        <div class="peer-meta">${p.songs.toLocaleString()} songs</div>
+      </div>
+      <div class="online-dot"></div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER: SONGS TABLE
+═══════════════════════════════════════════════════════════ */
+function renderSongs(songs, losslessOnly) {
+  const filtered = losslessOnly ? songs.filter(s => s.quality === 'FLAC') : songs;
+  const tbody = document.getElementById('songs-tbody');
+  const empty = document.getElementById('empty-state');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.classList.add('visible');
+    document.getElementById('result-count').textContent = '0';
+    return;
+  }
+
+  empty.classList.remove('visible');
+  document.getElementById('result-count').textContent = filtered.length;
+
+  tbody.innerHTML = filtered.map((s, i) => `
+    <tr onclick="playSong('${s.title}', '${s.artist}')">
+      <td style="color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace">${i + 1}</td>
+      <td>
+        <div class="song-title">${s.title}</div>
+        <span class="genre-tag">${s.genre}</span>
+      </td>
+      <td class="col-artist">${s.artist}</td>
+      <td class="col-album" style="font-size:11px;color:var(--muted)">${s.album}</td>
+      <td class="col-size">${s.size}</td>
+      <td>
+        <span class="quality-badge${s.quality === 'FLAC' ? ' flac' : ''}">${s.quality}</span>
+      </td>
+      <td>
+        <span class="peer-count col-peers">${s.peers}</span>
+      </td>
+      <td>
+        <button class="get-btn" id="get-${i}" onclick="event.stopPropagation(); getSong('${s.title}', '${s.artist}', '${s.size}', ${i})">Get</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER: DOWNLOADS
+═══════════════════════════════════════════════════════════ */
+function renderDownloads() {
+  const list = document.getElementById('dl-list');
+  const active = DOWNLOADS.filter(d => d.status === 'downloading').length;
+  document.getElementById('dl-count').textContent = `${active} active`;
+  document.getElementById('status-active-dl').textContent = `${active} active downloads`;
+
+  list.innerHTML = DOWNLOADS.map((d, i) => `
+    <div class="dl-item" id="dl-item-${i}">
+      <div class="dl-item-title">${d.title}</div>
+      <div class="dl-item-meta">
+        <span style="color:var(--muted);font-size:10px">${d.artist}</span>
+        <span class="dl-speed">${d.speed}</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="dl-prog-${i}" style="width:${d.pct}%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--muted)">${d.size}</span>
+        <span class="dl-status ${d.status}">${d.status.charAt(0).toUpperCase() + d.status.slice(1)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER: CARDS
+═══════════════════════════════════════════════════════════ */
+const GRADIENTS = [
+  'linear-gradient(135deg,#FF6B2B,#FF2255)',
+  'linear-gradient(135deg,#CC00AA,#8844FF)',
+  'linear-gradient(135deg,#4488FF,#00D4FF)',
+  'linear-gradient(135deg,#8844FF,#4488FF)',
+  'linear-gradient(135deg,#FF2255,#CC00AA)',
+  'linear-gradient(135deg,#00D4FF,#4488FF)',
+  'linear-gradient(135deg,#FF6B2B,#CC00AA)',
+  'linear-gradient(135deg,#4488FF,#8844FF)',
+];
+
+function renderCards(cards, containerId) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = cards.map((c, i) => `
+    <div class="music-card" onclick="playSong('${c.title}','${c.artist}')">
+      <div class="music-card-art" style="background:${GRADIENTS[i % GRADIENTS.length]}">${c.emoji}</div>
+      <div class="music-card-title">${c.title}</div>
+      <div class="music-card-artist">${c.artist}</div>
+      <div class="music-card-meta">${c.meta}</div>
+    </div>
+  `).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INTERACTIVITY
+═══════════════════════════════════════════════════════════ */
+let losslessOn = false;
+let currentSongs = [...SONGS];
+let playing = false;
+
+function setNavActive(el) {
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleLossless() {
+  losslessOn = !losslessOn;
+  const sw = document.getElementById('toggle-sw');
+  const tog = document.getElementById('lossless-toggle');
+  sw.classList.toggle('on', losslessOn);
+  tog.classList.toggle('on', losslessOn);
+  filterSongs();
+}
+
+function filterSongs() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const filtered = SONGS.filter(s =>
+    !q ||
+    s.title.toLowerCase().includes(q) ||
+    s.artist.toLowerCase().includes(q) ||
+    s.album.toLowerCase().includes(q) ||
+    s.genre.toLowerCase().includes(q)
+  );
+  currentSongs = filtered;
+  renderSongs(filtered, losslessOn);
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function browsePeer(name, idx) {
+  document.querySelectorAll('.peer-item').forEach((el, i) => {
+    el.classList.toggle('active', i === idx);
+  });
+  const notice = document.getElementById('peer-notice');
+  document.getElementById('peer-notice-text').textContent =
+    `Browsing ${name}'s library — ${PEERS[idx].songs.toLocaleString()} songs available`;
+  notice.classList.add('visible');
+  // Show all songs "from peer" (just the full list for demo)
+  renderSongs(SONGS, losslessOn);
+}
+
+function closePeerNotice() {
+  document.getElementById('peer-notice').classList.remove('visible');
+  document.querySelectorAll('.peer-item').forEach(el => el.classList.remove('active'));
+}
+
+function getSong(title, artist, size, idx) {
+  const btn = document.getElementById(`get-${idx}`);
+  if (btn.classList.contains('queued')) return;
+  btn.classList.add('queued');
+  btn.textContent = 'Queued';
+
+  const newDl = {
+    title,
+    artist,
+    size,
+    speed: '0 kb/s',
+    status: 'downloading',
+    pct: 0,
+  };
+  DOWNLOADS.unshift(newDl);
+  renderDownloads();
+  updateDlCount();
+
+  // Animate progress
+  const dlIdx = 0;
+  animateDownload(dlIdx, newDl);
+}
+
+function animateDownload(dlIdx, dlObj) {
+  const speeds = ['312 kb/s', '647 kb/s', '921 kb/s', '1.1 mb/s', '784 kb/s'];
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct += Math.random() * 8 + 2;
+    if (pct >= 100) {
+      pct = 100;
+      clearInterval(interval);
+      DOWNLOADS[dlIdx].status = 'complete';
+      DOWNLOADS[dlIdx].speed = '—';
+      DOWNLOADS[dlIdx].pct = 100;
+      renderDownloads();
+      updateDlCount();
+      return;
+    }
+    DOWNLOADS[dlIdx].pct = Math.round(pct);
+    DOWNLOADS[dlIdx].speed = speeds[Math.floor(Math.random() * speeds.length)];
+    const fill = document.getElementById(`dl-prog-${dlIdx}`);
+    if (fill) fill.style.width = pct + '%';
+    const speedEl = document.querySelector(`#dl-item-${dlIdx} .dl-speed`);
+    if (speedEl) speedEl.textContent = DOWNLOADS[dlIdx].speed;
+  }, 300);
+}
+
+function updateDlCount() {
+  const active = DOWNLOADS.filter(d => d.status === 'downloading').length;
+  document.getElementById('dl-count').textContent = `${active} active`;
+  document.getElementById('status-active-dl').textContent = `${active} active downloads`;
+}
+
+function playSong(title, artist) {
+  document.getElementById('np-title').textContent = title;
+  document.getElementById('np-artist').textContent = artist;
+  playing = true;
+  document.getElementById('play-btn').textContent = '⏸';
+  document.getElementById('np-fill').style.width = '5%';
+  // Animate progress for fun
+  let pct = 5;
+  clearInterval(window._playInterval);
+  window._playInterval = setInterval(() => {
+    pct += 0.2;
+    if (pct > 100) pct = 0;
+    document.getElementById('np-fill').style.width = pct + '%';
+    const totalSec = 227;
+    const cur = Math.floor((pct / 100) * totalSec);
+    const m = Math.floor(cur / 60), s = cur % 60;
+    document.getElementById('np-current').textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  }, 200);
+}
+
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('play-btn').textContent = playing ? '⏸' : '▶';
+  if (!playing) {
+    clearInterval(window._playInterval);
+  } else {
+    playSong(
+      document.getElementById('np-title').textContent,
+      document.getElementById('np-artist').textContent
+    );
+  }
+}
+
+function scrubTrack(e, el) {
+  const rect = el.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  document.getElementById('np-fill').style.width = pct + '%';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AMBIENT: Peer count drift
+═══════════════════════════════════════════════════════════ */
+let peerCount = 847;
+setInterval(() => {
+  peerCount += Math.floor(Math.random() * 5) - 2;
+  if (peerCount < 800) peerCount = 800;
+  const str = `${peerCount.toLocaleString()} peers online`;
+  document.getElementById('peers-badge').textContent = str;
+  document.getElementById('status-peers').textContent = str;
+}, 4000);
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATE existing downloads on load
+═══════════════════════════════════════════════════════════ */
+function animateExistingDownloads() {
+  DOWNLOADS.forEach((d, i) => {
+    if (d.status !== 'downloading') return;
+    const interval = setInterval(() => {
+      d.pct += Math.random() * 4 + 1;
+      if (d.pct >= 100) {
+        d.pct = 100;
+        d.status = 'complete';
+        d.speed = '—';
+        clearInterval(interval);
+        renderDownloads();
+        updateDlCount();
+        return;
+      }
+      const fill = document.getElementById(`dl-prog-${i}`);
+      if (fill) fill.style.width = d.pct + '%';
+    }, 400 + i * 80);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+renderPeers();
+renderSongs(SONGS, false);
+renderDownloads();
+renderCards(TRENDING_CARDS, 'trending-grid');
+renderCards(NEW_CARDS, 'new-grid');
+animateExistingDownloads();
+
+// Start playing the default track
+setTimeout(() => {
+  playSong('Neon Drift', 'CHVRCHES · Heaven/Hell');
+}, 500);
+</script>
+</body>
+</html>

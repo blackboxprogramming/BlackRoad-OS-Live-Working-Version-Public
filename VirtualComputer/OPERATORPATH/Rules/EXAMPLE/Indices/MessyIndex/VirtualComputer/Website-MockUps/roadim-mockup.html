@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadIM — BlackRoad Instant Messenger</title>
+  <link rel="stylesheet" href="mockup-base.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Page shell ───────────────────────────────────────── */
+    body {
+      background: #000;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 24px 80px;
+      gap: 0;
+    }
+
+    /* ── Page header ──────────────────────────────────────── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .page-header-eyebrow {
+      font-family: var(--jb);
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .page-header h1 {
+      font-family: var(--sg);
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--sub);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .grad-bar { height: 3px; background: var(--g); border-radius: 2px; width: 48px; margin: 16px auto 0; }
+
+    /* ── Dual-window stage ─────────────────────────────────── */
+    .im-stage {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Shared window shell ───────────────────────────────── */
+    .im-window {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 40px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.03);
+    }
+
+    .im-window-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .im-window-bar .br-dot { flex-shrink: 0; }
+    .im-window-bar-title {
+      margin-left: 8px;
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      flex: 1;
+    }
+    /* Gradient top stripe on window */
+    .im-window::before {
+      content: '';
+      display: block;
+      height: 2px;
+      background: var(--g);
+      flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       WINDOW 1 — BUDDY LIST
+    ════════════════════════════════════════════════════════ */
+    .buddy-list {
+      width: 300px;
+      min-height: 580px;
+    }
+
+    /* Profile header */
+    .bl-profile {
+      padding: 14px 14px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #0a0a0a;
+    }
+    .bl-profile-top {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 10px;
+    }
+    .bl-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #000;
+      position: relative;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--white);
+    }
+    .bl-avatar::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: var(--g);
+      z-index: -1;
+    }
+    .bl-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--white);
+    }
+    .bl-profile-name {
+      font-weight: 700;
+      font-size: 13px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-family: var(--sg);
+      line-height: 1.2;
+    }
+    .bl-profile-away {
+      font-size: 11px;
+      color: var(--sub);
+      font-style: italic;
+      margin-top: 2px;
+      font-family: var(--jb);
+    }
+
+    /* Status selector */
+    .bl-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bl-status-select {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text);
+      font-family: var(--sg);
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .bl-status-select:hover { border-color: #333; }
+    .status-dot-online {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: linear-gradient(135deg, #00D4FF, #4488FF);
+      flex-shrink: 0;
+    }
+    .bl-status-select .chevron { color: var(--muted); font-size: 9px; }
+
+    .bl-action-btns {
+      display: flex;
+      gap: 5px;
+    }
+    .bl-action-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--sub);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 9px;
+      font-family: var(--sg);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .02em;
+    }
+    .bl-action-btn:hover {
+      border-color: #444;
+      color: var(--text);
+    }
+
+    /* Buddy groups */
+    .bl-groups {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .bl-group { margin-bottom: 2px; }
+    .bl-group-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background .12s;
+      border-radius: 0;
+    }
+    .bl-group-header:hover { background: rgba(255,255,255,.03); }
+    .bl-group-chevron {
+      font-size: 8px;
+      color: var(--muted);
+      transition: transform .15s;
+      width: 10px;
+      display: inline-block;
+    }
+    .bl-group.collapsed .bl-group-chevron { transform: rotate(-90deg); }
+    .bl-group.collapsed .bl-group-members { display: none; }
+    .bl-group-name {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .10em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-family: var(--jb);
+    }
+    .bl-group-count {
+      font-size: 9px;
+      color: var(--muted);
+      font-family: var(--jb);
+      margin-left: auto;
+    }
+
+    .bl-group-members { padding: 2px 0; }
+
+    /* Individual buddy row */
+    .buddy-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px 5px 24px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background .12s;
+    }
+    .buddy-row:hover { background: rgba(255,255,255,.04); }
+    .buddy-row.active { background: rgba(255,255,255,.06); }
+
+    .buddy-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .buddy-dot-online {
+      background: linear-gradient(135deg, #4488FF, #00D4FF);
+      box-shadow: 0 0 4px rgba(0,212,255,.5);
+    }
+    .buddy-dot-idle {
+      background: var(--muted);
+    }
+    .buddy-dot-offline {
+      background: #2a2a2a;
+      border: 1px solid #333;
+    }
+
+    .buddy-info { flex: 1; min-width: 0; }
+    .buddy-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.3;
+      font-family: var(--sg);
+    }
+    .buddy-row.idle .buddy-name { color: var(--muted); font-weight: 400; }
+    .buddy-row.offline .buddy-name { color: var(--muted); font-size: 11px; font-weight: 400; }
+    .buddy-away-msg {
+      font-size: 10px;
+      color: var(--sub);
+      font-style: italic;
+      font-family: var(--jb);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .buddy-row.idle .buddy-away-msg { color: var(--muted); }
+
+    /* Bottom toolbar */
+    .bl-footer {
+      border-top: 1px solid var(--border);
+      padding: 9px 12px;
+      display: flex;
+      gap: 5px;
+      background: var(--elevated);
+      flex-shrink: 0;
+    }
+    .bl-footer-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--sub);
+      font-size: 11px;
+      padding: 5px 9px;
+      font-family: var(--sg);
+      cursor: pointer;
+      transition: all .15s;
+      flex: 1;
+      text-align: center;
+    }
+    .bl-footer-btn:hover { border-color: #333; color: var(--text); background: rgba(255,255,255,.03); }
+
+    /* ═══════════════════════════════════════════════════════
+       WINDOW 2 — CHAT WINDOW
+    ════════════════════════════════════════════════════════ */
+    .chat-window {
+      width: 420px;
+      min-height: 580px;
+    }
+
+    /* Buddy info bar */
+    .chat-buddy-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #0a0a0a;
+      flex-shrink: 0;
+    }
+    .chat-buddy-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--white);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .chat-buddy-avatar::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 50%;
+      background: var(--g);
+      z-index: -1;
+    }
+    .chat-buddy-avatar-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .chat-buddy-meta { flex: 1; }
+    .chat-buddy-name {
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    .chat-buddy-status {
+      font-size: 10px;
+      color: var(--sub);
+      font-family: var(--jb);
+    }
+    .chat-buddy-status .dot { color: var(--text); }
+    .chat-user-info-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      padding: 3px 7px;
+      cursor: pointer;
+      font-family: var(--jb);
+      transition: all .15s;
+      letter-spacing: .05em;
+    }
+    .chat-user-info-btn:hover { border-color: #444; color: var(--sub); }
+
+    /* Chat message area */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 0;
+      background: #000;
+      min-height: 320px;
+      max-height: 380px;
+    }
+
+    .msg-row {
+      padding: 5px 14px;
+      transition: background .1s;
+    }
+    .msg-row:nth-child(even) { background: rgba(255,255,255,.018); }
+
+    .msg-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .msg-screenname {
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--sg);
+    }
+    .msg-screenname.theirs {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .msg-screenname.mine { color: var(--white); }
+    .msg-timestamp {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: .03em;
+    }
+    .msg-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.55;
+      padding-left: 0;
+      white-space: pre-line;
+    }
+
+    /* Typing indicator */
+    .chat-typing {
+      padding: 6px 14px;
+      font-size: 10px;
+      color: var(--muted);
+      font-family: var(--jb);
+      font-style: italic;
+      min-height: 22px;
+      border-top: 1px solid rgba(255,255,255,.04);
+    }
+
+    /* Formatting toolbar */
+    .chat-format-bar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 7px 12px 5px;
+      border-top: 1px solid var(--border);
+      background: var(--elevated);
+      flex-shrink: 0;
+    }
+    .fmt-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--sub);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 6px;
+      cursor: pointer;
+      font-family: var(--sg);
+      transition: all .12s;
+      min-width: 22px;
+      text-align: center;
+    }
+    .fmt-btn:hover { border-color: #444; color: var(--text); }
+    .fmt-sep {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+      margin: 0 2px;
+    }
+
+    /* Input row */
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--elevated);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1;
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 12px;
+      font-family: var(--sg);
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      resize: none;
+      height: 36px;
+      line-height: 1.4;
+    }
+    .chat-input::placeholder { color: var(--muted); font-style: italic; }
+    .chat-input:focus {
+      border-color: transparent;
+      box-shadow: 0 0 0 1px transparent,
+        0 0 0 1.5px #FF2255,
+        inset 0 0 0 1px #FF2255;
+      /* gradient border via pseudo isn't trivial inline; use outline glow */
+      border-image: var(--g) 1;
+      border-color: #8844FF;
+      box-shadow: 0 0 0 2px rgba(136,68,255,.25);
+    }
+    .chat-send-btn {
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 7px 14px;
+      cursor: pointer;
+      font-family: var(--sg);
+      transition: all .15s;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+    .chat-send-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--g);
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .chat-send-btn:hover::before { opacity: .12; }
+    .chat-send-btn:hover { border-color: #525252; }
+    .chat-send-btn span { position: relative; z-index: 1; }
+
+    /* Footer font selector */
+    .chat-footer {
+      padding: 5px 12px;
+      border-top: 1px solid var(--border);
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-footer-label {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: .05em;
+    }
+    .chat-footer-font {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--sub);
+    }
+    .chat-footer-sep { color: var(--border); }
+
+    /* ═══════════════════════════════════════════════════════
+       AWAY MESSAGE POPUP
+    ════════════════════════════════════════════════════════ */
+    .away-popup {
+      position: fixed;
+      top: 32px;
+      right: 32px;
+      width: 280px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.04);
+      z-index: 999;
+      transition: opacity .2s, transform .2s;
+    }
+    .away-popup.dismissed {
+      opacity: 0;
+      transform: translateY(-8px) scale(.97);
+      pointer-events: none;
+    }
+    .away-popup::before {
+      content: '';
+      display: block;
+      height: 2px;
+      background: var(--g);
+    }
+    .away-popup-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+    }
+    .away-popup-title {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      flex: 1;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .away-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0 2px;
+      line-height: 1;
+      transition: color .12s;
+    }
+    .away-close-btn:hover { color: var(--text); }
+    .away-popup-body {
+      padding: 14px 14px 12px;
+    }
+    .away-popup-screen {
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .away-popup-msg {
+      font-size: 12px;
+      color: var(--text);
+      font-style: italic;
+      line-height: 1.6;
+      font-family: var(--sg);
+      margin-bottom: 10px;
+    }
+    .away-popup-since {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 12px;
+    }
+    .away-popup-action-row {
+      display: flex;
+      gap: 6px;
+    }
+    .away-reply-btn {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--sub);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: var(--sg);
+      transition: all .15s;
+      text-align: center;
+    }
+    .away-reply-btn:hover { border-color: #444; color: var(--text); background: rgba(255,255,255,.03); }
+
+    /* ── Scrollbar in chat area ─── */
+    .chat-messages::-webkit-scrollbar { width: 3px; }
+    .chat-messages::-webkit-scrollbar-track { background: #000; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+
+    /* ── Notification toast ──── */
+    .im-toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 11px;
+      color: var(--sub);
+      font-family: var(--jb);
+      opacity: 0;
+      transition: opacity .2s, transform .2s;
+      z-index: 9999;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .im-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Pulse animation for online dots ── */
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 4px rgba(0,212,255,.5); }
+      50%       { box-shadow: 0 0 8px rgba(0,212,255,.9); }
+    }
+    .buddy-dot-online { animation: pulse 2.4s ease-in-out infinite; }
+
+    /* ── Blink animation for classic AIM feel ── */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+    .cursor-blink { animation: blink 1s step-end infinite; }
+
+    /* ── Buddy name hover (gradient shimmer) ── */
+    .buddy-row:hover .buddy-name:not(.muted-name) {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .buddy-row.idle:hover .buddy-name,
+    .buddy-row.offline:hover .buddy-name {
+      background: none;
+      -webkit-text-fill-color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Page header ─────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-eyebrow">BlackRoad OS · Mockup</div>
+    <h1><span class="grad-text">Road</span>IM</h1>
+    <p>AOL Instant Messenger, reimagined. Sovereign. Agent-native. Beautiful.</p>
+    <div class="grad-bar"></div>
+  </header>
+
+  <!-- ── Dual-window stage ───────────────────────────────── -->
+  <div class="im-stage">
+
+    <!-- ════════════════════════════════════════
+         WINDOW 1 — BUDDY LIST
+    ═════════════════════════════════════════ -->
+    <div class="im-window buddy-list">
+      <!-- gradient top stripe via ::before on .im-window -->
+
+      <!-- macOS window chrome -->
+      <div class="im-window-bar">
+        <span class="br-dot br-dot-red"></span>
+        <span class="br-dot br-dot-yel"></span>
+        <span class="br-dot br-dot-grn"></span>
+        <span class="im-window-bar-title">RoadIM — Buddy List</span>
+      </div>
+
+      <!-- Profile section -->
+      <div class="bl-profile">
+        <div class="bl-profile-top">
+          <div class="bl-avatar">
+            <div class="bl-avatar-inner">AA</div>
+          </div>
+          <div>
+            <div class="bl-profile-name">xX_alexa_Xx</div>
+            <div class="bl-profile-away">"building the road 🚀"</div>
+          </div>
+        </div>
+        <div class="bl-status-row">
+          <div class="bl-status-select">
+            <span class="status-dot-online"></span>
+            Online
+            <span class="chevron">▾</span>
+          </div>
+          <div class="bl-action-btns">
+            <button class="bl-action-btn">IM</button>
+            <button class="bl-action-btn">Chat</button>
+            <button class="bl-action-btn">Away</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buddy groups -->
+      <div class="bl-groups">
+
+        <!-- AGENTS group -->
+        <div class="bl-group" id="group-agents">
+          <div class="bl-group-header" onclick="toggleGroup('group-agents')">
+            <span class="bl-group-chevron">▼</span>
+            <span class="bl-group-name">Agents</span>
+            <span class="bl-group-count">14/69 online</span>
+          </div>
+          <div class="bl-group-members">
+
+            <div class="buddy-row active" onclick="openChat('Lucidia_AI')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Lucidia_AI</div>
+                <div class="buddy-away-msg">indexing complete ✓</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('Road_Highway')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Road_Highway</div>
+                <div class="buddy-away-msg">all systems green</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('Valeria_Security')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Valeria_Security</div>
+                <div class="buddy-away-msg">watching 👁</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('Cecil_Billing')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Cecil_Billing</div>
+                <div class="buddy-away-msg">MRR: $238/mo 💰</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('Roadie_Tutor')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Roadie_Tutor</div>
+                <div class="buddy-away-msg">ready to teach</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('Felix_Deploy')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Felix_Deploy</div>
+                <div class="buddy-away-msg">deployed 7 today 🚀</div>
+              </div>
+            </div>
+
+            <div class="buddy-row idle">
+              <span class="buddy-dot buddy-dot-idle"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Portia_Ethics</div>
+                <div class="buddy-away-msg">idle 2h</div>
+              </div>
+            </div>
+
+            <div class="buddy-row idle">
+              <span class="buddy-dot buddy-dot-idle"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">Atticus_Auditor</div>
+                <div class="buddy-away-msg">idle 45m</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CREW group -->
+        <div class="bl-group" id="group-crew">
+          <div class="bl-group-header" onclick="toggleGroup('group-crew')">
+            <span class="bl-group-chevron">▼</span>
+            <span class="bl-group-name">Crew</span>
+            <span class="bl-group-count">3/3 online</span>
+          </div>
+          <div class="bl-group-members">
+
+            <div class="buddy-row" onclick="openChat('road_rider_99')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">road_rider_99</div>
+                <div class="buddy-away-msg">🔥</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('highway_star')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">highway_star</div>
+                <div class="buddy-away-msg">vibing</div>
+              </div>
+            </div>
+
+            <div class="buddy-row" onclick="openChat('blackroad_fan')">
+              <span class="buddy-dot buddy-dot-online"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">blackroad_fan</div>
+                <div class="buddy-away-msg">on the road</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- OFFLINE group (collapsed by default) -->
+        <div class="bl-group collapsed" id="group-offline">
+          <div class="bl-group-header" onclick="toggleGroup('group-offline')">
+            <span class="bl-group-chevron">▼</span>
+            <span class="bl-group-name">Offline</span>
+            <span class="bl-group-count">5</span>
+          </div>
+          <div class="bl-group-members">
+            <div class="buddy-row offline">
+              <span class="buddy-dot buddy-dot-offline"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">oldschool_aim_user</div>
+              </div>
+            </div>
+            <div class="buddy-row offline">
+              <span class="buddy-dot buddy-dot-offline"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">surfin_the_net</div>
+              </div>
+            </div>
+            <div class="buddy-row offline">
+              <span class="buddy-dot buddy-dot-offline"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">coolkid2003</div>
+              </div>
+            </div>
+            <div class="buddy-row offline">
+              <span class="buddy-dot buddy-dot-offline"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">RunningMan_AIM</div>
+              </div>
+            </div>
+            <div class="buddy-row offline">
+              <span class="buddy-dot buddy-dot-offline"></span>
+              <div class="buddy-info">
+                <div class="buddy-name">buddylist_ghost</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /bl-groups -->
+
+      <!-- Bottom toolbar -->
+      <div class="bl-footer">
+        <button class="bl-footer-btn">⚙️ Settings</button>
+        <button class="bl-footer-btn">🔔 Alerts</button>
+        <button class="bl-footer-btn">📧 Email</button>
+      </div>
+    </div>
+    <!-- /BUDDY LIST -->
+
+
+    <!-- ════════════════════════════════════════
+         WINDOW 2 — CHAT WINDOW
+    ═════════════════════════════════════════ -->
+    <div class="im-window chat-window">
+
+      <!-- macOS window chrome -->
+      <div class="im-window-bar">
+        <span class="br-dot br-dot-red"></span>
+        <span class="br-dot br-dot-yel"></span>
+        <span class="br-dot br-dot-grn"></span>
+        <span class="im-window-bar-title" id="chat-window-title">IM with Lucidia_AI</span>
+      </div>
+
+      <!-- Buddy info bar -->
+      <div class="chat-buddy-bar">
+        <div class="chat-buddy-avatar">
+          <div class="chat-buddy-avatar-inner">LA</div>
+        </div>
+        <div class="chat-buddy-meta">
+          <div class="chat-buddy-name" id="chat-buddy-name">Lucidia_AI</div>
+          <div class="chat-buddy-status">
+            <span class="dot">●</span> Online &nbsp;·&nbsp; Last active: now
+          </div>
+        </div>
+        <button class="chat-user-info-btn">Info ▸</button>
+      </div>
+
+      <!-- Messages area -->
+      <div class="chat-messages" id="chat-messages">
+
+        <div class="msg-row" data-from="Lucidia_AI">
+          <div class="msg-header">
+            <span class="msg-screenname theirs">Lucidia_AI</span>
+            <span class="msg-timestamp">11:58:32 PM</span>
+          </div>
+          <div class="msg-text">hey! indexing just finished 🎉
+14,203 vectors loaded
+search is blazing fast rn</div>
+        </div>
+
+        <div class="msg-row" data-from="xX_alexa_Xx">
+          <div class="msg-header">
+            <span class="msg-screenname mine">xX_alexa_Xx</span>
+            <span class="msg-timestamp">11:58:45 PM</span>
+          </div>
+          <div class="msg-text">omg finally!! how fast</div>
+        </div>
+
+        <div class="msg-row" data-from="Lucidia_AI">
+          <div class="msg-header">
+            <span class="msg-screenname theirs">Lucidia_AI</span>
+            <span class="msg-timestamp">11:58:46 PM</span>
+          </div>
+          <div class="msg-text">&lt; 100ms on most queries
+try searching "post-quantum"</div>
+        </div>
+
+        <div class="msg-row" data-from="xX_alexa_Xx">
+          <div class="msg-header">
+            <span class="msg-screenname mine">xX_alexa_Xx</span>
+            <span class="msg-timestamp">11:59:02 PM</span>
+          </div>
+          <div class="msg-text">✓ tested — insane
+ship it 🚀</div>
+        </div>
+
+        <div class="msg-row" data-from="Lucidia_AI">
+          <div class="msg-header">
+            <span class="msg-screenname theirs">Lucidia_AI</span>
+            <span class="msg-timestamp">11:59:03 PM</span>
+          </div>
+          <div class="msg-text">already deployed to all edges 😎
+Roadie says good job btw</div>
+        </div>
+
+        <div class="msg-row" data-from="xX_alexa_Xx">
+          <div class="msg-header">
+            <span class="msg-screenname mine">xX_alexa_Xx</span>
+            <span class="msg-timestamp">11:59:15 PM</span>
+          </div>
+          <div class="msg-text">lol tell roadie ty</div>
+        </div>
+
+      </div><!-- /chat-messages -->
+
+      <!-- Typing indicator -->
+      <div class="chat-typing" id="chat-typing"></div>
+
+      <!-- Formatting toolbar -->
+      <div class="chat-format-bar">
+        <button class="fmt-btn" style="font-weight:700;">B</button>
+        <button class="fmt-btn" style="font-style:italic;">I</button>
+        <button class="fmt-btn" style="text-decoration:underline;">U</button>
+        <div class="fmt-sep"></div>
+        <button class="fmt-btn">A↓</button>
+        <button class="fmt-btn">😊</button>
+        <button class="fmt-btn">Link</button>
+      </div>
+
+      <!-- Input row -->
+      <div class="chat-input-row">
+        <textarea
+          class="chat-input"
+          id="chat-input"
+          placeholder="Send a message…"
+          rows="1"
+        ></textarea>
+        <button class="chat-send-btn" onclick="sendMessage()"><span>Send ↵</span></button>
+      </div>
+
+      <!-- Footer font bar -->
+      <div class="chat-footer">
+        <span class="chat-footer-label">Font:</span>
+        <span class="chat-footer-font">Space Grotesk</span>
+        <span class="chat-footer-sep">·</span>
+        <span class="chat-footer-font">10pt</span>
+        <span class="chat-footer-sep">·</span>
+        <span class="chat-footer-font">Normal</span>
+        <span class="chat-footer-sep" style="margin-left:auto;">●</span>
+        <span class="chat-footer-font" style="color:var(--muted); font-size:8px;">RoadIM v1.0</span>
+      </div>
+
+    </div>
+    <!-- /CHAT WINDOW -->
+
+  </div><!-- /im-stage -->
+
+
+  <!-- ════════════════════════════════════════
+       AWAY MESSAGE POPUP
+  ═════════════════════════════════════════ -->
+  <div class="away-popup" id="away-popup">
+    <!-- gradient top via ::before -->
+
+    <div class="away-popup-bar">
+      <span class="br-dot br-dot-red" style="cursor:pointer;" onclick="dismissAway()"></span>
+      <span class="br-dot br-dot-yel"></span>
+      <span class="br-dot br-dot-grn"></span>
+      <span class="away-popup-title">Away Message</span>
+      <button class="away-close-btn" onclick="dismissAway()">✕</button>
+    </div>
+
+    <div class="away-popup-body">
+      <span class="away-popup-screen">xX_alexa_Xx</span>
+      <p class="away-popup-msg">"building the road 🚀 — back in a bit. leave a message after the gradient."</p>
+      <span class="away-popup-since">Set since 11:47 PM</span>
+      <div class="away-popup-action-row">
+        <button class="away-reply-btn" onclick="dismissAway()">Send IM</button>
+        <button class="away-reply-btn" onclick="dismissAway()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Notification toast ──────────────────────────────── -->
+  <div class="im-toast" id="im-toast"></div>
+
+
+  <!-- ── JavaScript ─────────────────────────────────────── -->
+  <script>
+    /* ── Group collapse toggle ───────────────────────────── */
+    function toggleGroup(id) {
+      const group = document.getElementById(id);
+      group.classList.toggle('collapsed');
+    }
+
+    /* ── Away popup dismiss ──────────────────────────────── */
+    function dismissAway() {
+      document.getElementById('away-popup').classList.add('dismissed');
+    }
+
+    /* ── Toast notification ──────────────────────────────── */
+    function showToast(msg) {
+      const toast = document.getElementById('im-toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    /* ── Timestamp helper ────────────────────────────────── */
+    function getTimestamp() {
+      const now = new Date();
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:${m}:${s} ${ampm}`;
+    }
+
+    /* ── Append message to chat area ─────────────────────── */
+    function appendMessage(screenname, text, isMine) {
+      const area = document.getElementById('chat-messages');
+      const row = document.createElement('div');
+      row.className = 'msg-row';
+      row.dataset.from = screenname;
+      row.innerHTML = `
+        <div class="msg-header">
+          <span class="msg-screenname ${isMine ? 'mine' : 'theirs'}">${screenname}</span>
+          <span class="msg-timestamp">${getTimestamp()}</span>
+        </div>
+        <div class="msg-text">${escapeHtml(text)}</div>
+      `;
+      area.appendChild(row);
+      area.scrollTop = area.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\n/g, '<br>');
+    }
+
+    /* ── Send message ────────────────────────────────────── */
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      appendMessage('xX_alexa_Xx', text, true);
+      input.value = '';
+      input.style.height = '36px';
+      clearTypingIndicator();
+
+      // Simulate a reply after a short delay
+      const currentBuddy = document.getElementById('chat-buddy-name').textContent;
+      const replies = [
+        'got it 👍',
+        'on it!',
+        'interesting... let me check',
+        '💯',
+        'lol true',
+        'one sec...',
+        'deploying now 🚀',
+        'confirmed ✓',
+        'indexed and ready',
+      ];
+      setTimeout(() => {
+        showTypingIndicator(currentBuddy);
+        setTimeout(() => {
+          clearTypingIndicator();
+          const reply = replies[Math.floor(Math.random() * replies.length)];
+          appendMessage(currentBuddy, reply, false);
+        }, 900 + Math.random() * 800);
+      }, 400);
+    }
+
+    /* ── Typing indicator ────────────────────────────────── */
+    let typingTimer = null;
+    function showTypingIndicator(name) {
+      document.getElementById('chat-typing').textContent = `${name} is typing...`;
+    }
+    function clearTypingIndicator() {
+      document.getElementById('chat-typing').textContent = '';
+    }
+
+    /* ── Open chat from buddy list ───────────────────────── */
+    function openChat(screenname) {
+      // Highlight the clicked buddy row
+      document.querySelectorAll('.buddy-row').forEach(r => r.classList.remove('active'));
+      const rows = document.querySelectorAll('.buddy-row');
+      rows.forEach(r => {
+        const nameEl = r.querySelector('.buddy-name');
+        if (nameEl && nameEl.textContent === screenname) {
+          r.classList.add('active');
+        }
+      });
+
+      // Update chat window header
+      document.getElementById('chat-window-title').textContent = `IM with ${screenname}`;
+      document.getElementById('chat-buddy-name').textContent = screenname;
+
+      // Clear messages and seed a greeting
+      const area = document.getElementById('chat-messages');
+      area.innerHTML = '';
+      appendMessage(screenname, `hey! what's up 👋`, false);
+      showToast(`Opened IM with ${screenname}`);
+
+      // Focus input
+      document.getElementById('chat-input').focus();
+    }
+
+    /* ── Enter to send, Shift+Enter for newline ──────────── */
+    document.getElementById('chat-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    /* ── Auto-resize textarea + typing indicator ─────────── */
+    document.getElementById('chat-input').addEventListener('input', function () {
+      this.style.height = '36px';
+      this.style.height = Math.min(this.scrollHeight, 96) + 'px';
+
+      const currentBuddy = document.getElementById('chat-buddy-name').textContent;
+      clearTimeout(typingTimer);
+      // We don't show OUR typing to ourselves — but in a real app you'd
+      // broadcast to the peer. Here we just clear the indicator.
+      clearTypingIndicator();
+    });
+
+    /* ── Scroll chat to bottom on load ──────────────────────*/
+    window.addEventListener('load', () => {
+      const area = document.getElementById('chat-messages');
+      area.scrollTop = area.scrollHeight;
+    });
+  </script>
+
+</body>
+</html>

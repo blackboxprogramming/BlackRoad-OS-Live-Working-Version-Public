@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>status.blackroad.io — BlackRoad Platform Status</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Page base ─────────────────────────────────────────────────── */
+    body { font-family: var(--sg); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    a { color: inherit; text-decoration: none; }
+
+    .mono { font-family: var(--jb); }
+
+    /* ── Gradient utilities ─────────────────────────────────────────── */
+    .grad-text {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .grad-border {
+      position: relative;
+      background: var(--bg);
+      border: 1px solid transparent;
+      background-clip: padding-box;
+    }
+    .grad-border::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: var(--g);
+      z-index: -1;
+    }
+
+    /* ── NAV ───────────────────────────────────────────────────────── */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--white10);
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .nav-logo-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--g);
+      display: inline-block;
+      animation: pulse-dot 2.4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(1.35); }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--sub);
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--white05); }
+
+    .nav-subscribe {
+      position: relative;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      background: var(--bg);
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .nav-subscribe::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 8px;
+      background: var(--g);
+      z-index: -1;
+    }
+    .nav-subscribe:hover { opacity: 0.85; }
+
+    /* ── HERO ──────────────────────────────────────────────────────── */
+    .hero {
+      background: var(--bg);
+      border-bottom: 1px solid var(--white10);
+      padding: 72px 32px 64px;
+      text-align: center;
+    }
+
+    .hero-inner { max-width: 720px; margin: 0 auto; }
+
+    .hero-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .hero-dot-wrap {
+      position: relative;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    .hero-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--g);
+      animation: hero-pulse 3s ease-in-out infinite;
+    }
+    .hero-dot-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--g);
+      opacity: 0;
+      animation: hero-ring 3s ease-in-out infinite;
+    }
+
+    @keyframes hero-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.8; transform: scale(0.92); }
+    }
+    @keyframes hero-ring {
+      0%   { transform: scale(0.8); opacity: 0.5; }
+      60%  { transform: scale(2.4); opacity: 0; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+
+    .hero-headline {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .hero-sub {
+      margin-top: 14px;
+      font-size: 15px;
+      color: var(--sub);
+      font-weight: 400;
+    }
+
+    .hero-uptime {
+      margin-top: 20px;
+      display: inline-block;
+      font-family: var(--jb);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      background: var(--white05);
+      border: 1px solid var(--white10);
+      border-radius: 8px;
+      padding: 8px 18px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-updated {
+      margin-top: 14px;
+      font-size: 12px;
+      font-family: var(--jb);
+      color: var(--sub);
+    }
+
+    /* ── Main layout ───────────────────────────────────────────────── */
+    .page { max-width: 1200px; margin: 0 auto; padding: 0 32px 80px; }
+
+    /* ── Section headings ───────────────────────────────────────────── */
+    .section { margin-top: 56px; }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--white10);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sub);
+    }
+
+    .section-meta {
+      font-size: 12px;
+      font-family: var(--jb);
+      color: var(--sub);
+    }
+
+    /* ── Group label inside services ────────────────────────────────── */
+    .service-group-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 18px 0 8px;
+    }
+    .service-group-label:first-child { padding-top: 8px; }
+
+    /* ── Service / Fleet rows ───────────────────────────────────────── */
+    .status-row {
+      display: grid;
+      grid-template-columns: 220px 130px 90px 78px 1fr;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: background 0.15s;
+      cursor: default;
+    }
+    .status-row:hover { background: var(--white05); }
+
+    .status-row-fleet {
+      grid-template-columns: 200px 130px 90px 78px 1fr;
+    }
+
+    .row-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .row-name .row-icon {
+      font-size: 12px;
+      opacity: 0.4;
+    }
+
+    .row-status {
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .row-status.operational { color: var(--text); }
+    .row-status.degraded    { color: var(--sub); }
+    .row-status.maintenance { color: var(--muted); }
+
+    .status-pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pip-op   { background: var(--text); opacity: 0.7; }
+    .pip-deg  { background: var(--sub); }
+    .pip-mnt  { background: var(--muted); }
+
+    .row-metric {
+      font-family: var(--jb);
+      font-size: 12px;
+      color: var(--sub);
+      text-align: right;
+    }
+
+    .row-uptime {
+      font-family: var(--jb);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: right;
+    }
+
+    /* ── 90-day uptime bar ──────────────────────────────────────────── */
+    .uptime-bars {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 28px;
+    }
+
+    .ubar {
+      flex: 1;
+      min-width: 2px;
+      max-width: 9px;
+      height: 22px;
+      border-radius: 2px;
+      background: var(--text);
+      opacity: 0.18;
+      transform: scaleY(0);
+      transform-origin: bottom;
+      transition: opacity 0.15s, transform 0.3s;
+      position: relative;
+      cursor: pointer;
+    }
+    .ubar.op  { opacity: 0.2; }
+    .ubar.inc { background: var(--muted); opacity: 0.7; }
+    .ubar.loaded { transform: scaleY(1); }
+    .ubar:hover { opacity: 0.95 !important; }
+
+    /* Tooltip */
+    .ubar::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a1a;
+      border: 1px solid var(--white10);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-family: var(--jb);
+      font-size: 11px;
+      font-style: normal;
+      color: var(--text);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 200;
+      transition: opacity 0.12s;
+    }
+    .ubar:hover::after { opacity: 1; }
+
+    /* Header row for bars section */
+    .bars-header {
+      display: grid;
+      grid-template-columns: 220px 130px 90px 78px 1fr;
+      gap: 12px;
+      padding: 0 14px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .bars-header-fleet {
+      grid-template-columns: 200px 130px 90px 78px 1fr;
+    }
+    .bars-header .col-right { text-align: right; }
+    .bars-header .col-bars  { padding-left: 4px; }
+
+    /* ── Incidents ─────────────────────────────────────────────────── */
+    .no-incidents-banner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white05);
+      border: 1px solid var(--white10);
+      border-radius: 10px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .no-incidents-banner .check-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--white10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+
+    .incident-card {
+      background: var(--s1);
+      border: 1px solid var(--white10);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 10px;
+      display: grid;
+      grid-template-columns: 190px 1fr auto;
+      gap: 16px;
+      align-items: center;
+      transition: border-color 0.15s;
+    }
+    .incident-card:hover { border-color: var(--white20); }
+
+    .incident-ts {
+      font-family: var(--jb);
+      font-size: 12px;
+      color: var(--sub);
+      line-height: 1.4;
+    }
+
+    .incident-body {}
+    .incident-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .incident-resolution {
+      font-size: 12px;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-resolved {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: var(--white05);
+      border: 1px solid var(--white10);
+      color: var(--sub);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    .incident-link {
+      font-size: 13px;
+      color: var(--sub);
+      transition: color 0.15s;
+      white-space: nowrap;
+    }
+    .incident-link:hover { color: var(--text); }
+
+    /* ── Maintenance ───────────────────────────────────────────────── */
+    .maint-card {
+      background: var(--s1);
+      border: 1px solid var(--white10);
+      border-radius: 10px;
+      padding: 22px 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .maint-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--sub);
+      background: var(--white05);
+      border: 1px solid var(--white10);
+      border-radius: 6px;
+      padding: 3px 10px;
+      margin-bottom: 12px;
+    }
+    .maint-badge-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--sub);
+    }
+
+    .maint-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .maint-window {
+      font-family: var(--jb);
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 6px;
+    }
+
+    .maint-note {
+      font-size: 13px;
+      color: var(--sub);
+    }
+
+    .maint-subscribe {
+      position: relative;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-family: var(--sg);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      background: var(--bg);
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .maint-subscribe::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 8px;
+      background: var(--g);
+      z-index: -1;
+    }
+    .maint-subscribe:hover { opacity: 0.82; }
+
+    /* ── Response times ─────────────────────────────────────────────── */
+    .rt-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 10px;
+    }
+
+    .rt-row {
+      background: var(--s1);
+      border: 1px solid var(--white10);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: 200px 1fr 56px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rt-name {
+      font-family: var(--jb);
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    .rt-bar-track {
+      height: 4px;
+      background: var(--white10);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .rt-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--g);
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .rt-val {
+      font-family: var(--jb);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: right;
+    }
+
+    /* ── Subscribe modal ────────────────────────────────────────────── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: #111;
+      border: 1px solid var(--white10);
+      border-radius: 12px;
+      padding: 36px 40px;
+      width: 480px;
+      max-width: 94vw;
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.2s;
+    }
+    .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .modal-sub {
+      font-size: 14px;
+      color: var(--sub);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+
+    .modal-input-row {
+      display: flex;
+      gap: 10px;
+    }
+    .modal-input {
+      flex: 1;
+      background: var(--white05);
+      border: 1px solid var(--white10);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: var(--sg);
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .modal-input::placeholder { color: var(--muted); }
+    .modal-input:focus { border-color: var(--white20); }
+
+    .modal-btn {
+      position: relative;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: var(--sg);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      background: var(--bg);
+      border: 1px solid transparent;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .modal-btn::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 8px;
+      background: var(--g);
+      z-index: -1;
+    }
+    .modal-btn:hover { opacity: 0.82; }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      background: none;
+      border: none;
+      color: var(--sub);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal-options {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .modal-option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: var(--sub);
+      cursor: pointer;
+    }
+    .modal-option input[type=checkbox] {
+      accent-color: var(--text);
+      cursor: pointer;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid var(--white10);
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-inner {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sub);
+    }
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+    .footer-links a {
+      font-size: 12px;
+      color: var(--muted);
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--sub); }
+    .footer-copy {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 48px 20px 40px; }
+      .page { padding: 0 20px 60px; }
+      .status-row, .status-row-fleet {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+      }
+      .status-row .row-metric,
+      .status-row .row-uptime { display: none; }
+      .status-row .uptime-bars { display: none; }
+      .bars-header { display: none; }
+      .incident-card { grid-template-columns: 1fr; gap: 8px; }
+      .maint-card { grid-template-columns: 1fr; }
+      .rt-grid { grid-template-columns: 1fr; }
+      .rt-row { grid-template-columns: 1fr 1fr 56px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAV ══════════════════════════════════════════════════════════ -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="nav-logo-dot"></span>
+        status.blackroad.io
+      </a>
+      <ul class="nav-links">
+        <li><a href="#services">Services</a></li>
+        <li><a href="#fleet">Fleet</a></li>
+        <li><a href="#incidents">Incidents</a></li>
+        <li><a href="#maintenance">Maintenance</a></li>
+      </ul>
+      <button class="nav-subscribe" onclick="openModal()">Subscribe to updates</button>
+    </div>
+  </nav>
+
+  <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-status-row">
+        <div class="hero-dot-wrap">
+          <div class="hero-dot-ring"></div>
+          <div class="hero-dot"></div>
+        </div>
+        <h1 class="hero-headline">All Systems Operational</h1>
+      </div>
+      <p class="hero-sub">18 services &nbsp;·&nbsp; 9 fleet hosts &nbsp;·&nbsp; Last updated <span id="last-updated">just now</span></p>
+      <div class="hero-uptime">Uptime last 90 days: 99.97%</div>
+    </div>
+  </section>
+
+  <!-- ══ MAIN PAGE ══════════════════════════════════════════════════════ -->
+  <main class="page">
+
+    <!-- ── SECTION 1: Platform Services ──────────────────────────────── -->
+    <section class="section" id="services">
+      <div class="section-header">
+        <span class="section-title">Platform Services</span>
+        <span class="section-meta mono">18 services · all operational</span>
+      </div>
+
+      <div class="bars-header">
+        <span>Service</span>
+        <span>Status</span>
+        <span class="col-right">Response</span>
+        <span class="col-right">Uptime</span>
+        <span class="col-bars">Last 90 days</span>
+      </div>
+
+      <!-- Core Platform -->
+      <div class="service-group-label">Core Platform</div>
+
+      <div class="status-row" data-service="BlackRoad OS" data-incidents="17,45" data-uptime="99.98" data-metric="31ms">
+        <div class="row-name"><span class="row-icon">⬡</span> BlackRoad OS</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">31ms</div>
+        <div class="row-uptime">99.98%</div>
+        <div class="uptime-bars" data-incidents="17,45"></div>
+      </div>
+
+      <div class="status-row" data-service="CarKeys" data-incidents="45" data-uptime="99.99" data-metric="18ms">
+        <div class="row-name"><span class="row-icon">◈</span> CarKeys</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">18ms</div>
+        <div class="row-uptime">99.99%</div>
+        <div class="uptime-bars" data-incidents="45"></div>
+      </div>
+
+      <div class="status-row" data-service="RoadTrip" data-incidents="62,63" data-uptime="99.94" data-metric="41ms">
+        <div class="row-name"><span class="row-icon">◎</span> RoadTrip</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">41ms</div>
+        <div class="row-uptime">99.94%</div>
+        <div class="uptime-bars" data-incidents="62,63"></div>
+      </div>
+
+      <div class="status-row" data-service="RoadChat" data-incidents="62" data-uptime="99.95" data-metric="38ms">
+        <div class="row-name"><span class="row-icon">◉</span> RoadChat</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">38ms</div>
+        <div class="row-uptime">99.95%</div>
+        <div class="uptime-bars" data-incidents="62"></div>
+      </div>
+
+      <div class="status-row" data-service="RoadCode" data-incidents="" data-uptime="100.00" data-metric="22ms">
+        <div class="row-name"><span class="row-icon">◫</span> RoadCode</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">22ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <!-- Finance -->
+      <div class="service-group-label">Finance</div>
+
+      <div class="status-row" data-service="RoadChain" data-incidents="29" data-uptime="99.96" data-metric="67ms">
+        <div class="row-name"><span class="row-icon">⬡</span> RoadChain</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">67ms</div>
+        <div class="row-uptime">99.96%</div>
+        <div class="uptime-bars" data-incidents="29"></div>
+      </div>
+
+      <div class="status-row" data-service="RoadCoin" data-incidents="" data-uptime="100.00" data-metric="44ms">
+        <div class="row-name"><span class="row-icon">◑</span> RoadCoin</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">44ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row" data-service="RoadPay" data-incidents="53" data-uptime="99.97" data-metric="29ms">
+        <div class="row-name"><span class="row-icon">◷</span> RoadPay</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">29ms</div>
+        <div class="row-uptime">99.97%</div>
+        <div class="uptime-bars" data-incidents="53"></div>
+      </div>
+
+      <!-- Productivity -->
+      <div class="service-group-label">Productivity</div>
+
+      <div class="status-row" data-service="RoadBook" data-incidents="" data-uptime="100.00" data-metric="19ms">
+        <div class="row-name"><span class="row-icon">◻</span> RoadBook</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">19ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row" data-service="RoadWork" data-incidents="38" data-uptime="99.98" data-metric="27ms">
+        <div class="row-name"><span class="row-icon">◼</span> RoadWork</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">27ms</div>
+        <div class="row-uptime">99.98%</div>
+        <div class="uptime-bars" data-incidents="38"></div>
+      </div>
+
+      <div class="status-row" data-service="OfficeRoad" data-incidents="" data-uptime="100.00" data-metric="24ms">
+        <div class="row-name"><span class="row-icon">◧</span> OfficeRoad</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">24ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <!-- Discovery -->
+      <div class="service-group-label">Discovery</div>
+
+      <div class="status-row" data-service="RoadView" data-incidents="71" data-uptime="99.97" data-metric="52ms">
+        <div class="row-name"><span class="row-icon">◯</span> RoadView</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">52ms</div>
+        <div class="row-uptime">99.97%</div>
+        <div class="uptime-bars" data-incidents="71"></div>
+      </div>
+
+      <div class="status-row" data-service="RoadWorld" data-incidents="" data-uptime="100.00" data-metric="36ms">
+        <div class="row-name"><span class="row-icon">◌</span> RoadWorld</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">36ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row" data-service="RoadSide" data-incidents="82" data-uptime="99.96" data-metric="33ms">
+        <div class="row-name"><span class="row-icon">◮</span> RoadSide</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">33ms</div>
+        <div class="row-uptime">99.96%</div>
+        <div class="uptime-bars" data-incidents="82"></div>
+      </div>
+
+      <div class="status-row" data-service="CarPool" data-incidents="" data-uptime="100.00" data-metric="28ms">
+        <div class="row-name"><span class="row-icon">◭</span> CarPool</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">28ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <!-- Infrastructure -->
+      <div class="service-group-label">Infrastructure</div>
+
+      <div class="status-row" data-service="API Gateway" data-incidents="63,76" data-uptime="99.93" data-metric="23ms">
+        <div class="row-name"><span class="row-icon">▷</span> API Gateway</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">23ms</div>
+        <div class="row-uptime">99.93%</div>
+        <div class="uptime-bars" data-incidents="63,76"></div>
+      </div>
+
+      <div class="status-row" data-service="Docs" data-incidents="" data-uptime="100.00" data-metric="14ms">
+        <div class="row-name"><span class="row-icon">▤</span> Docs</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">14ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row" data-service="Brand" data-incidents="" data-uptime="100.00" data-metric="11ms">
+        <div class="row-name"><span class="row-icon">◈</span> Brand</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Operational</div>
+        <div class="row-metric">11ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+    </section>
+
+    <!-- ── SECTION 2: Fleet Hosts ──────────────────────────────────────── -->
+    <section class="section" id="fleet">
+      <div class="section-header">
+        <span class="section-title">Fleet Hosts</span>
+        <span class="section-meta mono">9 Pi nodes · all online</span>
+      </div>
+
+      <div class="bars-header bars-header-fleet">
+        <span>Host</span>
+        <span>Status</span>
+        <span class="col-right">Ping</span>
+        <span class="col-right">Uptime</span>
+        <span class="col-bars">Last 90 days</span>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="lucidia" data-incidents="" data-uptime="100.00" data-metric="2ms">
+        <div class="row-name"><span class="row-icon">●</span> lucidia</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">2ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="aria" data-incidents="58" data-uptime="99.97" data-metric="3ms">
+        <div class="row-name"><span class="row-icon">●</span> aria</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">3ms</div>
+        <div class="row-uptime">99.97%</div>
+        <div class="uptime-bars" data-incidents="58"></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="alice" data-incidents="75" data-uptime="99.91" data-metric="4ms">
+        <div class="row-name"><span class="row-icon">●</span> alice</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">4ms</div>
+        <div class="row-uptime">99.91%</div>
+        <div class="uptime-bars" data-incidents="75"></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="cecilia" data-incidents="" data-uptime="100.00" data-metric="2ms">
+        <div class="row-name"><span class="row-icon">●</span> cecilia</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">2ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="octavia" data-incidents="33" data-uptime="99.98" data-metric="3ms">
+        <div class="row-name"><span class="row-icon">●</span> octavia</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">3ms</div>
+        <div class="row-uptime">99.98%</div>
+        <div class="uptime-bars" data-incidents="33"></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="anastasia" data-incidents="" data-uptime="100.00" data-metric="2ms">
+        <div class="row-name"><span class="row-icon">●</span> anastasia</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">2ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="alexandria" data-incidents="88" data-uptime="99.96" data-metric="5ms">
+        <div class="row-name"><span class="row-icon">●</span> alexandria</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">5ms</div>
+        <div class="row-uptime">99.96%</div>
+        <div class="uptime-bars" data-incidents="88"></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="blackroad" data-incidents="" data-uptime="100.00" data-metric="1ms">
+        <div class="row-name"><span class="row-icon">●</span> blackroad</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">1ms</div>
+        <div class="row-uptime">100.00%</div>
+        <div class="uptime-bars" data-incidents=""></div>
+      </div>
+
+      <div class="status-row status-row-fleet" data-service="gematria" data-incidents="41" data-uptime="99.97" data-metric="3ms">
+        <div class="row-name"><span class="row-icon">●</span> gematria</div>
+        <div class="row-status operational"><span class="status-pip pip-op"></span> Online</div>
+        <div class="row-metric">3ms</div>
+        <div class="row-uptime">99.97%</div>
+        <div class="uptime-bars" data-incidents="41"></div>
+      </div>
+
+    </section>
+
+    <!-- ── SECTION 3: Recent Incidents ────────────────────────────────── -->
+    <section class="section" id="incidents">
+      <div class="section-header">
+        <span class="section-title">Recent Incidents</span>
+        <span class="section-meta mono">3 resolved · 0 active</span>
+      </div>
+
+      <div class="no-incidents-banner">
+        <div class="check-icon">✓</div>
+        <span>No active incidents — all systems operating normally</span>
+      </div>
+
+      <div class="incident-card">
+        <div class="incident-ts">
+          2026-04-09<br>
+          14:23 UTC
+        </div>
+        <div class="incident-body">
+          <div class="incident-title">RoadChat elevated error rate</div>
+          <div class="incident-resolution">
+            <span class="badge-resolved">Resolved</span>
+            Resolved in 12 min &nbsp;·&nbsp; Affected: RoadChat API
+          </div>
+        </div>
+        <a href="#" class="incident-link">View details →</a>
+      </div>
+
+      <div class="incident-card">
+        <div class="incident-ts">
+          2026-03-28<br>
+          09:15 UTC
+        </div>
+        <div class="incident-body">
+          <div class="incident-title">API Gateway latency spike</div>
+          <div class="incident-resolution">
+            <span class="badge-resolved">Resolved</span>
+            Resolved in 4 min &nbsp;·&nbsp; Affected: API Gateway
+          </div>
+        </div>
+        <a href="#" class="incident-link">View details →</a>
+      </div>
+
+      <div class="incident-card">
+        <div class="incident-ts">
+          2026-03-15<br>
+          22:07 UTC
+        </div>
+        <div class="incident-body">
+          <div class="incident-title">alice.pi connectivity lost</div>
+          <div class="incident-resolution">
+            <span class="badge-resolved">Resolved</span>
+            Resolved in 47 min &nbsp;·&nbsp; Affected: alice fleet node
+          </div>
+        </div>
+        <a href="#" class="incident-link">View details →</a>
+      </div>
+
+    </section>
+
+    <!-- ── SECTION 4: Scheduled Maintenance ───────────────────────────── -->
+    <section class="section" id="maintenance">
+      <div class="section-header">
+        <span class="section-title">Scheduled Maintenance</span>
+        <span class="section-meta mono">1 upcoming</span>
+      </div>
+
+      <div class="maint-card">
+        <div>
+          <div class="maint-badge">
+            <span class="maint-badge-dot"></span>
+            Scheduled
+          </div>
+          <div class="maint-title">API Gateway certificate rotation</div>
+          <div class="maint-window mono">2026-04-15 &nbsp;02:00 – 04:00 UTC &nbsp;·&nbsp; 2h window</div>
+          <div class="maint-note">No user impact expected. Traffic will be routed through secondary edge during rotation.</div>
+        </div>
+        <button class="maint-subscribe" onclick="openModal()">Subscribe to notifications</button>
+      </div>
+
+    </section>
+
+    <!-- ── SECTION 5: Response Times ──────────────────────────────────── -->
+    <section class="section" id="response-times">
+      <div class="section-header">
+        <span class="section-title">Response Times</span>
+        <span class="section-meta mono">24h average · p50</span>
+      </div>
+
+      <div class="rt-grid" id="rt-grid">
+
+        <div class="rt-row">
+          <div class="rt-name">api.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="11"></div></div>
+          <div class="rt-val">23ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">chat.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="20"></div></div>
+          <div class="rt-val">41ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadchain.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="33"></div></div>
+          <div class="rt-val">67ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">carkeys.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="9"></div></div>
+          <div class="rt-val">18ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadtrip.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="20"></div></div>
+          <div class="rt-val">41ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadpay.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="14"></div></div>
+          <div class="rt-val">29ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadview.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="25"></div></div>
+          <div class="rt-val">52ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadwork.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="13"></div></div>
+          <div class="rt-val">27ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadbook.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="9"></div></div>
+          <div class="rt-val">19ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadside.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="16"></div></div>
+          <div class="rt-val">33ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadcoin.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="21"></div></div>
+          <div class="rt-val">44ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">docs.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="7"></div></div>
+          <div class="rt-val">14ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadworld.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="17"></div></div>
+          <div class="rt-val">36ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">carpool.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="13"></div></div>
+          <div class="rt-val">28ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">roadcode.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="11"></div></div>
+          <div class="rt-val">22ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">officeroad.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="12"></div></div>
+          <div class="rt-val">24ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">brand.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="5"></div></div>
+          <div class="rt-val">11ms</div>
+        </div>
+
+        <div class="rt-row">
+          <div class="rt-name">os.blackroad.io</div>
+          <div class="rt-bar-track"><div class="rt-bar-fill" data-width="15"></div></div>
+          <div class="rt-val">31ms</div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ══ FOOTER ════════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-brand">BlackRoad Platform</span>
+      <ul class="footer-links">
+        <li><a href="#">API</a></li>
+        <li><a href="#">Docs</a></li>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <span class="footer-copy mono">© 2026 BlackRoad OS Inc.</span>
+    </div>
+  </footer>
+
+  <!-- ══ SUBSCRIBE MODAL ═══════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="modal-backdrop" onclick="handleBackdropClick(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Subscribe to status updates">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+      <div class="modal-title">Stay informed</div>
+      <div class="modal-sub">Get notified when services are impacted or maintenance is scheduled. No noise — only signal.</div>
+      <div class="modal-input-row">
+        <input class="modal-input" type="email" placeholder="you@example.com" id="modal-email" autocomplete="email">
+        <button class="modal-btn" onclick="handleSubscribe()">Subscribe</button>
+      </div>
+      <div class="modal-options">
+        <label class="modal-option">
+          <input type="checkbox" checked> Incidents
+        </label>
+        <label class="modal-option">
+          <input type="checkbox" checked> Maintenance
+        </label>
+        <label class="modal-option">
+          <input type="checkbox"> Resolved updates
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ JAVASCRIPT ════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Date helpers ─────────────────────────────────────────────── */
+    function dateLabelForDayIndex(daysAgo) {
+      const d = new Date()
+      d.setDate(d.getDate() - (89 - daysAgo))
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    }
+
+    /* ── Build 90-day uptime bars ─────────────────────────────────── */
+    function buildUptimeBars() {
+      document.querySelectorAll('.uptime-bars').forEach(container => {
+        const raw = container.dataset.incidents || ''
+        const incidentDays = new Set(
+          raw.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n))
+        )
+
+        for (let i = 0; i < 90; i++) {
+          const bar  = document.createElement('div')
+          const isInc = incidentDays.has(i)
+          const label = dateLabelForDayIndex(i)
+          const tip   = isInc
+            ? `${label} — Degraded · ~18 min`
+            : `${label} — Operational`
+
+          bar.className = `ubar ${isInc ? 'inc' : 'op'}`
+          bar.dataset.tip = tip
+          bar.setAttribute('aria-label', tip)
+          container.appendChild(bar)
+        }
+      })
+    }
+
+    /* ── Stagger-animate bars on load ────────────────────────────── */
+    function animateBars() {
+      const allBars = document.querySelectorAll('.ubar')
+      // Group by container so stagger is per-row
+      const containers = document.querySelectorAll('.uptime-bars')
+      containers.forEach((container, ci) => {
+        const bars = container.querySelectorAll('.ubar')
+        bars.forEach((bar, bi) => {
+          const delay = ci * 12 + bi * 5  // ms
+          setTimeout(() => bar.classList.add('loaded'), delay)
+        })
+      })
+    }
+
+    /* ── Animate response time bars ──────────────────────────────── */
+    function animateResponseBars() {
+      document.querySelectorAll('.rt-bar-fill').forEach((bar, i) => {
+        const targetWidth = parseFloat(bar.dataset.width) || 0
+        setTimeout(() => {
+          bar.style.width = targetWidth + '%'
+        }, 200 + i * 40)
+      })
+    }
+
+    /* ── "Last updated" counter ───────────────────────────────────── */
+    let secondsAgo = 0
+    function startUpdatedCounter() {
+      setInterval(() => {
+        secondsAgo += 30
+        const el = document.getElementById('last-updated')
+        if (!el) return
+        if (secondsAgo < 60) {
+          el.textContent = 'just now'
+        } else {
+          const mins = Math.floor(secondsAgo / 60)
+          el.textContent = `${mins} min ago`
+        }
+      }, 30000)
+    }
+
+    /* ── Modal ───────────────────────────────────────────────────── */
+    function openModal() {
+      document.getElementById('modal-backdrop').classList.add('open')
+      setTimeout(() => {
+        const input = document.getElementById('modal-email')
+        if (input) input.focus()
+      }, 200)
+    }
+
+    function closeModal() {
+      document.getElementById('modal-backdrop').classList.remove('open')
+    }
+
+    function handleBackdropClick(e) {
+      if (e.target === document.getElementById('modal-backdrop')) closeModal()
+    }
+
+    function handleSubscribe() {
+      const email = document.getElementById('modal-email').value.trim()
+      if (!email || !email.includes('@')) {
+        document.getElementById('modal-email').style.borderColor = 'rgba(255,255,255,0.3)'
+        document.getElementById('modal-email').focus()
+        return
+      }
+      const btn = document.querySelector('.modal-btn')
+      btn.textContent = 'Subscribed ✓'
+      btn.style.opacity = '0.6'
+      btn.style.cursor = 'default'
+      setTimeout(closeModal, 1600)
+    }
+
+    /* ── Keyboard close ──────────────────────────────────────────── */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal()
+    })
+
+    /* ── Init ────────────────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      buildUptimeBars()
+      // Let layout settle, then animate
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          animateBars()
+          animateResponseBars()
+        })
+      })
+      startUpdatedCounter()
+    })
+  </script>
+
+</body>
+</html>

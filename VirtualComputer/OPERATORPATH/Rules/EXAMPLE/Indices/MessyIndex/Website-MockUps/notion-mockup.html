@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="RoadNote mockup — a BlackRoad-styled Notion-inspired workspace for docs, databases, rituals, and execution systems." />
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>RoadNote — Notion-style Workspace Mockup</title>
+  <style>
+    :root {
+      --bg:#000; --s1:#090909; --s2:#111; --s3:#181818; --s4:#202020; --border:#232323;
+      --text:#f5f5f5; --muted:#8d8d8d; --dim:#575757; --white:#fff; --sg:'Space Grotesk',sans-serif; --jb:'JetBrains Mono',monospace;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:var(--sg); height:100vh; overflow:hidden; }
+    .topbar {
+      height:52px; background:var(--s2); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; padding:0 16px;
+    }
+    .crumbs { display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
+    .crumb-strong { color:var(--white); font-weight:700; }
+    .search { margin-left:auto; width:320px; height:34px; border-radius:10px; background:var(--s3); border:1px solid var(--border); display:flex; align-items:center; gap:8px; padding:0 12px; }
+    .search input { flex:1; background:transparent; border:none; outline:none; color:var(--text); }
+    .search input::placeholder { color:var(--dim); }
+    .avatar { width:32px; height:32px; border-radius:10px; background:#fff; color:#000; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; }
+    .shell { display:grid; grid-template-columns:280px minmax(0,1fr) 300px; height:calc(100vh - 55px); min-height:0; }
+    .sidebar, .inspector { background:var(--s1); min-height:0; overflow:auto; }
+    .sidebar { border-right:1px solid var(--border); padding:14px 12px; }
+    .inspector { border-left:1px solid var(--border); padding:16px 14px; display:flex; flex-direction:column; gap:14px; }
+    .side-card, .panel, .db-card, .inspector-card {
+      background:var(--s2); border:1px solid var(--border); border-radius:16px;
+    }
+    .side-card { padding:14px; margin-bottom:14px; }
+    .workspace-name { font-size:15px; font-weight:700; }
+    .workspace-sub, .hint, .meta { font-size:12px; color:var(--muted); }
+    .nav-group { margin-bottom:16px; }
+    .nav-group h3 { margin:0 0 8px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+    .nav-item {
+      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border-radius:10px; color:var(--muted); font-size:13px;
+    }
+    .nav-item.active, .nav-item:hover { background:var(--s3); color:var(--white); }
+    .badge { font-family:var(--jb); font-size:10px; color:var(--dim); }
+    .content { min-width:0; overflow:auto; }
+    .page {
+      max-width:840px; margin:0 auto; padding:42px 40px 88px;
+    }
+    .hero-kicker { font-family:var(--jb); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+    h1 { margin:0 0 12px; font-size:46px; line-height:1; letter-spacing:-.04em; }
+    .lead { color:var(--muted); font-size:15px; line-height:1.8; max-width:720px; }
+    .hero-meta { display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+    .chip { padding:7px 10px; border-radius:999px; background:var(--s2); border:1px solid var(--border); font-size:11px; color:var(--muted); }
+    .block-stack { display:flex; flex-direction:column; gap:18px; margin-top:28px; }
+    .panel { padding:18px; }
+    .panel h2 { margin:0 0 8px; font-size:18px; }
+    .panel p { margin:0; color:var(--muted); font-size:13px; line-height:1.75; }
+    .db-card { margin-top:16px; overflow:hidden; }
+    .db-head, .db-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:12px; padding:12px 14px; }
+    .db-head { background:var(--s3); font-family:var(--jb); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); }
+    .db-row { border-top:1px solid var(--border); font-size:13px; }
+    .db-row strong { color:var(--white); }
+    .status { display:inline-flex; align-items:center; gap:6px; }
+    .status::before { content:''; width:7px; height:7px; border-radius:50%; background:#fff; opacity:.9; }
+    .inspector-card { padding:14px; }
+    .inspector-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+    .inspector-card h3 { margin:0; font-size:14px; }
+    .checklist { display:flex; flex-direction:column; gap:10px; }
+    .check { display:flex; gap:10px; align-items:flex-start; color:var(--muted); font-size:13px; }
+    .check-box { width:16px; height:16px; border-radius:5px; border:1px solid var(--border); background:var(--s3); margin-top:2px; }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+  <header class="topbar">
+    <div class="crumbs"><span class="crumb-strong">RoadNote</span><span>/</span><span>Operating manuals</span><span>/</span><span>Launch OS</span></div>
+    <div class="search"><span>⌕</span><input value="Find a page, doc, or database" /></div>
+    <div class="avatar">AA</div>
+  </header>
+  <main class="shell">
+    <aside class="sidebar">
+      <section class="side-card">
+        <div class="workspace-name">BlackRoad Workspace</div>
+        <div class="workspace-sub">Docs, rituals, trackers, and operating systems in one page tree.</div>
+      </section>
+      <div class="nav-group">
+        <h3>Favorites</h3>
+        <div class="nav-item active"><span>Launch Operating System</span><span class="badge">Pinned</span></div>
+        <div class="nav-item"><span>RoadTrip Runtime Spec</span><span class="badge">Live</span></div>
+        <div class="nav-item"><span>Design Taste Rules</span><span class="badge">Guide</span></div>
+      </div>
+      <div class="nav-group">
+        <h3>Databases</h3>
+        <div class="nav-item"><span>Release board</span><span class="badge">24 items</span></div>
+        <div class="nav-item"><span>Agent roster</span><span class="badge">69 active</span></div>
+        <div class="nav-item"><span>Trust ledger</span><span class="badge">Synced</span></div>
+      </div>
+      <div class="nav-group">
+        <h3>Systems</h3>
+        <div class="nav-item"><span>Brand guide</span><span class="badge">Reference</span></div>
+        <div class="nav-item"><span>Memory workflows</span><span class="badge">Codex</span></div>
+        <div class="nav-item"><span>Product map</span><span class="badge">22 surfaces</span></div>
+      </div>
+    </aside>
+    <section class="content">
+      <div class="page">
+        <div class="hero-kicker">BlackRoad / workspace document</div>
+        <h1>Launch Operating System</h1>
+        <p class="lead">This page treats planning, runtime, and narrative as one system. Instead of scattered docs, the workspace shows the command surface, the execution database, and the launch checklist in one readable sequence.</p>
+        <div class="hero-meta">
+          <div class="chip">Owner: Alexa</div>
+          <div class="chip">State: Active</div>
+          <div class="chip">Linked to RoadTrip</div>
+          <div class="chip">Synced with memory</div>
+        </div>
+        <div class="block-stack">
+          <section class="panel">
+            <h2>What this workspace is for</h2>
+            <p>Keep the launch language crisp, the backend milestones visible, and the design system coherent. The point of the page is not just to document work — it should steer the work while staying calm enough to read quickly.</p>
+          </section>
+          <section class="panel">
+            <h2>Execution database</h2>
+            <p>The central table tracks product readiness, owner, state, and release lane so the workspace acts like an operating manual and a command center at the same time.</p>
+            <div class="db-card">
+              <div class="db-head"><div>Surface</div><div>Status</div><div>Owner</div><div>Lane</div></div>
+              <div class="db-row"><div><strong>RoadTrip UI wiring</strong></div><div><span class="status">Done</span></div><div>Copilot</div><div>Runtime</div></div>
+              <div class="db-row"><div><strong>Mockup expansion batch</strong></div><div><span class="status">Active</span></div><div>Design</div><div>Portfolio</div></div>
+              <div class="db-row"><div><strong>Launch proof pack</strong></div><div><span class="status">Drafting</span></div><div>Narrative</div><div>Story</div></div>
+              <div class="db-row"><div><strong>Ops readiness sweep</strong></div><div><span class="status">Queued</span></div><div>Fleet</div><div>Infra</div></div>
+            </div>
+          </section>
+          <section class="panel">
+            <h2>Why the shell matters</h2>
+            <p>A Notion-style layout works well here because it supports hierarchy, databases, prose, and checklists without feeling like a dashboard pretending to be a document. The BlackRoad version keeps that flexibility but pushes the surface darker, denser, and more editorial.</p>
+          </section>
+        </div>
+      </div>
+    </section>
+    <aside class="inspector">
+      <section class="inspector-card">
+        <div class="inspector-head"><h3>Page properties</h3><span class="badge">Live</span></div>
+        <div class="meta">Type: System doc<br>Audience: operators, designers, founders<br>Depth: strategic + execution</div>
+      </section>
+      <section class="inspector-card">
+        <div class="inspector-head"><h3>Checklist</h3><span class="badge">6 tasks</span></div>
+        <div class="checklist">
+          <div class="check"><div class="check-box"></div><div>Plug runtime env vars into the app shell</div></div>
+          <div class="check"><div class="check-box"></div><div>Open the new template batch for visual review</div></div>
+          <div class="check"><div class="check-box"></div><div>Curate the strongest productivity surfaces into a mini-gallery</div></div>
+        </div>
+      </section>
+      <section class="inspector-card">
+        <div class="inspector-head"><h3>Backlinks</h3><span class="badge">9 refs</span></div>
+        <div class="meta">RoadTrip Runtime<br>Mockup Gallery<br>Brand Rules<br>Memory System</div>
+      </section>
+    </aside>
+  </main>
+</body>
+</html>

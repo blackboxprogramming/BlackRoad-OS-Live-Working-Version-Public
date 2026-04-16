@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadMSN — BlackRoad OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mockup-base.css">
+<style>
+  :root {
+    --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --g-r: linear-gradient(270deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+    --bg: #000;
+    --card: #0a0a0a;
+    --elevated: #111;
+    --hover: #181818;
+    --border: #1a1a1a;
+    --text: #f5f5f5;
+    --sub: #737373;
+    --muted: #444;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 40px 24px;
+    overflow-x: auto;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 20%, rgba(255,34,85,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 80%, rgba(68,136,255,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── WINDOW CHROME ── */
+  .window {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.03),
+      0 24px 64px rgba(0,0,0,0.7),
+      0 4px 16px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+  }
+
+  .window.shake {
+    animation: nudge-shake 0.5s ease;
+  }
+
+  @keyframes nudge-shake {
+    0%,100% { transform: translateX(0) translateY(0); }
+    10% { transform: translateX(-8px) translateY(-4px); }
+    20% { transform: translateX(8px) translateY(4px); }
+    30% { transform: translateX(-6px) translateY(2px); }
+    40% { transform: translateX(6px) translateY(-2px); }
+    50% { transform: translateX(-4px) translateY(4px); }
+    60% { transform: translateX(4px) translateY(-4px); }
+    70% { transform: translateX(-2px) translateY(2px); }
+    80% { transform: translateX(2px) translateY(-2px); }
+    90% { transform: translateX(-1px) translateY(1px); }
+  }
+
+  .title-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--elevated);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  .traffic-lights {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .dot:hover { opacity: 0.8; }
+  .dot.red   { background: #FF5F57; }
+  .dot.yellow{ background: #FEBC2E; }
+  .dot.green { background: #28C840; }
+
+  .title-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-left: 4px;
+    flex: 1;
+  }
+
+  .title-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── GRADIENT UTILITIES ── */
+  .gradient-text {
+    background: var(--g);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-border {
+    position: relative;
+    border-radius: 8px;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--g);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ── AVATAR CIRCLE ── */
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--g);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .avatar.sm {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  .avatar.lg {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+  .avatar .status-dot {
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--card);
+    background: #28C840;
+  }
+  .avatar .status-dot.away   { background: #FEBC2E; }
+  .avatar .status-dot.busy   { background: #FF5F57; }
+  .avatar .status-dot.offline{ background: var(--muted); }
+
+  /* ══════════════════════════════════
+     WINDOW 1 — CONTACTS LIST (320px)
+  ══════════════════════════════════ */
+  #contacts-window {
+    width: 320px;
+    height: 680px;
+  }
+
+  /* Profile section */
+  .profile-section {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .profile-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .display-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    margin-bottom: 2px;
+  }
+
+  .display-name-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .online-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .online-badge::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #28C840;
+  }
+
+  .personal-msg-wrap {
+    position: relative;
+  }
+
+  .personal-msg {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-style: italic;
+    padding: 4px 0;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .personal-msg:focus {
+    border-bottom-color: #8844FF;
+    color: var(--text);
+  }
+  .personal-msg::placeholder { color: var(--muted); }
+
+  /* Status pills */
+  .status-bar {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-shrink: 0;
+  }
+  .status-bar::-webkit-scrollbar { display: none; }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--sub);
+    font-size: 11px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .status-pill:hover { background: var(--hover); color: var(--text); }
+  .status-pill.active {
+    background: var(--elevated);
+    color: var(--text);
+    border-color: transparent;
+    position: relative;
+  }
+  .status-pill.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: var(--g);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .status-pill .pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+  .status-pill.pill-online  .pill-dot { background: #28C840; }
+  .status-pill.pill-away    .pill-dot { background: #FEBC2E; }
+  .status-pill.pill-busy    .pill-dot { background: #FF5F57; }
+  .status-pill.pill-offline .pill-dot { background: var(--muted); }
+
+  /* Contacts scroll area */
+  .contacts-body {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .contacts-body::-webkit-scrollbar { width: 4px; }
+  .contacts-body::-webkit-scrollbar-track { background: transparent; }
+  .contacts-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Group accordion */
+  .group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--border);
+  }
+  .group-header:hover { background: var(--hover); }
+
+  .group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--sub);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .group-chevron {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .group-header.collapsed .group-chevron { transform: rotate(-90deg); }
+
+  .group-body { overflow: hidden; }
+  .group-body.collapsed { display: none; }
+
+  /* Contact row */
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(26,26,26,0.5);
+    position: relative;
+  }
+  .contact-row:hover { background: var(--hover); }
+  .contact-row.active {
+    background: var(--elevated);
+  }
+  .contact-row.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--g);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+  .contact-name .away-tag {
+    font-size: 10px;
+    color: var(--text);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+  .contact-pm {
+    font-size: 10px;
+    color: var(--sub);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-style: italic;
+    line-height: 1.2;
+    margin-top: 1px;
+  }
+  .contact-action {
+    font-size: 11px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .contact-row:hover .contact-action { opacity: 1; }
+
+  /* Bottom toolbar */
+  .contacts-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 10px 8px;
+    border-top: 1px solid var(--border);
+    background: var(--elevated);
+    flex-shrink: 0;
+  }
+
+  .toolbar-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: all 0.15s;
+  }
+  .toolbar-btn:hover { background: var(--hover); color: var(--text); }
+  .toolbar-btn .icon { font-size: 16px; line-height: 1; }
+
+  /* ══════════════════════════════════
+     WINDOW 2 — CHAT (480px)
+  ══════════════════════════════════ */
+  #chat-window {
+    width: 480px;
+    height: 680px;
+  }
+
+  /* Chat history */
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    background: var(--bg);
+  }
+  .chat-body::-webkit-scrollbar { width: 4px; }
+  .chat-body::-webkit-scrollbar-track { background: transparent; }
+  .chat-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* System messages */
+  .sys-msg {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 6px 0;
+    position: relative;
+  }
+  .sys-msg::before, .sys-msg::after {
+    content: '';
+    display: inline-block;
+    height: 1px;
+    background: var(--border);
+    vertical-align: middle;
+    width: 60px;
+    margin: 0 8px;
+  }
+
+  .nudge-event {
+    text-align: center;
+    font-size: 11px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 8px 0;
+    animation: nudge-flash 0.8s ease;
+  }
+
+  @keyframes nudge-flash {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* Timestamp separator */
+  .time-sep {
+    text-align: center;
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 8px 0 4px;
+    letter-spacing: 0.08em;
+  }
+
+  /* Message bubbles */
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin: 2px 0;
+  }
+  .msg-row.mine { flex-direction: row-reverse; }
+
+  .msg-avatar-sm {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--g);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin-bottom: 2px;
+  }
+
+  .msg-bubble-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 72%;
+  }
+  .msg-row.mine .msg-bubble-wrap { align-items: flex-end; }
+
+  .msg-name-tag {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 1px;
+    padding: 0 4px;
+  }
+  .msg-row.mine .msg-name-tag { text-align: right; }
+
+  .msg-bubble {
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .msg-row:not(.mine) .msg-bubble {
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg-row.mine .msg-bubble {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-right-radius: 4px;
+    position: relative;
+  }
+  .msg-row.mine .msg-bubble::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: var(--g);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.5;
+  }
+
+  .msg-time {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0 4px;
+  }
+
+  .wink-emoji {
+    display: inline-block;
+    animation: wink-pop 0.4s ease;
+    font-size: 16px;
+  }
+  @keyframes wink-pop {
+    0% { transform: scale(0); }
+    60% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+
+  /* Typing indicator */
+  .typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    opacity: 1;
+    transition: opacity 0.3s;
+  }
+  .typing-indicator.hidden { opacity: 0; pointer-events: none; }
+
+  .typing-text {
+    font-size: 11px;
+    color: var(--sub);
+    font-style: italic;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .typing-dots {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .typing-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--sub);
+    animation: dot-bounce 1.4s infinite ease-in-out;
+  }
+  .typing-dots span:nth-child(1) { animation-delay: 0s; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dot-bounce {
+    0%,80%,100% { transform: scale(1); opacity: 0.5; }
+    40% { transform: scale(1.3); opacity: 1; }
+  }
+
+  /* Chat formatting toolbar */
+  .chat-format-bar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 12px 6px;
+    border-top: 1px solid var(--border);
+    background: var(--elevated);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  .fmt-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--sub);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .fmt-btn:hover { background: var(--hover); color: var(--text); }
+  .fmt-btn.active { color: var(--sub); background: rgba(136,68,255,0.1); }
+
+  .fmt-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  .fmt-spacer { flex: 1; }
+
+  .sound-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--sub);
+    font-size: 14px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .sound-btn:hover { background: var(--hover); color: var(--text); }
+
+  /* Chat input area */
+  .chat-input-area {
+    padding: 10px 12px 12px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    resize: none;
+    outline: none;
+    min-height: 60px;
+    max-height: 100px;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+  .chat-input:focus { border-color: rgba(136,68,255,0.5); }
+  .chat-input::placeholder { color: var(--muted); }
+
+  .send-btn {
+    position: relative;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 10px;
+    background: var(--elevated);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    height: 60px;
+  }
+  .send-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    padding: 1px;
+    background: var(--g);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+  .send-btn:hover { background: var(--hover); }
+  .send-btn:active { transform: scale(0.97); }
+
+  /* Emoticon picker popup */
+  .emoji-picker {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 12px;
+    width: 260px;
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    z-index: 100;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+    display: none;
+  }
+  .emoji-picker.open { display: block; }
+
+  .emoji-picker-title {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+  }
+
+  .emoji-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    text-align: center;
+    line-height: 1;
+  }
+  .emoji-btn:hover { background: var(--hover); }
+
+  /* Toast notification */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text);
+    z-index: 999;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  /* Nudge label on button */
+  .nudge-btn-label {
+    font-size: 9px;
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* Scrollbar for contacts */
+  .contacts-body::-webkit-scrollbar { width: 3px; }
+
+  /* Offline group style */
+  .contact-row.offline .contact-name { color: var(--muted); }
+  .contact-row.offline .avatar { opacity: 0.5; filter: grayscale(0.7); }
+
+  /* Collapsed offline group count badge */
+  .group-count {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    background: var(--elevated);
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  /* Empty chat state */
+  .chat-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--bg);
+    padding: 24px;
+  }
+  .chat-empty .empty-icon {
+    font-size: 48px;
+    opacity: 0.4;
+  }
+  .chat-empty p {
+    font-size: 13px;
+    color: var(--sub);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .chat-empty .empty-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Window label badge */
+  .window-badge {
+    font-size: 9px;
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--g);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  /* Responsive layout note */
+  .layout-hint {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Chat header info */
+  .chat-header-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    margin-left: 4px;
+  }
+  .chat-header-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .chat-header-status {
+    font-size: 10px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Format bar position context */
+  .chat-bottom {
+    position: relative;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout-hint">RoadMSN — BlackRoad OS · Mockup</div>
+
+<!-- ══════════════════════════════════════
+     WINDOW 1 — CONTACTS LIST
+══════════════════════════════════════ -->
+<div class="window" id="contacts-window">
+
+  <!-- Title bar -->
+  <div class="title-bar">
+    <div class="traffic-lights">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+    </div>
+    <span class="title-text">● RoadMSN</span>
+    <span class="window-badge">v2.0</span>
+  </div>
+
+  <!-- Profile -->
+  <div class="profile-section">
+    <div class="profile-header">
+      <div class="avatar lg" id="my-avatar">
+        A
+        <div class="status-dot" id="my-status-dot"></div>
+      </div>
+      <div class="profile-info">
+        <div class="display-name" id="display-name-el">~ alexa ~ ✨ building the road 🛣️</div>
+        <div class="display-name-counter" id="name-counter">47/120</div>
+        <span class="online-badge" id="status-label">Online</span>
+      </div>
+    </div>
+    <div class="personal-msg-wrap">
+      <input
+        class="personal-msg"
+        id="personal-msg"
+        type="text"
+        placeholder="what's on your mind?"
+        value="shipping things that matter 🚀"
+        maxlength="130"
+      >
+    </div>
+  </div>
+
+  <!-- Status pills -->
+  <div class="status-bar">
+    <button class="status-pill pill-online active" data-status="Online" onclick="setStatus(this)">
+      <span class="pill-dot"></span> Online
+    </button>
+    <button class="status-pill pill-away" data-status="Away" onclick="setStatus(this)">
+      <span class="pill-dot"></span> Away
+    </button>
+    <button class="status-pill pill-busy" data-status="Busy" onclick="setStatus(this)">
+      <span class="pill-dot"></span> Busy
+    </button>
+    <button class="status-pill pill-offline" data-status="Appear Offline" onclick="setStatus(this)">
+      <span class="pill-dot"></span> Appear Offline
+    </button>
+  </div>
+
+  <!-- Contacts list -->
+  <div class="contacts-body">
+
+    <!-- ROADIES group — expanded -->
+    <div class="group-header" id="group-roadies" onclick="toggleGroup('roadies')">
+      <span class="group-title">🛣️ Roadies <span class="group-count">6/8</span></span>
+      <span class="group-chevron">▾</span>
+    </div>
+    <div class="group-body" id="body-roadies">
+
+      <div class="contact-row active" data-contact="road_runner" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#FF6B2B,#FF2255);">🚀</div>
+        <div class="contact-info">
+          <div class="contact-name">🚀 road_runner</div>
+          <div class="contact-pm">~vibing~ 🌊 building stuff</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="devdave" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#4488FF,#8844FF);">💻</div>
+        <div class="contact-info">
+          <div class="contact-name">💻 devdave</div>
+          <div class="contact-pm">// coding... send snacks</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="beat_alexa" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#CC00AA,#8844FF);">🎵</div>
+        <div class="contact-info">
+          <div class="contact-name">🎵 beat_alexa 🎵</div>
+          <div class="contact-pm">in the zone, do not disturb</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="morning_person" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#FEBC2E,#FF6B2B);">☕</div>
+        <div class="contact-info">
+          <div class="contact-name">☕ morning_person <span class="away-tag">(Away)</span></div>
+          <div class="contact-pm">brb, need more coffee ☕</div>
+        </div>
+        <div class="status-dot away" style="position:static;width:8px;height:8px;border-width:1px;border-color:var(--card);flex-shrink:0;border-radius:50%;border:2px solid var(--card)"></div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="theRealRoadie" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#FF2255,#CC00AA);">🔥</div>
+        <div class="contact-info">
+          <div class="contact-name">🔥 theRealRoadie</div>
+          <div class="contact-pm">no cap, just building 🏗️</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="glitch_kid" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#00D4FF,#4488FF);">👾</div>
+        <div class="contact-info">
+          <div class="contact-name">👾 glitch_kid</div>
+          <div class="contact-pm">404: motivation not found lol</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+    </div>
+
+    <!-- AGENTS group — collapsed -->
+    <div class="group-header collapsed" id="group-agents" onclick="toggleGroup('agents')">
+      <span class="group-title">🤖 Agents <span class="group-count">3</span></span>
+      <span class="group-chevron">▾</span>
+    </div>
+    <div class="group-body collapsed" id="body-agents">
+
+      <div class="contact-row" data-contact="road_agent" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#8844FF,#4488FF);">🤖</div>
+        <div class="contact-info">
+          <div class="contact-name">road_agent</div>
+          <div class="contact-pm">always online, never tired</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="deploy_bot" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#00D4FF,#8844FF);">🚀</div>
+        <div class="contact-info">
+          <div class="contact-name">deploy_bot</div>
+          <div class="contact-pm">watching your pushes 👀</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+      <div class="contact-row" data-contact="lucid_agent" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#CC00AA,#FF2255);">💡</div>
+        <div class="contact-info">
+          <div class="contact-name">lucid_agent</div>
+          <div class="contact-pm">thinking... always thinking</div>
+        </div>
+        <span class="contact-action">💬</span>
+      </div>
+
+    </div>
+
+    <!-- OFFLINE group — collapsed -->
+    <div class="group-header collapsed" id="group-offline" onclick="toggleGroup('offline')">
+      <span class="group-title">💤 Offline <span class="group-count">2</span></span>
+      <span class="group-chevron">▾</span>
+    </div>
+    <div class="group-body collapsed" id="body-offline">
+
+      <div class="contact-row offline" data-contact="night_owl" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#444,#222);">🦉</div>
+        <div class="contact-info">
+          <div class="contact-name">🦉 night_owl</div>
+          <div class="contact-pm">last seen: 3 days ago</div>
+        </div>
+        <div class="status-dot offline" style="position:static;width:8px;height:8px;border-width:1px;border-radius:50%;border:2px solid var(--card);flex-shrink:0;"></div>
+      </div>
+
+      <div class="contact-row offline" data-contact="silent_type" onclick="openChat(this)">
+        <div class="avatar sm" style="background: linear-gradient(135deg,#444,#222);">🤐</div>
+        <div class="contact-info">
+          <div class="contact-name">🤐 silent_type</div>
+          <div class="contact-pm">last seen: a week ago</div>
+        </div>
+        <div class="status-dot offline" style="position:static;width:8px;height:8px;border-width:1px;border-radius:50%;border:2px solid var(--card);flex-shrink:0;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom toolbar -->
+  <div class="contacts-toolbar">
+    <button class="toolbar-btn" title="Add Contact" onclick="showToast('➕ Add Contact — coming soon')">
+      <span class="icon">➕</span>
+      <span>Add</span>
+    </button>
+    <button class="toolbar-btn" title="Status" onclick="showToast('📡 Status updated')">
+      <span class="icon">📡</span>
+      <span>Status</span>
+    </button>
+    <button class="toolbar-btn" title="Settings" onclick="showToast('⚙️ Settings — coming soon')">
+      <span class="icon">⚙️</span>
+      <span>Settings</span>
+    </button>
+    <button class="toolbar-btn" title="Sign Out" onclick="showToast('👋 See you on the road!')">
+      <span class="icon">👋</span>
+      <span>Sign Out</span>
+    </button>
+  </div>
+
+</div><!-- /contacts-window -->
+
+
+<!-- ══════════════════════════════════════
+     WINDOW 2 — CHAT
+══════════════════════════════════════ -->
+<div class="window" id="chat-window">
+
+  <!-- Title bar -->
+  <div class="title-bar" id="chat-title-bar">
+    <div class="traffic-lights">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+    </div>
+    <div class="avatar sm" style="background: linear-gradient(135deg,#FF6B2B,#FF2255); margin-left:4px;" id="chat-avatar">🚀</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name" id="chat-title">Chat with 🚀 road_runner ~vibing~</div>
+      <div class="chat-header-status" id="chat-status-line">Online · last active just now</div>
+    </div>
+    <span class="title-meta" id="chat-title-meta">road_runner</span>
+  </div>
+
+  <!-- Chat body -->
+  <div class="chat-body" id="chat-body">
+
+    <!-- System: signed in -->
+    <div class="sys-msg">alexa has just signed in · 4:20 PM</div>
+
+    <div class="time-sep">TODAY · 4:21 PM</div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">yooo finally online!! ok we need to talk about the next big thing for BlackRoad 👀</div>
+        <div class="msg-time">4:21</div>
+      </div>
+    </div>
+
+    <!-- Mine -->
+    <div class="msg-row mine">
+      <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">alexa</div>
+        <div class="msg-bubble">lol I literally just opened my laptop haha. ok what are you thinking?? 🤔</div>
+        <div class="msg-time">4:22</div>
+      </div>
+    </div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">ok hear me out — RoadCode needs a live collab mode. like figma but for code on the road</div>
+        <div class="msg-time">4:22</div>
+      </div>
+    </div>
+
+    <!-- Mine -->
+    <div class="msg-row mine">
+      <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">alexa</div>
+        <div class="msg-bubble">ohhhh okay I actually love that. real-time multiplayer coding sessions?</div>
+        <div class="msg-time">4:23</div>
+      </div>
+    </div>
+
+    <!-- Nudge event -->
+    <div class="nudge-event">🔔 road_runner sent a nudge! (nudge!)</div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">EXACTLY!! and we tie it into RoadMSN so you can voice chat while coding. full Roadie dev experience</div>
+        <div class="msg-time">4:23</div>
+      </div>
+    </div>
+
+    <!-- Mine -->
+    <div class="msg-row mine">
+      <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">alexa</div>
+        <div class="msg-bubble">ok but what's the MVP? we can't boil the ocean 🌊 what's the one thing that ships first?</div>
+        <div class="msg-time">4:24</div>
+      </div>
+    </div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">shared cursor + presence. show who's looking at what file. everything else is v2</div>
+        <div class="msg-time">4:25</div>
+      </div>
+    </div>
+
+    <!-- Mine — wink -->
+    <div class="msg-row mine">
+      <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">alexa</div>
+        <div class="msg-bubble">that's actually a clean scope. okay I'm in <span class="wink-emoji">😉</span> (wink) let's build it</div>
+        <div class="msg-time">4:25</div>
+      </div>
+    </div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">YESSs okay I'll draft the spec tonight. you handle the UI side? you're better at making things look 🔥</div>
+        <div class="msg-time">4:26</div>
+      </div>
+    </div>
+
+    <!-- Mine -->
+    <div class="msg-row mine">
+      <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">alexa</div>
+        <div class="msg-bubble">haha deal. send me the spec when it's ready, I'll have mockups done by morning ✨</div>
+        <div class="msg-time">4:27</div>
+      </div>
+    </div>
+
+    <!-- Their message -->
+    <div class="msg-row">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">road_runner</div>
+        <div class="msg-bubble">this is why you're my fav Roadie 🛣️💜 let's ship something people actually use this time</div>
+        <div class="msg-time">4:28</div>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typing-indicator">
+      <div class="msg-avatar-sm">🚀</div>
+      <div class="typing-text">road_runner is typing</div>
+      <div class="typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+  </div><!-- /chat-body -->
+
+  <!-- Chat bottom: format bar + input -->
+  <div class="chat-bottom">
+
+    <!-- Emoji picker popup -->
+    <div class="emoji-picker" id="emoji-picker">
+      <div class="emoji-picker-title">Emoticons</div>
+      <div class="emoji-grid" id="emoji-grid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Format toolbar -->
+    <div class="chat-format-bar">
+      <button class="fmt-btn" title="Bold" onclick="toggleFmt(this,'bold')"><b>B</b></button>
+      <button class="fmt-btn" title="Italic" onclick="toggleFmt(this,'italic')"><i>I</i></button>
+      <button class="fmt-btn" title="Underline" onclick="toggleFmt(this,'underline')"><u>U</u></button>
+      <div class="fmt-sep"></div>
+      <button class="fmt-btn" title="Font" onclick="showToast('🔤 Font picker coming soon')">Aa</button>
+      <button class="fmt-btn" title="Color" style="background: linear-gradient(135deg,#FF2255,#8844FF); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;" onclick="showToast('🎨 Color picker coming soon')">A</button>
+      <div class="fmt-sep"></div>
+      <button class="fmt-btn" title="Emoticon" id="emoji-toggle-btn" onclick="toggleEmojiPicker()">🙂</button>
+      <button class="fmt-btn" title="Wink" onclick="insertWink()">😉</button>
+      <button class="fmt-btn" title="Send File" onclick="showToast('📎 Send File coming soon')">📎</button>
+      <div class="fmt-sep"></div>
+      <button class="fmt-btn" title="Nudge!" onclick="sendNudge()" style="font-size:14px;">
+        🔔<span class="nudge-btn-label" style="font-size:8px;font-family:'JetBrains Mono',monospace;display:block;line-height:1;color:var(--sub);">nudge</span>
+      </button>
+      <div class="fmt-spacer"></div>
+      <button class="sound-btn" id="sound-btn" title="Sound toggle" onclick="toggleSound()">🔊</button>
+    </div>
+
+    <!-- Input area -->
+    <div class="chat-input-area">
+      <textarea
+        class="chat-input"
+        id="chat-input"
+        placeholder="say something... (press Enter to send)"
+        rows="3"
+      ></textarea>
+      <button class="send-btn" onclick="sendMessage()">Send ↵</button>
+    </div>
+
+  </div><!-- /chat-bottom -->
+
+</div><!-- /chat-window -->
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* ══════════════════════════════════
+   DATA — contacts config
+══════════════════════════════════ */
+const CONTACTS = {
+  road_runner: {
+    display: '🚀 road_runner ~vibing~',
+    avatar: '🚀',
+    gradient: 'linear-gradient(135deg,#FF6B2B,#FF2255)',
+    status: 'Online',
+    pm: '~vibing~ 🌊 building stuff',
+  },
+  devdave: {
+    display: '💻 devdave // coding...',
+    avatar: '💻',
+    gradient: 'linear-gradient(135deg,#4488FF,#8844FF)',
+    status: 'Online',
+    pm: '// coding... send snacks',
+  },
+  beat_alexa: {
+    display: '🎵 beat_alexa 🎵',
+    avatar: '🎵',
+    gradient: 'linear-gradient(135deg,#CC00AA,#8844FF)',
+    status: 'Online',
+    pm: 'in the zone, do not disturb',
+  },
+  morning_person: {
+    display: '☕ morning_person',
+    avatar: '☕',
+    gradient: 'linear-gradient(135deg,#FEBC2E,#FF6B2B)',
+    status: 'Away',
+    pm: 'brb, need more coffee ☕',
+  },
+  theRealRoadie: {
+    display: '🔥 theRealRoadie',
+    avatar: '🔥',
+    gradient: 'linear-gradient(135deg,#FF2255,#CC00AA)',
+    status: 'Online',
+    pm: 'no cap, just building 🏗️',
+  },
+  glitch_kid: {
+    display: '👾 glitch_kid',
+    avatar: '👾',
+    gradient: 'linear-gradient(135deg,#00D4FF,#4488FF)',
+    status: 'Online',
+    pm: '404: motivation not found lol',
+  },
+  road_agent: {
+    display: '🤖 road_agent',
+    avatar: '🤖',
+    gradient: 'linear-gradient(135deg,#8844FF,#4488FF)',
+    status: 'Online',
+    pm: 'always online, never tired',
+  },
+  deploy_bot: {
+    display: '🚀 deploy_bot',
+    avatar: '🚀',
+    gradient: 'linear-gradient(135deg,#00D4FF,#8844FF)',
+    status: 'Online',
+    pm: 'watching your pushes 👀',
+  },
+  lucid_agent: {
+    display: '💡 lucid_agent',
+    avatar: '💡',
+    gradient: 'linear-gradient(135deg,#CC00AA,#FF2255)',
+    status: 'Online',
+    pm: 'thinking... always thinking',
+  },
+  night_owl: {
+    display: '🦉 night_owl',
+    avatar: '🦉',
+    gradient: 'linear-gradient(135deg,#444,#222)',
+    status: 'Offline',
+    pm: 'last seen: 3 days ago',
+  },
+  silent_type: {
+    display: '🤐 silent_type',
+    avatar: '🤐',
+    gradient: 'linear-gradient(135deg,#444,#222)',
+    status: 'Offline',
+    pm: 'last seen: a week ago',
+  },
+};
+
+/* ══════════════════════════════════
+   STATE
+══════════════════════════════════ */
+let currentContact = 'road_runner';
+let soundOn = true;
+let typingTimer = null;
+
+/* ══════════════════════════════════
+   EMOJI DATA
+══════════════════════════════════ */
+const EMOJIS = [
+  '😊','😂','❤️','👍','🔥','✨','😎','🤔',
+  '😅','🥺','😭','🎉','🚀','💻','🛣️','🌊',
+  '💜','👀','🙌','😬','🤯','😤','🤩','💡',
+  '🎵','☕','👾','💻','🏗️','🔔','📎','🎨',
+  '🌙','⚡','🦋','🌸','🐉','🏆','💎','🎯',
+];
+
+/* ══════════════════════════════════
+   INIT
+══════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  buildEmojiGrid();
+  initPersonalMsg();
+  startTypingCycle();
+  scrollChatToBottom();
+});
+
+function buildEmojiGrid() {
+  const grid = document.getElementById('emoji-grid');
+  EMOJIS.forEach(em => {
+    const btn = document.createElement('button');
+    btn.className = 'emoji-btn';
+    btn.textContent = em;
+    btn.title = em;
+    btn.addEventListener('click', () => {
+      insertEmoji(em);
+    });
+    grid.appendChild(btn);
+  });
+}
+
+function initPersonalMsg() {
+  const input = document.getElementById('personal-msg');
+  input.addEventListener('input', () => {
+    // Just live feedback — value stays
+  });
+}
+
+/* ══════════════════════════════════
+   CONTACTS & CHAT
+══════════════════════════════════ */
+function openChat(rowEl) {
+  const contactKey = rowEl.dataset.contact;
+  if (!CONTACTS[contactKey]) return;
+  currentContact = contactKey;
+
+  // Update active state
+  document.querySelectorAll('.contact-row').forEach(r => r.classList.remove('active'));
+  rowEl.classList.add('active');
+
+  const c = CONTACTS[contactKey];
+
+  // Update chat title bar
+  document.getElementById('chat-title').textContent = 'Chat with ' + c.display;
+  document.getElementById('chat-title-meta').textContent = contactKey;
+  document.getElementById('chat-status-line').textContent = c.status + ' · ' + (c.status === 'Offline' ? c.pm : 'last active just now');
+
+  const chatAvatar = document.getElementById('chat-avatar');
+  chatAvatar.textContent = c.avatar;
+  chatAvatar.style.background = c.gradient;
+
+  // Load a fresh chat for this contact
+  loadChatFor(contactKey, c);
+
+  scrollChatToBottom();
+}
+
+function loadChatFor(key, c) {
+  const body = document.getElementById('chat-body');
+
+  const isRoadRunner = key === 'road_runner';
+
+  // If it's the main contact, keep the existing messages
+  if (isRoadRunner) {
+    scrollChatToBottom();
+    return;
+  }
+
+  // For other contacts, generate a brief placeholder chat
+  const greetings = {
+    devdave:       ['hey! caught you at a good time?', 'just wrapped a PR — what\'s up?'],
+    beat_alexa:    ['🎵 you rang?', 'dropping beats and bugs in equal measure'],
+    morning_person:['zzz... back now! what did I miss?', 'coffee acquired. ready to function.'],
+    theRealRoadie: ['LFG!! what we building?', 'no cap I been waiting for this convo'],
+    glitch_kid:    ['oh hey! did you see that bug I filed?', 'it\'s giving chaos energy today 💀'],
+    road_agent:    ['AGENT ONLINE. How can I assist?', 'All systems nominal. Standing by.'],
+    deploy_bot:    ['🤖 DEPLOY_BOT v3.1 online. Last deploy: 2m ago.', 'No errors in queue. What shall I push?'],
+    lucid_agent:   ['Processing... query received.', 'Insight incoming. Please wait.'],
+    night_owl:     ['[Offline — message will be delivered when online]', ''],
+    silent_type:   ['[Offline — message will be delivered when online]', ''],
+  };
+
+  const msgs = greetings[key] || ['hey!', 'what\'s up?'];
+
+  body.innerHTML = `
+    <div class="sys-msg">${key} conversation · ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+    <div class="time-sep">TODAY · ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+    <div class="msg-row">
+      <div class="msg-avatar-sm" style="background:${c.gradient};">${c.avatar}</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">${key}</div>
+        <div class="msg-bubble">${msgs[0]}</div>
+        <div class="msg-time">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>
+    ${msgs[1] ? `
+    <div class="msg-row">
+      <div class="msg-avatar-sm" style="background:${c.gradient};">${c.avatar}</div>
+      <div class="msg-bubble-wrap">
+        <div class="msg-name-tag">${key}</div>
+        <div class="msg-bubble">${msgs[1]}</div>
+        <div class="msg-time">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>` : ''}
+    <div class="typing-indicator hidden" id="typing-indicator">
+      <div class="msg-avatar-sm" style="background:${c.gradient};">${c.avatar}</div>
+      <div class="typing-text">${key} is typing</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════
+   SEND MESSAGE
+══════════════════════════════════ */
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const body = document.getElementById('chat-body');
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+  // Remove typing indicator temporarily
+  const typingEl = document.getElementById('typing-indicator');
+
+  const row = document.createElement('div');
+  row.className = 'msg-row mine';
+  row.innerHTML = `
+    <div class="msg-avatar-sm" style="background: var(--g);">A</div>
+    <div class="msg-bubble-wrap">
+      <div class="msg-name-tag">alexa</div>
+      <div class="msg-bubble">${escapeHtml(text)}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  `;
+
+  // Insert before typing indicator (or at end)
+  if (typingEl && typingEl.parentNode === body) {
+    body.insertBefore(row, typingEl);
+  } else {
+    body.appendChild(row);
+  }
+
+  input.value = '';
+  scrollChatToBottom();
+
+  // Simulate response after delay
+  setTimeout(() => simulateReply(), 1800 + Math.random() * 1200);
+}
+
+function simulateReply() {
+  const c = CONTACTS[currentContact];
+  if (!c) return;
+
+  const replies = [
+    'haha for real though 😂',
+    'okay that\'s actually a great point 👀',
+    'yes YES let\'s do it 🚀',
+    'wait can you say more about that?',
+    '100% agree, let\'s ship it',
+    'lmaooo okay okay I see you',
+    'oof that\'s a good call ngl',
+    'okay roadie mode activated 🛣️',
+  ];
+
+  const body = document.getElementById('chat-body');
+  const typingEl = document.getElementById('typing-indicator');
+  const time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+
+  const text = replies[Math.floor(Math.random() * replies.length)];
+
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.innerHTML = `
+    <div class="msg-avatar-sm" style="background:${c.gradient};">${c.avatar}</div>
+    <div class="msg-bubble-wrap">
+      <div class="msg-name-tag">${currentContact}</div>
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+  `;
+
+  if (typingEl && typingEl.parentNode === body) {
+    body.insertBefore(row, typingEl);
+  } else {
+    body.appendChild(row);
+  }
+
+  scrollChatToBottom();
+}
+
+/* ══════════════════════════════════
+   ENTER KEY TO SEND
+══════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('chat-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+});
+
+/* ══════════════════════════════════
+   TYPING INDICATOR CYCLE
+══════════════════════════════════ */
+function startTypingCycle() {
+  // Show typing for 2s, hide for 5s, repeat
+  function showTyping() {
+    const el = document.getElementById('typing-indicator');
+    if (el) {
+      el.classList.remove('hidden');
+      scrollChatToBottom();
+      typingTimer = setTimeout(() => {
+        el.classList.add('hidden');
+        typingTimer = setTimeout(showTyping, 5000 + Math.random() * 3000);
+      }, 2000);
+    }
+  }
+  typingTimer = setTimeout(showTyping, 3000);
+}
+
+/* ══════════════════════════════════
+   NUDGE
+══════════════════════════════════ */
+function sendNudge() {
+  const chatWin = document.getElementById('chat-window');
+  chatWin.classList.remove('shake');
+  void chatWin.offsetWidth; // reflow
+  chatWin.classList.add('shake');
+
+  const body = document.getElementById('chat-body');
+  const typingEl = document.getElementById('typing-indicator');
+
+  const nudgeEl = document.createElement('div');
+  nudgeEl.className = 'nudge-event';
+  nudgeEl.textContent = '🔔 alexa sent a nudge! (nudge!)';
+
+  if (typingEl && typingEl.parentNode === body) {
+    body.insertBefore(nudgeEl, typingEl);
+  } else {
+    body.appendChild(nudgeEl);
+  }
+
+  scrollChatToBottom();
+  showToast('🔔 Nudge sent!');
+
+  chatWin.addEventListener('animationend', () => {
+    chatWin.classList.remove('shake');
+  }, {once: true});
+}
+
+/* ══════════════════════════════════
+   WINK INSERT
+══════════════════════════════════ */
+function insertWink() {
+  const input = document.getElementById('chat-input');
+  const pos = input.selectionStart;
+  const before = input.value.substring(0, pos);
+  const after = input.value.substring(pos);
+  input.value = before + '😉 (wink) ' + after;
+  input.focus();
+  input.setSelectionRange(pos + 11, pos + 11);
+}
+
+/* ══════════════════════════════════
+   EMOJI PICKER
+══════════════════════════════════ */
+function toggleEmojiPicker() {
+  const picker = document.getElementById('emoji-picker');
+  picker.classList.toggle('open');
+}
+
+function insertEmoji(em) {
+  const input = document.getElementById('chat-input');
+  const pos = input.selectionStart;
+  const before = input.value.substring(0, pos);
+  const after = input.value.substring(pos);
+  input.value = before + em + after;
+  input.focus();
+  input.setSelectionRange(pos + em.length, pos + em.length);
+  document.getElementById('emoji-picker').classList.remove('open');
+}
+
+// Close emoji picker on outside click
+document.addEventListener('click', (e) => {
+  const picker = document.getElementById('emoji-picker');
+  const btn = document.getElementById('emoji-toggle-btn');
+  if (!picker.contains(e.target) && e.target !== btn) {
+    picker.classList.remove('open');
+  }
+});
+
+/* ══════════════════════════════════
+   FORMAT BUTTONS
+══════════════════════════════════ */
+function toggleFmt(btn, cmd) {
+  btn.classList.toggle('active');
+  document.getElementById('chat-input').focus();
+}
+
+/* ══════════════════════════════════
+   SOUND TOGGLE
+══════════════════════════════════ */
+function toggleSound() {
+  soundOn = !soundOn;
+  const btn = document.getElementById('sound-btn');
+  btn.textContent = soundOn ? '🔊' : '🔇';
+  showToast(soundOn ? '🔊 Sounds: On' : '🔇 Sounds: Off');
+}
+
+/* ══════════════════════════════════
+   STATUS
+══════════════════════════════════ */
+function setStatus(pill) {
+  document.querySelectorAll('.status-pill').forEach(p => p.classList.remove('active'));
+  pill.classList.add('active');
+
+  const status = pill.dataset.status;
+  const label = document.getElementById('status-label');
+  const dot = document.getElementById('my-status-dot');
+
+  label.textContent = status;
+
+  dot.className = 'status-dot';
+  if (status === 'Away')           dot.classList.add('away');
+  else if (status === 'Busy')      dot.classList.add('busy');
+  else if (status === 'Appear Offline') dot.classList.add('offline');
+
+  showToast('📡 Status: ' + status);
+}
+
+/* ══════════════════════════════════
+   GROUP ACCORDION
+══════════════════════════════════ */
+function toggleGroup(name) {
+  const header = document.getElementById('group-' + name);
+  const body = document.getElementById('body-' + name);
+  header.classList.toggle('collapsed');
+  body.classList.toggle('collapsed');
+}
+
+/* ══════════════════════════════════
+   TOAST
+══════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2500);
+}
+
+/* ══════════════════════════════════
+   UTILITIES
+══════════════════════════════════ */
+function scrollChatToBottom() {
+  const body = document.getElementById('chat-body');
+  setTimeout(() => { body.scrollTop = body.scrollHeight; }, 50);
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* ── Personal message live update ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const pmInput = document.getElementById('personal-msg');
+  pmInput.addEventListener('input', () => {
+    // Trim and reflect — subtle UX
+    if (pmInput.value.length > 120) pmInput.value = pmInput.value.slice(0, 120);
+  });
+});
+</script>
+</body>
+</html>

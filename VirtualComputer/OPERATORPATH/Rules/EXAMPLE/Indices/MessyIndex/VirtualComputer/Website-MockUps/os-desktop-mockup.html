@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad OS — Desktop</title>
+  <link rel="stylesheet" href="mockup-base.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Layout shell ─────────────────────────────────────────────── */
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      font-family: var(--sg);
+      user-select: none;
+    }
+
+    #os-shell {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ── Menubar ──────────────────────────────────────────────────── */
+    #menubar {
+      height: 32px;
+      min-height: 32px;
+      background: rgba(0,0,0,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      z-index: 1000;
+      position: relative;
+    }
+
+    .menubar-left {
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+
+    .menu-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-right: 14px;
+    }
+    .menu-logo-bar {
+      width: 16px;
+      height: 2px;
+      background: var(--g);
+      border-radius: 0px;
+      flex-shrink: 0;
+    }
+    .menu-logo-text {
+      font-family: var(--sg);
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--white);
+      letter-spacing: -0.01em;
+    }
+
+    .menu-items {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .menu-item {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--sub);
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: default;
+      transition: background .1s, color .1s;
+      white-space: nowrap;
+    }
+    .menu-item:hover {
+      background: var(--white10);
+      color: var(--white);
+    }
+    .menu-item.active {
+      color: var(--white);
+    }
+
+    .menubar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .agent-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .agent-pill {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: color .15s;
+    }
+    .agent-pill .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #28c840;
+      flex-shrink: 0;
+      animation: pulse-dot 3s ease-in-out infinite;
+    }
+    .agent-pill .dot.lucidia { animation-delay: 0s; }
+    .agent-pill .dot.road    { animation-delay: 1s; }
+    .agent-pill .dot.valeria { animation-delay: 2s; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.4; }
+    }
+
+    .menu-sep-v {
+      width: 1px;
+      height: 14px;
+      background: var(--border);
+    }
+
+    .menu-clock {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--sub);
+      white-space: nowrap;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .menu-status-icons {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: -0.05em;
+      white-space: nowrap;
+    }
+
+    /* ── Desktop ──────────────────────────────────────────────────── */
+    #desktop {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at top left, rgba(255,107,43,.08), transparent 24%), radial-gradient(circle at bottom right, rgba(68,136,255,.08), transparent 26%), #000;
+    }
+
+    .desktop-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse at center,
+        rgba(136, 68, 255, 0.04) 0%,
+        rgba(68, 136, 255, 0.02) 40%,
+        transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── Desktop Icons ────────────────────────────────────────────── */
+    .desktop-icons {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      display: grid;
+      grid-template-columns: repeat(2, 72px);
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .desktop-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .desktop-icon-box {
+      width: 48px;
+      height: 48px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      position: relative;
+      transition: transform .15s;
+    }
+    .desktop-icon-box::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 10px;
+      background: var(--g);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .desktop-icon:hover .desktop-icon-box {
+      transform: scale(1.08);
+    }
+    .desktop-icon:hover .desktop-icon-box::before {
+      opacity: 1;
+    }
+
+    .desktop-icon-label {
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--sub);
+      text-align: center;
+      white-space: nowrap;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+    }
+
+    /* ── Window base ──────────────────────────────────────────────── */
+    .os-window {
+      position: absolute;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.5);
+      transition: box-shadow .15s;
+    }
+    .os-window:hover {
+      box-shadow: 0 32px 80px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.6);
+    }
+    .os-window.focused {
+      border-color: #333;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(136,68,255,0.12), 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .window-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 12px;
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+      cursor: move;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .window-bar .br-dot { width: 10px; height: 10px; }
+    .window-title {
+      flex: 1;
+      text-align: center;
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      pointer-events: none;
+      margin-right: 30px; /* offset for dots */
+    }
+
+    /* ── Window 1: Highway Dashboard ─────────────────────────────── */
+    #win-highway {
+      width: 400px;
+      top: 60px;
+      left: calc(50% - 220px);
+      z-index: 100;
+    }
+
+    .hw-body {
+      padding: 16px;
+      background: var(--card);
+    }
+
+    .hw-greeting {
+      margin-bottom: 14px;
+    }
+    .hw-greeting-sup {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 3px;
+    }
+    .hw-greeting-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .hw-greeting-name span {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hw-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .hw-stat {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+    }
+    .hw-stat-num {
+      font-family: var(--jb);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      display: block;
+    }
+    .hw-stat-label {
+      font-size: 9px;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+    .hw-stat-num.grad-text {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hw-activity-title {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 8px;
+    }
+
+    .hw-activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .hw-activity-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .hw-activity-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #28c840;
+    }
+    .hw-activity-dot.amber { background: #febc2e; }
+    .hw-activity-dot.blue  { background: #4488FF; }
+    .hw-activity-text {
+      font-size: 10px;
+      color: var(--sub);
+      flex: 1;
+    }
+    .hw-activity-time {
+      font-family: var(--jb);
+      font-size: 8px;
+      color: var(--muted);
+    }
+
+    /* ── Window 2: Terminal ───────────────────────────────────────── */
+    #win-terminal {
+      width: 380px;
+      top: 80px;
+      left: calc(50% + 120px);
+      z-index: 90;
+    }
+
+    .term-body {
+      background: var(--card);
+      padding: 14px;
+      font-family: var(--jb);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .term-prompt {
+      color: #737373;
+    }
+    .term-prompt .term-user {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .term-prompt .term-dir {
+      color: var(--text);
+    }
+
+    .term-cmd {
+      color: var(--white);
+    }
+    .term-cmd .term-dollar {
+      color: var(--muted);
+    }
+
+    .term-output {
+      color: var(--sub);
+    }
+    .term-output .ok {
+      color: var(--text);
+    }
+    .term-output .agent-name {
+      color: var(--white);
+      font-weight: 600;
+      display: inline-block;
+      width: 72px;
+    }
+    .term-output .agent-status {
+      color: var(--text);
+    }
+    .term-output .agent-time {
+      color: var(--muted);
+    }
+    .term-output .more {
+      color: var(--text);
+    }
+
+    .term-cursor {
+      display: inline-block;
+      width: 7px;
+      height: 12px;
+      background: var(--white);
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      margin-left: 1px;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── Window 3: RoadChat ───────────────────────────────────────── */
+    #win-chat {
+      width: 320px;
+      top: 55px;
+      left: 20px;
+      z-index: 95;
+    }
+
+    .chat-layout {
+      display: flex;
+      height: 300px;
+    }
+
+    .chat-sidebar {
+      width: 90px;
+      background: var(--elevated);
+      border-right: 1px solid var(--border);
+      padding: 10px 0;
+      flex-shrink: 0;
+    }
+    .chat-sidebar-title {
+      font-family: var(--jb);
+      font-size: 8px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 0 10px;
+      margin-bottom: 6px;
+    }
+    .chat-channel {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      font-size: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .1s, color .1s;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .chat-channel:hover {
+      background: var(--white05);
+      color: var(--sub);
+    }
+    .chat-channel.active {
+      background: var(--white10);
+      color: var(--white);
+      position: relative;
+    }
+    .chat-channel.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--g);
+    }
+    .chat-hash {
+      color: var(--muted);
+      font-family: var(--jb);
+      font-size: 9px;
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--card);
+      overflow: hidden;
+    }
+
+    .chat-header {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chat-header .chat-hash { color: var(--sub); }
+
+    .chat-messages {
+      flex: 1;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .chat-msg {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .chat-msg-header {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .chat-msg-author {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .chat-msg-author.lucidia { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .chat-msg-author.road    { color: var(--text); }
+    .chat-msg-author.valeria { color: var(--sub); }
+    .chat-msg-author.alexa   { color: var(--text); }
+
+    .chat-msg-time {
+      font-family: var(--jb);
+      font-size: 7px;
+      color: var(--muted);
+    }
+    .chat-msg-text {
+      font-size: 10px;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+
+    .chat-input-row {
+      padding: 8px 10px;
+      border-top: 1px solid var(--border);
+    }
+    .chat-input {
+      width: 100%;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 9px;
+      font-family: var(--sg);
+      font-size: 10px;
+      color: var(--sub);
+      outline: none;
+    }
+    .chat-input::placeholder { color: var(--muted); }
+
+    /* ── Dock ─────────────────────────────────────────────────────── */
+    #dock {
+      height: 64px;
+      min-height: 64px;
+      background: #0a0a0a;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      gap: 4px;
+      z-index: 1000;
+      position: relative;
+    }
+
+    .dock-sep {
+      width: 1px;
+      height: 32px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .dock-item {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s, background .15s;
+      flex-shrink: 0;
+    }
+    .dock-item:hover {
+      transform: translateY(-6px) scale(1.12);
+      border-color: transparent;
+      background: var(--hover);
+    }
+    .dock-item:hover .dock-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+    .dock-item.active {
+      position: relative;
+    }
+    .dock-item.active::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--g);
+      border-radius: 10px 10px 0 0;
+    }
+
+    /* gradient border on hover via pseudo-element trick */
+    .dock-item::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 10px;
+      background: var(--g);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity .15s;
+    }
+    .dock-item:hover::after { opacity: 1; }
+    .dock-item:hover { border-color: transparent; }
+
+    .dock-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(0px);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 9px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .12s, transform .12s;
+      z-index: 2000;
+    }
+    /* gradient border on tooltip */
+    .dock-tooltip::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 6px;
+      background: var(--g);
+      z-index: -1;
+      opacity: 0.5;
+    }
+    .dock-tooltip::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      background: var(--card);
+      z-index: -1;
+    }
+
+    /* ── Active window flash on dock click ────────────────────────── */
+    @keyframes win-flash {
+      0%, 100% { box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(136,68,255,0.12); }
+      50%       { box-shadow: 0 32px 80px rgba(0,0,0,0.9), 0 0 0 2px rgba(136,68,255,0.35); }
+    }
+    .os-window.flash {
+      animation: win-flash .3s ease-in-out;
+    }
+
+    /* ── Scrollbars in chat ───────────────────────────────────────── */
+    .chat-messages::-webkit-scrollbar { width: 2px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); }
+  </style>
+</head>
+<body>
+<div id="os-shell">
+
+  <!-- ═══════════════════════════════ MENUBAR ═══════════════════════ -->
+  <div id="menubar">
+    <div class="menubar-left">
+      <div class="menu-logo">
+        <div class="menu-logo-bar"></div>
+        <span class="menu-logo-text">BlackRoad OS</span>
+      </div>
+      <div class="menu-items">
+        <span class="menu-item active">Highway</span>
+        <span class="menu-item">File</span>
+        <span class="menu-item">Edit</span>
+        <span class="menu-item">View</span>
+        <span class="menu-item">Agents</span>
+        <span class="menu-item">Help</span>
+      </div>
+    </div>
+
+    <div class="menubar-right">
+      <div class="agent-pills">
+        <span class="agent-pill">
+          <span class="dot lucidia"></span>Lucidia
+        </span>
+        <span class="agent-pill">
+          <span class="dot road"></span>Road
+        </span>
+        <span class="agent-pill">
+          <span class="dot valeria"></span>Valeria
+        </span>
+      </div>
+      <div class="menu-sep-v"></div>
+      <span class="menu-status-icons">▊▊▊ ▲</span>
+      <div class="menu-sep-v"></div>
+      <span class="menu-clock" id="menu-clock">11:36 PM</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ DESKTOP ═══════════════════════ -->
+  <div id="desktop">
+    <div class="desktop-glow"></div>
+
+    <!-- ── Window 1: Highway Dashboard ───────────────────────────── -->
+    <div class="os-window focused" id="win-highway" data-win="highway">
+      <div class="window-bar" data-winbar="highway">
+        <span class="br-dot br-dot-red"></span>
+        <span class="br-dot br-dot-yel"></span>
+        <span class="br-dot br-dot-grn"></span>
+        <span class="window-title">Highway</span>
+      </div>
+      <div class="hw-body">
+        <div class="hw-greeting">
+          <div class="hw-greeting-sup">Good evening</div>
+          <div class="hw-greeting-name">Hello, <span>Alexa</span> 👋</div>
+        </div>
+        <div class="hw-stats">
+          <div class="hw-stat">
+            <span class="hw-stat-num grad-text">69</span>
+            <span class="hw-stat-label">Agents</span>
+          </div>
+          <div class="hw-stat">
+            <span class="hw-stat-num">18</span>
+            <span class="hw-stat-label">Services</span>
+          </div>
+          <div class="hw-stat">
+            <span class="hw-stat-num">100%</span>
+            <span class="hw-stat-label">Uptime</span>
+          </div>
+          <div class="hw-stat">
+            <span class="hw-stat-num grad-text">✓</span>
+            <span class="hw-stat-label">Health</span>
+          </div>
+        </div>
+        <div class="hw-activity-title">Recent Activity</div>
+        <div class="hw-activity-list">
+          <div class="hw-activity-item">
+            <div class="hw-activity-dot"></div>
+            <span class="hw-activity-text">Lucidia indexed 14,382 vectors</span>
+            <span class="hw-activity-time">11:31pm</span>
+          </div>
+          <div class="hw-activity-item">
+            <div class="hw-activity-dot blue"></div>
+            <span class="hw-activity-text">Highway deploy → production</span>
+            <span class="hw-activity-time">11:33pm</span>
+          </div>
+          <div class="hw-activity-item">
+            <div class="hw-activity-dot amber"></div>
+            <span class="hw-activity-text">Security scan completed — clear</span>
+            <span class="hw-activity-time">11:34pm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Window 2: Terminal ─────────────────────────────────────── -->
+    <div class="os-window" id="win-terminal" data-win="terminal">
+      <div class="window-bar" data-winbar="terminal">
+        <span class="br-dot br-dot-red"></span>
+        <span class="br-dot br-dot-yel"></span>
+        <span class="br-dot br-dot-grn"></span>
+        <span class="window-title">Terminal — roadtrip</span>
+      </div>
+      <div class="term-body">
+        <div class="term-prompt">
+          <span class="term-user">alexa</span><span style="color:var(--muted)">@</span><span style="color:var(--sub)">blackroad-os</span> <span class="term-dir">~</span>
+        </div>
+        <div class="term-cmd"><span class="term-dollar">$ </span>agents status</div>
+        <div class="term-output">
+          <span class="ok">✓</span> <span class="agent-name">Lucidia</span> <span class="agent-status">active</span>   <span class="agent-time">847ms</span>
+        </div>
+        <div class="term-output">
+          <span class="ok">✓</span> <span class="agent-name">Road</span>    <span class="agent-status">active</span>   <span class="agent-time">312ms</span>
+        </div>
+        <div class="term-output">
+          <span class="ok">✓</span> <span class="agent-name">Valeria</span> <span class="agent-status">active</span>   <span class="agent-time">128ms</span>
+        </div>
+        <div class="term-output">
+          <span class="ok">✓</span> <span class="more">66 more agents online</span>
+        </div>
+        <div style="margin-top:6px">
+          <span class="term-cmd"><span class="term-dollar">$ </span></span><span class="term-cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Window 3: RoadChat ─────────────────────────────────────── -->
+    <div class="os-window" id="win-chat" data-win="chat">
+      <div class="window-bar" data-winbar="chat">
+        <span class="br-dot br-dot-red"></span>
+        <span class="br-dot br-dot-yel"></span>
+        <span class="br-dot br-dot-grn"></span>
+        <span class="window-title">RoadChat</span>
+      </div>
+      <div class="chat-layout">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-title">Channels</div>
+          <div class="chat-channel active">
+            <span class="chat-hash">#</span>general
+          </div>
+          <div class="chat-channel">
+            <span class="chat-hash">#</span>agents
+          </div>
+          <div class="chat-channel">
+            <span class="chat-hash">#</span>deploy
+          </div>
+          <div class="chat-channel">
+            <span class="chat-hash">#</span>security
+          </div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-header">
+            <span class="chat-hash">#</span>general
+          </div>
+          <div class="chat-messages">
+            <div class="chat-msg">
+              <div class="chat-msg-header">
+                <span class="chat-msg-author lucidia">Lucidia</span>
+                <span class="chat-msg-time">11:31pm</span>
+              </div>
+              <div class="chat-msg-text">Indexed 14k vectors ✓</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-header">
+                <span class="chat-msg-author road">Road</span>
+                <span class="chat-msg-time">11:33pm</span>
+              </div>
+              <div class="chat-msg-text">Highway health: green</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-header">
+                <span class="chat-msg-author valeria">Valeria</span>
+                <span class="chat-msg-time">11:34pm</span>
+              </div>
+              <div class="chat-msg-text">Security scan clear</div>
+            </div>
+            <div class="chat-msg">
+              <div class="chat-msg-header">
+                <span class="chat-msg-author alexa">Alexa</span>
+                <span class="chat-msg-time">11:36pm</span>
+              </div>
+              <div class="chat-msg-text">ship it 🚀</div>
+            </div>
+          </div>
+          <div class="chat-input-row">
+            <input class="chat-input" type="text" placeholder="Message #general" readonly />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Desktop Icons ──────────────────────────────────────────── -->
+    <div class="desktop-icons">
+      <div class="desktop-icon">
+        <div class="desktop-icon-box">🏎️</div>
+        <span class="desktop-icon-label">Highway</span>
+      </div>
+      <div class="desktop-icon">
+        <div class="desktop-icon-box">🔑</div>
+        <span class="desktop-icon-label">CarKeys</span>
+      </div>
+      <div class="desktop-icon">
+        <div class="desktop-icon-box">🌍</div>
+        <span class="desktop-icon-label">RoadTrip</span>
+      </div>
+      <div class="desktop-icon">
+        <div class="desktop-icon-box">🗺️</div>
+        <span class="desktop-icon-label">RoadMap</span>
+      </div>
+    </div>
+  </div><!-- /#desktop -->
+
+  <!-- ═══════════════════════════════ DOCK ═════════════════════════ -->
+  <div id="dock">
+    <div class="dock-item active" data-target="highway">
+      🏠
+      <span class="dock-tooltip">OS</span>
+    </div>
+    <div class="dock-item active" data-target="highway">
+      🏎️
+      <span class="dock-tooltip">Highway</span>
+    </div>
+
+    <div class="dock-sep"></div>
+
+    <div class="dock-item" data-target="chat">
+      💬
+      <span class="dock-tooltip">RoadChat</span>
+    </div>
+    <div class="dock-item">
+      ⚙️
+      <span class="dock-tooltip">RoadCode</span>
+    </div>
+    <div class="dock-item">
+      🔑
+      <span class="dock-tooltip">CarKeys</span>
+    </div>
+    <div class="dock-item">
+      🌍
+      <span class="dock-tooltip">RoadTrip</span>
+    </div>
+    <div class="dock-item">
+      🔗
+      <span class="dock-tooltip">RoadChain</span>
+    </div>
+
+    <div class="dock-sep"></div>
+
+    <div class="dock-item">
+      🗺️
+      <span class="dock-tooltip">RoadMap</span>
+    </div>
+    <div class="dock-item" data-target="terminal">
+      🎵
+      <span class="dock-tooltip">RoadBeat</span>
+    </div>
+    <div class="dock-item">
+      📺
+      <span class="dock-tooltip">AgentTV</span>
+    </div>
+  </div><!-- /#dock -->
+
+</div><!-- /#os-shell -->
+
+<script>
+  /* ── Clock ─────────────────────────────────────────────────────── */
+  const clockEl = document.getElementById('menu-clock');
+
+  function updateClock() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    clockEl.textContent = `${h}:${m} ${ampm}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ── Window focus (z-index) ─────────────────────────────────────── */
+  let zTop = 200;
+  const windows = document.querySelectorAll('.os-window');
+
+  function focusWindow(win) {
+    windows.forEach(w => w.classList.remove('focused'));
+    win.classList.add('focused');
+    win.style.zIndex = ++zTop;
+  }
+
+  windows.forEach(win => {
+    win.addEventListener('mousedown', () => focusWindow(win));
+  });
+
+  /* ── Dock clicks ───────────────────────────────────────────────── */
+  document.querySelectorAll('.dock-item[data-target]').forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.target;
+      const win = document.getElementById('win-' + target);
+      if (!win) return;
+      focusWindow(win);
+      win.classList.add('flash');
+      setTimeout(() => win.classList.remove('flash'), 300);
+    });
+  });
+
+  /* ── Window dragging ───────────────────────────────────────────── */
+  document.querySelectorAll('[data-winbar]').forEach(bar => {
+    const winId = 'win-' + bar.dataset.winbar;
+    const win   = document.getElementById(winId);
+    if (!win) return;
+
+    let dragging = false;
+    let startX, startY, origLeft, origTop;
+
+    bar.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      dragging = true;
+      focusWindow(win);
+
+      // Resolve current left/top from computed style or inline
+      const rect = win.getBoundingClientRect();
+      const desktop = document.getElementById('desktop').getBoundingClientRect();
+
+      startX   = e.clientX;
+      startY   = e.clientY;
+      origLeft = rect.left - desktop.left;
+      origTop  = rect.top  - desktop.top;
+
+      win.style.left = origLeft + 'px';
+      win.style.top  = origTop  + 'px';
+      // clear any calc() left positioning
+      win.style.removeProperty('left');
+      win.style.left = origLeft + 'px';
+
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      const desktop = document.getElementById('desktop');
+      const maxL = desktop.clientWidth  - win.offsetWidth;
+      const maxT = desktop.clientHeight - win.offsetHeight;
+      win.style.left = Math.max(0, Math.min(origLeft + dx, maxL)) + 'px';
+      win.style.top  = Math.max(0, Math.min(origTop  + dy, maxT)) + 'px';
+    });
+
+    document.addEventListener('mouseup', () => { dragging = false; });
+  });
+
+  /* ── Agent pill animation cycle ────────────────────────────────── */
+  // Already handled by CSS animations — nothing needed here.
+  // But we add a subtle hue-shift to each dot over time via JS for liveliness.
+  const pillDots = document.querySelectorAll('.agent-pill .dot');
+  const dotColors = ['#28c840', '#4488FF', '#CC00AA'];
+  setInterval(() => {
+    pillDots.forEach((dot, i) => {
+      // oscillate opacity slightly via style — complement the CSS animation
+      const phase = (Date.now() / 1200 + i * 1.2) % (Math.PI * 2);
+      dot.style.opacity = (0.6 + 0.4 * Math.sin(phase)).toFixed(2);
+    });
+  }, 80);
+</script>
+</body>
+</html>

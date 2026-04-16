@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadArcade — BlackRoad OS</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+
+  <style>
+    :root {
+      --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      --bg:    #000;
+      --card:  #0a0a0a;
+      --elevated: #111;
+      --hover: #181818;
+      --border:#1a1a1a;
+      --text:  #f5f5f5;
+      --sub:   #737373;
+      --muted: #444;
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grad bar ── */
+    .grad-bar {
+      height: 3px;
+      background: var(--g);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 200;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky;
+      top: 3px;
+      z-index: 100;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .nav-logo-orb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--g);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .nav-logo-orb::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--bg);
+    }
+
+    .nav-pill {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 28px;
+    }
+
+    .nav-pill a {
+      color: var(--sub);
+      text-decoration: none;
+      font-size: 0.825rem;
+      font-weight: 500;
+      transition: color 0.18s;
+      white-space: nowrap;
+    }
+
+    .nav-pill a:hover { color: var(--text); }
+
+    .nav-pill a.active {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .xp-chip {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 5px 12px;
+      white-space: nowrap;
+    }
+
+    /* ── Gradient button ── */
+    .btn-grad {
+      position: relative;
+      z-index: 0;
+      background: var(--card);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.825rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s, transform 0.12s;
+      white-space: nowrap;
+    }
+
+    .btn-grad::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 8px;
+      background: var(--g);
+      z-index: -1;
+    }
+
+    .btn-grad:hover { background: var(--hover); transform: translateY(-1px); }
+    .btn-grad:active { transform: translateY(0); }
+
+    /* ── Page layout ── */
+    .page-wrap {
+      padding-top: 3px;
+    }
+
+    .layout {
+      display: flex;
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 0 36px;
+      gap: 0;
+    }
+
+    .main-content {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 32px 60px 0;
+    }
+
+    .sidebar {
+      width: 288px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      padding: 40px 0 60px 28px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 48px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 5px 14px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--g);
+      flex-shrink: 0;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--sub);
+      font-weight: 400;
+      max-width: 480px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 28px;
+      margin-top: 24px;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .hero-stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+    }
+
+    .hero-stat-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .hero-stat-divider {
+      width: 1px;
+      background: var(--border);
+      height: 36px;
+      align-self: center;
+    }
+
+    /* ── Featured banner ── */
+    .featured-wrap {
+      position: relative;
+      z-index: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: var(--g);
+      margin-bottom: 44px;
+      cursor: pointer;
+    }
+
+    .featured-inner {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px 32px;
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      transition: background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .featured-inner::after {
+      content: '';
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(136,68,255,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .featured-wrap:hover .featured-inner { background: var(--hover); }
+
+    .featured-thumb-wrap {
+      width: 200px;
+      height: 130px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      overflow: hidden;
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+    }
+
+    .featured-thumb-wrap canvas { display: block; }
+
+    .featured-info { flex: 1; }
+
+    .featured-label {
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+
+    .featured-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      margin-bottom: 6px;
+    }
+
+    .featured-desc {
+      font-size: 0.9rem;
+      color: var(--sub);
+      margin-bottom: 18px;
+      max-width: 400px;
+      line-height: 1.5;
+    }
+
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 22px;
+    }
+
+    .meta-pill {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 0.72rem;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .featured-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 18px;
+      color: var(--sub);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.18s, color 0.18s;
+    }
+
+    .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+    /* ── Section header ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-count {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2px 8px;
+    }
+
+    .section-action {
+      font-size: 0.78rem;
+      color: var(--sub);
+      cursor: pointer;
+      transition: color 0.18s;
+    }
+
+    .section-action:hover { color: var(--text); }
+
+    /* ── Game grid ── */
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .game-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .game-card:hover {
+      background: var(--hover);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+      border-color: var(--muted);
+    }
+
+    .game-card.featured-card {
+      border-color: transparent;
+    }
+
+    .game-card.featured-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 16px;
+      background: var(--g);
+      z-index: -1;
+    }
+
+    .game-thumb {
+      width: 100%;
+      height: 120px;
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-thumb canvas { display: block; width: 100%; height: 100%; }
+
+    .game-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.7);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2px 8px;
+      font-size: 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+      backdrop-filter: blur(4px);
+    }
+
+    .game-card-body { padding: 14px 16px 16px; }
+
+    .game-name {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .star-badge {
+      font-size: 0.65rem;
+    }
+
+    .game-desc {
+      font-size: 0.73rem;
+      color: var(--sub);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .game-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .btn-play {
+      position: relative;
+      z-index: 0;
+      background: var(--elevated);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+
+    .btn-play::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 6px;
+      background: var(--g);
+      z-index: -1;
+    }
+
+    .btn-play:hover { background: var(--hover); }
+
+    .score-label {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+
+    /* ── Sidebar ── */
+    .sidebar-section { margin-bottom: 36px; }
+
+    .sidebar-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .sidebar-title-label { display: flex; align-items: center; gap: 6px; }
+
+    .lb-game-chip {
+      font-size: 0.62rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2px 8px;
+    }
+
+    .leaderboard-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .leaderboard-row:last-child { border-bottom: none; }
+
+    .lb-rank {
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      width: 18px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .lb-rank.gold {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    .lb-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    .lb-name {
+      flex: 1;
+      font-size: 0.78rem;
+      color: var(--sub);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .lb-score {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    /* Recent played */
+    .recent-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s;
+    }
+
+    .recent-card:hover { background: var(--hover); border-color: var(--muted); }
+
+    .recent-thumb {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .recent-info { flex: 1; min-width: 0; }
+
+    .recent-name {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .recent-score {
+      font-size: 0.68rem;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .recent-arrow {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Daily challenge */
+    .daily-card {
+      position: relative;
+      z-index: 0;
+      border-radius: 12px;
+      padding: 1px;
+      background: var(--g);
+    }
+
+    .daily-inner {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .daily-timer {
+      font-size: 0.62rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .daily-game-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .daily-desc {
+      font-size: 0.75rem;
+      color: var(--sub);
+      margin-bottom: 14px;
+      line-height: 1.45;
+    }
+
+    .daily-rewards {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .reward-chip {
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 3px 10px;
+      font-size: 0.68rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+    }
+
+    /* ── Modal overlay ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s ease;
+      backdrop-filter: blur(12px);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-window {
+      position: relative;
+      z-index: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: var(--g);
+      width: 620px;
+      max-width: 96vw;
+    }
+
+    .modal-chrome {
+      background: var(--card);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .modal-titlebar {
+      background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .macos-dots { display: flex; gap: 7px; }
+
+    .mac-dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: filter 0.15s;
+    }
+
+    .mac-dot:hover { filter: brightness(1.25); }
+    .mac-dot.red    { background: #FF5F57; }
+    .mac-dot.yellow { background: #FFBD2E; }
+    .mac-dot.green  { background: #28CA41; }
+
+    .modal-game-name {
+      flex: 1;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sub);
+    }
+
+    .modal-live-score {
+      font-size: 0.82rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text);
+    }
+
+    .modal-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    #snakeCanvas {
+      display: block;
+      background: #0a0a0a;
+    }
+
+    .game-over-layer {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      border-radius: 10px;
+    }
+
+    .game-over-layer.show { display: flex; }
+
+    .go-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .go-score {
+      font-size: 1rem;
+      color: var(--sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .modal-hints {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    /* ── Thumb placeholders ── */
+    .thumb-runner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .thumb-tiles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      padding: 14px;
+      align-content: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tile {
+      width: 38px;
+      height: 38px;
+      background: var(--elevated);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+    }
+
+    .thumb-typer {
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem;
+      line-height: 1.9;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .thumb-flap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      height: 100%;
+    }
+
+    .pipe-group { display: flex; flex-direction: column; gap: 22px; }
+
+    .pipe {
+      width: 14px;
+      height: 28px;
+      background: var(--elevated);
+      border: 1px solid #222;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="grad-bar"></div>
+
+<div class="page-wrap">
+
+  <!-- ══ NAV ══ -->
+  <nav>
+    <div class="nav-logo">
+      <div class="nav-logo-orb"></div>
+      RoadArcade
+    </div>
+
+    <div class="nav-pill">
+      <a href="#" class="active">Arcade</a>
+      <a href="#">My Games</a>
+      <a href="#">Leaderboard</a>
+      <a href="#">Store</a>
+      <a href="#">Profile</a>
+    </div>
+
+    <div class="nav-right">
+      <span class="xp-chip">⚡ 1,240 XP</span>
+      <button class="btn-grad">Sign In</button>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN LAYOUT ══ -->
+  <div class="layout">
+
+    <!-- ── CONTENT ── -->
+    <main class="main-content">
+
+      <!-- Hero -->
+      <section class="hero">
+        <div class="hero-eyebrow">
+          <div class="hero-eyebrow-dot"></div>
+          browser-native · no downloads · all roads
+        </div>
+        <h1>Arcade</h1>
+        <p class="hero-sub">Play anything. No downloads. All roads.</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-val">8</span>
+            <span class="hero-stat-label">Games</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-val">24.8k</span>
+            <span class="hero-stat-label">Players</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-val">0MB</span>
+            <span class="hero-stat-label">Downloads</span>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-val">100%</span>
+            <span class="hero-stat-label">Browser</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Featured banner -->
+      <div class="featured-wrap" id="featuredBanner" onclick="openModal()">
+        <div class="featured-inner">
+          <div class="featured-thumb-wrap">
+            <canvas id="featuredCanvas" width="200" height="130"></canvas>
+          </div>
+          <div class="featured-info">
+            <div class="featured-label">✦ &nbsp;Featured Game of the Day</div>
+            <div class="featured-title">RoadSnake</div>
+            <div class="featured-desc">The classic, reimagined — gradient body, living grid, endless roads ahead. See how long you can survive.</div>
+            <div class="featured-meta">
+              <span class="meta-pill">🕹 Arcade</span>
+              <span class="meta-pill">⭐ 4.9 / 5.0</span>
+              <span class="meta-pill">🏆 Top: 2,840</span>
+              <span class="meta-pill">👥 9.2k plays</span>
+            </div>
+            <div class="featured-actions">
+              <button class="btn-grad" onclick="event.stopPropagation(); openModal()">▶ &nbsp;Play Now</button>
+              <button class="btn-ghost" onclick="event.stopPropagation()">+ Wishlist</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Grid -->
+      <div class="section-header">
+        <span class="section-title">
+          All Games
+          <span class="section-count">8</span>
+        </span>
+        <span class="section-action">View all →</span>
+      </div>
+
+      <div class="game-grid">
+
+        <!-- 1 RoadSnake ★ -->
+        <div class="game-card featured-card" onclick="openModal()">
+          <div class="game-thumb">
+            <canvas id="snakeThumb" width="240" height="120"></canvas>
+            <div class="game-badge">⭐ Featured</div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadSnake <span class="star-badge">⭐</span></div>
+            <div class="game-desc">Classic snake with a gradient body. Eat, grow, survive.</div>
+            <div class="game-card-footer">
+              <button class="btn-play" onclick="event.stopPropagation(); openModal()">▶ Play Now</button>
+              <span class="score-label">Best: 2,840</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 RoadBreaker -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <canvas id="breakerThumb" width="240" height="120"></canvas>
+            <div class="game-badge">🔥 Hot</div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadBreaker</div>
+            <div class="game-desc">Smash all bricks, break every limit. Breakout classic.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 1,200</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 RoadRunner -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <div class="thumb-runner">
+              <span style="font-size:2.2rem;">🏃</span>
+              <span style="font-size:0.85rem;color:var(--muted);font-family:'JetBrains Mono',monospace;">→→→</span>
+              <div style="width:2px;height:60px;background:linear-gradient(180deg,transparent,#FF2255,transparent);border-radius:2px;"></div>
+            </div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadRunner</div>
+            <div class="game-desc">Endless runner — jump obstacles, never stop moving.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 890m</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 RoadPong -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <canvas id="pongThumb" width="240" height="120"></canvas>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadPong</div>
+            <div class="game-desc">One-on-one versus an AI that never sleeps. Beat it.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 7 – 2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 RoadTetris -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <canvas id="tetrisThumb" width="240" height="120"></canvas>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadTetris</div>
+            <div class="game-desc">Stack, clear, survive. Classic falling blocks reimagined.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 4,200</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Road2048 -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <div class="thumb-tiles">
+              <div class="tile" style="color:var(--text);border-color:#333;">2048</div>
+              <div class="tile" style="color:var(--sub);">1024</div>
+              <div class="tile" style="color:var(--muted);">512</div>
+              <div class="tile" style="color:var(--muted);">256</div>
+            </div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">Road2048</div>
+            <div class="game-desc">Merge tiles, chase 2048. Every move counts.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 18,432</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7 RoadTyper -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <div class="thumb-typer">
+              <div>
+                <span style="background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">the quick brown fox</span><br/>
+                <span style="color:var(--sub);">jumps over the</span><br/>
+                <span style="color:var(--muted);">lazy dog_</span><span style="color:#FF2255;animation:blink 1s step-end infinite;">|</span>
+              </div>
+            </div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadTyper</div>
+            <div class="game-desc">WPM challenge — type fast, type clean, beat your record.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 94 WPM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8 RoadFlap -->
+        <div class="game-card">
+          <div class="game-thumb">
+            <div class="thumb-flap">
+              <span style="font-size:2rem;">🐦</span>
+              <div class="pipe-group">
+                <div class="pipe"></div>
+                <div class="pipe"></div>
+              </div>
+              <div class="pipe-group" style="margin-top:18px;">
+                <div class="pipe"></div>
+                <div class="pipe"></div>
+              </div>
+            </div>
+          </div>
+          <div class="game-card-body">
+            <div class="game-name">RoadFlap</div>
+            <div class="game-desc">Flap through narrow gaps. One tap, one life.</div>
+            <div class="game-card-footer">
+              <button class="btn-play">▶ Play Now</button>
+              <span class="score-label">Best: 42</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /game-grid -->
+    </main>
+
+    <!-- ── SIDEBAR ── -->
+    <aside class="sidebar">
+
+      <!-- Leaderboard -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <span class="sidebar-title-label">🏆 Leaderboard</span>
+          <span class="lb-game-chip">RoadSnake</span>
+        </div>
+        <div id="leaderboardList"></div>
+      </div>
+
+      <!-- Recently Played -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <span class="sidebar-title-label">🎮 Recently Played</span>
+        </div>
+
+        <div class="recent-card" onclick="openModal()">
+          <div class="recent-thumb">🐍</div>
+          <div class="recent-info">
+            <div class="recent-name">RoadSnake</div>
+            <div class="recent-score">Score: 1,240 · 4m ago</div>
+          </div>
+          <span class="recent-arrow">›</span>
+        </div>
+
+        <div class="recent-card">
+          <div class="recent-thumb">🧱</div>
+          <div class="recent-info">
+            <div class="recent-name">RoadBreaker</div>
+            <div class="recent-score">Score: 880 · 22m ago</div>
+          </div>
+          <span class="recent-arrow">›</span>
+        </div>
+
+        <div class="recent-card">
+          <div class="recent-thumb">⌨️</div>
+          <div class="recent-info">
+            <div class="recent-name">RoadTyper</div>
+            <div class="recent-score">82 WPM · 1h ago</div>
+          </div>
+          <span class="recent-arrow">›</span>
+        </div>
+      </div>
+
+      <!-- Daily Challenge -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">
+          <span class="sidebar-title-label">⚡ Daily Challenge</span>
+        </div>
+
+        <div class="daily-card">
+          <div class="daily-inner">
+            <div class="daily-timer">Today · 14h 32m left</div>
+            <div class="daily-game-name">🐍 RoadSnake Marathon</div>
+            <div class="daily-desc">Survive for 3 uninterrupted minutes without dying. No pausing.</div>
+            <div class="daily-rewards">
+              <span class="reward-chip">⚡ +500 XP</span>
+              <span class="reward-chip">🏆 Unique Badge</span>
+            </div>
+            <button class="btn-grad" style="width:100%;text-align:center;" onclick="openModal()">Accept Challenge</button>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div><!-- /layout -->
+</div><!-- /page-wrap -->
+
+<!-- ══ SNAKE MODAL ══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal-window" id="modalWindow">
+    <div class="modal-chrome">
+
+      <div class="modal-titlebar">
+        <div class="macos-dots">
+          <div class="mac-dot red"   onclick="closeModal()" title="Close"></div>
+          <div class="mac-dot yellow" title="Minimize"></div>
+          <div class="mac-dot green"  title="Fullscreen"></div>
+        </div>
+        <div class="modal-game-name">RoadSnake — BlackRoad Arcade</div>
+        <div class="modal-live-score">Score: <span id="liveScore">0</span></div>
+      </div>
+
+      <div class="modal-body">
+        <div class="canvas-wrapper">
+          <canvas id="snakeCanvas" width="560" height="400"></canvas>
+          <div class="game-over-layer" id="gameOverLayer">
+            <div class="go-title">Game Over</div>
+            <div class="go-score" id="goScore">Score: 0</div>
+            <button class="btn-grad" onclick="restartGame()">↺ &nbsp;Play Again</button>
+          </div>
+        </div>
+
+        <div class="modal-hints">
+          Arrow keys or WASD to move &nbsp;·&nbsp; Space to pause &nbsp;·&nbsp; ESC to close
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+'use strict';
+
+/* ─────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────── */
+const GRAD = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+
+const LEADERBOARD = [
+  { handle:'x_roadie',   initials:'XR', score:2840 },
+  { handle:'viper99',    initials:'V9', score:2410 },
+  { handle:'neonwolf',   initials:'NW', score:2200 },
+  { handle:'snake_lord', initials:'SL', score:1980 },
+  { handle:'alexa_b',    initials:'AB', score:1750 },
+  { handle:'gridrunner', initials:'GR', score:1640 },
+  { handle:'pxlghst',    initials:'PG', score:1490 },
+  { handle:'driftmode',  initials:'DM', score:1320 },
+  { handle:'hyper_q',    initials:'HQ', score:1100 },
+  { handle:'road_zero',  initials:'RZ', score:980  },
+];
+
+/* ─────────────────────────────────────────────
+   LEADERBOARD RENDER
+───────────────────────────────────────────── */
+function renderLeaderboard() {
+  const el = document.getElementById('leaderboardList');
+  const medals = ['🥇','🥈','🥉'];
+  el.innerHTML = LEADERBOARD.map((e, i) => `
+    <div class="leaderboard-row">
+      <span class="lb-rank${i < 3 ? ' gold' : ''}">${medals[i] || (i+1)}</span>
+      <div class="lb-avatar">${e.initials}</div>
+      <span class="lb-name">${e.handle}</span>
+      <span class="lb-score">${e.score.toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+renderLeaderboard();
+
+/* ─────────────────────────────────────────────
+   THUMBNAIL CANVASES
+───────────────────────────────────────────── */
+function gradLinear(ctx, x0, y0, x1, y1, stops) {
+  const g = ctx.createLinearGradient(x0, y0, x1, y1);
+  stops.forEach(([p, c]) => g.addColorStop(p, c));
+  return g;
+}
+
+function drawSnakeThumb(canvasId) {
+  const cv = document.getElementById(canvasId);
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, W, H);
+
+  // subtle grid
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 0.5;
+  const S = 12;
+  for (let x = 0; x < W; x += S) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += S) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // snake segments
+  const segs = [
+    {x:10,y:5},{x:9,y:5},{x:8,y:5},{x:7,y:5},{x:6,y:5},
+    {x:6,y:4},{x:6,y:3},{x:7,y:3},{x:8,y:3},{x:9,y:3},{x:10,y:3}
+  ];
+  segs.forEach((s, i) => {
+    ctx.fillStyle = GRAD[i % GRAD.length];
+    ctx.beginPath();
+    ctx.roundRect(s.x * S + 1, s.y * S + 1, S - 2, S - 2, 3);
+    ctx.fill();
+  });
+
+  // food
+  const fx = 14 * S + S/2, fy = 4 * S + S/2;
+  const fg = ctx.createRadialGradient(fx, fy, 1, fx, fy, 6);
+  fg.addColorStop(0, '#fff');
+  fg.addColorStop(0.5, '#FF2255');
+  fg.addColorStop(1,   '#CC00AA');
+  ctx.fillStyle = fg;
+  ctx.beginPath(); ctx.arc(fx, fy, 5, 0, Math.PI*2); ctx.fill();
+}
+
+function drawBreakerThumb() {
+  const cv = document.getElementById('breakerThumb');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, W, H);
+
+  const bW = 34, bH = 11, gap = 3, rows = 3, cols = 5;
+  const offsetX = (W - cols * (bW + gap) + gap) / 2;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const idx = r * cols + c;
+      ctx.fillStyle = GRAD[idx % GRAD.length];
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.roundRect(offsetX + c * (bW + gap), 8 + r * (bH + gap), bW, bH, 3);
+      ctx.fill();
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // ball
+  const bx = 115, by = 88;
+  const ballG = ctx.createRadialGradient(bx, by, 2, bx, by, 7);
+  ballG.addColorStop(0, '#fff'); ballG.addColorStop(1, '#4488FF');
+  ctx.fillStyle = ballG;
+  ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI*2); ctx.fill();
+
+  // paddle
+  const pg = gradLinear(ctx, 74, 108, 170, 108, [[0,'#FF6B2B'],[1,'#00D4FF']]);
+  ctx.fillStyle = pg;
+  ctx.beginPath(); ctx.roundRect(74, 108, 96, 8, 4); ctx.fill();
+}
+
+function drawPongThumb() {
+  const cv = document.getElementById('pongThumb');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, W, H);
+
+  // center dashed line
+  ctx.setLineDash([5, 4]);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // left paddle
+  const lg = gradLinear(ctx, 18, 28, 18, 72, [[0,'#FF6B2B'],[1,'#FF2255']]);
+  ctx.fillStyle = lg;
+  ctx.beginPath(); ctx.roundRect(18, 28, 9, 44, 4); ctx.fill();
+
+  // right paddle
+  const rg = gradLinear(ctx, W-27, 42, W-27, 86, [[0,'#4488FF'],[1,'#00D4FF']]);
+  ctx.fillStyle = rg;
+  ctx.beginPath(); ctx.roundRect(W-27, 42, 9, 44, 4); ctx.fill();
+
+  // ball
+  const ballG = ctx.createRadialGradient(W/2+22, H/2, 2, W/2+22, H/2, 7);
+  ballG.addColorStop(0, '#fff'); ballG.addColorStop(1, '#8844FF');
+  ctx.fillStyle = ballG;
+  ctx.beginPath(); ctx.arc(W/2+22, H/2, 6, 0, Math.PI*2); ctx.fill();
+
+  // score
+  ctx.font = 'bold 22px "JetBrains Mono", monospace';
+  ctx.fillStyle = '#1a1a1a';
+  ctx.textAlign = 'center';
+  ctx.fillText('3', W/2 - 32, 28);
+  ctx.fillText('2', W/2 + 32, 28);
+  ctx.textAlign = 'left';
+}
+
+function drawTetrisThumb() {
+  const cv = document.getElementById('tetrisThumb');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, W, H);
+
+  const S = 13;
+  const pieces = [
+    // S-piece  orange
+    [{x:5,y:4},{x:6,y:4},{x:6,y:5},{x:7,y:5}],
+    // L-piece  blue
+    [{x:3,y:7},{x:3,y:6},{x:4,y:6},{x:5,y:6}],
+    // O-piece  violet
+    [{x:8,y:6},{x:9,y:6},{x:8,y:7},{x:9,y:7}],
+    // I-piece  cyan
+    [{x:2,y:8},{x:3,y:8},{x:4,y:8},{x:5,y:8}],
+  ];
+
+  const pColors = ['#FF6B2B','#4488FF','#CC00AA','#00D4FF'];
+
+  pieces.forEach((piece, pi) => {
+    piece.forEach(b => {
+      ctx.fillStyle = pColors[pi];
+      ctx.globalAlpha = 0.88;
+      ctx.beginPath();
+      ctx.roundRect(b.x * S + 1, b.y * S - 50, S - 2, S - 2, 2);
+      ctx.fill();
+    });
+  });
+  ctx.globalAlpha = 1;
+}
+
+// Draw featured canvas (bigger snake)
+function drawFeaturedCanvas() {
+  const cv = document.getElementById('featuredCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, W, H);
+
+  const S = 14;
+  ctx.strokeStyle = '#111'; ctx.lineWidth = 0.4;
+  for (let x = 0; x < W; x += S) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += S) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  const segs = [
+    {x:7,y:4},{x:6,y:4},{x:5,y:4},{x:4,y:4},{x:3,y:4},
+    {x:3,y:5},{x:3,y:6},{x:4,y:6},{x:5,y:6},{x:6,y:6},{x:7,y:6},{x:8,y:6}
+  ];
+  segs.forEach((s, i) => {
+    ctx.fillStyle = GRAD[i % GRAD.length];
+    ctx.beginPath();
+    ctx.roundRect(s.x * S + 1, s.y * S + 1, S - 2, S - 2, 3);
+    ctx.fill();
+  });
+
+  // food
+  const fx = 11 * S + S/2, fy = 3 * S + S/2;
+  const fg = ctx.createRadialGradient(fx, fy, 1, fx, fy, 7);
+  fg.addColorStop(0, '#fff'); fg.addColorStop(0.5, '#FF2255'); fg.addColorStop(1, '#CC00AA');
+  ctx.fillStyle = fg;
+  ctx.beginPath(); ctx.arc(fx, fy, 6, 0, Math.PI*2); ctx.fill();
+}
+
+// Init all thumbnails
+drawSnakeThumb('snakeThumb');
+drawFeaturedCanvas();
+drawBreakerThumb();
+drawPongThumb();
+drawTetrisThumb();
+
+/* ─────────────────────────────────────────────
+   MODAL
+───────────────────────────────────────────── */
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  initGame();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  stopGame();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+/* ─────────────────────────────────────────────
+   SNAKE GAME ENGINE
+───────────────────────────────────────────── */
+
+// Grid: 28 cols × 20 rows, 20px per cell = 560×400
+const COLS = 28;
+const ROWS = 20;
+const CELL = 20;
+
+let snake    = [];
+let dir      = { x: 1, y: 0 };
+let nextDir  = { x: 1, y: 0 };
+let food     = { x: 0, y: 0 };
+let score    = 0;
+let running  = false;
+let paused   = false;
+let rafId    = null;
+let speed    = 135;   // ms per tick
+let lastTick = 0;
+
+function initGame() {
+  snake = [
+    { x: 14, y: 10 },
+    { x: 13, y: 10 },
+    { x: 12, y: 10 },
+    { x: 11, y: 10 },
+  ];
+  dir     = { x: 1, y: 0 };
+  nextDir = { x: 1, y: 0 };
+  score   = 0;
+  speed   = 135;
+  paused  = false;
+  running = true;
+  lastTick = 0;
+
+  document.getElementById('liveScore').textContent = '0';
+  document.getElementById('gameOverLayer').classList.remove('show');
+
+  spawnFood();
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function stopGame() {
+  running = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+}
+
+function gameLoop(ts) {
+  if (!running) return;
+  if (!lastTick) lastTick = ts;
+
+  if (ts - lastTick >= speed) {
+    lastTick = ts;
+    if (!paused) {
+      tick();
+      drawGame();
+    }
+  }
+
+  rafId = requestAnimationFrame(gameLoop);
+}
+
+function tick() {
+  dir = { ...nextDir };
+
+  const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+  // Wall collision
+  if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+    return gameOver();
+  }
+
+  // Self collision
+  if (snake.some(s => s.x === head.x && s.y === head.y)) {
+    return gameOver();
+  }
+
+  snake.unshift(head);
+
+  if (head.x === food.x && head.y === food.y) {
+    score += 10;
+    document.getElementById('liveScore').textContent = score;
+    speed = Math.max(55, speed - 1.2);
+    spawnFood();
+  } else {
+    snake.pop();
+  }
+}
+
+function spawnFood() {
+  let pos;
+  do {
+    pos = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
+  } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+  food = pos;
+}
+
+function gameOver() {
+  running = false;
+  if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+  drawGame(); // final frame
+  document.getElementById('goScore').textContent = `Score: ${score}`;
+  document.getElementById('gameOverLayer').classList.add('show');
+}
+
+function restartGame() {
+  document.getElementById('gameOverLayer').classList.remove('show');
+  initGame();
+}
+
+/* ─────────────────────────────────────────────
+   DRAW
+───────────────────────────────────────────── */
+function drawGame() {
+  const cv  = document.getElementById('snakeCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // ── background
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.025)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x <= COLS; x++) {
+    ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, H); ctx.stroke();
+  }
+  for (let y = 0; y <= ROWS; y++) {
+    ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(W, y * CELL); ctx.stroke();
+  }
+
+  // ── food glow
+  const fcx = food.x * CELL + CELL / 2;
+  const fcy = food.y * CELL + CELL / 2;
+
+  // outer glow
+  const glowG = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, CELL);
+  glowG.addColorStop(0, 'rgba(255,34,85,0.25)');
+  glowG.addColorStop(1, 'rgba(255,34,85,0)');
+  ctx.fillStyle = glowG;
+  ctx.beginPath(); ctx.arc(fcx, fcy, CELL, 0, Math.PI*2); ctx.fill();
+
+  // food dot
+  const foodG = ctx.createRadialGradient(fcx - 2, fcy - 2, 1, fcx, fcy, CELL/2 - 2);
+  foodG.addColorStop(0,   '#fff');
+  foodG.addColorStop(0.35,'#FF2255');
+  foodG.addColorStop(1,   '#CC00AA');
+  ctx.fillStyle = foodG;
+  ctx.beginPath(); ctx.arc(fcx, fcy, CELL / 2 - 3, 0, Math.PI*2); ctx.fill();
+
+  // ── snake segments
+  snake.forEach((seg, i) => {
+    const color = GRAD[i % GRAD.length];
+    const sx = seg.x * CELL, sy = seg.y * CELL;
+
+    // segment glow on head
+    if (i === 0) {
+      const headGlow = ctx.createRadialGradient(sx + CELL/2, sy + CELL/2, 2, sx + CELL/2, sy + CELL/2, CELL);
+      headGlow.addColorStop(0, color + '55');
+      headGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = headGlow;
+      ctx.beginPath(); ctx.arc(sx + CELL/2, sy + CELL/2, CELL, 0, Math.PI*2); ctx.fill();
+    }
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(sx + 1, sy + 1, CELL - 2, CELL - 2, i === 0 ? 5 : 3);
+    ctx.fill();
+
+    // inner highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.beginPath();
+    ctx.roundRect(sx + 3, sy + 3, CELL / 2 - 2, 4, 2);
+    ctx.fill();
+
+    // eyes on head
+    if (i === 0) {
+      ctx.fillStyle = '#000';
+      const eyeOffX = dir.y * 2;
+      const eyeOffY = dir.x * 2;
+      const ex = sx + CELL/2 + eyeOffX;
+      const ey = sy + CELL/2 + eyeOffY;
+      ctx.beginPath(); ctx.arc(ex + dir.y * 3.5 - dir.x * 3.5, ey - dir.x * 3.5 - dir.y * 3.5, 2.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex - dir.y * 3.5 - dir.x * 3.5, ey + dir.x * 3.5 - dir.y * 3.5, 2.2, 0, Math.PI*2); ctx.fill();
+      // pupils
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(ex + dir.y * 3.5 - dir.x * 3.5 + 0.6, ey - dir.x * 3.5 - dir.y * 3.5 - 0.6, 0.8, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ex - dir.y * 3.5 - dir.x * 3.5 + 0.6, ey + dir.x * 3.5 - dir.y * 3.5 - 0.6, 0.8, 0, Math.PI*2); ctx.fill();
+    }
+  });
+
+  // ── border accent
+  const borderG = ctx.createLinearGradient(0, 0, W, H);
+  GRAD.forEach((c, i) => borderG.addColorStop(i / (GRAD.length - 1), c + '33'));
+  ctx.strokeStyle = borderG;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(1, 1, W - 2, H - 2);
+
+  // ── paused overlay
+  if (paused) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.font = 'bold 36px "Space Grotesk", sans-serif';
+    ctx.fillStyle = '#f5f5f5';
+    ctx.textAlign = 'center';
+    ctx.fillText('PAUSED', W/2, H/2 - 10);
+
+    ctx.font = '14px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#737373';
+    ctx.fillText('Space to resume', W/2, H/2 + 20);
+    ctx.textAlign = 'left';
+  }
+}
+
+/* ─────────────────────────────────────────────
+   KEYBOARD
+───────────────────────────────────────────── */
+document.addEventListener('keydown', e => {
+  const isOpen = document.getElementById('modalOverlay').classList.contains('open');
+  if (!isOpen) return;
+
+  switch (e.key) {
+    case 'ArrowUp':    case 'w': case 'W':
+      if (dir.y !== 1)  nextDir = { x: 0, y: -1 };
+      e.preventDefault(); break;
+    case 'ArrowDown':  case 's': case 'S':
+      if (dir.y !== -1) nextDir = { x: 0, y: 1 };
+      e.preventDefault(); break;
+    case 'ArrowLeft':  case 'a': case 'A':
+      if (dir.x !== 1)  nextDir = { x: -1, y: 0 };
+      e.preventDefault(); break;
+    case 'ArrowRight': case 'd': case 'D':
+      if (dir.x !== -1) nextDir = { x: 1, y: 0 };
+      e.preventDefault(); break;
+    case ' ':
+      if (running || paused) { paused = !paused; if (!paused) drawGame(); }
+      e.preventDefault(); break;
+    case 'Escape':
+      closeModal();
+      e.preventDefault(); break;
+  }
+});
+</script>
+
+</body>
+</html>

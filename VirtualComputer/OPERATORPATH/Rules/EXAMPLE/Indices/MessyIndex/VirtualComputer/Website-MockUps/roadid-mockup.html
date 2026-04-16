@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadID — Sovereign Digital Identity · BlackRoad OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+  <style>
+    /* ── Page chrome ─────────────────────────────────────────────── */
+    body { background: #000; }
+
+    .page-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px 120px;
+    }
+
+    /* ── Spacer below fixed nav ──────────────────────────────────── */
+    .nav-spacer { height: 88px; }
+
+    /* ── Section spacing ─────────────────────────────────────────── */
+    .section { padding: 56px 0 0; }
+
+    .section-label {
+      font-family: var(--jb);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       IDENTITY CARD
+    ══════════════════════════════════════════════════════════════ */
+    .id-card-wrap {
+      /* gradient border via background + padding trick */
+      background: var(--g);
+      border-radius: 16px;
+      padding: 2px;
+    }
+    .id-card {
+      background: #0a0a0a;
+      border-radius: 12px;
+      padding: 28px 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle grid watermark */
+    .id-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+
+    .id-card-header {
+      font-family: var(--jb);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+    .id-card-header-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .id-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #00D4FF;
+      box-shadow: 0 0 6px #00D4FF88;
+    }
+    .id-status-text {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--text);
+      letter-spacing: .1em;
+    }
+
+    /* profile row */
+    .id-profile-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    /* avatar */
+    .id-avatar-wrap {
+      background: var(--g);
+      border-radius: 50%;
+      padding: 2px;
+      flex-shrink: 0;
+    }
+    .id-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--sg);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    /* identity info */
+    .id-info { flex: 1; }
+    .id-name {
+      font-family: var(--sg);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .id-handle {
+      font-family: var(--jb);
+      font-size: 14px;
+      font-weight: 600;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 5px;
+    }
+    .id-role {
+      font-size: 13px;
+      color: var(--sub);
+      margin-bottom: 5px;
+    }
+    .id-since {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .06em;
+    }
+
+    /* QR decorative block (top-right corner of card) */
+    .id-qr {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 56px;
+      height: 56px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 2px;
+      opacity: .55;
+    }
+    .id-qr-cell {
+      border-radius: 0px;
+      background: var(--muted);
+    }
+    .id-qr-cell.lit {
+      background: var(--g);
+      background-size: 400% 100%;
+    }
+
+    /* card footer */
+    .id-card-footer {
+      border-top: 1px solid #1a1a1a;
+      padding-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .id-pubkey {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .id-pubkey span {
+      color: var(--sub);
+    }
+
+    /* verified badges */
+    .id-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .id-badge {
+      background: var(--g);
+      border-radius: 16px;
+      padding: 1px;
+    }
+    .id-badge-inner {
+      background: #111;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-family: var(--jb);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .id-badge-inner .check {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 11px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       IDENTITY SCORE
+    ══════════════════════════════════════════════════════════════ */
+    .score-card {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      padding: 40px 32px;
+    }
+
+    .score-hero {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .score-number {
+      font-family: var(--sg);
+      font-weight: 700;
+      font-size: 96px;
+      line-height: 1;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline;
+    }
+    .score-denom {
+      font-family: var(--sg);
+      font-weight: 700;
+      font-size: 36px;
+      color: var(--muted);
+      display: inline;
+    }
+    .score-label {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--sub);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+
+    /* factor bars */
+    .score-factors {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .factor-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .factor-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sub);
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .factor-bar-track {
+      flex: 1;
+      height: 4px;
+      background: #1a1a1a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .factor-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--g);
+      background-size: 400% 100%;
+    }
+    .factor-pct {
+      font-family: var(--jb);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--white);
+      width: 34px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CREDENTIALS GRID
+    ══════════════════════════════════════════════════════════════ */
+    .cred-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .cred-card {
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 10px;
+      padding: 20px 18px;
+      position: relative;
+      transition: border-color .15s;
+    }
+    .cred-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--g);
+      border-radius: 10px 10px 0 0;
+    }
+    .cred-card:hover { border-color: #333; }
+
+    .cred-icon {
+      font-size: 20px;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .cred-type {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .cred-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .cred-detail {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CONNECTED PRODUCTS
+    ══════════════════════════════════════════════════════════════ */
+    .products-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .product-pill-wrap {
+      background: var(--g);
+      border-radius: 8px;
+      padding: 1px;
+    }
+    .product-pill {
+      background: #0a0a0a;
+      border-radius: 6px;
+      padding: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .product-pill-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .product-pill-role {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--sub);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ACTIVITY TIMELINE
+    ══════════════════════════════════════════════════════════════ */
+    .timeline-wrap {
+      position: relative;
+      padding-left: 32px;
+    }
+
+    /* vertical gradient line */
+    .timeline-line {
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--g);
+      border-radius: 0px;
+      opacity: .35;
+    }
+
+    .timeline-event {
+      position: relative;
+      margin-bottom: 28px;
+    }
+    .timeline-event:last-child { margin-bottom: 0; }
+
+    /* gradient dot on the line */
+    .timeline-dot-wrap {
+      position: absolute;
+      left: -31px;
+      top: 3px;
+      background: var(--g);
+      border-radius: 50%;
+      padding: 2px;
+    }
+    .timeline-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #0a0a0a;
+    }
+
+    .timeline-body { }
+    .timeline-action {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 2px;
+    }
+    .timeline-desc {
+      font-size: 12px;
+      color: var(--sub);
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+    .timeline-meta {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════════════════════════ */
+    .page-footer {
+      text-align: center;
+      padding: 48px 0 0;
+      border-top: 1px solid #1a1a1a;
+      margin-top: 56px;
+    }
+    .footer-sig {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: .06em;
+      margin-bottom: 8px;
+    }
+    .footer-sig span {
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
+    .footer-hash {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: #333;
+      letter-spacing: .08em;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       NAV overrides for this page
+    ══════════════════════════════════════════════════════════════ */
+    .roadid-nav-logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+    .roadid-nav-logo-super {
+      font-family: var(--jb);
+      font-size: 7px;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      margin-bottom: 1px;
+    }
+    .roadid-nav-logo-main {
+      font-family: var(--sg);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+    }
+
+    /* ── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .cred-grid { grid-template-columns: repeat(2, 1fr); }
+      .id-name { font-size: 20px; }
+      .score-number { font-size: 72px; }
+      .factor-label { width: 140px; font-size: 11px; }
+    }
+    @media (max-width: 420px) {
+      .cred-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3px gradient top bar -->
+  <div class="grad-bar"></div>
+
+  <!-- Fixed pill nav -->
+  <nav class="br-nav">
+    <div class="br-nav-inner">
+      <a href="#" class="br-nav-logo">
+        <div class="br-nav-logo-bar"></div>
+        <div class="roadid-nav-logo-text">
+          <span class="roadid-nav-logo-super">BlackRoad OS</span>
+          <span class="roadid-nav-logo-main">RoadID</span>
+        </div>
+      </a>
+      <div class="br-nav-links">
+        <a href="#">Identity</a>
+        <a href="#">Credentials</a>
+        <a href="#">Network</a>
+        <a href="#">Activity</a>
+        <a href="#">Settings</a>
+      </div>
+      <button class="btn btn-white" style="font-size:11px; padding:7px 16px;">✓ Verify Identity</button>
+    </div>
+  </nav>
+
+  <div class="nav-spacer"></div>
+
+  <div class="page-wrap">
+
+    <!-- ══ IDENTITY CARD ══════════════════════════════════════════ -->
+    <div class="section" style="padding-top: 24px;">
+      <div class="id-card-wrap">
+        <div class="id-card">
+
+          <div class="id-card-header">
+            <span>BLACKROAD OS — SOVEREIGN IDENTITY</span>
+            <div class="id-card-header-right">
+              <div class="id-status-dot"></div>
+              <span class="id-status-text">ACTIVE</span>
+            </div>
+          </div>
+
+          <div class="id-profile-row">
+            <div class="id-avatar-wrap">
+              <div class="id-avatar">AA</div>
+            </div>
+
+            <div class="id-info">
+              <div class="id-name">Alexa Amundson</div>
+              <div class="id-handle">@alexa</div>
+              <div class="id-role">Founder · BlackRoad OS Inc.</div>
+              <div class="id-since">Since 2024 · ID #000001</div>
+            </div>
+
+            <!-- Decorative QR -->
+            <div class="id-qr" aria-hidden="true">
+              <!-- row 1 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div>
+              <!-- row 2 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div>
+              <!-- row 3 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div>
+              <!-- row 4 -->
+              <div class="id-qr-cell"></div><div class="id-qr-cell"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell"></div><div class="id-qr-cell"></div>
+              <!-- row 5 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div>
+              <!-- row 6 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div>
+              <!-- row 7 -->
+              <div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div><div class="id-qr-cell lit"></div><div class="id-qr-cell"></div>
+            </div>
+          </div>
+
+          <div class="id-card-footer">
+            <div class="id-pubkey">
+              <span style="color:var(--muted);">pk:</span>
+              <span>0x4f2a9c1e3d87f502a6b84c91e7d3f0a2b5c6d8e1f9…8b3d</span>
+            </div>
+            <div class="id-badges">
+              <div class="id-badge"><div class="id-badge-inner"><span class="check">✓</span> Identity</div></div>
+              <div class="id-badge"><div class="id-badge-inner"><span class="check">✓</span> Email</div></div>
+              <div class="id-badge"><div class="id-badge-inner"><span class="check">✓</span> CarKeys</div></div>
+              <div class="id-badge"><div class="id-badge-inner"><span class="check">✓</span> RoadChain</div></div>
+              <div class="id-badge"><div class="id-badge-inner"><span class="check">✓</span> RoadTrip</div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ IDENTITY SCORE ═════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-label">02 · Sovereign Identity Score</div>
+      <div class="score-card">
+
+        <div class="score-hero">
+          <div>
+            <span class="score-number">97</span><span class="score-denom">/100</span>
+          </div>
+          <div class="score-label">Sovereign Identity Score</div>
+        </div>
+
+        <div class="score-factors">
+          <div class="factor-row">
+            <span class="factor-label">Identity Verification</span>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:100%"></div>
+            </div>
+            <span class="factor-pct">100%</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-label">Key Security</span>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:94%"></div>
+            </div>
+            <span class="factor-pct">94%</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-label">Activity Score</span>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:98%"></div>
+            </div>
+            <span class="factor-pct">98%</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-label">Network Trust</span>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:96%"></div>
+            </div>
+            <span class="factor-pct">96%</span>
+          </div>
+          <div class="factor-row">
+            <span class="factor-label">Audit Compliance</span>
+            <div class="factor-bar-track">
+              <div class="factor-bar-fill" style="width:97%"></div>
+            </div>
+            <span class="factor-pct">97%</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ CREDENTIALS ════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-label">03 · Verifiable Credentials</div>
+      <div class="cred-grid">
+
+        <div class="cred-card">
+          <span class="cred-icon">🎓</span>
+          <div class="cred-type">Education</div>
+          <div class="cred-title">Self-Taught · Computer Science</div>
+          <div class="cred-detail">2018–2024</div>
+        </div>
+
+        <div class="cred-card">
+          <span class="cred-icon">💼</span>
+          <div class="cred-type">Professional</div>
+          <div class="cred-title">Founder · BlackRoad OS Inc.</div>
+          <div class="cred-detail">2024–present</div>
+        </div>
+
+        <div class="cred-card">
+          <span class="cred-icon">🔑</span>
+          <div class="cred-type">Security Clearance</div>
+          <div class="cred-title">CarKeys Level 3</div>
+          <div class="cred-detail">Issued by Iris · 2024</div>
+        </div>
+
+        <div class="cred-card">
+          <span class="cred-icon">🌍</span>
+          <div class="cred-type">Network</div>
+          <div class="cred-title">RoadTrip Agent Network</div>
+          <div class="cred-detail">69 connections</div>
+        </div>
+
+        <div class="cred-card">
+          <span class="cred-icon">🔗</span>
+          <div class="cred-type">On-Chain</div>
+          <div class="cred-title">RoadChain ID #000001</div>
+          <div class="cred-detail">847 events recorded</div>
+        </div>
+
+        <div class="cred-card">
+          <span class="cred-icon">🏆</span>
+          <div class="cred-type">Achievement</div>
+          <div class="cred-title">First User · BlackRoad OS</div>
+          <div class="cred-detail">#000001 · Genesis Badge</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ CONNECTED PRODUCTS ═════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-label">04 · Connected Products</div>
+      <div class="products-row">
+
+        <div class="product-pill-wrap">
+          <div class="product-pill">
+            <span class="product-pill-name">Highway</span>
+            <span class="product-pill-role">Admin</span>
+          </div>
+        </div>
+
+        <div class="product-pill-wrap">
+          <div class="product-pill">
+            <span class="product-pill-name">CarKeys</span>
+            <span class="product-pill-role">Owner</span>
+          </div>
+        </div>
+
+        <div class="product-pill-wrap">
+          <div class="product-pill">
+            <span class="product-pill-name">RoadTrip</span>
+            <span class="product-pill-role">69 agents</span>
+          </div>
+        </div>
+
+        <div class="product-pill-wrap">
+          <div class="product-pill">
+            <span class="product-pill-name">RoadChain</span>
+            <span class="product-pill-role">Validator</span>
+          </div>
+        </div>
+
+        <div class="product-pill-wrap">
+          <div class="product-pill">
+            <span class="product-pill-name">RoadCode</span>
+            <span class="product-pill-role">Developer</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ ACTIVITY TIMELINE ══════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-label">05 · Activity Timeline</div>
+      <div class="timeline-wrap">
+        <div class="timeline-line"></div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Identity Verified</div>
+            <div class="timeline-desc">Full sovereign identity verification completed via Iris.</div>
+            <div class="timeline-meta">Apr 10 2026 · 09:12 UTC · identity.verify</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Key Rotation</div>
+            <div class="timeline-desc">Public key rotated to secp256k1. Previous key archived on RoadChain.</div>
+            <div class="timeline-meta">Apr 08 2026 · 14:37 UTC · key.rotate</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Production Deployment</div>
+            <div class="timeline-desc">RoadCode service deployed to Railway · v2.14.0 · 3 services updated.</div>
+            <div class="timeline-meta">Apr 07 2026 · 22:05 UTC · deploy.production</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Agent Conversation</div>
+            <div class="timeline-desc">69-turn session with Iris on RoadTrip. 3 new action items logged.</div>
+            <div class="timeline-meta">Apr 06 2026 · 18:44 UTC · agent.session</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Payment Processed</div>
+            <div class="timeline-desc">RoadPay transaction · Stripe Atlas filing fee · $500 USD.</div>
+            <div class="timeline-meta">Apr 05 2026 · 11:20 UTC · payment.success</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">Score Updated</div>
+            <div class="timeline-desc">Sovereign Identity Score increased from 94 → 97. Audit compliance improved.</div>
+            <div class="timeline-meta">Apr 04 2026 · 08:59 UTC · score.updated</div>
+          </div>
+        </div>
+
+        <div class="timeline-event">
+          <div class="timeline-dot-wrap"><div class="timeline-dot"></div></div>
+          <div class="timeline-body">
+            <div class="timeline-action">New Credential Issued</div>
+            <div class="timeline-desc">CarKeys Level 3 security clearance issued by Iris · RoadChain event #847.</div>
+            <div class="timeline-meta">Apr 02 2026 · 16:31 UTC · credential.issued</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ FOOTER ═════════════════════════════════════════════════ -->
+    <div class="page-footer">
+      <div class="footer-sig">
+        Cryptographically signed by <span>Iris</span> · Last verified Apr 10 2026
+      </div>
+      <div class="footer-hash">sig: 0x8a1f2c4d…e9b7 · sha256:f0a3b1c8d2e5f7a9…4c2d · RoadChain block #000001</div>
+    </div>
+
+  </div><!-- /page-wrap -->
+
+</body>
+</html>

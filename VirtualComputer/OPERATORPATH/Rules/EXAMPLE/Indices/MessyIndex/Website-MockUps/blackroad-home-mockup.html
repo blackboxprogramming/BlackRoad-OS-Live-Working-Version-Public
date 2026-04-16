@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BlackRoad Home mockup for the main portal, dashboard, and entry point into the BlackRoad operating system." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='4' y='4' width='24' height='24' rx='8' fill='%23ffffff'/><text x='16' y='21' text-anchor='middle' font-size='11' font-family='Arial' fill='%23000'>BR</text></svg>">
+  <title>BlackRoad Home — Main Portal and Dashboard Mockup</title>
+  <link rel="stylesheet" href="mockup-base.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sg); display: flex; flex-direction: column; }
+    .grad { height: 3px; background: var(--g); flex-shrink: 0; }
+    .topbar { height: 58px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,.95); display:flex; align-items:center; gap:14px; padding:0 18px; }
+    .brand { display:flex; align-items:center; gap:10px; min-width:240px; }
+    .brand-mark { width:34px; height:34px; border-radius:10px; background:var(--white); color:#000; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; }
+    .brand-copy { display:flex; flex-direction:column; line-height:1.05; }
+    .brand-title { font-size:15px; font-weight:700; }
+    .brand-sub { font-family:var(--jb); font-size:10px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+    .search { flex:1; max-width:520px; height:38px; border-radius:10px; border:1px solid var(--border); background:var(--card); display:flex; align-items:center; padding:0 12px; color:var(--sub); font-size:13px; }
+    .top-actions { margin-left:auto; display:flex; gap:10px; align-items:center; }
+    .chip { padding:8px 12px; border-radius:999px; background:var(--card); border:1px solid var(--border); color:var(--sub); font-size:11px; font-family:var(--jb); }
+    .btn { padding:8px 12px; border-radius:9px; border:none; background:var(--white); color:#000; font-size:12px; font-weight:700; }
+    .shell { display:grid; grid-template-columns:80px 290px 1fr 330px; flex:1; min-height:0; }
+    .rail { background:var(--card); border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 0; }
+    .rail-btn { width:46px; height:46px; border-radius:14px; background:var(--elevated); border:1px solid transparent; display:flex; align-items:center; justify-content:center; color:var(--sub); font-size:16px; }
+    .rail-btn.active { color:var(--white); background:var(--hover); border-color:#323232; }
+    .sidebar, .context { background:#050505; padding:18px 16px; overflow:auto; }
+    .sidebar { border-right:1px solid var(--border); }
+    .context { border-left:1px solid var(--border); background:var(--card); }
+    .section-label { font-family:var(--jb); font-size:10px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; margin-bottom:8px; }
+    .card, .list-item, .mini-card, .status-row, .context-row { background:var(--card); border:1px solid var(--border); border-radius:12px; }
+    .card, .mini-card, .status-row, .context-row { padding:14px; }
+    .card h2, .mini-card h3 { font-size:16px; margin-bottom:6px; }
+    .card p, .list-item span, .mini-card p, .context-copy span, .status-row span { color:var(--sub); font-size:12px; line-height:1.6; }
+    .stack { display:flex; flex-direction:column; gap:10px; }
+    .list-item { padding:12px; }
+    .list-item strong, .context-copy strong, .status-row strong { display:block; font-size:13px; margin-bottom:4px; }
+    .main { background:linear-gradient(180deg, rgba(12,12,12,.96), rgba(0,0,0,1)); display:grid; grid-template-rows:auto auto 1fr; min-height:0; }
+    .hero { padding:18px; border-bottom:1px solid var(--border); display:grid; grid-template-columns:1.2fr .85fr; gap:16px; }
+    .hero-panel, .snapshot { background:linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:18px; box-shadow: 0 28px 72px rgba(0,0,0,.32); }
+    .hero h1 { font-size:28px; line-height:1.06; letter-spacing:-.04em; margin-bottom:10px; }
+    .hero p, .snapshot p { color:var(--sub); line-height:1.7; font-size:13px; }
+    .metrics { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .metric { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; }
+    .metric-label { font-family:var(--jb); font-size:10px; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
+    .metric-value { font-size:22px; font-weight:700; margin-top:8px; }
+    .metric-note { color:var(--sub); font-size:12px; margin-top:4px; }
+    .portal-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; padding:18px; }
+    .focus-strip { padding: 0 18px 18px; display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:14px; }
+    .mini-card, .focus-card { min-height:170px; display:flex; flex-direction:column; justify-content:space-between; box-shadow: 0 18px 40px rgba(0,0,0,.18); transition: transform .18s ease, border-color .18s ease; }
+    .mini-card:hover { transform: translateY(-2px); border-color: #2f2f2f; }
+    .focus-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; min-height: 136px; }
+    .focus-card:hover { transform: translateY(-2px); border-color: #2f2f2f; }
+    .focus-meta { display:flex; justify-content:space-between; gap:10px; margin-top:12px; color:var(--muted); font-family:var(--jb); font-size:10px; }
+    .mini-meta { display:flex; justify-content:space-between; font-family:var(--jb); font-size:10px; color:var(--muted); }
+    .tabs { height:48px; display:flex; gap:18px; align-items:center; padding:0 18px; border-bottom:1px solid var(--border); background:var(--card); }
+    .tab { font-size:13px; color:var(--sub); padding-bottom:11px; border-bottom:2px solid transparent; }
+    .tab.active { color:var(--white); border-color:#fff; }
+    .context-row { display:flex; justify-content:space-between; gap:10px; }
+    .mono { font-family:var(--jb); font-size:10px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="grad"></div>
+  <header class="topbar"><div class="brand"><div class="brand-mark">BR</div><div class="brand-copy"><div class="brand-title">BlackRoad Home</div><div class="brand-sub">Main portal and dashboard</div></div></div><div class="search">Search products, docs, agents, worlds, people, and active work...</div><div class="top-actions"><div class="chip">18 PRODUCTS</div><div class="chip">LIVE PORTAL</div><button class="btn">Open Workspace</button></div></header>
+  <div class="shell">
+    <aside class="rail"><div class="rail-btn active">⌂</div><div class="rail-btn">⌕</div><div class="rail-btn">◎</div><div class="rail-btn">⌘</div><div class="rail-btn">◫</div><div class="rail-btn">☰</div></aside>
+    <aside class="sidebar"><div><div class="section-label">Portal overview</div><div class="card"><h2>One front door for everything</h2><p>BlackRoad Home is the main portal, dashboard, and entry point into the whole operating system. It routes people into products, tracks live activity, and surfaces what matters right now.</p></div></div><div><div class="section-label">Pinned destinations</div><div class="stack"><div class="list-item"><strong>RoadTrip mission control</strong><span>Agent roster, host routing, and live dispatch visibility.</span></div><div class="list-item"><strong>RoadCode workspace</strong><span>Current implementation lanes, review queues, and repo activity.</span></div><div class="list-item"><strong>BlackBoard knowledge hub</strong><span>Published truth, collections, and high-signal docs.</span></div><div class="list-item"><strong>Stats command board</strong><span>KPIs, telemetry, and launch health in one glance.</span></div></div></div></aside>
+    <main class="main"><section class="hero"><div class="hero-panel"><div class="section-label">System entry</div><h1>Open the BlackRoad OS from one canonical home screen.</h1><p>The home portal brings together product launchers, personal focus, agent activity, and cross-system summaries so the next action is always one click away.</p><div class="metrics"><div class="metric"><div class="metric-label">Products linked</div><div class="metric-value">18</div><div class="metric-note">Canonical services and destinations</div></div><div class="metric"><div class="metric-label">Roadies online</div><div class="metric-value">69+</div><div class="metric-note">Across devices, hosts, and lanes</div></div><div class="metric"><div class="metric-label">Today focus cards</div><div class="metric-value">12</div><div class="metric-note">Launches, docs, tasks, and worlds</div></div></div></div><div class="snapshot"><div class="section-label">Today</div><h2>Personal operating view</h2><p>Surface the products, docs, projects, and active lanes that need attention without hunting through the system.</p><div class="stack" style="margin-top:14px"><div class="status-row"><div><strong>Launch watch</strong><span>Three public surfaces have active changes, one needs final review.</span></div><div class="mono">P1</div></div><div class="status-row"><div><strong>Agent activity</strong><span>RoadTrip, RoadCode, and Stats all reporting healthy sync.</span></div><div class="mono">LIVE</div></div><div class="status-row"><div><strong>Knowledge flow</strong><span>RoadBook notes are ready to publish into BlackBoard.</span></div><div class="mono">READY</div></div></div></div></section><div class="tabs"><div class="tab active">Home</div><div class="tab">Products</div><div class="tab">Work</div><div class="tab">Agents</div><div class="tab">Knowledge</div></div><section class="portal-grid"><div class="mini-card"><div><h3>Product launcher</h3><p>Jump into RoadTrip, RoadCode, RoadChat, Stats, and every canonical product from one dense directory.</p></div><div class="mini-meta"><span>FAST ACCESS</span><span>18 APPS</span></div></div><div class="mini-card"><div><h3>Mission digest</h3><p>See dispatch status, active coding lanes, queue depth, and collaborator presence at portal level.</p></div><div class="mini-meta"><span>OPS</span><span>SYNCED</span></div></div><div class="mini-card"><div><h3>Knowledge spotlight</h3><p>Latest docs, published insights, and reading paths surfaced beside execution work.</p></div><div class="mini-meta"><span>TRUTH</span><span>UPDATED</span></div></div><div class="mini-card"><div><h3>Quick launch scenes</h3><p>Enter RoadWorld districts, preview rooms, and event surfaces directly from the home grid.</p></div><div class="mini-meta"><span>SPATIAL</span><span>4 LIVE</span></div></div></section><section class="focus-strip"><div class="focus-card"><div><div class="section-label">Focus lane</div><h3>Today’s operating stack</h3><p>RoadTrip, RoadCode, Backlog, and BlackBoard are grouped as the current working lane so routing, implementation, priorities, and publishing all stay visible together.</p></div><div class="focus-meta"><span>PINNED</span><span>WORKFLOW</span></div></div><div class="focus-card"><div><div class="section-label">Launch orbit</div><h3>What’s ready next</h3><p>Support updates, docs corrections, and product screenshot passes are staged for release once the current lane clears its final review gate.</p></div><div class="focus-meta"><span>QUEUE</span><span>3 READY</span></div></div><div class="focus-card"><div><div class="section-label">Cross-system view</div><h3>Home as the system map</h3><p>The portal now behaves like a narrative layer too: product relationships, active worlds, agent health, and current priorities all read as one operating picture.</p></div><div class="focus-meta"><span>MAP</span><span>CONNECTED</span></div></div></section></main>
+    <aside class="context"><div><div class="section-label">Portal feed</div><div class="stack"><div class="context-row"><div class="context-copy"><strong>RoadTrip queue stable</strong><span>Dispatch completion and host coverage remain green.</span></div><div class="mono">+04m</div></div><div class="context-row"><div class="context-copy"><strong>RoadBook session active</strong><span>Reading-room highlights are being pushed toward a publishable collection.</span></div><div class="mono">+11m</div></div><div class="context-row"><div class="context-copy"><strong>Stats alert acknowledged</strong><span>Alias leakage item moved from urgent to watch after redirect cleanup.</span></div><div class="mono">+18m</div></div></div></div><div><div class="section-label">Quick actions</div><div class="stack"><div class="list-item"><strong>Open canonical docs</strong><span>Jump straight to the operating model, registry, and current session context.</span></div><div class="list-item"><strong>Start focus mode</strong><span>Collapse to one project lane with status, notes, and related tools.</span></div><div class="list-item"><strong>Launch agent roster</strong><span>Open RoadTrip with the current device and host already selected.</span></div></div></div></aside>
+  </div>
+</body>
+</html>

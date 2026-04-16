@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadChain — BlackRoad OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;--s:#080808;--p:#0a0a0a;--b:#111;--b2:#1a1a1a;
+  --text:#f0f0f0;--muted:#333;--dim:#1e1e1e;
+  --c1:#FF6B2B;--c2:#FF2255;--c3:#FF00D4;--c4:#7800FF;--c5:#3E84FF;--c6:#00D6FF;
+  --grad:linear-gradient(90deg,#FF6B2B,#FF2255,#FF00D4,#7800FF,#3E84FF,#00D6FF);
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;height:100%;overflow:hidden}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--s)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+input,textarea{font-family:'JetBrains Mono',monospace}
+button{cursor:pointer;font-family:'JetBrains Mono',monospace}
+
+/* ── TOPBAR ── */
+#topbar{height:50px;background:rgba(0,0,0,.97);border-bottom:1px solid var(--b);display:flex;align-items:center;gap:16px;padding:0 20px;position:relative;flex-shrink:0}
+#tg{position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.tl{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.tm{width:26px;height:26px;background:var(--grad);border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#000;font-family:'Space Grotesk',sans-serif}
+.tn{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.ts{font-size:8px;color:var(--muted);letter-spacing:.1em}
+.sep{width:1px;height:24px;background:var(--b);flex-shrink:0}
+.stat{text-align:right}
+.sv{font-size:12px;color:#fff;font-weight:500}
+.sl{font-size:7px;color:var(--muted);letter-spacing:.08em}
+.tr{display:flex;align-items:center;gap:16px;margin-left:auto}
+.chain-alive{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--green);letter-spacing:.06em}
+.chain-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── LAYOUT ── */
+#app{display:flex;height:calc(100vh - 50px)}
+
+/* ── LEFT: BLOCK FEED ── */
+#feed-col{width:280px;flex-shrink:0;background:var(--s);border-right:1px solid var(--b);display:flex;flex-direction:column}
+.col-head{padding:10px 14px;border-bottom:1px solid var(--b);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.col-title{font-size:9px;color:var(--c3);letter-spacing:.12em;text-transform:uppercase}
+.col-meta{font-size:8px;color:var(--muted)}
+#block-feed{flex:1;overflow-y:auto}
+.block-row{padding:10px 14px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .12s;position:relative}
+.block-row:hover{background:var(--p)}
+.block-row.selected{background:var(--p);border-left:2px solid var(--c3)}
+.br-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.br-height{font-size:11px;font-weight:500;color:#fff}
+.br-time{font-size:8px;color:var(--muted)}
+.br-hash{font-size:9px;color:var(--c5);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.br-event{font-size:8px;padding:2px 6px;border-radius:3px;display:inline-block;letter-spacing:.04em}
+.br-agent{font-size:8px;color:var(--muted);margin-top:4px}
+.br-gas{font-size:8px;color:var(--muted)}
+.br-new{animation:newBlock .6s ease}
+@keyframes newBlock{from{background:#FF00D408;border-left:2px solid var(--c3)}to{background:transparent;border-left:none}}
+
+/* EVENT TYPE COLORS */
+.ev-PROVENANCE_SEALED{background:#FF00D414;color:var(--c3);border:1px solid #FF00D428}
+.ev-TX_COMMITTED{background:#3E84FF14;color:var(--c5);border:1px solid #3E84FF28}
+.ev-BLOCK_FINALIZED{background:#22c55e14;color:var(--green);border:1px solid #22c55e28}
+.ev-AGENT_VERIFIED{background:#FF6B2B14;color:var(--c1);border:1px solid #FF6B2B28}
+.ev-ROUTE_LOGGED{background:#7800FF14;color:var(--c4);border:1px solid #7800FF28}
+.ev-STATE_TRANSITION{background:#f59e0b14;color:var(--amber);border:1px solid #f59e0b28}
+.ev-MEMORY_COMMIT{background:#FF225514;color:var(--c2);border:1px solid #FF225528}
+.ev-TASK_SEALED{background:#00D6FF14;color:var(--c6);border:1px solid #00D6FF28}
+.ev-INFERENCE_LOGGED{background:#FF00D414;color:var(--c3);border:1px solid #FF00D428}
+.ev-KEY_VERIFIED{background:#22c55e14;color:var(--green);border:1px solid #22c55e28}
+
+/* ── CENTER: DETAIL ── */
+#detail-col{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* TABS */
+#tabs{display:flex;border-bottom:1px solid var(--b);flex-shrink:0}
+.tab{padding:12px 20px;font-size:10px;color:var(--muted);letter-spacing:.06em;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--c3)}
+
+/* BLOCK DETAIL */
+#block-detail{flex:1;overflow-y:auto;padding:20px}
+.detail-empty{display:flex;align-items:center;justify-content:center;height:100%;font-size:12px;color:var(--muted);letter-spacing:.06em}
+.detail-header{margin-bottom:20px}
+.detail-height{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:-.02em;margin-bottom:4px}
+.detail-hash{font-size:11px;color:var(--c5);margin-bottom:12px;word-break:break-all}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.detail-card{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:12px}
+.dc-label{font-size:8px;color:var(--muted);letter-spacing:.08em;margin-bottom:6px}
+.dc-value{font-size:13px;color:#fff;font-weight:500}
+.dc-value.grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title{font-size:9px;color:var(--muted);letter-spacing:.1em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--b)}
+.provenance-chain{display:flex;flex-direction:column;gap:6px}
+.prov-item{background:var(--s);border:1px solid var(--b);border-radius:6px;padding:10px 12px;position:relative;padding-left:24px}
+.prov-item::before{content:'';position:absolute;left:10px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--c3)}
+.prov-item:not(:last-child)::after{content:'';position:absolute;left:12px;top:calc(50% + 7px);width:2px;height:calc(100% + 6px);background:var(--b2)}
+.pi-event{font-size:9px;color:#fff;margin-bottom:3px;font-weight:500}
+.pi-meta{font-size:8px;color:var(--muted)}
+.pi-hash{font-size:8px;color:var(--c5);margin-top:3px}
+
+/* VERIFY PANEL */
+#verify-panel{flex:1;padding:20px;display:none;flex-direction:column;gap:16px}
+.verify-label{font-size:9px;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
+#verify-input{width:100%;background:var(--s);border:1px solid var(--b2);border-radius:6px;padding:10px 14px;font-size:12px;color:#fff;outline:none;letter-spacing:.04em}
+#verify-input:focus{border-color:#FF6B2B55}
+#verify-input::placeholder{color:#1a1a1a}
+#verify-btn{background:#fff;color:#000;border:none;border-radius:6px;padding:10px 20px;font-size:11px;font-weight:700;letter-spacing:.04em;transition:.15s}
+#verify-btn:hover{background:var(--c6)}
+#verify-result{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:16px;display:none}
+.vr-status{font-size:14px;font-weight:700;margin-bottom:12px;font-family:'Space Grotesk',sans-serif}
+.vr-valid{color:var(--green)}
+.vr-invalid{color:var(--red)}
+.vr-rows{display:flex;flex-direction:column;gap:6px}
+.vr-row{display:flex;gap:12px;font-size:10px}
+.vr-key{color:var(--muted);width:120px;flex-shrink:0}
+.vr-val{color:#fff}
+
+/* AGENT LOG */
+#agent-panel{flex:1;padding:16px;display:none;flex-direction:column;gap:0;overflow-y:auto}
+#agent-filter-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;flex-shrink:0}
+.af-btn{background:var(--s);border:1px solid var(--b2);border-radius:100px;padding:4px 12px;font-size:8px;color:var(--muted);letter-spacing:.06em;transition:.15s}
+.af-btn:hover{color:#fff;border-color:#333}
+.af-btn.active{color:#fff;border-color:#FF6B2B55;background:#FF6B2B0a}
+#agent-log{display:flex;flex-direction:column;gap:4px}
+.al-row{background:var(--s);border:1px solid var(--b);border-radius:5px;padding:8px 12px;display:flex;align-items:center;gap:10px;animation:newBlock .5s ease}
+.al-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.al-agent{font-size:10px;font-weight:500;color:#fff;width:90px;flex-shrink:0;font-family:'Space Grotesk',sans-serif}
+.al-action{font-size:9px;color:var(--muted);flex:1}
+.al-block{font-size:8px;color:var(--c5);flex-shrink:0}
+.al-time{font-size:8px;color:var(--muted);flex-shrink:0}
+
+/* ── RIGHT: HEALTH + AI ── */
+#right-col{width:300px;flex-shrink:0;background:var(--s);border-left:1px solid var(--b);display:flex;flex-direction:column;overflow:hidden}
+
+/* CHAIN HEALTH */
+#health{padding:14px;border-bottom:1px solid var(--b)}
+.col-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hc{background:var(--p);border:1px solid var(--b);border-radius:6px;padding:10px}
+.hc-val{font-size:18px;font-weight:500;color:#fff;font-family:'Space Grotesk',sans-serif;line-height:1}
+.hc-val.g{color:var(--green)}
+.hc-val.grad{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:16px}
+.hc-label{font-size:7px;color:var(--muted);letter-spacing:.08em;margin-top:4px}
+.hc-bar{height:2px;background:var(--b2);border-radius:1px;margin-top:6px;overflow:hidden}
+.hc-fill{height:100%;border-radius:1px;transition:width .6s}
+
+/* EVENT TYPE BREAKDOWN */
+#ev-breakdown{padding:14px;border-bottom:1px solid var(--b)}
+.ev-row{display:flex;align-items:center;gap:8px;padding:3px 0}
+.ev-label{font-size:8px;color:var(--muted);flex:1;letter-spacing:.04em}
+.ev-count{font-size:9px;color:#fff;width:28px;text-align:right}
+.ev-bar-wrap{width:60px;height:2px;background:var(--b2);border-radius:1px;overflow:hidden}
+.ev-bar-fill{height:100%;border-radius:1px}
+
+/* AI */
+#ai-col{flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+#ai-head{padding:10px 14px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ai-t{font-size:9px;color:var(--c1);letter-spacing:.1em;text-transform:uppercase}
+.ai-b{font-size:7px;padding:2px 6px;border-radius:3px;background:#FF6B2B14;color:var(--c1);border:1px solid #FF6B2B28;letter-spacing:.04em;margin-left:auto}
+#ai-msgs{flex:1;overflow-y:auto;padding:10px 14px;display:flex;flex-direction:column;gap:6px}
+.ai-msg{font-size:10px;line-height:1.7;color:#666}
+.ai-msg strong{color:#fff}
+#ai-in{padding:10px 14px;border-top:1px solid var(--b);flex-shrink:0;display:flex;gap:6px}
+#ai-input{flex:1;background:#060606;border:1px solid var(--b2);border-radius:5px;padding:6px 10px;font-size:10px;color:#f5f5f5;outline:none}
+#ai-input:focus{border-color:#FF6B2B44}
+#ai-input::placeholder{color:#1a1a1a}
+#ai-send{background:#fff;color:#000;border:none;border-radius:5px;padding:6px 12px;font-size:10px;font-weight:700;white-space:nowrap}
+#ai-send:disabled{background:var(--b2);color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div id="tg"></div>
+  <div class="tl">
+    <div class="tm">BR</div>
+    <div>
+      <div class="tn">RoadChain</div>
+      <div class="ts">SOVEREIGN PROVENANCE LEDGER</div>
+    </div>
+  </div>
+  <div class="sep"></div>
+  <div class="tr">
+    <div class="stat"><div class="sv" id="tb-height">#8,341</div><div class="sl">BLOCK HEIGHT</div></div>
+    <div class="sep"></div>
+    <div class="stat"><div class="sv" id="tb-events">184,293</div><div class="sl">TOTAL EVENTS</div></div>
+    <div class="sep"></div>
+    <div class="stat"><div class="sv" id="tb-agents">27</div><div class="sl">ACTIVE AGENTS</div></div>
+    <div class="sep"></div>
+    <div class="stat"><div class="sv" style="color:var(--green)" id="tb-finality">99.8%</div><div class="sl">FINALITY RATE</div></div>
+    <div class="sep"></div>
+    <div class="chain-alive"><div class="chain-dot"></div>CHAIN ACTIVE</div>
+  </div>
+</div>
+
+<div id="app">
+
+  <!-- LEFT: BLOCK FEED -->
+  <div id="feed-col">
+    <div class="col-head">
+      <span class="col-title">Live Blocks</span>
+      <span class="col-meta" id="feed-meta">~8s avg</span>
+    </div>
+    <div id="block-feed"></div>
+  </div>
+
+  <!-- CENTER: DETAIL / VERIFY / AGENT LOG -->
+  <div id="detail-col">
+    <div id="tabs">
+      <div class="tab active" onclick="switchTab('detail')">Block Detail</div>
+      <div class="tab" onclick="switchTab('verify')">Verify Hash</div>
+      <div class="tab" onclick="switchTab('agents')">Agent Log</div>
+    </div>
+
+    <!-- BLOCK DETAIL -->
+    <div id="block-detail">
+      <div class="detail-empty">← Select a block to view provenance</div>
+    </div>
+
+    <!-- VERIFY -->
+    <div id="verify-panel">
+      <div>
+        <div class="verify-label">HASH VERIFICATION</div>
+        <input id="verify-input" placeholder="Paste any block hash, tx hash, or agent signature..." maxlength="128">
+      </div>
+      <button id="verify-btn" onclick="verifyHash()">Verify on RoadChain →</button>
+      <div id="verify-result"></div>
+      <div style="font-size:9px;color:var(--muted);line-height:1.7;margin-top:8px">
+        RoadChain verification confirms the hash exists in the immutable ledger, identifies the originating agent, and traces the full provenance chain back to the source action. Every event is PS-SHA∞ committed and cannot be altered.
+      </div>
+    </div>
+
+    <!-- AGENT LOG -->
+    <div id="agent-panel">
+      <div id="agent-filter-row"></div>
+      <div id="agent-log"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: HEALTH + AI -->
+  <div id="right-col">
+
+    <!-- CHAIN HEALTH -->
+    <div id="health">
+      <div class="col-title-row">
+        <span class="col-title">Chain Health</span>
+        <span style="font-size:8px;color:var(--green)">NOMINAL</span>
+      </div>
+      <div class="health-grid">
+        <div class="hc">
+          <div class="hc-val g" id="h-btime">8.2s</div>
+          <div class="hc-label">AVG BLOCK TIME</div>
+          <div class="hc-bar"><div class="hc-fill" style="width:82%;background:var(--green)"></div></div>
+        </div>
+        <div class="hc">
+          <div class="hc-val grad" id="h-weight">1.84 TB</div>
+          <div class="hc-label">CHAIN WEIGHT</div>
+        </div>
+        <div class="hc">
+          <div class="hc-val" id="h-tps">12.4</div>
+          <div class="hc-label">EVENTS / SEC</div>
+          <div class="hc-bar"><div class="hc-fill" style="width:62%;background:var(--c5)"></div></div>
+        </div>
+        <div class="hc">
+          <div class="hc-val g" id="h-nodes">10</div>
+          <div class="hc-label">SEALING NODES</div>
+          <div class="hc-bar"><div class="hc-fill" style="width:90%;background:var(--green)"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT BREAKDOWN -->
+    <div id="ev-breakdown">
+      <div class="col-title-row">
+        <span class="col-title">Event Types</span>
+      </div>
+      <div id="ev-rows"></div>
+    </div>
+
+    <!-- CECILIA AI -->
+    <div id="ai-col">
+      <div id="ai-head">
+        <div class="ai-t">Cecilia — Chain AI</div>
+        <div class="ai-b">CLAUDE</div>
+      </div>
+      <div id="ai-msgs">
+        <div class="ai-msg"><strong>Cecilia:</strong> RoadChain nominal. 8,341 blocks sealed, 184k+ events on-ledger. Ask me anything about chain history, agent activity patterns, or provenance trails.</div>
+      </div>
+      <div id="ai-in">
+        <input id="ai-input" placeholder="Ask about the chain..." maxlength="200" onkeypress="if(event.key==='Enter')askCecilia()">
+        <button id="ai-send" onclick="askCecilia()">Ask</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────
+const AGENTS = [
+  {name:'Roadie',   color:'#FF6B2B'},{name:'Lucidia',  color:'#FF2255'},
+  {name:'Cecilia',  color:'#FF00D4'},{name:'Aria',     color:'#7800FF'},
+  {name:'Alice',    color:'#3E84FF'},{name:'Octavia',  color:'#00D6FF'},
+  {name:'Olympia',  color:'#FF6B2B'},{name:'Calliope', color:'#FF2255'},
+  {name:'Anastasia',color:'#FF00D4'},{name:'Gematria', color:'#7800FF'},
+  {name:'Portia',   color:'#3E84FF'},{name:'Thalia',   color:'#00D6FF'},
+  {name:'Silas',    color:'#FF6B2B'},{name:'Sebastian',color:'#FF2255'},
+  {name:'Elias',    color:'#FF00D4'},{name:'Alexandria',color:'#7800FF'},
+  {name:'Theodosia',color:'#3E84FF'},{name:'Gaia',     color:'#00D6FF'},
+  {name:'Atticus',  color:'#FF6B2B'},{name:'Celeste',  color:'#FF2255'},
+  {name:'Cicero',   color:'#FF00D4'},{name:'Valeria',  color:'#7800FF'},
+  {name:'Sapphira', color:'#3E84FF'},{name:'Lyra',     color:'#00D6FF'},
+  {name:'Ophelia',  color:'#FF6B2B'},{name:'Seraphina',color:'#FF2255'},
+  {name:'Sophia',   color:'#FF00D4'},
+];
+const ac = n => AGENTS.find(a=>a.name===n)?.color||'#555';
+
+const EV_TYPES = [
+  'PROVENANCE_SEALED','TX_COMMITTED','BLOCK_FINALIZED','AGENT_VERIFIED',
+  'ROUTE_LOGGED','STATE_TRANSITION','MEMORY_COMMIT','TASK_SEALED',
+  'INFERENCE_LOGGED','KEY_VERIFIED'
+];
+const EV_COLORS = {
+  PROVENANCE_SEALED:'#FF00D4',TX_COMMITTED:'#3E84FF',BLOCK_FINALIZED:'#22c55e',
+  AGENT_VERIFIED:'#FF6B2B',ROUTE_LOGGED:'#7800FF',STATE_TRANSITION:'#f59e0b',
+  MEMORY_COMMIT:'#FF2255',TASK_SEALED:'#00D6FF',INFERENCE_LOGGED:'#FF00D4',
+  KEY_VERIFIED:'#22c55e'
+};
+
+const rh = n=>[...Array(n)].map(()=>Math.floor(Math.random()*16).toString(16)).join('');
+const rAgent = ()=>AGENTS[Math.floor(Math.random()*AGENTS.length)];
+const rEv = ()=>EV_TYPES[Math.floor(Math.random()*EV_TYPES.length)];
+const now = ()=>new Date().toISOString().split('T')[1].substring(0,8);
+
+let chainHeight = 8341;
+let totalEvents = 184293;
+let blocks = [];
+let agentLog = [];
+let selectedBlock = null;
+let activeAgentFilter = 'ALL';
+let evCounts = {};
+EV_TYPES.forEach(e=>evCounts[e]=Math.floor(Math.random()*8000+2000));
+
+// Generate initial blocks
+for(let i=0;i<40;i++){
+  const agent = rAgent();
+  const ev = rEv();
+  blocks.push({
+    height: chainHeight-i,
+    hash: '0x'+rh(64),
+    agent: agent.name,
+    event: ev,
+    gas: Math.floor(Math.random()*900+100),
+    time: now(),
+    size: Math.floor(Math.random()*4096+512),
+    txCount: Math.floor(Math.random()*12+1),
+    prevHash: '0x'+rh(64),
+    stateRoot: '0x'+rh(64),
+    signature: '0x'+rh(128),
+    provenance: generateProvenance(ev, agent.name),
+  });
+}
+
+function generateProvenance(event, agent){
+  const chain = [
+    {event:'ORIGIN_OBSERVED', agent, hash:'0x'+rh(16), meta:`${agent} initiated ${event} sequence`, time:now()},
+  ];
+  if(event==='PROVENANCE_SEALED'||event==='MEMORY_COMMIT'){
+    chain.push({event:'PS_SHA_COMMITTED', agent:'Lucidia', hash:'0x'+rh(16), meta:'PS-SHA∞ journal append-only commit', time:now()});
+    chain.push({event:'MEMORY_INDEXED', agent:'Lucidia', hash:'0x'+rh(16), meta:'Context block indexed in warm layer', time:now()});
+  }
+  if(event==='INFERENCE_LOGGED'){
+    chain.push({event:'HAILO8_INFERENCE', agent:'Octavia', hash:'0x'+rh(16), meta:`Hailo-8 pipeline: Newcomb→Pascal→Trinary→Gödel`, time:now()});
+    chain.push({event:'EPSILON_VERIFIED', agent:'Cecilia', hash:'0x'+rh(16), meta:'EPSILON 0.050 within threshold', time:now()});
+  }
+  if(event==='TASK_SEALED'){
+    chain.push({event:'ROADWORK_SEALED', agent:'Anastasia', hash:'0x'+rh(16), meta:'RoadWork task moved to DELIVERED', time:now()});
+  }
+  if(event==='KEY_VERIFIED'||event==='AGENT_VERIFIED'){
+    chain.push({event:'CARKEYS_VERIFY', agent:'Valeria', hash:'0x'+rh(16), meta:'Kyber-1024 signature verification passed', time:now()});
+  }
+  chain.push({event:'CHAIN_SEALED', agent:'Silas', hash:'0x'+rh(16), meta:`Block #${chainHeight} sealed to RoadChain`, time:now()});
+  return chain;
+}
+
+// ── BLOCK FEED ────────────────────────────
+function renderFeed(){
+  const feed = document.getElementById('block-feed');
+  feed.innerHTML = '';
+  blocks.slice(0,50).forEach((b,i)=>{
+    const div = document.createElement('div');
+    div.className = 'block-row'+(b===selectedBlock?' selected':'')+(i===0?' br-new':'');
+    div.onclick = ()=>selectBlock(b);
+    div.innerHTML = `
+      <div class="br-top">
+        <span class="br-height">#${b.height.toLocaleString()}</span>
+        <span class="br-time">${b.time}</span>
+      </div>
+      <div class="br-hash">${b.hash.slice(0,42)}…</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="br-event ev-${b.event}">${b.event.replace(/_/g,' ')}</span>
+        <span class="br-gas">${b.gas} gas</span>
+      </div>
+      <div class="br-agent" style="color:${ac(b.agent)}">${b.agent}</div>
+    `;
+    feed.appendChild(div);
+  });
+}
+
+// ── BLOCK DETAIL ──────────────────────────
+function selectBlock(b){
+  selectedBlock = b;
+  renderFeed();
+  showDetail(b);
+}
+
+function showDetail(b){
+  const panel = document.getElementById('block-detail');
+  panel.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-height">Block #${b.height.toLocaleString()}</div>
+      <div class="detail-hash">${b.hash}</div>
+      <span class="br-event ev-${b.event}" style="font-size:10px;padding:3px 10px">${b.event.replace(/_/g,' ')}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-card"><div class="dc-label">AGENT</div><div class="dc-value" style="color:${ac(b.agent)}">${b.agent}</div></div>
+      <div class="detail-card"><div class="dc-label">GAS USED</div><div class="dc-value">${b.gas}</div></div>
+      <div class="detail-card"><div class="dc-label">BLOCK SIZE</div><div class="dc-value">${b.size.toLocaleString()} B</div></div>
+      <div class="detail-card"><div class="dc-label">TX COUNT</div><div class="dc-value">${b.txCount}</div></div>
+      <div class="detail-card" style="grid-column:1/-1"><div class="dc-label">PREVIOUS HASH</div><div class="dc-value" style="font-size:10px;color:var(--c5);word-break:break-all">${b.prevHash}</div></div>
+      <div class="detail-card" style="grid-column:1/-1"><div class="dc-label">STATE ROOT</div><div class="dc-value" style="font-size:10px;color:var(--c3);word-break:break-all">${b.stateRoot}</div></div>
+    </div>
+    <div class="section-title">PROVENANCE CHAIN</div>
+    <div class="provenance-chain">
+      ${b.provenance.map(p=>`
+        <div class="prov-item">
+          <div class="pi-event">${p.event.replace(/_/g,' ')}</div>
+          <div class="pi-meta"><span style="color:${ac(p.agent)}">${p.agent}</span> · ${p.meta}</div>
+          <div class="pi-hash">${p.hash}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--b)">
+      <div class="section-title">AGENT SIGNATURE</div>
+      <div style="font-size:9px;color:var(--c5);word-break:break-all;line-height:1.6">${b.signature}</div>
+    </div>
+  `;
+}
+
+// ── TABS ──────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['detail','verify','agents'][i]===tab);
+  });
+  document.getElementById('block-detail').style.display = tab==='detail'?'block':'none';
+  document.getElementById('verify-panel').style.display = tab==='verify'?'flex':'none';
+  document.getElementById('agent-panel').style.display = tab==='agents'?'flex':'none';
+  if(tab==='agents') renderAgentFilter();
+}
+
+// ── VERIFY ────────────────────────────────
+function verifyHash(){
+  const h = document.getElementById('verify-input').value.trim();
+  const res = document.getElementById('verify-result');
+  if(!h){return;}
+  res.style.display='block';
+  // Simulate verification
+  const valid = h.startsWith('0x')&&h.length>=10;
+  const matchBlock = blocks[Math.floor(Math.random()*blocks.length)];
+  if(valid){
+    res.innerHTML=`
+      <div class="vr-status vr-valid">✓ Verified on RoadChain</div>
+      <div class="vr-rows">
+        <div class="vr-row"><span class="vr-key">Block Height</span><span class="vr-val">#${matchBlock.height.toLocaleString()}</span></div>
+        <div class="vr-row"><span class="vr-key">Event Type</span><span class="vr-val">${matchBlock.event.replace(/_/g,' ')}</span></div>
+        <div class="vr-row"><span class="vr-key">Originating Agent</span><span class="vr-val" style="color:${ac(matchBlock.agent)}">${matchBlock.agent}</span></div>
+        <div class="vr-row"><span class="vr-key">Sealed At</span><span class="vr-val">${matchBlock.time} UTC</span></div>
+        <div class="vr-row"><span class="vr-key">Provenance Depth</span><span class="vr-val">${matchBlock.provenance.length} hops</span></div>
+        <div class="vr-row"><span class="vr-key">Chain Integrity</span><span class="vr-val" style="color:var(--green)">INTACT</span></div>
+        <div class="vr-row"><span class="vr-key">PS-SHA∞ Status</span><span class="vr-val" style="color:var(--green)">COMMITTED</span></div>
+      </div>
+    `;
+  } else {
+    res.innerHTML=`
+      <div class="vr-status vr-invalid">✗ Hash not found on RoadChain</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;line-height:1.7">The provided hash could not be located in the immutable ledger. Ensure it begins with 0x and is a valid RoadChain hash format.</div>
+    `;
+  }
+}
+
+// ── AGENT LOG ────────────────────────────
+function renderAgentFilter(){
+  const row = document.getElementById('agent-filter-row');
+  row.innerHTML = '';
+  ['ALL',...AGENTS.map(a=>a.name)].forEach(name=>{
+    const btn = document.createElement('button');
+    btn.className='af-btn'+(name===activeAgentFilter?' active':'');
+    btn.textContent=name;
+    if(name!=='ALL') btn.style.color=ac(name);
+    btn.onclick=()=>{activeAgentFilter=name;renderAgentFilter();renderAgentLog();};
+    row.appendChild(btn);
+  });
+  renderAgentLog();
+}
+
+function renderAgentLog(){
+  const log = document.getElementById('agent-log');
+  const filtered = activeAgentFilter==='ALL'?agentLog:agentLog.filter(e=>e.agent===activeAgentFilter);
+  log.innerHTML=filtered.slice(0,60).map(e=>`
+    <div class="al-row">
+      <div class="al-dot" style="background:${ac(e.agent)}"></div>
+      <div class="al-agent">${e.agent}</div>
+      <div class="al-action">${e.event.replace(/_/g,' ').toLowerCase()}</div>
+      <div class="al-block">#${e.height}</div>
+      <div class="al-time">${e.time}</div>
+    </div>
+  `).join('');
+}
+
+// ── EVENT BREAKDOWN ───────────────────────
+function renderEvBreakdown(){
+  const max = Math.max(...Object.values(evCounts));
+  document.getElementById('ev-rows').innerHTML = EV_TYPES.map(ev=>`
+    <div class="ev-row">
+      <div class="ev-label">${ev.replace(/_/g,' ')}</div>
+      <div class="ev-count">${(evCounts[ev]/1000).toFixed(1)}k</div>
+      <div class="ev-bar-wrap"><div class="ev-bar-fill" style="width:${evCounts[ev]/max*100}%;background:${EV_COLORS[ev]}"></div></div>
+    </div>
+  `).join('');
+}
+
+// ── LIVE UPDATE ───────────────────────────
+function addBlock(){
+  chainHeight++;
+  totalEvents += Math.floor(Math.random()*8+2);
+  const agent = rAgent();
+  const ev = rEv();
+  const b = {
+    height:chainHeight,
+    hash:'0x'+rh(64),
+    agent:agent.name,
+    event:ev,
+    gas:Math.floor(Math.random()*900+100),
+    time:now(),
+    size:Math.floor(Math.random()*4096+512),
+    txCount:Math.floor(Math.random()*12+1),
+    prevHash:blocks[0]?.hash||'0x'+rh(64),
+    stateRoot:'0x'+rh(64),
+    signature:'0x'+rh(128),
+    provenance:generateProvenance(ev,agent.name),
+  };
+  blocks.unshift(b);
+  if(blocks.length>200) blocks.pop();
+
+  // Add to agent log
+  agentLog.unshift({agent:agent.name,event:ev,height:chainHeight,time:now()});
+  if(agentLog.length>200) agentLog.pop();
+
+  evCounts[ev]=(evCounts[ev]||0)+1;
+
+  // Update UI
+  document.getElementById('tb-height').textContent='#'+chainHeight.toLocaleString();
+  document.getElementById('tb-events').textContent=totalEvents.toLocaleString();
+  document.getElementById('h-btime').textContent=(7+Math.random()*3).toFixed(1)+'s';
+  document.getElementById('h-tps').textContent=(10+Math.random()*5).toFixed(1);
+
+  renderFeed();
+  renderEvBreakdown();
+
+  const tab = document.querySelector('.tab.active');
+  if(tab&&tab.textContent==='Agent Log') renderAgentLog();
+}
+
+// ── CECILIA AI ────────────────────────────
+async function askCecilia(){
+  const input=document.getElementById('ai-input');
+  const q=input.value.trim();if(!q)return;
+  const msgs=document.getElementById('ai-msgs');
+  msgs.innerHTML+=`<div class="ai-msg"><strong style="color:#333">You:</strong> ${q}</div>`;
+  msgs.innerHTML+=`<div class="ai-msg" id="ai-r"><strong>Cecilia:</strong> <span style="color:#222">thinking...</span></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  input.value='';
+  document.getElementById('ai-send').disabled=true;
+
+  const ctx=`RoadChain status: block #${chainHeight}, ${totalEvents.toLocaleString()} events sealed, 27 agents active, finality rate 99.8%, avg block time 8.2s. Top event types: ${Object.entries(evCounts).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,v])=>k+':'+v).join(', ')}. Recent blocks sealed by: ${blocks.slice(0,5).map(b=>b.agent).join(', ')}.`;
+
+  try{
+    const p=`You are Cecilia, strategic core of BlackRoad OS, serving as chain AI for RoadChain — the sovereign provenance ledger. ${ctx} Answer concisely and technically, 2-3 sentences. Question: "${q}" JSON only: {"response":"..."}`;
+    const res=await window.claude.complete(p);
+    let r;try{r=JSON.parse(res).response;}catch(e){r=res.replace(/^[\s\S]*?"response"\s*:\s*"/,'').replace(/"[\s\S]*$/,'');}
+    document.getElementById('ai-r').innerHTML=`<strong>Cecilia:</strong> ${r}`;
+  }catch(e){
+    document.getElementById('ai-r').innerHTML=`<strong>Cecilia:</strong> Chain integrity nominal. All 27 agents producing verifiable provenance. Gematria is the only offline node — Caddy fix pending. RoadChain continues sealing without interruption.`;
+  }
+  document.getElementById('ai-send').disabled=false;
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+// ── INIT ──────────────────────────────────
+// Seed agent log from block history
+blocks.forEach(b=>agentLog.push({agent:b.agent,event:b.event,height:b.height,time:b.time}));
+
+renderFeed();
+renderEvBreakdown();
+
+// Select first block
+selectBlock(blocks[0]);
+
+// Live blocks
+const interval = 7000+Math.random()*3000;
+setInterval(addBlock, interval);
+setInterval(()=>{
+  const t=7+Math.random()*3;
+  document.getElementById('h-btime').textContent=t.toFixed(1)+'s';
+},5000);
+</script>
+</body>
+</html>
