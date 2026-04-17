@@ -188,6 +188,23 @@
       document.body.style.paddingTop = '36px';
     },
 
+    // ── Analytics ──
+    track(type, data) {
+      var event = Object.assign({
+        type: type,
+        page: location.pathname,
+        product: BR.appName,
+        referrer: document.referrer || 'direct',
+        device: /Mobile|iPhone|iPad|Android/.test(navigator.userAgent) ? 'mobile' : 'desktop',
+        ts: Date.now()
+      }, data || {});
+      fetch(BR.ollama + '/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event)
+      }).catch(function(){});
+    },
+
     // ── Boot ──
     init() {
       BR.addNav();
@@ -196,8 +213,27 @@
       BR.activateEditing();
       BR.toast(BR.appName + ' — online');
 
-      // Track visit
-      fetch('https://network-scheduler.blackroad.workers.dev/visit').catch(() => {});
+      // Track visit + page view
+      fetch(BR.ollama + '/visit').catch(function(){});
+      BR.track('page_view');
+      BR.track('product_visit', { product: BR.appName.toLowerCase().replace(/[^a-z0-9]/g, '-') });
+
+      // Track audio/video plays
+      document.querySelectorAll('audio, video').forEach(function(el) {
+        el.addEventListener('play', function() {
+          var src = el.querySelector('source') ? el.querySelector('source').src : el.src;
+          var id = src.split('/').pop().replace(/\.\w+$/, '');
+          BR.track(el.tagName === 'AUDIO' ? 'podcast_play' : 'video_play', { id: id });
+        });
+      });
+
+      // Track outbound links
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a[href]');
+        if (a && a.hostname !== location.hostname) {
+          BR.track('outbound_click', { url: a.href });
+        }
+      });
     }
   };
 
