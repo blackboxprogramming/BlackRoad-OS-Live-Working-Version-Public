@@ -8,7 +8,8 @@
   const BR = window.BR = {
     version: '1.0.0',
     appName: document.title || 'BlackRoad',
-    ollama: 'https://network-scheduler.blackroad.workers.dev',
+    api: 'http://192.168.4.113:8089',
+    scheduler: 'https://network-scheduler.blackroad.workers.dev',
 
     // ── Storage ──
     store: {
@@ -27,28 +28,46 @@
       remove(key) { localStorage.removeItem('br.' + key); }
     },
 
-    // ── Chat (connects to Ollama via Cecilia or scheduler) ──
+    // ── Chat (connects to Product API on Cecilia) ──
     chat: async function(message, agent) {
       agent = agent || 'roadie';
-      const ollamaUrls = [
-        'http://192.168.4.113:11434/api/generate', // Cecilia
-        'http://localhost:11434/api/generate',       // Local
-      ];
-      for (const url of ollamaUrls) {
+      var product = BR.appName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      try {
+        var resp = await fetch(BR.api + '/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agent: agent, message: message, product: product })
+        });
+        if (resp.ok) {
+          var data = await resp.json();
+          return data.response || '';
+        }
+      } catch(e) {}
+      return "Agent offline. Connect to BlackRoad local network for AI features.";
+    },
+
+    // ── Server-side items (syncs to Cecilia SQLite) ──
+    serverItems: {
+      async list(product) {
         try {
-          const resp = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: agent, prompt: message, stream: false, options: { num_predict: 500 } })
+          var r = await fetch(BR.api + '/items/' + product);
+          return (await r.json()).items || [];
+        } catch(e) { return []; }
+      },
+      async add(product, data) {
+        try {
+          await fetch(BR.api + '/items/' + product, {
+            method: 'POST', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ data: data })
           });
-          if (resp.ok) {
-            const data = await resp.json();
-            return data.response || '';
-          }
-        } catch(e) { continue; }
+        } catch(e) {}
+      },
+      async search(q) {
+        try {
+          var r = await fetch(BR.api + '/search?q=' + encodeURIComponent(q));
+          return (await r.json()).results || [];
+        } catch(e) { return []; }
       }
-      // Fallback: return a canned response
-      return "I'm currently offline. The Ollama fleet isn't reachable from your browser. Try again when connected to the local network.";
     },
 
     // ── Tasks / Items (generic CRUD) ──
