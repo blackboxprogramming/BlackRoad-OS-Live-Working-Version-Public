@@ -1,1173 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700\&family=JetBrains+Mono:wght@400;500\&display=swap" rel="stylesheet"><style id="br-grayscale">:root{--bg:#000!important;--card:#060606!important;--border:#141414!important;--text:#f0f0f0!important;--muted:#555!important;--dim:#2a2a2a!important;--pink:#666!important;--amber:#777!important;--blue:#555!important;--violet:#444!important;--green:#777!important;--font:Space Grotesk,system-ui,sans-serif!important;--mono:JetBrains Mono,monospace!important}html,body{background:#000!important;color:#f0f0f0!important;font-family:Space Grotesk,system-ui,sans-serif!important}*{border-color:#191919!important}h1,h2,h3,h4,h5,h6,p,span,div,li,a,button,input,select,textarea,label{font-family:Space Grotesk,system-ui,sans-serif!important}code,pre,kbd{font-family:JetBrains Mono,monospace!important}a{color:#ccc!important}a:hover{color:#fff!important}button,input,select,textarea{background:#0a0a0a!important;color:#f0f0f0!important;border-color:#333!important}h1,h2,h3,h4,h5,h6{color:#fff!important}iframe,img,video,canvas{filter:none!important}svg:not(iframe svg){filter:grayscale(1)!important}</style>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roadie — Your AI Tutor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="mockup-base.css">
-  <style>
-    /* ── Page shell ──────────────────────────────────────────── */
-    body {
-      font-family: var(--sg);
-      background: #0a0a0a;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 24px;
-    }
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roadie — Your AI Tutor</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#000; --card:#060606; --border:#141414; --text:#f0f0f0; --muted:#555; --dim:#2a2a2a; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Space Grotesk',system-ui,sans-serif; height:100vh; display:flex; flex-direction:column; }
 
-    /* ── macOS window chrome ─────────────────────────────────── */
-    .macos-window {
-      width: 1280px;
-      max-width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #1a1a1a;
-      box-shadow: 0 32px 80px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.04);
-    }
+.header { padding:12px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-shrink:0; }
+.header h1 { font-size:18px; font-weight:700; }
+.header .role { color:var(--muted); font-size:12px; }
+.header .status { margin-left:auto; display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.header .dot { width:6px; height:6px; border-radius:50%; background:#888; }
 
-    .macos-bar {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 12px 16px;
-      background: #111;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .macos-bar .br-dot { width: 10px; height: 10px; }
-    .macos-title {
-      margin-left: 10px;
-      font-family: var(--jb);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: .04em;
-    }
+.subjects { padding:8px 20px; border-bottom:1px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; }
+.subject { background:var(--card); border:1px solid var(--border); color:var(--muted); padding:6px 14px; border-radius:16px; font-size:12px; cursor:pointer; white-space:nowrap; }
+.subject:hover, .subject.active { color:var(--text); border-color:#333; }
 
-    /* ── App shell: sidebar + main ───────────────────────────── */
-    .app-shell {
-      display: flex;
-      height: 800px;
-      background: #000;
-    }
+.chat { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.msg { max-width:85%; padding:12px 16px; border-radius:12px; font-size:14px; line-height:1.6; white-space:pre-wrap; }
+.msg-user { background:#111; border:1px solid #222; align-self:flex-end; }
+.msg-agent { background:var(--card); border:1px solid var(--border); align-self:flex-start; color:#ccc; }
+.msg-agent .name { font-size:11px; font-weight:600; color:#888; margin-bottom:4px; text-transform:uppercase; letter-spacing:.06em; }
+.msg-system { align-self:center; color:var(--muted); font-size:12px; font-family:'JetBrains Mono',monospace; padding:8px; }
+.typing { color:var(--muted); font-size:13px; padding:0 20px 8px; font-style:italic; display:none; }
 
-    /* ─────────────────────────────────────────────────────────
-       SIDEBAR
-    ───────────────────────────────────────────────────────── */
-    .sidebar {
-      width: 260px;
-      flex-shrink: 0;
-      background: #0a0a0a;
-      border-right: 1px solid #1a1a1a;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-
-    /* Logo */
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .logo-icon-wrap {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      padding: 1.5px;
-      background: var(--g);
-      flex-shrink: 0;
-    }
-    .logo-icon-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 6.5px;
-      background: #0a0a0a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
-    .logo-text-wrap { display: flex; flex-direction: column; gap: 1px; }
-    .logo-name {
-      font-size: 15px;
-      font-weight: 700;
-      background: var(--g);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -.01em;
-    }
-    .logo-tagline {
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      letter-spacing: .07em;
-      text-transform: uppercase;
-    }
-
-    /* Profile */
-    .sidebar-profile {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px 16px;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .profile-avatar-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      padding: 1.5px;
-      background: var(--g);
-      flex-shrink: 0;
-    }
-    .profile-avatar-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: #1a1a1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--white);
-      font-family: var(--jb);
-    }
-    .profile-info { display: flex; flex-direction: column; gap: 2px; }
-    .profile-name {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--white);
-    }
-    .profile-level {
-      font-size: 10px;
-      font-family: var(--jb);
-      color: var(--sub);
-    }
-
-    /* Progress */
-    .sidebar-progress {
-      padding: 14px 16px;
-      border-bottom: 1px solid #1a1a1a;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .progress-section-label {
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    /* XP row */
-    .xp-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .xp-value {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--white);
-    }
-    .xp-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 16px;
-      font-size: 9.5px;
-      font-family: var(--jb);
-      font-weight: 600;
-      background: var(--g);
-      color: #000;
-    }
-    .xp-bar-track {
-      height: 5px;
-      background: #1a1a1a;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    .xp-bar-fill {
-      height: 100%;
-      width: 71%;
-      background: var(--g);
-      border-radius: 16px;
-    }
-    .xp-next {
-      font-size: 10px;
-      color: var(--muted);
-      font-family: var(--jb);
-      margin-top: 4px;
-    }
-
-    /* Streak */
-    .streak-row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .streak-label {
-      font-size: 12px;
-      font-weight: 600;
-      background: var(--g);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .streak-sub {
-      font-size: 10px;
-      color: var(--muted);
-      font-family: var(--jb);
-      margin-left: auto;
-    }
-
-    /* Subjects */
-    .sidebar-section {
-      padding: 12px 10px 4px;
-    }
-    .sidebar-section-label {
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      padding: 0 6px 6px;
-    }
-
-    .subject-item {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--sub);
-      transition: background .15s, color .15s;
-      position: relative;
-    }
-    .subject-item:hover { background: #111; color: var(--text); }
-    .subject-item.active {
-      background: #111;
-      color: var(--white);
-    }
-    .subject-item.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 5px;
-      bottom: 5px;
-      width: 3px;
-      border-radius: 0 2px 2px 0;
-      background: var(--g);
-    }
-    .subject-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
-    .subject-count {
-      margin-left: auto;
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-    }
-
-    /* Recent sessions */
-    .recent-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      padding: 8px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background .15s;
-    }
-    .recent-item:hover { background: #111; }
-    .recent-title {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .recent-time {
-      font-size: 10px;
-      font-family: var(--jb);
-      color: var(--muted);
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      padding: 12px 16px;
-      border-top: 1px solid #1a1a1a;
-    }
-    .sidebar-footer-text {
-      font-size: 10px;
-      font-family: var(--jb);
-      color: var(--muted);
-    }
-
-    /* ─────────────────────────────────────────────────────────
-       MAIN AREA
-    ───────────────────────────────────────────────────────── */
-    .main-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: #000;
-      overflow: hidden;
-    }
-
-    /* Top bar */
-    .main-topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      height: 52px;
-      background: #0a0a0a;
-      border-bottom: 1px solid #1a1a1a;
-      flex-shrink: 0;
-    }
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-    }
-    .breadcrumb-seg { color: var(--sub); }
-    .breadcrumb-arrow { color: var(--muted); font-size: 10px; }
-    .breadcrumb-current {
-      font-weight: 600;
-      color: var(--white);
-    }
-
-    .topbar-right { display: flex; align-items: center; gap: 10px; }
-    .progress-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 16px;
-      font-size: 11px;
-      font-family: var(--jb);
-      color: var(--sub);
-    }
-    .progress-pill-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--g);
-    }
-    .topbar-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      background: transparent;
-      border: 1px solid #1a1a1a;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--sub);
-      cursor: pointer;
-      transition: all .15s;
-    }
-    .topbar-btn:hover { border-color: #333; color: var(--text); }
-
-    /* Lesson scroll area */
-    .lesson-scroll {
-      flex: 1;
-      overflow-y: auto;
-      padding: 28px 32px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* ── Message bubbles ───────────────────────────────── */
-    .msg-row {
-      display: flex;
-      gap: 12px;
-      max-width: 760px;
-    }
-    .msg-row.user {
-      flex-direction: row-reverse;
-      align-self: flex-end;
-    }
-
-    .msg-avatar-wrap {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      padding: 1.5px;
-      background: var(--g);
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .msg-avatar-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: #1a1a1a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-    .msg-avatar-user {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      padding: 1.5px;
-      background: var(--g);
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-    .msg-avatar-user-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: #2a1a2a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--white);
-      font-family: var(--jb);
-    }
-
-    .msg-bubble {
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px 12px 12px 4px;
-      padding: 14px 16px;
-      font-size: 13.5px;
-      color: var(--text);
-      line-height: 1.65;
-      flex: 1;
-    }
-    .msg-bubble.user {
-      background: #111;
-      border-color: #222;
-      border-radius: 12px 12px 4px 12px;
-    }
-
-    .msg-sender {
-      font-size: 10.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      margin-bottom: 6px;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-    .msg-bubble p { margin-bottom: 8px; }
-    .msg-bubble p:last-child { margin-bottom: 0; }
-    .msg-bubble strong { color: var(--white); font-weight: 600; }
-    .msg-bubble em { color: var(--sub); font-style: italic; }
-
-    .msg-eq {
-      display: inline-block;
-      font-family: var(--jb);
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--white);
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 6px;
-      padding: 6px 14px;
-      margin: 6px 0;
-      letter-spacing: .02em;
-    }
-
-    .msg-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      margin-top: 6px;
-    }
-    .msg-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text);
-    }
-    .msg-list li::before {
-      content: '→';
-      font-family: var(--jb);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-      flex-shrink: 0;
-    }
-
-    /* ── Code block ────────────────────────────────────── */
-    .code-block-wrap {
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
-      border-radius: 10px;
-      overflow: hidden;
-      max-width: 600px;
-    }
-    .code-block-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 14px;
-      background: #111;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .code-block-title {
-      font-size: 10.5px;
-      font-family: var(--jb);
-      color: var(--sub);
-      letter-spacing: .04em;
-    }
-    .code-block-lang {
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
-      border-radius: 4px;
-      padding: 2px 7px;
-    }
-    .code-block-body {
-      padding: 16px 18px;
-      font-family: var(--jb);
-      font-size: 12.5px;
-      line-height: 1.8;
-      color: #f5f5f5;
-    }
-    .code-comment { color: #444; }
-    .code-key { color: var(--sub); }
-    .code-val { color: var(--text); }
-    .code-eq-sym { color: var(--text); }
-
-    /* ── Quiz card ─────────────────────────────────────── */
-    .quiz-card {
-      background: #0a0a0a;
-      border: 1px solid #222;
-      border-radius: 10px;
-      overflow: hidden;
-      max-width: 620px;
-      position: relative;
-    }
-    .quiz-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--g);
-      border-radius: 10px 10px 0 0;
-    }
-    .quiz-card-header {
-      padding: 16px 18px 12px;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    .quiz-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .quiz-tag-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--g);
-    }
-    .quiz-question {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--white);
-      line-height: 1.5;
-    }
-    .quiz-options {
-      padding: 12px 18px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .quiz-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid #1a1a1a;
-      background: transparent;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--sub);
-      transition: all .15s;
-      text-align: left;
-      font-family: var(--sg);
-    }
-    .quiz-option:hover { border-color: #333; color: var(--text); background: #111; }
-    .quiz-option.selected {
-      border-color: transparent;
-      color: var(--white);
-      background: #111;
-      position: relative;
-    }
-    .quiz-option.selected::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      padding: 1px;
-      background: var(--g);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-    }
-    .quiz-option-key {
-      font-family: var(--jb);
-      font-size: 11px;
-      color: var(--muted);
-      width: 18px;
-      flex-shrink: 0;
-    }
-    .quiz-option.selected .quiz-option-key {
-      background: var(--g);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .quiz-option-correct {
-      margin-left: auto;
-      font-size: 10px;
-      font-family: var(--jb);
-      color: var(--muted);
-      display: none;
-    }
-    .quiz-option.selected .quiz-option-correct { display: block; color: var(--text); }
-
-    /* ── Action buttons row ────────────────────────────── */
-    .action-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      max-width: 620px;
-    }
-    .action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 9px 20px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all .15s;
-      font-family: var(--sg);
-      border: none;
-    }
-    .action-btn-primary {
-      background: var(--white);
-      color: #000;
-    }
-    .action-btn-primary:hover { background: #e5e5e5; }
-    .action-btn-outline {
-      background: transparent;
-      border: 1px solid #1a1a1a;
-      color: var(--sub);
-    }
-    .action-btn-outline:hover { border-color: #444; color: var(--text); }
-
-    /* ── Next lesson stub ──────────────────────────────── */
-    .next-lesson-stub {
-      background: #0a0a0a;
-      border: 1px solid #1a1a1a;
-      border-radius: 10px;
-      padding: 24px;
-      max-width: 620px;
-      display: none;
-    }
-    .next-lesson-stub.visible { display: block; }
-    .next-lesson-tag {
-      font-size: 9.5px;
-      font-family: var(--jb);
-      color: var(--muted);
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .next-lesson-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--white);
-      margin-bottom: 6px;
-    }
-    .next-lesson-desc {
-      font-size: 13px;
-      color: var(--sub);
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    .next-lesson-topics {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .next-lesson-topic {
-      padding: 4px 10px;
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 5px;
-      font-size: 11px;
-      font-family: var(--jb);
-      color: var(--sub);
-    }
-
-    /* ── Bottom input area ────────────────────────────── */
-    .input-area {
-      flex-shrink: 0;
-      padding: 16px 32px 20px;
-      background: #0a0a0a;
-      border-top: 1px solid #1a1a1a;
-    }
-
-    .input-chips {
-      display: flex;
-      gap: 7px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-    .chip {
-      padding: 4px 11px;
-      background: transparent;
-      border: 1px solid #1a1a1a;
-      border-radius: 16px;
-      font-size: 11.5px;
-      font-weight: 500;
-      color: var(--sub);
-      cursor: pointer;
-      transition: all .15s;
-      font-family: var(--sg);
-    }
-    .chip:hover { border-color: #333; color: var(--text); background: #111; }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    .input-wrap {
-      flex: 1;
-      position: relative;
-    }
-    .input-wrap::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 8px;
-      padding: 1px;
-      background: var(--g);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0;
-      transition: opacity .2s;
-    }
-    .input-wrap:focus-within::before { opacity: 1; }
-    .main-input {
-      width: 100%;
-      padding: 10px 16px;
-      background: #111;
-      border: 1px solid #1a1a1a;
-      border-radius: 8px;
-      color: var(--text);
-      font-family: var(--sg);
-      font-size: 13.5px;
-      outline: none;
-      transition: border-color .15s;
-    }
-    .main-input:focus { border-color: transparent; }
-    .main-input::placeholder { color: var(--muted); }
-
-    .ask-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 10px 20px;
-      background: var(--white);
-      border: none;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #000;
-      cursor: pointer;
-      transition: background .15s;
-      font-family: var(--sg);
-      flex-shrink: 0;
-    }
-    .ask-btn:hover { background: #e5e5e5; }
-
-    /* ── Scrollbar override for lesson area ────────────── */
-    .lesson-scroll::-webkit-scrollbar { width: 3px; }
-    .lesson-scroll::-webkit-scrollbar-thumb { background: #1a1a1a; }
-    .sidebar::-webkit-scrollbar { width: 2px; }
-    .sidebar::-webkit-scrollbar-thumb { background: #1a1a1a; }
-  </style>
+.input-bar { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; flex-shrink:0; }
+.input-bar input { flex:1; background:var(--card); border:1px solid var(--border); color:var(--text); padding:12px 16px; border-radius:8px; font-size:14px; outline:none; font-family:inherit; }
+.input-bar input:focus { border-color:#333; }
+.input-bar button { background:#111; border:1px solid #222; color:#ccc; padding:12px 24px; border-radius:8px; font-size:14px; cursor:pointer; font-family:inherit; }
+.input-bar button:hover { background:#1a1a1a; color:#fff; }
+</style>
 </head>
 <body>
 
-<div class="macos-window">
-  <!-- macOS titlebar -->
-  <div class="macos-bar">
-    <div class="br-dot br-dot-red"></div>
-    <div class="br-dot br-dot-yel"></div>
-    <div class="br-dot br-dot-grn"></div>
-    <span class="macos-title">Roadie — Your AI Tutor · Elliptic Curve Cryptography</span>
+<div class="header">
+  <h1>Roadie</h1>
+  <span class="role">Your AI Tutor</span>
+  <div class="status"><span class="dot"></span> online</div>
+</div>
+
+<div class="subjects" id="subjects">
+  <span class="subject active" onclick="setSubject(this,'general')">General</span>
+  <span class="subject" onclick="setSubject(this,'math')">Math</span>
+  <span class="subject" onclick="setSubject(this,'science')">Science</span>
+  <span class="subject" onclick="setSubject(this,'coding')">Coding</span>
+  <span class="subject" onclick="setSubject(this,'history')">History</span>
+  <span class="subject" onclick="setSubject(this,'philosophy')">Philosophy</span>
+  <span class="subject" onclick="setSubject(this,'writing')">Writing</span>
+  <span class="subject" onclick="setSubject(this,'blackroad')">BlackRoad</span>
+</div>
+
+<div class="chat" id="chat">
+  <div class="msg msg-agent">
+    <div class="name">Roadie</div>
+    Hey! I'm Roadie, your personal AI tutor. I can help with math, science, coding, history, philosophy, writing — or anything about BlackRoad OS. What would you like to learn today?
   </div>
+</div>
 
-  <div class="app-shell">
+<div class="typing" id="typing">Roadie is thinking...</div>
 
-    <!-- ────────────────────── SIDEBAR ────────────────────── -->
-    <aside class="sidebar">
-
-      <!-- Logo -->
-      <div class="sidebar-logo">
-        <div class="logo-icon-wrap">
-          <div class="logo-icon-inner">🛣️</div>
-        </div>
-        <div class="logo-text-wrap">
-          <div class="logo-name">Roadie</div>
-          <div class="logo-tagline">Your AI Tutor</div>
-        </div>
-      </div>
-
-      <!-- Profile -->
-      <div class="sidebar-profile">
-        <div class="profile-avatar-wrap">
-          <div class="profile-avatar-inner">AA</div>
-        </div>
-        <div class="profile-info">
-          <div class="profile-name">Alexa</div>
-          <div class="profile-level">Level 7 Learner</div>
-        </div>
-      </div>
-
-      <!-- Progress -->
-      <div class="sidebar-progress">
-        <div class="progress-section-label">Progress</div>
-        <div>
-          <div class="xp-row">
-            <div class="xp-value">2,847 XP</div>
-            <div class="xp-badge">Level 7</div>
-          </div>
-          <div class="xp-bar-track">
-            <div class="xp-bar-fill"></div>
-          </div>
-          <div class="xp-next">153 XP to Level 8</div>
-        </div>
-        <div class="streak-row">
-          <span style="font-size:14px;">🔥</span>
-          <span class="streak-label">14 days</span>
-          <span class="streak-sub">current streak</span>
-        </div>
-      </div>
-
-      <!-- Subjects -->
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">Subjects</div>
-        <div class="subject-item active">
-          <span class="subject-icon">🔐</span>
-          Cryptography
-          <span class="subject-count">12 lessons</span>
-        </div>
-        <div class="subject-item">
-          <span class="subject-icon">📐</span>
-          Mathematics
-          <span class="subject-count">24 lessons</span>
-        </div>
-        <div class="subject-item">
-          <span class="subject-icon">💻</span>
-          Computer Science
-          <span class="subject-count">18 lessons</span>
-        </div>
-        <div class="subject-item">
-          <span class="subject-icon">🧠</span>
-          AI &amp; Machine Learning
-          <span class="subject-count">9 lessons</span>
-        </div>
-        <div class="subject-item">
-          <span class="subject-icon">📚</span>
-          History
-          <span class="subject-count">15 lessons</span>
-        </div>
-      </div>
-
-      <!-- Recent Sessions -->
-      <div class="sidebar-section">
-        <div class="sidebar-section-label">Recent Sessions</div>
-        <div class="recent-item">
-          <div class="recent-title">Elliptic Curve Cryptography</div>
-          <div class="recent-time">2h ago</div>
-        </div>
-        <div class="recent-item">
-          <div class="recent-title">Post-Quantum Algorithms</div>
-          <div class="recent-time">yesterday</div>
-        </div>
-        <div class="recent-item">
-          <div class="recent-title">Blockchain Fundamentals</div>
-          <div class="recent-time">3d ago</div>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="sidebar-footer">
-        <div class="sidebar-footer-text">Roadie · BlackRoad OS</div>
-      </div>
-
-    </aside>
-
-    <!-- ──────────────────── MAIN AREA ─────────────────── -->
-    <div class="main-area">
-
-      <!-- Top bar -->
-      <div class="main-topbar">
-        <div class="breadcrumb">
-          <span class="breadcrumb-seg">Cryptography</span>
-          <span class="breadcrumb-arrow">›</span>
-          <span class="breadcrumb-current">Elliptic Curve Cryptography</span>
-        </div>
-        <div class="topbar-right">
-          <div class="progress-pill">
-            <div class="progress-pill-dot"></div>
-            3 / 8 complete
-          </div>
-          <button class="topbar-btn">📊 Stats</button>
-          <button class="topbar-btn">⚙️</button>
-        </div>
-      </div>
-
-      <!-- Lesson scroll -->
-      <div class="lesson-scroll" id="lessonScroll">
-
-        <!-- 1. Roadie intro message -->
-        <div class="msg-row">
-          <div class="msg-avatar-wrap">
-            <div class="msg-avatar-inner">🤖</div>
-          </div>
-          <div class="msg-bubble">
-            <div class="msg-sender">Roadie · AI Tutor</div>
-            <p>Let's explore <strong>Elliptic Curve Cryptography</strong> — the math behind CarKeys.</p>
-            <p>An elliptic curve is defined by the equation:</p>
-            <div class="msg-eq">y² = x³ + ax + b</div>
-            <p>The key insight is that adding two points on a curve produces a third point, and this operation is easy to do but <em>computationally impossible to reverse</em> — that's what makes it secure.</p>
-          </div>
-        </div>
-
-        <!-- 2. Code block -->
-        <div class="code-block-wrap">
-          <div class="code-block-header">
-            <span class="code-block-title">Curve Equation</span>
-            <span class="code-block-lang">math</span>
-          </div>
-          <div class="code-block-body">
-<span class="code-comment"># secp256k1 curve (used by Bitcoin &amp; CarKeys)</span>
-<span class="code-val">y²</span> <span class="code-eq-sym">=</span> <span class="code-val">x³ <span class="code-eq-sym">-</span> 3x <span class="code-eq-sym">+</span> 1</span>
-
-<span class="code-comment"># Point operations</span>
-<span class="code-key">Point addition</span><span class="code-eq-sym">:</span>     P <span class="code-eq-sym">+</span> Q <span class="code-eq-sym">=</span> R
-<span class="code-key">Scalar multiply</span><span class="code-eq-sym">:</span>   k <span class="code-eq-sym">×</span> P <span class="code-eq-sym">=</span> Public Key
-
-<span class="code-comment"># Key relationship</span>
-<span class="code-key">Private key k</span><span class="code-eq-sym">:</span>    secret integer
-<span class="code-key">Public key P</span><span class="code-eq-sym">:</span>     point on curve
-          </div>
-        </div>
-
-        <!-- 3. Quiz card -->
-        <div class="quiz-card">
-          <div class="quiz-card-header">
-            <div class="quiz-tag">
-              <div class="quiz-tag-dot"></div>
-              Quick Check
-            </div>
-            <div class="quiz-question">What makes ECC secure?</div>
-          </div>
-          <div class="quiz-options" id="quizOptions">
-            <button class="quiz-option" data-idx="0" onclick="selectOption(this)">
-              <span class="quiz-option-key">A</span>
-              The large key size
-            </button>
-            <button class="quiz-option selected" data-idx="1" onclick="selectOption(this)">
-              <span class="quiz-option-key">B</span>
-              The difficulty of reversing scalar multiplication
-              <span class="quiz-option-correct">✓ correct</span>
-            </button>
-            <button class="quiz-option" data-idx="2" onclick="selectOption(this)">
-              <span class="quiz-option-key">C</span>
-              Quantum encryption
-            </button>
-            <button class="quiz-option" data-idx="3" onclick="selectOption(this)">
-              <span class="quiz-option-key">D</span>
-              Symmetric keys
-            </button>
-          </div>
-        </div>
-
-        <!-- 4. User message -->
-        <div class="msg-row user">
-          <div class="msg-avatar-user">
-            <div class="msg-avatar-user-inner">AA</div>
-          </div>
-          <div class="msg-bubble user">
-            So CarKeys uses this to generate keypairs?
-          </div>
-        </div>
-
-        <!-- 5. Roadie response -->
-        <div class="msg-row">
-          <div class="msg-avatar-wrap">
-            <div class="msg-avatar-inner">🤖</div>
-          </div>
-          <div class="msg-bubble">
-            <div class="msg-sender">Roadie · AI Tutor</div>
-            <p>Exactly! CarKeys uses <strong>secp256k1</strong> (the same curve as Bitcoin) for ECDSA signatures. Here's how it connects:</p>
-            <ul class="msg-list">
-              <li>Your <strong>private key</strong> = random integer k</li>
-              <li>Your <strong>public key</strong> = k × G (generator point)</li>
-              <li><strong>Signing</strong> = math using private key</li>
-              <li><strong>Verification</strong> = math using public key only</li>
-            </ul>
-            <p style="margin-top:10px;">Want to see how <strong>key rotation</strong> works next?</p>
-          </div>
-        </div>
-
-        <!-- 6. Action buttons -->
-        <div class="action-row">
-          <button class="action-btn action-btn-primary" onclick="showNextLesson()">
-            Continue Lesson →
-          </button>
-          <button class="action-btn action-btn-outline">Ask a Question</button>
-          <button class="action-btn action-btn-outline">Take Quiz</button>
-        </div>
-
-        <!-- Next lesson stub (hidden, revealed on Continue) -->
-        <div class="next-lesson-stub" id="nextLessonStub">
-          <div class="next-lesson-tag">Next · Lesson 4 of 8</div>
-          <div class="next-lesson-title">Key Rotation &amp; Revocation</div>
-          <div class="next-lesson-desc">
-            Learn how CarKeys handles keypair rotation — what triggers it, how the network reaches consensus on a new public key, and why revocation without a central authority requires cryptographic proofs.
-          </div>
-          <div class="next-lesson-topics">
-            <span class="next-lesson-topic">Revocation lists</span>
-            <span class="next-lesson-topic">Merkle proofs</span>
-            <span class="next-lesson-topic">Threshold signatures</span>
-            <span class="next-lesson-topic">Key ceremony</span>
-          </div>
-        </div>
-
-      </div><!-- /lesson-scroll -->
-
-      <!-- Bottom input -->
-      <div class="input-area">
-        <div class="input-chips">
-          <button class="chip" onclick="fillInput('Explain that more simply')">Explain simpler</button>
-          <button class="chip" onclick="fillInput('Show me a code example')">Show example</button>
-          <button class="chip" onclick="fillInput('Quiz me on this topic')">Quiz me</button>
-          <button class="chip" onclick="fillInput('Go to the next topic')">Next topic</button>
-        </div>
-        <div class="input-row">
-          <div class="input-wrap">
-            <input
-              class="main-input"
-              id="mainInput"
-              type="text"
-              placeholder="Ask Roadie anything…"
-            >
-          </div>
-          <button class="ask-btn" onclick="handleAsk()">
-            Ask ↑
-          </button>
-        </div>
-      </div>
-
-    </div><!-- /main-area -->
-  </div><!-- /app-shell -->
-</div><!-- /macos-window -->
+<div class="input-bar">
+  <input type="text" id="input" placeholder="Ask Roadie anything..." autofocus>
+  <button id="send-btn">Send</button>
+</div>
 
 <script>
-  /* ── Quiz option selection ─────────────────────────── */
-  function selectOption(el) {
-    const options = document.querySelectorAll('.quiz-option');
-    options.forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    const correct = el.querySelector('.quiz-option-correct');
-    if (!correct) {
-      options.forEach(o => {
-        const c = o.querySelector('.quiz-option-correct');
-        if (c) c.style.display = 'none';
-      });
-    }
+var API = 'http://192.168.4.113:8089';
+var SCHEDULER = 'https://network-scheduler.blackroad.workers.dev';
+var currentSubject = 'general';
+var chatEl = document.getElementById('chat');
+var inputEl = document.getElementById('input');
+var typingEl = document.getElementById('typing');
+
+fetch(SCHEDULER + '/visit').catch(function(){});
+fetch(SCHEDULER + '/heartbeat?id=roadie-user-' + Math.random().toString(36).slice(2,6)).catch(function(){});
+
+function setSubject(el, subject) {
+  currentSubject = subject;
+  document.querySelectorAll('.subject').forEach(function(s) { s.classList.remove('active'); });
+  el.classList.add('active');
+  addMessage('system', 'Subject: ' + subject);
+}
+
+function addMessage(type, text, name) {
+  var div = document.createElement('div');
+  if (type === 'system') {
+    div.className = 'msg msg-system';
+    div.textContent = text;
+  } else if (type === 'user') {
+    div.className = 'msg msg-user';
+    div.textContent = text;
+  } else {
+    div.className = 'msg msg-agent';
+    div.innerHTML = '<div class="name">' + (name || 'Roadie') + '</div>';
+    div.appendChild(document.createTextNode(text));
   }
+  chatEl.appendChild(div);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return div;
+}
 
-  /* ── Continue → reveal next lesson stub ────────────── */
-  function showNextLesson() {
-    const stub = document.getElementById('nextLessonStub');
-    stub.classList.add('visible');
-    setTimeout(() => {
-      stub.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 80);
-  }
+async function sendMessage() {
+  var text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = '';
+  addMessage('user', text);
+  typingEl.style.display = 'block';
 
-  /* ── Chip shortcut fills input ─────────────────────── */
-  function fillInput(text) {
-    const input = document.getElementById('mainInput');
-    input.value = text;
-    input.focus();
-  }
+  var prompt = currentSubject !== 'general'
+    ? 'You are tutoring in ' + currentSubject + '. ' + text
+    : text;
 
-  /* ── Ask button (cosmetic send) ────────────────────── */
-  function handleAsk() {
-    const input = document.getElementById('mainInput');
-    const val = input.value.trim();
-    if (!val) return;
-    input.value = '';
-    input.focus();
-  }
-
-  /* ── Enter key support ─────────────────────────────── */
-  document.getElementById('mainInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') handleAsk();
-  });
-
-  /* ── Subject sidebar click ─────────────────────────── */
-  document.querySelectorAll('.subject-item').forEach(item => {
-    item.addEventListener('click', function() {
-      document.querySelectorAll('.subject-item').forEach(i => i.classList.remove('active'));
-      this.classList.add('active');
+  // Try streaming
+  try {
+    var resp = await fetch(API + '/chat/stream', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({agent: 'roadie', message: prompt, product: 'roadie'})
     });
-  });
-</script>
 
-<script src="../js/blackroad-app.js"></script></body>
+    typingEl.style.display = 'none';
+    var msgDiv = addMessage('agent', '', 'Roadie');
+    var textNode = msgDiv.childNodes[1] || msgDiv.appendChild(document.createTextNode(''));
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var full = '';
+
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
+      var chunk = decoder.decode(result.value, {stream:true});
+      var lines = chunk.split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (line.startsWith('data: ')) {
+          try {
+            var data = JSON.parse(line.slice(6));
+            if (data.token) { full += data.token; textNode.textContent = full; chatEl.scrollTop = chatEl.scrollHeight; }
+          } catch(e) {}
+        }
+      }
+    }
+    if (!full) textNode.textContent = 'I\'m offline right now. Connect to the BlackRoad local network for live tutoring.';
+  } catch(e) {
+    typingEl.style.display = 'none';
+    addMessage('agent', 'I\'m offline right now. Connect to the BlackRoad local network for live tutoring.', 'Roadie');
+  }
+
+  // Save to history
+  var history = JSON.parse(localStorage.getItem('br.roadie.history') || '[]');
+  history.push({q: text, subject: currentSubject, ts: Date.now()});
+  if (history.length > 100) history = history.slice(-100);
+  localStorage.setItem('br.roadie.history', JSON.stringify(history));
+}
+
+document.getElementById('send-btn').addEventListener('click', sendMessage);
+inputEl.addEventListener('keydown', function(e) { if (e.key === 'Enter') sendMessage(); });
+</script>
+<script src="blackroad-app.js"></script>
+</body>
 </html>
