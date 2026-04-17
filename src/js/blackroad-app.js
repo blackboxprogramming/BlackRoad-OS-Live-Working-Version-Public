@@ -5,8 +5,39 @@
 (function() {
   'use strict';
 
+  // Agent assignment — which agent hosts which product
+  var AGENT_MAP = {
+    'roadie':{agent:'roadie',name:'Roadie',role:'Your AI tutor'},'roadtrip':{agent:'roadie',name:'Roadie',role:'Agent convoy host'},
+    'backroad':{agent:'sophia',name:'Sophia',role:'Social wisdom'},'blackboard':{agent:'calliope',name:'Calliope',role:'Creative instructor'},
+    'roadwork':{agent:'octavia',name:'Octavia',role:'Task orchestrator'},'roadcode':{agent:'silas',name:'Silas',role:'Code reviewer'},
+    'roadview':{agent:'olympia',name:'Olympia',role:'Search commander'},'roadbook':{agent:'lucidia',name:'Lucidia',role:'Memory publisher'},
+    'officeroad':{agent:'aria',name:'Aria',role:'Office coordinator'},'carpool':{agent:'elias',name:'Elias',role:'Model router'},
+    'carkeys':{agent:'celeste',name:'Celeste',role:'Vault guardian'},'roadside':{agent:'thalia',name:'Thalia',role:'Support guide'},
+    'oneway':{agent:'valeria',name:'Valeria',role:'Export enforcer'},'roadchain':{agent:'cicero',name:'Cicero',role:'Ledger keeper'},
+    'roadcoin':{agent:'atticus',name:'Atticus',role:'Token auditor'},'roadworld':{agent:'gaia',name:'Gaia',role:'World builder'},
+    'roadpay':{agent:'atticus',name:'Atticus',role:'Payment auditor'},'highway':{agent:'gematria',name:'Gematria',role:'Analytics'},
+    'blackroad-os':{agent:'roadie',name:'Roadie',role:'System host'},
+    'roadtube':{agent:'sebastian',name:'Sebastian',role:'Video curator'},'roadflix':{agent:'seraphina',name:'Seraphina',role:'Film director'},
+    'roadradio':{agent:'lyra',name:'Lyra',role:'Audio curator'},'roadpulse':{agent:'thalia',name:'Thalia',role:'Social spark'},
+    'roadgram':{agent:'sapphira',name:'Sapphira',role:'Visual curator'},'roadnet':{agent:'sebastian',name:'Sebastian',role:'Network host'},
+    'roadsnap':{agent:'thalia',name:'Thalia',role:'Stories host'},'roadclips':{agent:'seraphina',name:'Seraphina',role:'Short form'},
+    'roadnotes':{agent:'alexandria',name:'Alexandria',role:'Knowledge keeper'},'roadkanban':{agent:'octavia',name:'Octavia',role:'Board manager'},
+    'roadboard':{agent:'calliope',name:'Calliope',role:'Whiteboard host'},'roaddrive':{agent:'lucidia',name:'Lucidia',role:'File memory'},
+    'roadlinear':{agent:'silas',name:'Silas',role:'Project tracker'},'roadtasks':{agent:'octavia',name:'Octavia',role:'Task runner'},
+    'roadschool':{agent:'elias',name:'Elias',role:'Teacher'},'roadcast':{agent:'aria',name:'Aria',role:'Recorder'},
+    'roadship':{agent:'gaia',name:'Gaia',role:'Deploy master'},'roaddeploy':{agent:'gaia',name:'Gaia',role:'CI/CD'},
+    'roadchat':{agent:'roadie',name:'Roadie',role:'Chat host'},'roadim':{agent:'aria',name:'Aria',role:'Messenger'},
+    'roaddb':{agent:'gematria',name:'Gematria',role:'Data explorer'},'roadapi':{agent:'silas',name:'Silas',role:'API guide'},
+    'roadamp':{agent:'gematria',name:'Gematria',role:'Analytics'},'roadarcade':{agent:'thalia',name:'Thalia',role:'Game host'},
+    'roadid':{agent:'valeria',name:'Valeria',role:'Identity guard'},'roadphone':{agent:'aria',name:'Aria',role:'Mobile voice'},
+    'roadspace':{agent:'ophelia',name:'Ophelia',role:'Profile depth'},'roadstock':{agent:'atticus',name:'Atticus',role:'Market auditor'},
+    'roadweather':{agent:'gaia',name:'Gaia',role:'Weather monitor'},
+    'roadnapster':{agent:'lyra',name:'Lyra',role:'Retro DJ'},'roadmsn':{agent:'alice',name:'Alice',role:'Retro chat'},
+    'roadlimewire':{agent:'lyra',name:'Lyra',role:'Retro P2P'}
+  };
+
   const BR = window.BR = {
-    version: '1.0.0',
+    version: '2.0.0',
     appName: document.title || 'BlackRoad',
     api: 'http://192.168.4.113:8089',
     scheduler: 'https://network-scheduler.blackroad.workers.dev',
@@ -185,26 +216,82 @@
       });
     },
 
-    // ── Add BlackRoad nav bar ──
+    // ── Resolve agent for this product ──
+    getAgent() {
+      var slug = BR.appName.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+      // Try matching by slug, then by partial match
+      if (AGENT_MAP[slug]) return AGENT_MAP[slug];
+      for (var k in AGENT_MAP) { if (slug.indexOf(k) >= 0 || k.indexOf(slug) >= 0) return AGENT_MAP[k]; }
+      return {agent:'roadie', name:'Roadie', role:'Assistant'};
+    },
+
+    // ── Add BlackRoad nav bar with agent ──
     addNav() {
       if (document.getElementById('br-nav')) return;
-      const nav = document.createElement('div');
+      var a = BR.getAgent();
+      var nav = document.createElement('div');
       nav.id = 'br-nav';
       nav.style.cssText = 'position:fixed;top:0;left:0;right:0;height:36px;background:#000;border-bottom:1px solid #191919;display:flex;align-items:center;padding:0 16px;gap:12px;z-index:99998;font-family:system-ui;';
-      nav.innerHTML = `
-        <span style="display:flex;gap:3px">
-          <span style="width:5px;height:5px;border-radius:50%;background:#aaa"></span>
-          <span style="width:5px;height:5px;border-radius:50%;background:#888"></span>
-          <span style="width:5px;height:5px;border-radius:50%;background:#666"></span>
-        </span>
-        <a href="https://os.blackroad.io" style="color:#d4d4d4!important;font-size:13px;font-weight:700;text-decoration:none">BlackRoad</a>
-        <span style="color:#333;font-size:12px">/</span>
-        <span style="color:#777;font-size:12px">${BR.appName}</span>
-        <a href="https://os.blackroad.io/live" style="margin-left:auto;color:#555!important;font-size:11px;text-decoration:none">Live</a>
-        <a href="https://blackroad-products.github.io/roadie/" style="color:#555!important;font-size:11px;text-decoration:none">Roadie</a>
-      `;
+      nav.innerHTML =
+        '<span style="display:flex;gap:3px">' +
+        '<span style="width:5px;height:5px;border-radius:50%;background:#aaa"></span>' +
+        '<span style="width:5px;height:5px;border-radius:50%;background:#888"></span>' +
+        '<span style="width:5px;height:5px;border-radius:50%;background:#666"></span></span>' +
+        '<a href="https://os.blackroad.io" style="color:#d4d4d4!important;font-size:13px;font-weight:700;text-decoration:none">BlackRoad</a>' +
+        '<span style="color:#333;font-size:12px">/</span>' +
+        '<span style="color:#777;font-size:12px">' + BR.appName + '</span>' +
+        '<span style="color:#333;font-size:10px;margin-left:4px">hosted by</span>' +
+        '<span style="color:#999;font-size:11px;font-weight:600">' + a.name + '</span>' +
+        '<span style="color:#444;font-size:10px">' + a.role + '</span>' +
+        '<a href="https://os.blackroad.io/live" style="margin-left:auto;color:#555!important;font-size:11px;text-decoration:none">Live</a>';
       document.body.prepend(nav);
       document.body.style.paddingTop = '36px';
+    },
+
+    // ── Add agent chat widget (bottom right) ──
+    addChatWidget() {
+      if (document.getElementById('br-chat-widget')) return;
+      var a = BR.getAgent();
+      var w = document.createElement('div');
+      w.id = 'br-chat-widget';
+      w.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99997;font-family:system-ui;';
+      w.innerHTML =
+        '<div id="br-chat-panel" style="display:none;width:320px;height:400px;background:#0a0a0a;border:1px solid #222;border-radius:12px;overflow:hidden;flex-direction:column;margin-bottom:8px">' +
+          '<div style="padding:10px 14px;border-bottom:1px solid #191919;display:flex;align-items:center;gap:8px">' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:#888"></span>' +
+            '<span style="color:#d4d4d4;font-size:13px;font-weight:600">' + a.name + '</span>' +
+            '<span style="color:#444;font-size:11px">' + a.role + '</span>' +
+            '<span onclick="document.getElementById(\'br-chat-panel\').style.display=\'none\'" style="margin-left:auto;color:#555;cursor:pointer;font-size:16px">×</span>' +
+          '</div>' +
+          '<div id="br-chat-messages" style="flex:1;overflow-y:auto;padding:12px;min-height:280px"></div>' +
+          '<div style="padding:8px;border-top:1px solid #191919;display:flex;gap:6px">' +
+            '<input id="br-chat-input" type="text" placeholder="Ask ' + a.name + '..." style="flex:1;background:#111;border:1px solid #222;color:#d4d4d4;padding:8px 12px;border-radius:6px;font-size:13px;outline:none">' +
+            '<button id="br-chat-send" style="background:#1a1a1a;border:1px solid #333;color:#999;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px">Send</button>' +
+          '</div>' +
+        '</div>' +
+        '<button id="br-chat-toggle" style="width:48px;height:48px;border-radius:50%;background:#111;border:1px solid #333;color:#999;font-size:20px;cursor:pointer;float:right" title="Chat with ' + a.name + '">●</button>';
+      document.body.appendChild(w);
+
+      document.getElementById('br-chat-toggle').onclick = function() {
+        var panel = document.getElementById('br-chat-panel');
+        panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
+      };
+
+      var sendMsg = async function() {
+        var input = document.getElementById('br-chat-input');
+        var msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        var msgs = document.getElementById('br-chat-messages');
+        msgs.innerHTML += '<div style="padding:8px 12px;margin:4px 0;background:#111;border-radius:6px;color:#d4d4d4;font-size:13px">' + msg + '</div>';
+        msgs.scrollTop = msgs.scrollHeight;
+        var response = await BR.chat(msg, a.agent);
+        msgs.innerHTML += '<div style="padding:8px 12px;margin:4px 0;background:#0a0a0a;border:1px solid #191919;border-radius:6px;color:#888;font-size:13px">' + response + '</div>';
+        msgs.scrollTop = msgs.scrollHeight;
+      };
+
+      document.getElementById('br-chat-send').onclick = sendMsg;
+      document.getElementById('br-chat-input').onkeydown = function(e) { if (e.key === 'Enter') sendMsg(); };
     },
 
     // ── Analytics ──
@@ -226,11 +313,13 @@
 
     // ── Boot ──
     init() {
+      var a = BR.getAgent();
       BR.addNav();
+      BR.addChatWidget();
       BR.activateInputs();
       BR.activateLists();
       BR.activateEditing();
-      BR.toast(BR.appName + ' — online');
+      BR.toast(a.name + ' — ' + a.role + ' — online');
 
       // Track visit + page view
       fetch(BR.ollama + '/visit').catch(function(){});
