@@ -1,458 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700\&family=JetBrains+Mono:wght@400;500\&display=swap" rel="stylesheet"><style id="br-grayscale">:root{--bg:#000!important;--card:#060606!important;--border:#141414!important;--text:#f0f0f0!important;--muted:#555!important;--dim:#2a2a2a!important;--pink:#666!important;--amber:#777!important;--blue:#555!important;--violet:#444!important;--green:#777!important;--font:Space Grotesk,system-ui,sans-serif!important;--mono:JetBrains Mono,monospace!important}html,body{background:#000!important;color:#f0f0f0!important;font-family:Space Grotesk,system-ui,sans-serif!important}*{border-color:#191919!important}h1,h2,h3,h4,h5,h6,p,span,div,li,a,button,input,select,textarea,label{font-family:Space Grotesk,system-ui,sans-serif!important}code,pre,kbd{font-family:JetBrains Mono,monospace!important}a{color:#ccc!important}a:hover{color:#fff!important}button,input,select,textarea{background:#0a0a0a!important;color:#f0f0f0!important;border-color:#333!important}h1,h2,h3,h4,h5,h6{color:#fff!important}iframe,img,video,canvas{filter:none!important}svg:not(iframe svg){filter:grayscale(1)!important}</style>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoadWork — Business Operations Platform</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="mockup-base.css">
-  <style>
-    :root {
-      --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
-      --bg: #000;
-      --card: #0a0a0a;
-      --elevated: #111;
-      --hover: #181818;
-      --border: #1a1a1a;
-      --muted: #444;
-      --sub: #737373;
-      --text: #f5f5f5;
-      --white: #fff;
-      --sg: 'Space Grotesk', sans-serif;
-      --jb: 'JetBrains Mono', monospace;
-    }
-    body { background: var(--bg); color: var(--text); font-family: var(--sg); margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; font-size: 13px; }
-
-    /* ── Top Nav ── */
-    .topnav { height: 48px; background: var(--card); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 16px; gap: 16px; flex-shrink: 0; }
-    .topnav-logo { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-    .topnav-logo-bar { width: 18px; height: 3px; background: var(--g); border-radius: 2px; }
-    .topnav-sep { width: 1px; height: 24px; background: var(--border); }
-    .topnav-product { font-size: 13px; font-weight: 600; color: var(--sub); }
-    .topnav-tabs { display: flex; gap: 2px; margin-left: 12px; }
-    .topnav-tab { padding: 6px 12px; font-size: 12px; font-weight: 500; color: var(--sub); border-radius: 6px; cursor: pointer; }
-    .topnav-tab:hover { background: var(--hover); color: var(--text); }
-    .topnav-tab.active { background: var(--elevated); color: var(--text); }
-    .topnav-spacer { flex: 1; }
-    .topnav-search { display: flex; align-items: center; background: var(--elevated); border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; gap: 6px; width: 200px; }
-    .topnav-search input { border: none; background: transparent; outline: none; font-size: 12px; color: var(--text); font-family: var(--sg); width: 100%; }
-    .topnav-search input::placeholder { color: var(--muted); }
-    .topnav-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; cursor: pointer; }
-
-    /* ── App Shell ── */
-    .shell { display: flex; flex: 1; overflow: hidden; }
-
-    /* ── Sidebar ── */
-    .sidebar { width: 220px; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
-    .sidebar-header { padding: 16px; border-bottom: 1px solid var(--border); }
-    .sidebar-title { font-size: 12px; font-weight: 600; color: var(--sub); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .sidebar-section { padding: 8px; }
-    .sidebar-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 8px 8px 4px; }
-    .sidebar-item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; color: var(--sub); font-size: 13px; }
-    .sidebar-item:hover { background: var(--hover); color: var(--text); }
-    .sidebar-item.active { background: var(--elevated); color: var(--text); }
-    .sidebar-item-icon { width: 16px; text-align: center; font-size: 14px; }
-    .sidebar-item-badge { margin-left: auto; font-size: 11px; font-family: var(--jb); color: var(--muted); background: var(--elevated); padding: 1px 6px; border-radius: 4px; }
-    .sidebar-divider { height: 1px; background: var(--border); margin: 4px 8px; }
-    .sidebar-agent { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--border); margin-top: auto; }
-    .sidebar-agent-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g); }
-    .sidebar-agent-name { font-size: 12px; font-weight: 600; }
-    .sidebar-agent-role { font-size: 10px; color: var(--sub); }
-
-    /* ── Main Content ── */
-    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-    /* ── View Header ── */
-    .view-header { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .view-title { font-size: 18px; font-weight: 700; }
-    .view-count { font-size: 12px; color: var(--muted); font-family: var(--jb); background: var(--elevated); padding: 2px 8px; border-radius: 4px; }
-    .view-spacer { flex: 1; }
-    .view-actions { display: flex; gap: 6px; }
-    .view-btn { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid var(--border); background: var(--card); color: var(--text); cursor: pointer; font-family: var(--sg); display: flex; align-items: center; gap: 4px; }
-    .view-btn:hover { border-color: #333; background: var(--elevated); }
-    .view-btn-primary { background: var(--g); border: none; color: var(--white); }
-    .view-btn-primary:hover { opacity: 0.9; }
-
-    /* ── Filter Bar ── */
-    .filters { padding: 8px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 6px; flex-shrink: 0; }
-    .filter-chip { padding: 4px 10px; font-size: 11px; font-weight: 500; border-radius: 4px; border: 1px solid var(--border); background: var(--card); color: var(--sub); cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .filter-chip:hover { border-color: #333; color: var(--text); }
-    .filter-chip.active { background: var(--elevated); color: var(--text); border-color: #333; }
-
-    /* ── Table View ── */
-    .table-container { flex: 1; overflow: auto; padding: 0; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    thead { position: sticky; top: 0; z-index: 10; }
-    th { background: var(--card); border-bottom: 1px solid var(--border); padding: 8px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-    td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:hover td { background: var(--card); }
-    .task-title { font-weight: 500; cursor: pointer; }
-    .task-title:hover { color: var(--white); }
-
-    /* ── Status Badges ── */
-    .status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .status-todo .status-dot { background: var(--muted); }
-    .status-todo { background: rgba(255,255,255,0.05); color: var(--sub); }
-    .status-progress .status-dot { background: #4488FF; }
-    .status-progress { background: rgba(68,136,255,0.1); color: var(--text); }
-    .status-review .status-dot { background: #CC00AA; }
-    .status-review { background: rgba(204,0,170,0.1); color: var(--text); }
-    .status-done .status-dot { background: #00D4FF; }
-    .status-done { background: rgba(0,212,255,0.1); color: var(--text); }
-    .status-blocked .status-dot { background: #FF2255; }
-    .status-blocked { background: rgba(255,34,85,0.1); color: var(--text); }
-
-    /* ── Priority ── */
-    .priority { font-family: var(--jb); font-size: 11px; font-weight: 600; }
-    .priority-p0 { color: var(--text); }
-    .priority-p1 { color: var(--text); }
-    .priority-p2 { color: var(--sub); }
-    .priority-p3 { color: var(--muted); }
-
-    /* ── Assignee ── */
-    .assignee { display: flex; align-items: center; gap: 6px; }
-    .assignee-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; }
-    .assignee-name { font-size: 12px; color: var(--sub); }
-
-    /* ── Tags ── */
-    .tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.05); color: var(--sub); border: 1px solid var(--border); margin-right: 3px; }
-
-    /* ── Progress Bar ── */
-    .progress-track { width: 80px; height: 4px; background: var(--elevated); border-radius: 2px; overflow: hidden; }
-    .progress-fill { height: 100%; background: var(--g); border-radius: 2px; }
-
-    /* ── Date ── */
-    .date { font-size: 12px; color: var(--muted); font-family: var(--jb); }
-    .date-overdue { color: var(--text); }
-
-    /* ── Right Panel (Detail) ── */
-    .detail-panel { width: 360px; background: var(--card); border-left: 1px solid var(--border); flex-shrink: 0; overflow-y: auto; display: flex; flex-direction: column; }
-    .detail-header { padding: 16px; border-bottom: 1px solid var(--border); }
-    .detail-close { font-size: 18px; color: var(--muted); cursor: pointer; float: right; }
-    .detail-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; padding-right: 24px; }
-    .detail-id { font-size: 11px; color: var(--muted); font-family: var(--jb); }
-    .detail-body { padding: 16px; flex: 1; }
-    .detail-section { margin-bottom: 16px; }
-    .detail-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-    .detail-value { font-size: 13px; }
-    .detail-desc { font-size: 13px; color: var(--sub); line-height: 1.6; }
-    .detail-meta-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); }
-    .detail-meta-key { font-size: 12px; color: var(--muted); }
-    .detail-meta-val { font-size: 12px; font-weight: 500; }
-    .detail-activity { padding: 16px; border-top: 1px solid var(--border); }
-    .detail-activity-title { font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 10px; }
-    .activity-item { display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px; }
-    .activity-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); margin-top: 5px; flex-shrink: 0; }
-    .activity-text { color: var(--sub); }
-    .activity-text strong { color: var(--text); font-weight: 600; }
-    .activity-time { font-size: 10px; color: var(--muted); font-family: var(--jb); margin-top: 2px; }
-
-    /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 3px; height: 3px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  </style>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RoadWork — Task Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--card:#060606;--border:#141414;--text:#f0f0f0;--muted:#555;--dim:#2a2a2a}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;min-height:100vh}
+.header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.header h1{font-size:18px;font-weight:700}
+.header .sub{color:var(--muted);font-size:12px}
+.header .counts{margin-left:auto;display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.header .counts span{padding:3px 8px;border:1px solid var(--border);border-radius:4px}
+.add-bar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.add-bar input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:6px;font-size:14px;outline:none;font-family:inherit}
+.add-bar select{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:6px;font-size:12px;font-family:inherit}
+.add-bar button{background:#111;border:1px solid #222;color:#ccc;padding:10px 20px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px}
+.add-bar button:hover{background:#1a1a1a;color:#fff}
+.board{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;min-height:calc(100vh - 110px)}
+.column{border-right:1px solid var(--border);padding:0}
+.column:last-child{border-right:none}
+.col-header{padding:10px 16px;border-bottom:1px solid var(--border);font-size:11px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.col-header .count{background:var(--card);border:1px solid var(--border);padding:1px 6px;border-radius:3px;font-size:10px}
+.task{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.task:hover{background:#080808}
+.task-text{font-size:14px;line-height:1.5;margin-bottom:6px}
+.task-meta{display:flex;gap:8px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.task-meta .priority-high{color:#999}
+.task-meta .priority-normal{color:var(--muted)}
+.task-meta .priority-low{color:var(--dim)}
+.task-actions{display:flex;gap:6px;margin-top:8px}
+.task-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;font-family:'JetBrains Mono',monospace}
+.task-btn:hover{color:var(--text);border-color:#333}
+.empty-col{padding:20px 16px;color:var(--dim);font-size:13px;text-align:center}
+</style>
 </head>
 <body>
-
-<!-- Top Nav -->
-<div class="topnav">
-  <div class="topnav-logo"><div class="topnav-logo-bar"></div>BlackRoad</div>
-  <div class="topnav-sep"></div>
-  <div class="topnav-product">RoadWork</div>
-  <div class="topnav-tabs">
-    <div class="topnav-tab active">My Work</div>
-    <div class="topnav-tab">Projects</div>
-    <div class="topnav-tab">Agents</div>
-    <div class="topnav-tab">Reports</div>
-  </div>
-  <div class="topnav-spacer"></div>
-  <div class="topnav-search"><span style="color:var(--muted)">&#x2315;</span><input placeholder="Search tasks..." /></div>
-  <div class="topnav-avatar">AA</div>
+<div class="header">
+  <h1>RoadWork</h1>
+  <span class="sub">task manager</span>
+  <div class="counts" id="counts"><span>todo: 0</span><span>doing: 0</span><span>done: 0</span></div>
 </div>
-
-<!-- Gradient bar -->
-<div style="height:2px;background:var(--g)"></div>
-
-<!-- App Shell -->
-<div class="shell">
-
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Workspace</div>
-      <div class="sidebar-item active"><span class="sidebar-item-icon">&#9776;</span>All Tasks<span class="sidebar-item-badge">2,563</span></div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#9733;</span>My Tasks<span class="sidebar-item-badge">14</span></div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#8987;</span>Due Soon<span class="sidebar-item-badge">7</span></div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#9888;</span>Blocked<span class="sidebar-item-badge">3</span></div>
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Priority Projects</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon" style="font-size:10px">P0</span>First Real User</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon" style="font-size:10px">P1</span>Fix Products</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon" style="font-size:10px">P2</span>SEO / Discovery</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon" style="font-size:10px">P3</span>Infra Maintenance</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon" style="font-size:10px">P4</span>Truth / Credibility</div>
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Views</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#9638;</span>Board</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#9776;</span>List</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128200;</span>Timeline</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128202;</span>Dashboard</div>
-    </div>
-    <div class="sidebar-divider"></div>
-    <div class="sidebar-section">
-      <div class="sidebar-label">Products</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#127968;</span>BlackRoad OS</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128172;</span>RoadChat</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128270;</span>RoadView</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128187;</span>RoadCode</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#128274;</span>CarKeys</div>
-      <div class="sidebar-item"><span class="sidebar-item-icon">&#127891;</span>Roadie</div>
-    </div>
-
-    <!-- Agent status -->
-    <div class="sidebar-agent">
-      <div class="sidebar-agent-dot"></div>
-      <div>
-        <div class="sidebar-agent-name">Drift</div>
-        <div class="sidebar-agent-role">Operations Agent</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="main">
-
-    <!-- View Header -->
-    <div class="view-header">
-      <div class="view-title">All Tasks</div>
-      <div class="view-count">2,563</div>
-      <div class="view-spacer"></div>
-      <div class="view-actions">
-        <div class="view-btn">&#8981; Filter</div>
-        <div class="view-btn">&#8693; Sort</div>
-        <div class="view-btn">&#8942; Group</div>
-        <div class="view-btn view-btn-primary">+ New Task</div>
-      </div>
-    </div>
-
-    <!-- Filters -->
-    <div class="filters">
-      <div class="filter-chip active">All</div>
-      <div class="filter-chip">To Do</div>
-      <div class="filter-chip">In Progress</div>
-      <div class="filter-chip">Review</div>
-      <div class="filter-chip">Done</div>
-      <div class="filter-chip">Blocked</div>
-      <div class="filter-chip">&#9660; Priority</div>
-      <div class="filter-chip">&#9660; Assignee</div>
-      <div class="filter-chip">&#9660; Product</div>
-    </div>
-
-    <!-- Table -->
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:40px"></th>
-            <th>Task</th>
-            <th style="width:110px">Status</th>
-            <th style="width:50px">Priority</th>
-            <th style="width:140px">Assignee</th>
-            <th style="width:100px">Product</th>
-            <th style="width:90px">Progress</th>
-            <th style="width:90px">Due</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Deploy security worker to blackroad.io root</span><br><span class="tag">security</span><span class="tag">infra</span></td>
-            <td><span class="status status-progress"><span class="status-dot"></span>In Progress</span></td>
-            <td><span class="priority priority-p0">P0</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">NX</div><span class="assignee-name">Nyx</span></div></td>
-            <td><span class="tag">BlackRoad OS</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:65%"></div></div></td>
-            <td><span class="date date-overdue">Apr 11</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Stripe checkout flow — first paying user</span><br><span class="tag">revenue</span><span class="tag">p0</span></td>
-            <td><span class="status status-blocked"><span class="status-dot"></span>Blocked</span></td>
-            <td><span class="priority priority-p0">P0</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">VL</div><span class="assignee-name">Valeria</span></div></td>
-            <td><span class="tag">RoadWork</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:30%"></div></div></td>
-            <td><span class="date date-overdue">Apr 10</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Clone all 27 Roadie voices locally via Chatterbox</span><br><span class="tag">ai</span><span class="tag">voice</span></td>
-            <td><span class="status status-progress"><span class="status-dot"></span>In Progress</span></td>
-            <td><span class="priority priority-p1">P1</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">AR</div><span class="assignee-name">Aria</span></div></td>
-            <td><span class="tag">RoadTrip</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:10%"></div></div></td>
-            <td><span class="date">Apr 12</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Fix chat.blackroad.io real-time WebSocket</span><br><span class="tag">product</span><span class="tag">p1</span></td>
-            <td><span class="status status-todo"><span class="status-dot"></span>To Do</span></td>
-            <td><span class="priority priority-p1">P1</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">EC</div><span class="assignee-name">Echo</span></div></td>
-            <td><span class="tag">RoadChat</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date">Apr 14</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Install Hailo-8 M.2 in Pi 5</span><br><span class="tag">hardware</span><span class="tag">ai</span></td>
-            <td><span class="status status-todo"><span class="status-dot"></span>To Do</span></td>
-            <td><span class="priority priority-p1">P1</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">TR</div><span class="assignee-name">Terra</span></div></td>
-            <td><span class="tag">Hardware</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date">Apr 15</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Jailbreak Nintendo Switch v1 — RCM exploit</span><br><span class="tag">hardware</span><span class="tag">hack</span></td>
-            <td><span class="status status-todo"><span class="status-dot"></span>To Do</span></td>
-            <td><span class="priority priority-p2">P2</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">VX</div><span class="assignee-name">Vex</span></div></td>
-            <td><span class="tag">Hardware</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date">Apr 16</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Brand verifier — fix remaining 77 non-compliant files</span><br><span class="tag">brand</span><span class="tag">design</span></td>
-            <td><span class="status status-progress"><span class="status-dot"></span>In Progress</span></td>
-            <td><span class="priority priority-p2">P2</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">MS</div><span class="assignee-name">Muse</span></div></td>
-            <td><span class="tag">Brand</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:22%"></div></div></td>
-            <td><span class="date">Apr 13</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Google Search Console — submit sitemaps for all domains</span><br><span class="tag">seo</span><span class="tag">p2</span></td>
-            <td><span class="status status-todo"><span class="status-dot"></span>To Do</span></td>
-            <td><span class="priority priority-p2">P2</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">BC</div><span class="assignee-name">Beacon</span></div></td>
-            <td><span class="tag">SEO</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date">Apr 17</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Fill remaining 24 BlackRoadOSInc directory sections</span><br><span class="tag">docs</span><span class="tag">index</span></td>
-            <td><span class="status status-progress"><span class="status-dot"></span>In Progress</span></td>
-            <td><span class="priority priority-p3">P3</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">RN</div><span class="assignee-name">Rune</span></div></td>
-            <td><span class="tag">Corporate</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:33%"></div></div></td>
-            <td><span class="date">Apr 20</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Delaware franchise tax payment (~$707)</span><br><span class="tag">compliance</span><span class="tag">overdue</span></td>
-            <td><span class="status status-blocked"><span class="status-dot"></span>Blocked</span></td>
-            <td><span class="priority priority-p1">P1</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">AA</div><span class="assignee-name">Alexa</span></div></td>
-            <td><span class="tag">Corporate</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date date-overdue">Overdue</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Configure Meshtastic MQTT bridge to fleet</span><br><span class="tag">mesh</span><span class="tag">lora</span></td>
-            <td><span class="status status-todo"><span class="status-dot"></span>To Do</span></td>
-            <td><span class="priority priority-p3">P3</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">EC</div><span class="assignee-name">Echo</span></div></td>
-            <td><span class="tag">Network</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:0%"></div></div></td>
-            <td><span class="date">Apr 18</span></td>
-          </tr>
-          <tr>
-            <td><input type="checkbox" /></td>
-            <td><span class="task-title">Inject voice players into live product pages</span><br><span class="tag">voice</span><span class="tag">ux</span></td>
-            <td><span class="status status-review"><span class="status-dot"></span>Review</span></td>
-            <td><span class="priority priority-p2">P2</span></td>
-            <td><div class="assignee"><div class="assignee-avatar">AR</div><span class="assignee-name">Aria</span></div></td>
-            <td><span class="tag">All Products</span></td>
-            <td><div class="progress-track"><div class="progress-fill" style="width:50%"></div></div></td>
-            <td><span class="date">Apr 14</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Detail Panel -->
-  <div class="detail-panel">
-    <div class="detail-header">
-      <span class="detail-close">&#10005;</span>
-      <div class="detail-id">WORK-001</div>
-      <div class="detail-title">Deploy security worker to blackroad.io root</div>
-    </div>
-    <div class="detail-body">
-      <div class="detail-section">
-        <div class="detail-label">Description</div>
-        <div class="detail-desc">The blackroad-security worker is deployed and protecting 13 domains. The blackroad.io root domain needs a route fix in the Cloudflare dashboard to wire it up. The worker code is ready, the route conflicts with the existing blackroad-io worker.</div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-meta-row"><span class="detail-meta-key">Status</span><span class="status status-progress"><span class="status-dot"></span>In Progress</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Priority</span><span class="priority priority-p0">P0</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Assignee</span><span class="detail-meta-val">Nyx</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Product</span><span class="detail-meta-val">BlackRoad OS</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Due</span><span class="detail-meta-val">Apr 11, 2026</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Created</span><span class="detail-meta-val">Apr 10, 2026</span></div>
-        <div class="detail-meta-row"><span class="detail-meta-key">Labels</span><span class="detail-meta-val"><span class="tag">security</span><span class="tag">infra</span></span></div>
-      </div>
-    </div>
-    <div class="detail-activity">
-      <div class="detail-activity-title">Activity</div>
-      <div class="activity-item">
-        <div class="activity-dot" style="background:var(--g)"></div>
-        <div>
-          <div class="activity-text"><strong>Nyx</strong> deployed security worker to 13 domains</div>
-          <div class="activity-time">2 hours ago</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-dot"></div>
-        <div>
-          <div class="activity-text"><strong>Nyx</strong> injected middleware into blackroad-io and lucidia-sites workers</div>
-          <div class="activity-time">2 hours ago</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-dot"></div>
-        <div>
-          <div class="activity-text"><strong>Atlas</strong> verified honeypot blocking on all protected domains</div>
-          <div class="activity-time">1 hour ago</div>
-        </div>
-      </div>
-      <div class="activity-item">
-        <div class="activity-dot"></div>
-        <div>
-          <div class="activity-text"><strong>Pulse</strong> detected 106,244 threats on Apr 10. Flagged for escalation.</div>
-          <div class="activity-time">45 min ago</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div class="add-bar">
+  <input type="text" id="task-input" placeholder="Add a task...">
+  <select id="task-priority"><option value="normal">normal</option><option value="high">high</option><option value="low">low</option></select>
+  <button id="add-btn">Add</button>
 </div>
+<div class="board">
+  <div class="column"><div class="col-header">Todo <span class="count" id="count-todo">0</span></div><div id="col-todo"></div></div>
+  <div class="column"><div class="col-header">Doing <span class="count" id="count-doing">0</span></div><div id="col-doing"></div></div>
+  <div class="column"><div class="col-header">Done <span class="count" id="count-done">0</span></div><div id="col-done"></div></div>
+</div>
+<script>
+var API='http://192.168.4.113:8089';
+fetch('https://network-scheduler.blackroad.workers.dev/visit').catch(function(){});
 
-<script src="../js/blackroad-app.js"></script></body>
+document.getElementById('add-btn').onclick=function(){
+  var text=document.getElementById('task-input').value.trim();
+  if(!text)return;
+  var priority=document.getElementById('task-priority').value;
+  fetch(API+'/roadwork/task',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,status:'todo',priority:priority})})
+  .then(function(){document.getElementById('task-input').value='';loadTasks()})
+  .catch(function(){
+    var tasks=JSON.parse(localStorage.getItem('rw.tasks')||'[]');
+    tasks.unshift({id:Date.now(),text:text,status:'todo',priority:priority,created:Date.now()/1000});
+    localStorage.setItem('rw.tasks',JSON.stringify(tasks));
+    document.getElementById('task-input').value='';
+    renderTasks(tasks);
+  });
+};
+document.getElementById('task-input').onkeydown=function(e){if(e.key==='Enter')document.getElementById('add-btn').click()};
+
+function loadTasks(){
+  fetch(API+'/roadwork/tasks').then(function(r){return r.json()}).then(function(d){
+    if(d.tasks)renderTasks(d.tasks);
+    if(d.counts)updateCounts(d.counts);
+  }).catch(function(){
+    var local=JSON.parse(localStorage.getItem('rw.tasks')||'[]');
+    renderTasks(local);
+  });
+}
+
+function renderTasks(tasks){
+  var cols={todo:[],doing:[],done:[]};
+  tasks.forEach(function(t){(cols[t.status]||cols.todo).push(t)});
+  ['todo','doing','done'].forEach(function(status){
+    var el=document.getElementById('col-'+status);
+    var countEl=document.getElementById('count-'+status);
+    countEl.textContent=cols[status].length;
+    if(!cols[status].length){el.innerHTML='<div class="empty-col">No tasks</div>';return}
+    el.innerHTML=cols[status].map(function(t){
+      var next=status==='todo'?'doing':status==='doing'?'done':'todo';
+      return '<div class="task"><div class="task-text">'+escapeHtml(t.text)+'</div><div class="task-meta"><span class="priority-'+t.priority+'">'+(t.priority||'normal')+'</span></div><div class="task-actions"><button class="task-btn" onclick="moveTask(\''+t.id+'\',\''+next+'\')">→ '+next+'</button><button class="task-btn" onclick="deleteTask(\''+t.id+'\')">×</button></div></div>';
+    }).join('');
+  });
+  document.getElementById('counts').innerHTML='<span>todo: '+cols.todo.length+'</span><span>doing: '+cols.doing.length+'</span><span>done: '+cols.done.length+'</span>';
+}
+
+function moveTask(id,status){
+  fetch(API+'/items/roadwork/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:status})})
+  .then(function(){loadTasks()}).catch(function(){});
+}
+function deleteTask(id){
+  fetch(API+'/items/roadwork/'+id,{method:'DELETE'}).then(function(){loadTasks()}).catch(function(){});
+}
+function updateCounts(c){document.getElementById('counts').innerHTML='<span>todo: '+c.todo+'</span><span>doing: '+c.doing+'</span><span>done: '+c.done+'</span>'}
+function escapeHtml(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML}
+loadTasks();
+</script>
+<script src="blackroad-app.js"></script>
+</body>
 </html>
