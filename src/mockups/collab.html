@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad Collab — Real-Time</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#000;--card:#060606;--border:#141414;--text:#f0f0f0;--muted:#555}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.header{padding:8px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.header h1{font-size:16px;font-weight:700}.header .room{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace}
+.header .users{margin-left:auto;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.header .dot{width:6px;height:6px;border-radius:50%;background:#888;display:inline-block;margin-right:4px}
+.main{flex:1;display:flex;overflow:hidden}
+.editor-panel{flex:1;display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.editor-toolbar{padding:6px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;font-size:11px;color:var(--muted);align-items:center}
+.editor-toolbar .room-select{background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:4px;font-size:11px}
+.editor{flex:1;padding:16px;font-size:15px;line-height:1.8;outline:none;overflow-y:auto;position:relative}
+.editor:empty:before{content:'Start typing... everyone in this room sees your changes in real-time.';color:#333}
+.canvas-panel{flex:1;position:relative;border-right:1px solid var(--border)}
+.canvas-panel canvas{width:100%;height:100%;cursor:crosshair}
+.canvas-tools{position:absolute;bottom:8px;left:8px;display:flex;gap:4px}
+.canvas-tools button{width:28px;height:28px;border-radius:4px;background:var(--card);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:10px}
+.canvas-tools button:hover{border-color:#333;color:var(--text)}
+.sidebar{width:280px;display:flex;flex-direction:column;flex-shrink:0}
+.user-list{padding:8px 12px;border-bottom:1px solid var(--border)}
+.user-list-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-family:'JetBrains Mono',monospace}
+.user-item{padding:3px 0;font-size:12px;display:flex;align-items:center;gap:6px}
+.user-item .dot{width:5px;height:5px;border-radius:50%;background:#888}
+.agent-item .dot{background:#555}
+.chat-messages{flex:1;overflow-y:auto;padding:8px 12px}
+.chat-msg{padding:4px 0;font-size:12px;border-bottom:1px solid var(--border)}
+.chat-msg .name{font-weight:600;color:#999}.chat-msg .text{color:#bbb}
+.chat-msg .time{font-size:9px;color:var(--muted);font-family:'JetBrains Mono',monospace;float:right}
+.chat-input{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:6px}
+.chat-input input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:4px;font-size:12px;outline:none;font-family:inherit}
+.chat-input button{background:#111;border:1px solid #222;color:#ccc;padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+.cursor-label{position:absolute;font-size:10px;color:#888;font-family:'JetBrains Mono',monospace;pointer-events:none;transform:translate(10px,-5px)}
+.tab-bar{display:flex;border-bottom:1px solid var(--border)}
+.tab{padding:8px 16px;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.tab:hover{color:var(--text)}.tab.active{color:var(--text);border-bottom-color:#555}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Collab</h1>
+  <span class="room" id="room-name">#general</span>
+  <span class="users"><span class="dot"></span><span id="user-count">0</span> online</span>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showPanel('editor',this)">Document</div>
+  <div class="tab" onclick="showPanel('canvas',this)">Whiteboard</div>
+</div>
+
+<div class="main">
+  <div class="editor-panel" id="panel-editor">
+    <div class="editor-toolbar">
+      <span>Room:</span>
+      <select class="room-select" id="room-select" onchange="joinRoom(this.value)">
+        <option value="general">#general</option>
+        <option value="engineering">#engineering</option>
+        <option value="design">#design</option>
+        <option value="brainstorm">#brainstorm</option>
+        <option value="math">#math</option>
+      </select>
+      <span style="margin-left:auto" id="edit-status">disconnected</span>
+    </div>
+    <div class="editor" id="editor" contenteditable="true"></div>
+  </div>
+
+  <div class="canvas-panel" id="panel-canvas" style="display:none">
+    <canvas id="draw-canvas"></canvas>
+    <div class="canvas-tools">
+      <button onclick="drawWidth=2">·</button>
+      <button onclick="drawWidth=5">●</button>
+      <button onclick="drawWidth=10">⬤</button>
+      <button onclick="clearDraw()">✕</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="user-list">
+      <div class="user-list-title">Users</div>
+      <div id="users"></div>
+      <div class="user-list-title" style="margin-top:8px">Agents</div>
+      <div id="agents"></div>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input">
+      <input id="chat-input" placeholder="Message..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var WS_URL = 'ws://192.168.4.113:8090';
+var ws = null;
+var myName = 'user-' + Math.random().toString(36).slice(2,6);
+var currentRoom = 'general';
+var drawWidth = 2;
+var drawing = false;
+var drawPoints = [];
+
+function connect() {
+  ws = new WebSocket(WS_URL);
+  ws.onopen = function() {
+    document.getElementById('edit-status').textContent = 'connected';
+    ws.send(JSON.stringify({action:'join', room:currentRoom, name:myName}));
+  };
+  ws.onmessage = function(e) {
+    var msg = JSON.parse(e.data);
+    switch(msg.action) {
+      case 'room_state':
+        document.getElementById('user-count').textContent = msg.user_count;
+        document.getElementById('users').innerHTML = msg.users.map(function(u){return '<div class="user-item"><span class="dot"></span>'+u+'</div>'}).join('');
+        document.getElementById('agents').innerHTML = msg.agents.slice(0,10).map(function(a){return '<div class="user-item agent-item"><span class="dot"></span>'+a+'</div>'}).join('');
+        if(msg.document) document.getElementById('editor').innerText = msg.document;
+        msg.chat.forEach(function(c){addChatMsg(c.user, c.text, c.ts)});
+        break;
+      case 'user_joined':
+        document.getElementById('user-count').textContent = msg.user_count;
+        addChatMsg('system', msg.user + ' joined', Date.now()/1000);
+        break;
+      case 'user_left':
+        document.getElementById('user-count').textContent = msg.user_count;
+        addChatMsg('system', msg.user + ' left', Date.now()/1000);
+        break;
+      case 'edit':
+        var editor = document.getElementById('editor');
+        if(msg.content !== editor.innerText) editor.innerText = msg.content;
+        break;
+      case 'chat':
+        addChatMsg(msg.user, msg.text, msg.ts);
+        break;
+      case 'cursor':
+        showCursor(msg.user, msg.x, msg.y);
+        break;
+      case 'draw':
+        drawRemote(msg.points, msg.color, msg.width);
+        break;
+    }
+  };
+  ws.onclose = function() {
+    document.getElementById('edit-status').textContent = 'reconnecting...';
+    setTimeout(connect, 3000);
+  };
+}
+
+function joinRoom(room) {
+  currentRoom = room;
+  document.getElementById('room-name').textContent = '#' + room;
+  document.getElementById('editor').innerText = '';
+  document.getElementById('chat-messages').innerHTML = '';
+  if(ws && ws.readyState === 1) ws.send(JSON.stringify({action:'join', room:room, name:myName}));
+}
+
+// Editor sync
+document.getElementById('editor').addEventListener('input', function() {
+  if(ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({action:'edit', content:this.innerText}));
+  }
+});
+
+// Cursor tracking
+document.getElementById('editor').addEventListener('mousemove', function(e) {
+  if(ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({action:'cursor', x:e.offsetX, y:e.offsetY}));
+  }
+});
+
+function showCursor(user, x, y) {
+  var id = 'cursor-' + user;
+  var el = document.getElementById(id);
+  if(!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'cursor-label';
+    document.getElementById('editor').appendChild(el);
+  }
+  el.textContent = user;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+}
+
+// Chat
+function sendChat() {
+  var input = document.getElementById('chat-input');
+  var text = input.value.trim();
+  if(!text || !ws) return;
+  ws.send(JSON.stringify({action:'chat', text:text}));
+  input.value = '';
+}
+
+function addChatMsg(user, text, ts) {
+  var el = document.getElementById('chat-messages');
+  var time = new Date(ts*1000).toLocaleTimeString().replace(/:\d{2} /,' ');
+  var div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = '<span class="time">' + time + '</span><span class="name">' + user + '</span> <span class="text">' + text + '</span>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+// Whiteboard drawing
+var canvas, ctx;
+function initCanvas() {
+  canvas = document.getElementById('draw-canvas');
+  ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  canvas.addEventListener('mousedown', function(e) { drawing = true; drawPoints = [{x:e.offsetX,y:e.offsetY}]; });
+  canvas.addEventListener('mousemove', function(e) {
+    if(!drawing) return;
+    drawPoints.push({x:e.offsetX,y:e.offsetY});
+    ctx.strokeStyle = '#d4d4d4';
+    ctx.lineWidth = drawWidth;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    var p = drawPoints;
+    ctx.moveTo(p[p.length-2].x, p[p.length-2].y);
+    ctx.lineTo(p[p.length-1].x, p[p.length-1].y);
+    ctx.stroke();
+  });
+  canvas.addEventListener('mouseup', function() {
+    drawing = false;
+    if(ws && ws.readyState === 1 && drawPoints.length > 1) {
+      ws.send(JSON.stringify({action:'draw', points:drawPoints, color:'#d4d4d4', width:drawWidth}));
+    }
+    drawPoints = [];
+  });
+}
+
+function drawRemote(points, color, width) {
+  if(!ctx || points.length < 2) return;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for(var i=1; i<points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.stroke();
+}
+
+function clearDraw() { if(ctx) ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+function showPanel(panel, tab) {
+  document.getElementById('panel-editor').style.display = panel==='editor' ? 'flex' : 'none';
+  document.getElementById('panel-canvas').style.display = panel==='canvas' ? 'block' : 'none';
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active')});
+  tab.classList.add('active');
+  if(panel==='canvas') initCanvas();
+}
+
+// Ping keepalive
+setInterval(function() { if(ws && ws.readyState === 1) ws.send(JSON.stringify({action:'ping'})); }, 30000);
+
+// Track visit
+fetch('https://network-scheduler.blackroad.workers.dev/visit').catch(function(){});
+
+connect();
+</script>
+<script src="../js/blackroad-app.js"></script>
+</body>
+</html>
