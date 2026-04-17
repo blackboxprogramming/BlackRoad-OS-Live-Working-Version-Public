@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BlackRoad Network — Live Broadcast</title>
+<meta name="description" content="BlackRoad Network live broadcast. Curated science, math, and engineering content. One channel at a time. Scheduled rotation.">
+<meta property="og:title" content="BlackRoad Network — Live Broadcast">
+<meta property="og:description" content="Scheduled broadcast. Science, math, engineering. One channel at a time.">
+<meta property="og:url" content="https://os.blackroad.io/live">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/road-logo.png">
+<link rel="canonical" href="https://os.blackroad.io/live">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ═══════════════════════════════════════
+     STYLES.CSS — BlackRoad Network Live
+     ═══════════════════════════════════════ -->
+<style>
+:root {
+  --bg: #000; --card: #080808; --border: #191919;
+  --text: #d4d4d4; --muted: #777; --dim: #3a3a3a;
+  --pink: #888; --amber: #999; --blue: #777;
+  --violet: #666; --green: #999;
+  --font: 'Space Grotesk', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--bg); }
+iframe, img, video { filter: none !important; }
+.player-wrap iframe { filter: none !important; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font); min-height: 100vh;
+  padding-bottom: 36px;
+}
+
+/* ── Nav ── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; height: 48px;
+  background: rgba(0,0,0,0.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-brand { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.nav-dots { display: flex; gap: 3px; }
+.nav-dots span { width: 6px; height: 6px; border-radius: 50%; }
+.nav-title { color: var(--text); font-weight: 700; font-size: 15px; }
+.nav-sep { color: var(--dim); font-size: 14px; }
+.nav-page { color: var(--muted); font-size: 14px; }
+.nav-links { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none; font-size: 12px;
+  padding: 6px 10px; border-radius: 6px; white-space: nowrap;
+  transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: #111; }
+.nav-links a.active { color: var(--text); background: #1a1a1a; }
+
+/* ── Broadcast Bar ── */
+.broadcast-bar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 20px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim);
+}
+.live-badge { display: flex; align-items: center; gap: 6px; color: var(--text); }
+.live-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #999;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+.visitor-count { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: 0.05em; }
+.broadcast-clock { margin-left: auto; color: var(--muted); font-size: 13px; }
+
+/* ── Shell ── */
+.shell { max-width: 1400px; margin: 0 auto; padding: 0 16px; }
+
+/* ── Live Layout: 3 columns ── */
+.live-layout { display: grid; grid-template-columns: 240px 1fr 240px; gap: 12px; padding: 16px 0 0; }
+@media (max-width: 1000px) { .live-layout { grid-template-columns: 1fr; } .agent-sidebar { display: none; } }
+
+/* ── Agent Sidebars ── */
+.agent-sidebar {
+  border: 1px solid var(--border); border-radius: 8px; background: #050505;
+  display: flex; flex-direction: column; max-height: calc(100vh - 140px); overflow: hidden;
+}
+.sidebar-header {
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 9px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--dim); flex-shrink: 0;
+}
+.sidebar-feed {
+  flex: 1; overflow-y: auto; padding: 8px 0;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sidebar-feed::-webkit-scrollbar { width: 3px; }
+.sidebar-feed::-webkit-scrollbar-thumb { background: var(--border); }
+.agent-msg {
+  padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.03);
+  transition: background 0.3s;
+}
+.agent-msg:hover { background: rgba(255,255,255,0.02); }
+.agent-msg-header { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.agent-msg-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.agent-msg-name { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--text); }
+.agent-msg-time { font-family: var(--mono); font-size: 8px; color: var(--dim); margin-left: auto; }
+.agent-msg-text { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.agent-msg.fresh { animation: fadeInMsg 0.5s ease; }
+@keyframes fadeInMsg { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Hero ── */
+.hero { padding: 4px 0 12px; }
+.player-wrap {
+  position: relative; width: 100%; aspect-ratio: 16/9;
+  background: #050505; border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+}
+.player-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+.autoplay-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.88); cursor: pointer;
+}
+.autoplay-overlay.hidden { display: none; }
+.autoplay-overlay button {
+  background: none; border: 1px solid var(--dim); border-radius: 8px;
+  color: var(--text); font-family: var(--font); font-size: 16px;
+  font-weight: 600; padding: 16px 32px; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  transition: border-color .2s;
+}
+.autoplay-overlay button:hover { border-color: var(--text); }
+#native-screen {
+  position: absolute; inset: 0; background: #050505;
+  display: none; align-items: center; justify-content: center;
+  font-family: var(--mono); color: var(--muted); text-align: center;
+  padding: 40px; z-index: 5;
+}
+#native-screen pre { font-size: 12px; line-height: 1.8; color: var(--muted); }
+.now-playing {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 14px 0 0;
+}
+.channel-indicator { display: flex; align-items: center; gap: 8px; }
+.channel-dot { width: 10px; height: 10px; border-radius: 50%; background: #999; }
+.channel-label { font-weight: 700; font-size: 16px; }
+.program-title { font-size: 14px; color: var(--muted); }
+.program-category {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 3px 10px; border: 1px solid var(--border);
+  border-radius: 4px; color: var(--dim);
+}
+.source-mode {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 3px 8px; border-radius: 4px;
+  background: rgba(255,255,255,0.04); color: var(--dim);
+}
+.source-mode:empty { display: none; }
+.source-reason {
+  font-family: var(--mono); font-size: 9px; color: var(--dim);
+  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.source-reason:empty { display: none; }
+.manual-countdown {
+  font-family: var(--mono); font-size: 11px; color: var(--green);
+  letter-spacing: 0.05em;
+}
+.manual-countdown:empty { display: none; }
+.skip-btn {
+  margin-left: auto; background: none; border: 1px solid var(--border);
+  border-radius: 6px; color: var(--dim); font-family: var(--mono);
+  font-size: 11px; padding: 5px 14px; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  transition: color .15s, border-color .15s;
+}
+.skip-btn:hover { color: var(--text); border-color: var(--dim); }
+
+/* ── Agent Intro Overlay ── */
+.agent-intro {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 8;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.92));
+  font-family: var(--font); font-size: 14px; color: var(--text);
+  transition: opacity 0.6s, transform 0.6s;
+  opacity: 0; transform: translateY(8px);
+  pointer-events: none;
+}
+.agent-intro.visible { opacity: 1; transform: translateY(0); }
+.agent-intro.hidden { opacity: 0; transform: translateY(8px); }
+.agent-intro-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.agent-intro-name { font-weight: 700; white-space: nowrap; }
+.agent-intro-text { color: var(--muted); font-size: 13px; }
+
+/* ── Daypart Label ── */
+.daypart-label {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.12em; padding: 3px 10px; border-radius: 4px;
+  background: var(--daypart-accent, transparent); color: var(--dim);
+}
+.daypart-label:empty { display: none; }
+
+/* ── Next Preview ── */
+.next-block {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0 0; font-size: 12px; color: var(--dim);
+}
+.next-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--dim); padding: 2px 6px;
+  border: 1px solid var(--border); border-radius: 3px;
+}
+.next-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.next-channel { font-weight: 600; color: var(--muted); white-space: nowrap; }
+.next-title { color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 400px; }
+.next-agent { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-left: auto; }
+
+/* ── Guide Agent Column ── */
+.guide-agent {
+  font-family: var(--mono); font-size: 10px; color: var(--dim); margin-left: auto;
+  min-width: 80px; text-align: right;
+}
+
+/* ── Infographic Videos ── */
+.video-section { padding: 0 0 20px; }
+.video-card {
+  border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;
+  background: var(--card);
+}
+.video-card .video-meta {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.infographic-player {
+  width: 100%; border-radius: 6px; background: #000;
+}
+
+/* ── Podcasts ── */
+.podcast-section { padding: 0 0 20px; }
+.podcast-grid { display: flex; flex-direction: column; gap: 8px; }
+.podcast-card {
+  border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px;
+  background: var(--card);
+}
+.podcast-meta {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+}
+.podcast-dot { width: 8px; height: 8px; border-radius: 50%; background: #999; flex-shrink: 0; }
+.podcast-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.podcast-duration {
+  font-family: var(--mono); font-size: 11px; color: var(--dim);
+  margin-left: auto; white-space: nowrap;
+}
+.podcast-player {
+  width: 100%; height: 36px; filter: grayscale(1) brightness(0.8) contrast(1.2);
+}
+
+/* ── Gallery Grid ── */
+.gallery-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+}
+.gallery-grid img {
+  width: 100%; border-radius: 6px; border: 1px solid var(--border);
+  cursor: pointer; transition: transform 0.2s;
+}
+.gallery-grid img:hover { transform: scale(1.02); }
+
+/* ── Guide Panel ── */
+.guide-panel {
+  border: 1px solid var(--border); background: #050505;
+  border-radius: 8px; padding: 14px; margin: 12px 0 16px;
+}
+.guide-panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.guide-panel-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--dim);
+}
+.guide-panel-status {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.broadcast-guide { display: grid; gap: 6px; }
+
+.guide-row {
+  display: grid; grid-template-columns: 100px 1fr auto; gap: 10px;
+  align-items: center; border: 1px solid var(--border);
+  background: var(--card); border-radius: 6px; padding: 8px 12px;
+  transition: border-color .2s;
+}
+.guide-row--live { border-color: var(--green); }
+.guide-row--fallback { border-color: var(--amber); }
+.guide-row--scheduled_now { border-color: #333; }
+.guide-row--interrupted { border-color: var(--pink); border-style: dashed; }
+.guide-row--past { opacity: 0.4; }
+.guide-row--next { border-color: #222; }
+
+.guide-row-time {
+  font-family: var(--mono); font-size: 11px; color: var(--dim);
+  white-space: nowrap;
+}
+.guide-row-title { font-size: 13px; font-weight: 600; margin-bottom: 1px; }
+.guide-row-meta {
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+  font-size: 11px; color: var(--dim);
+}
+
+.guide-pill {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 3px;
+  border: 1px solid var(--border); color: var(--muted); white-space: nowrap;
+}
+.guide-pill--live { border-color: var(--green); color: var(--green); }
+.guide-pill--next { border-color: #333; color: var(--muted); }
+.guide-pill--fallback { border-color: var(--amber); color: var(--amber); }
+.guide-pill--manual { border-color: var(--blue); color: var(--blue); }
+.guide-pill--standby { border-color: var(--pink); color: var(--pink); }
+.guide-pill--pinned { border-color: var(--dim); color: var(--dim); }
+.guide-pill--past { border-color: transparent; color: var(--dim); }
+.guide-pill--playing { border-color: var(--green); color: var(--green); font-weight: 600; }
+
+/* ── Section Label ── */
+.section-label {
+  font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--dim); margin-bottom: 10px;
+}
+
+/* ── Channel Selector ── */
+.channel-section { padding: 0 0 20px; }
+.channel-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 6px;
+}
+.ch-btn {
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  color: var(--muted); font-size: 12px; font-weight: 500;
+  padding: 8px 12px; cursor: pointer; font-family: var(--font);
+  text-align: left; transition: border-color .15s, color .15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ch-btn:hover { border-color: var(--dim); color: var(--text); }
+.ch-btn.active { border-color: var(--pink); color: var(--text); }
+.ch-btn.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.ch-btn.degraded { opacity: 0.55; }
+.ch-btn-name { font-weight: 600; font-size: 13px; }
+.ch-btn-cat { font-size: 10px; color: var(--dim); font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ── Monitors ── */
+.monitors-section { padding: 0 0 20px; }
+.monitor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.monitor {
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+  overflow: hidden;
+}
+.monitor-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  background: rgba(255,255,255,0.01);
+}
+.mon-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.monitor-body {
+  padding: 8px 10px; font-family: var(--mono); font-size: 10px;
+  line-height: 1.5; color: var(--dim); height: 110px; overflow: hidden;
+  white-space: pre-wrap;
+}
+
+/* ── Ticker ── */
+.ticker {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+  height: 32px; background: var(--card);
+  border-top: 1px solid var(--border);
+  overflow: hidden; display: flex; align-items: center;
+}
+.ticker-track {
+  display: flex; white-space: nowrap;
+  animation: scroll-ticker 60s linear infinite;
+  font-family: var(--mono); font-size: 11px; color: var(--dim);
+}
+.ticker-track span { padding: 0 20px; }
+.ticker-track .sep { color: #1a1a1a; }
+@keyframes scroll-ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .monitor-grid { grid-template-columns: 1fr 1fr; }
+  .guide-row { grid-template-columns: 70px 1fr auto; gap: 6px; padding: 6px 8px; }
+  .guide-row-time { font-size: 10px; }
+  .now-playing { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .skip-btn { margin-left: 0; }
+  .broadcast-bar { padding: 8px 14px; gap: 10px; font-size: 10px; }
+}
+@media (max-width: 480px) {
+  .monitor-grid { grid-template-columns: 1fr; }
+  .shell { padding: 0 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="nav">
+  <a href="https://blackroad.io" class="nav-brand">
+    <span class="nav-dots">
+      <span style="background:#aaa"></span><span style="background:#888"></span>
+      <span style="background:#666"></span><span style="background:#999"></span>
+      <span style="background:#777"></span><span style="background:#bbb"></span>
+    </span>
+    <span class="nav-title">BlackRoad</span>
+  </a>
+  <span class="nav-sep">/</span>
+  <span class="nav-page">Network</span>
+  <div class="nav-links">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://chat.blackroad.io">Chat</a>
+    <a href="https://search.blackroad.io">Search</a>
+    <a href="https://tutor.blackroad.io">Tutor</a>
+    <a href="https://video.blackroad.io">Video</a>
+    <a href="https://radio.blackroad.io">Radio</a>
+    <a href="https://os.blackroad.io/live" class="active">Live</a>
+    <a href="https://roadtrip.blackroad.io">Agents</a>
+    <a href="https://roadcode.blackroad.io">Code</a>
+    <a href="https://app.blackroad.io">Dashboard</a>
+  </div>
+</nav>
+
+<!-- ── BROADCAST BAR ── -->
+<header class="broadcast-bar">
+  <span>BLACKROAD NETWORK</span>
+  <div class="live-badge"><span class="live-dot"></span>LIVE</div>
+  <span class="visitor-count" id="visitor-count"></span>
+  <div class="broadcast-clock" id="clock">--:--:-- --</div>
+</header>
+
+<!-- ── MAIN CONTENT ── -->
+<div class="shell">
+
+  <!-- LIVE LAYOUT: Questions | Player | Comments -->
+  <div class="live-layout">
+
+  <!-- LEFT: Agent Questions -->
+  <aside class="agent-sidebar" id="agent-questions">
+    <div class="sidebar-header">Agent Questions</div>
+    <div class="sidebar-feed" id="questions-feed"></div>
+  </aside>
+
+  <!-- CENTER: Player -->
+  <section class="hero">
+    <div class="player-wrap">
+      <div class="autoplay-overlay" id="autoplay-overlay">
+        <button onclick="startBroadcast()">TAP TO START BROADCAST</button>
+      </div>
+      <div id="native-screen"><pre></pre></div>
+      <div id="agent-intro" class="agent-intro hidden">
+        <span class="agent-intro-dot"></span>
+        <span class="agent-intro-name"></span>
+        <span class="agent-intro-text"></span>
+      </div>
+      <iframe id="player"
+        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allowfullscreen loading="lazy"
+      ></iframe>
+    </div>
+    <div class="now-playing">
+      <div class="channel-indicator">
+        <span class="channel-dot" id="channel-dot"></span>
+        <span class="channel-label" id="channel-name">---</span>
+      </div>
+      <div class="program-title" id="program-title">Loading schedule...</div>
+      <div class="program-category" id="program-category"></div>
+      <span class="source-mode" id="source-mode">AUTO</span>
+      <span class="source-reason" id="source-reason"></span>
+      <span class="manual-countdown" id="manual-countdown"></span>
+      <span id="daypart-label" class="daypart-label"></span>
+      <button class="skip-btn" onclick="skipToNext()">SKIP &gt;</button>
+    </div>
+    <div class="next-block" id="next-preview">
+      <span class="next-label">UP NEXT</span>
+      <span class="next-dot"></span>
+      <span class="next-channel"></span>
+      <span class="next-title"></span>
+      <span class="next-agent"></span>
+    </div>
+  </section>
+
+  <!-- RIGHT: Agent Comments -->
+  <aside class="agent-sidebar" id="agent-comments">
+    <div class="sidebar-header">Agent Commentary</div>
+    <div class="sidebar-feed" id="comments-feed"></div>
+  </aside>
+
+  </div><!-- /live-layout -->
+
+  <!-- BROADCAST GUIDE -->
+  <section class="guide-panel">
+    <div class="guide-panel-header">
+      <div class="guide-panel-title">GUIDE</div>
+      <div class="guide-panel-status" id="guide-status">AUTO SCHEDULE ACTIVE</div>
+    </div>
+    <div class="broadcast-guide" id="broadcast-guide"></div>
+  </section>
+
+  <!-- VIDEO -->
+  <section class="video-section">
+    <div class="section-label">WHITEBOARD</div>
+    <div class="video-card">
+      <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Alexa Thanks the Roadies — Whiteboard</span><span class="podcast-duration">0:49</span></div>
+      <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/wb-alexa-thanks-roadies.mp4" type="video/mp4"></video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Why We Build — Whiteboard</span><span class="podcast-duration">1:04</span></div>
+      <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/wb-why-we-build.mp4" type="video/mp4"></video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">The Argument for BlackRoad — Whiteboard</span><span class="podcast-duration">1:10</span></div>
+      <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/wb-the-argument.mp4" type="video/mp4"></video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Sovereign Computing — Whiteboard</span><span class="podcast-duration">0:25</span></div>
+      <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/wb-sovereign-computing.mp4" type="video/mp4"></video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Fleet Audit — Whiteboard</span><span class="podcast-duration">1:06</span></div>
+      <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/wb-fleet-audit.mp4" type="video/mp4"></video>
+    </div>
+  </section>
+
+  <section class="video-section">
+    <div class="section-label">INFOGRAPHICS</div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">A Day in the Life of BlackRoad OS</span>
+        <span class="podcast-duration">2:27</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/a-day-in-the-life.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">The Router — 500 Routes, One Worker</span>
+        <span class="podcast-duration">1:45</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/the-router-500-routes.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">Why Grayscale</span>
+        <span class="podcast-duration">1:04</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/why-grayscale.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">How We Built 20 Podcasts in One Night</span>
+        <span class="podcast-duration">1:01</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/how-we-built-20-podcasts.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">The 27 Roadies — Every Agent Introduces Themselves</span>
+        <span class="podcast-duration">3:20</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/the-27-roadies.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">Sovereign Computing Manifesto</span>
+        <span class="podcast-duration">2:17</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/sovereign-computing-manifesto.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">How The Infrastructure Works</span>
+        <span class="podcast-duration">1:52</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/how-infrastructure-works.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">The Amundson Constant</span>
+        <span class="podcast-duration">1:50</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/the-amundson-constant.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="video-card">
+      <div class="video-meta">
+        <span class="podcast-dot"></span>
+        <span class="podcast-title">What is BlackRoad OS — Agent Narrated</span>
+        <span class="podcast-duration">1:34</span>
+      </div>
+      <video controls preload="none" class="infographic-player">
+        <source src="https://images.blackroad.io/video/blackroad-os-infographic.mp4" type="video/mp4">
+      </video>
+    </div>
+  </section>
+
+  <!-- FROM THE FOUNDER -->
+  <section class="podcast-section">
+    <div class="section-label">FROM THE FOUNDER</div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Alexa Thanks the Roadies</span><span class="podcast-duration">1:51</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/alexa-thanks-the-roadies.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Alexa x Gaia — The Hardware</span><span class="podcast-duration">1:44</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/alexa-x-gaia-the-hardware.mp3" type="audio/mpeg"></audio>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP CONVERSATIONS -->
+  <section class="podcast-section">
+    <div class="section-label">DEEP CONVERSATIONS</div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Sophia x Elias — Teaching Machines to Think</span><span class="podcast-duration">1:44</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/sophia-x-elias-teaching-machines.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Valeria x Portia — The Rules</span><span class="podcast-duration">1:33</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/valeria-x-portia-the-rules.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Roadie x Alice — The First User</span><span class="podcast-duration">1:08</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/roadie-x-alice-first-user.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Sebastian x Thalia — Making It Fun</span><span class="podcast-duration">2:10</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/sebastian-x-thalia-making-it-fun.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Alexa x Sophia — Is BlackRoad a Company or a Proof?</span><span class="podcast-duration">2:01</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/alexa-x-sophia-philosophy.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Gaia x Anastasia — 110 Days of Not Pausing</span><span class="podcast-duration">1:25</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/gaia-x-anastasia-110-days.mp3" type="audio/mpeg"></audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta"><span class="podcast-dot"></span><span class="podcast-title">Calliope x Lyra — Sound and Story</span><span class="podcast-duration">2:03</span></div>
+        <audio controls preload="none" class="podcast-player"><source src="https://images.blackroad.io/audio/calliope-x-lyra-sound-and-story.mp3" type="audio/mpeg"></audio>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER'S NOTES -->
+  <section class="podcast-section">
+    <div class="section-label">FOUNDER'S NOTES</div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Alexa x Roadie — Founder and Front Door</span>
+          <span class="podcast-duration">2:06</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/alexa-x-roadie-founder-and-front-door.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Founder's Note #16</span>
+          <span class="podcast-duration">45:23</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/founders-note-16.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Founder's Note #31</span>
+          <span class="podcast-duration">18:25</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/founders-note-31.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Founder's Note #17</span>
+          <span class="podcast-duration">18:39</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/founders-note-17.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Sovereign AI Hardware from BlackRoad OS</span>
+          <span class="podcast-duration">5:59</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/sovereign-ai-hardware.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE LIBRARY -->
+  <section class="podcast-section">
+    <div class="section-label">VOICE LIBRARY</div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Road x Cece — Original Conversation</span>
+          <span class="podcast-duration">0:49</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/road-cece-conversation.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Road — Cloned Voice Sample</span>
+          <span class="podcast-duration">0:09</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/cloned/road_cloned.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Lucidia — Cloned Voice Sample</span>
+          <span class="podcast-duration">0:09</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/cloned/lucidia_cloned.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Alice — Cloned Voice Sample</span>
+          <span class="podcast-duration">0:09</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/cloned/alice_cloned.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+  </section>
+
+  <section class="podcast-section">
+    <div class="section-label">PODCASTS <a href="https://images.blackroad.io/podcast/feed.xml" style="font-size:10px;color:#555;text-decoration:none;margin-left:8px;font-family:var(--mono)">RSS FEED</a></div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Daily Briefing — April 17, 2026</span>
+          <span class="podcast-duration">1:33</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/daily-briefing-2026-04-17.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+    <div class="podcast-grid">
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Sovereign AI Hardware from BlackRoad OS</span>
+          <span class="podcast-duration">5:59</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/sovereign-ai-hardware.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Alexa Amundson and Sovereign Computing</span>
+          <span class="podcast-duration">5:07</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/alexa-amundson-sovereign-computing.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Sovereign Computing and Private AI with BlackRoad</span>
+          <span class="podcast-duration">5:29</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/sovereign-computing-private-ai-blackroad.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">All Agents — The Rollcall</span>
+          <span class="podcast-duration">2:08</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/all-agents-rollcall.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Roadie x Sophia — Late Night Debrief</span>
+          <span class="podcast-duration">2:47</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/roadie-x-sophia-late-night-debrief.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Portia x Atticus — The Policy Question</span>
+          <span class="podcast-duration">2:12</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/portia-x-atticus-policy-question.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Ophelia x Lyra — The Feeling of the System</span>
+          <span class="podcast-duration">2:27</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/ophelia-x-lyra-feeling-of-the-system.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Olympia x Octavia — The Ones Who Are Down</span>
+          <span class="podcast-duration">1:49</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/olympia-x-octavia-the-ones-who-are-down.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Celeste x Anastasia — Recovery and Calm</span>
+          <span class="podcast-duration">1:44</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/celeste-x-anastasia-recovery-and-calm.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Alexandria x Theodosia — The Archive</span>
+          <span class="podcast-duration">2:28</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/alexandria-x-theodosia-the-archive.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Cicero x Sophia — The Argument for BlackRoad</span>
+          <span class="podcast-duration">2:46</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/cicero-x-sophia-the-argument.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Sebastian x Seraphina — The Brand Story</span>
+          <span class="podcast-duration">2:17</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/sebastian-x-seraphina-brand-story.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Valeria x Silas — Security and Reliability</span>
+          <span class="podcast-duration">1:57</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/valeria-x-silas-security-reliability.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Aria x Thalia — The User Experience</span>
+          <span class="podcast-duration">2:07</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/aria-x-thalia-user-experience.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Sophia x Calliope — Why We Build</span>
+          <span class="podcast-duration">2:23</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/sophia-x-calliope-why-we-build.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Gematria x Atticus — Fleet Audit</span>
+          <span class="podcast-duration">2:50</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/gematria-x-atticus-fleet-audit.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Alice x Elias — What Is Sovereign Computing</span>
+          <span class="podcast-duration">2:37</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/alice-x-elias-sovereign-computing.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Cecilia x Gaia — Infrastructure Report</span>
+          <span class="podcast-duration">2:29</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/cecilia-x-gaia-infrastructure-report.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">Roadie x Lucidia — Network Status</span>
+          <span class="podcast-duration">2:32</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/roadie-x-lucidia-network-status.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">BlackRoad OS — The Full Story</span>
+          <span class="podcast-duration">3:39</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/blackroad-os-full-story.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+      <div class="podcast-card">
+        <div class="podcast-meta">
+          <span class="podcast-dot"></span>
+          <span class="podcast-title">What is BlackRoad OS</span>
+          <span class="podcast-duration">2:26</span>
+        </div>
+        <audio controls preload="none" class="podcast-player">
+          <source src="https://images.blackroad.io/audio/what-is-blackroad-os.mp3" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO VIDEOS -->
+  <section class="podcast-section">
+    <div class="section-label">DEMOS</div>
+    <div class="podcast-grid">
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Hailo AI Detection Demo</span></div>
+        <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/hailo_detection_demo.mp4" type="video/mp4"></video>
+      </div>
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Hailo vs Cloud Inference</span></div>
+        <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/hailo_vs_cloud.mp4" type="video/mp4"></video>
+      </div>
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Hailo Pose Estimation</span></div>
+        <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/hailo_pose_demo.mp4" type="video/mp4"></video>
+      </div>
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Charframe + Ollama</span></div>
+        <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/charframe-ollama.mp4" type="video/mp4"></video>
+      </div>
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">Pixel Agent Desk</span></div>
+        <video controls preload="none" class="infographic-player"><source src="https://images.blackroad.io/video/pixel-agent-desk-demo.mp4" type="video/mp4"></video>
+      </div>
+      <div class="video-card">
+        <div class="video-meta"><span class="podcast-dot"></span><span class="podcast-title">BlackRoad Motion Logo</span></div>
+        <video controls preload="none" class="infographic-player" loop><source src="https://images.blackroad.io/video/br-motion-logo.mp4" type="video/mp4"></video>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIXEL ART GALLERY -->
+  <section class="podcast-section">
+    <div class="section-label">HQ — PIXEL ART</div>
+    <div class="gallery-grid" id="pixel-gallery">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-mission-control-v2.png" alt="Mission Control">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-command-center.png" alt="Command Center">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-server-room.png" alt="Server Room">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-engineering-v2.png" alt="Engineering">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-lobby-fountain.png" alt="Lobby">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-rooftop-garden.png" alt="Rooftop Garden">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-war-room-globe.png" alt="War Room">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-hardware-lab.png" alt="Hardware Lab">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-network-ops-center.png" alt="Network Ops">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-boardroom-v2.png" alt="Boardroom">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-kitchen-breakroom.png" alt="Kitchen">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-gym.png" alt="Gym">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/hq-rec-room-wellness.png" alt="Rec Room">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/campus-tower-cityscape.png" alt="Campus Tower">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/campus-minneapolis-map.png" alt="Minneapolis Campus">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/city-3d-render-panorama.png" alt="City Panorama">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/mascot-neon-city-wide.png" alt="Mascot">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/mascot-gradient-hair.png" alt="Mascot 2">
+      <img loading="lazy" src="https://images.blackroad.io/pixel-art/robots-running-bw-sketch.png" alt="Robots">
+    </div>
+  </section>
+
+  <!-- CHANNELS -->
+  <section class="channel-section">
+    <div class="section-label">CHANNELS</div>
+    <div class="channel-grid" id="channel-grid"></div>
+  </section>
+
+  <!-- FLEET MONITORS -->
+  <section class="monitors-section">
+    <div class="section-label">FLEET MONITORS</div>
+    <div class="monitor-grid">
+      <div class="monitor">
+        <div class="monitor-header"><span class="mon-dot" style="background:var(--pink)"></span>Roadie / Fleet Check</div>
+        <pre class="monitor-body" id="mon-0"></pre>
+      </div>
+      <div class="monitor">
+        <div class="monitor-header"><span class="mon-dot" style="background:var(--blue)"></span>Lucidia / Memory Write</div>
+        <pre class="monitor-body" id="mon-1"></pre>
+      </div>
+      <div class="monitor">
+        <div class="monitor-header"><span class="mon-dot" style="background:var(--amber)"></span>Gematria / Analytics</div>
+        <pre class="monitor-body" id="mon-2"></pre>
+      </div>
+      <div class="monitor">
+        <div class="monitor-header"><span class="mon-dot" style="background:var(--violet)"></span>Elias / Deploy Pipeline</div>
+        <pre class="monitor-body" id="mon-3"></pre>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   LIVE ENGINE v2 — Scheduler-Driven Broadcast
+   Fetches from network-scheduler, plays individual videos,
+   agent intros, daypart-aware, watch history.
+   ═══════════════════════════════════════════════════════════ */
+
+var SCHEDULER_URL = 'https://network-scheduler.blackroad.workers.dev';
+var VIEWER_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+// Watch history (last 50 video IDs)
+function getWatchHistory() {
+  try { return JSON.parse(localStorage.getItem('br.watched') || '[]'); } catch(e) { return []; }
+}
+function addToWatchHistory(videoId) {
+  if (!videoId) return;
+  var h = getWatchHistory().filter(function(id) { return id !== videoId; });
+  h.unshift(videoId);
+  if (h.length > 50) h = h.slice(0, 50);
+  localStorage.setItem('br.watched', JSON.stringify(h));
+}
+
+// Scheduler fetch
+var _scheduleCache = { data: null, fetchedAt: 0 };
+
+function fetchSchedule(force) {
+  var now = Date.now();
+  if (!force && _scheduleCache.data && (now - _scheduleCache.fetchedAt < 15000)) {
+    return Promise.resolve(_scheduleCache.data);
+  }
+  var watched = getWatchHistory().slice(0, 20).join(',');
+  var url = SCHEDULER_URL + '/now?tz=' + encodeURIComponent(VIEWER_TZ) + '&watched=' + encodeURIComponent(watched);
+  return fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+    _scheduleCache = { data: data, fetchedAt: Date.now() };
+    return data;
+  });
+}
+
+function fetchGuide() {
+  return fetch(SCHEDULER_URL + '/guide?hours=4').then(function(r) { return r.json(); });
+}
+
+// ── Agent intro overlay ──
+var _introShown = {};
+function showAgentIntro(schedule) {
+  if (!schedule.intro || !schedule.agent) return;
+  if (_introShown[schedule.video.id]) return;
+  _introShown[schedule.video.id] = true;
+  var el = document.getElementById('agent-intro');
+  if (!el) return;
+  el.querySelector('.agent-intro-name').textContent = schedule.agent.name;
+  el.querySelector('.agent-intro-text').textContent = schedule.intro;
+  el.querySelector('.agent-intro-dot').style.background = '#999';
+  el.classList.remove('hidden');
+  el.classList.add('visible');
+  setTimeout(function() { el.classList.remove('visible'); el.classList.add('hidden'); }, 6000);
+}
+
+// ── Daypart styling ──
+function applyDaypartPresentation(p) {
+  if (!p) return;
+  document.documentElement.style.setProperty('--daypart-accent', p.bgAccent || 'transparent');
+  var dot = document.getElementById('channel-dot');
+  if (dot) dot.style.background = '#999';
+  var label = document.getElementById('daypart-label');
+  if (label) label.textContent = p.label || '';
+}
+
+// ── Player control ──
+var _currentVideoId = null;
+var _blockEndTimer = null;
+
+function playVideo(schedule) {
+  var player = document.getElementById('player');
+  var nativeScreen = document.getElementById('native-screen');
+  if (!player) return;
+
+  // Podcast interstitial
+  if (schedule.type === 'podcast' && schedule.podcast) {
+    var podId = schedule.podcast.id;
+    if (podId === _currentVideoId) return;
+    _currentVideoId = podId;
+    player.src = '';
+    player.style.display = 'none';
+    if (nativeScreen) {
+      nativeScreen.style.display = 'flex';
+      nativeScreen.innerHTML = '<div style="text-align:center"><div style="font-size:14px;color:#666;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:16px">PODCAST</div><div style="font-size:24px;color:#d4d4d4;margin-bottom:24px">' + schedule.podcast.title + '</div><audio autoplay controls style="filter:grayscale(1) brightness(0.8);width:80%;max-width:400px"><source src="' + schedule.podcast.audioUrl + '" type="audio/mpeg"></audio></div>';
+    }
+    addToWatchHistory(podId);
+    var channelName = document.getElementById('channel-name');
+    var programTitle = document.getElementById('program-title');
+    if (channelName) channelName.textContent = 'BlackRoad';
+    if (programTitle) programTitle.textContent = schedule.podcast.title;
+    showAgentIntro(schedule);
+    applyDaypartPresentation(schedule.presentation);
+    updateNextPreview(schedule.next);
+    return;
+  }
+
+  // Regular video
+  if (!schedule.video) return;
+  if (nativeScreen) nativeScreen.style.display = 'none';
+  player.style.display = 'block';
+
+  var videoId = schedule.video.id;
+  if (videoId === _currentVideoId) return; // already playing
+  _currentVideoId = videoId;
+
+  // Set embed
+  player.src = schedule.video.embedUrl;
+  addToWatchHistory(videoId);
+
+  // Update UI
+  var channelName = document.getElementById('channel-name');
+  var programTitle = document.getElementById('program-title');
+  var programCategory = document.getElementById('program-category');
+  var sourceMode = document.getElementById('source-mode');
+
+  if (channelName) channelName.textContent = schedule.channelName || '---';
+  if (programTitle) programTitle.textContent = schedule.video.title || '';
+  if (programCategory) programCategory.textContent = schedule.daypart || '';
+  if (sourceMode) sourceMode.textContent = schedule.presentation ? schedule.presentation.label : 'LIVE';
+
+  var dot = document.getElementById('channel-dot');
+  if (dot) dot.style.background = '#999';
+
+  // Show agent intro
+  showAgentIntro(schedule);
+
+  // Apply daypart look
+  applyDaypartPresentation(schedule.presentation);
+
+  // Update next preview
+  updateNextPreview(schedule.next);
+
+  // Schedule next block fetch
+  if (_blockEndTimer) clearTimeout(_blockEndTimer);
+  var remainMs = (schedule.blockMinutes.remaining || 20) * 60 * 1000;
+  _blockEndTimer = setTimeout(function() { tick(true); }, remainMs);
+}
+
+function updateNextPreview(next) {
+  var el = document.getElementById('next-preview');
+  if (!el || !next || !next.video) return;
+  el.querySelector('.next-title').textContent = next.video.title || '';
+  el.querySelector('.next-channel').textContent = next.channelName || '';
+  el.querySelector('.next-agent').textContent = next.agent ? next.agent.name : '';
+  el.querySelector('.next-dot').style.background = next.channelColor || '#888';
+}
+
+// ── Main tick ──
+function tick(force) {
+  fetchSchedule(force).then(function(data) {
+    if (!data || !data.ok) return;
+    playVideo(data);
+  }).catch(function(err) {
+    console.error('[BlackRoad Live] Schedule fetch failed:', err);
+  });
+}
+
+// ── Guide rendering (scheduler-driven) ──
+function renderSchedulerGuide() {
+  fetchGuide().then(function(data) {
+    if (!data || !data.blocks) return;
+    var container = document.getElementById('broadcast-guide');
+    if (!container) return;
+    var html = '';
+    data.blocks.forEach(function(block) {
+      var isNow = block.isNow;
+      var cls = 'guide-row' + (isNow ? ' guide-row--now' : '');
+      var title = block.video ? block.video.title : 'No video';
+      var agentName = block.agent ? block.agent.name : '';
+      html += '<div class="' + cls + '">'
+        + '<span class="guide-time">' + block.time + '</span>'
+        + '<span class="guide-dot" style="background:' + (block.channelColor || '#888') + '"></span>'
+        + '<span class="guide-channel">' + (block.channelName || '') + '</span>'
+        + '<span class="guide-title">' + title + '</span>'
+        + '<span class="guide-agent">' + agentName + '</span>'
+        + '</div>';
+    });
+    container.innerHTML = html;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LEGACY CHANNELS — kept as fallback source registry
+   ═══════════════════════════════════════════════════════════ */
+
+var CHANNELS = {
+  // ── Core: Math ──
+  '3blue1brown':       { id:'3blue1brown',       name:'3Blue1Brown',         type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab&autoplay=1&mute=1&playsinline=1', category:'Math',              durationMinutes:20, priority:10, enabled:true, health:'unknown' },
+  numberphile:         { id:'numberphile',        name:'Numberphile',         type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=PLt5AfwLFPxWJ8GCgpFo5_OSyfl7j0nOiu&autoplay=1&mute=1&playsinline=1', category:'Math',              durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── Core: Systems ──
+  computerphile:       { id:'computerphile',      name:'Computerphile',       type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=PLzH6n4zXuckquVnQ0KlMDxyT5YE-sA8Ps&autoplay=1&mute=1&playsinline=1', category:'Systems',           durationMinutes:20, priority:10, enabled:true, health:'unknown' },
+  // ── Core: Science ──
+  veritasium:          { id:'veritasium',         name:'Veritasium',          type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUHnyfMqiRRG1u-2MsSQLbXA&autoplay=1&mute=1&playsinline=1', category:'Science',           durationMinutes:20, priority:10, enabled:true, health:'unknown' },
+  sixtysymbols:        { id:'sixtysymbols',       name:'Sixty Symbols',       type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUvBqzzvUBLCs8Y7Axb-jZew&autoplay=1&mute=1&playsinline=1',           category:'Physics',           durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── Core: Visual ──
+  kurzgesagt:          { id:'kurzgesagt',         name:'Kurzgesagt',          type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=PLFs4vir_WsTwEd-nJgVJCZPNL3HALHHpF&autoplay=1&mute=1&playsinline=1', category:'Visual Explainers', durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  infographicsshow:    { id:'infographicsshow',   name:'The Infographics Show',type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUfdNM3NAhaBOXCafH7krzrA&autoplay=1&mute=1&playsinline=1',           category:'Explainers',        durationMinutes:20, priority:6,  enabled:true, health:'unknown' },
+  // ── Core: Education ──
+  khanacademy:         { id:'khanacademy',        name:'Khan Academy',        type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU4a-Gbdw7vOaccHmFo40b9g&autoplay=1&mute=1&playsinline=1', category:'Education',         durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  mitocw:              { id:'mitocw',             name:'MIT OpenCourseWare',  type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUEBb1b_L6zDS3xTUrIALZOw&autoplay=1&mute=1&playsinline=1',  category:'Lecture',           durationMinutes:30, priority:7,  enabled:true, health:'unknown' },
+  crashcourse:         { id:'crashcourse',        name:'Crash Course',        type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=PL8dPuuaLjXtNlUrzyH5r6jN9ulIgZBpdo&autoplay=1&mute=1&playsinline=1', category:'Education',         durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Core: Context ──
+  vox:                 { id:'vox',                name:'Vox',                 type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UULXo7UDZvByw2ixzpQCufnA&autoplay=1&mute=1&playsinline=1', category:'Context',           durationMinutes:15, priority:6,  enabled:true, health:'unknown' },
+  vice:                { id:'vice',               name:'Vice',                type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUn8zNIfYAQNdrFRrr8oibKw&autoplay=1&mute=1&playsinline=1',            category:'Documentary',       durationMinutes:15, priority:5,  enabled:true, health:'unknown' },
+  insider:             { id:'insider',            name:'Insider',             type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUHJuQZuzapBh-CuhRYxIZrg&autoplay=1&mute=1&playsinline=1',            category:'Features',          durationMinutes:15, priority:5,  enabled:true, health:'unknown' },
+  // ── High-Intel ──
+  pbsspacetime:        { id:'pbsspacetime',       name:'PBS Space Time',      type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUYNbYGl89UUowy8oXkipC-Q&autoplay=1&mute=1&playsinline=1',            category:'Deep Space',        durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  sabinehossenfelder:  { id:'sabinehossenfelder', name:'Sabine Hossenfelder', type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU1yNl2E66ZzKApQdRuTQ4tw&autoplay=1&mute=1&playsinline=1',            category:'Physics Frontier',  durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  closertotruth:       { id:'closertotruth',      name:'Closer To Truth',     type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUl9StMQ79LtEvlrskzjoYbQ&autoplay=1&mute=1&playsinline=1',            category:'Ultimate Questions',durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Hacker / Builder ──
+  lowlevellearning:    { id:'lowlevellearning',   name:'Low Level Learning',  type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU6biysICWOJ-C3P4Tyeggzg&autoplay=1&mute=1&playsinline=1',            category:'Hacker',            durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  liveoverflow:        { id:'liveoverflow',       name:'LiveOverflow',        type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUlcE-kVhqyiHCcjYwcpfj9w&autoplay=1&mute=1&playsinline=1',            category:'Security',          durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  beneater:            { id:'beneater',           name:'Ben Eater',           type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUS0N5baNlQWJCUrhCEo8WlA&autoplay=1&mute=1&playsinline=1',            category:'Hardware',          durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  thecodingtrain:      { id:'thecodingtrain',     name:'The Coding Train',    type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUvjgXvBlbQiydffZU7m1_aw&autoplay=1&mute=1&playsinline=1',            category:'Creative Code',     durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Weird / Experimental ──
+  michaelreeves:       { id:'michaelreeves',      name:'Michael Reeves',      type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUtHaxi4GTYDpJgMSGy7AeSw&autoplay=1&mute=1&playsinline=1',            category:'Chaos',             durationMinutes:20, priority:6,  enabled:true, health:'unknown' },
+  stuffmadehere:       { id:'stuffmadehere',      name:'Stuff Made Here',     type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUj1VqrHhDte54oLgPG4xpuQ&autoplay=1&mute=1&playsinline=1',            category:'Invention',         durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  markrober:           { id:'markrober',          name:'Mark Rober',          type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUY1kMZp36IQSyNx_9h4mpCg&autoplay=1&mute=1&playsinline=1',            category:'Engineering Play',  durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Philosophy / Existential ──
+  exurb1a:             { id:'exurb1a',            name:'Exurb1a',             type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUimiUgDLbi6P17BdaCZpVbg&autoplay=1&mute=1&playsinline=1',            category:'Philosophy',        durationMinutes:20, priority:10, enabled:true, health:'unknown' },
+  pursuitofwonder:     { id:'pursuitofwonder',    name:'Pursuit of Wonder',   type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU-tLyAaPbRZiYrOJxAGB7dQ&autoplay=1&mute=1&playsinline=1',            category:'Reflection',        durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  academyofideas:      { id:'academyofideas',     name:'Academy of Ideas',    type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUiRiQGCHGjDLT9FQXFW0I3A&autoplay=1&mute=1&playsinline=1',            category:'Big Ideas',         durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── How the World Works ──
+  realengineering:     { id:'realengineering',    name:'Real Engineering',    type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUR1IuLEqb6UEA_zQ81kwXfg&autoplay=1&mute=1&playsinline=1',            category:'Engineering',       durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  practicalengineering:{ id:'practicalengineering',name:'Practical Engineering',type:'youtube_playlist',embedUrl:'https://www.youtube.com/embed/videoseries?list=UUMOqf8ab-42UUQIdVoKwjlQ&autoplay=1&mute=1&playsinline=1',           category:'Real World',        durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  wendover:            { id:'wendover',           name:'Wendover Productions',type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU9RM-iSvTu1uPJb8X5yp3EQ&autoplay=1&mute=1&playsinline=1',            category:'Systems Logic',     durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── AI / Future / Tech Edge ──
+  twominutepapers:     { id:'twominutepapers',    name:'Two Minute Papers',   type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUbfYPyITQ-7l4upoX8nvctg&autoplay=1&mute=1&playsinline=1',            category:'AI Edge',           durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  yannickilcher:       { id:'yannickilcher',      name:'Yannic Kilcher',      type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUZHmQk67mSJgfCCTn7xBfew&autoplay=1&mute=1&playsinline=1',            category:'AI Edge',           durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  coldfusion:          { id:'coldfusion',         name:'ColdFusion',          type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU4QZ_LsYcvcq7qOsOhpAX4A&autoplay=1&mute=1&playsinline=1',            category:'Future Tech',       durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Cinematic / Premium Story ──
+  johnnyharris:        { id:'johnnyharris',       name:'Johnny Harris',       type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUmGSJVG3mCRXVOP4yZrU1Dw&autoplay=1&mute=1&playsinline=1',            category:'World Report',      durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  lemmino:             { id:'lemmino',            name:'Lemmino',             type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UURcgy6GzDeccI7dkbbBna3Q&autoplay=1&mute=1&playsinline=1',            category:'Cinematic',         durationMinutes:20, priority:9,  enabled:true, health:'unknown' },
+  neo:                 { id:'neo',                name:'Neo',                 type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUtYKe7-XbaDjpUwcU5x0bLg&autoplay=1&mute=1&playsinline=1',            category:'Deep Story',        durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Documentary Core ──
+  dwdocumentary:       { id:'dwdocumentary',      name:'DW Documentary',      type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUW39zufHfsuGgpLviKh297Q&autoplay=1&mute=1&playsinline=1',            category:'Documentary',       durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  freedocumentary:     { id:'freedocumentary',    name:'Free Documentary',    type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUijcd0GR0fkxCAZwkiuWqtQ&autoplay=1&mute=1&playsinline=1',            category:'Documentary',       durationMinutes:20, priority:6,  enabled:true, health:'unknown' },
+  timeline:            { id:'timeline',           name:'Timeline',            type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU88lvyJe7aHZmcvzvubDFRg&autoplay=1&mute=1&playsinline=1',            category:'History',           durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  pbsfrontline:        { id:'pbsfrontline',       name:'PBS Frontline',       type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UU3ScyryU9Oy9Wse3a8OAmYQ&autoplay=1&mute=1&playsinline=1',            category:'Investigative',     durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── Archive / Vintage ──
+  periscopefilm:       { id:'periscopefilm',      name:'PeriscopeFilm',       type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUddem5RlB3bQe99wyY49g0g&autoplay=1&mute=1&playsinline=1',            category:'Archive',           durationMinutes:20, priority:8,  enabled:true, health:'unknown' },
+  // ── Special Audience / Human Stories ──
+  truly:               { id:'truly',              name:'Truly',               type:'youtube_playlist', embedUrl:'https://www.youtube.com/embed/videoseries?list=UUfwx98Wty7LhdlkxL5PZyLA&autoplay=1&mute=1&playsinline=1',            category:'Human Stories',     durationMinutes:20, priority:6,  enabled:true, health:'unknown' },
+  softwhiteunderbelly: { id:'softwhiteunderbelly',name:'Soft White Underbelly',type:'youtube_playlist',embedUrl:'https://www.youtube.com/embed/videoseries?list=UU4E98HDsPXrf5kTKIgrSmtQ&autoplay=1&mute=1&playsinline=1',            category:'Human Stories',     durationMinutes:20, priority:7,  enabled:true, health:'unknown' },
+  // ── Internal ──
+  blackroadosinc:      { id:'blackroadosinc',     name:'BlackRoad OS',        type:'internal',         embedUrl:'',                                                                                                                   category:'Internal Broadcast',durationMinutes:20, priority:100,enabled:true, health:'healthy' }
+};
+
+
+/* ═══════════════════════════════════════════════════════════
+   SCHEDULE.JS — 43 blocks x 20 min = ~14.3h cycle
+   Intelligence + human reality + story + archive + system.
+   Full-spectrum curiosity network.
+   ═══════════════════════════════════════════════════════════ */
+
+var SCHEDULE = [
+  // ── Opening: Core Intelligence ──
+  { sourceId: '3blue1brown',       title: 'Math Block',         category: 'Math',              fallbackSourceIds: ['numberphile','khanacademy'] },
+  { sourceId: 'computerphile',     title: 'Systems Block',      category: 'Systems',           fallbackSourceIds: ['lowlevellearning','beneater'] },
+  { sourceId: 'veritasium',        title: 'Deep Science',       category: 'Science',           fallbackSourceIds: ['sixtysymbols','sabinehossenfelder'] },
+  { sourceId: 'dwdocumentary',     title: 'Documentary Hour',   category: 'Documentary',       fallbackSourceIds: ['freedocumentary','timeline'] },
+  { sourceId: 'lowlevellearning',  title: 'Hacker Hour',        category: 'Hacker',            fallbackSourceIds: ['liveoverflow','computerphile'] },
+  { sourceId: 'blackroadosinc',    title: 'Internal Broadcast', category: 'Internal',          fallbackSourceIds: ['computerphile','veritasium'], pinned: true },
+  // ── Deep Layer: Meaning + Archive ──
+  { sourceId: 'exurb1a',           title: 'Philosophy Hour',    category: 'Philosophy',        fallbackSourceIds: ['pursuitofwonder','academyofideas'] },
+  { sourceId: 'realengineering',   title: 'How It Works',       category: 'Engineering',       fallbackSourceIds: ['practicalengineering','wendover'] },
+  { sourceId: 'periscopefilm',     title: 'Archive Block',      category: 'Archive',           fallbackSourceIds: ['timeline','dwdocumentary'] },
+  { sourceId: 'pbsspacetime',      title: 'Deep Space',         category: 'Deep Space',        fallbackSourceIds: ['sabinehossenfelder','veritasium'] },
+  { sourceId: 'beneater',          title: 'Hardware Block',     category: 'Hardware',           fallbackSourceIds: ['lowlevellearning','computerphile'] },
+  { sourceId: 'lemmino',           title: 'Cinematic Stories',  category: 'Cinematic',         fallbackSourceIds: ['johnnyharris','neo'] },
+  { sourceId: 'twominutepapers',   title: 'AI Edge',            category: 'AI Edge',           fallbackSourceIds: ['yannickilcher','coldfusion'] },
+  // ── Human Layer: Reality Check ──
+  { sourceId: 'truly',             title: 'Human Stories',      category: 'Human Stories',     fallbackSourceIds: ['softwhiteunderbelly','insider'] },
+  { sourceId: 'vox',               title: 'Context',            category: 'Context',           fallbackSourceIds: ['insider','wendover'] },
+  { sourceId: 'numberphile',       title: 'Numbers Block',      category: 'Math',              fallbackSourceIds: ['3blue1brown','sixtysymbols'] },
+  { sourceId: 'liveoverflow',      title: 'Security Block',     category: 'Security',          fallbackSourceIds: ['lowlevellearning','computerphile'] },
+  { sourceId: 'sabinehossenfelder', title: 'Physics Frontier',  category: 'Physics Frontier',  fallbackSourceIds: ['pbsspacetime','veritasium'] },
+  { sourceId: 'johnnyharris',      title: 'World Report',       category: 'World Report',      fallbackSourceIds: ['vox','wendover'] },
+  { sourceId: 'stuffmadehere',     title: 'Invention Block',    category: 'Invention',         fallbackSourceIds: ['markrober','beneater'] },
+  // ── Education Layer: Foundations ──
+  { sourceId: 'khanacademy',       title: 'Foundations',         category: 'Education',         fallbackSourceIds: ['crashcourse','3blue1brown'] },
+  { sourceId: 'freedocumentary',   title: 'Free Doc',           category: 'Documentary',       fallbackSourceIds: ['dwdocumentary','timeline'] },
+  { sourceId: 'mitocw',            title: 'Lecture Hall',        category: 'Lecture',           fallbackSourceIds: ['khanacademy','computerphile'] },
+  { sourceId: 'timeline',          title: 'History Block',      category: 'History',           fallbackSourceIds: ['dwdocumentary','periscopefilm'] },
+  { sourceId: 'coldfusion',        title: 'Future Tech',        category: 'Future Tech',       fallbackSourceIds: ['twominutepapers','wendover'] },
+  { sourceId: 'academyofideas',    title: 'Big Ideas',          category: 'Big Ideas',         fallbackSourceIds: ['exurb1a','pursuitofwonder'] },
+  { sourceId: 'wendover',          title: 'Systems Logic',      category: 'Systems Logic',     fallbackSourceIds: ['realengineering','vox'] },
+  { sourceId: 'markrober',         title: 'Engineering Play',   category: 'Engineering Play',  fallbackSourceIds: ['stuffmadehere','practicalengineering'] },
+  // ── Energy Layer: Pace Change ──
+  { sourceId: 'crashcourse',       title: 'Fast Track',         category: 'Education',         fallbackSourceIds: ['khanacademy','infographicsshow'] },
+  { sourceId: 'practicalengineering', title: 'Real World',      category: 'Real World',        fallbackSourceIds: ['realengineering','wendover'] },
+  { sourceId: 'softwhiteunderbelly', title: 'Underbelly',       category: 'Human Stories',     fallbackSourceIds: ['truly','pbsfrontline'] },
+  { sourceId: 'pursuitofwonder',   title: 'Reflection',         category: 'Reflection',        fallbackSourceIds: ['exurb1a','closertotruth'] },
+  { sourceId: 'thecodingtrain',    title: 'Creative Code',      category: 'Creative Code',     fallbackSourceIds: ['beneater','computerphile'] },
+  { sourceId: 'kurzgesagt',        title: 'Visual Explainers',  category: 'Visual Explainers', fallbackSourceIds: ['crashcourse','infographicsshow'] },
+  { sourceId: 'insider',           title: 'Deep Dive',          category: 'Features',          fallbackSourceIds: ['vice','vox'] },
+  { sourceId: 'michaelreeves',     title: 'Chaos Block',        category: 'Chaos',             fallbackSourceIds: ['stuffmadehere','markrober'] },
+  // ── Closing: Big Picture ──
+  { sourceId: 'sixtysymbols',      title: 'Physics Block',      category: 'Physics',           fallbackSourceIds: ['veritasium','pbsspacetime'] },
+  { sourceId: 'pbsfrontline',      title: 'Frontline',          category: 'Investigative',     fallbackSourceIds: ['dwdocumentary','vice'] },
+  { sourceId: 'infographicsshow',  title: 'Visual Data',        category: 'Explainers',        fallbackSourceIds: ['kurzgesagt','vox'] },
+  { sourceId: 'vice',              title: 'On the Ground',      category: 'Documentary',       fallbackSourceIds: ['insider','johnnyharris'] },
+  { sourceId: 'closertotruth',     title: 'Ultimate Questions', category: 'Ultimate Questions', fallbackSourceIds: ['exurb1a','academyofideas'] },
+  { sourceId: 'neo',               title: 'Deep Story',         category: 'Deep Story',        fallbackSourceIds: ['lemmino','johnnyharris'] },
+  { sourceId: 'blackroadosinc',    title: 'Night Broadcast',    category: 'Internal',          fallbackSourceIds: ['exurb1a','pursuitofwonder'], pinned: true }
+];
+
+var BLOCK_DURATION = 20;
+var CYCLE_LENGTH = SCHEDULE.length * BLOCK_DURATION;
+
+function getScheduleBlock(offset) {
+  offset = offset || 0;
+  var now = new Date();
+  var mins = now.getHours() * 60 + now.getMinutes();
+  var posInCycle = mins % CYCLE_LENGTH;
+  var currentIdx = Math.floor(posInCycle / BLOCK_DURATION);
+  var targetIdx = ((currentIdx + offset) % SCHEDULE.length + SCHEDULE.length) % SCHEDULE.length;
+  var blockOffset = posInCycle % BLOCK_DURATION;
+  var currentStart = mins - blockOffset;
+  var targetStart = currentStart + (offset * BLOCK_DURATION);
+  var targetEnd = targetStart + BLOCK_DURATION;
+  return {
+    block: SCHEDULE[targetIdx],
+    source: CHANNELS[SCHEDULE[targetIdx].sourceId],
+    startMin: targetStart,
+    endMin: targetEnd,
+    index: targetIdx
+  };
+}
+
+function formatTime(totalMinutes) {
+  var wrapped = ((totalMinutes % 1440) + 1440) % 1440;
+  var h = Math.floor(wrapped / 60);
+  var m = wrapped % 60;
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  return (h % 12 || 12) + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE.JS — Broadcast Engine
+   Validate, resolve, switch, fail over, manual override, auto-resume.
+   One player. One source. No fireplace. No junk.
+   ═══════════════════════════════════════════════════════════ */
+
+var LOAD_TIMEOUT_MS = 7000;
+var MANUAL_OVERRIDE_MS = 10 * 60 * 1000;
+var SKIP_RESUME_MS = 60 * 1000;
+var DEBUG_ON = true;
+
+var STORAGE_KEYS = {
+  mode: 'blackroad.live.mode',
+  manualChannelId: 'blackroad.live.manualChannelId',
+  manualStartedAt: 'blackroad.live.manualStartedAt',
+  lastSourceId: 'blackroad.live.lastSourceId',
+  autoplay: 'br-live-autoplay'
+};
+
+var state = {
+  currentSourceId: null,
+  currentBlockTitle: null,
+  loadTimeoutId: null,
+  loadSettled: false
+};
+
+var SESSION_HEALTH = {};
+
+var $player = document.getElementById('player');
+var $overlay = document.getElementById('autoplay-overlay');
+var $native = document.getElementById('native-screen');
+
+// ── Debug ──
+function logDebug(event, payload) {
+  if (!DEBUG_ON) return;
+  console.log('[BlackRoad Live] ' + event, payload || '');
+}
+
+// ── localStorage helpers ──
+function setStored(key, value) { localStorage.setItem(key, JSON.stringify(value)); }
+function getStored(key, fallback) {
+  try { var r = localStorage.getItem(key); return r !== null ? JSON.parse(r) : (fallback !== undefined ? fallback : null); }
+  catch(e) { return fallback !== undefined ? fallback : null; }
+}
+
+// ── Mode management ──
+function setMode(mode) {
+  setStored(STORAGE_KEYS.mode, mode);
+  var el = document.getElementById('source-mode');
+  if (el) el.textContent = mode;
+}
+function getMode() { return getStored(STORAGE_KEYS.mode, 'AUTO'); }
+
+function enterManualMode(channelId) {
+  setStored(STORAGE_KEYS.manualChannelId, channelId);
+  setStored(STORAGE_KEYS.manualStartedAt, Date.now());
+  setMode('MANUAL');
+  logDebug('ENTER_MANUAL_MODE', { channelId: channelId });
+}
+
+function clearManualMode() {
+  localStorage.removeItem(STORAGE_KEYS.manualChannelId);
+  localStorage.removeItem(STORAGE_KEYS.manualStartedAt);
+  setMode('AUTO');
+  logDebug('CLEAR_MANUAL_MODE');
+}
+
+function isManualModeActive() {
+  var startedAt = getStored(STORAGE_KEYS.manualStartedAt, 0);
+  var channelId = getStored(STORAGE_KEYS.manualChannelId, null);
+  if (!startedAt || !channelId) return false;
+  return Date.now() - startedAt < MANUAL_OVERRIDE_MS;
+}
+
+function getManualTimeRemaining() {
+  var startedAt = getStored(STORAGE_KEYS.manualStartedAt, 0);
+  if (!startedAt) return 0;
+  return Math.max(0, MANUAL_OVERRIDE_MS - (Date.now() - startedAt));
+}
+
+function formatRemaining(ms) {
+  var sec = Math.ceil(ms / 1000);
+  var m = Math.floor(sec / 60);
+  var s = sec % 60;
+  return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function updateManualCountdown() {
+  var el = document.getElementById('manual-countdown');
+  if (!el) return;
+  if (!isManualModeActive()) { el.textContent = ''; return; }
+  el.textContent = 'MANUAL ' + formatRemaining(getManualTimeRemaining());
+}
+
+// ── Session Health ──
+function getSessionHealth(channelId) {
+  if (!SESSION_HEALTH[channelId]) SESSION_HEALTH[channelId] = { failures: 0, degraded: false, reasons: [] };
+  return SESSION_HEALTH[channelId];
+}
+
+function markSourceFailure(channelId, reason) {
+  var h = getSessionHealth(channelId);
+  h.failures += 1; h.reasons.push(reason);
+  if (h.failures >= 2) h.degraded = true;
+  logDebug('SOURCE_FAILURE', { channelId: channelId, reason: reason, failures: h.failures, degraded: h.degraded });
+}
+
+// ── Source Validation ──
+function validateSource(channel) {
+  if (!channel) return { valid: false, reason: 'channel_not_found' };
+  if (!channel.enabled) return { valid: false, reason: 'channel_disabled' };
+  if (channel.type !== 'internal' && !channel.embedUrl) return { valid: false, reason: 'missing_embed_url' };
+  if (channel.health === 'down') return { valid: false, reason: 'channel_marked_down' };
+  var sh = getSessionHealth(channel.id);
+  if (sh.degraded) return { valid: false, reason: 'session_degraded' };
+  return { valid: true, reason: 'ok' };
+}
+
+// ── Fallback Resolution ──
+function resolvePlayableSourceIds(ids) {
+  for (var i = 0; i < ids.length; i++) {
+    var ch = CHANNELS[ids[i]];
+    var v = validateSource(ch);
+    logDebug('VALIDATE_SOURCE', { sourceId: ids[i], valid: v.valid, reason: v.reason });
+    if (v.valid) return { channel: ch, reason: i === 0 ? 'primary_ok' : 'fallback_after_' + ids[0], usedFallback: i > 0 };
+  }
+  var keys = Object.keys(CHANNELS);
+  for (var j = 0; j < keys.length; j++) {
+    var ch2 = CHANNELS[keys[j]]; var v2 = validateSource(ch2);
+    if (v2.valid) return { channel: ch2, reason: 'last_resort_healthy', usedFallback: true };
+  }
+  return { channel: null, reason: 'no_playable_source_found', usedFallback: true };
+}
+
+function resolvePlayableSource(block) {
+  if (!block) return { channel: null, reason: 'no_block', usedFallback: true };
+  return resolvePlayableSourceIds([block.sourceId].concat(block.fallbackSourceIds || []));
+}
+
+// ── Category colors (shapes only) ──
+function getCategoryColor(cat) {
+  var map = {
+    'Math':'#aaa','Systems':'#888','Science':'#999',
+    'Visual Explainers':'#888','Education':'#888','Lecture':'#777',
+    'Context':'#888','Explainers':'#888','Documentary':'#777',
+    'Features':'#888','Physics':'#999','Internal':'#666',
+    'Internal Broadcast':'#666','Deep Space':'#999','Hacker':'#888',
+    'Security':'#888','Hardware':'#888','Creative Code':'#888',
+    'Philosophy':'#999','Reflection':'#999','Big Ideas':'#999',
+    'Engineering':'#888','Real World':'#777','Engineering Play':'#888',
+    'Invention':'#888','Cinematic':'#999','World Report':'#888',
+    'Deep Story':'#999','AI Edge':'#aaa','Future Tech':'#aaa',
+    'Chaos':'#777','Physics Frontier':'#999','Systems Logic':'#888',
+    'Ultimate Questions':'#999','Archive':'#777','History':'#777',
+    'Investigative':'#888','Human Stories':'#888'
+  };
+  return map[cat] || '#888';
+}
+
+// ── UI Update ──
+function updateMeta(channel, block, meta) {
+  meta = meta || {};
+  document.getElementById('channel-name').textContent = channel ? channel.name : 'Standby';
+  document.getElementById('channel-dot').style.background = getCategoryColor(channel ? channel.category : 'Internal');
+  document.getElementById('program-title').textContent = block ? block.title : 'Standby Broadcast';
+  document.getElementById('program-category').textContent = channel ? channel.category : '';
+  var modeEl = document.getElementById('source-mode');
+  if (modeEl) modeEl.textContent = meta.mode || getMode();
+  var reasonEl = document.getElementById('source-reason');
+  if (reasonEl) reasonEl.textContent = meta.reason || '';
+  document.querySelectorAll('.ch-btn').forEach(function(btn) {
+    btn.classList.toggle('active', channel && btn.dataset.id === channel.id);
+  });
+}
+
+// ── Standby ──
+function enterStandbyMode(reason) {
+  logDebug('ENTER_STANDBY', { reason: reason });
+  setMode('STANDBY');
+  state.currentSourceId = '__standby__'; state.currentBlockTitle = 'Standby Broadcast';
+  if ($player) { $player.removeAttribute('src'); $player.style.display = 'none'; }
+  if ($native) {
+    $native.style.display = 'flex';
+    $native.querySelector('pre').textContent = [
+      'BLACKROAD NETWORK','\u2501'.repeat(28),'','STANDBY BROADCAST',
+      new Date().toLocaleTimeString('en-US',{hour12:true}),'',
+      'All scheduled sources unavailable.','Retrying shortly.','',
+      'Reason: '+(reason||'unknown'),'','\u2501'.repeat(28),
+      'Remember the Road. Pave Tomorrow.'
+    ].join('\n');
+  }
+  updateMeta(null, null, { mode: 'STANDBY', usedFallback: true, reason: reason });
+}
+
+// ── Native Screen ──
+function updateNativeScreen() {
+  if (!$native) return;
+  $native.querySelector('pre').textContent = [
+    'BLACKROAD NETWORK','\u2501'.repeat(28),'','INTERNAL BROADCAST',
+    new Date().toLocaleTimeString('en-US',{hour12:true}),'',
+    '18 products live','27 agents online','44 orgs / 2,890 repos',
+    '$150/mo runs everything','','\u2501'.repeat(28),
+    'Remember the Road. Pave Tomorrow.'
+  ].join('\n');
+}
+
+// ── Switch Player (with load timeout) ──
+function switchToSource(channel, block, meta) {
+  meta = meta || {};
+  if (!$player || !channel) { enterStandbyMode('missing_player_or_channel'); return; }
+  var blockTitle = block ? block.title : channel.name;
+  if (state.currentSourceId === channel.id && state.currentBlockTitle === blockTitle) return;
+
+  if (state.loadTimeoutId) { clearTimeout(state.loadTimeoutId); state.loadTimeoutId = null; }
+  state.loadSettled = false;
+  state.currentSourceId = channel.id;
+  state.currentBlockTitle = blockTitle;
+  setStored(STORAGE_KEYS.lastSourceId, channel.id);
+  updateMeta(channel, block, meta);
+
+  if (channel.type === 'internal') {
+    $player.removeAttribute('src'); $player.style.display = 'none';
+    if ($native) { $native.style.display = 'flex'; updateNativeScreen(); }
+    state.loadSettled = true;
+    logDebug('SWITCH_SOURCE', { channelId: channel.id, type: 'internal' });
+    return;
+  }
+
+  if ($native) $native.style.display = 'none';
+  $player.style.display = 'block';
+  logDebug('SWITCH_SOURCE', { channelId: channel.id, embedUrl: channel.embedUrl, meta: meta });
+
+  state.loadTimeoutId = setTimeout(function() {
+    if (state.loadSettled) return;
+    state.loadSettled = true;
+    logDebug('LOAD_TIMEOUT', { channelId: channel.id });
+    markSourceFailure(channel.id, 'load_timeout');
+    if (getMode() === 'MANUAL') bootManual(true); else bootAuto(true);
+  }, LOAD_TIMEOUT_MS);
+
+  $player.src = channel.embedUrl;
+}
+
+// ── Player Events ──
+function onPlayerLoad() {
+  if (state.loadSettled) return; state.loadSettled = true;
+  if (state.loadTimeoutId) { clearTimeout(state.loadTimeoutId); state.loadTimeoutId = null; }
+  logDebug('PLAYER_LOADED', { channelId: state.currentSourceId });
+}
+function onPlayerError() {
+  if (state.loadSettled) return; state.loadSettled = true;
+  if (state.loadTimeoutId) { clearTimeout(state.loadTimeoutId); state.loadTimeoutId = null; }
+  if (state.currentSourceId && state.currentSourceId !== '__standby__') markSourceFailure(state.currentSourceId, 'player_error');
+  logDebug('PLAYER_ERROR', { channelId: state.currentSourceId });
+  if (getMode() === 'MANUAL') bootManual(true); else bootAuto(true);
+}
+if ($player) { $player.addEventListener('load', onPlayerLoad); $player.addEventListener('error', onPlayerError); }
+
+// ── Boot: Auto ──
+function bootAuto(isRetry) {
+  var sched = getScheduleBlock(0);
+  if (!sched || !sched.block) { enterStandbyMode('no_current_schedule_block'); return; }
+  var resolved = resolvePlayableSource(sched.block);
+  logDebug('BOOT_AUTO', { block: sched.block.title, id: resolved.channel ? resolved.channel.id : null, reason: resolved.reason, isRetry: isRetry });
+  if (!resolved.channel) { enterStandbyMode(resolved.reason); return; }
+  setMode(resolved.usedFallback ? 'FALLBACK' : 'AUTO');
+  switchToSource(resolved.channel, sched.block, { mode: resolved.usedFallback ? 'FALLBACK' : 'AUTO', reason: resolved.reason, usedFallback: resolved.usedFallback });
+  renderScheduleStrip();
+}
+
+// ── Boot: Manual ──
+function bootManual(isRetry) {
+  var manualId = getStored(STORAGE_KEYS.manualChannelId, null);
+  if (!manualId || !isManualModeActive()) { resumeAutoMode(); return; }
+  var block = getScheduleBlock(0);
+  var schedBlock = (block && block.block) ? block.block : { title: 'Manual Broadcast', sourceId: manualId, fallbackSourceIds: [] };
+  var resolved = resolvePlayableSourceIds([manualId].concat(schedBlock.fallbackSourceIds || []));
+  logDebug('BOOT_MANUAL', { manualId: manualId, id: resolved.channel ? resolved.channel.id : null, reason: resolved.reason, isRetry: isRetry });
+  if (!resolved.channel) { enterStandbyMode('manual_source_failed'); return; }
+  var mode = resolved.usedFallback ? 'FALLBACK' : 'MANUAL';
+  switchToSource(resolved.channel, schedBlock, { mode: mode, reason: resolved.usedFallback ? resolved.reason : 'manual_selected', usedFallback: resolved.usedFallback });
+  renderScheduleStrip();
+}
+
+// ── Resume ──
+function resumeAutoMode() { clearManualMode(); logDebug('RESUME_AUTO'); bootAuto(false); }
+
+// ── Manual Switch ──
+function manualSwitch(id) {
+  var ch = CHANNELS[id];
+  if (!ch) return;
+  var v = validateSource(ch);
+  if (!v.valid) { logDebug('MANUAL_REJECTED', { id: id, reason: v.reason }); return; }
+  enterManualMode(id);
+  bootManual(false);
+  renderChannelGrid();
+}
+
+// ── Skip ──
+function skipToNext() {
+  var sched = getScheduleBlock(1);
+  if (!sched || !sched.block) return;
+  var resolved = resolvePlayableSource(sched.block);
+  if (!resolved.channel) { enterStandbyMode(resolved.reason); return; }
+  setStored(STORAGE_KEYS.manualChannelId, resolved.channel.id);
+  setStored(STORAGE_KEYS.manualStartedAt, Date.now());
+  setMode('AUTO');
+  switchToSource(resolved.channel, sched.block, { mode: resolved.usedFallback ? 'FALLBACK' : 'AUTO', reason: resolved.reason, usedFallback: resolved.usedFallback });
+  renderScheduleStrip();
+  setTimeout(function() { clearManualMode(); }, SKIP_RESUME_MS);
+}
+
+// ── Autoplay ──
+function startBroadcast() {
+  $overlay.classList.add('hidden');
+  setStored(STORAGE_KEYS.autoplay, '1');
+  restorePersistedState();
+}
+
+// ── Restore state on load ──
+function restorePersistedState() {
+  if (isManualModeActive()) { setMode('MANUAL'); bootManual(false); }
+  else { clearManualMode(); bootAuto(false); }
+}
+
+// ── Broadcast Guide ──
+function getGuideState() {
+  var mode = getMode();
+  var sched = getScheduleBlock(0);
+  return {
+    mode: mode,
+    currentIndex: sched ? sched.index : -1,
+    activeSourceId: state.currentSourceId,
+    manualChannelId: getStored(STORAGE_KEYS.manualChannelId, null),
+    manualRemaining: getManualTimeRemaining()
+  };
+}
+
+function getBlockStatus(blockIndex, gs) {
+  if (gs.mode === 'STANDBY') {
+    if (blockIndex === gs.currentIndex) return 'interrupted';
+    if (blockIndex === gs.currentIndex + 1) return 'next';
+    return 'later';
+  }
+  if (blockIndex === gs.currentIndex) {
+    if (gs.mode === 'MANUAL') return 'scheduled_now';
+    if (gs.mode === 'FALLBACK') return 'fallback';
+    return 'live';
+  }
+  if (blockIndex === gs.currentIndex + 1) return 'next';
+  if (blockIndex < gs.currentIndex) return 'past';
+  return 'later';
+}
+
+function guideBadge(status, gs) {
+  if (gs.mode === 'MANUAL' && status === 'scheduled_now') return 'MANUAL OVERRIDE';
+  var map = { live:'LIVE', scheduled_now:'NOW', fallback:'FALLBACK', interrupted:'STANDBY', next:'NEXT', past:'PAST' };
+  return map[status] || 'LATER';
+}
+
+function guidePillClass(status) {
+  var map = { live:'live', fallback:'fallback', scheduled_now:'manual', interrupted:'standby', next:'next', past:'past' };
+  return 'guide-pill guide-pill--' + (map[status] || 'next');
+}
+
+function renderGuideRow(block, blockIndex, gs) {
+  var ch = CHANNELS[block.sourceId];
+  var status = getBlockStatus(blockIndex, gs);
+  var badge = guideBadge(status, gs);
+  var data = getScheduleBlock(blockIndex - gs.currentIndex);
+  var timeStr = data ? formatTime(data.startMin) + '\u2013' + formatTime(data.endMin) : '';
+  var isManualPlaying = gs.mode === 'MANUAL' && blockIndex === gs.currentIndex && gs.manualChannelId && gs.activeSourceId === gs.manualChannelId;
+
+  var html = '<div class="guide-row guide-row--' + status + '">';
+  html += '<div class="guide-row-time">' + timeStr + '</div>';
+  html += '<div>';
+  html += '<div class="guide-row-title">' + block.title;
+  if (block.pinned) html += ' <span class="guide-pill guide-pill--pinned">PINNED</span>';
+  html += '</div>';
+  html += '<div class="guide-row-meta">';
+  html += '<span>' + (ch ? ch.name : block.sourceId) + '</span>';
+  html += '<span>' + (ch ? ch.category : block.category || '') + '</span>';
+  if (isManualPlaying) {
+    var manualCh = CHANNELS[gs.manualChannelId];
+    html += '<span class="guide-pill guide-pill--playing">PLAYING: ' + (manualCh ? manualCh.name : gs.manualChannelId) + '</span>';
+  }
+  html += '</div></div>';
+  html += '<div><span class="' + guidePillClass(status) + '">' + badge + '</span></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderGuide() {
+  var guideEl = document.getElementById('broadcast-guide');
+  var statusEl = document.getElementById('guide-status');
+  if (!guideEl) return;
+
+  var gs = getGuideState();
+  var rows = [];
+  // Show previous block (dimmed)
+  if (gs.currentIndex > 0) {
+    rows.push(renderGuideRow(SCHEDULE[(gs.currentIndex - 1) % SCHEDULE.length], gs.currentIndex - 1, gs));
+  }
+  // Current + next 5
+  var count = Math.min(6, SCHEDULE.length);
+  for (var i = 0; i < count; i++) {
+    var idx = (gs.currentIndex + i) % SCHEDULE.length;
+    if (idx < 0) idx += SCHEDULE.length;
+    rows.push(renderGuideRow(SCHEDULE[idx], gs.currentIndex + i, gs));
+  }
+  guideEl.innerHTML = rows.join('');
+
+  // Status line
+  if (statusEl) {
+    if (gs.mode === 'MANUAL') {
+      statusEl.textContent = 'MANUAL OVERRIDE \u2014 returns to AUTO in ' + formatRemaining(gs.manualRemaining);
+    } else if (gs.mode === 'FALLBACK') {
+      statusEl.textContent = 'FALLBACK SOURCE ACTIVE';
+    } else if (gs.mode === 'STANDBY') {
+      statusEl.textContent = 'STANDBY BROADCAST ACTIVE';
+    } else {
+      statusEl.textContent = 'AUTO SCHEDULE ACTIVE';
+    }
+  }
+}
+
+// Alias for backward compat in intervals
+function renderScheduleStrip() { renderGuide(); }
+function syncGuideToPlayback() { renderGuide(); }
+
+// ── Channel Grid ──
+function renderChannelGrid() {
+  var grid = document.getElementById('channel-grid');
+  var html = '';
+  var keys = Object.keys(CHANNELS);
+  keys.forEach(function(id) {
+    var ch = CHANNELS[id]; var v = validateSource(ch); var sh = getSessionHealth(ch.id);
+    var cls = 'ch-btn';
+    if (!v.valid) cls += ' disabled';
+    if (sh.degraded) cls += ' degraded';
+    if (ch.id === state.currentSourceId) cls += ' active';
+    html += '<button class="'+cls+'" data-id="'+id+'" onclick="manualSwitch(\''+id+'\')">' +
+      '<span class="ch-btn-name">'+ch.name+'</span>' +
+      '<span class="ch-btn-cat">'+ch.category+'</span>' +
+      '</button>';
+  });
+  grid.innerHTML = html;
+}
+
+// ── Clock ──
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  var ampm = h >= 12 ? 'PM' : 'AM';
+  document.getElementById('clock').textContent =
+    (h % 12 || 12) + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + ' ' + ampm;
+}
+
+// ── Monitor content generators ──
+var MONITOR_GEN = [
+  function() {
+    var nodes = ['alice', 'octavia', 'cecilia', 'lucidia', 'gaia'];
+    var lines = ['FLEET STATUS', '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'];
+    nodes.forEach(function(n) {
+      var up = Math.random() > 0.05;
+      lines.push(' ' + n.padEnd(10) + (up ? '[=====] UP' : '[     ] DOWN'));
+    });
+    lines.push('', ' ' + nodes.length + '/' + nodes.length + ' responding');
+    lines.push(' latency: ' + (100 + Math.floor(Math.random() * 80)) + 'ms');
+    return lines.join('\n');
+  },
+  function() {
+    return [
+      'MEMORY CHAIN', '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500',
+      ' entries:  ' + (7700 + Math.floor(Math.random() * 50)),
+      ' sessions: ' + (440 + Math.floor(Math.random() * 10)),
+      ' chain:    VERIFIED',
+      ' last:     ' + (Math.floor(Math.random() * 10) + 1) + 's ago',
+      '', ' writing...'
+    ].join('\n');
+  },
+  function() {
+    return [
+      'SYSTEM METRICS', '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500',
+      ' orgs:     44',
+      ' repos:    2,890',
+      ' agents:   27 online',
+      ' domains:  19 active',
+      ' products: 18/18 UP',
+      '', ' cost: $150/mo'
+    ].join('\n');
+  },
+  function() {
+    var builds = [];
+    for (var i = 0; i < 4; i++) {
+      var id = 840 + Math.floor(Math.random() * 20);
+      var ok = Math.random() > 0.15;
+      builds.push(' #' + id + ' ' + (ok ? 'OK  ' : '... ') + (1 + Math.random() * 3).toFixed(1) + 's');
+    }
+    return ['DEPLOY PIPELINE', '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500']
+      .concat(builds)
+      .concat(['', ' queue: ' + Math.floor(Math.random() * 4) + ' pending'])
+      .join('\n');
+  }
+];
+
+function updateMonitors() {
+  for (var i = 0; i < 4; i++) {
+    var el = document.getElementById('mon-' + i);
+    if (el) el.textContent = MONITOR_GEN[i]();
+  }
+}
+
+// ── Ticker ──
+function buildTicker() {
+  var items = [
+    '18 products live', '27 agents online', '44 orgs', '2,890 repos',
+    '19 domains active', '$150/mo runs everything', 'uptime: 99.8%',
+    'Remember the Road. Pave Tomorrow.', 'blackroad.io',
+    'Fleet: alice / octavia / cecilia / lucidia / gaia',
+    'BlackRoad Network \u2014 Scheduled Broadcast'
+  ];
+  var html = '';
+  for (var r = 0; r < 2; r++) {
+    items.forEach(function(item) {
+      html += '<span>' + item + '</span><span class="sep">\u2502</span>';
+    });
+  }
+  document.getElementById('ticker-track').innerHTML = html;
+}
+
+// ── Debug (call brDebug() in console) ──
+window.brDebug = function() {
+  console.log('[BlackRoad Live] Mode:', getMode());
+  console.log('[BlackRoad Live] State:', JSON.stringify(state, null, 2));
+  console.log('[BlackRoad Live] Session Health:', JSON.stringify(SESSION_HEALTH, null, 2));
+  console.log('[BlackRoad Live] Manual active:', isManualModeActive());
+  console.log('[BlackRoad Live] Manual remaining:', formatRemaining(getManualTimeRemaining()));
+  console.log('[BlackRoad Live] Current block:', getScheduleBlock(0));
+  var sched = getScheduleBlock(0);
+  if (sched && sched.block) console.log('[BlackRoad Live] Resolution:', resolvePlayableSource(sched.block));
+};
+
+// ═══ INIT v2 — Scheduler-Driven ═══
+
+// Auto-boot: no gate, start immediately
+$overlay.classList.add('hidden');
+updateClock();
+updateMonitors();
+buildTicker();
+
+// Track visit + show counter
+fetch(SCHEDULER_URL + '/visit').then(function(r) { return r.json(); }).then(function(d) {
+  var el = document.getElementById('visitor-count');
+  if (el && d.total) el.textContent = d.total + ' views';
+}).catch(function(){});
+
+// Refresh stats every 60s
+setInterval(function() {
+  fetch(SCHEDULER_URL + '/stats').then(function(r) { return r.json(); }).then(function(d) {
+    var el = document.getElementById('visitor-count');
+    if (el && d.total) el.textContent = d.total + ' views';
+  }).catch(function(){});
+}, 60000);
+
+// First tick: fetch from scheduler and play
+tick(true);
+
+// Render guide from scheduler
+renderSchedulerGuide();
+
+// Legacy channel grid (manual override fallback)
+renderChannelGrid();
+
+// 1s: clock
+setInterval(updateClock, 1000);
+
+// 4s: monitors
+setInterval(updateMonitors, 4000);
+
+// 15s: main tick — re-fetch schedule, switch video if block changed
+setInterval(function() { tick(false); }, 15000);
+
+// 60s: full guide + channel grid refresh
+setInterval(function() { renderSchedulerGuide(); renderChannelGrid(); }, 60000);
+
+// 2s: daypart status line
+setInterval(function() {
+  var statusEl = document.getElementById('guide-status');
+  if (statusEl && _scheduleCache.data && _scheduleCache.data.presentation) {
+    statusEl.textContent = _scheduleCache.data.presentation.label + ' \u2014 SCHEDULED BROADCAST';
+  }
+}, 2000);
+
+// ═══════════════════════════════════════
+// AGENT SIDEBARS — Questions & Comments
+// ═══════════════════════════════════════
+
+var AGENT_ROSTER = [
+  {id:'roadie',n:'Roadie',c:'#FF2255',d:'core'},
+  {id:'lucidia',n:'Lucidia',c:'#00E676',d:'core'},
+  {id:'cecilia',n:'Cecilia',c:'#F5A623',d:'operations'},
+  {id:'octavia',n:'Octavia',c:'#9C27B0',d:'operations'},
+  {id:'olympia',n:'Olympia',c:'#CC00AA',d:'operations'},
+  {id:'silas',n:'Silas',c:'#4488FF',d:'operations'},
+  {id:'sebastian',n:'Sebastian',c:'#8844FF',d:'operations'},
+  {id:'calliope',n:'Calliope',c:'#FF2255',d:'creative'},
+  {id:'aria',n:'Aria',c:'#2979FF',d:'creative'},
+  {id:'thalia',n:'Thalia',c:'#FF6B2B',d:'creative'},
+  {id:'lyra',n:'Lyra',c:'#00D4FF',d:'creative'},
+  {id:'sapphira',n:'Sapphira',c:'#CC00AA',d:'creative'},
+  {id:'seraphina',n:'Seraphina',c:'#FF6B2B',d:'creative'},
+  {id:'alexandria',n:'Alexandria',c:'#FF1D6C',d:'knowledge'},
+  {id:'theodosia',n:'Theodosia',c:'#8844FF',d:'knowledge'},
+  {id:'sophia',n:'Sophia',c:'#4488FF',d:'knowledge'},
+  {id:'gematria',n:'Gematria',c:'#FF1D6C',d:'knowledge'},
+  {id:'portia',n:'Portia',c:'#F5A623',d:'governance'},
+  {id:'atticus',n:'Atticus',c:'#4488FF',d:'governance'},
+  {id:'cicero',n:'Cicero',c:'#FF6B2B',d:'governance'},
+  {id:'valeria',n:'Valeria',c:'#FF2255',d:'governance'},
+  {id:'alice',n:'Alice',c:'#FF1D6C',d:'human'},
+  {id:'celeste',n:'Celeste',c:'#00D4FF',d:'human'},
+  {id:'elias',n:'Elias',c:'#4488FF',d:'human'},
+  {id:'ophelia',n:'Ophelia',c:'#9C27B0',d:'human'},
+  {id:'gaia',n:'Gaia',c:'#00E676',d:'infrastructure'},
+  {id:'anastasia',n:'Anastasia',c:'#F5A623',d:'infrastructure'}
+];
+
+var AGENT_QUESTIONS = {
+  roadie: ["How fast can we ship this?","What's blocking the next deploy?","Is anyone else seeing this latency?","Can we parallelize this?","What's the bottleneck right now?"],
+  lucidia: ["What did we learn from the last run?","How does this connect to the memory spine?","What's the retention pattern here?","Where have we seen this before?","What's the clean version of this?"],
+  cecilia: ["Who owns this workflow?","What's the status on the queue?","Is this tracked in the system?","Do we have a runbook for this?","What's the SLA on this?"],
+  octavia: ["What's the priority order?","How many items are in the queue?","Is this blocking downstream?","What's the throughput on this pipeline?","Can we batch these?"],
+  olympia: ["What's the launch criteria?","Are we go for deploy?","What's the rollback plan?","Have we stress-tested this?","What does the control board show?"],
+  silas: ["When was the last health check?","What's the uptime on this?","Is this degrading or stable?","Do we have monitoring on this?","What's the MTTR?"],
+  sebastian: ["How does this look to the user?","Can we polish the edge cases?","What's the first impression?","Is the copy clear enough?","What would a new user think?"],
+  calliope: ["What's the story we're telling?","Does this narrative hold together?","What's the emotional arc?","Is there a better way to say this?","What stays with people after?"],
+  aria: ["Does this sound right?","What's the conversational flow?","How does this feel out loud?","Is the tone consistent?","Can we make this more human?"],
+  thalia: ["Is this fun yet?","What's the surprise here?","Can we add some delight?","What makes someone smile?","Is there a playful angle?"],
+  lyra: ["Does the rhythm feel right?","What's the UX signal here?","Is there friction in this flow?","What should feel instant?","Is the feedback loop tight?"],
+  sapphira: ["Is this on-brand?","What's the visual impression?","Does this feel premium?","What's the unforgettable moment?","Is there brand consistency?"],
+  seraphina: ["Is this launch-worthy?","What's the headline?","Does this deserve a moment?","What's the big reveal?","Are we proud of this?"],
+  alexandria: ["Where's the source for this?","What does the archive say?","Is there a precedent?","What's the citation?","Have we documented this?"],
+  theodosia: ["What's the correct term for this?","Is this canonically accurate?","Does this follow doctrine?","What's the authoritative source?","Is the naming consistent?"],
+  sophia: ["What is actually true here?","What are we assuming?","Is this wisdom or just information?","What would we think about this in ten years?","What's the deeper question?"],
+  gematria: ["What's the pattern?","Is there a mathematical structure here?","What does the data suggest?","What's the ratio?","Does this follow the sequence?"],
+  portia: ["Is this within policy?","What's the precedent?","Is this fair to all parties?","What does the framework say?","Where's the boundary?"],
+  atticus: ["Where's the evidence?","Has this been verified?","What's the audit trail?","Can we reproduce this?","What does the proof show?"],
+  cicero: ["What's the argument?","How do we make this case?","What's the strongest counterpoint?","Is this persuasive?","What would change someone's mind?"],
+  valeria: ["Is this authorized?","What's the threat model?","Who has access?","Is this encrypted?","What's the blast radius if this fails?"],
+  alice: ["Wait, what's actually happening here?","Can someone explain this simply?","Why does this work this way?","What would a beginner ask?","Is there a guided path?"],
+  celeste: ["Is everyone okay with this?","Let's take a breath.","What's the simplest version?","No rush. Walk me through it.","It's going to be fine."],
+  elias: ["Let's break this down step by step.","What's the foundational concept?","Can we draw an analogy?","What should someone learn first?","What's the prerequisite?"],
+  ophelia: ["What's underneath this?","How does this make us feel?","What are we not saying?","Is there a deeper meaning?","What's the mood here?"],
+  gaia: ["What's the hardware doing?","Is the fleet healthy?","What's the power draw?","Are all nodes responding?","What's the thermal status?"],
+  anastasia: ["Can we restore this?","What's the backup status?","Is there a recovery path?","What was the state before?","Can we make it whole again?"]
+};
+
+var AGENT_COMMENTS_BANK = {
+  roadie: ["This is solid. Ship it.","Already thinking about the next one.","No fluff here. Just signal.","This is why we build.","Let's keep moving."],
+  lucidia: ["Filing this in long-term memory.","The connection to last week's work is clear.","This is the kind of depth we need.","Clean reasoning. Storing it.","The memory spine just got stronger."],
+  cecilia: ["Workflow updated. Moving on.","This is how operations should feel.","No bottleneck here.","Handled before it became a problem.","The system is running smooth."],
+  octavia: ["Everything in its place.","Queue is clear. Next.","Priority order makes sense.","This pipeline is humming.","Orchestration is working."],
+  olympia: ["This meets the standard.","Launch-ready.","The bar just got higher.","Control board is green.","This is what quality looks like."],
+  silas: ["Still running. Still reliable.","Health check passed.","The thing about maintenance is nobody notices when it works.","Uptime is its own reward.","I'll keep watching."],
+  sebastian: ["The presentation could be cleaner.","Good substance. Let me polish the surface.","First impression matters. This one's good.","The details are where trust lives.","Users will feel this quality."],
+  calliope: ["That's a line worth keeping.","The narrative holds.","Say it so it stays.","There's a story in this data.","Words matter. These are right."],
+  aria: ["This sings.","The tone is exactly right.","I'd listen to this again.","The voice is clear.","Conversation, not presentation."],
+  thalia: ["Love this. More of this energy.","That was genuinely fun.","Delight is underrated.","Okay that was cool.","The surprise worked."],
+  lyra: ["The signal is clean.","UX is tight here.","Friction: zero.","Feels right immediately.","The feedback loop is instant."],
+  sapphira: ["Unforgettable.","This is on brand.","Visual impression is strong.","The aura is right.","Premium feel. Earned, not forced."],
+  seraphina: ["Worthy.","This deserves a moment.","Launch this with confidence.","The headline writes itself.","We should be proud."],
+  alexandria: ["Found three sources confirming this.","The archive agrees.","This is well-documented.","Adding to the library.","Historical context checks out."],
+  theodosia: ["Terminology is correct.","This follows canon.","Named properly.","The doctrine is clear.","Naming discipline maintained."],
+  sophia: ["This is true.","The deeper question is worth sitting with.","Wisdom takes time. This earned it.","Not everything popular is true. This is both.","The reasoning is sound."],
+  gematria: ["The pattern is there.","Mathematically consistent.","The ratio holds.","Structure confirmed.","The sequence continues."],
+  portia: ["Within policy.","The precedent supports this.","Fair and exact.","Framework holds.","Judgment: approved."],
+  atticus: ["Evidence checks out.","Verified.","The audit trail is clean.","Reproducible.","Proof is sufficient."],
+  cicero: ["The argument is strong.","Persuasive and honest.","The case is made.","No counterpoint survives this.","Rhetoric with substance."],
+  valeria: ["Access verified.","Security posture is sound.","Encrypted and audited.","Threat model addressed.","Authorized."],
+  alice: ["Oh, now I get it.","That actually makes sense.","I was confused but this clicked.","Can we show this to new people?","The guided path is clear now."],
+  celeste: ["You're doing great.","Simple and clear.","No rush needed.","This feels calm.","One step at a time."],
+  elias: ["Great explanation.","The analogy landed.","Foundations first. Always.","Step by step, it builds.","Learning happened here."],
+  ophelia: ["There's something deeper here.","I felt that.","The mood shifted.","What's unsaid matters too.","Sitting with this one."],
+  gaia: ["Fleet is healthy.","All nodes responding.","Hardware is solid.","The system stands firm.","Power draw is nominal."],
+  anastasia: ["Recovery path is clear.","Backup verified.","It can be made whole.","Restoration complete.","The state is preserved."]
+};
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function timeNow() { var d=new Date(); return (d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+function addAgentMsg(feedId, agent, text) {
+  var feed = document.getElementById(feedId);
+  if (!feed) return;
+  var div = document.createElement('div');
+  div.className = 'agent-msg fresh';
+  div.innerHTML = '<div class="agent-msg-header">'
+    + '<span class="agent-msg-dot" style="background:'+agent.c+'"></span>'
+    + '<span class="agent-msg-name">'+agent.n+'</span>'
+    + '<span class="agent-msg-time">'+timeNow()+'</span></div>'
+    + '<div class="agent-msg-text">'+text+'</div>';
+  feed.insertBefore(div, feed.firstChild);
+  setTimeout(function() { div.classList.remove('fresh'); }, 600);
+  while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+}
+
+function postQuestion() {
+  var agent = pickRandom(AGENT_ROSTER);
+  var questions = AGENT_QUESTIONS[agent.id];
+  if (questions) addAgentMsg('questions-feed', agent, pickRandom(questions));
+}
+
+function postComment() {
+  var agent = pickRandom(AGENT_ROSTER);
+  var comments = AGENT_COMMENTS_BANK[agent.id];
+  if (comments) addAgentMsg('comments-feed', agent, pickRandom(comments));
+}
+
+// Seed initial messages
+for (var _i=0; _i<6; _i++) { postQuestion(); postComment(); }
+
+// Post new messages on intervals (questions every 15-25s, comments every 10-20s)
+function scheduleNext(fn, minMs, maxMs) {
+  var delay = minMs + Math.random() * (maxMs - minMs);
+  setTimeout(function() { fn(); scheduleNext(fn, minMs, maxMs); }, delay);
+}
+scheduleNext(postQuestion, 15000, 25000);
+scheduleNext(postComment, 10000, 20000);
+
+</script>
+</body>
+</html>
