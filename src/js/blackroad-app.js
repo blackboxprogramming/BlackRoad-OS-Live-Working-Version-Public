@@ -59,20 +59,51 @@
       remove(key) { localStorage.removeItem('br.' + key); }
     },
 
-    // ── Chat (connects to Product API on Cecilia) ──
-    chat: async function(message, agent) {
+    // ── Chat (streaming from Product API on Cecilia) ──
+    chat: async function(message, agent, onToken) {
       agent = agent || 'roadie';
       var product = BR.appName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+      // If onToken callback provided, use streaming
+      if (onToken) {
+        try {
+          var resp = await fetch(BR.api + '/chat/stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ agent: agent, message: message, product: product })
+          });
+          var reader = resp.body.getReader();
+          var decoder = new TextDecoder();
+          var full = '';
+          while (true) {
+            var result = await reader.read();
+            if (result.done) break;
+            var chunk = decoder.decode(result.value, {stream: true});
+            var lines = chunk.split('\n');
+            for (var i = 0; i < lines.length; i++) {
+              var line = lines[i].trim();
+              if (line.startsWith('data: ')) {
+                try {
+                  var data = JSON.parse(line.slice(6));
+                  if (data.token) { full += data.token; onToken(data.token, full); }
+                  if (data.done) return full;
+                } catch(e) {}
+              }
+            }
+          }
+          return full;
+        } catch(e) {}
+        return "Agent offline.";
+      }
+
+      // Fallback: non-streaming
       try {
         var resp = await fetch(BR.api + '/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agent: agent, message: message, product: product })
         });
-        if (resp.ok) {
-          var data = await resp.json();
-          return data.response || '';
-        }
+        if (resp.ok) { var data = await resp.json(); return data.response || ''; }
       } catch(e) {}
       return "Agent offline. Connect to BlackRoad local network for AI features.";
     },
@@ -283,11 +314,19 @@
         if (!msg) return;
         input.value = '';
         var msgs = document.getElementById('br-chat-messages');
+        // User message
         msgs.innerHTML += '<div style="padding:8px 12px;margin:4px 0;background:#111;border-radius:6px;color:#d4d4d4;font-size:13px">' + msg + '</div>';
+        // Agent response div (will fill character by character)
+        var responseDiv = document.createElement('div');
+        responseDiv.style.cssText = 'padding:8px 12px;margin:4px 0;background:#0a0a0a;border:1px solid #191919;border-radius:6px;color:#888;font-size:13px;white-space:pre-wrap;';
+        responseDiv.textContent = '';
+        msgs.appendChild(responseDiv);
         msgs.scrollTop = msgs.scrollHeight;
-        var response = await BR.chat(msg, a.agent);
-        msgs.innerHTML += '<div style="padding:8px 12px;margin:4px 0;background:#0a0a0a;border:1px solid #191919;border-radius:6px;color:#888;font-size:13px">' + response + '</div>';
-        msgs.scrollTop = msgs.scrollHeight;
+        // Stream character by character
+        await BR.chat(msg, a.agent, function(token, full) {
+          responseDiv.textContent = full;
+          msgs.scrollTop = msgs.scrollHeight;
+        });
       };
 
       document.getElementById('br-chat-send').onclick = sendMsg;
