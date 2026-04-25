@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "feature_flags": {
+    "global_enabled": true
+  },
+  "maintenance_mode": {
+    "allowlist_endpoints": ["GET /health/live", "GET /health/ready"],
+    "status_code": 503,
+    "retry_after_seconds": 60
+  },
+  "step_up": {
+    "rules": [
+      {
+        "match": { "endpoint": "POST /secrets/materialize" },
+        "required": true,
+        "mechanisms": ["mfa-approval"]
+      },
+      {
+        "match": { "endpoint": "POST /fossil/override" },
+        "required": true,
+        "mechanisms": ["dual-control"]
+      }
+    ]
+  },
+  "endpoints": {}
+  "feature_flags": {
+    "global_enabled": true,
+    "require_step_up": true
+  },
+  "break_glass": {
+    "enabled": true,
+    "alg": "HS256",
+    "hmac_secret_env": "AUTOPAL_BREAK_GLASS_SECRET",
+    "ttl_seconds": 600,
+    "allowlist_endpoints": [
+      "POST /secrets/materialize",
+      "POST /fossil/override",
+      "POST /approvals/{rid}/approve"
+    ],
+    "allowed_subjects": ["ops-oncall", "sre-lead"]
+  },
+  "audit": {
+    "enabled": true,
+    "sink": "stdout",
+    "redact_values": true
+  "auth": {
+    "oidc": {
+      "issuer": "https://issuer.example.com/",
+      "jwks_url": "https://issuer.example.com/.well-known/jwks.json",
+      "clock_skew_seconds": 300,
+      "audience_allowlist": [
+        "gha:org/repo@refs/heads/main",
+        "gha:org/repo@refs/tags/v*"
+      ]
+    }
+  },
+  "rate_limits": {
+    "global_per_minute": 600,
+    "per_caller_per_minute": 60,
+    "endpoints": {
+      "POST /secrets/materialize": { "per_minute": 10, "burst": 3 },
+      "POST /fossil/override":     { "per_minute": 6,  "burst": 2 }
+    }
+  },
+  "dual_control": {
+    "provider": "webhook",
+    "callback_url": "https://approvals.example.com/callback",
+    "ttl_seconds": 900,
+    "require_distinct_approvers": true
+  }
+}

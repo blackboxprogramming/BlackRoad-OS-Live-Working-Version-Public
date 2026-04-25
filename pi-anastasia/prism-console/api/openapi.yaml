@@ -1,0 +1,378 @@
+openapi: 3.1.0
+info:
+  title: BlackRoad API
+  version: '1.0.0'
+  description: |
+    OpenAPI specification for the BlackRoad API service including health,
+    memory, and logging endpoints.
+servers:
+  - url: http://localhost:4000
+paths:
+  /health:
+    get:
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Service is running
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  version:
+                    type: string
+                    example: '1.0.0'
+                  uptime:
+                    type: number
+                    format: float
+                    example: 12.34
+  /api/health:
+    get:
+      summary: Readiness check including API and LLM bridge
+      responses:
+        '200':
+          description: API and bridge status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  version:
+                    type: string
+                  uptime:
+                    type: number
+                    format: float
+                  services:
+                    type: object
+                    properties:
+                      api:
+                        type: boolean
+                        example: true
+                      llm:
+                        type: boolean
+                        example: true
+        '502':
+          description: One or more services unavailable
+  /api/llm/health:
+    get:
+      summary: LLM bridge health
+      responses:
+        '200':
+          description: Bridge reachable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '502':
+          description: Bridge unreachable
+  /api/memory/index:
+    post:
+      summary: Index a memory document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Optional document identifier
+                text:
+                  type: string
+                  description: Text content to index
+                source:
+                  type: string
+                  nullable: true
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Document indexed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    type: string
+                    description: Identifier of the stored document
+        '400':
+          description: Invalid request
+  /api/memory/search:
+    post:
+      summary: Search indexed memory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                q:
+                  type: string
+                  description: Query text
+                top_k:
+                  type: integer
+                  minimum: 1
+                  maximum: 20
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        score:
+                          type: number
+                        text:
+                          type: string
+                        meta:
+                          type: object
+        '400':
+          description: Invalid request
+  /api/contradictions:
+    get:
+      summary: List contradictory claims
+      responses:
+        '200':
+          description: Contradiction summary
+      summary: List logged contradictions
+      responses:
+        '200':
+          description: Recent contradictions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contradictions:
+                    type: object
+                    properties:
+                      issues:
+                        type: integer
+                      summary:
+                        type: object
+                        properties:
+                          total_claims:
+                            type: integer
+                          contradictory_claims:
+                            type: integer
+                          unresolved_observations:
+                            type: integer
+                      records:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            claim_id:
+                              type: string
+                            topic:
+                              type: string
+                            statement:
+                              type: string
+                            support:
+                              type: number
+                            refute:
+                              type: number
+                            unknown:
+                              type: number
+                            observation_count:
+                              type: integer
+                            open_observations:
+                              type: integer
+                            last_observed_at:
+                              type: string
+                              format: date-time
+                            observations:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  id:
+                                    type: integer
+                                  claim_id:
+                                    type: string
+                                  polarity:
+                                    type: integer
+                                  confidence:
+                                    type: number
+                                  note:
+                                    type: string
+                                  observed_at:
+                                    type: string
+                                    format: date-time
+                                  status:
+                                    type: string
+                                  source_kind:
+                                    type: string
+                                  source_label:
+                                    type: string
+                                  source_uri:
+                                    type: string
+    post:
+      summary: Record an observation for a claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                claim_id:
+                  type: string
+                topic:
+                  type: string
+                statement:
+                  type: string
+                polarity:
+                  type: integer
+                  enum: [-1, 0, 1]
+                confidence:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                note:
+                  type: string
+                source:
+                  type: object
+                  properties:
+                    kind:
+                      type: string
+                    label:
+                      type: string
+                    uri:
+                      type: string
+              required:
+                - topic
+                - statement
+      responses:
+        '200':
+          description: Observation recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  observation:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      claim_id:
+                        type: string
+                      polarity:
+                        type: integer
+                      confidence:
+                        type: number
+                      note:
+                        type: string
+                      observed_at:
+                        type: string
+                        format: date-time
+                      status:
+                        type: string
+                      source_kind:
+                        type: string
+                      source_label:
+                        type: string
+                      source_uri:
+                        type: string
+                  claim:
+                    type: object
+                    properties:
+                      claim_id:
+                        type: string
+                      topic:
+                        type: string
+                      statement:
+                        type: string
+                      support:
+                        type: number
+                      refute:
+                        type: number
+                      unknown:
+                        type: number
+                      observation_count:
+                        type: integer
+                      open_observations:
+                        type: integer
+                      last_observed_at:
+                        type: string
+                        format: date-time
+  /api/contradictions/{observationId}/resolve:
+    post:
+      summary: Update the status of an observation
+      parameters:
+        - in: path
+          name: observationId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum: [open, investigating, resolved]
+                note:
+                  type: string
+      responses:
+        '200':
+          description: Updated observation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  observation:
+                    type: object
+                  claim:
+                    type: object
+                    type: array
+                    items:
+                      type: object
+  /api/events:
+    get:
+      summary: List recent events
+      responses:
+        '200':
+          description: Recent events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      type: object
