@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drive Shell (Mock)</title>
+    <style>
+      :root{
+        --bg:#0b0b0b;
+        --panel:rgba(255,255,255,0.05);
+        --panel2:rgba(255,255,255,0.07);
+        --line:rgba(255,255,255,0.12);
+        --text:rgba(255,255,255,0.88);
+        --muted:rgba(255,255,255,0.60);
+        --font:system-ui,-apple-system,"Segoe UI",sans-serif;
+        --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0}
+      body{background:transparent;color:var(--text);font-family:var(--font)}
+
+      .shell{
+        height:100%;
+        display:grid;
+        grid-template-rows: auto 1fr;
+      }
+      .top{
+        padding: 10px 12px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+        background: rgba(0,0,0,0.20);
+        border-bottom: 1px solid rgba(255,255,255,0.10);
+      }
+      .left{
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        min-width:0;
+      }
+      .badge{
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.90);
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+        flex: 0 0 auto;
+      }
+      .app{
+        font-weight: 700;
+        letter-spacing: .2px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .hint{
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--muted);
+        white-space:nowrap;
+      }
+      .actions{
+        display:flex;
+        gap: 8px;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+      }
+      .chip{
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: rgba(255,255,255,0.84);
+        font-family: var(--mono);
+        font-size: 11px;
+        cursor:pointer;
+        user-select:none;
+      }
+      .chip:active{ transform: translateY(1px); }
+
+      .main{
+        min-height:0;
+        display:grid;
+        grid-template-columns: 220px 1fr;
+      }
+      .nav{
+        padding: 12px;
+        border-right: 1px solid rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.02);
+      }
+      .nav .item{
+        padding: 9px 10px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        color: rgba(255,255,255,0.78);
+        font-size: 12px;
+      }
+      .nav .item.active{
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+      }
+      .nav .label{
+        font-family: var(--mono);
+        font-size: 10px;
+        color: rgba(255,255,255,0.52);
+        padding: 10px 6px 6px;
+        letter-spacing: .06em;
+      }
+
+      .content{
+        min-height:0;
+        padding: 12px;
+        display:grid;
+        grid-template-rows: auto 1fr;
+        gap: 12px;
+      }
+      .bar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+      }
+      .path{
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(255,255,255,0.72);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .search{
+        flex:1;
+        max-width: 360px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(255,255,255,0.84);
+        outline:none;
+      }
+      .table{
+        min-height:0;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        overflow:hidden;
+        display:grid;
+        grid-template-rows: auto 1fr;
+      }
+      .thead, .row{
+        display:grid;
+        grid-template-columns: 1.2fr 0.6fr 0.6fr;
+        gap: 10px;
+        align-items:center;
+      }
+      .thead{
+        padding: 10px 12px;
+        background: rgba(0,0,0,0.10);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: .08em;
+        color: rgba(255,255,255,0.55);
+      }
+      .tbody{
+        overflow:auto;
+      }
+      .row{
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 12px;
+        color: rgba(255,255,255,0.78);
+      }
+      .row:hover{ background: rgba(255,255,255,0.03); }
+      .fname{
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        min-width:0;
+      }
+      .dot{
+        width: 10px;
+        height: 10px;
+        border-radius: 4px;
+        background: rgba(255,255,255,0.22);
+        border: 1px solid rgba(255,255,255,0.16);
+        flex: 0 0 auto;
+      }
+      .fn{
+        min-width:0;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .muted{ color: rgba(255,255,255,0.55); font-family: var(--mono); font-size: 11px; }
+
+      @media (max-width: 780px){
+        .main{ grid-template-columns: 1fr; }
+        .nav{ display:none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="top">
+        <div class="left">
+          <div class="badge" aria-hidden="true"></div>
+          <div class="app" id="appName">App</div>
+          <div class="hint">Drive-style shell (mock)</div>
+        </div>
+        <div class="actions">
+          <div class="chip" data-open="https://www.google.com">Google</div>
+          <div class="chip" data-open="https://chatgpt.com">ChatGPT</div>
+          <div class="chip" data-open="https://mail.google.com">Gmail</div>
+          <div class="chip" data-open="https://drive.google.com">Drive</div>
+          <div class="chip" data-open="https://github.com">GitHub</div>
+          <div class="chip" data-open="https://www.youtube.com">YouTube</div>
+          <div class="chip" data-open="https://open.spotify.com">Spotify</div>
+          <div class="chip" data-open="https://www.reddit.com">Reddit</div>
+          <div class="chip" data-open="https://www.facebook.com">Facebook</div>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="nav">
+          <div class="item active">My Drive</div>
+          <div class="item">Shared</div>
+          <div class="item">Recent</div>
+          <div class="item">Starred</div>
+          <div class="label">TOOLS</div>
+          <div class="item">Uploads</div>
+          <div class="item">Indexes</div>
+          <div class="item">Exports</div>
+        </div>
+
+        <div class="content">
+          <div class="bar">
+            <div class="path" id="path">/Apps/<span id="pathApp">App</span>/</div>
+            <input class="search" id="search" placeholder="Search files (mock)..." />
+          </div>
+
+          <div class="table" aria-label="files">
+            <div class="thead">
+              <div>Name</div>
+              <div>Type</div>
+              <div>Updated</div>
+            </div>
+            <div class="tbody" id="rows"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const app = params.get('app') || 'App';
+      document.getElementById('appName').textContent = app;
+      document.getElementById('pathApp').textContent = app;
+
+      const sample = [
+        { name: 'Index.md', type: 'DOC', updated: 'Today' },
+        { name: 'Inbox', type: 'FOLDER', updated: 'Today' },
+        { name: 'Projects', type: 'FOLDER', updated: 'Yesterday' },
+        { name: 'Links.json', type: 'JSON', updated: 'This week' },
+        { name: 'Notes.rtf', type: 'RTF', updated: 'This week' },
+        { name: 'Exports', type: 'FOLDER', updated: 'This month' },
+      ];
+
+      const rows = document.getElementById('rows');
+      function render(list){
+        rows.innerHTML = '';
+        for (const r of list){
+          const el = document.createElement('div');
+          el.className = 'row';
+          el.innerHTML = `
+            <div class="fname"><div class="dot" aria-hidden="true"></div><div class="fn">${r.name}</div></div>
+            <div class="muted">${r.type}</div>
+            <div class="muted">${r.updated}</div>
+          `;
+          rows.appendChild(el);
+        }
+      }
+      render(sample);
+
+      document.querySelectorAll('[data-open]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const url = el.getAttribute('data-open');
+          if (url) window.open(url, '_blank', 'noopener');
+        });
+      });
+
+      const search = document.getElementById('search');
+      search.addEventListener('input', () => {
+        const q = (search.value || '').trim().toLowerCase();
+        if (!q) return render(sample);
+        render(sample.filter((r) => r.name.toLowerCase().includes(q) || r.type.toLowerCase().includes(q)));
+      });
+    </script>
+  </body>
+</html>
+

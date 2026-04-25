@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mockups — BlackRoad OS</title>
+<meta name="description" content="Design mockups for BlackRoad OS products.">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/road-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--card:#0a0a0a;--elevated:#111;
+  --border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6}
+::selection{background:rgba(255,255,255,.1)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:#222;border-radius:2px}
+a{color:var(--text);text-decoration:none}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(10,10,10,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);position:sticky;top:0;z-index:10}
+.nav-logo{font-weight:700;font-size:18px;color:var(--white);display:flex;align-items:center;gap:10px}
+.nav-bar{width:24px;height:4px;border-radius:2px;background:var(--white)}
+.nav-links{display:flex;gap:24px}
+.nav-links a{font-size:13px;font-weight:500;color:var(--sub);transition:color .15s}
+.nav-links a:hover{color:var(--white)}
+
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+
+.hero{padding:80px 0 48px;text-align:center}
+.hero-eyebrow{font-family:var(--jb);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.hero h1{font-size:48px;font-weight:700;letter-spacing:-.04em;color:var(--white);line-height:1.05}
+.hero p{font-size:16px;color:var(--sub);max-width:560px;margin:18px auto 0}
+
+.filter-bar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.filter-btn{padding:6px 14px;border-radius:999px;font-size:12px;font-weight:500;background:var(--elevated);border:1px solid var(--border);color:var(--sub);cursor:pointer;transition:all .15s}
+.filter-btn:hover{color:var(--white);border-color:#333}
+.filter-btn.active{color:#000;background:var(--white);border-color:var(--white)}
+.mockups{display:flex;flex-direction:column;gap:32px;padding-bottom:80px}
+
+.mockup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding-bottom:80px}
+.mockup-link{display:block;padding:14px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;transition:border-color .15s,transform .15s}
+.mockup-link:hover{border-color:#333;transform:translateY(-1px)}
+.mockup-link-name{font-size:14px;font-weight:600;color:var(--white);margin-bottom:4px}
+.mockup-link-cat{font-family:var(--jb);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+@media(max-width:900px){.mockup-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.mockup-grid{grid-template-columns:1fr}}
+
+.footer{padding:40px 0;border-top:1px solid var(--border);text-align:center}
+.footer a{font-size:13px;color:var(--sub);margin:0 12px}
+.footer a:hover{color:var(--white)}
+.footer-copy{font-size:11px;color:var(--muted);margin-top:12px}
+
+@media(max-width:600px){.hero h1{font-size:32px}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="/" class="nav-logo"><div class="nav-bar"></div>BlackRoad OS</a>
+  <div class="nav-links">
+    <a href="/">OS</a>
+    <a href="/products">Products</a>
+    <a href="/mockups" style="color:#fff">Mockups</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-eyebrow">Design Reference</div>
+    <h1>Mockups</h1>
+    <p>Product mockups and design direction. Black and white only. Ideas first, color later.</p>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filter-btn active" onclick="filterMockups('all')">All</div>
+    <div class="filter-btn" onclick="filterMockups('product')">Products</div>
+    <div class="filter-btn" onclick="filterMockups('social')">Social</div>
+    <div class="filter-btn" onclick="filterMockups('domain')">Domains</div>
+    <div class="filter-btn" onclick="filterMockups('video')">Video</div>
+    <div class="filter-btn" onclick="filterMockups('tool')">Tools</div>
+  </div>
+
+  <div class="mockup-grid" id="mockup-list"></div>
+
+  <script>
+  var MOCKUPS = [
+    {slug:'youtube-mockup',title:'RoadTube',cat:'social'},
+    {slug:'spotify-mockup',title:'RoadBand / Spotify',cat:'social'},
+    {slug:'netflix-mockup',title:'RoadStream / Netflix',cat:'social'},
+    {slug:'twitter-mockup',title:'BackRoad / Twitter',cat:'social'},
+    {slug:'instagram-mockup',title:'BackRoad / Instagram',cat:'social'},
+    {slug:'facebook-mockup',title:'BackRoad / Facebook',cat:'social'},
+    {slug:'tiktok-mockup',title:'BackRoad / TikTok',cat:'social'},
+    {slug:'snapchat-mockup',title:'BackRoad / Snapchat',cat:'social'},
+    {slug:'linkedin-mockup',title:'BackRoad / LinkedIn',cat:'social'},
+    {slug:'backroad-feed',title:'BackRoad Feed',cat:'product'},
+    {slug:'backroad-gallery',title:'BackRoad Gallery',cat:'product'},
+    {slug:'backroad-stories',title:'BackRoad Stories',cat:'product'},
+    {slug:'backroad-tube',title:'BackRoad Tube',cat:'product'},
+    {slug:'roadchat-mockup',title:'Detour / Chat',cat:'product'},
+    {slug:'roadchat-app-mockup',title:'Detour / Chat App',cat:'product'},
+    {slug:'roadmsn-mockup',title:'Detour / MSN',cat:'product'},
+    {slug:'roadim-mockup',title:'Detour / IM',cat:'product'},
+    {slug:'roadie-tutor-mockup',title:'Roadie Tutor',cat:'product'},
+    {slug:'roadie-room',title:'Roadie Room',cat:'product'},
+    {slug:'roadwork-mockup',title:'RoadWork',cat:'product'},
+    {slug:'roadpay-mockup',title:'Tollbooth / Pay',cat:'product'},
+    {slug:'roadsearch-mockup',title:'RoadView / Search',cat:'product'},
+    {slug:'roadview-communities',title:'RoadView Communities',cat:'product'},
+    {slug:'carkeys-app-mockup',title:'CarKeys Vault',cat:'product'},
+    {slug:'vault-mockup',title:'Vault',cat:'product'},
+    {slug:'officeroad-mockup',title:'OfficeRoad',cat:'product'},
+    {slug:'oneway-mockup',title:'OneWay Export',cat:'product'},
+    {slug:'roadcode-mockup',title:'RoadCode',cat:'tool'},
+    {slug:'roadradio-mockup',title:'RoadBand / Radio',cat:'product'},
+    {slug:'roadlimewire-mockup',title:'RoadBand / LimeWire',cat:'product'},
+    {slug:'roadnapster-mockup',title:'RoadBand / Napster',cat:'product'},
+    {slug:'roadspace-mockup',title:'RoadWorld / MySpace',cat:'product'},
+    {slug:'roadphone-mockup',title:'RoadPhone',cat:'product'},
+    {slug:'roadstock-mockup',title:'RoadCoin / Stock',cat:'product'},
+    {slug:'roadarcade-mockup',title:'RoadWorld / Arcade',cat:'product'},
+    {slug:'roadboard-mockup',title:'BlackBoard',cat:'product'},
+    {slug:'roadamp-mockup',title:'RoadAmp',cat:'product'},
+    {slug:'roaddb-mockup',title:'RoadDB',cat:'tool'},
+    {slug:'roadid-mockup',title:'RoadChain / ID',cat:'product'},
+    {slug:'roaddeploy-mockup',title:'RoadDeploy',cat:'tool'},
+    {slug:'roadapi-mockup',title:'RoadAPI',cat:'tool'},
+    {slug:'os-desktop-mockup',title:'BlackRoad OS Desktop',cat:'product'},
+    {slug:'blackroad-home-mockup',title:'BlackRoad Home',cat:'product'},
+    {slug:'blackroad-brand-guide',title:'Brand Guide',cat:'tool'},
+    {slug:'brand-verifier',title:'Brand Verifier',cat:'tool'},
+    {slug:'hq-skyscraper-mockup',title:'Pixel HQ',cat:'product'},
+    {slug:'memory-gate-mockup',title:'Memory Gate',cat:'product'},
+    {slug:'roster-mockup',title:'Agent Roster',cat:'product'},
+    {slug:'stats-mockup',title:'Stats Dashboard',cat:'tool'},
+    {slug:'classroom-mockup',title:'Classroom',cat:'product'},
+    {slug:'schoology-mockup',title:'Schoology',cat:'product'},
+    {slug:'notion-mockup',title:'Notion',cat:'tool'},
+    {slug:'linear-mockup',title:'Linear',cat:'tool'},
+    {slug:'trello-mockup',title:'Trello',cat:'tool'},
+    {slug:'clickup-mockup',title:'ClickUp',cat:'tool'},
+    {slug:'asana-mockup',title:'Asana',cat:'tool'},
+    {slug:'miro-mockup',title:'Miro',cat:'tool'},
+    {slug:'loom-mockup',title:'Loom',cat:'tool'},
+    {slug:'vercel-mockup',title:'Vercel',cat:'tool'},
+    {slug:'railway-mockup',title:'Railway',cat:'tool'},
+    {slug:'backlog-mockup',title:'Backlog',cat:'tool'},
+    {slug:'google-drive-mockup',title:'Google Drive',cat:'tool'},
+    {slug:'docs-mockup',title:'Docs',cat:'tool'},
+    {slug:'roadweather-mockup',title:'RoadWeather',cat:'product'},
+    {slug:'domain-api-blackroad-io',title:'api.blackroad.io',cat:'domain'},
+    {slug:'domain-blackroad-company',title:'blackroad.company',cat:'domain'},
+    {slug:'domain-blackroadai-com',title:'blackroadai.com',cat:'domain'},
+    {slug:'domain-blackroadinc-us',title:'blackroadinc.us',cat:'domain'},
+    {slug:'domain-brand-blackroad-io',title:'brand.blackroad.io',cat:'domain'},
+    {slug:'domain-docs-blackroad-io',title:'docs.blackroad.io',cat:'domain'},
+    {slug:'domain-status-blackroad-io',title:'status.blackroad.io',cat:'domain'},
+    {slug:'icon-library',title:'Icon Library',cat:'tool'},
+    {slug:'infographics',title:'Infographics',cat:'tool'},
+    {slug:'animations',title:'Animations',cat:'tool'},
+    {slug:'hello-world',title:'Hello World',cat:'tool'},
+    {slug:'video-decode',title:'Video: Decode',cat:'video'},
+    {slug:'video-globe',title:'Video: Globe',cat:'video'},
+    {slug:'video-origin',title:'Video: Origin',cat:'video'},
+    {slug:'video-parade',title:'Video: Parade',cat:'video'},
+    {slug:'video-pulse',title:'Video: Pulse',cat:'video'},
+    {slug:'video-race',title:'Video: Race',cat:'video'},
+    {slug:'video-robot-vs',title:'Video: Robot VS',cat:'video'},
+    {slug:'video-warp',title:'Video: Warp',cat:'video'},
+  ];
+
+  function renderMockups(filter){
+    var el=document.getElementById('mockup-list');
+    var list=filter==='all'?MOCKUPS:MOCKUPS.filter(function(m){return m.cat===filter});
+    var html='';
+    list.forEach(function(m){
+      html+='<a class="mockup-link" href="/mockups/'+m.slug+'" target="_blank">';
+      html+='<div class="mockup-link-name">'+m.title+'</div>';
+      html+='<div class="mockup-link-cat">'+m.cat+'</div>';
+      html+='</a>';
+    });
+    el.innerHTML=html;
+  }
+
+  function filterMockups(cat){
+    document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+    event.target.classList.add('active');
+    renderMockups(cat);
+  }
+
+  renderMockups('all');
+  </script>
+</div>
+
+<div class="footer">
+  <a href="/">OS</a>
+  <a href="/products">Products</a>
+  <a href="/mockups">Mockups</a>
+  <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+</div>
+</body>
+</html>

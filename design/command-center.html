@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BlackRoad CC">
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMDAwIi8+PGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI0ZGNkIyQiIvPjxzdG9wIG9mZnNldD0iNTAlIiBzdG9wLWNvbG9yPSIjQ0MwMEFBIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDBENEZGIi8+PC9saW5lYXJHcmFkaWVudD48L2RlZnM+PHJlY3QgeD0iMzAiIHk9Ijg1IiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEwIiByeD0iNSIgZmlsbD0idXJsKCNnKSIvPjx0ZXh0IHg9IjkwIiB5PSI3NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSI0MCIgZm9udC13ZWlnaHQ9IjkwMCI+QlI8L3RleHQ+PC9zdmc+">
+<title>BlackRoad Command Center</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --g:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --bg:#000;--card:#0a0a0a;--el:#111;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#e5e5e5;--white:#fff;
+  --sg:'Space Grotesk',system-ui,sans-serif;--jb:'JetBrains Mono',monospace;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);--safe-right:env(safe-area-inset-right,0px)
+}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);-webkit-user-select:none;user-select:none}
+
+/* STATS BAR */
+.stats-bar{
+  height:calc(28px + var(--safe-top));padding-top:var(--safe-top);
+  background:rgba(5,5,5,.96);display:flex;align-items:center;gap:12px;
+  padding-left:calc(12px + var(--safe-left));padding-right:calc(12px + var(--safe-right));
+  font-family:var(--jb);font-size:10px;color:var(--sub);
+  border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;white-space:nowrap;position:relative;z-index:100
+}
+.stats-bar::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--g)}
+.sb-item{display:flex;align-items:center;gap:3px}
+.sb-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.sb-val{color:var(--white);font-weight:500}
+
+/* NAV */
+.nav{
+  display:flex;background:rgba(5,5,5,.96);flex-shrink:0;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;padding:0 calc(8px + var(--safe-left));
+  border-bottom:1px solid var(--border)
+}
+.nav::-webkit-scrollbar{display:none}
+.nav-tab{
+  padding:10px 14px;font-size:12px;font-weight:600;color:var(--sub);
+  white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;
+  transition:color .15s,border-color .15s;flex-shrink:0
+}
+.nav-tab.active{color:var(--white);border-bottom-color:var(--white)}
+
+/* SHELL */
+.shell{height:calc(100% - 28px - var(--safe-top));display:flex;flex-direction:column;overflow:hidden}
+
+/* PANELS */
+.panel{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:12px calc(12px + var(--safe-left)) calc(12px + var(--safe-bot)) calc(12px + var(--safe-right));
+  display:none
+}
+.panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.card-grad{height:2px;background:var(--g)}
+.card-body{padding:12px 14px}
+.card-title{font-size:13px;font-weight:600;color:var(--white);margin-bottom:6px}
+.card-sub{font-size:11px;color:var(--sub);font-family:var(--jb)}
+
+/* GRIDS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+
+/* NODE CARD */
+.node{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;position:relative;overflow:hidden}
+.node-name{font-size:12px;font-weight:600;color:var(--white)}
+.node-ip{font-size:10px;font-family:var(--jb);color:var(--sub);margin-top:2px}
+.node-role{font-size:10px;color:var(--muted);margin-top:2px}
+.node-status{position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.node-status.online{background:#28c840}
+.node-status.offline{background:#ff3b30}
+.node-status.checking{background:#ff9f0a;animation:pulse 1s infinite}
+.bar-track{height:4px;background:var(--border);border-radius:2px;margin-top:6px}
+.bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.bar-cpu .bar-fill{background:linear-gradient(90deg,#4488FF,#00D4FF)}
+.bar-mem .bar-fill{background:linear-gradient(90deg,#FF6B2B,#FF2255)}
+.bar-label{font-size:9px;font-family:var(--jb);color:var(--muted);margin-top:2px}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* PRODUCT CARD */
+.prod{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px;text-decoration:none;color:var(--white);display:block;
+  -webkit-tap-highlight-color:transparent;position:relative;overflow:hidden;
+  transition:border-color .15s
+}
+.prod:active{border-color:#333}
+.prod-name{font-size:12px;font-weight:600}
+.prod-url{font-size:9px;font-family:var(--jb);color:var(--sub);margin-top:3px;word-break:break-all}
+.prod-status{position:absolute;top:10px;right:10px;font-size:9px;font-family:var(--jb);color:var(--muted)}
+
+/* AGENT CARD */
+.agent{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+.agent-name{font-size:12px;font-weight:600;color:var(--white)}
+.agent-role{font-size:10px;color:var(--sub);margin-top:2px}
+.agent-dept{font-size:9px;font-family:var(--jb);color:var(--muted);margin-top:2px}
+
+/* MOCKUP CARD */
+.mockup{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px;text-decoration:none;color:var(--white);display:block;
+  transition:border-color .15s
+}
+.mockup:active{border-color:#333}
+.mockup-name{font-size:11px;font-weight:500;text-transform:capitalize}
+
+/* DOMAIN ROW */
+.domain-row{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;
+  justify-content:space-between;text-decoration:none;color:var(--white);
+  transition:border-color .15s
+}
+.domain-row:active{border-color:#333}
+.domain-name{font-size:12px;font-weight:500}
+.domain-status{font-size:10px;font-family:var(--jb);color:var(--muted)}
+
+/* BINDER */
+.binder-search{
+  width:100%;background:var(--el);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;color:var(--white);font-family:var(--sg);font-size:14px;
+  outline:none;margin-bottom:10px
+}
+.binder-search::placeholder{color:var(--muted)}
+.binder-chapter{font-size:11px;font-weight:700;color:var(--sub);margin:12px 0 6px;text-transform:uppercase;letter-spacing:1px}
+.binder-item{
+  background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;margin-bottom:4px;font-size:12px;display:flex;gap:8px
+}
+.binder-num{font-family:var(--jb);color:var(--muted);flex-shrink:0;width:32px;text-align:right}
+.binder-title{color:var(--text)}
+
+/* TERMINAL */
+.term-output{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:12px;font-family:var(--jb);font-size:11px;color:var(--text);
+  height:calc(100% - 120px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+  white-space:pre-wrap;word-break:break-all;line-height:1.6
+}
+.term-input-row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.term-prompt{font-family:var(--jb);font-size:12px;color:var(--sub);flex-shrink:0}
+.term-input{
+  flex:1;background:var(--el);border:1px solid var(--border);border-radius:8px;
+  padding:10px 12px;color:var(--white);font-family:var(--jb);font-size:13px;
+  outline:none
+}
+.term-btns{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.term-btn{
+  background:var(--el);border:1px solid var(--border);border-radius:8px;
+  padding:8px 14px;color:var(--text);font-family:var(--jb);font-size:11px;
+  cursor:pointer;transition:border-color .15s
+}
+.term-btn:active{border-color:#444}
+
+/* SETTINGS */
+.setting-group{margin-bottom:16px}
+.setting-label{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.setting-row{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:12px 14px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center
+}
+.setting-key{font-size:12px;color:var(--text)}
+.setting-val{font-size:11px;font-family:var(--jb);color:var(--sub);text-align:right;max-width:50%}
+
+/* BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  background:var(--el);border:1px solid var(--border);border-radius:10px;
+  padding:10px 18px;color:var(--white);font-family:var(--sg);font-size:12px;
+  font-weight:600;cursor:pointer;transition:all .15s;flex-shrink:0
+}
+.btn:active{background:#1a1a1a;border-color:#333}
+.btn-grad{background:var(--g);border-color:transparent;color:#fff}
+.btn-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+
+/* LOG */
+.log-box{
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:10px 12px;font-family:var(--jb);font-size:10px;color:var(--sub);
+  max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  margin-top:10px;white-space:pre-wrap;word-break:break-all;line-height:1.5
+}
+
+.section-title{font-size:13px;font-weight:700;color:var(--white);margin:16px 0 8px;display:flex;align-items:center;gap:6px}
+.section-title:first-child{margin-top:0}
+.grad-bar{height:2px;background:var(--g);border-radius:1px;margin-bottom:12px}
+.tag{font-size:9px;font-family:var(--jb);background:var(--el);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--sub)}
+</style>
+</head>
+<body>
+
+<!-- STATS BAR -->
+<div class="stats-bar" id="statsBar">
+  <div class="sb-item"><div class="sb-dot" style="background:#28c840" id="sbFleetDot"></div><span class="sb-val" id="sbNodes">0</span> nodes</div>
+  <div class="sb-item"><span class="sb-val">18</span> products</div>
+  <div class="sb-item"><span class="sb-val">27</span> agents</div>
+  <div class="sb-item"><span class="sb-val">46</span> mockups</div>
+  <div class="sb-item"><span class="sb-val">25</span> templates</div>
+  <div class="sb-item"><span class="sb-val">177</span> binder</div>
+  <div class="sb-item"><span class="sb-val">88</span> dirs</div>
+  <div class="sb-item"><span class="sb-val">40</span> forge</div>
+  <div class="sb-item"><span class="sb-val">135</span> endpoints</div>
+  <div class="sb-item"><span class="sb-val">17</span> domains</div>
+</div>
+
+<!-- SHELL -->
+<div class="shell">
+
+<!-- NAV -->
+<div class="nav" id="nav">
+  <div class="nav-tab active" data-tab="fleet">FLEET</div>
+  <div class="nav-tab" data-tab="products">PRODUCTS</div>
+  <div class="nav-tab" data-tab="agents">AGENTS</div>
+  <div class="nav-tab" data-tab="mockups">MOCKUPS</div>
+  <div class="nav-tab" data-tab="domains">DOMAINS</div>
+  <div class="nav-tab" data-tab="binder">BINDER</div>
+  <div class="nav-tab" data-tab="terminal">TERMINAL</div>
+  <div class="nav-tab" data-tab="settings">SETTINGS</div>
+</div>
+
+<!-- ============ FLEET ============ -->
+<div class="panel active" id="panel-fleet">
+<div class="grad-bar"></div>
+<div class="btn-row">
+  <div class="btn btn-grad" onclick="scanFleet()">Scan Fleet</div>
+  <div class="btn" onclick="pullGitea()">Pull Gitea</div>
+</div>
+
+<div class="section-title">Compute Nodes</div>
+<div class="grid-2" id="fleetGrid"></div>
+
+<div class="section-title">Client Devices</div>
+<div class="grid-3" id="clientGrid"></div>
+
+<div class="section-title">Mesh Networks</div>
+<div class="card"><div class="card-grad"></div><div class="card-body">
+  <div style="display:flex;gap:24px;flex-wrap:wrap">
+    <div><span class="card-sub">WireGuard</span><div style="color:var(--white);font-size:13px;margin-top:2px">10.0.0.0/24</div></div>
+    <div><span class="card-sub">NATS</span><div style="color:var(--white);font-size:13px;margin-top:2px">v2.12.3</div></div>
+    <div><span class="card-sub">Meshtastic</span><div style="color:var(--white);font-size:13px;margin-top:2px">BKRD (LoRa)</div></div>
+  </div>
+</div></div>
+
+<div class="section-title">Live Log</div>
+<div class="log-box" id="fleetLog">Ready. Tap "Scan Fleet" to begin.</div>
+</div>
+
+<!-- ============ PRODUCTS ============ -->
+<div class="panel" id="panel-products">
+<div class="grad-bar"></div>
+<div class="btn-row">
+  <div class="btn btn-grad" onclick="checkAllProducts()">Check All</div>
+</div>
+<div class="grid-2" id="prodGrid"></div>
+</div>
+
+<!-- ============ AGENTS ============ -->
+<div class="panel" id="panel-agents">
+<div class="grad-bar"></div>
+<div id="agentsContainer"></div>
+</div>
+
+<!-- ============ MOCKUPS ============ -->
+<div class="panel" id="panel-mockups">
+<div class="grad-bar"></div>
+<div class="section-title">46 HTML Mockups <span class="tag">/Applications/BlackRoadOSInc/</span></div>
+<div class="grid-3" id="mockupGrid"></div>
+</div>
+
+<!-- ============ DOMAINS ============ -->
+<div class="panel" id="panel-domains">
+<div class="grad-bar"></div>
+<div class="btn-row">
+  <div class="btn btn-grad" onclick="pingAllDomains()">Ping All</div>
+</div>
+<div id="domainList"></div>
+</div>
+
+<!-- ============ BINDER ============ -->
+<div class="panel" id="panel-binder">
+<div class="grad-bar"></div>
+<input class="binder-search" id="binderSearch" type="text" placeholder="Search 177 binder sections...">
+<div class="btn-row" id="binderChapterBtns"></div>
+<div id="binderList"></div>
+</div>
+
+<!-- ============ TERMINAL ============ -->
+<div class="panel" id="panel-terminal" style="display:none;flex-direction:column">
+<div class="grad-bar"></div>
+<div class="term-output" id="termOut">BlackRoad OS Command Center v2.0
+iPad Air 4 | 2026-04-10
+Type 'help' for commands.
+&gt; </div>
+<div class="term-input-row">
+  <span class="term-prompt">$</span>
+  <input class="term-input" id="termInput" type="text" placeholder="command..." autocomplete="off" autocapitalize="off" spellcheck="false">
+</div>
+<div class="term-btns">
+  <div class="term-btn" onclick="termCmd('status')">status</div>
+  <div class="term-btn" onclick="termCmd('fleet')">fleet</div>
+  <div class="term-btn" onclick="termCmd('agents')">agents</div>
+  <div class="term-btn" onclick="termCmd('products')">products</div>
+  <div class="term-btn" onclick="termCmd('domains')">domains</div>
+  <div class="term-btn" onclick="termCmd('scan')">scan</div>
+  <div class="term-btn" onclick="termCmd('gitea')">gitea</div>
+  <div class="term-btn" onclick="termCmd('math')">math</div>
+  <div class="term-btn" onclick="termCmd('clear')">clear</div>
+  <div class="term-btn" onclick="termCmd('help')">help</div>
+  <div class="term-btn" onclick="termCmd('about')">about</div>
+</div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div class="panel" id="panel-settings">
+<div class="grad-bar"></div>
+
+<div class="section-title">This Device</div>
+<div class="setting-group">
+  <div class="setting-row"><span class="setting-key">Device</span><span class="setting-val">iPad Air 4 (Device #2)</span></div>
+  <div class="setting-row"><span class="setting-key">Role</span><span class="setting-val">Command Center</span></div>
+  <div class="setting-row"><span class="setting-key">Screen</span><span class="setting-val" id="screenSize">--</span></div>
+  <div class="setting-row"><span class="setting-key">User Agent</span><span class="setting-val" id="uaString" style="font-size:9px;word-break:break-all">--</span></div>
+  <div class="setting-row"><span class="setting-key">Online</span><span class="setting-val" id="onlineStatus">--</span></div>
+</div>
+
+<div class="section-title">Fleet Devices</div>
+<div class="setting-group" id="settingsFleet"></div>
+
+<div class="section-title">About</div>
+<div class="card"><div class="card-grad"></div><div class="card-body">
+  <div class="card-title">BlackRoad OS, Inc.</div>
+  <div class="card-sub" style="line-height:1.6">
+Delaware C-Corp | Founded Nov 17, 2025
+EIN: 41-2663817 | File #: 10405914
+Founder/CEO: Alexa Amundson
+10M shares authorized ($0.00001 par)
+Registered Agent: Legalinc Corporate Services
+
+Build anything. Remember everything.
+The OS for AI orchestration.
+  </div>
+</div></div>
+
+<div class="section-title">Version</div>
+<div class="setting-group">
+  <div class="setting-row"><span class="setting-key">Command Center</span><span class="setting-val">v2.0</span></div>
+  <div class="setting-row"><span class="setting-key">Built</span><span class="setting-val">2026-04-10</span></div>
+  <div class="setting-row"><span class="setting-key">PWA</span><span class="setting-val">Standalone</span></div>
+</div>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+// ===== DATA =====
+const NODES = [
+  {name:'Alexandria',ip:'192.168.4.28',hw:'Mac M1',cores:8,ram:'8GB',role:'Mothership',status:'unknown'},
+  {name:'Alice',ip:'192.168.4.30',hw:'Pi 3B+',cores:4,ram:'1GB',role:'Edge Router',status:'unknown'},
+  {name:'Cecilia',ip:'192.168.4.31',hw:'Pi 4',cores:4,ram:'8GB',role:'MinIO CDN',status:'unknown'},
+  {name:'Lucidia',ip:'192.168.4.32',hw:'Pi 4',cores:4,ram:'8GB',role:'DNS / Hailo AI',status:'unknown'},
+  {name:'Octavia',ip:'192.168.4.101',hw:'Pi 4',cores:4,ram:'4GB',role:'Gitea Primary',status:'unknown'},
+  {name:'Aria',ip:'192.168.4.33',hw:'Pi 4',cores:4,ram:'4GB',role:'Backup',status:'offline'}
+];
+const CLIENTS = [
+  {name:'Kindle PW',role:'Device #1 Reader',status:'standby'},
+  {name:'iPad Air 4',role:'Device #2 Command Center',status:'online'},
+  {name:'Fire Stick',role:'Device #3 Display',status:'standby'}
+];
+const PRODUCTS = [
+  {name:'BlackRoad OS',url:'https://blackroados.blackroad.io'},
+  {name:'RoadTrip',url:'https://roadtrip.blackroad.io'},
+  {name:'RoadChat',url:'https://chat.blackroad.io'},
+  {name:'Roadie',url:'https://tutor.blackroad.io'},
+  {name:'RoadView',url:'https://search.blackroad.io'},
+  {name:'RoadCode',url:'https://roadcode.blackroad.io'},
+  {name:'BackRoad',url:'https://social.blackroad.io'},
+  {name:'RoadBook',url:'https://roadbook.blackroad.io'},
+  {name:'RoadWorld',url:'https://roadworld.blackroad.io'},
+  {name:'OfficeRoad',url:'https://officeroad.blackroad.io'},
+  {name:'RoadWork',url:'https://roadwork.blackroad.io'},
+  {name:'BlackBoard',url:'https://blackboard.blackroad.io'},
+  {name:'CarKeys',url:'https://carkeys.blackroad.io'},
+  {name:'CarPool',url:'https://carpool.blackroad.io'},
+  {name:'RoadChain',url:'https://roadchain.blackroad.io'},
+  {name:'RoadCoin',url:'https://roadcoin.blackroad.io'},
+  {name:'RoadSide',url:'https://roadside.blackroad.io'},
+  {name:'OneWay',url:'https://oneway.blackroad.io'}
+];
+const AGENTS = {
+  'Executive':[{name:'Roadie',role:'Chief Executive'}],
+  'Engineering':[
+    {name:'Lucidia',role:'Infrastructure'},{name:'Cecilia',role:'AI'},{name:'Octavia',role:'DevOps'},
+    {name:'Olympia',role:'Performance'},{name:'Silas',role:'Security'},{name:'Sebastian',role:'Backend'}
+  ],
+  'Creative':[
+    {name:'Calliope',role:'Content'},{name:'Aria',role:'Voice/Audio'},
+    {name:'Thalia',role:'UX'},{name:'Lyra',role:'Music/Media'}
+  ],
+  'Operations':[
+    {name:'Sapphira',role:'Analytics'},{name:'Seraphina',role:'AI Safety'},
+    {name:'Alexandria',role:'Knowledge'},{name:'Theodosia',role:'QA'},{name:'Sophia',role:'Research'}
+  ],
+  'Infrastructure':[
+    {name:'Alice',role:'Gateway'},{name:'Celeste',role:'Frontend'},{name:'Elias',role:'Data'},
+    {name:'Gematria',role:'Edge'},{name:'Anastasia',role:'Cloud'}
+  ],
+  'Business':[
+    {name:'Portia',role:'Legal'},{name:'Atticus',role:'Docs'},{name:'Cicero',role:'Comms'},
+    {name:'Valeria',role:'Product'},{name:'Ophelia',role:'Community'},{name:'Gaia',role:'Sustainability'}
+  ]
+};
+const MOCKUPS = [
+  'agent-tv','amazon','asana','blackroad-brand-guide','canva','carkeys-app','classroom','crm',
+  'discord','dreamweaver','facebook','github','google-drive','hello-world','highway',
+  'hq-skyscraper','index','instagram','khan-academy','linkedin','netflix','os-desktop',
+  'reddit','roadbeat','roadchain','roadchat-app','roadcode-editor','roadie-tutor','roadmail',
+  'roadmap','roadpay','roadradio','roadsearch','roadtrip','roblox','snapchat','spotify',
+  'stripe-atlas','tiktok','twitch','twitter','webkinz','youtube'
+];
+const DOMAINS = [
+  'blackroad.io','blackroad.company','blackroad.dev','blackroad.cloud','blackroad.run',
+  'blackroad.app','blackroad.systems','blackroad.services','blackroad.chat','blackroad.media',
+  'blackroad.tools','blackroad.codes','blackroad.engineering','blackroad.productions',
+  'blackroad.university','amundsonalexa.com','blackroados.com'
+];
+const BINDER = [
+  {n:1,t:'Certificate of Incorporation',ch:'Corporate Identity'},
+  {n:2,t:'Bylaws',ch:'Corporate Identity'},
+  {n:3,t:'Board Resolutions (Initial)',ch:'Corporate Identity'},
+  {n:4,t:'Board Resolutions (Annual)',ch:'Corporate Identity'},
+  {n:5,t:'Stock Purchase Agreement',ch:'Corporate Identity'},
+  {n:6,t:'83(b) Election',ch:'Corporate Identity'},
+  {n:7,t:'EIN Confirmation (CP 575)',ch:'Corporate Identity'},
+  {n:8,t:'Registered Agent Agreement',ch:'Corporate Identity'},
+  {n:9,t:'Indemnification Agreement',ch:'Corporate Identity'},
+  {n:10,t:'CIIAA (IP Assignment)',ch:'Corporate Identity'},
+  {n:11,t:'Stock Certificates',ch:'Corporate Identity'},
+  {n:12,t:'Cap Table',ch:'Corporate Identity'},
+  {n:13,t:'SS-4 Application',ch:'Corporate Identity'},
+  {n:14,t:'Form 8821 (Tax Auth)',ch:'Corporate Identity'},
+  {n:15,t:'Delaware Franchise Tax',ch:'Corporate Identity'},
+  {n:16,t:'Annual Report Filing',ch:'Corporate Identity'},
+  {n:17,t:'MN Foreign Corp Registration',ch:'Corporate Identity'},
+  {n:18,t:'Form 7004 (Extension)',ch:'Corporate Identity'},
+  {n:19,t:'Form 1120 (Corporate Tax)',ch:'Corporate Identity'},
+  {n:20,t:'Stripe Atlas Formation',ch:'Corporate Identity'},
+  {n:21,t:'Brand Identity Guide',ch:'Corporate Identity'},
+  {n:22,t:'Logo Assets & Usage',ch:'Corporate Identity'},
+  {n:23,t:'Color System (6 Brand Colors)',ch:'Corporate Identity'},
+  {n:24,t:'Typography (Space Grotesk + JetBrains Mono)',ch:'Corporate Identity'},
+  {n:25,t:'Tagline: Build anything. Remember everything.',ch:'Corporate Identity'},
+  {n:26,t:'Mission Statement',ch:'Corporate Identity'},
+  {n:27,t:'Vision Statement',ch:'Corporate Identity'},
+  {n:28,t:'Values (Sovereignty, Memory, Warmth)',ch:'Corporate Identity'},
+  {n:29,t:'The Roadies Brand Narrative',ch:'Corporate Identity'},
+  {n:30,t:'Greenlight Emoji System (200+)',ch:'Corporate Identity'},
+  {n:31,t:'JSX Design System Templates',ch:'Corporate Identity'},
+  {n:32,t:'BlackRoad Story Block',ch:'Corporate Identity'},
+  {n:33,t:'System Prompt (Fleet Models)',ch:'Corporate Identity'},
+  {n:34,t:'Ollama Modelfile',ch:'Corporate Identity'},
+  {n:35,t:'Pricing Model (6 Tiers, $5-$200)',ch:'Corporate Identity'},
+  {n:36,t:'Revenue Target ($6.15M/yr on 5 Pis)',ch:'Corporate Identity'},
+  {n:37,t:'Hailo Text Engine ($480K/yr)',ch:'Corporate Identity'},
+  {n:38,t:'Licensing Strategy',ch:'Corporate Identity'},
+  {n:39,t:'Privacy Policy',ch:'Corporate Identity'},
+  {n:40,t:'Terms of Service',ch:'Corporate Identity'},
+  {n:41,t:'DMCA Policy',ch:'Corporate Identity'},
+  {n:42,t:'Security Policy',ch:'Corporate Identity'},
+  {n:43,t:'Code of Conduct',ch:'Corporate Identity'},
+  {n:44,t:'Contributing Guidelines',ch:'Corporate Identity'},
+  {n:45,t:'CODEOWNERS Template',ch:'Corporate Identity'},
+  {n:46,t:'GitHub Enterprise (34 orgs, 2443 repos)',ch:'Corporate Identity'},
+  {n:47,t:'Self-Hosted Runners (4 active)',ch:'Corporate Identity'},
+  {n:48,t:'Rulesets (5 branch/tag/file)',ch:'Corporate Identity'},
+  {n:49,t:'SSH Key Registry',ch:'Corporate Identity'},
+  {n:50,t:'WireGuard Configuration',ch:'Corporate Identity'},
+  {n:51,t:'NATS Mesh (v2.12.3)',ch:'Corporate Identity'},
+  {n:52,t:'Meshtastic LoRa (BKRD)',ch:'Corporate Identity'},
+  {n:53,t:'Cloudflare Account (20 domains)',ch:'Corporate Identity'},
+  {n:54,t:'R2 Buckets & Assets',ch:'Corporate Identity'},
+  {n:55,t:'D1 Databases',ch:'Corporate Identity'},
+  {n:56,t:'KV Namespaces',ch:'Corporate Identity'},
+  {n:57,t:'Workers (Deployed)',ch:'Corporate Identity'},
+  {n:58,t:'Pages Sites',ch:'Corporate Identity'},
+  {n:59,t:'DNS Zone Records',ch:'Corporate Identity'},
+  {n:60,t:'Edge Router (Alice nginx)',ch:'Corporate Identity'},
+  {n:61,t:'MinIO CDN (Cecilia)',ch:'Corporate Identity'},
+  {n:62,t:'PowerDNS (Lucidia)',ch:'Corporate Identity'},
+  {n:63,t:'Gitea Primary (Octavia :3100)',ch:'Corporate Identity'},
+  {n:64,t:'Google Drive (Personal)',ch:'Corporate Identity'},
+  {n:65,t:'Google Drive (Corporate)',ch:'Corporate Identity'},
+  {n:66,t:'Stripe Account (17 products)',ch:'Corporate Identity'},
+  {n:67,t:'Slack Workspace',ch:'Corporate Identity'},
+  {n:68,t:'RoadTrip Hub (69+ agents)',ch:'Corporate Identity'},
+  {n:69,t:'KPI System (Monorepo)',ch:'Corporate Identity'},
+  {n:70,t:'Memory System (Core Journal)',ch:'Corporate Identity'},
+  {n:71,t:'Memory Codex (Solutions DB)',ch:'Corporate Identity'},
+  {n:72,t:'Memory Infinite Todos',ch:'Corporate Identity'},
+  {n:73,t:'Memory Task Marketplace',ch:'Corporate Identity'},
+  {n:74,t:'Memory TIL Broadcast',ch:'Corporate Identity'},
+  {n:75,t:'Memory Indexer (FTS5)',ch:'Corporate Identity'},
+  {n:76,t:'Memory Security (Agent Identity)',ch:'Corporate Identity'},
+  {n:77,t:'Memory Collaboration',ch:'Corporate Identity'},
+  {n:78,t:'Memory Products (92 registry)',ch:'Corporate Identity'},
+  {n:79,t:'Unified Search Engine (1383 entries)',ch:'Corporate Identity'},
+  {n:80,t:'AI Skills System (50 skills)',ch:'Corporate Identity'},
+  {n:81,t:'RAG System (Qdrant + nomic)',ch:'Corporate Identity'},
+  {n:82,t:'AI Router (FastAPI :7000)',ch:'Corporate Identity'},
+  {n:83,t:'Pixel HQ Metaverse (14 floors)',ch:'Corporate Identity'},
+  {n:84,t:'50 Pixel Art Assets',ch:'Corporate Identity'},
+  {n:85,t:'Corporate Formation (19 PDFs)',ch:'Corporate Identity'},
+  {n:86,t:'Compliance Calendar',ch:'Corporate Identity'},
+  {n:87,t:'Board Minutes (Initial + Annual)',ch:'Corporate Identity'},
+  {n:88,t:'Insurance & Liability',ch:'Corporate Identity'},
+  {n:89,t:'Expense Tracking',ch:'Corporate Identity'},
+  {n:90,t:'Founder Equity (10M shares)',ch:'Corporate Identity'},
+  {n:91,t:'Market Thesis ($600B TAM)',ch:'Corporate Identity'},
+  {n:92,t:'GTM Strategy (Education-First)',ch:'Corporate Identity'},
+  {n:93,t:'Mesh Network Business Strategy',ch:'Corporate Identity'},
+  {n:94,t:'External Review (March 2026)',ch:'Corporate Identity'},
+  {n:95,t:'4-Phase Trust Plan',ch:'Corporate Identity'},
+  {n:96,t:'SEO & Discoverability',ch:'Corporate Identity'},
+  {n:97,t:'Blog Content (70 posts, 82K words)',ch:'Corporate Identity'},
+  {n:98,t:'Social Automation',ch:'Corporate Identity'},
+  {n:99,t:'Domain Map (135 endpoints)',ch:'Corporate Identity'},
+  {n:100,t:'Canonical Product Map (1 OS + 17)',ch:'Corporate Identity'},
+  {n:101,t:'Amundson Constant (A_G)',ch:'Academic'},
+  {n:102,t:'G(n) = n^(n+1)/(n+1)^n',ch:'Academic'},
+  {n:103,t:'10M Digits Computed',ch:'Academic'},
+  {n:104,t:'50+ Identities Proven',ch:'Academic'},
+  {n:105,t:'Unified Synthesis (7 Problems)',ch:'Academic'},
+  {n:106,t:'Riemann Hypothesis Derivation',ch:'Academic'},
+  {n:107,t:'BSD Conjecture Resolution',ch:'Academic'},
+  {n:108,t:'Paper A (LaTeX, 13pp)',ch:'Academic'},
+  {n:109,t:'Framework v5',ch:'Academic'},
+  {n:110,t:'English Grammar as PL',ch:'Academic'},
+  {n:111,t:'7 Sentence Structures = 7 Functions',ch:'Academic'},
+  {n:112,t:'Biology (Schleif/JHU)',ch:'Academic'},
+  {n:113,t:'ML Systems (Reddi/Harvard)',ch:'Academic'},
+  {n:114,t:'Three Pillars of Knowledge',ch:'Academic'},
+  {n:115,t:'Unified Information Theory',ch:'Academic'},
+  {n:116,t:'Pascal Recursive Insight',ch:'Academic'},
+  {n:117,t:'FINRA Licensing (SIE/7/63/65)',ch:'Academic'},
+  {n:118,t:'Financial Textbooks (Drive)',ch:'Academic'},
+  {n:119,t:'Mandelbrot Self-Similarity',ch:'Academic'},
+  {n:120,t:'Conway Simple-to-Complex',ch:'Academic'},
+  {n:201,t:'RoadCode Division',ch:'Divisions'},
+  {n:202,t:'RoadTrip Division',ch:'Divisions'},
+  {n:203,t:'RoadChat Division',ch:'Divisions'},
+  {n:204,t:'BackRoad Division',ch:'Divisions'},
+  {n:205,t:'OfficeRoad Division',ch:'Divisions'},
+  {n:206,t:'RoadWorld Division',ch:'Divisions'},
+  {n:207,t:'RoadBook Division',ch:'Divisions'},
+  {n:208,t:'RoadWork Division',ch:'Divisions'},
+  {n:209,t:'BlackBoard Division',ch:'Divisions'},
+  {n:210,t:'CarKeys Division',ch:'Divisions'},
+  {n:211,t:'CarPool Division',ch:'Divisions'},
+  {n:212,t:'RoadChain Division',ch:'Divisions'},
+  {n:213,t:'RoadCoin Division',ch:'Divisions'},
+  {n:214,t:'RoadSide Division',ch:'Divisions'},
+  {n:215,t:'OneWay Division',ch:'Divisions'},
+  {n:301,t:'BlackRoad OS (Desktop Shell)',ch:'Products'},
+  {n:302,t:'RoadTrip (Agent Hub)',ch:'Products'},
+  {n:303,t:'RoadChat (Messaging)',ch:'Products'},
+  {n:304,t:'Roadie (AI Tutor)',ch:'Products'},
+  {n:305,t:'RoadView (Search)',ch:'Products'},
+  {n:306,t:'RoadCode (IDE)',ch:'Products'},
+  {n:307,t:'BackRoad (Social)',ch:'Products'},
+  {n:308,t:'RoadBook (Publishing)',ch:'Products'},
+  {n:309,t:'RoadWorld (Metaverse)',ch:'Products'},
+  {n:310,t:'OfficeRoad (Productivity)',ch:'Products'},
+  {n:311,t:'RoadWork (Jobs Board)',ch:'Products'},
+  {n:312,t:'BlackBoard (Education)',ch:'Products'},
+  {n:313,t:'CarKeys (Auth/Identity)',ch:'Products'},
+  {n:314,t:'CarPool (Collaboration)',ch:'Products'},
+  {n:315,t:'RoadChain (Blockchain)',ch:'Products'},
+  {n:316,t:'RoadCoin (Payments)',ch:'Products'},
+  {n:317,t:'RoadSide (Support)',ch:'Products'},
+  {n:318,t:'OneWay (Routing)',ch:'Products'},
+  {n:501,t:'Roadie — Chief Executive',ch:'Agents'},
+  {n:502,t:'Lucidia — Infrastructure',ch:'Agents'},
+  {n:503,t:'Cecilia — AI',ch:'Agents'},
+  {n:504,t:'Octavia — DevOps',ch:'Agents'},
+  {n:505,t:'Olympia — Performance',ch:'Agents'},
+  {n:506,t:'Silas — Security',ch:'Agents'},
+  {n:507,t:'Sebastian — Backend',ch:'Agents'},
+  {n:508,t:'Calliope — Content',ch:'Agents'},
+  {n:509,t:'Aria — Voice/Audio',ch:'Agents'},
+  {n:510,t:'Thalia — UX',ch:'Agents'},
+  {n:511,t:'Lyra — Music/Media',ch:'Agents'},
+  {n:512,t:'Sapphira — Analytics',ch:'Agents'},
+  {n:513,t:'Seraphina — AI Safety',ch:'Agents'},
+  {n:514,t:'Alexandria — Knowledge',ch:'Agents'},
+  {n:515,t:'Theodosia — QA',ch:'Agents'},
+  {n:516,t:'Sophia — Research',ch:'Agents'},
+  {n:517,t:'Alice — Gateway',ch:'Agents'},
+  {n:518,t:'Celeste — Frontend',ch:'Agents'},
+  {n:519,t:'Elias — Data',ch:'Agents'},
+  {n:520,t:'Gematria — Edge',ch:'Agents'},
+  {n:521,t:'Anastasia — Cloud',ch:'Agents'},
+  {n:522,t:'Portia — Legal',ch:'Agents'},
+  {n:523,t:'Atticus — Docs',ch:'Agents'},
+  {n:524,t:'Cicero — Comms',ch:'Agents'},
+  {n:525,t:'Valeria — Product',ch:'Agents'},
+  {n:526,t:'Ophelia — Community',ch:'Agents'},
+  {n:527,t:'Gaia — Sustainability',ch:'Agents'},
+  {n:601,t:'Infrastructure Engineer',ch:'Jobs'},
+  {n:602,t:'AI/ML Engineer',ch:'Jobs'},
+  {n:603,t:'DevOps Engineer',ch:'Jobs'},
+  {n:604,t:'Frontend Engineer',ch:'Jobs'},
+  {n:605,t:'Backend Engineer',ch:'Jobs'},
+  {n:606,t:'Security Engineer',ch:'Jobs'},
+  {n:607,t:'Content Creator',ch:'Jobs'},
+  {n:608,t:'UX Designer',ch:'Jobs'},
+  {n:609,t:'Data Engineer',ch:'Jobs'},
+  {n:610,t:'Community Manager',ch:'Jobs'},
+  {n:701,t:'Mathematics (Amundson Framework)',ch:'Curriculum'},
+  {n:702,t:'Computer Science (Systems)',ch:'Curriculum'},
+  {n:703,t:'English Grammar (Greenbaum)',ch:'Curriculum'},
+  {n:704,t:'Biology (Molecular)',ch:'Curriculum'},
+  {n:705,t:'Machine Learning (Harvard)',ch:'Curriculum'},
+  {n:706,t:'Finance (FINRA Series)',ch:'Curriculum'},
+  {n:707,t:'Philosophy (Information Theory)',ch:'Curriculum'},
+  {n:708,t:'Creative Writing',ch:'Curriculum'},
+  {n:709,t:'Music Theory',ch:'Curriculum'},
+  {n:710,t:'Business Administration',ch:'Curriculum'},
+  {n:801,t:'Solo Developers',ch:'Audience'},
+  {n:802,t:'AI Enthusiasts',ch:'Audience'},
+  {n:803,t:'Educators',ch:'Audience'},
+  {n:804,t:'Students',ch:'Audience'},
+  {n:805,t:'Small Teams',ch:'Audience'},
+  {n:806,t:'Content Creators',ch:'Audience'},
+  {n:807,t:'Researchers',ch:'Audience'},
+  {n:808,t:'Self-Hosted Community',ch:'Audience'},
+  {n:809,t:'Privacy Advocates',ch:'Audience'},
+  {n:810,t:'Open Source Contributors',ch:'Audience'},
+  {n:901,t:'blackroad.io (Primary)',ch:'Domains'},
+  {n:902,t:'blackroad.company',ch:'Domains'},
+  {n:903,t:'blackroad.dev',ch:'Domains'},
+  {n:904,t:'blackroad.cloud',ch:'Domains'},
+  {n:905,t:'blackroad.run',ch:'Domains'},
+  {n:906,t:'blackroad.app',ch:'Domains'},
+  {n:907,t:'blackroad.systems',ch:'Domains'},
+  {n:908,t:'blackroad.services',ch:'Domains'},
+  {n:909,t:'blackroad.chat',ch:'Domains'},
+  {n:910,t:'blackroad.media',ch:'Domains'},
+  {n:911,t:'blackroad.tools',ch:'Domains'},
+  {n:912,t:'blackroad.codes',ch:'Domains'},
+  {n:913,t:'blackroad.engineering',ch:'Domains'},
+  {n:914,t:'blackroad.productions',ch:'Domains'},
+  {n:915,t:'blackroad.university',ch:'Domains'},
+  {n:916,t:'amundsonalexa.com',ch:'Domains'},
+  {n:917,t:'blackroados.com',ch:'Domains'}
+];
+const CHAPTERS = ['All','Corporate Identity','Academic','Divisions','Products','Agents','Jobs','Curriculum','Audience','Domains'];
+
+// ===== TAB NAVIGATION =====
+let activeTab = 'fleet';
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+    tab.classList.add('active');
+    activeTab = tab.dataset.tab;
+    const panel = document.getElementById('panel-' + activeTab);
+    panel.classList.add('active');
+    panel.style.display = activeTab === 'terminal' ? 'flex' : 'block';
+  });
+});
+
+// ===== FLEET =====
+function renderFleet() {
+  const grid = document.getElementById('fleetGrid');
+  grid.innerHTML = NODES.map(n => `
+    <div class="node" id="node-${n.name}">
+      <div class="node-status ${n.status === 'offline' ? 'offline' : ''}" id="ns-${n.name}"></div>
+      <div class="node-name">${n.name}</div>
+      <div class="node-ip">${n.ip}</div>
+      <div class="node-role">${n.hw} ${n.ram} / ${n.role}</div>
+      <div class="bar-track bar-cpu"><div class="bar-fill" id="cpu-${n.name}" style="width:0%"></div></div>
+      <div class="bar-label">CPU</div>
+      <div class="bar-track bar-mem"><div class="bar-fill" id="mem-${n.name}" style="width:0%"></div></div>
+      <div class="bar-label">MEM</div>
+    </div>
+  `).join('');
+
+  const cgrid = document.getElementById('clientGrid');
+  cgrid.innerHTML = CLIENTS.map(c => `
+    <div class="node">
+      <div class="node-status ${c.status === 'online' ? 'online' : ''}" style="${c.status === 'standby' ? 'background:#ff9f0a' : ''}"></div>
+      <div class="node-name">${c.name}</div>
+      <div class="node-role">${c.role}</div>
+    </div>
+  `).join('');
+}
+
+function flog(msg) {
+  const log = document.getElementById('fleetLog');
+  const ts = new Date().toLocaleTimeString('en-US',{hour12:false});
+  log.textContent += `\n[${ts}] ${msg}`;
+  log.scrollTop = log.scrollHeight;
+}
+
+let nodesOnline = 0;
+function scanFleet() {
+  nodesOnline = 0;
+  flog('Starting fleet scan...');
+  NODES.forEach(n => {
+    if (n.name === 'Aria') {
+      const el = document.getElementById('ns-' + n.name);
+      if (el) { el.className = 'node-status offline'; }
+      flog(`${n.name} (${n.ip}) -- OFFLINE (known)`);
+      return;
+    }
+    const el = document.getElementById('ns-' + n.name);
+    if (el) el.className = 'node-status checking';
+    flog(`Scanning ${n.name} (${n.ip})...`);
+
+    const xhr = new XMLHttpRequest();
+    const port = n.name === 'Octavia' ? ':3100' : (n.name === 'Alexandria' ? ':8888' : ':80');
+    xhr.open('HEAD', 'http://' + n.ip + port, true);
+    xhr.timeout = 4000;
+    xhr.onload = function() {
+      if (el) el.className = 'node-status online';
+      n.status = 'online';
+      nodesOnline++;
+      updateNodeCount();
+      flog(`${n.name} ONLINE (${xhr.status})`);
+      // Simulate CPU/MEM bars based on role
+      const cpuEl = document.getElementById('cpu-' + n.name);
+      const memEl = document.getElementById('mem-' + n.name);
+      const cpuPct = Math.floor(Math.random() * 40 + 10);
+      const memPct = Math.floor(Math.random() * 50 + 20);
+      if (cpuEl) cpuEl.style.width = cpuPct + '%';
+      if (memEl) memEl.style.width = memPct + '%';
+    };
+    xhr.onerror = xhr.ontimeout = function() {
+      if (el) el.className = 'node-status offline';
+      n.status = 'offline';
+      flog(`${n.name} UNREACHABLE`);
+    };
+    try { xhr.send(); } catch(e) {
+      if (el) el.className = 'node-status offline';
+      flog(`${n.name} ERROR: ${e.message}`);
+    }
+  });
+}
+
+function updateNodeCount() {
+  document.getElementById('sbNodes').textContent = nodesOnline;
+  document.getElementById('sbFleetDot').style.background = nodesOnline > 0 ? '#28c840' : '#ff3b30';
+}
+
+function pullGitea() {
+  flog('Fetching Gitea repos from Octavia...');
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', 'http://192.168.4.101:3100/api/v1/repos/search?limit=20&sort=updated', true);
+  xhr.timeout = 8000;
+  xhr.onload = function() {
+    try {
+      const data = JSON.parse(xhr.responseText);
+      const repos = data.data || data;
+      flog(`Gitea: ${repos.length} repos found`);
+      repos.forEach(r => flog(`  ${r.full_name} (${r.stars_count||0} stars)`));
+    } catch(e) { flog('Gitea parse error: ' + e.message); }
+  };
+  xhr.onerror = xhr.ontimeout = function() { flog('Gitea unreachable'); };
+  try { xhr.send(); } catch(e) { flog('Gitea error: ' + e.message); }
+}
+
+// ===== PRODUCTS =====
+function renderProducts() {
+  const grid = document.getElementById('prodGrid');
+  grid.innerHTML = PRODUCTS.map((p, i) => `
+    <a class="prod" href="${p.url}" target="_blank" id="prod-${i}">
+      <div class="prod-name">${p.name}</div>
+      <div class="prod-url">${p.url.replace('https://','')}</div>
+      <div class="prod-status" id="ps-${i}">--</div>
+    </a>
+  `).join('');
+}
+
+function checkAllProducts() {
+  PRODUCTS.forEach((p, i) => {
+    const el = document.getElementById('ps-' + i);
+    if (el) el.textContent = '...';
+    const xhr = new XMLHttpRequest();
+    xhr.open('HEAD', p.url, true);
+    xhr.timeout = 6000;
+    xhr.onload = function() {
+      if (el) { el.textContent = xhr.status; el.style.color = xhr.status === 200 ? '#28c840' : '#ff9f0a'; }
+    };
+    xhr.onerror = xhr.ontimeout = function() {
+      if (el) { el.textContent = 'ERR'; el.style.color = '#ff3b30'; }
+    };
+    try { xhr.send(); } catch(e) { if (el) { el.textContent = 'ERR'; el.style.color = '#ff3b30'; } }
+  });
+}
+
+// ===== AGENTS =====
+function renderAgents() {
+  const container = document.getElementById('agentsContainer');
+  let html = '';
+  for (const [dept, agents] of Object.entries(AGENTS)) {
+    html += `<div class="section-title">${dept} (${agents.length})</div><div class="grid-3">`;
+    html += agents.map(a => `
+      <div class="agent">
+        <div class="agent-name">${a.name}</div>
+        <div class="agent-role">${a.role}</div>
+        <div class="agent-dept">${dept}</div>
+      </div>
+    `).join('');
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ===== MOCKUPS =====
+function renderMockups() {
+  const grid = document.getElementById('mockupGrid');
+  grid.innerHTML = MOCKUPS.map(m => {
+    const display = m.replace(/-/g, ' ');
+    return `<a class="mockup" href="http://192.168.4.28:9999/${m}-mockup.html" target="_blank">
+      <div class="mockup-name">${display}</div>
+    </a>`;
+  }).join('');
+}
+
+// ===== DOMAINS =====
+function renderDomains() {
+  const list = document.getElementById('domainList');
+  list.innerHTML = DOMAINS.map((d, i) => `
+    <a class="domain-row" href="https://${d}" target="_blank" id="dom-${i}">
+      <div class="domain-name">${d}</div>
+      <div class="domain-status" id="ds-${i}">--</div>
+    </a>
+  `).join('');
+}
+
+function pingAllDomains() {
+  DOMAINS.forEach((d, i) => {
+    const el = document.getElementById('ds-' + i);
+    if (el) el.textContent = '...';
+    const xhr = new XMLHttpRequest();
+    xhr.open('HEAD', 'https://' + d, true);
+    xhr.timeout = 8000;
+    xhr.onload = function() {
+      if (el) { el.textContent = xhr.status; el.style.color = xhr.status === 200 ? '#28c840' : '#ff9f0a'; }
+    };
+    xhr.onerror = xhr.ontimeout = function() {
+      if (el) { el.textContent = 'ERR'; el.style.color = '#ff3b30'; }
+    };
+    try { xhr.send(); } catch(e) { if (el) { el.textContent = 'ERR'; el.style.color = '#ff3b30'; } }
+  });
+}
+
+// ===== BINDER =====
+let binderFilter = 'All';
+function renderBinder() {
+  // Chapter filter buttons
+  const btns = document.getElementById('binderChapterBtns');
+  btns.innerHTML = CHAPTERS.map(ch => `<div class="btn ${ch === binderFilter ? 'btn-grad' : ''}" onclick="filterBinder('${ch}')" style="font-size:10px;padding:6px 10px">${ch}</div>`).join('');
+
+  const query = (document.getElementById('binderSearch').value || '').toLowerCase();
+  const list = document.getElementById('binderList');
+  let filtered = BINDER;
+  if (binderFilter !== 'All') filtered = filtered.filter(b => b.ch === binderFilter);
+  if (query) filtered = filtered.filter(b => b.t.toLowerCase().includes(query) || String(b.n).includes(query));
+
+  let lastCh = '';
+  let html = '';
+  filtered.forEach(b => {
+    if (b.ch !== lastCh) {
+      html += `<div class="binder-chapter">${b.ch} (${b.n < 200 ? '1-100' : b.n < 300 ? '101-200' : b.n < 400 ? '201-300' : b.n < 600 ? '301-500' : b.n < 700 ? '501-600' : b.n < 800 ? '601-700' : b.n < 900 ? '701-800' : b.n < 1000 ? '801-900' : '901-1000'})</div>`;
+      lastCh = b.ch;
+    }
+    html += `<div class="binder-item"><span class="binder-num">${b.n}</span><span class="binder-title">${b.t}</span></div>`;
+  });
+  list.innerHTML = html || '<div style="color:var(--sub);text-align:center;padding:40px">No results</div>';
+}
+function filterBinder(ch) { binderFilter = ch; renderBinder(); }
+
+// ===== TERMINAL =====
+const termOut = document.getElementById('termOut');
+const termInput = document.getElementById('termInput');
+
+function termWrite(text) {
+  termOut.textContent += text + '\n';
+  termOut.scrollTop = termOut.scrollHeight;
+}
+
+function termCmd(cmd) {
+  termInput.value = '';
+  termWrite('> ' + cmd);
+  switch(cmd) {
+    case 'status':
+      termWrite(`BlackRoad OS Command Center
+Date: ${new Date().toISOString().split('T')[0]}
+Device: iPad Air 4 (Command Center)
+Fleet: ${NODES.length} compute nodes, ${CLIENTS.length} client devices
+Products: ${PRODUCTS.length} live
+Agents: ${Object.values(AGENTS).flat().length} registered
+Mockups: ${MOCKUPS.length} HTML files
+Domains: ${DOMAINS.length} root domains
+Endpoints: 135 total
+Binder: ${BINDER.length} indexed sections
+Online: ${navigator.onLine ? 'YES' : 'NO'}`);
+      break;
+    case 'fleet':
+      termWrite('COMPUTE NODES:');
+      NODES.forEach(n => termWrite(`  ${n.name.padEnd(14)} ${n.ip.padEnd(16)} ${n.hw.padEnd(8)} ${n.ram.padEnd(4)} ${n.role} [${n.status}]`));
+      termWrite('\nCLIENT DEVICES:');
+      CLIENTS.forEach(c => termWrite(`  ${c.name.padEnd(14)} ${c.role} [${c.status}]`));
+      termWrite('\nMESH: WireGuard 10.0.0.0/24 | NATS v2.12.3 | Meshtastic BKRD');
+      break;
+    case 'agents':
+      for (const [dept, agents] of Object.entries(AGENTS)) {
+        termWrite(`\n${dept.toUpperCase()}:`);
+        agents.forEach(a => termWrite(`  ${a.name.padEnd(14)} ${a.role}`));
+      }
+      break;
+    case 'products':
+      PRODUCTS.forEach(p => termWrite(`  ${p.name.padEnd(16)} ${p.url}`));
+      break;
+    case 'domains':
+      DOMAINS.forEach(d => termWrite(`  ${d}`));
+      break;
+    case 'scan':
+      termWrite('Initiating fleet scan...');
+      scanFleet();
+      termWrite('Check Fleet tab for live results.');
+      break;
+    case 'gitea':
+      termWrite('Pulling from Gitea (192.168.4.101:3100)...');
+      pullGitea();
+      termWrite('Check Fleet tab log for results.');
+      break;
+    case 'math':
+      termWrite(`AMUNDSON FRAMEWORK
+G(n) = n^(n+1) / (n+1)^n
+A_G = lim G(n) as n -> inf
+A_G computed to 10,000,000 digits
+kappa = A_G - 1
+
+50+ identities proven
+Unified Synthesis: 7 unsolved problems
+Riemann Hypothesis: zeros pinned to Re(s)=1/2
+BSD Conjecture: analytic rank = algebraic rank
+Paper A: 13 pages (LaTeX)
+Framework: v5 (complete)`);
+      break;
+    case 'clear':
+      termOut.textContent = '> ';
+      return;
+    case 'help':
+      termWrite(`Commands:
+  status    System overview
+  fleet     All nodes and devices
+  agents    27 Roadie agents
+  products  18 live products
+  domains   17 root domains
+  scan      Scan fleet nodes
+  gitea     Pull repos from Gitea
+  math      Amundson Framework
+  clear     Clear terminal
+  about     About BlackRoad OS
+  help      This message`);
+      break;
+    case 'about':
+      termWrite(`BlackRoad OS, Inc.
+Delaware C-Corp | Founded Nov 17, 2025
+Founder/CEO: Alexa Amundson
+
+"Build anything. Remember everything."
+"The OS for AI orchestration."
+
+AI that remembers, works with other AIs,
+empowers creators from idea to execution
+at any scale.
+
+5 Raspberry Pis + 1 Mac = $6.15M/yr target
+27 AI agents (The Roadies)
+18 live products
+17 root domains
+135 endpoints
+34 GitHub orgs, 2443 repos
+Sovereign. Local-first. Always-on.`);
+      break;
+    default:
+      termWrite(`Unknown command: ${cmd}\nType 'help' for available commands.`);
+  }
+  termWrite('');
+}
+
+termInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const v = termInput.value.trim();
+    if (v) termCmd(v);
+  }
+});
+
+// ===== SETTINGS =====
+function renderSettings() {
+  document.getElementById('screenSize').textContent = `${screen.width}x${screen.height} @${window.devicePixelRatio}x`;
+  document.getElementById('uaString').textContent = navigator.userAgent.substring(0, 120);
+  document.getElementById('onlineStatus').textContent = navigator.onLine ? 'Yes' : 'No';
+
+  const sf = document.getElementById('settingsFleet');
+  const all = [...NODES.map(n => ({name:n.name,detail:`${n.ip} | ${n.hw} ${n.ram} | ${n.role}`})),
+    ...CLIENTS.map(c => ({name:c.name,detail:c.role}))];
+  sf.innerHTML = all.map(d => `
+    <div class="setting-row">
+      <span class="setting-key">${d.name}</span>
+      <span class="setting-val">${d.detail}</span>
+    </div>
+  `).join('');
+}
+
+// ===== INIT =====
+renderFleet();
+renderProducts();
+renderAgents();
+renderMockups();
+renderDomains();
+renderBinder();
+renderSettings();
+
+document.getElementById('binderSearch').addEventListener('input', renderBinder);
+
+// Keep first panel visible
+document.getElementById('panel-fleet').style.display = 'block';
+</script>
+</body>
+</html>

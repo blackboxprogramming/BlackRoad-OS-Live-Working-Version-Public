@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Search Dock — Mock (Grayscale)</title>
+    <style>
+      :root{
+        --bg:#000;
+        --text:rgba(255,255,255,0.88);
+        --muted:rgba(255,255,255,0.55);
+        --line:rgba(255,255,255,0.14);
+        --chip:rgba(255,255,255,0.06);
+        --chip2:rgba(255,255,255,0.10);
+        --font:system-ui,-apple-system,"Segoe UI",sans-serif;
+        --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%;margin:0}
+      body{background:var(--bg);color:var(--text);font-family:var(--font);overflow:hidden}
+
+      .wrap{
+        height:100%;
+        display:flex;
+        flex-direction:column;
+      }
+
+      .top{
+        padding: 16px 18px 10px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+      }
+      .brand{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:0;
+      }
+      .mark{
+        width:10px;height:10px;border-radius:50%;
+        background:#fff;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.06);
+      }
+      .title{
+        font-weight:700;
+        letter-spacing:.2px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .meta{
+        font-family:var(--mono);
+        font-size:11px;
+        color:var(--muted);
+        white-space:nowrap;
+      }
+
+      .grid-wrap{
+        flex:1;
+        min-height:0;
+        padding: 10px 18px 90px;
+        display:flex;
+        align-items:stretch;
+        justify-content:center;
+        overflow:auto;
+      }
+
+      .layout{
+        width: min(1260px, 100%);
+        min-height: 0;
+        display:grid;
+        grid-template-columns: 260px 1fr 260px;
+        grid-template-rows: 1fr auto;
+        gap: 14px;
+        align-items:start;
+      }
+      @media (max-width: 1060px){
+        .layout{ grid-template-columns: 220px 1fr 220px; }
+      }
+      @media (max-width: 880px){
+        .layout{ grid-template-columns: 1fr; grid-template-rows: auto auto auto auto; }
+      }
+
+      .videos{
+        display:grid;
+        gap: 12px;
+        align-content:start;
+      }
+      .video{
+        border-radius: 14px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        overflow:hidden;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+      }
+      .thumb{
+        aspect-ratio: 16 / 9;
+        background:
+          radial-gradient(circle at 30% 25%, rgba(255,255,255,0.12), rgba(255,255,255,0) 60%),
+          linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0)),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0 1px, rgba(0,0,0,0) 1px 4px);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color: rgba(255,255,255,0.65);
+        font-family: var(--mono);
+        letter-spacing: .04em;
+        font-size: 12px;
+        position: relative;
+      }
+      .thumb iframe{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        border:0;
+      }
+      .thumb .thumb-label{
+        position:absolute;
+        left: 10px;
+        bottom: 10px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(0,0,0,0.55);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: rgba(255,255,255,0.80);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: .02em;
+        pointer-events:none;
+      }
+      .vmeta{
+        padding: 10px 10px 10px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+        color: rgba(255,255,255,0.72);
+        font-size: 12px;
+      }
+      .vmeta .name{
+        flex:1;
+        min-width:0;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        font-size: 12px;
+        color: rgba(255,255,255,0.78);
+      }
+      .vmeta .pill{
+        font-family: var(--mono);
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: rgba(255,255,255,0.72);
+        white-space:nowrap;
+      }
+      .video:active{ transform: translateY(1px); }
+
+      .apps{
+        min-height:0;
+        display:flex;
+        flex-direction:column;
+        gap: 12px;
+        align-items:center;
+        position: relative;
+      }
+      .apps-head{
+        width: 100%;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        color: rgba(255,255,255,0.70);
+        font-size: 12px;
+      }
+      .apps-head .hint{ font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.55); }
+
+      .apps-home{
+        width:100%;
+        display:flex;
+        flex-direction:column;
+        gap: 12px;
+        align-items:center;
+        transition: opacity 160ms ease;
+      }
+      .apps-home.hide{
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .grid{
+        width: 100%;
+        display:grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 18px 16px;
+      }
+      @media (max-width: 1060px){
+        .grid{ grid-template-columns: repeat(5, 1fr); }
+      }
+      @media (max-width: 880px){
+        .grid{ grid-template-columns: repeat(4, 1fr); }
+      }
+      @media (max-width: 620px){
+        .grid{ grid-template-columns: repeat(3, 1fr); gap: 16px 12px; }
+      }
+
+      .app{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap: 8px;
+        user-select:none;
+      }
+
+      .icon{
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), rgba(255,255,255,0.06) 55%, rgba(255,255,255,0.04));
+        border: 1px solid var(--line);
+        box-shadow:
+          0 14px 28px rgba(0,0,0,0.45),
+          inset 0 0 0 1px rgba(0,0,0,0.22);
+        position: relative;
+        cursor: pointer;
+      }
+      .icon::after{
+        content:"";
+        position:absolute;
+        inset: 18px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.82);
+        opacity: .9;
+      }
+      .icon:active{
+        transform: translateY(1px);
+        box-shadow:
+          0 10px 18px rgba(0,0,0,0.40),
+          inset 0 0 0 1px rgba(0,0,0,0.22);
+      }
+
+      .appstage{
+        position:absolute;
+        inset: 0;
+        pointer-events:none;
+        opacity: 0;
+        transition: opacity 160ms ease;
+      }
+      .appstage.show{
+        opacity: 1;
+        pointer-events:auto;
+      }
+      .appwin{
+        position:absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow:
+          0 18px 42px rgba(0,0,0,0.55),
+          inset 0 0 0 1px rgba(0,0,0,0.25);
+        overflow:hidden;
+        transform-origin: 0 0;
+        transform:
+          translate(var(--dx, 0px), var(--dy, 0px))
+          scale(var(--sx, 1), var(--sy, 1));
+        opacity: 0.001;
+        transition:
+          transform 260ms cubic-bezier(.2,.8,.2,1),
+          opacity 160ms ease;
+      }
+      .appwin.settled{
+        transform: translate(0px, 0px) scale(1, 1);
+        opacity: 1;
+      }
+      @media (prefers-reduced-motion: reduce){
+        .apps-home, .appstage, .appwin{ transition: none !important; }
+      }
+
+      .win-head{
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.10);
+        background: rgba(0,0,0,0.12);
+        color: rgba(255,255,255,0.78);
+        font-size: 12px;
+      }
+      .win-close{
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.26);
+        border: 1px solid rgba(255,255,255,0.18);
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.30);
+        cursor: pointer;
+        flex: 0 0 auto;
+      }
+      .win-close:hover{ background: rgba(255,255,255,0.32); }
+      .win-title{
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(255,255,255,0.70);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .win-body{
+        height: calc(100% - 42px);
+        position: relative;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 25% 15%, rgba(255,255,255,0.09), rgba(255,255,255,0) 60%),
+          linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0));
+      }
+      .win-body .placeholder{
+        position:absolute;
+        inset:0;
+        padding: 12px;
+        display:grid;
+        place-items:center;
+        color: rgba(255,255,255,0.70);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: .02em;
+        pointer-events:none;
+      }
+      .launcher{
+        position:absolute;
+        inset:0;
+        padding: 12px;
+        overflow:auto;
+      }
+      .launcher-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        color: rgba(255,255,255,0.70);
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+      .launcher-head .hint{ font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.55); }
+      .launcher .grid{ gap: 16px 14px; }
+      .win-body iframe{
+        position:absolute;
+        inset:0;
+        width:100%;
+        height:100%;
+        border:0;
+        background: transparent;
+      }
+
+      .name{
+        width: 92px;
+        text-align:center;
+        font-size: 12px;
+        color: rgba(255,255,255,0.78);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .terminal{
+        grid-column: 1 / -1;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.10);
+        overflow:hidden;
+        display:grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 220px;
+      }
+      @media (max-width: 880px){
+        .terminal{ min-height: 200px; }
+      }
+      .term-head{
+        padding: 10px 12px;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.70);
+        font-size: 12px;
+      }
+      .term-head .tag{
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(255,255,255,0.55);
+      }
+      .term-body{
+        padding: 10px 12px;
+        overflow:auto;
+        font-family: var(--mono);
+        font-size: 11px;
+        line-height: 1.5;
+        color: rgba(255,255,255,0.78);
+        white-space: pre-wrap;
+        user-select:text;
+      }
+      .term-in{
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-top: 1px solid rgba(255,255,255,0.08);
+      }
+      .prompt{
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(255,255,255,0.60);
+        white-space:nowrap;
+      }
+      .term-in input{
+        flex:1;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 10px;
+        padding: 8px 10px;
+        color: rgba(255,255,255,0.86);
+        font-family: var(--mono);
+        font-size: 12px;
+        outline:none;
+      }
+      .term-in input::placeholder{ color: rgba(255,255,255,0.40); }
+      .term-btn{
+        padding: 8px 12px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-family: var(--mono);
+        color: rgba(255,255,255,0.86);
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.16);
+        cursor: default;
+        white-space:nowrap;
+      }
+
+      .bottom{
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 14px 14px 18px;
+        background: linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.92));
+        border-top: 1px solid rgba(255,255,255,0.06);
+        display:flex;
+        justify-content:center;
+      }
+
+      .search{
+        width: min(840px, 100%);
+        display:flex;
+        align-items:center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+        backdrop-filter: blur(12px);
+      }
+      .lens{
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(255,255,255,0.14);
+        display:grid;
+        place-items:center;
+        color: rgba(255,255,255,0.82);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+      input{
+        flex:1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font-size: 14px;
+      }
+      input::placeholder{ color: rgba(255,255,255,0.42); }
+      .btn{
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-family: var(--mono);
+        letter-spacing: .04em;
+        color: rgba(255,255,255,0.86);
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.16);
+        cursor: default;
+        white-space:nowrap;
+      }
+      .btn:active{ background: rgba(255,255,255,0.10); }
+
+      .toast{
+        position: fixed;
+        left: 18px;
+        bottom: 86px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.14);
+        color: rgba(255,255,255,0.75);
+        font-family: var(--mono);
+        font-size: 11px;
+        white-space: pre-wrap;
+        max-width: min(520px, calc(100vw - 36px));
+        display:none;
+      }
+      .toast.show{display:block}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div class="title">Search Dock (Mock)</div>
+        </div>
+        <div class="meta" id="clock">—</div>
+      </div>
+
+      <div class="grid-wrap">
+        <div class="layout">
+          <div class="videos" id="leftVideos"></div>
+
+          <div class="apps">
+            <div class="apps-home" id="appsHome">
+              <div class="apps-head">
+                <div>Apps</div>
+                <div class="hint">click an icon → open</div>
+              </div>
+              <div class="grid" id="grid"></div>
+            </div>
+
+            <div class="appstage" id="appStage" aria-hidden="true">
+              <div class="appwin" id="appWin" role="dialog" aria-label="App window">
+                <div class="win-head">
+                  <button class="win-close" id="appClose" aria-label="Back to apps"></button>
+                  <div class="win-title" id="appTitle">—</div>
+                </div>
+                <div class="win-body" id="appBody">
+                  <iframe id="appFrame" title="App content" loading="eager"></iframe>
+                  <div class="launcher" id="roadosLauncher" hidden>
+                    <div class="launcher-head">
+                      <div>RoadOS</div>
+                      <div class="hint">pick a category → open</div>
+                    </div>
+                    <div class="grid" id="roadosGrid"></div>
+                  </div>
+                  <div class="placeholder" id="appPlaceholder">APP WINDOW (mock)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="videos" id="rightVideos"></div>
+
+          <div class="terminal" aria-label="terminal">
+            <div class="term-head">
+              <div>Terminal</div>
+              <div class="tag">mock · local</div>
+            </div>
+            <div class="term-body" id="term"></div>
+            <div class="term-in">
+              <div class="prompt">~ $</div>
+              <input id="cmd" autocomplete="off" placeholder="type a command (try: help)" />
+              <div class="term-btn" id="run">RUN</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="bottom">
+      <div class="search" role="search">
+        <div class="lens" aria-hidden="true">⌕</div>
+        <input id="q" autocomplete="off" placeholder="Search apps, docs, games…" />
+        <div class="btn" id="go">GO</div>
+      </div>
+    </div>
+
+    <script>
+      // Home screen apps (25 slots). Slot 1 = RoadOS (folder/launcher).
+      // The other 24 are placeholders you can rename later.
+      const HOME_APPS = [
+        'RoadOS',
+        'ChatGPT','Drive','Gmail','GitHub','YouTube','Spotify','Reddit','Facebook','Google',
+        'Calendar','Notes','Tasks','Files','Maps',
+        'Photos','Camera','Messages','Calls','Music',
+        'News','Weather','Settings','Store','Terminal'
+      ];
+
+      // These used to be the home screen. They now live inside RoadOS.
+      const ROADOS_CATEGORIES = [
+        'Government','Law','Defense','Energy','Water','Food','Health','Pharma','Finance','Banking',
+        'Insurance','Trade','Industry','Transport','Logistics','Telecom','Internet','Media','Education',
+        'Science','Technology','Agriculture','Housing','Labor','Environment'
+      ];
+
+      const grid = document.getElementById('grid');
+      const q = document.getElementById('q');
+      const toast = document.getElementById('toast');
+      const term = document.getElementById('term');
+      const cmd = document.getElementById('cmd');
+      const leftVideos = document.getElementById('leftVideos');
+      const rightVideos = document.getElementById('rightVideos');
+      const appsHome = document.getElementById('appsHome');
+      const appStage = document.getElementById('appStage');
+      const appWin = document.getElementById('appWin');
+      const appClose = document.getElementById('appClose');
+      const appTitle = document.getElementById('appTitle');
+      const appBody = document.getElementById('appBody');
+      const appFrame = document.getElementById('appFrame');
+      const appPlaceholder = document.getElementById('appPlaceholder');
+      const roadosLauncher = document.getElementById('roadosLauncher');
+      const roadosGrid = document.getElementById('roadosGrid');
+
+      const APP_STAGE_PAD = 8;
+      let openAppName = null;
+      let openFromEl = null;
+      let roadosMode = null; // 'launcher' | 'category' | null
+      let roadosCategory = null;
+
+      function showToast(msg){
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(()=>toast.classList.remove('show'), 1400);
+      }
+
+      function logLine(s){
+        const ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        term.textContent = (term.textContent ? (term.textContent + "\n") : "") + `[${ts}] ${s}`;
+        term.scrollTop = term.scrollHeight;
+      }
+
+      function pad2(n){ return String(n).padStart(2,'0'); }
+      function tick(){
+        const d = new Date();
+        let h = d.getHours();
+        const m = d.getMinutes();
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12; if (h === 0) h = 12;
+        document.getElementById('clock').textContent = `${h}:${pad2(m)} ${ampm}`;
+      }
+      tick(); setInterval(tick, 1000);
+
+      function setWinFromIcon(iconEl){
+        const appsCol = appStage.parentElement;
+        const cRect = appsCol.getBoundingClientRect();
+        const iRect = iconEl.getBoundingClientRect();
+        const endLeft = APP_STAGE_PAD;
+        const endTop = APP_STAGE_PAD;
+        const endW = Math.max(1, appsCol.clientWidth - APP_STAGE_PAD * 2);
+        const endH = Math.max(1, appsCol.clientHeight - APP_STAGE_PAD * 2);
+
+        const startLeft = (iRect.left - cRect.left) - endLeft;
+        const startTop = (iRect.top - cRect.top) - endTop;
+        const startW = Math.max(1, iRect.width);
+        const startH = Math.max(1, iRect.height);
+
+        const sx = startW / endW;
+        const sy = startH / endH;
+        const dx = startLeft;
+        const dy = startTop;
+
+        appStage.style.left = `${endLeft}px`;
+        appStage.style.top = `${endTop}px`;
+        appStage.style.right = `${endLeft}px`;
+        appStage.style.bottom = `${endTop}px`;
+
+        appWin.style.setProperty('--dx', `${dx}px`);
+        appWin.style.setProperty('--dy', `${dy}px`);
+        appWin.style.setProperty('--sx', `${sx}`);
+        appWin.style.setProperty('--sy', `${sy}`);
+      }
+
+      function showAppsGrid(){
+        openAppName = null;
+        openFromEl = null;
+        roadosMode = null;
+        roadosCategory = null;
+        appsHome.classList.remove('hide');
+        appStage.classList.remove('show');
+        appStage.setAttribute('aria-hidden', 'true');
+        appWin.classList.remove('settled');
+        appFrame.removeAttribute('src');
+        appPlaceholder.textContent = 'APP WINDOW (mock)';
+        appPlaceholder.style.display = '';
+        roadosLauncher.hidden = true;
+        q.focus();
+      }
+
+      function showRoadOSLauncher(){
+        roadosMode = 'launcher';
+        roadosCategory = null;
+        appTitle.textContent = 'RoadOS';
+        appFrame.removeAttribute('src');
+        appPlaceholder.style.display = 'none';
+        roadosLauncher.hidden = false;
+      }
+
+      function openRoadOSCategory(name){
+        roadosMode = 'category';
+        roadosCategory = name;
+        roadosLauncher.hidden = true;
+        appPlaceholder.style.display = 'none';
+        appTitle.textContent = `RoadOS / ${name}`;
+        appFrame.src = `apps/${encodeURIComponent(name)}/index.html`;
+        showToast('OPEN ' + name);
+        logLine('OPEN ' + name + ' (RoadOS)');
+      }
+
+      function openApp(name, iconEl){
+        if (!iconEl) return;
+        if (openAppName === name) return;
+        if (openAppName) return; // keep it simple: close first, then open another
+
+        openAppName = name;
+        openFromEl = iconEl;
+        roadosMode = null;
+        roadosCategory = null;
+        appTitle.textContent = name;
+        appPlaceholder.textContent = `OPEN ${name}`;
+        appPlaceholder.style.display = 'none';
+        roadosLauncher.hidden = true;
+
+        if (name === 'RoadOS'){
+          showRoadOSLauncher();
+        } else if (ROADOS_CATEGORIES.includes(name)) {
+          // Allows opening categories directly (e.g. via terminal open <name>).
+          appFrame.src = `apps/${encodeURIComponent(name)}/index.html`;
+        } else {
+          // Generic placeholder app: Drive-style shell with quick-launch chips.
+          appFrame.src = `apps/_shared/drive_mock.html?app=${encodeURIComponent(name)}`;
+        }
+
+        appsHome.classList.add('hide');
+        appStage.classList.add('show');
+        appStage.setAttribute('aria-hidden', 'false');
+
+        setWinFromIcon(iconEl);
+        appWin.classList.remove('settled');
+        requestAnimationFrame(() => appWin.classList.add('settled'));
+
+        showToast('OPEN ' + name);
+        logLine('OPEN ' + name + ' (stage)');
+      }
+
+      function closeApp(){
+        if (!openAppName) return;
+
+        // RoadOS uses the same circle as "back":
+        // - from category → back to RoadOS launcher
+        // - from launcher → close back to home
+        if (openAppName === 'RoadOS' && roadosMode === 'category'){
+          showRoadOSLauncher();
+          showToast('RoadOS');
+          logLine('RoadOS launcher');
+          return;
+        }
+
+        const iconEl = openFromEl;
+        const name = openAppName;
+        setWinFromIcon(iconEl);
+        appWin.classList.remove('settled'); // animates back to icon
+
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+          showAppsGrid();
+          showToast('CLOSE ' + name);
+          logLine('CLOSE ' + name);
+          return;
+        }
+
+        const onDone = (e) => {
+          if (e && e.propertyName !== 'transform') return;
+          appWin.removeEventListener('transitionend', onDone);
+          showAppsGrid();
+          showToast('CLOSE ' + name);
+          logLine('CLOSE ' + name);
+        };
+        appWin.addEventListener('transitionend', onDone);
+      }
+
+      function mkApp(name){
+        const el = document.createElement('div');
+        el.className = 'app';
+        el.innerHTML = `<div class="icon" role="button" tabindex="0" aria-label="${name}"></div><div class="name">${name}</div>`;
+        const icon = el.querySelector('.icon');
+        el.addEventListener('click', () => {
+          openApp(name, icon);
+        });
+        el.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && document.activeElement === icon){
+            e.preventDefault();
+            openApp(name, icon);
+          }
+        });
+        return el;
+      }
+
+      for (const name of HOME_APPS) grid.appendChild(mkApp(name));
+      appClose.addEventListener('click', closeApp);
+
+      for (const name of ROADOS_CATEGORIES) roadosGrid.appendChild(mkApp(name));
+
+      const VIDEOS = [
+        {
+          name: 'PeriscopeFilm — Playlist #1',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h4XLrcDApCm_6VdHi6pc3CJ&si=rY_uNNbm3Drh5CwZ',
+        },
+        {
+          name: 'PeriscopeFilm — Playlist #2',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h49-hwnqGXMTjoqkHAb1L-b&si=Eq1i64k4ZpG4GZiv',
+        },
+        {
+          name: 'PeriscopeFilm — Playlist #3',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h7gwRbAAXILeo3wK9JMXis2&si=-D8yW-_CgfxOOukB',
+        },
+        {
+          name: 'Playlist #4 (awaiting link)',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h5xx8CUReeJT5V3cLvCluDS&si=oSCjche6LYLswet4',
+        },
+        {
+          name: 'PeriscopeFilm — Playlist #5',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h6aYNvwjTnpZriaS3flcJR_&si=BH1lsovmBscUt-O6',
+        },
+        {
+          name: 'PeriscopeFilm — Playlist #6',
+          pill: 'PLAYLIST',
+          playlistUrl: 'https://youtube.com/playlist?list=PLqqqqZrD37h4MlkYj5NYrJaxpCfSYUEmm&si=3S6HjaqXWr4UnnbO',
+        },
+      ];
+
+      function getPlaylistId(url) {
+        if (!url) return null;
+        try {
+          const u = new URL(url);
+          return u.searchParams.get('list');
+        } catch {
+          const m = String(url).match(/[?&]list=([^&]+)/);
+          return m ? m[1] : null;
+        }
+      }
+
+      function mkVideo(v, side){
+        const listId = getPlaylistId(v.playlistUrl);
+        const el = document.createElement('div');
+        el.className = 'video';
+        el.innerHTML = `
+          <div class="thumb">
+            ${
+              listId
+                ? `<iframe
+                     data-listid="${encodeURIComponent(listId)}"
+                     src="https://www.youtube-nocookie.com/embed/videoseries?list=${encodeURIComponent(listId)}&autoplay=1&mute=1&loop=1&playlist=${encodeURIComponent(listId)}&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+                     title="${side} video"
+                     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                     allowfullscreen
+                   ></iframe>`
+                : ''
+            }
+            <div class="thumb-label">${side} · ${listId ? 'PERISCOPEFILM' : 'NO PLAYLIST'}</div>
+          </div>
+          <div class="vmeta">
+            <div class="name">${v.name}</div>
+            <div class="pill">${v.pill}</div>
+          </div>
+        `;
+        el.addEventListener('click', () => {
+          if (v.playlistUrl) window.open(v.playlistUrl, '_blank', 'noopener');
+          showToast((v.playlistUrl ? 'OPEN ' : 'TODO ') + v.name);
+          logLine((v.playlistUrl ? 'OPEN ' : 'TODO ') + v.name + ' (' + side + ')');
+        });
+        return el;
+      }
+      // Left = playlists 1–3, Right = playlists 4–6.
+      for (const v of VIDEOS.slice(0, 3)) leftVideos.appendChild(mkVideo(v, 'LEFT'));
+      for (const v of VIDEOS.slice(3, 6)) rightVideos.appendChild(mkVideo(v, 'RIGHT'));
+
+      // Autoplay is sometimes blocked until a user gesture (especially on file:// pages).
+      // Try on load, then again on first interaction.
+      function kickAutoplay() {
+        document.querySelectorAll('iframe[data-listid]').forEach((frame) => {
+          try {
+            frame.contentWindow?.postMessage(
+              JSON.stringify({ event: 'command', func: 'playVideo', args: [] }),
+              '*'
+            );
+            frame.contentWindow?.postMessage(
+              JSON.stringify({ event: 'command', func: 'mute', args: [] }),
+              '*'
+            );
+          } catch {}
+        });
+      }
+      setTimeout(kickAutoplay, 700);
+      let kicked = false;
+      function onFirstGesture() {
+        if (kicked) return;
+        kicked = true;
+        kickAutoplay();
+        showToast('AUTOPLAY START');
+        logLine('AUTOPLAY kick');
+      }
+      window.addEventListener('pointerdown', onFirstGesture, { once: true });
+      window.addEventListener('keydown', onFirstGesture, { once: true });
+
+      function go(){
+        const v = (q.value || '').trim();
+        if (!v) return showToast('TYPE A QUERY');
+        showToast('SEARCH ' + v + ' (mock)');
+        logLine('SEARCH ' + v);
+      }
+      document.getElementById('go').addEventListener('click', go);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement === q) go();
+        if (e.key === '/' && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+        if (e.key === 'Escape' && openAppName) { e.preventDefault(); closeApp(); }
+      });
+
+      function runCmd(){
+        const v = (cmd.value || '').trim();
+        if (!v) return;
+        logLine('~ $ ' + v);
+        cmd.value = '';
+        const lower = v.toLowerCase();
+        if (lower === 'help') return logLine('commands: help, clear, open <name>, search <query>');
+        if (lower === 'clear') { term.textContent = ''; return; }
+        if (lower.startsWith('open ')) {
+          const name = v.slice(5).trim();
+          const match = [...grid.querySelectorAll('.app')].find((a) =>
+            (a.querySelector('.name')?.textContent || '').toLowerCase() === name.toLowerCase()
+          );
+          const icon = match?.querySelector('.icon');
+          if (icon) return openApp(match.querySelector('.name').textContent, icon);
+          return logLine('OPEN ' + name + ' (not found)');
+        }
+        if (lower.startsWith('search ')) return logLine('SEARCH ' + v.slice(7) + ' (mock)');
+        logLine('UNKNOWN: ' + v);
+      }
+      document.getElementById('run').addEventListener('click', runCmd);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && document.activeElement === cmd) runCmd();
+      });
+
+      logLine('ready');
+      setTimeout(()=>q.focus(), 250);
+    </script>
+  </body>
+</html>
