@@ -1,0 +1,159 @@
+package ecs
+
+import (
+	"math"
+	"math/rand"
+	"testing"
+)
+
+func TestEntityPoolConstructor(t *testing.T) {
+	_ = newEntityPool(128, reservedEntities)
+}
+
+func TestEntityPool(t *testing.T) {
+	p := newEntityPool(128, reservedEntities)
+
+	expectedAll := []Entity{newEntity(0), newEntity(1), newEntity(2), newEntity(3), newEntity(4), newEntity(5), newEntity(6)}
+	expectedAll[0].gen = math.MaxUint32
+	expectedAll[1].gen = math.MaxUint32
+
+	for range 5 {
+		_ = p.Get()
+	}
+	expectSlicesEqual(t, expectedAll, p.entities, "Wrong initial entities")
+
+	expectPanicsWithValue(t, "can't recycle reserved zero or wildcard entity", func() { p.Recycle(p.entities[0]) })
+	expectPanicsWithValue(t, "can't recycle reserved zero or wildcard entity", func() { p.Recycle(p.entities[1]) })
+
+	e0 := p.entities[reservedEntities]
+	p.Recycle(e0)
+	expectFalse(t, p.Alive(e0), "Dead entity should not be alive")
+
+	e0Old := e0
+	e0 = p.Get()
+	expectedAll[reservedEntities].gen++
+	expectTrue(t, p.Alive(e0), "Recycled entity of new generation should be alive")
+	expectFalse(t, p.Alive(e0Old), "Recycled entity of old generation should not be alive")
+
+	expectSlicesEqual(t, expectedAll, p.entities, "Wrong entities after get/recycle")
+
+	e0Old = p.entities[reservedEntities]
+	for i := range 5 {
+		p.Recycle(p.entities[i+reservedEntities])
+		expectedAll[i+1].gen++
+	}
+
+	expectEqual(t, 5, p.Cap())
+	expectEqual(t, 130, p.TotalCap())
+
+	expectFalse(t, p.Alive(e0Old), "Recycled entity of old generation should not be alive")
+
+	for range 5 {
+		_ = p.Get()
+	}
+
+	expectFalse(t, p.Alive(e0Old), "Recycled entity of old generation should not be alive")
+	expectFalse(t, p.Alive(Entity{}), "Zero entity should not be alive")
+	expectFalse(t, p.Alive(Entity{1, 0}), "Wildcard entity should not be alive")
+}
+
+func TestEntityPoolStochastic(t *testing.T) {
+	n := 32
+	p := newEntityPool(16, reservedEntities)
+
+	for range n {
+		p.Reset()
+		expectEqual(t, 0, p.Len())
+		expectEqual(t, 0, p.Available())
+
+		alive := map[Entity]bool{}
+		for range n {
+			e := p.Get()
+			alive[e] = true
+		}
+
+		for e, isAlive := range alive {
+			expectEqual(t, isAlive, p.Alive(e), "Wrong alive state of entity %v after initialization", e)
+			if rand.Float32() > 0.75 {
+				continue
+			}
+			p.Recycle(e)
+			alive[e] = false
+		}
+		for e, isAlive := range alive {
+			expectEqual(t, isAlive, p.Alive(e), "Wrong alive state of entity %v after 1st removal. Entity is %v", e, p.entities[e.id])
+		}
+		for range n {
+			e := p.Get()
+			alive[e] = true
+		}
+		for e, isAlive := range alive {
+			expectEqual(t, isAlive, p.Alive(e), "Wrong alive state of entity %v after 1st recycling. Entity is %v", e, p.entities[e.id])
+		}
+		expectEqual(t, uint32(0), p.available, "No more entities should be available")
+
+		for e, isAlive := range alive {
+			if !isAlive || rand.Float32() > 0.75 {
+				continue
+			}
+			p.Recycle(e)
+			alive[e] = false
+		}
+		for e, a := range alive {
+			expectEqual(t, a, p.Alive(e), "Wrong alive state of entity %v after 2nd removal. Entity is %v", e, p.entities[e.id])
+		}
+	}
+}
+
+func TestBitPool(t *testing.T) {
+	p := newBitPool()
+
+	for i := range mask64TotalBits {
+		expectEqual(t, i, int(p.Get()))
+	}
+
+	expectPanics(t, func() { p.Get() })
+
+	for i := range 10 {
+		p.Recycle(uint8(i))
+	}
+	for i := 9; i >= 0; i-- {
+		expectEqual(t, i, int(p.Get()))
+	}
+
+	expectPanics(t, func() { p.Get() })
+
+	p.Reset()
+
+	for i := range mask64TotalBits {
+		expectEqual(t, i, int(p.Get()))
+	}
+
+	expectPanics(t, func() { p.Get() })
+
+	for i := range 10 {
+		p.Recycle(uint8(i))
+	}
+	for i := 9; i >= 0; i-- {
+		expectEqual(t, i, int(p.Get()))
+	}
+}
+
+func TestIntPool(t *testing.T) {
+	p := newIntPool[int](16)
+
+	for range 3 {
+		for i := range 32 {
+			expectEqual(t, i, p.Get())
+		}
+
+		expectEqual(t, 32, len(p.pool))
+
+		p.Recycle(3)
+		p.Recycle(4)
+		expectEqual(t, 4, p.Get())
+		expectEqual(t, 3, p.Get())
+
+		p.Reset()
+	}
+}

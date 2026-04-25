@@ -1,0 +1,40 @@
+# Changelog
+
+## [[v0.2.1]](https://github.com/mlange-42/ark-tools/compare/v0.2.0...v0.2.1)
+
+- Improves performance of CSV reporters by buffering output (#15)
+
+## [[v0.2.0]](https://github.com/mlange-42/ark-tools/compare/v0.1.5...v0.2.0)
+
+- Adds option `Final` to CSV reporters, to write output only during finalization (#13)
+
+## [[v0.1.5]](https://github.com/mlange-42/ark-tools/compare/v0.1.4...v0.1.5)
+
+- The source field of the PRNG resource `Rand` is ignored during JSON (de)-serialization (#11)
+- Upgrades to Ark v0.4.3 (#12)
+
+## [[v0.1.4]](https://github.com/mlange-42/ark-tools/compare/v0.1.3...v0.1.4)
+
+- Termination systems use the `Tick` resource instead of an internal counter (#10)
+
+## [[v0.1.3]](https://github.com/mlange-42/ark-tools/compare/v0.1.2...v0.1.3)
+
+- Upgrades to Ark v0.4.0 (#8, #9)
+
+## [[v0.1.2]](https://github.com/mlange-42/ark-tools/compare/v0.1.1...v0.1.2)
+
+- Upgrades to Ark v0.3.0 (#7)
+
+## [[v0.1.1]](https://github.com/mlange-42/ark-tools/compare/v0.1.0...v0.1.1)
+
+## Documentation
+
+- Adds more examples to the API docs (#4)
+
+### Bugfixes
+
+- Fixes Windows timing issue (#4)
+
+## [[v0.1.0]](https://github.com/mlange-42/ark-tools/tree/v0.1.0)
+
+Initial release.

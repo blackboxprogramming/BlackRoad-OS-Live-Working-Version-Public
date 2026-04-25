@@ -1,0 +1,140 @@
+package ecs
+
+import "math"
+
+type cacheID uint32
+
+const maxCacheID = math.MaxUint32
+
+// Cache entry for a filter.
+type cacheEntry struct {
+	filter    *filter      // The underlying filter.
+	tables    tableIDs     // Tables matching the filter.
+	relations []relationID // Entity relationships.
+	id        cacheID      // Entry ID.
+}
+
+// cache provides filter caching to speed up queries.
+//
+// For registered filters, the relevant archetypes are tracked internally,
+// so that there are no mask checks required during iteration.
+// This is particularly helpful to avoid query iteration slowdown by a very high number of archetypes.
+// If the number of archetypes exceeds approx. 50-100, uncached filters experience a slowdown.
+// The relative slowdown increases with lower numbers of entities queried (noticeable below a few thousand entities).
+// Cached filters avoid this slowdown.
+//
+// The overhead of tracking cached filters internally is very low,
+// as updates are required only when new archetypes are created.
+type cache struct {
+	indices map[cacheID]int  // Mapping from filter IDs to indices in filters
+	filters []cacheEntry     // The cached filters, indexed by indices
+	intPool intPool[cacheID] // Pool for filter IDs
+}
+
+// newCache creates a new [cache].
+func newCache() cache {
+	return cache{
+		intPool: newIntPool[cacheID](128),
+		indices: map[cacheID]int{},
+		filters: []cacheEntry{},
+	}
+}
+
+// getEntry returns the cache entry for the given ID.
+func (c *cache) getEntry(id cacheID) *cacheEntry {
+	return &c.filters[c.indices[id]]
+}
+
+// register a filter.
+func (c *cache) register(storage *storage, filter *filter, relations []relationID) {
+	// TODO: prevent duplicate registration
+	id := c.intPool.Get()
+	filter.cache = id
+	index := len(c.filters)
+	tables := newTableIDs(storage.getCacheTables(filter, relations)...)
+	c.filters = append(c.filters,
+		cacheEntry{
+			id:        id,
+			filter:    filter,
+			relations: relations,
+			tables:    tables,
+		})
+	c.indices[id] = index
+}
+
+// unregister a filter.
+func (c *cache) unregister(filter *filter) {
+	idx, ok := c.indices[filter.cache]
+	if !ok {
+		panic("no filter for id found to unregister")
+	}
+	delete(c.indices, filter.cache)
+
+	filter.cache = maxCacheID
+
+	last := len(c.filters) - 1
+	if idx != last {
+		c.filters[idx], c.filters[last] = c.filters[last], c.filters[idx]
+		c.indices[c.filters[idx].id] = idx
+	}
+	c.filters[last] = cacheEntry{}
+	c.filters = c.filters[:last]
+}
+
+// addTable adds a table.
+//
+// Iterates over all filters and adds the node to the resp. entry where the filter matches.
+func (c *cache) addTable(storage *storage, table *table) {
+	arch := &storage.archetypes[table.archetype]
+	if !table.HasRelations() {
+		for i := range c.filters {
+			e := &c.filters[i]
+			if !e.filter.matches(&arch.mask) {
+				continue
+			}
+			e.tables.Append(table.id)
+		}
+		return
+	}
+
+	for i := range c.filters {
+		e := &c.filters[i]
+		if !e.filter.matches(&arch.mask) {
+			continue
+		}
+		if !table.Matches(e.relations) {
+			continue
+		}
+		e.tables.Append(table.id)
+	}
+}
+
+// removeTable removes a table.
+//
+// Can only be used for tables that have a relation target.
+// Tables without a relation are never removed.
+func (c *cache) removeTable(table *table) {
+	//if !table.HasRelations() {
+	//	// unreachable
+	//	return
+	//}
+	for i := range c.filters {
+		e := &c.filters[i]
+		e.tables.Remove(table.id)
+	}
+}
+
+// Reset the cache.
+// Un-registers all filters.
+func (c *cache) Reset() {
+	if len(c.indices) == 0 {
+		return
+	}
+	for i := range c.filters {
+		f := &c.filters[i]
+		f.filter.cache = maxCacheID
+	}
+	c.indices = map[cacheID]int{}
+	c.filters = c.filters[:0]
+	c.intPool.Reset()
+}

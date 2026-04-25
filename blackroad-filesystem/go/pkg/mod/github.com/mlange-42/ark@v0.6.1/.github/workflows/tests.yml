@@ -1,0 +1,168 @@
+name: Tests
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+jobs:
+
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.25.x'
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        go get .
+    - name: Run Unit tests
+      run: |
+        go test -v -covermode atomic -coverprofile="coverage.out" -coverpkg=./ecs ./...
+        go tool cover -func="coverage.out"
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: ./coverage.out
+        token: ${{ secrets.CODECOV_TOKEN }}
+    #- name: Coveralls
+    #  # continue-on-error: true # allows tests to pass during coveralls.io outage
+    #  uses: coverallsapp/github-action@v2
+    #  with:
+    #    path-to-lcov: coverage.out
+
+  test_tiny:
+    name: Run tests (tiny)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.25.x'
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        go get .
+    - name: Run Unit tests
+      run: |
+        go test -tags ark_tiny -v -covermode atomic -coverprofile="coverage.out" -coverpkg=./ecs ./...
+        go tool cover -func="coverage.out"
+
+  test_debug:
+    name: Run tests (debug)
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.25.x'
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        go get .
+    - name: Run Unit tests
+      run: |
+        go test -tags ark_debug -v -covermode atomic -coverprofile="coverage.out" -coverpkg=./ecs ./...
+        go tool cover -func="coverage.out"
+
+  lint:
+    name: Run linters
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.25.x'
+      - name: Check format
+        run: |
+          if gofmt -e -l . >&1 | grep '^'; then
+            exit 1
+          fi
+      - name: Run GolangCI-Lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+
+      - name: Run GolangCI-Lint (tiny)
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          args: --build-tags=ark_tiny
+
+      - name: Run GolangCI-Lint (debug)
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          args: --build-tags=ark_debug
+
+  semver:
+    name: Run SemVer check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.25.x'
+      - name: Install dependencies
+        run: |
+          go get .
+          go install golang.org/x/exp/cmd/gorelease@latest
+      - name: Get latest tag
+        uses: actions-ecosystem/action-get-latest-tag@v1
+        id: latest-tag
+      - name: Run gorelease
+        run: gorelease -base=${{ steps.latest-tag.outputs.tag }}
+
+  examples:
+    name: Run Examples
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.25.x'
+      - name: Install dependencies
+        run: go get .
+      - name: Run examples
+        run: |
+          cd examples
+          go run ./custom_events
+          go run ./entity_grid
+          go run ./events
+          go run ./kdtree
+          go run ./parallel_queries
+          go run ./parallel_runs
+          go run ./readme
+          go run ./relations
+          go run ./systems
+          go run ./world_lock
+
+  ebiten_example:
+    name: Build Ebiten Example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.25.x'
+      - name: Install Ebiten dependencies
+        run: sudo apt install -y gcc libc6-dev libgl1-mesa-dev libxcursor-dev libxi-dev libxinerama-dev libxrandr-dev libxxf86vm-dev libasound2-dev pkg-config
+      - name: Install dependencies
+        run: |
+          cd examples/ebitengine
+          go get .
+      - name: Build ebitengine example
+        run: |
+          cd examples/ebitengine
+          go build .
