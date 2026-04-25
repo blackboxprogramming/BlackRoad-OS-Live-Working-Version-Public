@@ -1,0 +1,20 @@
+{
+  "name": "blackroad-workerd-edge",
+  "version": "1.0.0",
+  "description": "BlackRoad OS — Self-hosted Cloudflare Workers runtime (workerd)",
+  "scripts": {
+    "dev":     "workerd serve workerd.capnp",
+    "start":   "workerd serve workerd.capnp",
+    "install-workerd": "npm install -g workerd",
+    "deploy:pi":       "rsync -avz --exclude node_modules . pi@192.168.4.64:/opt/blackroad-workerd/ && ssh pi@192.168.4.64 'sudo systemctl restart blackroad-workerd'",
+    "deploy:do":       "rsync -avz --exclude node_modules . root@159.65.43.12:/opt/blackroad-workerd/ && ssh root@159.65.43.12 'systemctl restart blackroad-workerd'",
+    "deploy:both":     "npm run deploy:pi && npm run deploy:do",
+    "status:pi":       "ssh pi@192.168.4.64 'systemctl status blackroad-workerd'",
+    "status:do":       "ssh root@159.65.43.12 'systemctl status blackroad-workerd'",
+    "logs:pi":         "ssh pi@192.168.4.64 'journalctl -u blackroad-workerd -f'",
+    "logs:do":         "ssh root@159.65.43.12 'journalctl -u blackroad-workerd -f'"
+  },
+  "devDependencies": {
+    "workerd": "^1.20260302.0"
+  }
+}

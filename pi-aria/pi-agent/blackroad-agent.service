@@ -1,0 +1,44 @@
+[Unit]
+Description=BlackRoad Pi Agent - Edge Device Runtime
+Documentation=https://github.com/BlackRoad-OS/blackroad-pi-ops
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/opt/blackroad/pi-agent
+Environment=PYTHONUNBUFFERED=1
+Environment=BLACKROAD_PI_CONFIG=/etc/blackroad/pi-agent.config.json
+
+# Secrets from environment file
+EnvironmentFile=-/etc/blackroad/agent.env
+
+ExecStart=/opt/blackroad/pi-agent/venv/bin/python -m pi_agent.main
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Restart policy
+Restart=always
+RestartSec=10
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+PrivateTmp=true
+ReadWritePaths=/var/log/blackroad
+
+# Resource limits
+MemoryMax=256M
+CPUQuota=50%
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=blackroad-agent
+
+[Install]
+WantedBy=multi-user.target
