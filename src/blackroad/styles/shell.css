@@ -1,0 +1,109 @@
+/* BlackRoad OS — SiteShell Layout */
+/* The OS-level layout that every site inherits. */
+
+@import './tokens.css';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  background: var(--br-bg);
+  color: var(--br-text);
+  font-family: var(--br-font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Shell grid — desktop */
+.br-shell {
+  display: grid;
+  grid-template-rows: var(--br-topbar-height) 1fr var(--br-dock-height);
+  grid-template-columns: var(--br-rail-width) 1fr var(--br-rail-width);
+  grid-template-areas:
+    "topbar   topbar   topbar"
+    "left     main     right"
+    "dock     dock     dock";
+  min-height: 100vh;
+  width: 100%;
+}
+
+.br-topbar   { grid-area: topbar; }
+.br-rail-l   { grid-area: left; }
+.br-main     { grid-area: main; }
+.br-rail-r   { grid-area: right; }
+.br-dock     { grid-area: dock; position: sticky; bottom: 0; z-index: 100; }
+
+/* Main content area */
+.br-main {
+  padding: var(--br-gap-lg);
+  overflow-y: auto;
+  max-width: var(--br-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Section spacing */
+.br-section {
+  margin-bottom: var(--br-gap-2xl);
+}
+
+.br-section-title {
+  font-family: var(--br-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--br-dim);
+  margin-bottom: var(--br-gap-md);
+}
+
+/* Headings */
+h1, h2, h3 {
+  font-family: var(--br-font-heading);
+  color: var(--br-text);
+  font-weight: 500;
+}
+
+h1 { font-size: 32px; line-height: 1.2; }
+h2 { font-size: 22px; line-height: 1.3; }
+h3 { font-size: 16px; line-height: 1.4; }
+
+/* Monospace metadata */
+.br-mono {
+  font-family: var(--br-font-mono);
+  font-size: 12px;
+  color: var(--br-muted);
+}
+
+/* Eyebrow text */
+.br-eyebrow {
+  font-family: var(--br-font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--br-dim);
+  margin-bottom: var(--br-gap-sm);
+}
+
+/* Links */
+a {
+  color: var(--br-text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--br-line);
+  transition: border-color var(--br-duration) var(--br-ease);
+}
+
+a:hover {
+  border-color: var(--br-muted);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--br-bg); }
+::-webkit-scrollbar-thumb { background: var(--br-line); border-radius: 3px; }
