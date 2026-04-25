@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad OS - App Factory Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
+      color: #fff;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #FF6B35, #F7931E);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card h3 {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .stat-card .value {
+      font-size: 36px;
+      font-weight: bold;
+      color: #FF6B35;
+    }
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .app-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: transform 0.2s;
+    }
+    .app-card:hover {
+      transform: translateY(-4px);
+      border-color: #FF6B35;
+    }
+    .app-card h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .app-card .meta {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .status.deployed { background: #10b981; color: #fff; }
+    .status.building { background: #f59e0b; color: #fff; }
+    .status.generated { background: #6366f1; color: #fff; }
+    .actions {
+      margin-top: 15px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #FF6B35;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-right: 10px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #F7931E;
+    }
+    .btn.secondary {
+      background: rgba(255,255,255,0.1);
+    }
+    .btn.secondary:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏭 BlackRoad OS App Factory</h1>
+    <p>Automated iOS & Android App Generation & Deployment</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <h3>Total Apps</h3>
+      <div class="value" id="total-apps">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>iOS Apps</h3>
+      <div class="value" id="ios-apps">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Android Apps</h3>
+      <div class="value" id="android-apps">0</div>
+    </div>
+    <div class="stat-card">
+      <h3>Deployed</h3>
+      <div class="value" id="deployed-apps">0</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-bottom: 30px;">
+    <button class="btn" onclick="generateApp()">➕ Generate New App</button>
+    <button class="btn secondary" onclick="deployAll()">🚀 Deploy All</button>
+    <button class="btn secondary" onclick="refreshData()">🔄 Refresh</button>
+  </div>
+
+  <div class="apps-grid" id="apps-grid">
+    <!-- Apps will be loaded here -->
+  </div>
+
+  <script>
+    // Mock data - replace with actual API calls
+    const mockApps = [
+      {
+        name: "BlackRoad Dashboard",
+        bundle_id: "com.blackroados.dashboard",
+        status: "deployed",
+        template: "react-native",
+        version: "1.2.3",
+        last_deployed: "2026-02-10"
+      },
+      {
+        name: "BlackRoad Metrics",
+        bundle_id: "com.blackroados.metrics",
+        status: "building",
+        template: "react-native",
+        version: "1.0.0",
+        last_deployed: null
+      },
+      {
+        name: "BlackRoad Operator",
+        bundle_id: "com.blackroados.operator",
+        status: "generated",
+        template: "flutter",
+        version: "1.0.0",
+        last_deployed: null
+      }
+    ];
+
+    function renderApps() {
+      const grid = document.getElementById('apps-grid');
+      grid.innerHTML = mockApps.map(app => `
+        <div class="app-card">
+          <h3>${app.name}</h3>
+          <div class="meta">
+            ${app.bundle_id} • ${app.template} • v${app.version}
+          </div>
+          <span class="status ${app.status}">${app.status.toUpperCase()}</span>
+          <div class="actions">
+            <button class="btn" onclick="deployApp('${app.name}', 'ios')">📱 Deploy iOS</button>
+            <button class="btn" onclick="deployApp('${app.name}', 'android')">🤖 Deploy Android</button>
+          </div>
+        </div>
+      `).join('');
+
+      // Update stats
+      document.getElementById('total-apps').textContent = mockApps.length;
+      document.getElementById('ios-apps').textContent = mockApps.length;
+      document.getElementById('android-apps').textContent = mockApps.length;
+      document.getElementById('deployed-apps').textContent = 
+        mockApps.filter(a => a.status === 'deployed').length;
+    }
+
+    function generateApp() {
+      const name = prompt('Enter app name:');
+      if (name) {
+        alert(`Generating: ${name}\nRun: ./generate-app.sh "${name}" react-native`);
+      }
+    }
+
+    function deployApp(name, platform) {
+      alert(`Deploying ${name} to ${platform}...\nRun: ./deploy-app.sh "${name}" ${platform}`);
+    }
+
+    function deployAll() {
+      if (confirm('Deploy all apps to both iOS and Android?')) {
+        alert('Deploying all apps...\nRun: ./deploy-all-apps.sh');
+      }
+    }
+
+    function refreshData() {
+      renderApps();
+      alert('Data refreshed!');
+    }
+
+    // Initial render
+    renderApps();
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BlackRoad Terminal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a12;
+            font-family: 'Courier New', monospace;
+            color: #14f195;
+            padding: 20px;
+        }
+        .terminal {
+            background: rgba(18,18,31,0.95);
+            border: 2px solid #9945ff;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 80vh;
+        }
+        .output {
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+        }
+        .input-line {
+            display: flex;
+            align-items: center;
+        }
+        .prompt {
+            color: #f7931a;
+            margin-right: 10px;
+        }
+        input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #14f195;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="output" id="output">BlackRoad Terminal v1.0.0
+Type 'help' for commands
+
+</div>
+        <div class="input-line">
+            <span class="prompt">blackroad@lucidia:~$</span>
+            <input type="text" id="input" autofocus>
+        </div>
+    </div>
+    <script>
+        const commands = {
+            help: 'Available commands: help, clear, whoami, date, echo, hash, agents, pi',
+            whoami: 'blackroad-user',
+            date: () => new Date().toString(),
+            clear: () => { document.getElementById('output').textContent = ''; return ''; },
+            hash: (args) => 'Use hash.blackroad.io for hash generation',
+            agents: 'Alice (Claude) | Aria (GPT-4) | Lucidia (Gemma)',
+            pi: 'Lucidia: 192.168.4.38 | Aria: 192.168.4.64 | Alice: 192.168.4.49'
+        };
+        
+        document.getElementById('input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const input = e.target.value;
+                const output = document.getElementById('output');
+                output.textContent += `blackroad@lucidia:~$ ${input}\n`;
+                
+                const [cmd, ...args] = input.split(' ');
+                if (commands[cmd]) {
+                    const result = typeof commands[cmd] === 'function' ? 
+                        commands[cmd](args) : commands[cmd];
+                    if (result) output.textContent += result + '\n\n';
+                } else if (cmd) {
+                    output.textContent += `Command not found: ${cmd}\n\n`;
+                }
+                
+                e.target.value = '';
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        });
+    </script>
+</body>
+</html>

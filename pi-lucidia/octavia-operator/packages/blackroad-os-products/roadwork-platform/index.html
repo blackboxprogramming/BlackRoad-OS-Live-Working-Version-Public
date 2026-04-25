@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoadWork - AI Tutoring for $9/month | Unlimited Help with Homework</title>
+    <meta name="description" content="Get unlimited AI tutoring for $9/month. Upload homework, get instant explanations, step-by-step solutions, and 24/7 help. Better than Chegg, CourseHero, or expensive tutors.">
+    <style>
+        :root {
+            --black: #000000;
+            --white: #FFFFFF;
+            --amber: #F5A623;
+            --hot-pink: #FF1D6C;
+            --electric-blue: #2979FF;
+            --violet: #9C27B0;
+            --space-xs: 8px;
+            --space-sm: 13px;
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --space-2xl: 89px;
+            --space-3xl: 144px;
+            --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            line-height: 1.618;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Grid Background */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 55px 55px;
+            animation: grid-move 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(55px, 55px); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--space-md) var(--space-xl);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s var(--ease);
+        }
+
+        .btn-primary {
+            background: var(--hot-pink);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 29, 108, 0.4);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Hero */
+        .hero {
+            padding: calc(var(--space-3xl) * 2) 0 var(--space-3xl);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            line-height: 1.1;
+        }
+
+        .hero .gradient-text {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: var(--space-xl);
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .price-banner {
+            display: inline-block;
+            background: rgba(255, 29, 108, 0.1);
+            border: 2px solid var(--hot-pink);
+            border-radius: 50px;
+            padding: var(--space-sm) var(--space-xl);
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: var(--space-xl);
+        }
+
+        .price-banner .old-price {
+            text-decoration: line-through;
+            opacity: 0.5;
+            margin-right: var(--space-sm);
+        }
+
+        .price-banner .new-price {
+            color: var(--hot-pink);
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-3xl) 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+            transition: all 0.3s var(--ease);
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-4px);
+            border-color: var(--hot-pink);
+        }
+
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-md);
+        }
+
+        .feature-card h3 {
+            font-size: 24px;
+            margin-bottom: var(--space-sm);
+            color: var(--hot-pink);
+        }
+
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Demo Section */
+        .demo {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: var(--space-3xl);
+            margin: var(--space-3xl) 0;
+            text-align: center;
+        }
+
+        .demo h2 {
+            font-size: 48px;
+            margin-bottom: var(--space-xl);
+        }
+
+        .demo-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto var(--space-lg);
+            color: var(--white);
+            font-size: 18px;
+            font-family: inherit;
+        }
+
+        .demo-input:focus {
+            outline: none;
+            border-color: var(--hot-pink);
+        }
+
+        #demo-response {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+            text-align: left;
+            display: none;
+        }
+
+        /* Pricing Comparison */
+        .comparison {
+            margin: var(--space-3xl) 0;
+        }
+
+        .comparison h2 {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: var(--space-xl);
+        }
+
+        .comparison-table {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-md);
+        }
+
+        .comparison-col {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: var(--space-lg);
+        }
+
+        .comparison-col.highlight {
+            border: 2px solid var(--hot-pink);
+            background: rgba(255, 29, 108, 0.05);
+        }
+
+        .comparison-col h3 {
+            font-size: 24px;
+            margin-bottom: var(--space-md);
+        }
+
+        .comparison-col .price {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--hot-pink);
+            margin-bottom: var(--space-md);
+        }
+
+        .comparison-col ul {
+            list-style: none;
+        }
+
+        .comparison-col li {
+            padding: var(--space-xs) 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .comparison-col li::before {
+            content: '✓';
+            color: var(--hot-pink);
+            margin-right: var(--space-xs);
+        }
+
+        /* CTA */
+        .cta {
+            text-align: center;
+            padding: var(--space-3xl) 0;
+        }
+
+        .cta h2 {
+            font-size: 56px;
+            margin-bottom: var(--space-md);
+        }
+
+        .cta p {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: var(--space-xl);
+        }
+
+        .btn-cta {
+            font-size: 24px;
+            padding: var(--space-lg) var(--space-2xl);
+            background: var(--hot-pink);
+            color: var(--white);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: all 0.3s var(--ease);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(255, 29, 108, 0.5);
+        }
+
+        footer {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .comparison-table { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">🎓 RoadWork</div>
+            <a href="#pricing" class="btn btn-primary">Start Free Trial</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Stop Paying <span class="gradient-text">$20/month</span><br>For Homework Help</h1>
+            <p>Get unlimited AI tutoring, step-by-step explanations, and 24/7 help for just $9/month. No more Chegg paywalls.</p>
+
+            <div class="price-banner">
+                <span class="old-price">$19.95</span>
+                <span class="new-price">$9/month</span>
+                <span style="margin-left: var(--space-sm);">unlimited access</span>
+            </div>
+
+            <a href="#demo" class="btn btn-cta">Try It Free →</a>
+            <p style="font-size: 14px; margin-top: var(--space-sm);">No credit card required • Cancel anytime</p>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📸</div>
+                <h3>Upload Any Problem</h3>
+                <p>Take a photo of your homework, upload a PDF, or paste text. RoadWork understands all formats.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🧠</div>
+                <h3>Step-by-Step Explanations</h3>
+                <p>Not just answers - understand WHY. Get detailed breakdowns that teach you the concepts.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Instant Responses</h3>
+                <p>No waiting. Get help immediately, 24/7. Perfect for late-night study sessions.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>All Subjects</h3>
+                <p>Math, Physics, Chemistry, Biology, History, English, and more. One platform for everything.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Visual Learning</h3>
+                <p>Get graphs, diagrams, and interactive visualizations. Perfect for STEM subjects.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Academic Integrity</h3>
+                <p>Focuses on teaching, not cheating. Learn the material, don't just copy answers.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo" class="container">
+        <div class="demo">
+            <h2>Try RoadWork Now (Free Demo)</h2>
+            <p>Ask any homework question:</p>
+            <textarea class="demo-input" placeholder="Example: Solve for x: 2x + 5 = 13" id="question" rows="4"></textarea>
+            <button class="btn btn-cta" onclick="askQuestion()">Get Help →</button>
+            <div id="demo-response"></div>
+        </div>
+    </section>
+
+    <section id="pricing" class="container">
+        <div class="comparison">
+            <h2>Why Switch to RoadWork?</h2>
+            <div class="comparison-table">
+                <div class="comparison-col">
+                    <h3>Chegg</h3>
+                    <div class="price">$19.95/mo</div>
+                    <ul>
+                        <li>Limited questions</li>
+                        <li>Slow responses</li>
+                        <li>Textbook-only</li>
+                        <li>Old interface</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-col">
+                    <h3>CourseHero</h3>
+                    <div class="price">$39.95/mo</div>
+                    <ul>
+                        <li>Upload required</li>
+                        <li>Limited unlocks</li>
+                        <li>Paywalled docs</li>
+                        <li>Expensive</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-col">
+                    <h3>Private Tutor</h3>
+                    <div class="price">$50+/hour</div>
+                    <ul>
+                        <li>Very expensive</li>
+                        <li>Schedule conflicts</li>
+                        <li>Limited hours</li>
+                        <li>Not 24/7</li>
+                    </ul>
+                </div>
+
+                <div class="comparison-col highlight">
+                    <h3>RoadWork ✨</h3>
+                    <div class="price">$9/mo</div>
+                    <ul>
+                        <li>✓ Unlimited questions</li>
+                        <li>✓ Instant AI help</li>
+                        <li>✓ All subjects</li>
+                        <li>✓ 24/7 available</li>
+                        <li>✓ Step-by-step</li>
+                        <li>✓ Visual learning</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="cta">
+            <h2>Start Learning Better Today</h2>
+            <p>Join thousands of students getting better grades with RoadWork</p>
+            <button class="btn-cta" onclick="checkout()">Start Free Trial →</button>
+            <p style="font-size: 14px; margin-top: var(--space-md);">14-day free trial • $9/month after • Cancel anytime</p>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 BlackRoad Education, Inc. All rights reserved.</p>
+            <p style="margin-top: var(--space-sm);">Built to help students learn, not cheat.</p>
+        </div>
+    </footer>
+
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            const response = document.getElementById('demo-response');
+
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            response.style.display = 'block';
+            response.innerHTML = '<p>🤖 Roadie is thinking...</p>';
+
+            // Simulate AI response (replace with actual API call)
+            setTimeout(() => {
+                response.innerHTML = `
+                    <h3>Question: ${question}</h3>
+                    <h4>Step-by-Step Solution:</h4>
+                    <p><strong>Step 1:</strong> Subtract 5 from both sides<br>
+                    2x + 5 - 5 = 13 - 5<br>
+                    2x = 8</p>
+
+                    <p><strong>Step 2:</strong> Divide both sides by 2<br>
+                    2x / 2 = 8 / 2<br>
+                    x = 4</p>
+
+                    <p><strong>Answer:</strong> x = 4</p>
+
+                    <p style="margin-top: var(--space-md); color: var(--hot-pink);">
+                    ✨ Want unlimited help like this? <a href="#" onclick="checkout()" style="color: var(--hot-pink); text-decoration: underline;">Start your free trial</a>
+                    </p>
+                `;
+            }, 1500);
+        }
+
+        function checkout() {
+            // Replace with actual Stripe checkout
+            alert('🎓 Starting your free trial!\n\nYou\'ll get:\n• 14 days free\n• Unlimited questions\n• All subjects\n• 24/7 access\n\nThen just $9/month. Cancel anytime!\n\nContact: blackroad.systems@gmail.com');
+        }
+    </script>
+</body>
+</html>

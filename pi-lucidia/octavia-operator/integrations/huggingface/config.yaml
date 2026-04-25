@@ -1,0 +1,45 @@
+# Hugging Face — BlackRoad OS Integration
+# https://huggingface.co/docs/api-inference
+
+name: huggingface
+category: ai-providers
+status: active
+api_base: https://huggingface.co/api
+
+auth:
+  type: bearer_token
+  env: HUGGINGFACE_TOKEN
+
+endpoints:
+  models:
+    list: GET /models
+    get: GET /models/{repo_id}
+    download: GET /models/{repo_id}/resolve/{revision}/{filename}
+  inference:
+    run: POST https://api-inference.huggingface.co/models/{model_id}
+  spaces:
+    list: GET /spaces
+    get: GET /spaces/{repo_id}
+  repos:
+    create: POST /repos/create
+    delete: DELETE /repos/delete
+  datasets:
+    list: GET /datasets
+    get: GET /datasets/{repo_id}
+
+models_used:
+  - id: meta-llama/Llama-3.1-8B
+    purpose: general-agent-inference
+  - id: Qwen/Qwen2.5-72B
+    purpose: primary-reasoning
+  - id: deepseek-ai/DeepSeek-V2
+    purpose: code-generation
+  - id: mistralai/Mistral-7B-v0.1
+    purpose: fast-inference
+  - id: openai/whisper-large-v3
+    purpose: speech-to-text
+
+health_check:
+  endpoint: GET /api/whoami
+  interval: 300
+  timeout: 10

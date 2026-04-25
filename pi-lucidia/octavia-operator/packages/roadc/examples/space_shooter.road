@@ -1,0 +1,270 @@
+# BlackRoad 3D Space Shooter
+# A complete game example showing language features
+
+## Game State
+type GameState:
+    score: int
+    lives: int
+    level: int
+    paused: bool
+
+var state = GameState{
+    score: 0,
+    lives: 3,
+    level: 1,
+    paused: false
+}
+
+## Player Ship Type
+type Ship:
+    position: vec3
+    velocity: vec3
+    health: int
+    fireCooldown: float
+
+var player = Ship{
+    position: vec3(0, 0, 0),
+    velocity: vec3(0, 0, 0),
+    health: 100,
+    fireCooldown: 0.0
+}
+
+## Enemy Type
+type Enemy:
+    position: vec3
+    velocity: vec3
+    health: int
+    alive: bool
+
+var enemies: list[Enemy] = []
+
+## 3D Scene Definition
+space GameWorld:
+    ## Player Ship (Hot Pink!)
+    cube PlayerShip:
+        position: vec3(0, 0, 0)
+        scale: vec3(0.5, 0.5, 1.0)
+        color: #FF1D6C  # BlackRoad Hot Pink
+        material: {
+            "metalness": 0.8,
+            "roughness": 0.2,
+            "emissive": #FF1D6C
+        }
+
+    ## Starfield Background
+    plane Starfield:
+        position: vec3(0, 0, -20)
+        scale: vec3(100, 100, 1)
+        color: #000000
+        texture: "stars.png"
+
+    ## Directional Light
+    light MainLight:
+        type: directional
+        position: vec3(5, 10, 5)
+        color: #FFFFFF
+        intensity: 1.5
+        shadows: true
+
+    ## Camera
+    camera MainCam:
+        position: vec3(0, 5, 10)
+        lookAt: vec3(0, 0, 0)
+        fov: 60
+        near: 0.1
+        far: 1000
+
+## Game Functions
+
+fun spawnEnemy():
+    let x = random(-8.0, 8.0)
+    let y = random(-5.0, 5.0)
+
+    let enemy = Enemy{
+        position: vec3(x, y, -15),
+        velocity: vec3(0, 0, 2.0),
+        health: 30,
+        alive: true
+    }
+
+    enemies.push(enemy)
+
+    # Spawn visual cube in scene
+    spawn cube:
+        id: "enemy_{enemies.len()}"
+        position: enemy.position
+        scale: vec3(0.8, 0.8, 0.8)
+        color: #F5A623  # Amber
+        tag: "enemy"
+
+fun shoot():
+    if player.fireCooldown > 0:
+        return
+
+    # Create bullet
+    spawn sphere:
+        id: "bullet_{time()}"
+        position: player.position + vec3(0, 0, -1)
+        radius: 0.1
+        color: #2979FF  # Electric Blue
+        velocity: vec3(0, 0, -25.0)
+        tag: "bullet"
+        glow: true
+
+    # Play sound
+    audio.play("shoot.wav")
+
+    # Set cooldown
+    player.fireCooldown = 0.2
+
+fun updatePlayer(delta: float):
+    # Handle input
+    if input.key(Key.Left):
+        player.velocity.x = -10.0
+    elif input.key(Key.Right):
+        player.velocity.x = 10.0
+    else:
+        player.velocity.x = 0.0
+
+    if input.key(Key.Up):
+        player.velocity.y = 10.0
+    elif input.key(Key.Down):
+        player.velocity.y = -10.0
+    else:
+        player.velocity.y = 0.0
+
+    if input.key(Key.Space):
+        shoot()
+
+    # Update position
+    player.position = player.position + (player.velocity * delta)
+
+    # Clamp to screen bounds
+    player.position.x = clamp(player.position.x, -8.0, 8.0)
+    player.position.y = clamp(player.position.y, -5.0, 5.0)
+
+    # Update cooldown
+    if player.fireCooldown > 0:
+        player.fireCooldown = player.fireCooldown - delta
+
+    # Update visual
+    GameWorld.PlayerShip.position = player.position
+
+fun updateEnemies(delta: float):
+    for enemy in enemies:
+        if not enemy.alive:
+            continue
+
+        # Move enemy forward
+        enemy.position.z = enemy.position.z + (enemy.velocity.z * delta)
+
+        # Remove if off screen
+        if enemy.position.z > 5:
+            enemy.alive = false
+            destroy("enemy_{i}")
+            state.lives = state.lives - 1
+
+fun checkCollisions():
+    # Get all bullets
+    let bullets = scene.findByTag("bullet")
+    let enemyObjects = scene.findByTag("enemy")
+
+    for bullet in bullets:
+        for enemy in enemyObjects:
+            # Check distance
+            let dist = distance(bullet.position, enemy.position)
+
+            if dist < 1.0:
+                # Hit!
+                destroy(bullet.id)
+                destroy(enemy.id)
+
+                # Update score
+                state.score = state.score + 100
+
+                # Particle effect
+                spawn particles:
+                    position: enemy.position
+                    color: #FF1D6C
+                    count: 20
+                    lifetime: 0.5
+
+                # Sound
+                audio.play("explosion.wav")
+
+    # Check player collision
+    for enemy in enemyObjects:
+        let dist = distance(player.position, enemy.position)
+        if dist < 1.0:
+            # Player hit!
+            player.health = player.health - 10
+            destroy(enemy.id)
+
+            if player.health <= 0:
+                gameOver()
+
+fun spawnWave():
+    for i in 0..5:
+        spawnEnemy()
+
+fun gameOver():
+    print("Game Over! Final Score: {state.score}")
+    state.paused = true
+
+    # Show game over screen
+    ui.text("GAME OVER", pos: vec2(400, 300), size: 48, color: #FF1D6C)
+    ui.text("Score: {state.score}", pos: vec2(400, 360), size: 32, color: #FFFFFF)
+
+## Main Game Loop
+async fun main():
+    # Initialize
+    print("BlackRoad Space Shooter 🚀")
+    print("Arrow keys to move, Space to shoot")
+
+    # Load assets
+    await audio.load("shoot.wav")
+    await audio.load("explosion.wav")
+
+    # Start background music
+    audio.playMusic("background.mp3", loop: true)
+
+    # Spawn initial wave
+    spawnWave()
+
+    var lastSpawn: float = 0.0
+
+    # Main game loop
+    while not state.paused:
+        let delta = time.deltaTime()
+
+        # Update game objects
+        updatePlayer(delta)
+        updateEnemies(delta)
+        checkCollisions()
+
+        # Spawn new wave every 5 seconds
+        lastSpawn = lastSpawn + delta
+        if lastSpawn > 5.0:
+            spawnWave()
+            lastSpawn = 0.0
+            state.level = state.level + 1
+
+        # Render scene
+        render(GameWorld, camera: MainCam)
+
+        # Draw UI
+        ui.text("Score: {state.score}", pos: vec2(10, 10), size: 24)
+        ui.text("Lives: {state.lives}", pos: vec2(10, 40), size: 24)
+        ui.text("Level: {state.level}", pos: vec2(10, 70), size: 24)
+
+        # Health bar
+        ui.rect(
+            pos: vec2(10, 100),
+            size: vec2(player.health * 2, 20),
+            color: player.health > 50 ? #00FF00 : #FF0000
+        )
+
+        # Cap at 60 FPS
+        await time.sleep(1.0 / 60.0)
+
+    print("Thanks for playing! 🖤🛣️")

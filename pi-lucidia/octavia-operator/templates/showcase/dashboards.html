@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard & UI Templates - BlackRoad OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-primary: #020308;
+      --bg-secondary: rgba(6, 10, 30, 0.92);
+      --bg-card: rgba(12, 18, 40, 0.85);
+      --text-primary: #f5f5ff;
+      --text-muted: rgba(245, 245, 255, 0.7);
+      --accent-cyan: #00e5ff;
+      --accent-green: #1af59d;
+      --accent-yellow: #ffc400;
+      --accent-purple: #a855f7;
+      --accent-orange: #ff9d00;
+      --accent-pink: #ff0066;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --gradient-brand: linear-gradient(135deg, #ff9d00, #ff0066, #7700ff, #0066ff);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #050816 0, #020308 45%, #000000 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+    .nav { margin-bottom: 24px; }
+    .nav a { color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; }
+    .nav a:hover { text-decoration: underline; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    h1 .icon { font-size: 2.2rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+    /* Design System Info */
+    .design-system {
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(0, 229, 255, 0.04));
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 12px;
+      margin-bottom: 24px;
+    }
+    .design-system h2 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .color-swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .swatch {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+    .swatch-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .swatch-label { color: var(--text-muted); }
+    .design-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .dashboard-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .dashboard-preview {
+      height: 160px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Individual preview styles */
+    .preview-home {
+      background: linear-gradient(135deg, #050816 0%, #0a0f2e 50%, #020308 100%);
+    }
+    .preview-home::after {
+      content: "BlackRoad OS";
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .preview-home .mock-cards {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+    }
+    .mock-card {
+      flex: 1;
+      height: 50px;
+      border-radius: 6px;
+      background: rgba(12, 18, 40, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .preview-models {
+      background: linear-gradient(135deg, #050816, #0d0520 60%, #020308);
+    }
+    .preview-models::after {
+      content: "ψ";
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      font-size: 2rem;
+      color: var(--accent-purple);
+    }
+
+    .preview-status {
+      background: linear-gradient(135deg, #050816, #021208 60%, #020308);
+    }
+    .preview-status .status-dots {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .status-dot.green { background: var(--accent-green); }
+    .status-dot.yellow { background: var(--accent-yellow); }
+    .status-dot.red { background: #ff4444; }
+    .status-line {
+      width: 80px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .preview-quantum {
+      background: linear-gradient(135deg, #0d0520, #050816 60%, #000820);
+    }
+    .preview-quantum::after {
+      content: "Q";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3rem;
+      font-weight: 100;
+      color: rgba(168, 85, 247, 0.3);
+    }
+
+    .preview-learning {
+      background: linear-gradient(135deg, #050816, #081020 60%, #020308);
+    }
+    .preview-learning .xp-bar {
+      position: absolute;
+      bottom: 30px;
+      left: 20px;
+      right: 20px;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+    .preview-learning .xp-fill {
+      height: 100%;
+      width: 65%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--accent-yellow), var(--accent-orange));
+    }
+
+    .preview-quests {
+      background: linear-gradient(135deg, #050816, #100818 60%, #020308);
+    }
+    .preview-quests .quest-items {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .quest-item {
+      height: 28px;
+      border-radius: 6px;
+      background: rgba(12, 18, 40, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 6px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+    .quest-check {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .quest-check.done {
+      background: var(--accent-green);
+      border-color: var(--accent-green);
+    }
+
+    .dashboard-info {
+      padding: 16px;
+    }
+    .dashboard-info .d-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .dashboard-info .d-file {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+    }
+    .dashboard-info .d-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .dashboard-info .d-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .dashboard-info .d-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .footer {
+      text-align: center; margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="nav"><a href="index.html">&larr; Template Showcase</a></div>
+
+    <h1><span class="icon">🖥</span> Dashboard & UI Templates</h1>
+    <p class="subtitle">Six interactive HTML dashboard pages built with the BlackRoad OS design system. Dark theme, gradient branding, and responsive layouts.</p>
+
+    <!-- Design System -->
+    <div class="design-system">
+      <h2>Design System</h2>
+      <div class="color-swatches">
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #00e5ff;"></div>
+          <span class="swatch-label">Cyan #00e5ff</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #1af59d;"></div>
+          <span class="swatch-label">Green #1af59d</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #ffc400;"></div>
+          <span class="swatch-label">Yellow #ffc400</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #a855f7;"></div>
+          <span class="swatch-label">Purple #a855f7</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #ff9d00;"></div>
+          <span class="swatch-label">Orange #ff9d00</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #ff0066;"></div>
+          <span class="swatch-label">Pink #ff0066</span>
+        </div>
+        <div class="swatch">
+          <div class="swatch-dot" style="background: #020308;"></div>
+          <span class="swatch-label">BG #020308</span>
+        </div>
+      </div>
+      <div class="design-note">
+        All dashboards use system-ui font stack, radial gradient backgrounds, card-based layouts with subtle borders, and the brand gradient (orange &rarr; pink &rarr; violet &rarr; blue). Interactive elements feature smooth hover transitions with translateY(-4px) lift effects.
+      </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+
+      <a href="../dashboard_home.html" class="dashboard-card">
+        <div class="dashboard-preview preview-home">
+          <div class="mock-cards">
+            <div class="mock-card" style="border-left: 2px solid var(--accent-purple);"></div>
+            <div class="mock-card" style="border-left: 2px solid var(--accent-green);"></div>
+            <div class="mock-card" style="border-left: 2px solid var(--accent-cyan);"></div>
+          </div>
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">Dashboard Home</div>
+          <div class="d-file">dashboard_home.html</div>
+          <div class="d-desc">Main BlackRoad OS dashboard with health status indicators, navigation card grid for all subsystems, quick stats (XP, rank, streak), and coach suggestion card.</div>
+          <div class="d-meta">
+            <span>📐 390 lines</span>
+            <span>🎨 5 nav cards</span>
+            <span>📊 Health API</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="../models_page.html" class="dashboard-card">
+        <div class="dashboard-preview preview-models">
+          <div style="position: absolute; top: 60px; left: 20px; right: 20px;">
+            <div style="display: flex; gap: 8px;">
+              <div class="mock-card" style="height: 60px; border-color: rgba(168, 85, 247, 0.3);"></div>
+              <div class="mock-card" style="height: 60px; opacity: 0.5;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">Model Registry</div>
+          <div class="d-file">models_page.html</div>
+          <div class="d-desc">AI model registry with rank-based skill tree. Models grouped by required rank (Novice to BlackRoad Sage), with unlock status indicators and metadata display.</div>
+          <div class="d-meta">
+            <span>📐 424 lines</span>
+            <span>🔮 Psi symbol</span>
+            <span>🔓 Unlock system</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="../status_page.html" class="dashboard-card">
+        <div class="dashboard-preview preview-status">
+          <div class="status-dots">
+            <div class="status-row"><div class="status-dot green"></div><div class="status-line"></div></div>
+            <div class="status-row"><div class="status-dot green"></div><div class="status-line"></div></div>
+            <div class="status-row"><div class="status-dot yellow"></div><div class="status-line"></div></div>
+            <div class="status-row"><div class="status-dot green"></div><div class="status-line"></div></div>
+            <div class="status-row"><div class="status-dot red"></div><div class="status-line"></div></div>
+          </div>
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">System Status</div>
+          <div class="d-file">status_page.html</div>
+          <div class="d-desc">Real-time system status dashboard showing service health, component breakdown, ledger events, error tracking, and infrastructure monitoring.</div>
+          <div class="d-meta">
+            <span>📐 517 lines</span>
+            <span>📡 Real-time</span>
+            <span>🚨 Alert tracking</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="../quantum_dashboard.html" class="dashboard-card">
+        <div class="dashboard-preview preview-quantum">
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">Quantum Console</div>
+          <div class="d-file">quantum_dashboard.html</div>
+          <div class="d-desc">Quantum computing interface with prediction visualization, decision boundary rendering, classifier training controls, and calculation results display.</div>
+          <div class="d-meta">
+            <span>📐 441 lines</span>
+            <span>⚛️ Quantum ML</span>
+            <span>📊 Visualizations</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="../learning_history.html" class="dashboard-card">
+        <div class="dashboard-preview preview-learning">
+          <div style="position: absolute; top: 16px; left: 20px; font-size: 0.85rem; font-weight: 600;">Learning History</div>
+          <div style="position: absolute; top: 40px; left: 20px; font-size: 1.8rem; font-weight: 700; color: var(--accent-yellow); font-family: monospace;">2,450 XP</div>
+          <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">Learning History</div>
+          <div class="d-file">learning_history.html</div>
+          <div class="d-desc">Agent learning tracker with progressive skill development timeline, XP accumulation visualization, achievement history, and performance metrics dashboard.</div>
+          <div class="d-meta">
+            <span>📐 515 lines</span>
+            <span>📈 Progress tracking</span>
+            <span>🏆 Achievements</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="../quests_page.html" class="dashboard-card">
+        <div class="dashboard-preview preview-quests">
+          <div class="quest-items">
+            <div class="quest-item"><div class="quest-check done"></div>Complete onboarding</div>
+            <div class="quest-item"><div class="quest-check done"></div>Run first prediction</div>
+            <div class="quest-item"><div class="quest-check"></div>Reach Apprentice rank</div>
+            <div class="quest-item"><div class="quest-check"></div>Train a custom model</div>
+          </div>
+        </div>
+        <div class="dashboard-info">
+          <div class="d-name">Quests & Promotion</div>
+          <div class="d-file">quests_page.html</div>
+          <div class="d-desc">Quest management with RPG-style task cards, completion tracking, promotion path visualization, badge earning system, and agent assignment tracking.</div>
+          <div class="d-meta">
+            <span>📐 517 lines</span>
+            <span>🎯 Quest cards</span>
+            <span>🏅 Badges</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="footer">
+      <p>BlackRoad OS Template Showcase &middot; Dashboard & UI Templates &middot; <span class="mono">&copy; 2026 BlackRoad OS, Inc.</span></p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Infrastructure Templates - BlackRoad OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-primary: #020308;
+      --bg-secondary: rgba(6, 10, 30, 0.92);
+      --bg-card: rgba(12, 18, 40, 0.85);
+      --text-primary: #f5f5ff;
+      --text-muted: rgba(245, 245, 255, 0.7);
+      --accent-cyan: #00e5ff;
+      --accent-green: #1af59d;
+      --accent-yellow: #ffc400;
+      --accent-purple: #a855f7;
+      --accent-orange: #ff9d00;
+      --accent-pink: #ff0066;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #050816 0, #020308 45%, #000000 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+    .nav { margin-bottom: 24px; }
+    .nav a { color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; }
+    .nav a:hover { text-decoration: underline; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    h1 .icon { font-size: 2.2rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+    .template-list { display: flex; flex-direction: column; gap: 20px; }
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+    .template-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .template-name { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .template-file {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255, 157, 0, 0.1);
+      border: 1px solid rgba(255, 157, 0, 0.3);
+      color: var(--accent-orange);
+    }
+    .template-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }
+    .template-sections { display: flex; flex-wrap: wrap; gap: 6px; }
+    .section-pill {
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+    .preview-block {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .preview-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-orange);
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    /* Coverage stats */
+    .coverage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .coverage-item {
+      text-align: center;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+    }
+    .coverage-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      font-family: "JetBrains Mono", monospace;
+    }
+    .coverage-value.cf { color: var(--accent-orange); }
+    .coverage-value.rl { color: var(--accent-purple); }
+    .coverage-value.vc { color: var(--accent-cyan); }
+    .coverage-value.dm { color: var(--accent-green); }
+    .coverage-value.sb { color: var(--accent-pink); }
+    .coverage-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Domain table */
+    .domain-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.85rem;
+    }
+    .domain-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .domain-table td {
+      padding: 6px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .domain-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .footer {
+      text-align: center; margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="nav"><a href="index.html">&larr; Template Showcase</a></div>
+
+    <h1><span class="icon">🏗</span> Infrastructure Templates</h1>
+    <p class="subtitle">The template system backbone: master catalogs, GraphSQL schemas, and the infrastructure that powers 200+ templates across 5,216 subdomains.</p>
+
+    <!-- Coverage Stats -->
+    <div class="coverage-grid">
+      <div class="coverage-item">
+        <div class="coverage-value cf">20</div>
+        <div class="coverage-label">Cloudflare Templates</div>
+      </div>
+      <div class="coverage-item">
+        <div class="coverage-value rl">10</div>
+        <div class="coverage-label">Railway Templates</div>
+      </div>
+      <div class="coverage-item">
+        <div class="coverage-value vc">10</div>
+        <div class="coverage-label">Vercel Templates</div>
+      </div>
+      <div class="coverage-item">
+        <div class="coverage-value dm">16</div>
+        <div class="coverage-label">Domains</div>
+      </div>
+      <div class="coverage-item">
+        <div class="coverage-value sb">5,216</div>
+        <div class="coverage-label">Subdomains</div>
+      </div>
+    </div>
+
+    <div class="template-list">
+
+      <!-- Master Template System -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🎯 Master Template System</div>
+          <div class="template-file">MASTER-TEMPLATE-SYSTEM.md</div>
+        </div>
+        <div class="template-desc">
+          The comprehensive master document that defines the entire template ecosystem. Describes all template categories, the platform integration system, subdomain template structure, and the distribution pipeline. Covers Cloudflare Workers/Pages, Railway services, Vercel deployments, Google Drive, Notion, GitHub, and Airtable.
+        </div>
+        <div class="template-sections">
+          <span class="section-pill">Core Development (25)</span>
+          <span class="section-pill">Cloudflare (20)</span>
+          <span class="section-pill">Railway (10)</span>
+          <span class="section-pill">Vercel (10)</span>
+          <span class="section-pill">Google Drive (30)</span>
+          <span class="section-pill">Notion (25)</span>
+          <span class="section-pill">GitHub (20)</span>
+          <span class="section-pill">Airtable (10)</span>
+          <span class="section-pill">Subdomains (5,216)</span>
+        </div>
+        <div class="preview-label">Subdomain Template Structure</div>
+        <div class="preview-block">subdomain-templates/
+├── LANDING-PAGE-TEMPLATE.html     # Generic landing
+├── API-SUBDOMAIN-TEMPLATE/        # API service page
+├── DASHBOARD-SUBDOMAIN-TEMPLATE/  # Dashboard app
+├── DOCS-SUBDOMAIN-TEMPLATE/       # Documentation
+├── AUTH-SUBDOMAIN-TEMPLATE/       # Auth service
+├── PAYMENT-SUBDOMAIN-TEMPLATE/    # Payment page
+├── AGENT-SUBDOMAIN-TEMPLATE/      # Agent portal
+└── QUANTUM-SUBDOMAIN-TEMPLATE/    # Quantum computing</div>
+      </div>
+
+      <!-- Template Index -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">📚 Complete Template Catalog</div>
+          <div class="template-file">TEMPLATE-INDEX.md</div>
+        </div>
+        <div class="template-desc">
+          The searchable, categorized index of all 200+ templates with usage statistics, quick start guide, template generation commands, and maintenance procedures. Covers deployment to 43 repos and import to 15+ platforms.
+        </div>
+        <div class="template-sections">
+          <span class="section-pill">200+ Templates</span>
+          <span class="section-pill">15+ Platforms</span>
+          <span class="section-pill">43 Repos</span>
+          <span class="section-pill">Usage Stats</span>
+          <span class="section-pill">Quick Start</span>
+          <span class="section-pill">Generation</span>
+          <span class="section-pill">Maintenance</span>
+        </div>
+        <div class="preview-label">Top 5 Most Used Templates</div>
+        <div class="preview-block">1. README Template          → 43 repos
+2. Landing Page (CF)        → 872 sites
+3. Python Flask Service     → 28 repos
+4. Notion Project Dashboard → 156 projects
+5. CF Deploy Workflow       → 43 repos</div>
+      </div>
+
+      <!-- GraphSQL Schema -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🧱 GraphSQL Schema</div>
+          <div class="template-file">TEMPLATE-SYSTEM-GRAPHSQL-SCHEMA.sql</div>
+        </div>
+        <div class="template-desc">
+          Complete graph database schema for the template system. Models three template structures as graph nodes and edges: Template 001 (Infra Runbook) with step pipeline, Template 002 (Architecture) with component topology, and Template 003 (Domain/DNS) with 16 domains and routing edges. Includes a master template catalog table, emoji reference table, and queryable views.
+        </div>
+        <div class="template-sections">
+          <span class="section-pill">template_001_nodes</span>
+          <span class="section-pill">template_002_component_nodes</span>
+          <span class="section-pill">template_003_domain_nodes</span>
+          <span class="section-pill">template_catalog</span>
+          <span class="section-pill">emoji_reference</span>
+          <span class="section-pill">Views</span>
+        </div>
+        <div class="preview-label">Domain Nodes (16 Primary Domains)</div>
+        <table class="domain-table">
+          <thead>
+            <tr><th>Domain</th><th>Purpose</th><th>Subdomains</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>🛣 blackroad.io</td><td>Main platform</td><td>364</td></tr>
+            <tr><td>🔮 lucidia.earth</td><td>Lucidia OS</td><td>364</td></tr>
+            <tr><td>🤖 blackroadai.com</td><td>AI services</td><td>364</td></tr>
+            <tr><td>📡 blackroad.network</td><td>Network services</td><td>364</td></tr>
+            <tr><td>🏗 blackroad.systems</td><td>System services</td><td>364</td></tr>
+            <tr><td>👤 blackroad.me</td><td>Personal brand</td><td>364</td></tr>
+            <tr><td>🏢 blackroad-inc.us</td><td>Corporate</td><td>364</td></tr>
+            <tr><td>👩‍💻 aliceqi.com</td><td>Alice Qi brand</td><td>364</td></tr>
+            <tr><td>🧠 blackroadqi.com</td><td>Quantum intelligence</td><td>364</td></tr>
+            <tr><td>💎 lucidiaqi.com</td><td>Lucidia intelligence</td><td>364</td></tr>
+            <tr><td>🎨 lucidiastud.io</td><td>Lucidia studio</td><td>364</td></tr>
+            <tr><td>⚛️ blackroadquantum.com</td><td>Quantum computing</td><td>364</td></tr>
+          </tbody>
+        </table>
+        <div class="preview-label" style="margin-top: 16px;">Schema Structure</div>
+        <div class="preview-block">CREATE TABLE template_catalog (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  category    TEXT NOT NULL,
+  type        TEXT NOT NULL,
+  file_path   TEXT NOT NULL,
+  emoji       TEXT,
+  description TEXT,
+  variables   TEXT,      -- JSON array of placeholders
+  usage_count INTEGER DEFAULT 0,
+  last_used   TIMESTAMP,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);</div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <p>BlackRoad OS Template Showcase &middot; Infrastructure &middot; <span class="mono">&copy; 2026 BlackRoad OS, Inc.</span></p>
+    </div>
+  </div>
+</body>
+</html>

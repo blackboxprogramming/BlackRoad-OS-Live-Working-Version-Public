@@ -1,0 +1,314 @@
+#!/bin/bash
+# 🔐 CECE-VPN v1.0 - VPN & Network Management
+# Manages Tailscale mesh network and connections
+
+# BlackRoad Color Palette (xterm-256)
+BR_ORANGE=208
+BR_AMBER=202
+BR_PINK=198
+BR_MAGENTA=163
+BR_BLUE=33
+BR_WHITE=255
+
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'
+BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+VPN_DIR="$CECE_HOME/vpn"
+VPN_LOG="$VPN_DIR/vpn.log"
+
+mkdir -p "$VPN_DIR"
+
+# Tailscale device registry
+declare -A TS_DEVICES=(
+    ["cecilia"]="100.72.180.98"
+    ["lucidia"]="100.66.235.47"
+    ["alice"]="100.77.210.18"
+    ["aria"]="100.109.14.17"
+    ["octavia"]="100.83.149.86"
+    ["shellfish"]="100.94.33.37"
+    ["codex-infinity"]="100.108.132.8"
+)
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)🔐 CECE-VPN - Network Management${RESET}              $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+log_vpn() {
+    echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$VPN_LOG"
+}
+
+# Show Tailscale status
+cmd_status() {
+    banner
+    echo ""
+
+    if ! command -v tailscale &>/dev/null; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Tailscale not installed"
+        echo "Install: curl -fsSL https://tailscale.com/install.sh | sh"
+        return 1
+    fi
+
+    echo -e "$(fg $BR_WHITE)Tailscale Status:${RESET}"
+    echo ""
+
+    # Get status
+    local status=$(tailscale status 2>/dev/null)
+    local ip=$(tailscale ip -4 2>/dev/null)
+
+    if [ -n "$ip" ]; then
+        echo -e "  $(fg $BR_BLUE)●${RESET} Connected"
+        echo -e "  $(fg $BR_WHITE)Tailscale IP:${RESET} $ip"
+        echo ""
+
+        echo -e "$(fg $BR_WHITE)Connected Peers:${RESET}"
+        echo ""
+        tailscale status 2>/dev/null | while read -r line; do
+            if echo "$line" | grep -q "online"; then
+                echo -e "  $(fg $BR_BLUE)●${RESET} $line"
+            elif echo "$line" | grep -q "offline"; then
+                echo -e "  $(fg $BR_PINK)○${RESET} $line"
+            fi
+        done | head -15
+    else
+        echo -e "  $(fg $BR_PINK)○${RESET} Disconnected"
+    fi
+}
+
+# List all devices with their IPs
+cmd_devices() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)BlackRoad Device Fleet:${RESET}"
+    echo ""
+
+    printf "  $(fg $BR_BLUE)%-15s %-18s %-18s %s${RESET}\n" "DEVICE" "LOCAL IP" "TAILSCALE IP" "STATUS"
+    echo "  ──────────────────────────────────────────────────────────────"
+
+    # Local IPs
+    declare -A LOCAL_IPS=(
+        ["cecilia"]="192.168.4.89"
+        ["lucidia"]="192.168.4.38"
+        ["alice"]="192.168.4.49"
+        ["aria"]="192.168.4.82"
+        ["octavia"]="192.168.4.81"
+    )
+
+    for device in "${!TS_DEVICES[@]}"; do
+        local ts_ip="${TS_DEVICES[$device]}"
+        local local_ip="${LOCAL_IPS[$device]:-N/A}"
+
+        # Check connectivity
+        local status=""
+        if ping -c 1 -W 1 "${LOCAL_IPS[$device]:-$ts_ip}" &>/dev/null 2>&1; then
+            status="$(fg $BR_BLUE)● online${RESET}"
+        elif ping -c 1 -W 1 "$ts_ip" &>/dev/null 2>&1; then
+            status="$(fg $BR_AMBER)● via TS${RESET}"
+        else
+            status="$(fg $BR_PINK)○ offline${RESET}"
+        fi
+
+        printf "  %-15s %-18s %-18s %b\n" "$device" "$local_ip" "$ts_ip" "$status"
+    done
+}
+
+# Connect via Tailscale
+cmd_connect() {
+    local device="$1"
+
+    if [ -z "$device" ]; then
+        echo "Usage: cece-vpn connect <device>"
+        return 1
+    fi
+
+    local ts_ip="${TS_DEVICES[$device]}"
+
+    if [ -z "$ts_ip" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Unknown device '$device'"
+        return 1
+    fi
+
+    echo -e "$(fg $BR_BLUE)Connecting to $device via Tailscale ($ts_ip)...${RESET}"
+    ssh -o ConnectTimeout=10 "$ts_ip"
+
+    log_vpn "CONNECT: $device ($ts_ip)"
+}
+
+# Ping all devices
+cmd_ping() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Pinging all devices...${RESET}"
+    echo ""
+
+    for device in "${!TS_DEVICES[@]}"; do
+        local ts_ip="${TS_DEVICES[$device]}"
+
+        echo -n "  $device ($ts_ip): "
+
+        if ping -c 1 -W 2 "$ts_ip" &>/dev/null; then
+            local latency=$(ping -c 1 -W 2 "$ts_ip" 2>/dev/null | grep "time=" | sed 's/.*time=\([0-9.]*\).*/\1/')
+            echo -e "$(fg $BR_BLUE)✓${RESET} ${latency}ms"
+        else
+            echo -e "$(fg $BR_PINK)✗${RESET} unreachable"
+        fi
+    done
+}
+
+# Show routing info
+cmd_routes() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Network Routes:${RESET}"
+    echo ""
+
+    if command -v tailscale &>/dev/null; then
+        echo -e "$(fg $BR_BLUE)Tailscale Routes:${RESET}"
+        tailscale status --json 2>/dev/null | jq -r '.Peer[] | select(.RxBytes > 0) | "  \(.HostName): \(.TailscaleIPs[0])"' 2>/dev/null || echo "  No routes"
+    fi
+
+    echo ""
+    echo -e "$(fg $BR_BLUE)Local Routes:${RESET}"
+    ip route 2>/dev/null | head -10 | while read -r line; do
+        echo "  $line"
+    done
+}
+
+# Enable/disable Tailscale
+cmd_up() {
+    echo -e "$(fg $BR_BLUE)Bringing Tailscale up...${RESET}"
+    sudo tailscale up
+
+    if [ $? -eq 0 ]; then
+        echo -e "$(fg $BR_BLUE)✓${RESET} Tailscale connected"
+        log_vpn "UP: Connected"
+    else
+        echo -e "$(fg $BR_PINK)✗${RESET} Failed to connect"
+    fi
+}
+
+cmd_down() {
+    echo -e "$(fg $BR_AMBER)Bringing Tailscale down...${RESET}"
+    sudo tailscale down
+
+    if [ $? -eq 0 ]; then
+        echo -e "$(fg $BR_BLUE)✓${RESET} Tailscale disconnected"
+        log_vpn "DOWN: Disconnected"
+    else
+        echo -e "$(fg $BR_PINK)✗${RESET} Failed to disconnect"
+    fi
+}
+
+# Test connectivity to all devices
+cmd_test() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Testing fleet connectivity...${RESET}"
+    echo ""
+
+    local online=0
+    local offline=0
+
+    for device in "${!TS_DEVICES[@]}"; do
+        local ts_ip="${TS_DEVICES[$device]}"
+
+        echo -n "  $device: "
+
+        # Try SSH test
+        if ssh -o ConnectTimeout=5 -o BatchMode=yes "$ts_ip" "echo ok" &>/dev/null; then
+            echo -e "$(fg $BR_BLUE)✓${RESET} SSH OK"
+            ((online++))
+        elif ping -c 1 -W 2 "$ts_ip" &>/dev/null; then
+            echo -e "$(fg $BR_AMBER)○${RESET} Ping OK (SSH failed)"
+            ((online++))
+        else
+            echo -e "$(fg $BR_PINK)✗${RESET} Unreachable"
+            ((offline++))
+        fi
+    done
+
+    echo ""
+    echo -e "$(fg $BR_WHITE)Result:${RESET} $online online, $offline offline"
+
+    log_vpn "TEST: $online online, $offline offline"
+}
+
+# Show network stats
+cmd_stats() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Network Statistics:${RESET}"
+    echo ""
+
+    if command -v tailscale &>/dev/null; then
+        local json=$(tailscale status --json 2>/dev/null)
+
+        if [ -n "$json" ]; then
+            local self_ip=$(echo "$json" | jq -r '.Self.TailscaleIPs[0]')
+            local peer_count=$(echo "$json" | jq '.Peer | length')
+
+            echo -e "  $(fg $BR_BLUE)Tailscale IP:${RESET}    $self_ip"
+            echo -e "  $(fg $BR_BLUE)Connected Peers:${RESET} $peer_count"
+        fi
+    fi
+
+    # Network interface stats
+    echo ""
+    echo -e "$(fg $BR_WHITE)Interface Statistics:${RESET}"
+
+    for iface in eth0 wlan0 tailscale0; do
+        if [ -d "/sys/class/net/$iface" ]; then
+            local rx=$(($(cat /sys/class/net/$iface/statistics/rx_bytes 2>/dev/null || echo 0) / 1024 / 1024))
+            local tx=$(($(cat /sys/class/net/$iface/statistics/tx_bytes 2>/dev/null || echo 0) / 1024 / 1024))
+            echo -e "  $(fg $BR_BLUE)$iface:${RESET} RX ${rx}MB / TX ${tx}MB"
+        fi
+    done
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-vpn <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  status          Show Tailscale status"
+    echo "  devices         List all fleet devices"
+    echo "  connect <dev>   SSH via Tailscale"
+    echo "  ping            Ping all devices"
+    echo "  test            Test SSH to all devices"
+    echo "  routes          Show network routes"
+    echo "  stats           Network statistics"
+    echo "  up              Enable Tailscale"
+    echo "  down            Disable Tailscale"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Devices:${RESET}"
+    for d in "${!TS_DEVICES[@]}"; do
+        echo "  • $d (${TS_DEVICES[$d]})"
+    done
+}
+
+# Main
+main() {
+    local cmd="${1:-status}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        status) cmd_status ;;
+        devices|list) cmd_devices ;;
+        connect|ssh) cmd_connect "$@" ;;
+        ping) cmd_ping ;;
+        test) cmd_test ;;
+        routes) cmd_routes ;;
+        stats) cmd_stats ;;
+        up) cmd_up ;;
+        down) cmd_down ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

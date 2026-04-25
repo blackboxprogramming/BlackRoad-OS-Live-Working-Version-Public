@@ -1,0 +1,51 @@
+# Enclave — BlackRoad OS Integration
+# https://docs.enclave.io
+
+name: enclave
+category: auth
+status: active
+api_base: https://api.enclave.io/v1
+
+auth:
+  type: bearer_token
+  env: ENCLAVE_API_KEY
+  org_id_env: ENCLAVE_ORG_ID
+
+endpoints:
+  systems:
+    list: GET /org/{orgId}/systems
+    get: GET /org/{orgId}/systems/{systemId}
+    enable: PUT /org/{orgId}/systems/{systemId}
+    disable: DELETE /org/{orgId}/systems/{systemId}
+  policies:
+    list: GET /org/{orgId}/policies
+    create: POST /org/{orgId}/policies
+    get: GET /org/{orgId}/policies/{policyId}
+    update: PUT /org/{orgId}/policies/{policyId}
+    delete: DELETE /org/{orgId}/policies/{policyId}
+  tags:
+    list: GET /org/{orgId}/tags
+    create: POST /org/{orgId}/tags
+  dns:
+    list: GET /org/{orgId}/dns
+    create: POST /org/{orgId}/dns
+
+features:
+  - zero_trust_networking
+  - overlay_networks
+  - policy_based_access
+  - dns_discovery
+  - tag_based_routing
+
+network_policies:
+  - name: pi-fleet-mesh
+    description: Allow Raspberry Pi fleet internal communication
+    tags: [raspberry-pi, agent-runtime]
+  - name: dev-to-prod
+    description: Developer access to production services
+    tags: [developer, production]
+
+health_check:
+  endpoint: GET /org/{orgId}/systems
+  interval: 300
+  timeout: 10

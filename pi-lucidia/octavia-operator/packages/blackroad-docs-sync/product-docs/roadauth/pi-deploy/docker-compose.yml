@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  roadauth:
+    image: node:18-alpine
+    container_name: roadauth
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: node server.js
+    environment:
+      - NODE_ENV=production
+      - PORT=3002
+      - PI_NAME=lucidia
+      - SERVICE_NAME=roadauth
+    networks:
+      - blackroad-net
+
+networks:
+  blackroad-net:
+    driver: bridge

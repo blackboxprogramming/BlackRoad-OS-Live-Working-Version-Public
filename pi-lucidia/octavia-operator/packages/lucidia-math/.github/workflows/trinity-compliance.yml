@@ -1,0 +1,215 @@
+name: Trinity Compliance Check
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight
+
+jobs:
+  check-compliance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Check Trinity Structure
+        run: |
+          echo "🌈 Light Trinity Compliance Check"
+          echo "================================="
+          echo ""
+
+          ERRORS=0
+
+          # Check .trinity/ exists
+          if [ ! -d ".trinity" ]; then
+            echo "❌ CRITICAL: .trinity/ directory missing"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "✅ .trinity/ directory present"
+          fi
+
+          # Check RedLight
+          echo ""
+          echo "🔴 Checking RedLight..."
+          if [ ! -d ".trinity/redlight" ]; then
+            echo "   ❌ RedLight directory missing"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "   ✅ RedLight directory present"
+
+            # Count templates
+            if [ -d ".trinity/redlight/templates" ]; then
+              template_count=$(find .trinity/redlight/templates -name "*.html" 2>/dev/null | wc -l)
+              echo "   📄 Found $template_count HTML templates"
+              if [ "$template_count" -lt 10 ]; then
+                echo "   ⚠️  Warning: Expected at least 10 templates, found $template_count"
+              fi
+            else
+              echo "   ❌ Templates directory missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+
+            # Check docs
+            if [ -f ".trinity/redlight/docs/REDLIGHT_TEMPLATE_SYSTEM.md" ]; then
+              echo "   ✅ Documentation present"
+            else
+              echo "   ❌ Documentation missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+
+          # Check GreenLight
+          echo ""
+          echo "💚 Checking GreenLight..."
+          if [ ! -d ".trinity/greenlight" ]; then
+            echo "   ❌ GreenLight directory missing"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "   ✅ GreenLight directory present"
+
+            # Count docs
+            if [ -d ".trinity/greenlight/docs" ]; then
+              doc_count=$(find .trinity/greenlight/docs -name "*.md" 2>/dev/null | wc -l)
+              echo "   📚 Found $doc_count documentation files"
+              if [ "$doc_count" -lt 10 ]; then
+                echo "   ⚠️  Warning: Expected at least 10 docs, found $doc_count"
+              fi
+            else
+              echo "   ❌ Docs directory missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+
+            # Check template script
+            if [ -f ".trinity/greenlight/scripts/memory-greenlight-templates.sh" ]; then
+              echo "   ✅ Template script present"
+
+              # Count templates in script
+              template_funcs=$(grep -c "^gl_" .trinity/greenlight/scripts/memory-greenlight-templates.sh 2>/dev/null || echo "0")
+              echo "   🔧 Found $template_funcs template functions"
+            else
+              echo "   ❌ Template script missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+
+          # Check YellowLight
+          echo ""
+          echo "💛 Checking YellowLight..."
+          if [ ! -d ".trinity/yellowlight" ]; then
+            echo "   ❌ YellowLight directory missing"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "   ✅ YellowLight directory present"
+
+            # Check docs
+            if [ -f ".trinity/yellowlight/docs/YELLOWLIGHT_INFRASTRUCTURE_SYSTEM.md" ]; then
+              echo "   ✅ Documentation present"
+            else
+              echo "   ❌ Documentation missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+
+            # Check scripts
+            script_count=$(find .trinity/yellowlight/scripts -name "*.sh" 2>/dev/null | wc -l)
+            echo "   🔧 Found $script_count infrastructure scripts"
+          fi
+
+          # Check Trinity System
+          echo ""
+          echo "🌈 Checking Trinity System..."
+          if [ ! -d ".trinity/system" ]; then
+            echo "   ❌ System directory missing"
+            ERRORS=$((ERRORS + 1))
+          else
+            echo "   ✅ System directory present"
+
+            # Check core docs
+            if [ -f ".trinity/system/THE_LIGHT_TRINITY.md" ]; then
+              echo "   ✅ Trinity overview present"
+            else
+              echo "   ❌ Trinity overview missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+
+            if [ -f ".trinity/system/LIGHT_TRINITY_ENFORCEMENT.md" ]; then
+              echo "   ✅ Enforcement docs present"
+            else
+              echo "   ❌ Enforcement docs missing"
+              ERRORS=$((ERRORS + 1))
+            fi
+          fi
+
+          # Check README
+          echo ""
+          echo "📖 Checking README..."
+          if [ -f ".trinity/README.md" ]; then
+            echo "   ✅ Trinity README present"
+          else
+            echo "   ⚠️  Warning: Trinity README missing"
+          fi
+
+          # Summary
+          echo ""
+          echo "================================="
+          if [ $ERRORS -eq 0 ]; then
+            echo "✅ Trinity compliance check PASSED"
+            echo "🌈 All three lights present and functional"
+            exit 0
+          else
+            echo "❌ Trinity compliance check FAILED"
+            echo "🔥 Found $ERRORS critical issues"
+            echo ""
+            echo "To fix, see: .trinity/README.md"
+            echo "Source of truth: https://github.com/blackroad-os/blackroad-os-infra"
+            exit 1
+          fi
+
+      - name: Run Trinity Tests
+        if: success()
+        run: |
+          if [ -f ".trinity/system/trinity-record-test.sh" ]; then
+            echo "🧪 Running Trinity tests..."
+            bash .trinity/system/trinity-record-test.sh
+          else
+            echo "⚠️  No test script found, skipping tests"
+          fi
+
+      - name: Generate Compliance Report
+        if: always()
+        run: |
+          echo "📊 Trinity Compliance Report" > trinity-report.txt
+          echo "============================" >> trinity-report.txt
+          echo "" >> trinity-report.txt
+          echo "Repository: ${{ github.repository }}" >> trinity-report.txt
+          echo "Branch: ${{ github.ref_name }}" >> trinity-report.txt
+          echo "Commit: ${{ github.sha }}" >> trinity-report.txt
+          echo "Date: $(date -u)" >> trinity-report.txt
+          echo "" >> trinity-report.txt
+
+          # Structure check
+          echo "Structure:" >> trinity-report.txt
+          echo "  RedLight: $([ -d .trinity/redlight ] && echo '✅' || echo '❌')" >> trinity-report.txt
+          echo "  GreenLight: $([ -d .trinity/greenlight ] && echo '✅' || echo '❌')" >> trinity-report.txt
+          echo "  YellowLight: $([ -d .trinity/yellowlight ] && echo '✅' || echo '❌')" >> trinity-report.txt
+          echo "  System: $([ -d .trinity/system ] && echo '✅' || echo '❌')" >> trinity-report.txt
+          echo "" >> trinity-report.txt
+
+          # File counts
+          echo "File Counts:" >> trinity-report.txt
+          echo "  RedLight templates: $(find .trinity/redlight/templates -name '*.html' 2>/dev/null | wc -l)" >> trinity-report.txt
+          echo "  GreenLight docs: $(find .trinity/greenlight/docs -name '*.md' 2>/dev/null | wc -l)" >> trinity-report.txt
+          echo "  YellowLight scripts: $(find .trinity/yellowlight/scripts -name '*.sh' 2>/dev/null | wc -l)" >> trinity-report.txt
+
+          cat trinity-report.txt
+
+      - name: Upload Compliance Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trinity-compliance-report
+          path: trinity-report.txt
+          retention-days: 30

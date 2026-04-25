@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""
+br-live-demo
+Live demonstration of BR visual language in action.
+Shows sequences, flows, and real-time semantic rendering.
+"""
+
+import sys
+import time
+import random
+
+RESET = "\x1b[0m"
+CLEAR = "\x1b[2J\x1b[H"
+BOLD = "\x1b[1m"
+DIM = "\x1b[2m"
+
+# Canonical BR shapes
+SHAPES = {
+    range(0, 16): "█", range(16, 52): "▓", range(52, 88): "▶",
+    range(88, 124): "●", range(124, 160): "◆", range(160, 196): "▲",
+    range(196, 232): "✖", range(232, 256): "◌",
+}
+
+SPECIAL = {
+    0: "∅", 1: "✗", 2: "✓", 3: "⚠",
+    196: "✗", 202: "⚡", 226: "★", 232: "∅", 255: "◉",
+}
+
+TOKENS = {
+    16: "RAW_SENSOR", 28: "VALID_INPUT", 64: "EXEC_HIGH", 100: "MEM_PERSIST",
+    2: "SUCCESS", 130: "AGENT_THINK", 136: "AGENT_EXEC", 178: "WARN_DRIFT",
+    196: "ERROR_FATAL", 190: "WARN_DEGRADE", 184: "RETRY",
+}
+
+def get_shape(color):
+    if color in SPECIAL:
+        return SPECIAL[color]
+    for color_range, shape in SHAPES.items():
+        if color in color_range:
+            return shape
+    return "?"
+
+def render_glyph(color, width=3):
+    """Render a colored glyph."""
+    shape = get_shape(color)
+    bg = f"\x1b[48;5;{color}m"
+    fg_color = 255 if color < 128 else 0
+    fg = f"\x1b[38;5;{fg_color}m"
+    return f"{bg}{fg}{shape:^{width}}{RESET}"
+
+def demo_pipeline():
+    """Demonstrate HTTP request pipeline."""
+    print(f"\n{BOLD}HTTP REQUEST PIPELINE{RESET}\n")
+    
+    sequence = [
+        (16, "RAW_SENSOR", "Receive HTTP request"),
+        (28, "VALID_INPUT", "Parse and validate"),
+        (64, "EXEC_HIGH", "Route to handler"),
+        (100, "MEM_PERSIST", "Write to database"),
+        (2, "SUCCESS", "Return 200 OK"),
+    ]
+    
+    for i, (color, token, desc) in enumerate(sequence):
+        if i > 0:
+            print("    ↓")
+        print(f"{render_glyph(color, 5)}  {token:15}  {DIM}{desc}{RESET}")
+        time.sleep(0.5)
+    
+    print(f"\n{DIM}Full sequence: 16 → 28 → 64 → 100 → 2{RESET}")
+
+def demo_agent_loop():
+    """Demonstrate agent decision loop."""
+    print(f"\n{BOLD}AGENT DECISION LOOP{RESET}\n")
+    
+    sequence = [
+        (130, "AGENT_THINK", "Analyze situation"),
+        (136, "AGENT_EXEC", "Take action"),
+        (88, "MEM_VOLATILE", "Update internal state"),
+        (178, "WARN_DRIFT", "Detected anomaly"),
+        (130, "AGENT_THINK", "Re-evaluate"),
+    ]
+    
+    for color, token, desc in sequence:
+        print(f"{render_glyph(color, 5)}  {token:15}  {DIM}{desc}{RESET}")
+        time.sleep(0.5)
+    
+    print(f"\n{DIM}Full sequence: 130 → 136 → 88 → 178 → 130{RESET}")
+
+def demo_error_recovery():
+    """Demonstrate error recovery."""
+    print(f"\n{BOLD}ERROR RECOVERY SEQUENCE{RESET}\n")
+    
+    sequence = [
+        (196, "ERROR_FATAL", "Critical failure"),
+        (190, "WARN_DEGRADE", "Enter degraded mode"),
+        (184, "RETRY", "Attempt recovery"),
+        (2, "SUCCESS", "Recovery succeeded"),
+    ]
+    
+    for color, token, desc in sequence:
+        print(f"{render_glyph(color, 5)}  {token:15}  {DIM}{desc}{RESET}")
+        time.sleep(0.5)
+    
+    print(f"\n{DIM}Full sequence: 196 → 190 → 184 → 2{RESET}")
+
+def demo_zone_showcase():
+    """Show all zones with their shapes."""
+    print(f"\n{BOLD}BR ZONE SHAPE GRAMMAR{RESET}\n")
+    
+    zones = [
+        ("OS_LAYER", 7, "█", "Core system primitives"),
+        ("PERCEPTION", 28, "▓", "Input, sensors, listeners"),
+        ("EXECUTION", 64, "▶", "Actions, mutations, writes"),
+        ("MEMORY", 100, "●", "State, cache, persistence"),
+        ("AUTONOMY", 136, "◆", "Agents, decision, delegation"),
+        ("TENSION", 178, "▲", "Warnings, drift, uncertainty"),
+        ("PARADOX", 202, "✖", "Errors, contradiction, halt"),
+        ("META", 244, "◌", "Null, silence, void, escape"),
+    ]
+    
+    for zone_name, color, shape, desc in zones:
+        print(f"{render_glyph(color, 5)}  {shape}  {zone_name:12}  {DIM}{desc}{RESET}")
+        time.sleep(0.3)
+
+def demo_live_swarm():
+    """Simulate live agent swarm activity."""
+    print(f"\n{BOLD}LIVE AGENT SWARM (10 agents){RESET}\n")
+    
+    agents = [
+        ("api", 40), ("executor", 64), ("memory", 100),
+        ("planner", 130), ("sentinel", 178), ("validator", 28),
+        ("deployer", 72), ("monitor", 160), ("recovery", 184),
+        ("coordinator", 138),
+    ]
+    
+    print("Initial state:")
+    for name, color in agents:
+        print(f"  {render_glyph(color, 3)} {name:12}", end="  ")
+        if agents.index((name, color)) % 3 == 2:
+            print()
+    
+    print(f"\n\n{DIM}Simulating 5 seconds of activity...{RESET}\n")
+    
+    for _ in range(5):
+        time.sleep(1)
+        # Randomly show some state changes
+        active = random.choice(agents)
+        print(f"{render_glyph(active[1], 3)} {active[0]} active")
+
+def main():
+    print(CLEAR)
+    print("═" * 70)
+    print(f"{BOLD}BR VISUAL LANGUAGE — LIVE DEMO{RESET}")
+    print("═" * 70)
+    
+    demos = [
+        ("1", "HTTP Request Pipeline", demo_pipeline),
+        ("2", "Agent Decision Loop", demo_agent_loop),
+        ("3", "Error Recovery", demo_error_recovery),
+        ("4", "Zone Shape Grammar", demo_zone_showcase),
+        ("5", "Live Agent Swarm", demo_live_swarm),
+        ("6", "All Demos", None),
+    ]
+    
+    if len(sys.argv) > 1:
+        choice = sys.argv[1]
+    else:
+        print("\nSelect demo:\n")
+        for num, name, _ in demos:
+            print(f"  {num}. {name}")
+        print("\nUsage: br-live-demo <number>")
+        print(f"Example: br-live-demo 1\n")
+        sys.exit(0)
+    
+    if choice == "6":
+        for _, name, func in demos[:-1]:
+            print(f"\n{'─' * 70}")
+            func()
+            time.sleep(2)
+    else:
+        for num, name, func in demos:
+            if num == choice and func:
+                func()
+                break
+    
+    print(f"\n{'═' * 70}")
+    print(f"{DIM}Use 'br-shape' for static sequences{RESET}")
+    print(f"{DIM}Use 'br-palette' for interactive exploration{RESET}\n")
+
+if __name__ == "__main__":
+    main()

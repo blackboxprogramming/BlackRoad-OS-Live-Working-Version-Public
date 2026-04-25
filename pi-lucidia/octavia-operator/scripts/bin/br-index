@@ -1,0 +1,219 @@
+#!/bin/bash
+# BR-Index: BlackRoad Empire Intelligence System
+# Real-time indexing and coordination for 1,038+ repositories
+
+set -e
+
+VERSION="0.1.0"
+LIB_DIR="$HOME/br-index-lib"
+DATA_DIR="$HOME/.br-index"
+CACHE_FILE="$DATA_DIR/repos.json"
+AGENT_REGISTRY="$DATA_DIR/agents.json"
+MEMORY_INDEX="$DATA_DIR/memory.json"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+# Source library modules
+source "$LIB_DIR/github.sh"
+source "$LIB_DIR/cache.sh"
+source "$LIB_DIR/memory.sh"
+source "$LIB_DIR/agents.sh"
+
+# Initialize data directory
+mkdir -p "$DATA_DIR"
+
+show_banner() {
+  echo -e "${CYAN}${BOLD}"
+  echo "╔═══════════════════════════════════════════════╗"
+  echo "║     BR-INDEX: BlackRoad Empire Intelligence   ║"
+  echo "║              v${VERSION}                         ║"
+  echo "╚═══════════════════════════════════════════════╝"
+  echo -e "${NC}"
+}
+
+show_help() {
+  show_banner
+  echo -e "${BOLD}COMMANDS:${NC}"
+  echo ""
+  echo -e "  ${GREEN}scan${NC}              Full scan of all BlackRoad-OS repositories"
+  echo -e "  ${GREEN}status${NC}            Real-time empire status overview"
+  echo -e "  ${GREEN}repo <name>${NC}       Deep dive into specific repository"
+  echo -e "  ${GREEN}agents${NC}            List all deployed agents across empire"
+  echo -e "  ${GREEN}memory${NC}            Query memory system entries"
+  echo -e "  ${GREEN}search <query>${NC}    Search across all repositories"
+  echo -e "  ${GREEN}stats${NC}             Empire-wide statistics"
+  echo -e "  ${GREEN}dashboard${NC}         Launch CEO dashboard (coming soon)"
+  echo -e "  ${GREEN}sync${NC}              Sync local cache with GitHub"
+  echo -e "  ${GREEN}health${NC}            Health check across all repos"
+  echo ""
+  echo -e "${BOLD}OPTIONS:${NC}"
+  echo -e "  ${YELLOW}-h, --help${NC}        Show this help message"
+  echo -e "  ${YELLOW}-v, --version${NC}     Show version information"
+  echo ""
+  echo -e "${BOLD}EXAMPLES:${NC}"
+  echo -e "  ${CYAN}br-index scan${NC}                  # Scan all repos"
+  echo -e "  ${CYAN}br-index status${NC}                # View empire status"
+  echo -e "  ${CYAN}br-index repo roadauth${NC}         # View roadauth details"
+  echo -e "  ${CYAN}br-index search 'agent'${NC}        # Search for 'agent'"
+  echo ""
+}
+
+cmd_scan() {
+  echo -e "${CYAN}${BOLD}🔍 Scanning BlackRoad Empire...${NC}"
+  echo ""
+  
+  github_scan_all_repos
+  
+  echo ""
+  echo -e "${GREEN}✅ Scan complete! Index saved to $CACHE_FILE${NC}"
+}
+
+cmd_status() {
+  echo -e "${CYAN}${BOLD}📊 BlackRoad Empire Status${NC}"
+  echo ""
+  
+  cache_load
+  
+  local total=$(cache_get_count)
+  local forks=$(cache_get_fork_count)
+  local originals=$((total - forks))
+  local updated_today=$(cache_get_updated_today_count)
+  local with_issues=$(cache_get_with_issues_count)
+  
+  echo -e "${BOLD}Empire Overview:${NC}"
+  echo -e "  Total Repositories:    ${GREEN}$total${NC}"
+  echo -e "  Original Projects:     ${BLUE}$originals${NC}"
+  echo -e "  Forked Projects:       ${YELLOW}$forks${NC}"
+  echo -e "  Updated Today:         ${MAGENTA}$updated_today${NC}"
+  echo -e "  With Open Issues:      ${RED}$with_issues${NC}"
+  echo ""
+  
+  echo -e "${BOLD}Top 10 Most Recently Updated:${NC}"
+  cache_get_recent 10
+  echo ""
+  
+  echo -e "${CYAN}💾 Cache: $CACHE_FILE${NC}"
+  echo -e "${CYAN}🤖 Agents: $AGENT_REGISTRY${NC}"
+  echo -e "${CYAN}🧠 Memory: $MEMORY_INDEX${NC}"
+}
+
+cmd_repo() {
+  local repo_name="$1"
+  
+  if [ -z "$repo_name" ]; then
+    echo -e "${RED}Error: Repository name required${NC}"
+    echo "Usage: br-index repo <name>"
+    exit 1
+  fi
+  
+  echo -e "${CYAN}${BOLD}🔎 Repository: $repo_name${NC}"
+  echo ""
+  
+  github_get_repo_details "$repo_name"
+}
+
+cmd_stats() {
+  echo -e "${CYAN}${BOLD}📈 Empire Statistics${NC}"
+  echo ""
+  
+  cache_load
+  cache_show_stats
+}
+
+cmd_agents() {
+  echo -e "${CYAN}${BOLD}🤖 Agent Registry${NC}"
+  echo ""
+  
+  agents_list_all
+}
+
+cmd_memory() {
+  echo -e "${CYAN}${BOLD}🧠 Memory System Index${NC}"
+  echo ""
+  
+  memory_query_all
+}
+
+cmd_search() {
+  local query="$1"
+  
+  if [ -z "$query" ]; then
+    echo -e "${RED}Error: Search query required${NC}"
+    echo "Usage: br-index search <query>"
+    exit 1
+  fi
+  
+  echo -e "${CYAN}${BOLD}🔍 Searching empire for: \"$query\"${NC}"
+  echo ""
+  
+  github_search_repos "$query"
+}
+
+cmd_sync() {
+  echo -e "${CYAN}${BOLD}🔄 Syncing with GitHub...${NC}"
+  echo ""
+  
+  github_sync_cache
+  
+  echo ""
+  echo -e "${GREEN}✅ Sync complete!${NC}"
+}
+
+cmd_health() {
+  echo -e "${CYAN}${BOLD}🏥 Empire Health Check${NC}"
+  echo ""
+  
+  cache_load
+  
+  echo -e "${BOLD}Checking repository health...${NC}"
+  cache_health_check
+}
+
+# Main command router
+case "${1:-}" in
+  scan)
+    cmd_scan
+    ;;
+  status)
+    cmd_status
+    ;;
+  repo)
+    cmd_repo "$2"
+    ;;
+  stats)
+    cmd_stats
+    ;;
+  agents)
+    cmd_agents
+    ;;
+  memory)
+    cmd_memory
+    ;;
+  search)
+    cmd_search "$2"
+    ;;
+  sync)
+    cmd_sync
+    ;;
+  health)
+    cmd_health
+    ;;
+  -h|--help|help)
+    show_help
+    ;;
+  -v|--version)
+    echo "br-index v$VERSION"
+    ;;
+  *)
+    show_help
+    exit 1
+    ;;
+esac

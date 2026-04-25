@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""
+br-shape
+Terminal-safe BR Shape Renderer
+Converts xterm-256 colors into semantic glyphs based on BR_COLOR_SPEC.md
+"""
+
+import sys
+
+RESET = "\x1b[0m"
+
+# Canonical shape mapping per BR_COLOR_SPEC.md zones
+ZONE_SHAPES = {
+    # OS_LAYER (0-15): Solid block - kernel/system operations
+    range(0, 16): "█",
+    
+    # PERCEPTION (16-51): Medium shade - input/sensors
+    range(16, 52): "▓",
+    
+    # EXECUTION (52-87): Arrow - action/mutation
+    range(52, 88): "▶",
+    
+    # MEMORY (88-123): Circle - state/persistence
+    range(88, 124): "●",
+    
+    # AUTONOMY (124-159): Diamond - agents/decision
+    range(124, 160): "◆",
+    
+    # TENSION (160-195): Triangle - warnings/drift
+    range(160, 196): "▲",
+    
+    # PARADOX (196-231): X - errors/halt
+    range(196, 232): "✖",
+    
+    # META (232-255): Empty circle - null/void/escape
+    range(232, 256): "◌",
+}
+
+# Zone metadata for descriptions
+ZONES = {
+    "OS_LAYER": (0, 15, "Core system primitives"),
+    "PERCEPTION": (16, 51, "Input, sensors, listeners"),
+    "EXECUTION": (52, 87, "Actions, mutations, writes"),
+    "MEMORY": (88, 123, "State, cache, persistence"),
+    "AUTONOMY": (124, 159, "Agents, decision, delegation"),
+    "TENSION": (160, 195, "Warnings, drift, uncertainty"),
+    "PARADOX": (196, 231, "Errors, contradiction, halt"),
+    "META": (232, 255, "Null, silence, void, escape"),
+}
+
+# Special operator glyphs (override zone defaults for semantic clarity)
+SPECIAL_GLYPHS = {
+    0: "∅",      # NULL - absolute void
+    1: "✗",      # ERROR - system error
+    2: "✓",      # SUCCESS - kernel success
+    3: "⚠",      # WARN - system warning
+    4: "ⓘ",      # INFO - kernel info
+    196: "✗",    # ERROR_FATAL - fatal error
+    202: "⚡",    # EXEC_FORCE - forced execution
+    226: "★",    # ERROR_CASCADE - cascade failure
+    232: "∅",    # META_NULL - explicit null
+    255: "◉",    # META_BRIGHT - full introspection
+}
+
+# Semantic tokens for key colors (from BR_COLOR_SPEC.md)
+TOKENS = {
+    0: "NULL", 1: "ERROR", 2: "SUCCESS", 3: "WARN", 4: "INFO", 5: "DEBUG",
+    6: "SYSCALL", 7: "NEUTRAL",
+    16: "RAW_SENSOR", 28: "VALID_INPUT", 40: "STREAM_LIVE",
+    64: "EXEC_HIGH", 76: "EXEC_ATOMIC", 202: "EXEC_FORCE",
+    88: "MEM_VOLATILE", 100: "MEM_PERSIST", 118: "MEM_ARCHIVE",
+    130: "AGENT_THINK", 136: "AGENT_EXEC", 154: "AGENT_META",
+    166: "WARN_MEMORY", 178: "WARN_DRIFT", 190: "WARN_DEGRADE",
+    196: "ERROR_FATAL", 208: "ERROR_DATA", 226: "ERROR_CASCADE",
+    232: "META_NULL", 244: "META_ESCAPE", 255: "META_BRIGHT",
+}
+
+def get_zone(color):
+    """Get zone name for a color index."""
+    for zone_name, (start, end, _) in ZONES.items():
+        if start <= color <= end:
+            return zone_name
+    return "UNKNOWN"
+
+def get_shape(color):
+    """Get semantic shape glyph for a color index."""
+    # Check special glyphs first
+    if color in SPECIAL_GLYPHS:
+        return SPECIAL_GLYPHS[color]
+    
+    # Find zone-based shape
+    for color_range, shape in ZONE_SHAPES.items():
+        if color in color_range:
+            return shape
+    
+    return "?"  # Unknown color
+
+def render_glyph(color, show_bg=True):
+    """Render a single colored glyph with optional background."""
+    shape = get_shape(color)
+    
+    if show_bg:
+        # Use color as background, contrasting foreground
+        bg = f"\x1b[48;5;{color}m"
+        # Simple contrast: if color < 128, use white (255), else use black (0)
+        fg_color = 255 if color < 128 else 0
+        fg = f"\x1b[38;5;{fg_color}m"
+        return f"{bg}{fg} {shape} {RESET}"
+    else:
+        # Color the glyph itself
+        fg = f"\x1b[38;5;{color}m"
+        return f"{fg}{shape}{RESET}"
+
+def render_single(color):
+    """Mode 1: Single color render with semantic description."""
+    zone = get_zone(color)
+    token = TOKENS.get(color, f"COLOR_{color}")
+    shape = get_shape(color)
+    
+    # Visual render
+    print(f"\n{render_glyph(color, show_bg=True)}\n")
+    
+    # Semantic description
+    print(f"Color:  {color}")
+    print(f"Token:  {token}")
+    print(f"Zone:   {zone}")
+    print(f"Shape:  {shape}")
+    
+    # Zone description
+    for zone_name, (start, end, desc) in ZONES.items():
+        if zone_name == zone:
+            print(f"Range:  {start}–{end}")
+            print(f"Desc:   {desc}")
+            break
+    print()
+
+def render_zone(zone_name):
+    """Mode 2: Zone render - grid of glyphs for entire zone."""
+    zone_name = zone_name.upper()
+    
+    if zone_name not in ZONES:
+        print(f"Error: Unknown zone '{zone_name}'")
+        print(f"Available zones: {', '.join(ZONES.keys())}")
+        return
+    
+    start, end, desc = ZONES[zone_name]
+    
+    print(f"\n{zone_name} ({start}–{end})")
+    print(f"{desc}\n")
+    
+    # Render grid (6 per row for consistency)
+    for i in range(start, end + 1):
+        print(render_glyph(i, show_bg=True), end=" ")
+        if (i - start + 1) % 6 == 0:
+            print()  # New line every 6 glyphs
+    
+    # Ensure final newline if row incomplete
+    if (end - start + 1) % 6 != 0:
+        print()
+    print()
+
+def render_sequence(colors, show_bg=True):
+    """Mode 3: Sequence render - left-to-right semantic flow."""
+    # Render with visual separation
+    glyphs = [render_glyph(c, show_bg=show_bg) for c in colors]
+    print("\n" + " → ".join(glyphs) + "\n")
+    
+    # Also show semantic interpretation
+    tokens = [TOKENS.get(c, f"C{c}") for c in colors]
+    zones = [get_zone(c) for c in colors]
+    
+    print("Semantic flow:")
+    for color, token, zone in zip(colors, tokens, zones):
+        shape = get_shape(color)
+        print(f"  {color:>3} ({zone:12}) {shape}  {token}")
+    print()
+
+def show_usage():
+    """Display usage information."""
+    print("Usage:")
+    print("  br-shape <color>                # Single color render")
+    print("  br-shape --zone <zone>          # Zone grid render")
+    print("  br-shape <c1> <c2> <c3>...      # Sequence render")
+    print()
+    print("Zones: OS_LAYER, PERCEPTION, EXECUTION, MEMORY,")
+    print("       AUTONOMY, TENSION, PARADOX, META")
+    print()
+    print("Examples:")
+    print("  br-shape 202                    # Show EXEC_FORCE")
+    print("  br-shape --zone AUTONOMY        # Show all agent colors")
+    print("  br-shape 16 28 64 100 2         # Show input pipeline")
+
+def main():
+    if len(sys.argv) < 2:
+        show_usage()
+        sys.exit(1)
+    
+    # Mode detection
+    if sys.argv[1] == "--zone":
+        if len(sys.argv) < 3:
+            print("Error: --zone requires zone name")
+            show_usage()
+            sys.exit(1)
+        # Mode 2: Zone render
+        render_zone(sys.argv[2])
+        
+    elif len(sys.argv) == 2 and sys.argv[1].isdigit():
+        # Mode 1: Single color render
+        color = int(sys.argv[1])
+        if 0 <= color <= 255:
+            render_single(color)
+        else:
+            print(f"Error: Color must be 0-255, got {color}")
+            sys.exit(1)
+            
+    else:
+        # Mode 3: Sequence render
+        try:
+            colors = [int(arg) for arg in sys.argv[1:]]
+            if all(0 <= c <= 255 for c in colors):
+                render_sequence(colors)
+            else:
+                print("Error: All colors must be 0-255")
+                sys.exit(1)
+        except ValueError:
+            print(f"Error: Invalid color value")
+            show_usage()
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()

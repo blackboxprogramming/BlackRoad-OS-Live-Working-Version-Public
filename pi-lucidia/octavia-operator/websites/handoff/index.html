@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad · Handoff</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --grad: linear-gradient(90deg, #FF8400, #FF4400, #FF0066, #CC00AA, #8800FF, #0066FF, #2233CC);
+      --fg: #fff;
+      --mode: 'handoff';
+    }
+
+    html, body {
+      height: 100%;
+      min-height: 100vh;
+      background: #000 !important;
+      background-color: #000 !important;
+      color: var(--fg);
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* nuclear override for artifact viewers */
+    html { background: #000 !important; }
+    body { background: #000 !important; }
+
+    /* ── TOP / BOTTOM RULE ── */
+    .rule {
+      position: fixed;
+      left: 0; right: 0;
+      height: 2px;
+      background: var(--fg);
+      opacity: 0.15;
+      transition: background 0.8s ease, opacity 0.8s ease;
+    }
+    .rule.top { top: 0; }
+    .rule.bot { bottom: 0; }
+
+    /* ── CENTER STAGE ── */
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── SIGNAL RINGS ── */
+    .rings {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid var(--fg);
+      opacity: 0;
+      animation: expand 3s ease-out infinite;
+      transition: border-color 0.8s ease;
+    }
+    .ring:nth-child(1) { width: 30px;  height: 30px;  animation-delay: 0s; }
+    .ring:nth-child(2) { width: 60px;  height: 60px;  animation-delay: 0.6s; }
+    .ring:nth-child(3) { width: 90px;  height: 90px;  animation-delay: 1.2s; }
+    .ring:nth-child(4) { width: 120px; height: 120px; animation-delay: 1.8s; }
+
+    .core {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--fg);
+      position: relative;
+      z-index: 2;
+      transition: background 0.8s ease;
+      animation: core-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes expand {
+      0%   { transform: scale(0.2); opacity: 0.6; }
+      100% { transform: scale(1);   opacity: 0; }
+    }
+    @keyframes core-pulse {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.8); }
+    }
+
+    /* ── WORDMARK ── */
+    .wordmark {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--fg);
+      transition: color 0.8s ease;
+    }
+
+    /* ── SCAN LINE ── */
+    .scanwrap {
+      width: 100%;
+      height: 2px;
+      margin-top: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .scanline {
+      position: absolute;
+      height: 100%;
+      width: 40%;
+      left: -40%;
+      background: var(--fg);
+      opacity: 0.6;
+      animation: scan 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      transition: background 0.8s ease;
+    }
+    @keyframes scan {
+      0%   { left: -40%; }
+      50%  { left: 140%; }
+      100% { left: 140%; }
+    }
+
+    /* ── STATUS LINE ── */
+    .status {
+      margin-top: 32px;
+      font-size: 0.5rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      opacity: 0.3;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--fg);
+      animation: core-pulse 1.5s ease-in-out infinite;
+      transition: background 0.8s ease;
+    }
+    .cursor {
+      display: inline-block;
+      width: 1.5px;
+      height: 0.8em;
+      background: var(--fg);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.8s step-end infinite;
+      transition: background 0.8s ease;
+    }
+    @keyframes blink {
+      0%, 49%, 100% { opacity: 1; }
+      50%, 99%      { opacity: 0; }
+    }
+
+    /* ── COUNTER ── */
+    .counter {
+      position: fixed;
+      bottom: 20px;
+      right: 24px;
+      font-size: 0.42rem;
+      opacity: 0.15;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: opacity 0.4s;
+    }
+    .counter span { opacity: 0.5; }
+
+    /* ── MODE BADGE ── */
+    .mode-badge {
+      position: fixed;
+      top: 16px;
+      right: 20px;
+      font-size: 0.42rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.25);
+      transition: all 0.8s ease;
+    }
+
+    /* ── COLOR MODE ── */
+    body.color-mode .rule { background: var(--grad); opacity: 1; height: 3px; }
+    body.color-mode .ring { border-image: var(--grad) 1; border-color: transparent; }
+    body.color-mode .core { background: #FF8400; animation: core-pulse 3s ease-in-out infinite, color-cycle 4s linear infinite; }
+    body.color-mode .wordmark { background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    body.color-mode .scanline { background: var(--grad); background-size: 300%; animation: scan 2.4s cubic-bezier(0.4,0,0.6,1) infinite, grad-shift 3s ease infinite; opacity: 1; }
+    body.color-mode .status-dot { animation: core-pulse 1.5s ease-in-out infinite, color-cycle 3s linear infinite; }
+    body.color-mode .cursor { background: #FF0066; }
+    body.color-mode .mode-badge { border-color: #FF8400; color: #FF8400; }
+
+    @keyframes color-cycle {
+      0%   { background-color: #FF8400; }
+      25%  { background-color: #FF0066; }
+      50%  { background-color: #8800FF; }
+      75%  { background-color: #0066FF; }
+      100% { background-color: #FF8400; }
+    }
+    @keyframes grad-shift {
+      0%, 100% { background-position: 0%; }
+      50%       { background-position: 100%; }
+    }
+
+    /* ── TUNNEL FLASH ── */
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .flash.go { animation: flash-in 0.4s ease-out forwards; }
+    @keyframes flash-in {
+      0%   { opacity: 0.6; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body id="body" data-state="handoff" style="background:#000!important;background-color:#000!important;min-height:100vh;">
+
+  <div class="flash" id="flash"></div>
+  <div class="rule top"></div>
+  <div class="rule bot"></div>
+
+  <div class="mode-badge" id="modeBadge">handoff</div>
+
+  <div class="stage">
+    <div class="rings">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="core"></div>
+    </div>
+
+    <div class="wordmark">BlackRoad</div>
+
+    <div class="scanwrap">
+      <div class="scanline"></div>
+    </div>
+
+    <div class="status">
+      <div class="status-dot"></div>
+      <span id="statusText">awaiting tunnel</span>
+      <div class="cursor"></div>
+    </div>
+  </div>
+
+  <div class="counter" id="counter">
+    <span>seen · </span><span id="countNum">0</span>
+  </div>
+
+  <script>
+    // ── STATE ──
+    const body    = document.getElementById('body');
+    const badge   = document.getElementById('modeBadge');
+    const status  = document.getElementById('statusText');
+    const counter = document.getElementById('countNum');
+    const flash   = document.getElementById('flash');
+
+    // ── COUNT: track renders in localStorage
+    const key = 'br_handoff_count';
+    const defaultCounts = { handoff: 0, color: 0 };
+    let counts = defaultCounts;
+
+    // Safely read counts from localStorage, falling back if anything goes wrong
+    (function initCounts() {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          const raw = window.localStorage.getItem(key);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === 'object') {
+              counts = parsed;
+              return;
+            }
+          }
+        }
+      } catch (e) {
+        // ignore and fall back to defaultCounts
+      }
+      counts = { ...defaultCounts };
+    })();
+
+    function saveCount() {
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(key, JSON.stringify(counts));
+        }
+      } catch (e) {
+        // ignore write errors
+      }
+    }
+    function updateCounter() {
+      const mode = body.dataset.state;
+      counter.textContent = counts[mode] || 0;
+    }
+
+    // ── DETECT MODE ──
+    // color mode triggers: ?color, ?tunnel, custom header x-br-identity
+    // also fires when postMessage({tunnel:true}) received
+    function getMode() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('color') || p.has('tunnel') || p.has('identity')) return 'color';
+      // Check meta tag (for server-side injection)
+      const meta = document.querySelector('meta[name="br-mode"]');
+      if (meta && meta.content === 'color') return 'color';
+      return 'handoff';
+    }
+
+    function activateColor(source) {
+      if (body.dataset.state === 'color') return;
+
+      // Flash transition
+      flash.classList.add('go');
+      setTimeout(() => flash.classList.remove('go'), 400);
+
+      body.dataset.state = 'color';
+      body.classList.add('color-mode');
+      badge.textContent = 'tunneled';
+      status.textContent = 'identity confirmed';
+
+      counts.color = (counts.color || 0) + 1;
+      saveCount();
+      updateCounter();
+
+      // Emit event for parent frames / agents
+      window.dispatchEvent(new CustomEvent('br-tunnel', {
+        detail: { state: 'color', source, ts: Date.now() }
+      }));
+    }
+
+    function activateHandoff() {
+      body.dataset.state = 'handoff';
+      body.classList.remove('color-mode');
+      badge.textContent = 'handoff';
+      status.textContent = 'awaiting tunnel';
+
+      counts.handoff = (counts.handoff || 0) + 1;
+      saveCount();
+      updateCounter();
+    }
+
+    // ── INIT ──
+    const initMode = getMode();
+    if (initMode === 'color') {
+      // Skip flash on init
+      body.dataset.state = 'color';
+      body.classList.add('color-mode');
+      badge.textContent = 'tunneled';
+      status.textContent = 'identity confirmed';
+      counts.color = (counts.color || 0) + 1;
+      saveCount();
+    } else {
+      counts.handoff = (counts.handoff || 0) + 1;
+      saveCount();
+    }
+    updateCounter();
+
+    // ── POSTMESSAGE TUNNEL ──
+    window.addEventListener('message', (e) => {
+      if (e.data?.tunnel === true || e.data?.state === 'color') {
+        activateColor('postmessage');
+      }
+      if (e.data?.state === 'handoff') {
+        activateHandoff();
+      }
+    });
+
+    // ── KEYBOARD SHORTCUT: T to toggle (dev) ──
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 't' || e.key === 'T') {
+        body.dataset.state === 'color' ? activateHandoff() : activateColor('keyboard');
+      }
+    });
+
+    // ── EXPOSE API ──
+    window.BlackRoad = {
+      tunnel: () => activateColor('api'),
+      handoff: () => activateHandoff(),
+      state: () => body.dataset.state,
+      counts: () => ({ ...counts }),
+    };
+
+    // ── REPORT to parent if in iframe ──
+    if (window.parent !== window) {
+      let parentOrigin = window.location.origin;
+      if (document.referrer) {
+        try {
+          parentOrigin = new URL(document.referrer).origin;
+        } catch (e) {
+          // Fallback to same-origin if referrer is not a valid URL
+          parentOrigin = window.location.origin;
+        }
+      }
+      window.parent.postMessage({
+        br_state: body.dataset.state,
+        ts: Date.now()
+      }, parentOrigin);
+    }
+  </script>
+
+</body>
+</html>

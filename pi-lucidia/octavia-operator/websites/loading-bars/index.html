@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>BR · Loading Bar Designs</title>
+<link rel="stylesheet" href="../_shared/design.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    background: var(--black) !important;
+    font-family: var(--font-mono);
+    min-height: 100vh;
+  }
+  #root {
+    background: var(--black);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+  .demo-grid {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+  .block-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+  }
+  .grad-rule {
+    height: 1px;
+    background: var(--grad);
+    margin-bottom: 6px;
+  }
+
+  /* ── A · Sweep ── */
+  .bar-a-track { width: 100%; height: 3px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+  .bar-a-fill  { height: 100%; background: var(--white); position: relative; overflow: hidden; }
+  .bar-a-fill::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+    animation: shimmer 1.8s ease-in-out infinite;
+  }
+  .bar-a-meta { display: flex; justify-content: space-between; margin-top: var(--sp-xs); }
+  .bar-a-name { font-size: 11px; font-weight: 700; color: var(--white); font-family: var(--font-mono); }
+  .bar-a-pct  { font-size: 10px; color: rgba(255, 255, 255, 0.4); font-family: var(--font-mono); }
+
+  /* ── B · Blocks ── */
+  .bar-b-track { display: flex; gap: 3px; width: 100%; }
+  .bar-b-seg   { flex: 1; height: 10px; background: rgba(255, 255, 255, 0.1); }
+  .bar-b-seg.filled { background: var(--white); }
+  .bar-b-seg.active { background: rgba(255, 255, 255, 0.45); animation: blk 0.9s ease-in-out infinite; }
+  .bar-b-meta  { display: flex; justify-content: space-between; margin-top: var(--sp-xs); }
+  .bar-b-name  { font-size: 11px; font-weight: 700; color: var(--white); font-family: var(--font-mono); }
+  .bar-b-count { font-size: 10px; color: rgba(255, 255, 255, 0.35); font-family: var(--font-mono); }
+
+  /* ── C · Multi-row ── */
+  .bar-c-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .bar-c-row:last-child { border-bottom: none; }
+  .bar-c-label { font-size: 9px; color: rgba(255, 255, 255, 0.4); min-width: 60px; flex-shrink: 0; font-family: var(--font-mono); }
+  .bar-c-track { flex: 1; height: 2px; background: rgba(255, 255, 255, 0.1); }
+  .bar-c-fill  { height: 100%; background: var(--white); }
+  .bar-c-val   { font-size: 10px; font-weight: 700; color: var(--white); min-width: 28px; text-align: right; flex-shrink: 0; font-family: var(--font-mono); }
+
+  /* ── D · Card + Shimmer ── */
+  .bar-d-wrap   { border: 1px solid rgba(255, 255, 255, 0.15); padding: 14px 16px; background: var(--black); }
+  .bar-d-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .bar-d-title  { font-size: 11px; font-weight: 700; color: var(--white); font-family: var(--font-mono); }
+  .bar-d-status { display: flex; align-items: center; gap: 6px; font-size: 9px; color: rgba(255, 255, 255, 0.4); letter-spacing: 0.12em; text-transform: uppercase; font-family: var(--font-mono); }
+  .bar-d-dot    { width: 6px; height: 6px; border-radius: 50%; background: var(--white); flex-shrink: 0; animation: pulse 1.5s ease-in-out infinite; }
+  .bar-d-track  { width: 100%; height: 4px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+  .bar-d-fill   { height: 100%; background: var(--white); position: relative; overflow: hidden; }
+  .bar-d-fill::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 60px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: sweep 1.8s ease-in-out infinite;
+  }
+  .bar-d-footer { display: flex; justify-content: space-between; margin-top: var(--sp-xs); }
+  .bar-d-sub    { font-size: 9px; color: rgba(255, 255, 255, 0.25); font-family: var(--font-mono); }
+  .bar-d-pct    { font-size: 13px; font-weight: 700; color: var(--white); font-family: var(--font-mono); }
+
+  /* ── E · Minimal ── */
+  .bar-e-outer { position: relative; height: 1px; background: rgba(255, 255, 255, 0.15); width: 100%; }
+  .bar-e-fill  { position: absolute; top: 0; left: 0; height: 1px; background: var(--white); }
+  .bar-e-thumb { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 5px; height: 5px; background: var(--white); border-radius: 50%; }
+  .bar-e-meta  { display: flex; justify-content: space-between; margin-top: 10px; }
+  .bar-e-label { font-size: 9px; color: rgba(255, 255, 255, 0.35); font-family: var(--font-mono); }
+  .bar-e-val   { font-size: 9px; color: rgba(255, 255, 255, 0.35); font-family: var(--font-mono); }
+
+  /* ── Animations ── */
+  @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
+  @keyframes sweep   { 0% { left: -60px; } 100% { left: 110%; } }
+  @keyframes pulse   { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.8); opacity: 0.4; } }
+  @keyframes blk     { 0%, 100% { opacity: 0.45; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+<div id="root">
+<div class="demo-grid">
+
+  <!-- A · Sweep -->
+  <div>
+    <div class="grad-rule"></div>
+    <div class="block-label">A · Sweep</div>
+    <div class="bar-a-track"><div class="bar-a-fill" style="width:72%"></div></div>
+    <div class="bar-a-meta">
+      <span class="bar-a-name">blackroad-os</span>
+      <span class="bar-a-pct">72%</span>
+    </div>
+  </div>
+
+  <!-- B · Blocks -->
+  <div>
+    <div class="grad-rule"></div>
+    <div class="block-label">B · Blocks</div>
+    <div class="bar-b-track" id="segs"></div>
+    <div class="bar-b-meta">
+      <span class="bar-b-name">blackroad-ai</span>
+      <span class="bar-b-count" id="seg-count"></span>
+    </div>
+  </div>
+
+  <!-- C · Multi-row -->
+  <div>
+    <div class="grad-rule"></div>
+    <div class="block-label">C · Multi-row</div>
+    <div class="bar-c-row"><span class="bar-c-label" id="bar-c-label-agents">agents</span><div class="bar-c-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88" aria-labelledby="bar-c-label-agents"><div class="bar-c-fill" style="width:88%"></div></div><span class="bar-c-val">88</span></div>
+    <div class="bar-c-row"><span class="bar-c-label" id="bar-c-label-workers">workers</span><div class="bar-c-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="61" aria-labelledby="bar-c-label-workers"><div class="bar-c-fill" style="width:61%"></div></div><span class="bar-c-val">61</span></div>
+    <div class="bar-c-row"><span class="bar-c-label" id="bar-c-label-uptime">uptime</span><div class="bar-c-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99" aria-labelledby="bar-c-label-uptime"><div class="bar-c-fill" style="width:99%"></div></div><span class="bar-c-val">99</span></div>
+    <div class="bar-c-row"><span class="bar-c-label" id="bar-c-label-memory">memory</span><div class="bar-c-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="43" aria-labelledby="bar-c-label-memory"><div class="bar-c-fill" style="width:43%"></div></div><span class="bar-c-val">43</span></div>
+  </div>
+
+  <!-- D · Card + Shimmer -->
+  <div>
+    <div class="grad-rule"></div>
+    <div class="block-label">D · Card + Shimmer</div>
+    <div class="bar-d-wrap">
+      <div class="bar-d-header">
+        <span class="bar-d-title">blackroad-cloud</span>
+        <div class="bar-d-status"><div class="bar-d-dot"></div>loading</div>
+      </div>
+      <div class="bar-d-track"><div class="bar-d-fill" style="width:58%"></div></div>
+      <div class="bar-d-footer">
+        <span class="bar-d-sub">deploying · 3 of 7</span>
+        <span class="bar-d-pct">58%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- E · Minimal -->
+  <div>
+    <div class="grad-rule"></div>
+    <div class="block-label">E · Minimal</div>
+    <div class="bar-e-outer" role="progressbar" aria-valuenow="34" aria-valuemin="0" aria-valuemax="100" aria-label="blackroad-security progress">
+      <div class="bar-e-fill" style="width:34%"></div>
+      <div class="bar-e-thumb" style="left:34%" aria-hidden="true"></div>
+    </div>
+    <div class="bar-e-meta">
+      <span class="bar-e-label">blackroad-security</span>
+      <span class="bar-e-val">34 / 100</span>
+    </div>
+  </div>
+
+</div>
+</div>
+<script>
+  // Build segmented blocks for variant B
+  const track = document.getElementById('segs');
+  const counter = document.getElementById('seg-count');
+  const total = 20;
+  const filled = 13;
+  for (let i = 0; i < total; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'bar-b-seg' + (i < filled ? ' filled' : i === filled ? ' active' : '');
+    track.appendChild(seg);
+  }
+  counter.textContent = filled + ' / ' + total;
+</script>
+</body>
+</html>

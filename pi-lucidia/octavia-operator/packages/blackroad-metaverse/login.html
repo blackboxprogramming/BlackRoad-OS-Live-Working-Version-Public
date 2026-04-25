@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — BlackRoad Metaverse @ Lucidia.Earth</title>
+    <meta name="description" content="Enter the BlackRoad Metaverse — A living, breathing universe at your fingertips">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* ===== OFFICIAL BLACKROAD COLORS ===== */
+            --sunrise-orange: #FF9D00;
+            --warm-orange: #FF6B00;
+            --hot-pink: #FF0066;
+            --electric-magenta: #FF006B;
+            --deep-magenta: #D600AA;
+            --vivid-purple: #7700FF;
+            --cyber-blue: #0066FF;
+            
+            /* ===== NEUTRALS ===== */
+            --pure-black: #000000;
+            --deep-black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --dark-gray: #2A2A2A;
+            --pure-white: #FFFFFF;
+            --gray-300: #A0A0A0;
+            
+            /* ===== GRADIENTS ===== */
+            --gradient-br: linear-gradient(180deg, #FF9D00 0%, #FF6B00 25%, #FF0066 75%, #FF006B 100%);
+            --gradient-os: linear-gradient(180deg, #FF006B 0%, #D600AA 25%, #7700FF 75%, #0066FF 100%);
+            --gradient-full: linear-gradient(180deg, #FF9D00 0%, #FF6B00 14%, #FF0066 28%, #FF006B 42%, #D600AA 57%, #7700FF 71%, #0066FF 100%);
+            
+            /* ===== GOLDEN RATIO SPACING ===== */
+            --space-xs: 8px;
+            --space-sm: 13px;
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --space-2xl: 89px;
+            
+            /* ===== BORDER RADIUS ===== */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            --radius-2xl: 34px;
+            
+            /* ===== GLASS MORPHISM ===== */
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg-strong: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-border-strong: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--pure-black);
+            color: var(--pure-white);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(119, 0, 255, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 50%, rgba(255, 0, 102, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 80%, rgba(0, 102, 255, 0.15) 0%, transparent 50%);
+            animation: backgroundShift 15s ease infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-5%, 5%) scale(1.05); }
+            66% { transform: translate(5%, -5%) scale(0.95); }
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--pure-white);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 10s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-40px) translateX(-10px); }
+            75% { transform: translateY(-20px) translateX(5px); }
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        /* ===== LOGIN CARD ===== */
+        .login-card {
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border-strong);
+            border-radius: var(--radius-2xl);
+            padding: var(--space-2xl);
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== HEADER ===== */
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 48px;
+            font-weight: 900;
+            background: var(--gradient-full);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 6s ease infinite;
+            margin-bottom: var(--space-md);
+            letter-spacing: -2px;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .tagline {
+            font-size: 14px;
+            color: var(--gray-300);
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--pure-white);
+            margin-top: var(--space-sm);
+            font-weight: 300;
+        }
+
+        /* ===== FORM ===== */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--pure-white);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            font-size: 16px;
+            color: var(--pure-white);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--hot-pink);
+            background: rgba(255, 0, 102, 0.1);
+            box-shadow: 0 0 0 3px rgba(255, 0, 102, 0.1);
+        }
+
+        input::placeholder {
+            color: var(--gray-300);
+        }
+
+        /* ===== BUTTONS ===== */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin-top: var(--space-md);
+        }
+
+        .btn {
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--gradient-br);
+            color: var(--pure-white);
+            box-shadow: 0 4px 15px rgba(255, 0, 102, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 0, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--pure-white);
+            border: 1px solid var(--glass-border-strong);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-bg);
+            border-color: var(--pure-white);
+        }
+
+        .btn-guest {
+            background: var(--gradient-os);
+            color: var(--pure-white);
+            box-shadow: 0 4px 15px rgba(119, 0, 255, 0.3);
+        }
+
+        .btn-guest:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(119, 0, 255, 0.5);
+        }
+
+        /* ===== DIVIDER ===== */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--glass-border);
+        }
+
+        .divider-text {
+            font-size: 12px;
+            color: var(--gray-300);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== FOOTER ===== */
+        .login-footer {
+            text-align: center;
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-link {
+            color: var(--hot-pink);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--vivid-purple);
+            text-decoration: underline;
+        }
+
+        .powered-by {
+            margin-top: var(--space-md);
+            font-size: 12px;
+            color: var(--gray-300);
+        }
+
+        .powered-by span {
+            background: var(--gradient-full);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* ===== REMEMBER ME ===== */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 400;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ===== NOTIFICATION ===== */
+        .notification {
+            position: fixed;
+            top: var(--space-lg);
+            right: var(--space-lg);
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border-strong);
+            border-radius: var(--radius-md);
+            padding: var(--space-md) var(--space-lg);
+            color: var(--pure-white);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(400px);
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .login-card {
+                padding: var(--space-xl);
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .container {
+                padding: var(--space-md);
+            }
+        }
+
+        /* ===== LOADING STATE ===== */
+        .btn.loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            right: var(--space-md);
+            margin-top: -8px;
+            border: 2px solid var(--pure-white);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="animated-background"></div>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="logo">BlackRoad</div>
+                <div class="tagline">Metaverse Portal</div>
+                <div class="subtitle">Enter the Universe</div>
+            </div>
+
+            <!-- Login Form -->
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="Enter your username"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">Remember me for 30 days</label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        Enter Metaverse
+                    </button>
+                    
+                    <button type="button" class="btn btn-guest" id="guestBtn">
+                        Continue as Guest
+                    </button>
+                </div>
+            </form>
+
+            <div class="divider">
+                <div class="divider-text">New Here?</div>
+            </div>
+
+            <button class="btn btn-secondary" id="signupBtn">
+                Create Account
+            </button>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <a href="#" class="footer-link" id="forgotPassword">Forgot Password?</a>
+                <div class="powered-by">
+                    Powered by <span>BlackRoad OS</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== PARTICLES SYSTEM =====
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // ===== NOTIFICATION SYSTEM =====
+        function showNotification(message, duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, duration);
+        }
+
+        // ===== FORM HANDLING =====
+        const loginForm = document.getElementById('loginForm');
+        const guestBtn = document.getElementById('guestBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const forgotPassword = document.getElementById('forgotPassword');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = e.target.querySelector('.btn-primary');
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            // Loading state
+            btn.classList.add('loading');
+            btn.textContent = 'Authenticating...';
+
+            // Simulate authentication
+            setTimeout(() => {
+                // Store user data
+                const userData = {
+                    username: username,
+                    loggedIn: true,
+                    timestamp: Date.now(),
+                    remember: remember
+                };
+
+                if (remember) {
+                    localStorage.setItem('blackroad_user', JSON.stringify(userData));
+                } else {
+                    sessionStorage.setItem('blackroad_user', JSON.stringify(userData));
+                }
+
+                showNotification('🎉 Welcome to the Metaverse!');
+
+                // Redirect to metaverse
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }, 1500);
+        });
+
+        guestBtn.addEventListener('click', () => {
+            const userData = {
+                username: 'Guest',
+                loggedIn: true,
+                guest: true,
+                timestamp: Date.now()
+            };
+
+            sessionStorage.setItem('blackroad_user', JSON.stringify(userData));
+            showNotification('🎮 Entering as Guest...');
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        });
+
+        signupBtn.addEventListener('click', () => {
+            showNotification('🚀 Sign up feature coming soon!');
+        });
+
+        forgotPassword.addEventListener('click', (e) => {
+            e.preventDefault();
+            showNotification('📧 Password reset coming soon!');
+        });
+
+        // ===== CHECK EXISTING SESSION =====
+        function checkExistingSession() {
+            const localUser = localStorage.getItem('blackroad_user');
+            const sessionUser = sessionStorage.getItem('blackroad_user');
+
+            if (localUser || sessionUser) {
+                const userData = JSON.parse(localUser || sessionUser);
+                const daysSinceLogin = (Date.now() - userData.timestamp) / (1000 * 60 * 60 * 24);
+
+                // If remembered and less than 30 days, auto-login
+                if (userData.remember && daysSinceLogin < 30) {
+                    showNotification('👋 Welcome back, ' + userData.username + '!');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
+            }
+        }
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            // Enter to submit
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName === 'INPUT') {
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            }
+
+            // Escape to clear
+            if (e.key === 'Escape') {
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('username').focus();
+            }
+        });
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            checkExistingSession();
+            document.getElementById('username').focus();
+        });
+    </script>
+</body>
+</html>

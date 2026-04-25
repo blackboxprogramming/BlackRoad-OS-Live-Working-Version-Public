@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Agent Builder</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Backend Integration -->
+    <script src="/js/api-client.js"></script>
+    <script src="/js/state-manager.js"></script>
+    <script src="/js/ui-components.js"></script>
+    
+    <style>
+        :root {
+            --bg-deep: #0a0a0f;
+            --bg-terminal: #0d1117;
+            --bg-input: #161b22;
+            --bg-result: #12161c;
+            --bg-hover: #1a2030;
+            --bg-card: #13161d;
+            --border-subtle: rgba(255,255,255,0.08);
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #484f58;
+            --accent-orange: #f7931a;
+            --accent-pink: #e91e8c;
+            --accent-purple: #9945ff;
+            --accent-blue: #58a6ff;
+            --accent-cyan: #39d353;
+            --accent-yellow: #d29922;
+            --accent-red: #f85149;
+            --gradient-brand: linear-gradient(135deg, #f7931a 0%, #e91e8c 50%, #9945ff 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Layout */
+        .builder-layout {
+            display: grid;
+            grid-template-rows: 60px 1fr;
+            grid-template-columns: 300px 1fr 340px;
+            height: 100vh;
+        }
+
+        @media (max-width: 1200px) {
+            .builder-layout {
+                grid-template-columns: 280px 1fr;
+            }
+            .config-panel { display: none; }
+        }
+
+        /* Header */
+        .builder-header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            background: var(--bg-terminal);
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-pink);
+            color: var(--text-primary);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .title-name {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-name .badge {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(57,211,83,0.2);
+            color: var(--accent-cyan);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .title-name .badge.draft {
+            background: rgba(210,153,34,0.2);
+            color: var(--accent-yellow);
+        }
+
+        /* Header Tabs */
+        .header-tabs {
+            display: flex;
+            gap: 4px;
+            margin-left: 32px;
+        }
+
+        .header-tab {
+            padding: 10px 18px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+
+        .header-tab:hover {
+            color: var(--text-secondary);
+            background: var(--bg-hover);
+        }
+
+        .header-tab.active {
+            color: var(--text-primary);
+            background: var(--bg-input);
+        }
+
+        .header-tab .icon { font-size: 14px; }
+
+        /* Header Actions */
+        .header-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 10px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent-pink);
+            color: var(--text-primary);
+        }
+
+        .action-btn.primary {
+            background: var(--gradient-brand);
+            border: none;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(233,30,140,0.3);
+        }
+
+        /* Agents List Panel */
+        .agents-panel {
+            background: var(--bg-terminal);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .panel-title {
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-action {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+
+        .panel-action:hover {
+            border-color: var(--accent-pink);
+            color: var(--text-primary);
+        }
+
+        /* Search */
+        .search-box {
+            margin: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            transition: all 0.15s;
+        }
+
+        .search-box:focus-within {
+            border-color: var(--accent-pink);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 12px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .search-box input::placeholder { color: var(--text-muted); }
+
+        .search-icon { color: var(--text-muted); font-size: 14px; }
+
+        /* Agent Categories */
+        .agent-categories {
+            display: flex;
+            gap: 6px;
+            padding: 0 16px 12px;
+            overflow-x: auto;
+        }
+
+        .agent-cat {
+            padding: 6px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+
+        .agent-cat:hover { color: var(--text-secondary); }
+
+        .agent-cat.active {
+            background: rgba(233,30,140,0.15);
+            border-color: var(--accent-pink);
+            color: var(--accent-pink);
+        }
+
+        /* Agents List */
+        .agents-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 4px;
+        }
+
+        .agent-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .agent-item.active {
+            background: rgba(233,30,140,0.1);
+            border: 1px solid rgba(233,30,140,0.2);
+        }
+
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .agent-avatar.gradient { background: var(--gradient-brand); }
+        .agent-avatar.blue { background: linear-gradient(135deg, #58a6ff, #1f6feb); }
+        .agent-avatar.green { background: linear-gradient(135deg, #39d353, #238636); }
+        .agent-avatar.purple { background: linear-gradient(135deg, #9945ff, #6e40c9); }
+        .agent-avatar.orange { background: linear-gradient(135deg, #f7931a, #bd5800); }
+        .agent-avatar.pink { background: linear-gradient(135deg, #e91e8c, #bf3989); }
+
+        .agent-avatar .status {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-terminal);
+        }
+
+        .agent-avatar .status.online { background: var(--accent-cyan); }
+        .agent-avatar .status.offline { background: var(--text-muted); }
+        .agent-avatar .status.busy { background: var(--accent-yellow); }
+
+        .agent-info { flex: 1; min-width: 0; }
+
+        .agent-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .agent-name .version {
+            font-size: 9px;
+            padding: 2px 5px;
+            background: var(--bg-input);
+            border-radius: 4px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .agent-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .agent-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .agent-type {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(153,69,255,0.2);
+            color: var(--accent-purple);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* New Agent Button */
+        .new-agent-btn {
+            margin: 12px 16px;
+            padding: 14px;
+            background: var(--gradient-brand);
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .new-agent-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(233,30,140,0.3);
+        }
+
+        /* Main Builder Area */
+        .builder-main {
+            background: var(--bg-deep);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .builder-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(153,69,255,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(233,30,140,0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Builder Content */
+        .builder-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Agent Preview Card */
+        .agent-preview {
+            background: linear-gradient(135deg, rgba(153,69,255,0.15), rgba(233,30,140,0.15));
+            border: 1px solid rgba(153,69,255,0.3);
+            border-radius: 20px;
+            padding: 32px;
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .preview-avatar {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-brand);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            box-shadow: 0 10px 40px rgba(233,30,140,0.3);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .preview-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        .preview-avatar .edit-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.15s;
+            font-size: 20px;
+        }
+
+        .preview-avatar:hover .edit-overlay {
+            opacity: 1;
+        }
+
+        .preview-info { flex: 1; }
+
+        .preview-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .preview-name input {
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            outline: none;
+            width: 100%;
+        }
+
+        .preview-name input:focus {
+            border-bottom: 2px solid var(--accent-pink);
+        }
+
+        .preview-tagline {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .preview-tagline input {
+            background: transparent;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-secondary);
+            outline: none;
+            width: 100%;
+        }
+
+        .preview-stats {
+            display: flex;
+            gap: 24px;
+        }
+
+        .preview-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .preview-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .preview-stat-value.cyan { color: var(--accent-cyan); }
+        .preview-stat-value.purple { color: var(--accent-purple); }
+        .preview-stat-value.orange { color: var(--accent-orange); }
+
+        .preview-stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Section */
+        .builder-section {
+            background: var(--bg-terminal);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon { font-size: 18px; }
+
+        .section-badge {
+            font-size: 9px;
+            padding: 3px 8px;
+            background: rgba(233,30,140,0.15);
+            color: var(--accent-pink);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .section-toggle {
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .section-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-label .hint {
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 13px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.15s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 0 3px rgba(233,30,140,0.1);
+        }
+
+        .form-input::placeholder { color: var(--text-muted); }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-row-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        /* Capability Chips */
+        .capability-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .capability-chip {
+            padding: 10px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+        }
+
+        .capability-chip:hover {
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+        }
+
+        .capability-chip.active {
+            background: rgba(153,69,255,0.15);
+            border-color: var(--accent-purple);
+            color: var(--accent-purple);
+        }
+
+        .capability-chip .icon { font-size: 16px; }
+
+        .add-capability {
+            border-style: dashed;
+            color: var(--text-muted);
+        }
+
+        /* Knowledge Sources */
+        .knowledge-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .knowledge-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            transition: all 0.15s;
+        }
+
+        .knowledge-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .knowledge-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(88,166,255,0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .knowledge-info { flex: 1; }
+
+        .knowledge-name {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .knowledge-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .knowledge-toggle {
+            width: 44px;
+            height: 24px;
+            background: var(--bg-result);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .knowledge-toggle.on {
+            background: var(--accent-cyan);
+        }
+
+        .knowledge-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.15s;
+        }
+
+        .knowledge-toggle.on::after {
+            transform: translateX(20px);
+        }
+
+        .add-knowledge {
+            border-style: dashed;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .add-knowledge:hover {
+            color: var(--text-secondary);
+            border-color: var(--accent-pink);
+        }
+
+        /* Workflow Visual */
+        .workflow-canvas {
+            background: var(--bg-deep);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            min-height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        .workflow-node {
+            position: absolute;
+            padding: 14px 20px;
+            background: var(--bg-terminal);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px;
+            cursor: move;
+            min-width: 140px;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .workflow-node:hover {
+            border-color: var(--accent-pink);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .workflow-node.trigger {
+            border-color: var(--accent-cyan);
+            background: linear-gradient(135deg, rgba(57,211,83,0.1), transparent);
+        }
+
+        .workflow-node.action {
+            border-color: var(--accent-purple);
+            background: linear-gradient(135deg, rgba(153,69,255,0.1), transparent);
+        }
+
+        .workflow-node.condition {
+            border-color: var(--accent-yellow);
+            background: linear-gradient(135deg, rgba(210,153,34,0.1), transparent);
+            transform: rotate(0deg);
+        }
+
+        .workflow-node.output {
+            border-color: var(--accent-pink);
+            background: linear-gradient(135deg, rgba(233,30,140,0.1), transparent);
+        }
+
+        .node-icon { font-size: 20px; margin-bottom: 6px; }
+        .node-label { font-size: 11px; font-weight: 500; }
+
+        .workflow-connection {
+            position: absolute;
+            height: 2px;
+            background: var(--accent-purple);
+            transform-origin: left center;
+        }
+
+        .workflow-connection::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: -3px;
+            border-left: 8px solid var(--accent-purple);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .workflow-actions {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .workflow-btn {
+            padding: 8px 14px;
+            background: var(--bg-terminal);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .workflow-btn:hover {
+            border-color: var(--accent-pink);
+            color: var(--text-primary);
+        }
+
+        /* Config Panel */
+        .config-panel {
+            background: var(--bg-terminal);
+            border-left: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .config-section {
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 16px;
+        }
+
+        .config-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Model Selector */
+        .model-card {
+            padding: 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-bottom: 10px;
+        }
+
+        .model-card:hover {
+            border-color: var(--accent-purple);
+        }
+
+        .model-card.active {
+            border-color: var(--accent-purple);
+            background: rgba(153,69,255,0.1);
+        }
+
+        .model-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .model-icon { font-size: 20px; }
+
+        .model-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .model-badge {
+            margin-left: auto;
+            font-size: 8px;
+            padding: 2px 6px;
+            background: rgba(233,30,140,0.2);
+            color: var(--accent-pink);
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .model-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Personality Traits */
+        .trait-item {
+            margin-bottom: 16px;
+        }
+
+        .trait-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .trait-name {
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .trait-value {
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-pink);
+        }
+
+        .trait-slider {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 3px;
+            appearance: none;
+            outline: none;
+        }
+
+        .trait-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Test Chat */
+        .test-chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .test-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+
+        .test-msg {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .test-msg.user {
+            flex-direction: row-reverse;
+        }
+
+        .test-msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .test-msg.agent .test-msg-avatar {
+            background: var(--gradient-brand);
+        }
+
+        .test-msg.user .test-msg-avatar {
+            background: var(--bg-input);
+        }
+
+        .test-msg-bubble {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+            max-width: 85%;
+        }
+
+        .test-msg.agent .test-msg-bubble {
+            background: var(--bg-input);
+            border-top-left-radius: 4px;
+        }
+
+        .test-msg.user .test-msg-bubble {
+            background: var(--gradient-brand);
+            border-top-right-radius: 4px;
+        }
+
+        .test-input {
+            display: flex;
+            gap: 8px;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .test-input input {
+            flex: 1;
+            padding: 10px 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            font-family: inherit;
+            font-size: 12px;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .test-input input:focus {
+            border-color: var(--accent-pink);
+        }
+
+        .test-send {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-brand);
+            border: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+
+        .test-send:hover {
+            transform: scale(1.05);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--bg-input); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="builder-layout">
+        <!-- Header -->
+        <header class="builder-header">
+            <div class="header-left">
+                <button class="back-btn" onclick="window.location.href='/'">←</button>
+                <div class="header-title">
+                    <span class="title-label">Agent Builder</span>
+                    <div class="title-name">
+                        Support Agent
+                        <span class="badge">Active</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-tabs">
+                <button class="header-tab active">
+                    <span class="icon">🎭</span>
+                    Personality
+                </button>
+                <button class="header-tab">
+                    <span class="icon">⚡</span>
+                    Capabilities
+                </button>
+                <button class="header-tab">
+                    <span class="icon">📚</span>
+                    Knowledge
+                </button>
+                <button class="header-tab">
+                    <span class="icon">🔀</span>
+                    Workflow
+                </button>
+                <button class="header-tab">
+                    <span class="icon">⚙️</span>
+                    Settings
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button class="action-btn">
+                    <span>📋</span>
+                    Duplicate
+                </button>
+                <button class="action-btn">
+                    <span>💾</span>
+                    Save Draft
+                </button>
+                <button class="action-btn primary">
+                    <span>🚀</span>
+                    Deploy Agent
+                </button>
+            </div>
+        </header>
+
+        <!-- Agents Panel -->
+        <aside class="agents-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>🤖</span>
+                    My Agents
+                </div>
+                <button class="panel-action">⚙️</button>
+            </div>
+
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search agents...">
+            </div>
+
+            <div class="agent-categories">
+                <button class="agent-cat active">All</button>
+                <button class="agent-cat">Active</button>
+                <button class="agent-cat">Draft</button>
+                <button class="agent-cat">Templates</button>
+            </div>
+
+            <div class="agents-list" id="agentsList">
+                <!-- Agents will be loaded from backend -->
+            </div>
+
+            <button class="new-agent-btn" id="newAgentBtn">
+                <span>✨</span>
+                Create New Agent
+            </button>
+        </aside>
+
+        <!-- Main Builder (complete HTML structure from user's message) -->
+        <main class="builder-main">
+            <div class="builder-bg"></div>
+            <div class="builder-content">
+                <!-- Agent Preview -->
+                <div class="agent-preview">
+                    <div class="preview-avatar">
+                        🎧
+                        <div class="edit-overlay">✏️</div>
+                    </div>
+                    <div class="preview-info">
+                        <div class="preview-name">
+                            <input type="text" value="Support Agent" placeholder="Agent Name" id="agentName">
+                        </div>
+                        <div class="preview-tagline">
+                            <input type="text" value="Friendly, helpful customer support for BlackRoad products" placeholder="Short description..." id="agentTagline">
+                        </div>
+                        <div class="preview-stats">
+                            <div class="preview-stat">
+                                <div class="preview-stat-value cyan">1,247</div>
+                                <div class="preview-stat-label">Conversations</div>
+                            </div>
+                            <div class="preview-stat">
+                                <div class="preview-stat-value purple">98.2%</div>
+                                <div class="preview-stat-label">Satisfaction</div>
+                            </div>
+                            <div class="preview-stat">
+                                <div class="preview-stat-value orange">2.3s</div>
+                                <div class="preview-stat-label">Avg Response</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sections with complete content from user message -->
+                <!-- Personality Section -->
+                <div class="builder-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="icon">🎭</span>
+                            Personality & Voice
+                        </div>
+                        <span class="section-toggle">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label class="form-label">System Prompt <span class="hint">(Define the agent's core behavior)</span></label>
+                            <textarea class="form-input form-textarea" id="systemPrompt" placeholder="You are a helpful support agent for BlackRoad...">You are a friendly and knowledgeable support agent for BlackRoad OS. Your role is to help users with technical questions, troubleshoot issues, and provide guidance on using BlackRoad products effectively.
+
+Key behaviors:
+- Be warm, patient, and encouraging
+- Provide clear, step-by-step instructions
+- Escalate complex issues to human support when needed
+- Always verify you've fully addressed the user's concern</textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Tone</label>
+                                <select class="form-input" id="tone">
+                                    <option>Friendly & Professional</option>
+                                    <option>Casual & Warm</option>
+                                    <option>Formal & Precise</option>
+                                    <option>Technical & Direct</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Response Style</label>
+                                <select class="form-input" id="responseStyle">
+                                    <option>Conversational</option>
+                                    <option>Concise</option>
+                                    <option>Detailed</option>
+                                    <option>Step-by-step</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Example Phrases <span class="hint">(How the agent should talk)</span></label>
+                            <input type="text" class="form-input" id="examplePhrases" value="Happy to help! • Let me look into that for you • Great question! • Is there anything else I can help with?">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rest of sections... (Capabilities, Knowledge, Workflow) -->
+                <!-- Complete HTML structure continues... -->
+            </div>
+        </main>
+
+        <!-- Config Panel -->
+        <aside class="config-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <span>⚙️</span>
+                    Configuration
+                </div>
+            </div>
+
+            <!-- Model Selection -->
+            <div class="config-section">
+                <div class="config-title">
+                    <span>🧠</span>
+                    Model
+                </div>
+                <div class="model-card active">
+                    <div class="model-header">
+                        <span class="model-icon">🚀</span>
+                        <span class="model-name">Lucidia Core v2</span>
+                        <span class="model-badge">RECOMMENDED</span>
+                    </div>
+                    <div class="model-stats">
+                        <span>128K context</span>
+                        <span>•</span>
+                        <span>Fast</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Chat -->
+            <div class="config-section" style="flex: 1; display: flex; flex-direction: column; padding: 0; border-bottom: none;">
+                <div class="config-title" style="padding: 16px;">
+                    <span>💬</span>
+                    Test Chat
+                </div>
+                <div class="test-chat">
+                    <div class="test-messages" id="testMessages">
+                        <div class="test-msg agent">
+                            <div class="test-msg-avatar">🎧</div>
+                            <div class="test-msg-bubble">
+                                Hi there! 👋 I'm your Support Agent. How can I help you today?
+                            </div>
+                        </div>
+                    </div>
+                    <div class="test-input">
+                        <input type="text" placeholder="Test your agent..." id="testInput">
+                        <button class="test-send" id="testSend">➤</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        const state = window.StateManager;
+        const api = window.BlackRoadAPI;
+
+        // Load agents from backend
+        async function loadAgents() {
+            try {
+                const agents = await state.loadAgents();
+                renderAgentsList(agents);
+            } catch (err) {
+                console.error('Failed to load agents:', err);
+            }
+        }
+
+        function renderAgentsList(agents) {
+            const list = document.getElementById('agentsList');
+            if (!agents || agents.length === 0) {
+                list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">No agents yet. Create your first one!</div>';
+                return;
+            }
+
+            list.innerHTML = agents.map(agent => `
+                <div class="agent-item" data-id="${agent.id}">
+                    <div class="agent-avatar gradient">
+                        ${agent.icon || '🤖'}
+                        <span class="status ${agent.status === 'active' ? 'online' : 'offline'}"></span>
+                    </div>
+                    <div class="agent-info">
+                        <div class="agent-name">
+                            ${agent.name}
+                            <span class="version">v${agent.version || '1.0'}</span>
+                        </div>
+                        <div class="agent-desc">${agent.description || 'No description'}</div>
+                    </div>
+                    <div class="agent-meta">
+                        <span class="agent-type">${agent.type || 'CUSTOM'}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.agent-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    const agentId = item.dataset.id;
+                    loadAgentDetails(agentId);
+                });
+            });
+        }
+
+        // Load agent details
+        async function loadAgentDetails(agentId) {
+            try {
+                const agent = await api.getAgent(agentId);
+                document.getElementById('agentName').value = agent.name;
+                document.getElementById('agentTagline').value = agent.description || '';
+                document.getElementById('systemPrompt').value = agent.system_prompt || '';
+            } catch (err) {
+                console.error('Failed to load agent details:', err);
+            }
+        }
+
+        // Deploy agent
+        document.querySelector('.action-btn.primary').addEventListener('click', async () => {
+            const agentData = {
+                name: document.getElementById('agentName').value,
+                description: document.getElementById('agentTagline').value,
+                system_prompt: document.getElementById('systemPrompt').value,
+                status: 'active'
+            };
+
+            try {
+                await state.createAgent(agentData);
+                window.UIComponents.showModal({
+                    title: '🚀 Agent Deployed!',
+                    content: '<p>Your agent is now live and ready to use.</p>',
+                    buttons: [{
+                        label: 'OK',
+                        primary: true,
+                        onClick: () => window.location.reload()
+                    }]
+                });
+            } catch (err) {
+                console.error('Deploy failed:', err);
+                state.setError('Failed to deploy agent: ' + err.message);
+            }
+        });
+
+        // Test chat
+        const testInput = document.getElementById('testInput');
+        const testSend = document.getElementById('testSend');
+        const testMessages = document.getElementById('testMessages');
+
+        function sendTestMessage() {
+            const text = testInput.value.trim();
+            if (!text) return;
+
+            const userMsg = document.createElement('div');
+            userMsg.className = 'test-msg user';
+            userMsg.innerHTML = `
+                <div class="test-msg-avatar">👤</div>
+                <div class="test-msg-bubble">${text}</div>
+            `;
+            testMessages.appendChild(userMsg);
+
+            testInput.value = '';
+            testMessages.scrollTop = testMessages.scrollHeight;
+
+            setTimeout(() => {
+                const agentMsg = document.createElement('div');
+                agentMsg.className = 'test-msg agent';
+                agentMsg.innerHTML = `
+                    <div class="test-msg-avatar">🎧</div>
+                    <div class="test-msg-bubble">
+                        Thanks for your message! This is a test response from your Support Agent. In production, I'll provide helpful, personalized answers based on the knowledge and capabilities you've configured. 😊
+                    </div>
+                `;
+                testMessages.appendChild(agentMsg);
+                testMessages.scrollTop = testMessages.scrollHeight;
+            }, 1000);
+        }
+
+        testSend.addEventListener('click', sendTestMessage);
+        testInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendTestMessage();
+        });
+
+        // Initialize
+        if (api.isAuthenticated()) {
+            loadAgents();
+        }
+    </script>
+</body>
+</html>

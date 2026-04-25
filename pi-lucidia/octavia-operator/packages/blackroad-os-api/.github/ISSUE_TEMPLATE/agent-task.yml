@@ -1,0 +1,85 @@
+name: "🤖 Agent Task"
+description: "For Codex or other agents to pick up"
+title: "[AGENT] "
+labels: ["agent-task", "automated"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Agent-Executable Task
+        This issue is designed to be picked up and executed by Codex or another AI agent.
+        
+        Keep instructions clear, specific, and executable.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - "P0 - Immediate"
+        - "P1 - Today"
+        - "P2 - This week"
+        - "P3 - When available"
+    validations:
+      required: true
+
+  - type: textarea
+    id: instruction
+    attributes:
+      label: Instruction
+      description: What should the agent do? Be specific and executable.
+      placeholder: |
+        Create a new API endpoint at /api/users/preferences that:
+        - Accepts GET and PUT requests
+        - GET returns current user preferences from database
+        - PUT updates preferences with validation
+        - Follow existing patterns in /api/users/profile
+    validations:
+      required: true
+
+  - type: textarea
+    id: files
+    attributes:
+      label: Files to touch
+      description: Which files should be created or modified?
+      placeholder: |
+        - Create: src/pages/api/users/preferences.ts
+        - Modify: src/types/user.ts (add PreferencesType)
+        - Modify: prisma/schema.prisma (if needed)
+    validations:
+      required: false
+
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: How does the agent know it's complete?
+      placeholder: |
+        - Endpoint responds correctly to GET/PUT
+        - TypeScript compiles without errors
+        - Tests pass (if tests exist for this area)
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints / Don'ts
+      description: What should the agent avoid?
+      placeholder: |
+        - Don't modify the auth middleware
+        - Don't add new dependencies
+        - Follow existing code style
+    validations:
+      required: false
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Assigned agent
+      options:
+        - "Codex"
+        - "Any available agent"
+        - "Specific agent (note in context)"
+    validations:
+      required: false

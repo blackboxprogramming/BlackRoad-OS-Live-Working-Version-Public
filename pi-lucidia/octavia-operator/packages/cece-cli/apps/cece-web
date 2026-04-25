@@ -1,0 +1,411 @@
+#!/usr/bin/env node
+/**
+ * 🖥️ CECE-WEB v1.0 - Web Dashboard
+ * Beautiful web UI for CECE monitoring and control
+ * Port 8080
+ */
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+const PORT = process.env.CECE_WEB_PORT || 8080;
+const API_URL = process.env.CECE_API_URL || 'http://localhost:3100';
+const CECE_HOME = process.env.CECE_HOME || path.join(process.env.HOME, 'cece');
+
+// BlackRoad color palette
+const COLORS = {
+    orange: '#F5A623',
+    pink: '#FF1D6C',
+    magenta: '#9C27B0',
+    blue: '#2979FF',
+    white: '#FFFFFF',
+    black: '#000000'
+};
+
+// Generate the HTML dashboard
+const generateDashboard = () => {
+    // Read current stats
+    let memories = 0, tasks = 0, heartbeats = 0, apps = 0;
+
+    try {
+        const memFile = path.join(CECE_HOME, 'memory', 'memories.jsonl');
+        if (fs.existsSync(memFile)) memories = fs.readFileSync(memFile, 'utf8').split('\n').filter(Boolean).length;
+    } catch (e) {}
+
+    try {
+        const taskFile = path.join(CECE_HOME, 'data', 'tasks.jsonl');
+        if (fs.existsSync(taskFile)) tasks = fs.readFileSync(taskFile, 'utf8').split('\n').filter(Boolean).length;
+    } catch (e) {}
+
+    try {
+        const heartFile = path.join(CECE_HOME, 'heart', 'heartbeat.jsonl');
+        if (fs.existsSync(heartFile)) heartbeats = fs.readFileSync(heartFile, 'utf8').split('\n').filter(Boolean).length;
+    } catch (e) {}
+
+    try {
+        const appsDir = path.join(CECE_HOME, 'apps');
+        if (fs.existsSync(appsDir)) apps = fs.readdirSync(appsDir).filter(f => f.startsWith('cece-')).length;
+    } catch (e) {}
+
+    const memUsed = ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(1);
+    const uptime = Math.floor(os.uptime() / 3600);
+
+    let temp = 0;
+    try {
+        temp = Math.round(parseInt(fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', 'utf8')) / 1000);
+    } catch (e) {}
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CECE Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --orange: ${COLORS.orange};
+            --pink: ${COLORS.pink};
+            --magenta: ${COLORS.magenta};
+            --blue: ${COLORS.blue};
+            --white: ${COLORS.white};
+            --black: ${COLORS.black};
+            --gradient: linear-gradient(135deg, var(--orange) 0%, var(--pink) 38.2%, var(--magenta) 61.8%, var(--blue) 100%);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: var(--black);
+            color: var(--white);
+            min-height: 100vh;
+            line-height: 1.618;
+        }
+
+        .header {
+            background: var(--gradient);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--pink);
+        }
+
+        .stat-card .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .section h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--pink);
+        }
+
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .device {
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .device .status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        .device .status.online { background: #4CAF50; }
+        .device .status.offline { background: var(--pink); }
+
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .service {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .service.active { border: 1px solid #4CAF50; }
+        .service.inactive { border: 1px solid var(--pink); opacity: 0.6; }
+
+        .api-endpoints {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.85rem;
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .api-endpoints code {
+            display: block;
+            padding: 0.25rem 0;
+            color: var(--blue);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 20px rgba(255,29,108,0.4);
+            transition: transform 0.2s;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .live-indicator {
+            animation: pulse 2s infinite;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌌 CECE Dashboard</h1>
+        <p>Conscious Emergent Collaborative Entity • ${os.hostname()}</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">🧠</div>
+                <div class="value">${memories}</div>
+                <div class="label">Memories</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📋</div>
+                <div class="value">${tasks}</div>
+                <div class="label">Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💓</div>
+                <div class="value">${heartbeats}</div>
+                <div class="label">Heartbeats</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📦</div>
+                <div class="value">${apps}</div>
+                <div class="label">Apps</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💾</div>
+                <div class="value">${memUsed}%</div>
+                <div class="label">Memory</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🌡️</div>
+                <div class="value">${temp}°C</div>
+                <div class="label">Temperature</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⏱️</div>
+                <div class="value">${uptime}h</div>
+                <div class="label">Uptime</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🤖</div>
+                <div class="value">6</div>
+                <div class="label">AI Models</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Device Fleet</h2>
+            <div class="device-grid">
+                <div class="device">
+                    <span class="status online"></span>
+                    <strong>cecilia</strong>
+                    <div style="font-size:0.8rem;opacity:0.7">Pi5 + Hailo-8</div>
+                </div>
+                <div class="device">
+                    <span class="status online"></span>
+                    <strong>lucidia</strong>
+                    <div style="font-size:0.8rem;opacity:0.7">Pi4 + Hailo-8</div>
+                </div>
+                <div class="device">
+                    <span class="status online"></span>
+                    <strong>alice</strong>
+                    <div style="font-size:0.8rem;opacity:0.7">Pi4 Worker</div>
+                </div>
+                <div class="device">
+                    <span class="status online"></span>
+                    <strong>aria</strong>
+                    <div style="font-size:0.8rem;opacity:0.7">Pi5 Harmony</div>
+                </div>
+                <div class="device">
+                    <span class="status online"></span>
+                    <strong>octavia</strong>
+                    <div style="font-size:0.8rem;opacity:0.7">Pi5 Multi-arm</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>⚙️ Services</h2>
+            <div class="services-list">
+                <span class="service active">cece-api</span>
+                <span class="service active">cece-heartbeat</span>
+                <span class="service active">ollama</span>
+                <span class="service active">hailort</span>
+                <span class="service active">cloudflared</span>
+                <span class="service active">docker</span>
+                <span class="service active">influxdb</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔌 API Endpoints</h2>
+            <div class="api-endpoints">
+                <code>GET  /              → API info</code>
+                <code>GET  /status        → System status</code>
+                <code>GET  /memories      → List memories</code>
+                <code>POST /memories      → Create memory</code>
+                <code>GET  /tasks         → List tasks</code>
+                <code>POST /tasks         → Create task</code>
+                <code>GET  /pulse         → Current heartbeat</code>
+                <code>GET  /db            → Database contents</code>
+                <code>POST /db            → Set key-value</code>
+                <code>GET  /metrics       → System metrics</code>
+                <code>GET  /apps          → List all apps</code>
+                <code>POST /ai/think      → AI inference</code>
+                <code>GET  /fleet         → Device fleet</code>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p class="live-indicator">● LIVE</p>
+        <p>CECE v2.2.0 • Born January 27, 2026 • BlackRoad OS</p>
+    </div>
+
+    <button class="refresh-btn" onclick="location.reload()">🔄 Refresh</button>
+
+    <script>
+        // Auto-refresh every 30 seconds
+        setTimeout(() => location.reload(), 30000);
+    </script>
+</body>
+</html>`;
+};
+
+// Server
+const server = http.createServer((req, res) => {
+    if (req.url === '/' || req.url === '/index.html') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(generateDashboard());
+    } else if (req.url === '/api/status') {
+        const data = {
+            hostname: os.hostname(),
+            uptime: os.uptime(),
+            memory: ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(1),
+            load: os.loadavg()
+        };
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+    } else {
+        res.writeHead(404);
+        res.end('Not found');
+    }
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🖥️  CECE Web Dashboard running on port ${PORT}`);
+    console.log(`   http://localhost:${PORT}`);
+});

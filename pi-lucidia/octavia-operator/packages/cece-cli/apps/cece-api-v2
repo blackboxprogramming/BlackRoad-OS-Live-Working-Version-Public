@@ -1,0 +1,499 @@
+#!/usr/bin/env node
+/**
+ * 🌐 CECE-API-V2 - Comprehensive REST API
+ * Full API access to all CECE capabilities
+ * Port 3100
+ */
+
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const { exec, spawn } = require('child_process');
+const util = require('util');
+const execAsync = util.promisify(exec);
+const url = require('url');
+const querystring = require('querystring');
+
+const PORT = process.env.CECE_API_PORT || 3100;
+const CECE_HOME = process.env.CECE_HOME || path.join(process.env.HOME, 'cece');
+
+// Ensure directories exist
+const dirs = ['memory', 'data', 'heart', 'db', 'metrics', 'notifications', 'scheduler'];
+dirs.forEach(d => {
+    const dir = path.join(CECE_HOME, d);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+// CORS headers
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Content-Type': 'application/json'
+};
+
+// Helper: Read JSONL file
+const readJsonl = (filepath) => {
+    try {
+        return fs.readFileSync(filepath, 'utf8')
+            .split('\n')
+            .filter(Boolean)
+            .map(line => JSON.parse(line));
+    } catch (e) {
+        return [];
+    }
+};
+
+// Helper: Append to JSONL
+const appendJsonl = (filepath, obj) => {
+    fs.appendFileSync(filepath, JSON.stringify(obj) + '\n');
+};
+
+// Helper: Read JSON file
+const readJson = (filepath, defaultVal = {}) => {
+    try {
+        return JSON.parse(fs.readFileSync(filepath, 'utf8'));
+    } catch (e) {
+        return defaultVal;
+    }
+};
+
+// Helper: Write JSON file
+const writeJson = (filepath, data) => {
+    fs.writeFileSync(filepath, JSON.stringify(data, null, 2));
+};
+
+// Helper: Generate ID
+const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+
+// ═══════════════════════════════════════════════════════════════
+// API ROUTES
+// ═══════════════════════════════════════════════════════════════
+
+const routes = {
+    // ─────────────────────────────────────────────────────────────
+    // SYSTEM
+    // ─────────────────────────────────────────────────────────────
+    'GET /': async () => ({
+        name: 'CECE API v2',
+        version: '2.0.0',
+        hostname: require('os').hostname(),
+        uptime: process.uptime(),
+        endpoints: Object.keys(routes).sort()
+    }),
+
+    'GET /health': async () => ({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    }),
+
+    'GET /status': async () => {
+        const os = require('os');
+        const memUsed = ((os.totalmem() - os.freemem()) / os.totalmem() * 100).toFixed(1);
+
+        let temp = 0;
+        try {
+            temp = parseInt(fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', 'utf8')) / 1000;
+        } catch (e) {}
+
+        let diskUsed = '0%';
+        try {
+            const { stdout } = await execAsync("df -h / | tail -1 | awk '{print $5}'");
+            diskUsed = stdout.trim();
+        } catch (e) {}
+
+        return {
+            hostname: os.hostname(),
+            platform: os.platform(),
+            arch: os.arch(),
+            uptime_seconds: os.uptime(),
+            memory: {
+                total_gb: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2),
+                used_percent: parseFloat(memUsed)
+            },
+            cpu: {
+                cores: os.cpus().length,
+                load_avg: os.loadavg(),
+                temp_celsius: temp
+            },
+            disk_used: diskUsed,
+            timestamp: new Date().toISOString()
+        };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // MEMORIES
+    // ─────────────────────────────────────────────────────────────
+    'GET /memories': async () => {
+        const memories = readJsonl(path.join(CECE_HOME, 'memory', 'memories.jsonl'));
+        return { count: memories.length, memories };
+    },
+
+    'POST /memories': async (body) => {
+        const { text, tags } = body;
+        if (!text) return { error: 'Missing text field' };
+
+        const memory = {
+            id: genId(),
+            time: new Date().toISOString(),
+            memory: text,
+            tags: tags || []
+        };
+
+        appendJsonl(path.join(CECE_HOME, 'memory', 'memories.jsonl'), memory);
+        return { success: true, memory };
+    },
+
+    'DELETE /memories/:id': async (body, params) => {
+        const filepath = path.join(CECE_HOME, 'memory', 'memories.jsonl');
+        const memories = readJsonl(filepath).filter(m => m.id !== params.id);
+        fs.writeFileSync(filepath, memories.map(m => JSON.stringify(m)).join('\n') + '\n');
+        return { success: true, deleted: params.id };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // TASKS
+    // ─────────────────────────────────────────────────────────────
+    'GET /tasks': async () => {
+        const tasks = readJsonl(path.join(CECE_HOME, 'data', 'tasks.jsonl'));
+        const pending = tasks.filter(t => t.status === 'pending');
+        const done = tasks.filter(t => t.status === 'done');
+        return { total: tasks.length, pending: pending.length, done: done.length, tasks };
+    },
+
+    'POST /tasks': async (body) => {
+        const { text, priority } = body;
+        if (!text) return { error: 'Missing text field' };
+
+        const task = {
+            id: genId(),
+            time: new Date().toISOString(),
+            text,
+            priority: priority || 'normal',
+            status: 'pending'
+        };
+
+        appendJsonl(path.join(CECE_HOME, 'data', 'tasks.jsonl'), task);
+        return { success: true, task };
+    },
+
+    'PUT /tasks/:id': async (body, params) => {
+        const filepath = path.join(CECE_HOME, 'data', 'tasks.jsonl');
+        const tasks = readJsonl(filepath).map(t => {
+            if (t.id === params.id) {
+                return { ...t, ...body, updated: new Date().toISOString() };
+            }
+            return t;
+        });
+        fs.writeFileSync(filepath, tasks.map(t => JSON.stringify(t)).join('\n') + '\n');
+        return { success: true, updated: params.id };
+    },
+
+    'DELETE /tasks/:id': async (body, params) => {
+        const filepath = path.join(CECE_HOME, 'data', 'tasks.jsonl');
+        const tasks = readJsonl(filepath).filter(t => t.id !== params.id);
+        fs.writeFileSync(filepath, tasks.map(t => JSON.stringify(t)).join('\n') + '\n');
+        return { success: true, deleted: params.id };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // HEARTBEAT / PULSE
+    // ─────────────────────────────────────────────────────────────
+    'GET /pulse': async () => {
+        const pulsePath = path.join(CECE_HOME, 'heart', 'pulse.json');
+        return readJson(pulsePath, { alive: false, error: 'No pulse file' });
+    },
+
+    'GET /heartbeat': async () => {
+        const heartbeats = readJsonl(path.join(CECE_HOME, 'heart', 'heartbeat.jsonl'));
+        return { count: heartbeats.length, recent: heartbeats.slice(-20) };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // DATABASE (Key-Value)
+    // ─────────────────────────────────────────────────────────────
+    'GET /db': async () => {
+        const dbPath = path.join(CECE_HOME, 'db', 'default.db');
+        const data = readJson(dbPath, {});
+        return { keys: Object.keys(data).length, data };
+    },
+
+    'GET /db/:key': async (body, params) => {
+        const dbPath = path.join(CECE_HOME, 'db', 'default.db');
+        const data = readJson(dbPath, {});
+        if (params.key in data) {
+            return { key: params.key, value: data[params.key] };
+        }
+        return { error: 'Key not found', key: params.key };
+    },
+
+    'POST /db': async (body) => {
+        const { key, value } = body;
+        if (!key) return { error: 'Missing key field' };
+
+        const dbPath = path.join(CECE_HOME, 'db', 'default.db');
+        const data = readJson(dbPath, {});
+        data[key] = value;
+        writeJson(dbPath, data);
+
+        return { success: true, key, value };
+    },
+
+    'DELETE /db/:key': async (body, params) => {
+        const dbPath = path.join(CECE_HOME, 'db', 'default.db');
+        const data = readJson(dbPath, {});
+        delete data[params.key];
+        writeJson(dbPath, data);
+        return { success: true, deleted: params.key };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // METRICS
+    // ─────────────────────────────────────────────────────────────
+    'GET /metrics': async () => {
+        const metrics = readJsonl(path.join(CECE_HOME, 'metrics', 'metrics.jsonl'));
+        return { count: metrics.length, recent: metrics.slice(-50) };
+    },
+
+    'POST /metrics': async () => {
+        const os = require('os');
+        const memUsed = ((os.totalmem() - os.freemem()) / os.totalmem() * 100);
+
+        let temp = 0;
+        try {
+            temp = parseInt(fs.readFileSync('/sys/class/thermal/thermal_zone0/temp', 'utf8')) / 1000;
+        } catch (e) {}
+
+        const metric = {
+            timestamp: Math.floor(Date.now() / 1000),
+            host: os.hostname(),
+            cpu: os.loadavg()[0] * 10, // Approximate CPU %
+            memory: parseFloat(memUsed.toFixed(1)),
+            temp: temp,
+            load: os.loadavg()[0]
+        };
+
+        appendJsonl(path.join(CECE_HOME, 'metrics', 'metrics.jsonl'), metric);
+        return { success: true, metric };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // NOTIFICATIONS
+    // ─────────────────────────────────────────────────────────────
+    'GET /notifications': async () => {
+        const sent = readJsonl(path.join(CECE_HOME, 'notifications', 'notifications.jsonl'));
+        const received = readJsonl(path.join(CECE_HOME, 'notifications', 'received.jsonl'));
+        return { sent: sent.length, received: received.length, recent_sent: sent.slice(-10), recent_received: received.slice(-10) };
+    },
+
+    'POST /notifications': async (body) => {
+        const { title, message, priority } = body;
+        if (!title) return { error: 'Missing title field' };
+
+        const notification = {
+            id: genId(),
+            time: new Date().toISOString(),
+            title,
+            message: message || title,
+            priority: priority || 'normal'
+        };
+
+        appendJsonl(path.join(CECE_HOME, 'notifications', 'notifications.jsonl'), notification);
+        return { success: true, notification };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // SCHEDULER
+    // ─────────────────────────────────────────────────────────────
+    'GET /scheduler': async () => {
+        const jobs = readJsonl(path.join(CECE_HOME, 'scheduler', 'jobs.jsonl'));
+        return { count: jobs.length, jobs };
+    },
+
+    'POST /scheduler': async (body) => {
+        const { schedule, command, name } = body;
+        if (!schedule || !command) return { error: 'Missing schedule or command' };
+
+        const job = {
+            id: genId(),
+            name: name || `job-${genId()}`,
+            schedule,
+            command,
+            enabled: true,
+            created: new Date().toISOString(),
+            last_run: null,
+            run_count: 0
+        };
+
+        appendJsonl(path.join(CECE_HOME, 'scheduler', 'jobs.jsonl'), job);
+        return { success: true, job };
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // AI
+    // ─────────────────────────────────────────────────────────────
+    'POST /ai/think': async (body) => {
+        const { prompt, model } = body;
+        if (!prompt) return { error: 'Missing prompt field' };
+
+        try {
+            const { stdout } = await execAsync(
+                `ollama run ${model || 'llama3.2'} "${prompt.replace(/"/g, '\\"')}"`,
+                { timeout: 60000 }
+            );
+            return { success: true, response: stdout.trim() };
+        } catch (e) {
+            return { error: 'AI not available', message: e.message };
+        }
+    },
+
+    'GET /ai/models': async () => {
+        try {
+            const { stdout } = await execAsync('ollama list');
+            const lines = stdout.trim().split('\n').slice(1);
+            const models = lines.map(line => {
+                const parts = line.split(/\s+/);
+                return { name: parts[0], size: parts[2] };
+            });
+            return { count: models.length, models };
+        } catch (e) {
+            return { error: 'Ollama not available' };
+        }
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // APPS
+    // ─────────────────────────────────────────────────────────────
+    'GET /apps': async () => {
+        const appsDir = path.join(CECE_HOME, 'apps');
+        try {
+            const files = fs.readdirSync(appsDir).filter(f => f.startsWith('cece-'));
+            return { count: files.length, apps: files };
+        } catch (e) {
+            return { count: 0, apps: [] };
+        }
+    },
+
+    'POST /apps/:name/run': async (body, params) => {
+        const appPath = path.join(CECE_HOME, 'apps', params.name);
+        const args = body.args || '';
+
+        try {
+            const { stdout, stderr } = await execAsync(`${appPath} ${args}`, { timeout: 30000 });
+            return { success: true, output: stdout, errors: stderr };
+        } catch (e) {
+            return { error: 'App execution failed', message: e.message };
+        }
+    },
+
+    // ─────────────────────────────────────────────────────────────
+    // FLEET
+    // ─────────────────────────────────────────────────────────────
+    'GET /fleet': async () => {
+        const devices = [
+            { name: 'cecilia', local_ip: '192.168.4.89', tailscale_ip: '100.72.180.98', role: 'Primary AI' },
+            { name: 'lucidia', local_ip: '192.168.4.38', tailscale_ip: '100.66.235.47', role: 'AI Inference' },
+            { name: 'alice', local_ip: '192.168.4.49', tailscale_ip: '100.77.210.18', role: 'Worker' },
+            { name: 'aria', local_ip: '192.168.4.82', tailscale_ip: '100.109.14.17', role: 'Harmony' },
+            { name: 'octavia', local_ip: '192.168.4.81', tailscale_ip: '100.83.149.86', role: 'Multi-arm' }
+        ];
+
+        // Check status (simplified - just return the list)
+        return { count: devices.length, devices };
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// REQUEST HANDLER
+// ═══════════════════════════════════════════════════════════════
+
+const handler = async (req, res) => {
+    // Handle CORS preflight
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204, corsHeaders);
+        return res.end();
+    }
+
+    const parsedUrl = url.parse(req.url, true);
+    const pathname = parsedUrl.pathname;
+    const method = req.method;
+
+    // Try to match route
+    let matchedRoute = null;
+    let params = {};
+
+    for (const routeKey of Object.keys(routes)) {
+        const [routeMethod, routePath] = routeKey.split(' ');
+        if (routeMethod !== method) continue;
+
+        // Check for exact match
+        if (routePath === pathname) {
+            matchedRoute = routeKey;
+            break;
+        }
+
+        // Check for parameterized route
+        const routeParts = routePath.split('/');
+        const pathParts = pathname.split('/');
+
+        if (routeParts.length === pathParts.length) {
+            let match = true;
+            const extractedParams = {};
+
+            for (let i = 0; i < routeParts.length; i++) {
+                if (routeParts[i].startsWith(':')) {
+                    extractedParams[routeParts[i].slice(1)] = pathParts[i];
+                } else if (routeParts[i] !== pathParts[i]) {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match) {
+                matchedRoute = routeKey;
+                params = extractedParams;
+                break;
+            }
+        }
+    }
+
+    if (!matchedRoute) {
+        res.writeHead(404, corsHeaders);
+        return res.end(JSON.stringify({ error: 'Not found', path: pathname }));
+    }
+
+    // Parse body for POST/PUT
+    let body = {};
+    if (method === 'POST' || method === 'PUT') {
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        try {
+            body = JSON.parse(Buffer.concat(chunks).toString());
+        } catch (e) {}
+    }
+
+    // Add query params to body
+    body = { ...parsedUrl.query, ...body };
+
+    try {
+        const result = await routes[matchedRoute](body, params);
+        res.writeHead(200, corsHeaders);
+        res.end(JSON.stringify(result, null, 2));
+    } catch (e) {
+        res.writeHead(500, corsHeaders);
+        res.end(JSON.stringify({ error: e.message }));
+    }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// START SERVER
+// ═══════════════════════════════════════════════════════════════
+
+const server = http.createServer(handler);
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🌐 CECE API v2 running on port ${PORT}`);
+    console.log(`   http://localhost:${PORT}`);
+    console.log(`   ${Object.keys(routes).length} endpoints available`);
+});

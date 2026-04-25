@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad API Tester</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 {
+            background: linear-gradient(135deg, #f7931a 0%, #e91e8c 50%, #9945ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: 800;
+        }
+        .card {
+            background: rgba(18,18,31,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(30px);
+            margin-bottom: 20px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .response {
+            background: rgba(20,241,149,0.1);
+            border: 1px solid #14f195;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            color: #14f195;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔌 API TESTER</h1>
+            <p style="color: rgba(255,255,255,0.6);">Test Your BlackRoad APIs</p>
+        </div>
+        <div class="card">
+            <select id="method">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>DELETE</option>
+            </select>
+            <input type="text" id="url" placeholder="https://api.example.com/endpoint">
+            <textarea id="headers" rows="3" placeholder='{"Authorization": "Bearer token"}'></textarea>
+            <textarea id="body" rows="5" placeholder='{"key": "value"}'></textarea>
+            <button onclick="sendRequest()">🚀 Send Request</button>
+            <div id="response" class="response" style="display:none;"></div>
+        </div>
+    </div>
+    <script>
+        async function sendRequest() {
+            const method = document.getElementById('method').value;
+            const url = document.getElementById('url').value;
+            const headers = document.getElementById('headers').value;
+            const body = document.getElementById('body').value;
+            
+            try {
+                const options = { method };
+                if (headers) options.headers = JSON.parse(headers);
+                if (body && method !== 'GET') options.body = body;
+                
+                const response = await fetch(url, options);
+                const data = await response.text();
+                
+                document.getElementById('response').textContent = 
+                    `Status: ${response.status}\n\n${data}`;
+                document.getElementById('response').style.display = 'block';
+            } catch (error) {
+                document.getElementById('response').textContent = `Error: ${error.message}`;
+                document.getElementById('response').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

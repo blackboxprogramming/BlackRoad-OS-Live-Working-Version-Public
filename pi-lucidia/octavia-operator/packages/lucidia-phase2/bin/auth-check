@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+KEYFILE="$HOME/lucidia-phase2/auth/operator.key"
+
+if [[ ! -f "$KEYFILE" ]]; then
+  echo "Operator key missing."
+  exit 1
+fi
+
+read -s -p "🔐 Enter operator key: " INPUT
+echo ""
+
+EXPECTED=$(cat "$KEYFILE")
+
+if [[ "$INPUT" != "$EXPECTED" ]]; then
+  echo "❌ Authorization failed."
+  exit 1
+fi
+
+echo "✅ Authorized."

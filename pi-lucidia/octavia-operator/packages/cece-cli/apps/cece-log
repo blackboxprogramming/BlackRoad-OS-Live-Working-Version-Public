@@ -1,0 +1,274 @@
+#!/bin/bash
+# 📜 CECE-LOG v1.0 - Centralized Logging System
+# Aggregate, search, and analyze logs from all CECE components
+
+# BlackRoad Colors
+BR_ORANGE=208; BR_AMBER=202; BR_PINK=198; BR_MAGENTA=163; BR_BLUE=33; BR_WHITE=255
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'; BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+LOG_DIR="$CECE_HOME/logs"
+CENTRAL_LOG="$LOG_DIR/central.jsonl"
+
+mkdir -p "$LOG_DIR"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)📜 CECE-LOG - Centralized Logging${RESET}             $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+# Log levels
+declare -A LEVELS=([debug]=0 [info]=1 [warn]=2 [error]=3 [fatal]=4)
+declare -A LEVEL_COLORS=([debug]=$BR_WHITE [info]=$BR_BLUE [warn]=$BR_AMBER [error]=$BR_PINK [fatal]=$BR_PINK)
+
+# Write a log entry
+cmd_write() {
+    local level="${1:-info}"
+    local source="${2:-cece}"
+    local message="${*:3}"
+
+    [ -z "$message" ] && { echo "Usage: cece-log write <level> <source> <message>"; return 1; }
+
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local entry="{\"time\":\"$timestamp\",\"level\":\"$level\",\"source\":\"$source\",\"message\":\"$message\",\"host\":\"$(hostname)\"}"
+
+    echo "$entry" >> "$CENTRAL_LOG"
+    echo -e "$(fg ${LEVEL_COLORS[$level]:-$BR_WHITE})[$level]${RESET} $source: $message"
+}
+
+# Shorthand logging functions
+cmd_debug() { cmd_write debug "${1:-cece}" "${*:2}"; }
+cmd_info() { cmd_write info "${1:-cece}" "${*:2}"; }
+cmd_warn() { cmd_write warn "${1:-cece}" "${*:2}"; }
+cmd_error() { cmd_write error "${1:-cece}" "${*:2}"; }
+
+# Tail logs in real-time
+cmd_tail() {
+    local count="${1:-20}"
+    local filter="$2"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Live log stream (Ctrl+C to stop)${RESET}"
+    echo ""
+
+    tail -n "$count" -f "$CENTRAL_LOG" 2>/dev/null | while read -r line; do
+        local level=$(echo "$line" | jq -r '.level' 2>/dev/null)
+        local source=$(echo "$line" | jq -r '.source' 2>/dev/null)
+        local message=$(echo "$line" | jq -r '.message' 2>/dev/null)
+        local time=$(echo "$line" | jq -r '.time' 2>/dev/null | cut -d'T' -f2 | cut -c1-8)
+
+        # Filter if specified
+        [ -n "$filter" ] && ! echo "$line" | grep -qi "$filter" && continue
+
+        local color=${LEVEL_COLORS[$level]:-$BR_WHITE}
+        echo -e "$(fg $BR_WHITE)$time${RESET} $(fg $color)[$level]${RESET} $(fg $BR_MAGENTA)$source${RESET}: $message"
+    done
+}
+
+# Search logs
+cmd_search() {
+    local query="$1"
+    local count="${2:-50}"
+
+    [ -z "$query" ] && { echo "Usage: cece-log search <query> [count]"; return 1; }
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Searching for:${RESET} $query"
+    echo ""
+
+    grep -i "$query" "$CENTRAL_LOG" 2>/dev/null | tail -n "$count" | while read -r line; do
+        local level=$(echo "$line" | jq -r '.level' 2>/dev/null)
+        local source=$(echo "$line" | jq -r '.source' 2>/dev/null)
+        local message=$(echo "$line" | jq -r '.message' 2>/dev/null)
+        local time=$(echo "$line" | jq -r '.time' 2>/dev/null | cut -d'T' -f2 | cut -c1-8)
+
+        local color=${LEVEL_COLORS[$level]:-$BR_WHITE}
+        echo -e "$(fg $BR_WHITE)$time${RESET} $(fg $color)[$level]${RESET} $(fg $BR_MAGENTA)$source${RESET}: $message"
+    done
+}
+
+# Show logs by level
+cmd_level() {
+    local level="$1"
+    local count="${2:-20}"
+
+    [ -z "$level" ] && { echo "Usage: cece-log level <debug|info|warn|error> [count]"; return 1; }
+
+    grep "\"level\":\"$level\"" "$CENTRAL_LOG" 2>/dev/null | tail -n "$count" | while read -r line; do
+        local source=$(echo "$line" | jq -r '.source' 2>/dev/null)
+        local message=$(echo "$line" | jq -r '.message' 2>/dev/null)
+        local time=$(echo "$line" | jq -r '.time' 2>/dev/null | cut -d'T' -f2 | cut -c1-8)
+
+        echo -e "$(fg $BR_WHITE)$time${RESET} $(fg $BR_MAGENTA)$source${RESET}: $message"
+    done
+}
+
+# Show logs by source
+cmd_source() {
+    local source="$1"
+    local count="${2:-20}"
+
+    [ -z "$source" ] && {
+        echo -e "$(fg $BR_WHITE)Log Sources:${RESET}"
+        jq -r '.source' "$CENTRAL_LOG" 2>/dev/null | sort | uniq -c | sort -rn
+        return
+    }
+
+    grep "\"source\":\"$source\"" "$CENTRAL_LOG" 2>/dev/null | tail -n "$count" | while read -r line; do
+        local level=$(echo "$line" | jq -r '.level' 2>/dev/null)
+        local message=$(echo "$line" | jq -r '.message' 2>/dev/null)
+        local time=$(echo "$line" | jq -r '.time' 2>/dev/null | cut -d'T' -f2 | cut -c1-8)
+
+        local color=${LEVEL_COLORS[$level]:-$BR_WHITE}
+        echo -e "$(fg $BR_WHITE)$time${RESET} $(fg $color)[$level]${RESET} $message"
+    done
+}
+
+# Show recent logs
+cmd_show() {
+    local count="${1:-30}"
+
+    banner
+    echo ""
+
+    tail -n "$count" "$CENTRAL_LOG" 2>/dev/null | while read -r line; do
+        local level=$(echo "$line" | jq -r '.level' 2>/dev/null)
+        local source=$(echo "$line" | jq -r '.source' 2>/dev/null)
+        local message=$(echo "$line" | jq -r '.message' 2>/dev/null)
+        local time=$(echo "$line" | jq -r '.time' 2>/dev/null | cut -d'T' -f2 | cut -c1-8)
+
+        local color=${LEVEL_COLORS[$level]:-$BR_WHITE}
+        echo -e "$(fg $BR_WHITE)$time${RESET} $(fg $color)[$level]${RESET} $(fg $BR_MAGENTA)$source${RESET}: $message"
+    done
+}
+
+# Statistics
+cmd_stats() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Log Statistics:${RESET}"
+    echo ""
+
+    local total=$(wc -l < "$CENTRAL_LOG" 2>/dev/null || echo 0)
+    local size=$(du -sh "$CENTRAL_LOG" 2>/dev/null | awk '{print $1}')
+
+    echo -e "  $(fg $BR_BLUE)Total Entries:${RESET}  $total"
+    echo -e "  $(fg $BR_BLUE)File Size:${RESET}      $size"
+    echo ""
+
+    echo -e "$(fg $BR_WHITE)By Level:${RESET}"
+    for level in debug info warn error fatal; do
+        local count=$(grep -c "\"level\":\"$level\"" "$CENTRAL_LOG" 2>/dev/null || echo 0)
+        local color=${LEVEL_COLORS[$level]}
+        printf "  $(fg $color)%-8s${RESET} %d\n" "$level" "$count"
+    done
+
+    echo ""
+    echo -e "$(fg $BR_WHITE)Top Sources:${RESET}"
+    jq -r '.source' "$CENTRAL_LOG" 2>/dev/null | sort | uniq -c | sort -rn | head -5 | while read -r count source; do
+        printf "  $(fg $BR_MAGENTA)%-15s${RESET} %d\n" "$source" "$count"
+    done
+}
+
+# Export logs
+cmd_export() {
+    local output="${1:-$LOG_DIR/export-$(date +%Y%m%d).json}"
+    local days="${2:-7}"
+
+    local cutoff=$(date -d "$days days ago" +%Y-%m-%d 2>/dev/null || date -v-${days}d +%Y-%m-%d)
+
+    jq -c "select(.time >= \"$cutoff\")" "$CENTRAL_LOG" > "$output" 2>/dev/null
+
+    local count=$(wc -l < "$output")
+    echo -e "$(fg $BR_BLUE)✓${RESET} Exported $count entries to $(fg $BR_WHITE)$output${RESET}"
+}
+
+# Rotate/clean old logs
+cmd_rotate() {
+    local keep="${1:-10000}"
+
+    local total=$(wc -l < "$CENTRAL_LOG" 2>/dev/null || echo 0)
+
+    if [ "$total" -le "$keep" ]; then
+        echo "Only $total entries, nothing to rotate."
+        return
+    fi
+
+    local tmp=$(mktemp)
+    tail -n "$keep" "$CENTRAL_LOG" > "$tmp"
+    mv "$tmp" "$CENTRAL_LOG"
+
+    local deleted=$((total - keep))
+    echo -e "$(fg $BR_BLUE)✓${RESET} Rotated logs: deleted $deleted, kept $keep"
+}
+
+# Collect logs from services
+cmd_collect() {
+    echo -e "$(fg $BR_BLUE)Collecting logs from services...${RESET}"
+
+    # Collect from journald
+    for svc in cece-api cece-heartbeat cece-net-gateway; do
+        journalctl -u "$svc" -n 20 --no-pager -o json 2>/dev/null | while read -r line; do
+            local msg=$(echo "$line" | jq -r '.MESSAGE' 2>/dev/null)
+            [ -n "$msg" ] && cmd_write info "$svc" "$msg" > /dev/null
+        done
+    done
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Logs collected"
+}
+
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-log <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Write Logs:${RESET}"
+    echo "  write <level> <source> <msg>  Write log entry"
+    echo "  debug <source> <message>      Write debug log"
+    echo "  info <source> <message>       Write info log"
+    echo "  warn <source> <message>       Write warning"
+    echo "  error <source> <message>      Write error"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Read Logs:${RESET}"
+    echo "  show [n]              Show recent logs"
+    echo "  tail [n] [filter]     Live log stream"
+    echo "  search <query> [n]    Search logs"
+    echo "  level <level> [n]     Filter by level"
+    echo "  source [name] [n]     Filter by source"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Manage:${RESET}"
+    echo "  stats                 Log statistics"
+    echo "  export [file] [days]  Export recent logs"
+    echo "  rotate [keep]         Clean old logs"
+    echo "  collect               Gather from services"
+}
+
+main() {
+    local cmd="${1:-show}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        write) cmd_write "$@" ;;
+        debug) cmd_debug "$@" ;;
+        info) cmd_info "$@" ;;
+        warn) cmd_warn "$@" ;;
+        error) cmd_error "$@" ;;
+        show|list) cmd_show "$@" ;;
+        tail|follow) cmd_tail "$@" ;;
+        search|grep) cmd_search "$@" ;;
+        level) cmd_level "$@" ;;
+        source) cmd_source "$@" ;;
+        stats) cmd_stats ;;
+        export) cmd_export "$@" ;;
+        rotate|clean) cmd_rotate "$@" ;;
+        collect) cmd_collect ;;
+        help|--help|-h) cmd_help ;;
+        *) cmd_show "$cmd" ;;
+    esac
+}
+
+main "$@"

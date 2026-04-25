@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""
+╦  ╦ ╦╔═╗╦╔╦╗╦╔═╗
+║  ║ ║║  ║ ║║║╠═╣
+╩═╝╚═╝╚═╝╩═╩╝╩╩ ╩
+
+BlackRoad OS AI Interface
+
+Usage:
+  lucidia           - Launch interactive shell
+  lucidia --curses  - Launch full-screen UI
+  lucidia --help    - Show help
+"""
+
+import sys
+import os
+
+# Add roadpad to path
+roadpad_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, roadpad_dir)
+
+def main():
+    args = sys.argv[1:]
+
+    if "--help" in args or "-h" in args:
+        print(__doc__)
+        print("""
+Options:
+  --curses, -c    Full-screen curses UI
+  --shell, -s     Simple shell mode (default)
+  --model MODEL   Start with specific model
+                  (lucidia, claude, copilot, ollama, cecilia)
+
+Examples:
+  lucidia                    # Interactive shell
+  lucidia -c                 # Full-screen UI
+  lucidia --model copilot    # Start with Copilot
+""")
+        return
+
+    # Check for curses mode
+    if "--curses" in args or "-c" in args:
+        from lucidia_curses import run
+        run()
+    else:
+        # Default to shell mode
+        from lucidia import LucidiaShell
+        shell = LucidiaShell()
+
+        # Check for model override
+        for i, arg in enumerate(args):
+            if arg == "--model" and i + 1 < len(args):
+                shell.model = args[i + 1]
+
+        shell.run()
+
+
+if __name__ == "__main__":
+    main()

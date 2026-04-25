@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Admin Portal - Central Management Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #000;
+            color: #FFF;
+            line-height: 1.618;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(255,255,255,0.03);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 34px 21px;
+            overflow-y: auto;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 34px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .nav-item {
+            padding: 13px 21px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+        .nav-item:hover {
+            background: rgba(255,29,108,0.1);
+            border-left: 3px solid #FF1D6C;
+        }
+        .nav-item.active {
+            background: rgba(255,29,108,0.15);
+            border-left: 3px solid #FF1D6C;
+        }
+        .main {
+            margin-left: 280px;
+            padding: 34px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 34px;
+            padding-bottom: 21px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .page-title {
+            font-size: 34px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 21px;
+            margin-bottom: 34px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 21px;
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            border-color: #FF1D6C;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 21px rgba(255,29,108,0.2);
+        }
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 34px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .stat-change {
+            font-size: 13px;
+            color: #2ECC71;
+        }
+        .products-section {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+            margin-bottom: 34px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 21px;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #FF1D6C;
+        }
+        .btn {
+            padding: 13px 21px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            color: #FFF;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 21px rgba(255,29,108,0.3);
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 21px;
+        }
+        .product-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 21px;
+            transition: all 0.3s;
+        }
+        .product-card:hover {
+            border-color: #2979FF;
+            transform: translateY(-2px);
+        }
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 13px;
+        }
+        .product-icon {
+            font-size: 34px;
+        }
+        .status-badge {
+            padding: 5px 13px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-active {
+            background: rgba(46,204,113,0.2);
+            color: #2ECC71;
+        }
+        .status-inactive {
+            background: rgba(231,76,60,0.2);
+            color: #E74C3C;
+        }
+        .product-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2979FF;
+        }
+        .product-desc {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 13px;
+        }
+        .product-stats {
+            display: flex;
+            gap: 21px;
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        .chart-container {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+            margin-bottom: 34px;
+        }
+        .chart {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(180deg, rgba(255,29,108,0.1) 0%, transparent 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            gap: 13px;
+            padding: 21px;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #FF1D6C 0%, #F5A623 100%);
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+        }
+        .bar:hover {
+            opacity: 0.8;
+            transform: scaleY(1.05);
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+            }
+            .main {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">🖤🛣️ BlackRoad Admin</div>
+        <div class="nav-item active">
+            <span>📊</span>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item">
+            <span>🎯</span>
+            <span>Products</span>
+        </div>
+        <div class="nav-item">
+            <span>👥</span>
+            <span>Team</span>
+        </div>
+        <div class="nav-item">
+            <span>💳</span>
+            <span>Billing</span>
+        </div>
+        <div class="nav-item">
+            <span>🔑</span>
+            <span>API Keys</span>
+        </div>
+        <div class="nav-item">
+            <span>📈</span>
+            <span>Analytics</span>
+        </div>
+        <div class="nav-item">
+            <span>🚨</span>
+            <span>Alerts</span>
+        </div>
+        <div class="nav-item">
+            <span>⚙️</span>
+            <span>Settings</span>
+        </div>
+        <div class="nav-item">
+            <span>📚</span>
+            <span>Documentation</span>
+        </div>
+        <div class="nav-item">
+            <span>💬</span>
+            <span>Support</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="page-title">Dashboard</div>
+            <div class="user-menu">
+                <span>Alexa Amundson</span>
+                <div class="user-avatar">👤</div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value">150</div>
+                <div class="stat-change">↑ 50 this month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Users</div>
+                <div class="stat-value">12,847</div>
+                <div class="stat-change">↑ 23% vs last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">API Requests</div>
+                <div class="stat-value">2.4M</div>
+                <div class="stat-change">↑ 18% vs last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Monthly Revenue</div>
+                <div class="stat-value">$347K</div>
+                <div class="stat-change">↑ 34% vs last month</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <div class="section-header">
+                <div class="section-title">Usage Over Time</div>
+            </div>
+            <div class="chart">
+                <div class="bar" style="height: 40%;"></div>
+                <div class="bar" style="height: 55%;"></div>
+                <div class="bar" style="height: 48%;"></div>
+                <div class="bar" style="height: 72%;"></div>
+                <div class="bar" style="height: 65%;"></div>
+                <div class="bar" style="height: 85%;"></div>
+                <div class="bar" style="height: 100%;"></div>
+            </div>
+        </div>
+
+        <div class="products-section">
+            <div class="section-header">
+                <div class="section-title">Active Products</div>
+                <button class="btn">+ Add Product</button>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">🔒</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">RoadAuth</div>
+                    <div class="product-desc">Universal authentication across 150+ products</div>
+                    <div class="product-stats">
+                        <span>👥 5,247 MAU</span>
+                        <span>📊 $125/mo</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">🔌</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">RoadAPI</div>
+                    <div class="product-desc">Unified API gateway for all services</div>
+                    <div class="product-stats">
+                        <span>📡 487K requests</span>
+                        <span>📊 $199/mo</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">💰</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">RoadBilling</div>
+                    <div class="product-desc">Unified billing and payments</div>
+                    <div class="product-stats">
+                        <span>💳 $347K processed</span>
+                        <span>📊 FREE</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">🤖</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">BlackRoad AI</div>
+                    <div class="product-desc">Sovereign AI platform with 30K agents</div>
+                    <div class="product-stats">
+                        <span>🔥 1.2M tokens</span>
+                        <span>📊 $299/mo</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">🔗</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">LangChain Studio</div>
+                    <div class="product-desc">AI workflow orchestration</div>
+                    <div class="product-stats">
+                        <span>⚡ 147 workflows</span>
+                        <span>📊 $149/mo</span>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-icon">💬</div>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                    <div class="product-name">RoadSupport</div>
+                    <div class="product-desc">AI-powered customer support</div>
+                    <div class="product-stats">
+                        <span>📞 2,847 chats</span>
+                        <span>📊 $99/mo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="products-section">
+            <div class="section-header">
+                <div class="section-title">Quick Actions</div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card" style="cursor: pointer;">
+                    <div class="product-icon">🔑</div>
+                    <div class="product-name">Generate API Key</div>
+                    <div class="product-desc">Create new API key for integration</div>
+                </div>
+                <div class="product-card" style="cursor: pointer;">
+                    <div class="product-icon">👥</div>
+                    <div class="product-name">Invite Team Member</div>
+                    <div class="product-desc">Add new user to your organization</div>
+                </div>
+                <div class="product-card" style="cursor: pointer;">
+                    <div class="product-icon">📊</div>
+                    <div class="product-name">View Analytics</div>
+                    <div class="product-desc">Deep dive into usage metrics</div>
+                </div>
+                <div class="product-card" style="cursor: pointer;">
+                    <div class="product-icon">💳</div>
+                    <div class="product-name">Update Billing</div>
+                    <div class="product-desc">Manage payment methods</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nav item click handlers
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Animate stats on load
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.stat-card').forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // Animate bars
+        document.querySelectorAll('.bar').forEach((bar, index) => {
+            const originalHeight = bar.style.height;
+            bar.style.height = '0';
+            setTimeout(() => {
+                bar.style.transition = 'height 1s ease';
+                bar.style.height = originalHeight;
+            }, 300 + (index * 100));
+        });
+    </script>
+</body>
+</html>

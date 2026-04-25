@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Products - Software That Actually Helps You</title>
+    <meta name="description" content="Better tools, better prices. RoadWork ($9/mo education), PitStop ($29/mo DevOps), Canvas Studio (FREE design). Start making money tomorrow.">
+    <style>
+        :root {
+            --black: #000000;
+            --white: #FFFFFF;
+            --amber: #F5A623;
+            --hot-pink: #FF1D6C;
+            --electric-blue: #2979FF;
+            --violet: #9C27B0;
+            --space-xs: 8px;
+            --space-sm: 13px;
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --space-2xl: 89px;
+            --space-3xl: 144px;
+            --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            line-height: 1.618;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 55px 55px;
+            animation: grid-move 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes grid-move {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(55px, 55px); }
+        }
+
+        /* Orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .orb-1 {
+            top: 10%;
+            left: 20%;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink));
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            top: 60%;
+            right: 15%;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, var(--violet), var(--electric-blue));
+            animation: float 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, -50px); }
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: var(--space-md) var(--space-xl);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        nav .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--amber), var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--space-lg);
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.3s var(--ease);
+        }
+
+        .nav-links a:hover {
+            color: var(--hot-pink);
+        }
+
+        .btn {
+            padding: var(--space-sm) var(--space-lg);
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s var(--ease);
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--hot-pink);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 29, 108, 0.4);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-xl);
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero {
+            padding: calc(var(--space-3xl) * 2) 0 var(--space-3xl);
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 72px;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+            line-height: 1.1;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: var(--space-xl);
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-2xl);
+            margin: var(--space-3xl) 0;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            margin-top: var(--space-xs);
+        }
+
+        /* Product Cards */
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: var(--space-xl);
+            margin: var(--space-3xl) 0;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: var(--space-xl);
+            transition: all 0.4s var(--ease);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--electric-blue) 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s var(--ease);
+        }
+
+        .product-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .product-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .product-icon {
+            font-size: 64px;
+            margin-bottom: var(--space-md);
+        }
+
+        .product-tag {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-md);
+            background: rgba(255, 29, 108, 0.2);
+            color: var(--hot-pink);
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--space-md);
+        }
+
+        .product-card h2 {
+            font-size: 32px;
+            margin-bottom: var(--space-sm);
+        }
+
+        .product-card .tagline {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 18px;
+            margin-bottom: var(--space-lg);
+        }
+
+        .product-price {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--hot-pink), var(--violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: var(--space-lg) 0;
+        }
+
+        .product-price span {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .features {
+            list-style: none;
+            margin: var(--space-lg) 0;
+        }
+
+        .features li {
+            padding: var(--space-xs) 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+        }
+
+        .features li::before {
+            content: '✓';
+            color: var(--hot-pink);
+            margin-right: var(--space-sm);
+            font-weight: bold;
+        }
+
+        .product-links {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--hot-pink);
+            background: rgba(255, 29, 108, 0.1);
+        }
+
+        /* CTA Section */
+        .cta {
+            text-align: center;
+            padding: var(--space-3xl) 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            margin: var(--space-3xl) 0;
+        }
+
+        .cta h2 {
+            font-size: 56px;
+            margin-bottom: var(--space-md);
+        }
+
+        .cta p {
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: var(--space-xl);
+        }
+
+        footer {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 42px; }
+            .hero p { font-size: 20px; }
+            .products { grid-template-columns: 1fr; }
+            .stats { flex-direction: column; gap: var(--space-lg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <nav>
+        <div class="container">
+            <div class="logo">🖤 BlackRoad Products</div>
+            <ul class="nav-links">
+                <li><a href="#products">Products</a></li>
+                <li><a href="https://github.com/BlackRoad-OS">GitHub</a></li>
+                <li><a href="mailto:blackroad.systems@gmail.com">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h1>Software That Actually<br><span class="gradient-text">Helps You</span></h1>
+            <p>Better tools at honest prices. Education, DevOps, Design — all built to make your life easier, not drain your wallet.</p>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">Products Launched</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">$9-$99</div>
+                    <div class="stat-label">Monthly Pricing</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">1 FREE</div>
+                    <div class="stat-label">Forever Product</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="container">
+        <div class="products">
+            <!-- RoadWork -->
+            <div class="product-card">
+                <div class="product-icon">🎓</div>
+                <span class="product-tag">Education</span>
+                <h2>RoadWork</h2>
+                <p class="tagline">AI tutoring that won't bankrupt you</p>
+                <p>Stop paying $20/month for Chegg. Get unlimited homework help, step-by-step explanations, and 24/7 AI tutoring for less than a coffee.</p>
+
+                <div class="product-price">$9<span>/month</span></div>
+
+                <ul class="features">
+                    <li>Unlimited questions (vs Chegg's limited)</li>
+                    <li>All subjects (Math, Science, English, etc.)</li>
+                    <li>Step-by-step explanations</li>
+                    <li>24/7 instant AI help with Roadie</li>
+                    <li>Visual learning with diagrams</li>
+                    <li>Photo upload for homework</li>
+                </ul>
+
+                <div class="product-links">
+                    <a href="https://github.com/BlackRoad-Education/roadwork-platform" class="btn btn-primary">Start Free Trial →</a>
+                    <a href="https://github.com/BlackRoad-Education/roadwork-platform" class="btn btn-outline">View Demo</a>
+                </div>
+            </div>
+
+            <!-- PitStop -->
+            <div class="product-card">
+                <div class="product-icon">🏁</div>
+                <span class="product-tag">DevOps</span>
+                <h2>PitStop</h2>
+                <p class="tagline">Infrastructure management without terminal hell</p>
+                <p>Manage Docker, Kubernetes, databases, and CI/CD pipelines visually. No more memorizing 50 terminal commands.</p>
+
+                <div class="product-price">$29<span>/month</span></div>
+
+                <ul class="features">
+                    <li>Visual Docker container management</li>
+                    <li>Kubernetes dashboard (drag & drop)</li>
+                    <li>Database tools (PostgreSQL, MongoDB, Redis)</li>
+                    <li>CI/CD pipeline builder</li>
+                    <li>Resource monitoring & alerts</li>
+                    <li>Security scanning built-in</li>
+                </ul>
+
+                <div class="product-links">
+                    <a href="https://github.com/BlackRoad-OS/blackroad-os-pitstop" class="btn btn-primary">Start Free Trial →</a>
+                    <a href="https://github.com/BlackRoad-OS/blackroad-os-pitstop" class="btn btn-outline">Live Demo</a>
+                </div>
+            </div>
+
+            <!-- Canvas Studio -->
+            <div class="product-card">
+                <div class="product-icon">🎨</div>
+                <span class="product-tag">Design • FREE</span>
+                <h2>Canvas Studio</h2>
+                <p class="tagline">Canva Pro features, $0/month price</p>
+                <p>Create stunning graphics, presentations, social media posts. 10,000+ templates, millions of free images. No watermarks, no limits.</p>
+
+                <div class="product-price">FREE<span> forever</span></div>
+
+                <ul class="features">
+                    <li>10,000+ professional templates</li>
+                    <li>Millions of free stock images & icons</li>
+                    <li>AI-powered tools (background remover, etc.)</li>
+                    <li>Team collaboration & real-time editing</li>
+                    <li>Unlimited cloud storage</li>
+                    <li>No watermarks, no signup required</li>
+                </ul>
+
+                <div class="product-links">
+                    <a href="https://github.com/BlackRoad-Studio/canvas-studio" class="btn btn-primary">Start Creating Free →</a>
+                    <a href="https://github.com/BlackRoad-Studio/canvas-studio" class="btn btn-outline">See Templates</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="cta">
+            <h2>Ready to Save Money?</h2>
+            <p>Switch from expensive tools to better, cheaper alternatives</p>
+            <div style="display: flex; gap: var(--space-md); justify-content: center;">
+                <a href="#products" class="btn btn-primary" style="font-size: 20px; padding: var(--space-md) var(--space-2xl);">Explore Products →</a>
+                <a href="https://github.com/BlackRoad-OS" class="btn btn-outline" style="font-size: 20px; padding: var(--space-md) var(--space-2xl);">View on GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 BlackRoad OS, Inc. All rights reserved.</p>
+            <p style="margin-top: var(--space-sm);">Built with transparency. Powered by open source. Priced with honesty.</p>
+            <p style="margin-top: var(--space-md);">
+                <a href="mailto:blackroad.systems@gmail.com" style="color: var(--hot-pink); text-decoration: none;">blackroad.systems@gmail.com</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Stripe integration placeholder
+        console.log('BlackRoad Products - Ready for payment integration');
+        console.log('Contact blackroad.systems@gmail.com to activate payments');
+    </script>
+</body>
+</html>

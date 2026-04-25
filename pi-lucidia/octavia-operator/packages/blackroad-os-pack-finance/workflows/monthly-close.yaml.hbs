@@ -1,0 +1,41 @@
+---
+name: Monthly Close
+on:
+  workflow_dispatch:
+    inputs:
+      period:
+        description: "Closing period (YYYY-MM)"
+        required: true
+  schedule:
+    - cron: "0 3 2 * *"
+
+env:
+  REQUIRED_SECRETS: BILLING_TOKEN,SLACK_WEBHOOK
+
+jobs:
+  validate-ledgers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Reconcile
+        run: python br_fin.py reconcile ledgers/2025-11-24-general.csv
+
+  close-books:
+    needs: validate-ledgers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render close note
+        run: |
+          echo "Closing {{period}}" > close-note.txt
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: close-note
+          path: close-note.txt

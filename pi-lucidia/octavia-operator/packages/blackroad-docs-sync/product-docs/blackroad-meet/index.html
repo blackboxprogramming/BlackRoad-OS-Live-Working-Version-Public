@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Meet - Sovereign Video Conferencing</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #000;
+            color: #FFF;
+            line-height: 1.618;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 89px 34px;
+            background: linear-gradient(135deg, rgba(41,121,255,0.1) 0%, rgba(156,39,176,0.1) 100%);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(41,121,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+        h1 {
+            font-size: 55px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 21px;
+            position: relative;
+            z-index: 1;
+        }
+        .subtitle {
+            font-size: 24px;
+            opacity: 0.8;
+            margin-bottom: 55px;
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+        }
+        .meeting-controls {
+            display: flex;
+            gap: 21px;
+            margin-bottom: 34px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+        .btn {
+            padding: 21px 55px;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            color: #FFF;
+            border: none;
+            border-radius: 13px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 13px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 13px 34px rgba(41,121,255,0.4);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .features {
+            padding: 144px 34px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 55px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 89px;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 34px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: #2979FF;
+            transform: translateY(-5px);
+            box-shadow: 0 13px 34px rgba(41,121,255,0.2);
+        }
+        .feature-icon { font-size: 55px; margin-bottom: 21px; }
+        .feature-title { font-size: 24px; font-weight: 600; margin-bottom: 13px; color: #9C27B0; }
+        .feature-desc { font-size: 16px; opacity: 0.8; line-height: 1.618; }
+        .demo-section {
+            padding: 144px 34px;
+            background: rgba(255,255,255,0.02);
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 21px;
+            margin-bottom: 34px;
+        }
+        .video-tile {
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, rgba(41,121,255,0.2) 0%, rgba(156,39,176,0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-tile::before {
+            content: '📹';
+            font-size: 89px;
+            opacity: 0.3;
+        }
+        .participant-name {
+            position: absolute;
+            bottom: 13px;
+            left: 13px;
+            background: rgba(0,0,0,0.7);
+            padding: 8px 13px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .meeting-toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 21px;
+            padding: 34px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            flex-wrap: wrap;
+        }
+        .toolbar-btn {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.1);
+            color: #FFF;
+        }
+        .toolbar-btn:hover {
+            background: rgba(41,121,255,0.3);
+            transform: scale(1.1);
+        }
+        .toolbar-btn.danger {
+            background: rgba(231,76,60,0.3);
+        }
+        .toolbar-btn.danger:hover {
+            background: rgba(231,76,60,0.5);
+        }
+        .pricing {
+            padding: 144px 34px;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 34px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .pricing-card:hover {
+            border-color: #2979FF;
+            transform: translateY(-5px);
+        }
+        .pricing-card.featured {
+            border-color: #2979FF;
+            box-shadow: 0 0 34px rgba(41,121,255,0.3);
+        }
+        .plan-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 13px;
+            color: #2979FF;
+        }
+        .plan-price {
+            font-size: 55px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 21px;
+        }
+        .plan-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 34px;
+        }
+        .plan-features li {
+            padding: 13px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            opacity: 0.8;
+        }
+        .plan-features li::before {
+            content: '✓ ';
+            color: #2ECC71;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        footer {
+            padding: 89px 34px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div style="font-size: 89px; margin-bottom: 21px; position: relative; z-index: 1;">📹</div>
+        <h1>BlackRoad Meet</h1>
+        <p class="subtitle">Sovereign Video Conferencing. Zero-Knowledge Privacy. Unlimited Participants. Built for the BlackRoad Ecosystem.</p>
+        <div class="meeting-controls">
+            <button class="btn" onclick="alert('🎥 Starting new meeting...')">
+                <span>📹</span>
+                <span>Start New Meeting</span>
+            </button>
+            <button class="btn btn-secondary" onclick="alert('🔗 Enter meeting code to join')">
+                <span>🔗</span>
+                <span>Join Meeting</span>
+            </button>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">Enterprise Video Collaboration</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎥</div>
+                <h3 class="feature-title">HD Video & Audio</h3>
+                <p class="feature-desc">4K video quality. Crystal-clear audio. Adaptive bitrate streaming. Background noise suppression. Virtual backgrounds.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3 class="feature-title">Unlimited Participants</h3>
+                <p class="feature-desc">No limits on meeting size. Host 10,000+ participants. Breakout rooms. Waiting rooms. Host controls.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3 class="feature-title">Zero-Knowledge Encryption</h3>
+                <p class="feature-desc">End-to-end encrypted meetings. Zero-knowledge architecture. GDPR compliant. SOC 2 Type II certified.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📺</div>
+                <h3 class="feature-title">Screen Sharing</h3>
+                <p class="feature-desc">Share your screen, window, or tab. Annotate in real-time. Remote control. Presenter mode.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">Live Chat & Reactions</h3>
+                <p class="feature-desc">In-meeting chat. Emoji reactions. Q&A mode. Polls and surveys. File sharing.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">Recording & Transcription</h3>
+                <p class="feature-desc">Cloud recording. Live transcription. AI-generated summaries. Searchable transcripts. Export to video.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3 class="feature-title">Global Edge Network</h3>
+                <p class="feature-desc">300+ edge locations worldwide. <30ms latency. 99.99% uptime SLA. Automatic failover.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔌</div>
+                <h3 class="feature-title">API & Integrations</h3>
+                <p class="feature-desc">RESTful API. Webhooks. Calendar integrations (Google, Outlook). Slack, Teams. Custom integrations.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">AI-Powered Features</h3>
+                <p class="feature-desc">AI meeting notes. Action item extraction. Speaker identification. Real-time translation. Sentiment analysis.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section">
+        <div class="demo-container">
+            <h2 class="section-title">Live Meeting Demo</h2>
+            <div class="video-grid">
+                <div class="video-tile">
+                    <div class="participant-name">👤 Alexa Amundson</div>
+                </div>
+                <div class="video-tile">
+                    <div class="participant-name">👤 Team Member 1</div>
+                </div>
+                <div class="video-tile">
+                    <div class="participant-name">👤 Team Member 2</div>
+                </div>
+                <div class="video-tile">
+                    <div class="participant-name">👤 Team Member 3</div>
+                </div>
+            </div>
+            <div class="meeting-toolbar">
+                <button class="toolbar-btn" title="Mute/Unmute">🎤</button>
+                <button class="toolbar-btn" title="Start/Stop Video">📹</button>
+                <button class="toolbar-btn" title="Share Screen">📺</button>
+                <button class="toolbar-btn" title="Chat">💬</button>
+                <button class="toolbar-btn" title="Participants">👥</button>
+                <button class="toolbar-btn" title="Reactions">👍</button>
+                <button class="toolbar-btn" title="Record">⏺️</button>
+                <button class="toolbar-btn" title="Settings">⚙️</button>
+                <button class="toolbar-btn danger" title="Leave Meeting">📞</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing">
+        <h2 class="section-title">Transparent Pricing</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="plan-price">$0</div>
+                <ul class="plan-features">
+                    <li>Up to 100 participants</li>
+                    <li>45-minute time limit</li>
+                    <li>HD video quality</li>
+                    <li>Screen sharing</li>
+                    <li>Chat and reactions</li>
+                    <li>Basic recording</li>
+                    <li>Community support</li>
+                </ul>
+                <button class="btn">Get Started Free</button>
+            </div>
+            <div class="pricing-card featured">
+                <div class="plan-name">Pro</div>
+                <div class="plan-price">$49<span style="font-size: 18px; opacity: 0.7;">/mo</span></div>
+                <ul class="plan-features">
+                    <li>Up to 1,000 participants</li>
+                    <li>Unlimited meeting time</li>
+                    <li>4K video quality</li>
+                    <li>Advanced screen sharing</li>
+                    <li>Cloud recording (unlimited)</li>
+                    <li>Live transcription</li>
+                    <li>AI meeting summaries</li>
+                    <li>Priority support</li>
+                    <li>Custom branding</li>
+                </ul>
+                <button class="btn">Upgrade to Pro</button>
+            </div>
+            <div class="pricing-card">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">Custom</div>
+                <ul class="plan-features">
+                    <li>Unlimited participants</li>
+                    <li>Unlimited everything</li>
+                    <li>Dedicated infrastructure</li>
+                    <li>SSO integration</li>
+                    <li>Advanced analytics</li>
+                    <li>API access</li>
+                    <li>Compliance (HIPAA, SOC 2)</li>
+                    <li>24/7 dedicated support</li>
+                    <li>Custom contracts & SLAs</li>
+                </ul>
+                <button class="btn">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div style="font-size: 34px; margin-bottom: 21px;">📹 BlackRoad Meet</div>
+        <div style="display: flex; gap: 34px; justify-content: center; margin-bottom: 21px; flex-wrap: wrap;">
+            <a href="#" style="color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">Features</a>
+            <a href="#" style="color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">Pricing</a>
+            <a href="#" style="color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">API Docs</a>
+            <a href="#" style="color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">Support</a>
+            <a href="#" style="color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s;">Privacy</a>
+        </div>
+        <p style="opacity: 0.6; font-size: 14px;">Built by BlackRoad OS | Sovereign video conferencing</p>
+        <p style="opacity: 0.6; font-size: 14px; margin-top: 13px;">🖤🛣️ Connect. Collaborate. Communicate.</p>
+    </footer>
+
+    <script>
+        // Animate feature cards on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card, .pricing-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+
+        // Simulate live video effect
+        document.querySelectorAll('.video-tile').forEach((tile, index) => {
+            setTimeout(() => {
+                tile.style.transition = 'all 0.5s ease';
+                tile.style.opacity = '1';
+            }, index * 200);
+        });
+
+        // Toolbar button interactions
+        document.querySelectorAll('.toolbar-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 100);
+            });
+        });
+    </script>
+</body>
+</html>

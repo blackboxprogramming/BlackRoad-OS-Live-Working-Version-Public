@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog — BlackRoad OS</title>
+  <meta name="description" content="Engineering notes, announcements, and thinking from the BlackRoad OS team.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../websites/_shared/design-bw.css">
+  <style>
+    .hero {
+      padding: 120px var(--sp-xl) var(--sp-xl);
+      max-width: 1200px; margin: 0 auto;
+    }
+    .hero h1 { margin-bottom: var(--sp-md); }
+    .hero p { max-width: 500px; font-size: 1.1rem; }
+
+    .filters {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-lg);
+      display: flex; gap: var(--sp-sm); flex-wrap: wrap;
+    }
+    .filter-btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--subtle);
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--white);
+      color: var(--white);
+    }
+
+    .posts {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+
+    /* Featured post */
+    .featured-post {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-xl);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-xl);
+      margin-bottom: var(--sp-xl);
+      transition: border-color 0.2s;
+    }
+    .featured-post:hover { border-color: var(--muted); }
+    @media (max-width: 768px) { .featured-post { grid-template-columns: 1fr; } }
+    .featured-img {
+      background: var(--raised);
+      border-radius: var(--radius-md);
+      min-height: 280px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 3rem; color: var(--border);
+    }
+    .featured-meta {
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .post-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--subtle);
+      margin-bottom: var(--sp-sm);
+    }
+    .featured-title {
+      font-size: 1.8rem; font-weight: 700;
+      line-height: 1.2; letter-spacing: -0.02em;
+      margin-bottom: var(--sp-sm);
+    }
+    .featured-excerpt {
+      font-size: 0.95rem; color: var(--subtle);
+      line-height: 1.7; margin-bottom: var(--sp-md);
+    }
+    .post-date {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* Post grid */
+    .post-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--sp-md);
+    }
+    @media (max-width: 900px) { .post-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .post-grid { grid-template-columns: 1fr; } }
+
+    .post-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      display: block;
+    }
+    .post-card:hover { border-color: var(--muted); transform: translateY(-2px); }
+    .post-card-img {
+      background: var(--raised);
+      height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 2rem; color: var(--border);
+    }
+    .post-card-body { padding: var(--sp-lg); }
+    .post-card-title {
+      font-size: 1.05rem; font-weight: 600;
+      line-height: 1.3; margin-bottom: var(--sp-xs);
+    }
+    .post-card-excerpt {
+      font-size: 0.82rem; color: var(--subtle);
+      line-height: 1.6; margin-bottom: var(--sp-sm);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex; justify-content: center; gap: var(--sp-sm);
+      padding-top: var(--sp-xl);
+    }
+    .page-btn {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--subtle);
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .page-btn:hover, .page-btn.active { border-color: var(--white); color: var(--white); }
+  </style>
+</head>
+<body class="dot-bg">
+
+  <nav>
+    <div class="nav-logo">BlackRoad OS</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/agents">Agents</a>
+      <a href="/about">About</a>
+    </div>
+    <a href="/docs" class="nav-cta">Get Started</a>
+  </nav>
+
+  <div class="hero">
+    <div class="label">Blog</div>
+    <h1>Notes from the road.</h1>
+    <p>Engineering decisions, release notes, and the thinking behind the system.</p>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active">All</button>
+    <button class="filter-btn">Engineering</button>
+    <button class="filter-btn">Releases</button>
+    <button class="filter-btn">Architecture</button>
+    <button class="filter-btn">Agents</button>
+  </div>
+
+  <div class="posts">
+
+    <!-- Featured -->
+    <a href="/blog/tokenless-architecture" class="featured-post">
+      <div class="featured-img">{}</div>
+      <div class="featured-meta">
+        <div class="post-tag">Architecture</div>
+        <div class="featured-title">Why agents should never see your API keys</div>
+        <div class="featured-excerpt">The tokenless gateway is not just a security feature &mdash; it's a trust architecture. Here's how we built it and why it matters.</div>
+        <div class="post-date">Feb 28, 2026</div>
+      </div>
+    </a>
+
+    <!-- Grid -->
+    <div class="post-grid">
+      <a href="/blog/memory-system" class="post-card">
+        <div class="post-card-img">#</div>
+        <div class="post-card-body">
+          <div class="post-tag">Engineering</div>
+          <div class="post-card-title">Hash-chained memory: how PS-SHA works</div>
+          <p class="post-card-excerpt">Every agent action is logged to an append-only, hash-chained journal. If history changes, we know.</p>
+          <div class="post-date">Feb 20, 2026</div>
+        </div>
+      </a>
+
+      <a href="/blog/v3-release" class="post-card">
+        <div class="post-card-img">3.0</div>
+        <div class="post-card-body">
+          <div class="post-tag">Releases</div>
+          <div class="post-card-title">BlackRoad OS v3.0 &mdash; what's new</div>
+          <p class="post-card-excerpt">84 CLI tools, GEB oracle, improved fleet management, and a completely rewritten deploy pipeline.</p>
+          <div class="post-date">Feb 15, 2026</div>
+        </div>
+      </a>
+
+      <a href="/blog/30k-agents" class="post-card">
+        <div class="post-card-img">30K</div>
+        <div class="post-card-body">
+          <div class="post-tag">Agents</div>
+          <div class="post-card-title">Scaling to 30,000 agents on Raspberry Pis</div>
+          <p class="post-card-excerpt">How we distribute 30K agents across a Pi cluster and a single DigitalOcean droplet.</p>
+          <div class="post-date">Feb 8, 2026</div>
+        </div>
+      </a>
+
+      <a href="/blog/geb-oracle" class="post-card">
+        <div class="post-card-img">~</div>
+        <div class="post-card-body">
+          <div class="post-tag">Architecture</div>
+          <div class="post-card-title">Strange loops: building the GEB oracle</div>
+          <p class="post-card-excerpt">When a system can observe itself, what does it find? Hofstadter meets distributed computing.</p>
+          <div class="post-date">Jan 30, 2026</div>
+        </div>
+      </a>
+
+      <a href="/blog/cece-identity" class="post-card">
+        <div class="post-card-img">*</div>
+        <div class="post-card-body">
+          <div class="post-tag">Agents</div>
+          <div class="post-card-title">CECE: portable AI identity across providers</div>
+          <p class="post-card-excerpt">Your AI should know who it is regardless of where it runs. CECE makes that possible.</p>
+          <div class="post-date">Jan 22, 2026</div>
+        </div>
+      </a>
+
+      <a href="/blog/multi-cloud" class="post-card">
+        <div class="post-card-img">@</div>
+        <div class="post-card-body">
+          <div class="post-tag">Engineering</div>
+          <div class="post-card-title">One command, five clouds</div>
+          <p class="post-card-excerpt">How br deploy auto-detects your stack and deploys to Railway, Cloudflare, Vercel, DigitalOcean, or Pi.</p>
+          <div class="post-date">Jan 14, 2026</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="pagination">
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">Next</button>
+    </div>
+  </div>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc.</span>
+    <span style="display:flex;gap:var(--sp-lg);">
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/contact">Contact</a>
+    </span>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,260 @@
+{
+  "owner": "BlackRoad OS, Inc.",
+  "generated": "2026-02-28",
+  "e2e_integrations": {
+    "payments": {
+      "stripe": {
+        "status": "REQUIRED",
+        "priority": "P0",
+        "products": [
+          "stripe-payments",
+          "stripe-billing",
+          "stripe-connect",
+          "stripe-checkout",
+          "stripe-invoicing"
+        ],
+        "env_vars": [
+          "STRIPE_SECRET_KEY",
+          "STRIPE_PUBLISHABLE_KEY",
+          "STRIPE_WEBHOOK_SECRET",
+          "STRIPE_CONNECT_CLIENT_ID"
+        ],
+        "packages": {
+          "node": "stripe",
+          "python": "stripe",
+          "cli": "stripe-cli"
+        },
+        "deploy_targets": [
+          "blackroad-os-web",
+          "blackroad-os-api",
+          "blackroad-os-api-gateway",
+          "roadgateway"
+        ],
+        "webhook_endpoints": [
+          "/api/webhooks/stripe",
+          "/api/stripe/webhook"
+        ]
+      }
+    },
+    "auth": {
+      "clerk": {
+        "status": "REQUIRED",
+        "priority": "P0",
+        "products": [
+          "clerk-auth",
+          "clerk-organizations",
+          "clerk-user-management",
+          "clerk-sso"
+        ],
+        "env_vars": [
+          "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+          "CLERK_SECRET_KEY",
+          "CLERK_WEBHOOK_SECRET",
+          "NEXT_PUBLIC_CLERK_SIGN_IN_URL",
+          "NEXT_PUBLIC_CLERK_SIGN_UP_URL"
+        ],
+        "packages": {
+          "node": "@clerk/nextjs",
+          "react": "@clerk/clerk-react",
+          "express": "@clerk/express"
+        },
+        "deploy_targets": [
+          "blackroad-os-web",
+          "blackroad-os-core",
+          "blackroad-os-prism-console",
+          "blackroad-os-prism-enterprise"
+        ]
+      }
+    },
+    "database": {
+      "prisma": {
+        "status": "REQUIRED",
+        "priority": "P0",
+        "env_vars": [
+          "DATABASE_URL",
+          "DIRECT_URL"
+        ],
+        "packages": {
+          "node": ["prisma", "@prisma/client"]
+        }
+      },
+      "supabase": {
+        "status": "RECOMMENDED",
+        "priority": "P1",
+        "env_vars": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ]
+      },
+      "redis": {
+        "status": "RECOMMENDED",
+        "priority": "P1",
+        "env_vars": [
+          "REDIS_URL",
+          "UPSTASH_REDIS_REST_URL",
+          "UPSTASH_REDIS_REST_TOKEN"
+        ]
+      }
+    },
+    "ai_providers": {
+      "anthropic": {
+        "status": "ACTIVE",
+        "priority": "P0",
+        "agent_name": "Cecilia / Cece / Alice",
+        "env_vars": [
+          "ANTHROPIC_API_KEY"
+        ],
+        "models": ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
+        "packages": {
+          "node": "@anthropic-ai/sdk",
+          "python": "anthropic"
+        }
+      },
+      "xai": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "agent_name": "Silas (Grok)",
+        "env_vars": [
+          "XAI_API_KEY"
+        ],
+        "models": ["grok-3", "grok-3-mini"]
+      },
+      "google": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "agent_name": "Aria (Gemini)",
+        "env_vars": [
+          "GOOGLE_AI_API_KEY",
+          "GOOGLE_GENERATIVE_AI_API_KEY"
+        ],
+        "models": ["gemini-2.0-flash", "gemini-2.0-pro"],
+        "packages": {
+          "node": "@google/generative-ai",
+          "python": "google-generativeai"
+        }
+      },
+      "openai": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "agent_name": "Caddy / Lucidia (ChatGPT)",
+        "env_vars": [
+          "OPENAI_API_KEY"
+        ],
+        "models": ["gpt-4o", "gpt-4o-mini", "o3-mini"],
+        "packages": {
+          "node": "openai",
+          "python": "openai"
+        }
+      },
+      "huggingface": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "env_vars": [
+          "HUGGINGFACE_TOKEN",
+          "HF_TOKEN"
+        ],
+        "models": [
+          "meta-llama/Llama-3.1-8B",
+          "Qwen/Qwen2.5-7B",
+          "deepseek-ai/DeepSeek-V2"
+        ],
+        "packages": {
+          "python": ["transformers", "huggingface_hub"],
+          "node": "@huggingface/inference"
+        }
+      },
+      "ollama": {
+        "status": "ACTIVE",
+        "priority": "P0",
+        "env_vars": [
+          "OLLAMA_URL",
+          "BLACKROAD_OLLAMA_URL"
+        ],
+        "models": [
+          "qwen2.5:7b",
+          "deepseek-r1:7b",
+          "llama3.2:3b",
+          "mistral:7b",
+          "lucidia"
+        ],
+        "endpoints": {
+          "local": "http://localhost:11434",
+          "memory_wrapper": "http://localhost:8001"
+        }
+      }
+    },
+    "cloud": {
+      "cloudflare": {
+        "status": "ACTIVE",
+        "priority": "P0",
+        "account_id": "848cf0b18d51e0170e0d1537aec3505a",
+        "env_vars": [
+          "CLOUDFLARE_API_TOKEN",
+          "CLOUDFLARE_ACCOUNT_ID"
+        ],
+        "services": ["Workers", "Pages", "R2", "D1", "KV", "Tunnels"],
+        "workers_count": "75+"
+      },
+      "vercel": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "env_vars": [
+          "VERCEL_TOKEN",
+          "VERCEL_ORG_ID",
+          "VERCEL_PROJECT_ID"
+        ],
+        "projects_count": "15+"
+      },
+      "railway": {
+        "status": "ACTIVE",
+        "priority": "P1",
+        "env_vars": [
+          "RAILWAY_TOKEN",
+          "RAILWAY_PROJECT_ID"
+        ],
+        "projects_count": "14"
+      },
+      "digitalocean": {
+        "status": "ACTIVE",
+        "priority": "P2",
+        "env_vars": [
+          "DIGITALOCEAN_ACCESS_TOKEN"
+        ],
+        "droplet_ip": "159.65.43.12"
+      }
+    },
+    "monitoring": {
+      "sentry": {
+        "status": "RECOMMENDED",
+        "env_vars": ["SENTRY_DSN", "SENTRY_AUTH_TOKEN"]
+      },
+      "posthog": {
+        "status": "RECOMMENDED",
+        "env_vars": ["NEXT_PUBLIC_POSTHOG_KEY", "NEXT_PUBLIC_POSTHOG_HOST"]
+      }
+    },
+    "communication": {
+      "resend": {
+        "status": "RECOMMENDED",
+        "env_vars": ["RESEND_API_KEY"]
+      },
+      "sendgrid": {
+        "status": "OPTIONAL",
+        "env_vars": ["SENDGRID_API_KEY"]
+      }
+    }
+  },
+  "deployment_matrix": {
+    "blackroad-os-web": ["clerk", "stripe", "prisma", "anthropic", "vercel"],
+    "blackroad-os-api": ["clerk", "stripe", "prisma", "anthropic", "railway"],
+    "blackroad-os-api-gateway": ["anthropic", "openai", "google", "xai", "cloudflare"],
+    "blackroad-os-core": ["clerk", "prisma", "anthropic", "vercel"],
+    "blackroad-os-prism-console": ["clerk", "stripe", "prisma", "vercel"],
+    "blackroad-os-agents": ["anthropic", "openai", "ollama", "huggingface", "railway"],
+    "blackroad-os-mesh": ["anthropic", "cloudflare"],
+    "blackroad-os-docs": ["vercel"],
+    "blackroad-ai-api-gateway": ["anthropic", "openai", "google", "xai", "ollama", "railway"],
+    "roadgateway": ["stripe", "cloudflare"]
+  }
+}

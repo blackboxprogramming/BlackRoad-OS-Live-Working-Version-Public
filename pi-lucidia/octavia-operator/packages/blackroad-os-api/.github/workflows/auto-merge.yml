@@ -1,0 +1,81 @@
+name: Auto-Approve and Merge
+
+# This workflow automatically approves and merges PRs when:
+# 1. CI passes
+# 2. PR is from a trusted source (you, Codex, or designated bots)
+#
+# No human approval required. CI is the reviewer.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI"] # Replace with your actual CI workflow name
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    
+    # Only run for trusted actors
+    # Add your GitHub username, Codex bot, any other trusted sources
+    if: |
+      github.actor == 'YOUR_GITHUB_USERNAME' ||
+      github.actor == 'codex-bot' ||
+      github.actor == 'dependabot[bot]' ||
+      github.actor == 'github-actions[bot]'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wait for CI to complete
+        uses: fountainhead/action-wait-for-check@v1.1.0
+        id: wait-for-ci
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          checkName: build  # Replace with your CI check name
+          ref: ${{ github.event.pull_request.head.sha }}
+          timeoutSeconds: 300
+          intervalSeconds: 10
+
+      - name: Auto-approve PR
+        if: steps.wait-for-ci.outputs.conclusion == 'success'
+        uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge PR
+        if: steps.wait-for-ci.outputs.conclusion == 'success'
+        uses: pascalgn/automerge-action@v0.16.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: squash
+          MERGE_COMMIT_MESSAGE: pull-request-title
+          MERGE_DELETE_BRANCH: true
+          UPDATE_METHOD: rebase
+
+      - name: Add blocked label on CI failure
+        if: steps.wait-for-ci.outputs.conclusion == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: ['blocked', 'ci-failed']
+            });
+            
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: '🔴 **CI Failed** - Auto-merge blocked. Check the logs and fix the issue.'
+            });

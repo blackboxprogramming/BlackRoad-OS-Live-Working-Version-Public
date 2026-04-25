@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# br-gui - Quick launcher for BlackRoad terminal GUI
+# Usage: br-gui <preset>
+
+PINK='\033[38;5;205m'
+BLUE='\033[38;5;75m'
+PURPLE='\033[38;5;141m'
+ORANGE='\033[38;5;208m'
+RESET='\033[0m'
+
+case "${1:-help}" in
+    dashboard|dash)
+        echo -e "${PINK}Launching Dashboard...${RESET}"
+        ~/br-container.sh dashboard 140 45
+        ;;
+    
+    grid|g)
+        rows="${2:-2}"
+        cols="${3:-2}"
+        echo -e "${PINK}Launching ${rows}×${cols} Grid...${RESET}"
+        ~/br-container.sh grid "$rows" "$cols" 120 40
+        ;;
+    
+    split|s)
+        direction="${2:-horizontal}"
+        echo -e "${PINK}Launching ${direction} split...${RESET}"
+        ~/br-container.sh "${direction}" 100 30
+        ;;
+    
+    web|w)
+        url="${2:-https://blackroad.io}"
+        echo -e "${PINK}Rendering: $url${RESET}"
+        ~/br-web-render.sh --boxed "$url" 120
+        ;;
+    
+    monitor|mon)
+        # System monitoring dashboard
+        echo -e "${PINK}System Monitor${RESET}"
+        ~/br-container.sh dashboard 140 45 &
+        sleep 1
+        
+        # Could populate with real data
+        echo -e "${BLUE}Use panes to show: top, df, ps, netstat${RESET}"
+        ;;
+    
+    demo|d)
+        ~/br-gui-demo.sh
+        ;;
+    
+    window|win)
+        name="${2:-My Window}"
+        ~/br-window-manager.sh create "$name" 40 120
+        ;;
+    
+    list|ls)
+        ~/br-window-manager.sh list
+        ;;
+    
+    check)
+        echo -e "${BLUE}Checking system...${RESET}\n"
+        
+        echo -e "Scripts:"
+        ls -1 ~/br-container.sh ~/br-window-manager.sh ~/br-web-render.sh 2>/dev/null | \
+            while read f; do echo -e "  ${PURPLE}✓${RESET} $(basename $f)"; done
+        
+        echo ""
+        echo -e "Web renderer:"
+        ~/br-web-render.sh --check
+        
+        echo ""
+        echo -e "Windows:"
+        count=$(find ~/.br-windows -name '*.json' 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "  ${BLUE}$count${RESET} defined"
+        ;;
+    
+    clean)
+        echo -e "${ORANGE}Cleaning window state...${RESET}"
+        rm -rf ~/.br-windows/*.json ~/.br-windows/*.content
+        echo -e "${PURPLE}✓${RESET} Cleaned"
+        ;;
+    
+    help|*)
+        echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        echo -e "${PINK}   BlackRoad Terminal GUI Launcher  ${RESET}"
+        echo -e "${PINK}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
+        echo ""
+        echo -e "${BLUE}Quick Commands:${RESET}"
+        echo -e "  ${PURPLE}dashboard${RESET}     - Launch 3-column dashboard"
+        echo -e "  ${PURPLE}grid${RESET} [r] [c]  - Launch grid (default 2×2)"
+        echo -e "  ${PURPLE}split${RESET} [h|v]   - Launch split layout"
+        echo -e "  ${PURPLE}web${RESET} [url]     - Render web page"
+        echo -e "  ${PURPLE}monitor${RESET}       - System monitoring view"
+        echo -e "  ${PURPLE}window${RESET} [name] - Create new window"
+        echo -e "  ${PURPLE}demo${RESET}          - Interactive demo"
+        echo ""
+        echo -e "${BLUE}Management:${RESET}"
+        echo -e "  ${PURPLE}list${RESET}          - List all windows"
+        echo -e "  ${PURPLE}check${RESET}         - System check"
+        echo -e "  ${PURPLE}clean${RESET}         - Clean window state"
+        echo ""
+        echo -e "${ORANGE}Examples:${RESET}"
+        echo -e "  ${BLUE}br-gui dashboard${RESET}"
+        echo -e "  ${BLUE}br-gui grid 3 4${RESET}"
+        echo -e "  ${BLUE}br-gui web https://blackroad.io${RESET}"
+        echo -e "  ${BLUE}br-gui split vertical${RESET}"
+        echo ""
+        echo -e "${GRAY}Full docs:${RESET} ~/BR_GUI_SYSTEM_GUIDE.md"
+        ;;
+esac

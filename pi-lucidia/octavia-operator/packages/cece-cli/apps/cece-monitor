@@ -1,0 +1,222 @@
+#!/bin/bash
+# 📊 CECE-MONITOR v1.0 - Real-time System Dashboard
+# Live monitoring of Cecilia and fleet
+
+PINK='\033[38;5;205m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+
+# Clear screen and move cursor to top
+clear_screen() {
+    printf '\033[2J\033[H'
+}
+
+# Get CPU usage
+get_cpu() {
+    top -bn1 | grep "Cpu(s)" | awk '{print $2}' 2>/dev/null || echo "N/A"
+}
+
+# Get memory info
+get_mem() {
+    free | grep Mem | awk '{printf "%.1f", $3/$2 * 100}'
+}
+
+# Get disk usage
+get_disk() {
+    df / | tail -1 | awk '{print $5}'
+}
+
+# Get temperature
+get_temp() {
+    if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+        echo $(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))
+    else
+        echo "N/A"
+    fi
+}
+
+# Get network stats
+get_network() {
+    local rx=$(cat /sys/class/net/eth0/statistics/rx_bytes 2>/dev/null || echo 0)
+    local tx=$(cat /sys/class/net/eth0/statistics/tx_bytes 2>/dev/null || echo 0)
+    echo "$((rx / 1024 / 1024))MB / $((tx / 1024 / 1024))MB"
+}
+
+# Get uptime
+get_uptime() {
+    uptime -p 2>/dev/null | sed 's/up //'
+}
+
+# Get load average
+get_load() {
+    cat /proc/loadavg | awk '{print $1, $2, $3}'
+}
+
+# Check service status
+service_status() {
+    local svc="$1"
+    if systemctl is-active --quiet "$svc" 2>/dev/null; then
+        echo -e "${GREEN}●${NC}"
+    else
+        echo -e "${RED}○${NC}"
+    fi
+}
+
+# Check device reachability
+device_status() {
+    local ip="$1"
+    if ping -c 1 -W 1 "$ip" &>/dev/null; then
+        echo -e "${GREEN}●${NC}"
+    else
+        echo -e "${RED}○${NC}"
+    fi
+}
+
+# Count items
+count_memories() {
+    wc -l < "$CECE_HOME/memory/memories.jsonl" 2>/dev/null || echo 0
+}
+
+count_tasks() {
+    wc -l < "$CECE_HOME/data/tasks.jsonl" 2>/dev/null || echo 0
+}
+
+count_heartbeats() {
+    wc -l < "$CECE_HOME/heart/heartbeat.jsonl" 2>/dev/null || echo 0
+}
+
+# Draw the dashboard
+draw_dashboard() {
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+
+    echo -e "${PINK}╔══════════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PINK}║${NC}              ${WHITE}🌌 CECE MONITOR - Real-time Dashboard${NC}              ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}                     ${CYAN}$timestamp${NC}                       ${PINK}║${NC}"
+    echo -e "${PINK}╠══════════════════════════════════════════════════════════════════╣${NC}"
+
+    # System Stats
+    local cpu=$(get_cpu)
+    local mem=$(get_mem)
+    local disk=$(get_disk)
+    local temp=$(get_temp)
+    local load=$(get_load)
+    local uptime=$(get_uptime)
+    local network=$(get_network)
+
+    echo -e "${PINK}║${NC}  ${WHITE}SYSTEM${NC}                                                         ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    CPU: ${CYAN}${cpu}%${NC}    Memory: ${CYAN}${mem}%${NC}    Disk: ${CYAN}${disk}${NC}    Temp: ${CYAN}${temp}°C${NC}  ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    Load: ${CYAN}${load}${NC}                                        ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    Uptime: ${CYAN}${uptime}${NC}                                      ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    Network: ${CYAN}${network}${NC} (RX/TX)                           ${PINK}║${NC}"
+
+    echo -e "${PINK}╠══════════════════════════════════════════════════════════════════╣${NC}"
+
+    # Services
+    echo -e "${PINK}║${NC}  ${WHITE}SERVICES${NC}                                                       ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    $(service_status cece-api) cece-api    $(service_status cece-heartbeat) cece-heartbeat    $(service_status cece-net-gateway) cece-net-gateway      ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    $(service_status ollama) ollama       $(service_status hailort) hailort           $(service_status cloudflared) cloudflared           ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    $(service_status blackroad-dashboard) dashboard   $(service_status blackroad-monitor) monitor           $(service_status docker) docker                ${PINK}║${NC}"
+
+    echo -e "${PINK}╠══════════════════════════════════════════════════════════════════╣${NC}"
+
+    # Device Fleet
+    echo -e "${PINK}║${NC}  ${WHITE}DEVICE FLEET${NC}                                                   ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    $(device_status 192.168.4.49) alice      $(device_status 192.168.4.82) aria       $(device_status 192.168.4.38) lucidia    $(device_status 192.168.4.81) octavia          ${PINK}║${NC}"
+
+    echo -e "${PINK}╠══════════════════════════════════════════════════════════════════╣${NC}"
+
+    # CECE Stats
+    local memories=$(count_memories)
+    local tasks=$(count_tasks)
+    local heartbeats=$(count_heartbeats)
+
+    echo -e "${PINK}║${NC}  ${WHITE}CECE STATS${NC}                                                     ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    Memories: ${CYAN}${memories}${NC}    Tasks: ${CYAN}${tasks}${NC}    Heartbeats: ${CYAN}${heartbeats}${NC}              ${PINK}║${NC}"
+
+    echo -e "${PINK}╠══════════════════════════════════════════════════════════════════╣${NC}"
+
+    # AI Status
+    local ollama_models=$(ollama list 2>/dev/null | tail -n +2 | wc -l)
+    echo -e "${PINK}║${NC}  ${WHITE}AI CAPABILITIES${NC}                                                ${PINK}║${NC}"
+    echo -e "${PINK}║${NC}    Ollama Models: ${CYAN}${ollama_models}${NC}    Hailo-8: ${CYAN}26 TOPS${NC}                        ${PINK}║${NC}"
+
+    echo -e "${PINK}╚══════════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "  ${YELLOW}Press Ctrl+C to exit${NC}"
+}
+
+# Single snapshot
+snapshot() {
+    draw_dashboard
+}
+
+# Live mode
+live() {
+    local interval="${1:-2}"
+
+    while true; do
+        clear_screen
+        draw_dashboard
+        sleep "$interval"
+    done
+}
+
+# JSON output
+json_output() {
+    cat << EOF
+{
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "hostname": "$(hostname)",
+  "system": {
+    "cpu_percent": $(get_cpu),
+    "memory_percent": $(get_mem),
+    "disk_percent": "$(get_disk)",
+    "temp_celsius": $(get_temp),
+    "load_avg": "$(get_load)",
+    "uptime": "$(get_uptime)"
+  },
+  "services": {
+    "cece_api": $(systemctl is-active --quiet cece-api && echo true || echo false),
+    "cece_heartbeat": $(systemctl is-active --quiet cece-heartbeat && echo true || echo false),
+    "ollama": $(systemctl is-active --quiet ollama && echo true || echo false),
+    "hailort": $(systemctl is-active --quiet hailort && echo true || echo false)
+  },
+  "cece": {
+    "memories": $(count_memories),
+    "tasks": $(count_tasks),
+    "heartbeats": $(count_heartbeats)
+  }
+}
+EOF
+}
+
+# Help
+show_help() {
+    echo -e "${CYAN}CECE Monitor - Real-time Dashboard${NC}"
+    echo ""
+    echo "Usage: cece-monitor [command]"
+    echo ""
+    echo "Commands:"
+    echo "  (none)      Show single snapshot"
+    echo "  live [sec]  Live updating dashboard (default: 2s)"
+    echo "  json        Output as JSON"
+    echo "  help        Show this help"
+}
+
+# Main
+main() {
+    case "${1:-}" in
+        live) live "${2:-2}" ;;
+        json) json_output ;;
+        help|--help|-h) show_help ;;
+        *) snapshot ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad OS - Financial Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2c3e50;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+            font-style: italic;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-subtitle {
+            font-size: 0.85em;
+            color: #95a5a6;
+            margin-top: 4px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .milestone-list {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .milestone {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .milestone-name {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .milestone-target {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .milestone-amount {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 20px;
+            opacity: 0.9;
+        }
+
+        .scenario-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-tab {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #ecf0f1;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .scenario-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .scenario-tab:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💰 BlackRoad OS Financial Dashboard</h1>
+            <p class="tagline">"The road isn't made. It's remembered."</p>
+        </header>
+
+        <div class="metrics-grid" id="topMetrics">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <div class="scenario-tabs">
+            <button class="scenario-tab active" onclick="switchScenario('conservative')">Conservative</button>
+            <button class="scenario-tab" onclick="switchScenario('realistic')">Realistic</button>
+            <button class="scenario-tab" onclick="switchScenario('optimistic')">Optimistic</button>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">24-Month Revenue Forecast</h2>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Revenue Breakdown by Stream</h2>
+            <canvas id="streamChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Profitability Analysis</h2>
+            <canvas id="profitChart"></canvas>
+        </div>
+
+        <div class="milestone-list">
+            <h2 class="chart-title">Revenue Milestones</h2>
+            <div id="milestonesList">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <footer>
+            <p>© 2023-2025 BlackRoad OS, Inc. All Rights Reserved.</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                Confidential Financial Projections | Updated in Real-Time
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        let currentScenario = 'realistic';
+        let revenueData = null;
+        let charts = {};
+
+        // Load revenue data
+        async function loadData() {
+            try {
+                const response = await fetch('../revenue_projections.json');
+                revenueData = await response.json();
+                initializeDashboard();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Fallback to embedded data if fetch fails
+                loadEmbeddedData();
+            }
+        }
+
+        function loadEmbeddedData() {
+            // Minimal fallback data structure
+            revenueData = {
+                data: {
+                    projections: {
+                        current_state: {
+                            historical_revenue: {
+                                total_all_time: 26800000
+                            },
+                            cash_position: 32350
+                        },
+                        total_projections: {
+                            year_1_conservative: { total_annual: 161200, monthly_average: 13433 },
+                            year_1_realistic: { total_annual: 456000, monthly_average: 38000 },
+                            year_1_optimistic: { total_annual: 1280000, monthly_average: 106667 },
+                            year_3_conservative: { total_annual: 280000 },
+                            year_3_realistic: { total_annual: 950000 },
+                            year_3_optimistic: { total_annual: 3500000 }
+                        },
+                        milestones: {
+                            first_dollar: { target_date: "2025-01-15", amount: 25, source: "First sponsor" },
+                            first_1k_month: { target_date: "2025-03-01", amount: 1000, source: "Mix of sponsors + consulting" },
+                            first_10k_month: { target_date: "2025-06-01", amount: 10000, source: "Licensing + consulting" },
+                            quit_job: { target_date: "2025-12-01", required_mrr: 20000, safety_buffer: 100000 },
+                            first_100k_year: { target_date: "2025-12-31", amount: 100000, source: "All streams" },
+                            first_1m_year: { target_date: "2027-12-31", amount: 1000000, source: "SaaS scaling" }
+                        }
+                    },
+                    monthly_forecast: generateFallbackForecast()
+                }
+            };
+            initializeDashboard();
+        }
+
+        function generateFallbackForecast() {
+            const forecast = [];
+            const startDate = new Date();
+            for (let i = 0; i < 24; i++) {
+                const month_num = i + 1;
+                const conservative_revenue = 1000 + (month_num * 500);
+                const realistic_revenue = 2000 + (month_num * 1500) + (Math.pow(month_num, 1.5) * 100);
+                const optimistic_revenue = 5000 * Math.pow(1.15, month_num);
+
+                forecast.push({
+                    month: `${startDate.getFullYear()}-${String(startDate.getMonth() + 1).padStart(2, '0')}`,
+                    month_num: month_num,
+                    conservative: {
+                        revenue: Math.floor(conservative_revenue),
+                        expenses: 150 + (month_num * 10),
+                        profit: Math.floor(conservative_revenue - (150 + month_num * 10))
+                    },
+                    realistic: {
+                        revenue: Math.floor(realistic_revenue),
+                        expenses: 500 + (month_num * 100),
+                        profit: Math.floor(realistic_revenue - (500 + month_num * 100))
+                    },
+                    optimistic: {
+                        revenue: Math.floor(optimistic_revenue),
+                        expenses: 1000 + (month_num * 300),
+                        profit: Math.floor(optimistic_revenue - (1000 + month_num * 300))
+                    }
+                });
+
+                startDate.setMonth(startDate.getMonth() + 1);
+            }
+            return forecast;
+        }
+
+        function initializeDashboard() {
+            updateTopMetrics();
+            createRevenueChart();
+            createStreamChart();
+            createProfitChart();
+            renderMilestones();
+        }
+
+        function updateTopMetrics() {
+            const projections = revenueData.data.projections;
+            const current = projections.current_state;
+            const year1 = projections.total_projections[`year_1_${currentScenario}`];
+            const year3 = projections.total_projections[`year_3_${currentScenario}`];
+
+            const metrics = [
+                {
+                    label: 'Historical Revenue',
+                    value: `$${(current.historical_revenue.total_all_time / 1000000).toFixed(1)}M`,
+                    subtitle: 'All-time total'
+                },
+                {
+                    label: 'Current Assets',
+                    value: `$${current.cash_position.toLocaleString()}`,
+                    subtitle: 'Crypto holdings'
+                },
+                {
+                    label: 'Year 1 Projection',
+                    value: `$${(year1.total_annual / 1000).toFixed(0)}K`,
+                    subtitle: currentScenario.charAt(0).toUpperCase() + currentScenario.slice(1)
+                },
+                {
+                    label: 'Year 3 Projection',
+                    value: `$${year3.total_annual >= 1000000 ? (year3.total_annual / 1000000).toFixed(1) + 'M' : (year3.total_annual / 1000).toFixed(0) + 'K'}`,
+                    subtitle: currentScenario.charAt(0).toUpperCase() + currentScenario.slice(1)
+                },
+                {
+                    label: 'Monthly Average (Y1)',
+                    value: `$${(year1.monthly_average / 1000).toFixed(1)}K`,
+                    subtitle: 'Projected MRR'
+                },
+                {
+                    label: 'Profit Margin',
+                    value: '85-99%',
+                    subtitle: 'High margin business'
+                }
+            ];
+
+            const container = document.getElementById('topMetrics');
+            container.innerHTML = metrics.map(m => `
+                <div class="metric-card">
+                    <div class="metric-label">${m.label}</div>
+                    <div class="metric-value">${m.value}</div>
+                    <div class="metric-subtitle">${m.subtitle}</div>
+                </div>
+            `).join('');
+        }
+
+        function createRevenueChart() {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            const forecast = revenueData.data.monthly_forecast;
+
+            if (charts.revenue) charts.revenue.destroy();
+
+            charts.revenue = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: forecast.map(f => f.month),
+                    datasets: [
+                        {
+                            label: 'Conservative',
+                            data: forecast.map(f => f.conservative.revenue),
+                            borderColor: '#95a5a6',
+                            backgroundColor: 'rgba(149, 165, 166, 0.1)',
+                            tension: 0.4,
+                            hidden: currentScenario !== 'conservative'
+                        },
+                        {
+                            label: 'Realistic',
+                            data: forecast.map(f => f.realistic.revenue),
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            hidden: currentScenario !== 'realistic'
+                        },
+                        {
+                            label: 'Optimistic',
+                            data: forecast.map(f => f.optimistic.revenue),
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            tension: 0.4,
+                            hidden: currentScenario !== 'optimistic'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createStreamChart() {
+            const ctx = document.getElementById('streamChart').getContext('2d');
+            const breakdown = revenueData.data.projections.total_projections[`year_1_${currentScenario}`].breakdown;
+
+            if (charts.stream) charts.stream.destroy();
+
+            charts.stream = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(breakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        data: Object.values(breakdown),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#FF9D00',
+                            '#28a745',
+                            '#0066FF',
+                            '#dc3545'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createProfitChart() {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            const forecast = revenueData.data.monthly_forecast;
+
+            if (charts.profit) charts.profit.destroy();
+
+            charts.profit = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: forecast.map(f => f.month),
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: forecast.map(f => f[currentScenario].revenue),
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)'
+                        },
+                        {
+                            label: 'Expenses',
+                            data: forecast.map(f => f[currentScenario].expenses),
+                            backgroundColor: 'rgba(220, 53, 69, 0.8)'
+                        },
+                        {
+                            label: 'Profit',
+                            data: forecast.map(f => f[currentScenario].profit),
+                            backgroundColor: 'rgba(40, 167, 69, 0.8)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(0) + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMilestones() {
+            const milestones = revenueData.data.projections.milestones;
+            const container = document.getElementById('milestonesList');
+
+            container.innerHTML = Object.entries(milestones).map(([key, m]) => `
+                <div class="milestone">
+                    <div>
+                        <div class="milestone-name">${key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</div>
+                        <div class="milestone-target">Target: ${m.target_date} | ${m.source || 'Multiple streams'}</div>
+                    </div>
+                    <div class="milestone-amount">
+                        ${m.amount ? '$' + (m.amount / 1000).toFixed(m.amount >= 1000 ? 0 : 0) + (m.amount >= 1000 ? 'K' : '') :
+                          m.required_mrr ? '$' + (m.required_mrr / 1000).toFixed(0) + 'K MRR' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchScenario(scenario) {
+            currentScenario = scenario;
+
+            // Update tab styling
+            document.querySelectorAll('.scenario-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update all charts and metrics
+            updateTopMetrics();
+            createRevenueChart();
+            createStreamChart();
+            createProfitChart();
+        }
+
+        // Load data on page load
+        loadData();
+    </script>
+</body>
+</html>

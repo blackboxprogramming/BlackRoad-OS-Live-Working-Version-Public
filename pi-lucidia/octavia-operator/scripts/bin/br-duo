@@ -1,0 +1,29 @@
+#!/bin/bash
+
+LEFT_AGENT="blackroad-operator"
+RIGHT_AGENT="blackroad-analyst"
+
+LEFT_X=2
+LEFT_Y=1
+RIGHT_X=36
+RIGHT_Y=1
+BOX_W=30
+BOX_H=10
+
+INPUT="$(cat)"
+TMP_A="/tmp/blackroad_a.txt"
+
+clear
+
+# --- Agent A: run + capture ---
+printf "%s\n" "$INPUT" \
+| ./br-run "$LEFT_AGENT" \
+| tee "$TMP_A" \
+| ./br-turn "$LEFT_AGENT" "$LEFT_X" "$LEFT_Y" "$BOX_W" "$BOX_H"
+
+sleep 0.5
+
+# --- Agent B: respond to A ---
+cat "$TMP_A" \
+| ./br-run "$RIGHT_AGENT" \
+| ./br-turn "$RIGHT_AGENT" "$RIGHT_X" "$RIGHT_Y" "$BOX_W" "$BOX_H"

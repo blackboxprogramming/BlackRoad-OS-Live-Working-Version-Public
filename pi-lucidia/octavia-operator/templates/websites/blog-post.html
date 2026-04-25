@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why agents should never see your API keys — BlackRoad OS</title>
+  <meta name="description" content="The tokenless gateway is not just a security feature — it's a trust architecture.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../websites/_shared/design-bw.css">
+  <style>
+    .article-hero {
+      max-width: 760px; margin: 0 auto;
+      padding: 140px var(--sp-xl) var(--sp-xl);
+    }
+    .article-hero .post-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--subtle);
+      margin-bottom: var(--sp-sm);
+    }
+    .article-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.1;
+      margin-bottom: var(--sp-md);
+    }
+    .article-meta {
+      display: flex; align-items: center; gap: var(--sp-md);
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--muted);
+    }
+    .article-meta-sep { color: var(--border); }
+
+    .article-body {
+      max-width: 680px; margin: 0 auto;
+      padding: var(--sp-xl) var(--sp-xl) var(--sp-2xl);
+    }
+    .article-body p {
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--light);
+      margin-bottom: var(--sp-lg);
+    }
+    .article-body h2 {
+      font-size: 1.5rem;
+      margin-top: var(--sp-xl);
+      margin-bottom: var(--sp-md);
+    }
+    .article-body h3 {
+      font-size: 1.15rem;
+      margin-top: var(--sp-lg);
+      margin-bottom: var(--sp-sm);
+    }
+    .article-body blockquote {
+      border-left: 2px solid var(--border);
+      padding-left: var(--sp-md);
+      margin: var(--sp-lg) 0;
+      color: var(--subtle);
+      font-style: italic;
+    }
+    .article-body code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .article-body pre {
+      background: var(--deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-lg);
+      overflow-x: auto;
+      margin: var(--sp-lg) 0;
+    }
+    .article-body pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--light);
+    }
+    .article-body ul, .article-body ol {
+      margin: var(--sp-md) 0 var(--sp-lg);
+      padding-left: var(--sp-lg);
+    }
+    .article-body li {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--light);
+      margin-bottom: var(--sp-xs);
+    }
+
+    /* Author card */
+    .author-card {
+      max-width: 680px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+    .author-inner {
+      display: flex; gap: var(--sp-lg); align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: var(--sp-lg);
+    }
+    .author-avatar {
+      width: 60px; height: 60px;
+      background: var(--raised);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono); font-size: 1.2rem; color: var(--muted);
+      flex-shrink: 0;
+    }
+    .author-name { font-weight: 600; margin-bottom: 2px; }
+    .author-bio { font-size: 0.82rem; color: var(--subtle); line-height: 1.5; }
+
+    /* Related posts */
+    .related {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--sp-md);
+    }
+    @media (max-width: 600px) { .related-grid { grid-template-columns: 1fr; } }
+    .related-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-lg);
+      display: block;
+      transition: border-color 0.2s;
+    }
+    .related-card:hover { border-color: var(--muted); }
+    .related-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: var(--sp-xs);
+    }
+    .related-title { font-weight: 600; font-size: 0.95rem; line-height: 1.3; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">BlackRoad OS</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/docs">Docs</a>
+    </div>
+    <a href="/docs" class="nav-cta">Get Started</a>
+  </nav>
+
+  <article>
+    <div class="article-hero">
+      <div class="post-tag">Architecture</div>
+      <h1>Why agents should never see your API keys</h1>
+      <div class="article-meta">
+        <span>Alexa Amundson</span>
+        <span class="article-meta-sep">/</span>
+        <span>Feb 28, 2026</span>
+        <span class="article-meta-sep">/</span>
+        <span>8 min read</span>
+      </div>
+    </div>
+
+    <div class="article-body">
+      <p>The most common pattern in AI-powered applications is also the most dangerous: embedding API keys directly in agent code. It works. It ships. And it creates a blast radius that grows with every agent you deploy.</p>
+
+      <p>At BlackRoad OS, we took a different approach. Our tokenless gateway architecture ensures that no agent &mdash; not one of our 30,000 &mdash; ever sees a provider API key. Here's why, and how.</p>
+
+      <h2>The problem with embedded keys</h2>
+
+      <p>When an agent carries its own API key, three things are true:</p>
+
+      <ul>
+        <li>Every agent is a potential leak vector</li>
+        <li>Key rotation requires touching every agent</li>
+        <li>There's no central audit trail for provider calls</li>
+      </ul>
+
+      <p>At small scale, this is manageable. At 30,000 agents distributed across Raspberry Pis and cloud droplets, it's a liability.</p>
+
+      <h2>The gateway pattern</h2>
+
+      <p>Instead of giving agents keys, we give them a gateway address:</p>
+
+      <pre><code>[Agent CLI] ---> [BlackRoad Gateway :8787] ---> [Ollama/Claude/OpenAI]</code></pre>
+
+      <p>The gateway is the only component that holds provider credentials. Agents authenticate to the gateway via the trust boundary &mdash; not via API keys.</p>
+
+      <blockquote>The gateway is not a proxy. It's a trust boundary. That distinction matters.</blockquote>
+
+      <h2>Verification</h2>
+
+      <p>We run <code>verify-tokenless-agents.sh</code> on every commit. It scans all agent code for forbidden strings &mdash; API key patterns, provider URLs called directly, hardcoded tokens. If it finds anything, the commit is rejected.</p>
+
+      <pre><code>$ ./blackroad-core/scripts/verify-tokenless-agents.sh
+Scanning 30,000 agent configs...
+0 violations found.
+All agents are tokenless.</code></pre>
+
+      <h2>Why this matters beyond security</h2>
+
+      <p>The tokenless pattern gives us three capabilities for free:</p>
+
+      <ul>
+        <li><strong>Central logging</strong> &mdash; every provider call flows through one point, so we get a complete audit trail</li>
+        <li><strong>Instant rotation</strong> &mdash; change a key once at the gateway, and every agent picks it up immediately</li>
+        <li><strong>Provider switching</strong> &mdash; swap from OpenAI to local Ollama without touching a single agent</li>
+      </ul>
+
+      <p>Architecture decisions compound. The tokenless gateway was a day of work that saved us months of security debt.</p>
+    </div>
+  </article>
+
+  <!-- Author -->
+  <div class="author-card">
+    <div class="author-inner">
+      <div class="author-avatar">AA</div>
+      <div>
+        <div class="author-name">Alexa Amundson</div>
+        <div class="author-bio">Founder of BlackRoad OS. Writes code, policy, and occasionally blog posts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related -->
+  <div class="related">
+    <div class="label mb-md">Related</div>
+    <div class="related-grid">
+      <a href="/blog/memory-system" class="related-card">
+        <div class="related-tag">Engineering</div>
+        <div class="related-title">Hash-chained memory: how PS-SHA works</div>
+      </a>
+      <a href="/blog/30k-agents" class="related-card">
+        <div class="related-tag">Agents</div>
+        <div class="related-title">Scaling to 30,000 agents on Raspberry Pis</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc.</span>
+    <span style="display:flex;gap:var(--sp-lg);">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/contact">Contact</a>
+    </span>
+  </footer>
+
+</body>
+</html>

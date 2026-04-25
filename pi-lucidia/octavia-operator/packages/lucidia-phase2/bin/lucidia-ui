@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+SESSION=$(gum input --prompt "Session name: " --value "p2-session")
+
+AGENT=$(printf "lucidia\nalice\noctavia\nenclave\n" | \
+  gum choose --header "Select agent")
+
+if [[ -z "$AGENT" ]]; then
+  echo "No agent selected."
+  exit 1
+fi
+
+echo ""
+echo "▶ Session: $SESSION"
+echo "▶ Agent:   $AGENT"
+echo ""
+
+ollama run "$AGENT" | tee -a "$HOME/lucidia-phase2/sessions/$SESSION-$AGENT.log"

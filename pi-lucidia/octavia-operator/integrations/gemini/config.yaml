@@ -1,0 +1,52 @@
+# Gemini (Google AI) — BlackRoad OS Integration
+# https://ai.google.dev/gemini-api/docs
+
+name: gemini
+category: ai-providers
+status: active
+api_base: https://generativelanguage.googleapis.com/v1beta
+
+auth:
+  type: api_key
+  env: GOOGLE_AI_API_KEY
+  param: key
+
+endpoints:
+  generate:
+    content: POST /models/{model}:generateContent
+    stream: POST /models/{model}:streamGenerateContent
+  embed:
+    content: POST /models/{model}:embedContent
+    batch: POST /models/{model}:batchEmbedContents
+  models:
+    list: GET /models
+    get: GET /models/{model}
+  count_tokens:
+    count: POST /models/{model}:countTokens
+
+models:
+  - id: gemini-2.5-pro
+    purpose: advanced-reasoning
+    context: 1000000
+  - id: gemini-2.5-flash
+    purpose: fast-multimodal
+    context: 1000000
+  - id: gemini-2.0-flash
+    purpose: balanced
+    context: 1000000
+
+features:
+  - multimodal
+  - grounding
+  - code_execution
+  - function_calling
+  - long_context
+  - streaming
+
+gateway_route: /v1/google
+default_model: gemini-2.5-flash
+
+health_check:
+  endpoint: GET /models
+  interval: 300
+  timeout: 10

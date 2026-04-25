@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""
+br-color
+Query and display BR color semantics.
+"""
+
+import sys
+
+RESET = "\x1b[0m"
+
+# Zone definitions from BR_COLOR_SPEC.md
+ZONES = {
+    "OS_LAYER": (0, 15, "Core system primitives"),
+    "PERCEPTION": (16, 51, "Input, sensors, listeners"),
+    "EXECUTION": (52, 87, "Actions, mutations, writes"),
+    "MEMORY": (88, 123, "State, cache, persistence"),
+    "AUTONOMY": (124, 159, "Agents, decision, delegation"),
+    "TENSION": (160, 195, "Warnings, drift, uncertainty"),
+    "PARADOX": (196, 231, "Errors, contradiction, halt"),
+    "META": (232, 255, "Null, silence, void, escape"),
+}
+
+# Token definitions for key colors
+TOKENS = {
+    0: "NULL", 1: "ERROR", 2: "SUCCESS", 3: "WARN", 4: "INFO", 5: "DEBUG",
+    6: "SYSCALL", 7: "NEUTRAL", 8: "NULL_BRIGHT", 9: "ERROR_BRIGHT",
+    10: "SUCCESS_BRIGHT", 11: "WARN_BRIGHT", 12: "INFO_BRIGHT", 13: "DEBUG_BRIGHT",
+    14: "SYSCALL_BRIGHT", 15: "NEUTRAL_BRIGHT",
+    
+    16: "RAW_SENSOR", 28: "VALID_INPUT", 40: "STREAM_LIVE",
+    64: "EXEC_HIGH", 76: "EXEC_ATOMIC", 202: "EXEC_FORCE",
+    88: "MEM_VOLATILE", 100: "MEM_PERSIST", 118: "MEM_ARCHIVE",
+    130: "AGENT_THINK", 136: "AGENT_EXEC", 154: "AGENT_META",
+    166: "WARN_MEMORY", 178: "WARN_DRIFT", 190: "WARN_DEGRADE",
+    196: "ERROR_FATAL", 208: "ERROR_DATA", 226: "ERROR_CASCADE",
+    232: "META_NULL", 244: "META_ESCAPE", 255: "META_BRIGHT",
+}
+
+# Shape mappings
+SHAPES = {
+    range(0, 16): "■",
+    range(16, 52): "░",
+    range(52, 88): "█",
+    range(88, 124): "▓",
+    range(124, 160): "●",
+    range(160, 196): "▲",
+    range(196, 232): "◆",
+    range(232, 256): "░",
+}
+
+SPECIAL_SHAPES = {
+    0: "·", 1: "✗", 2: "✓", 3: "⚠",
+    196: "✗", 202: "⚡", 226: "★", 232: "∅", 255: "◉",
+}
+
+def get_zone(color):
+    """Get zone name for a color."""
+    for zone_name, (start, end, _) in ZONES.items():
+        if start <= color <= end:
+            return zone_name
+    return "UNKNOWN"
+
+def get_shape(color):
+    """Get shape for a color."""
+    if color in SPECIAL_SHAPES:
+        return SPECIAL_SHAPES[color]
+    for color_range, shape in SHAPES.items():
+        if color in color_range:
+            return shape
+    return "?"
+
+def display_color(color):
+    """Display full info for a color."""
+    zone = get_zone(color)
+    token = TOKENS.get(color, f"COLOR_{color}")
+    shape = get_shape(color)
+    
+    bg = f"\x1b[48;5;{color}m"
+    fg = f"\x1b[38;5;{255 - color}m"
+    
+    print(f"\n{bg}{fg}  {color:>3}  {RESET}")
+    print(f"Token:  {token}")
+    print(f"Zone:   {zone}")
+    print(f"Shape:  {shape}")
+    
+    for zone_name, (start, end, desc) in ZONES.items():
+        if zone_name == zone:
+            print(f"Range:  {start}–{end}")
+            print(f"Desc:   {desc}")
+            break
+    print()
+
+def list_zone(zone_name):
+    """List all colors in a zone."""
+    zone_name = zone_name.upper()
+    if zone_name not in ZONES:
+        print(f"Error: Unknown zone '{zone_name}'")
+        print(f"Available zones: {', '.join(ZONES.keys())}")
+        return
+    
+    start, end, desc = ZONES[zone_name]
+    print(f"\n{zone_name} ({start}–{end}): {desc}\n")
+    
+    for i in range(start, end + 1):
+        bg = f"\x1b[48;5;{i}m"
+        fg = f"\x1b[38;5;{255 - i}m"
+        token = TOKENS.get(i, f"COLOR_{i}")
+        shape = get_shape(i)
+        print(f"{bg}{fg} {i:>3} {RESET}  {shape}  {token}")
+    print()
+
+def show_all():
+    """Show all zones overview."""
+    print("\nBR COLOR ZONES\n")
+    for zone_name, (start, end, desc) in ZONES.items():
+        print(f"{zone_name:12} {start:>3}–{end:<3}  {desc}")
+    print()
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage:")
+        print("  br-color <color>           # Show info for color index")
+        print("  br-color zone <zone>       # List all colors in zone")
+        print("  br-color show              # Show all zones")
+        print()
+        print("Zones: OS_LAYER, PERCEPTION, EXECUTION, MEMORY,")
+        print("       AUTONOMY, TENSION, PARADOX, META")
+        sys.exit(1)
+    
+    cmd = sys.argv[1]
+    
+    if cmd == "show":
+        show_all()
+    elif cmd == "zone":
+        if len(sys.argv) < 3:
+            print("Error: zone requires a zone name")
+            sys.exit(1)
+        list_zone(sys.argv[2])
+    else:
+        try:
+            color = int(cmd)
+            if 0 <= color <= 255:
+                display_color(color)
+            else:
+                print("Error: color must be 0-255")
+                sys.exit(1)
+        except ValueError:
+            print(f"Error: '{cmd}' is not a valid color index")
+            sys.exit(1)
+
+if __name__ == "__main__":
+    main()

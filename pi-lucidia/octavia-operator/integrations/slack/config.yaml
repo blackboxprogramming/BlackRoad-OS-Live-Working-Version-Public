@@ -1,0 +1,61 @@
+# Slack — BlackRoad OS Integration
+# https://api.slack.com/methods
+
+name: slack
+category: communication
+status: active
+api_base: https://slack.com/api
+
+auth:
+  type: bearer_token
+  env: SLACK_BOT_TOKEN
+  signing_secret_env: SLACK_SIGNING_SECRET
+
+endpoints:
+  messages:
+    post: POST /chat.postMessage
+    update: POST /chat.update
+    delete: POST /chat.delete
+    schedule: POST /chat.scheduleMessage
+  channels:
+    list: GET /conversations.list
+    info: GET /conversations.info
+    create: POST /conversations.create
+    history: GET /conversations.history
+    join: POST /conversations.join
+  users:
+    list: GET /users.list
+    info: GET /users.info
+    lookup: GET /users.lookupByEmail
+  files:
+    upload: POST /files.uploadV2
+    list: GET /files.list
+  reactions:
+    add: POST /reactions.add
+    remove: POST /reactions.remove
+  views:
+    open: POST /views.open
+    update: POST /views.update
+    push: POST /views.push
+
+channels:
+  general: configured
+  engineering: configured
+  deployments: configured
+  alerts: configured
+  agent-updates: configured
+
+webhooks:
+  incoming_url_env: SLACK_WEBHOOK_URL
+  events:
+    - message
+    - app_mention
+    - reaction_added
+    - channel_created
+  endpoint: /webhooks/slack
+  secret_env: SLACK_SIGNING_SECRET
+
+health_check:
+  endpoint: POST /auth.test
+  interval: 300
+  timeout: 10

@@ -1,0 +1,316 @@
+#!/bin/bash
+# 📈 CECE-METRICS v1.0 - System Metrics Collection
+# Collects and stores metrics in InfluxDB format
+
+PINK='\033[38;5;205m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+METRICS_DIR="$CECE_HOME/metrics"
+METRICS_FILE="$METRICS_DIR/metrics.jsonl"
+INFLUX_URL="${INFLUX_URL:-http://localhost:8086}"
+INFLUX_DB="${INFLUX_DB:-cece}"
+
+mkdir -p "$METRICS_DIR"
+
+banner() {
+    echo -e "${PINK}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PINK}║${NC}            ${WHITE}📈 CECE-METRICS - System Metrics${NC}               ${PINK}║${NC}"
+    echo -e "${PINK}╚════════════════════════════════════════════════════════════╝${NC}"
+}
+
+# Get CPU usage
+get_cpu() {
+    top -bn1 2>/dev/null | grep "Cpu(s)" | awk '{print $2}' | sed 's/%//' || echo "0"
+}
+
+# Get memory usage
+get_memory() {
+    free 2>/dev/null | grep Mem | awk '{printf "%.1f", $3/$2 * 100}' || echo "0"
+}
+
+# Get disk usage
+get_disk() {
+    df / 2>/dev/null | tail -1 | awk '{print $5}' | sed 's/%//' || echo "0"
+}
+
+# Get temperature
+get_temp() {
+    if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+        echo $(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))
+    else
+        echo "0"
+    fi
+}
+
+# Get load average
+get_load() {
+    cat /proc/loadavg 2>/dev/null | awk '{print $1}' || echo "0"
+}
+
+# Get network stats
+get_network_rx() {
+    cat /sys/class/net/eth0/statistics/rx_bytes 2>/dev/null || echo "0"
+}
+
+get_network_tx() {
+    cat /sys/class/net/eth0/statistics/tx_bytes 2>/dev/null || echo "0"
+}
+
+# Get uptime in seconds
+get_uptime() {
+    cat /proc/uptime 2>/dev/null | awk '{print int($1)}' || echo "0"
+}
+
+# Collect all metrics
+cmd_collect() {
+    local timestamp=$(date +%s)
+    local hostname=$(hostname)
+
+    local cpu=$(get_cpu)
+    local memory=$(get_memory)
+    local disk=$(get_disk)
+    local temp=$(get_temp)
+    local load=$(get_load)
+    local net_rx=$(get_network_rx)
+    local net_tx=$(get_network_tx)
+    local uptime=$(get_uptime)
+
+    # Store as JSON
+    local metric=$(cat << EOF
+{"timestamp":$timestamp,"host":"$hostname","cpu":$cpu,"memory":$memory,"disk":$disk,"temp":$temp,"load":$load,"net_rx":$net_rx,"net_tx":$net_tx,"uptime":$uptime}
+EOF
+)
+
+    echo "$metric" >> "$METRICS_FILE"
+
+    echo -e "${GREEN}✓${NC} Metrics collected for ${CYAN}$hostname${NC}"
+    echo "  CPU: ${cpu}% | Memory: ${memory}% | Disk: ${disk}% | Temp: ${temp}°C"
+}
+
+# Show current metrics
+cmd_now() {
+    banner
+    echo ""
+
+    local hostname=$(hostname)
+    local cpu=$(get_cpu)
+    local memory=$(get_memory)
+    local disk=$(get_disk)
+    local temp=$(get_temp)
+    local load=$(get_load)
+    local net_rx=$(($(get_network_rx) / 1024 / 1024))
+    local net_tx=$(($(get_network_tx) / 1024 / 1024))
+
+    echo -e "${WHITE}Current Metrics - $hostname${NC}"
+    echo ""
+    echo -e "  ${CYAN}CPU Usage:${NC}     ${cpu}%"
+    echo -e "  ${CYAN}Memory:${NC}        ${memory}%"
+    echo -e "  ${CYAN}Disk:${NC}          ${disk}%"
+    echo -e "  ${CYAN}Temperature:${NC}   ${temp}°C"
+    echo -e "  ${CYAN}Load Average:${NC}  ${load}"
+    echo -e "  ${CYAN}Network RX:${NC}    ${net_rx} MB"
+    echo -e "  ${CYAN}Network TX:${NC}    ${net_tx} MB"
+}
+
+# Show historical metrics
+cmd_history() {
+    local count="${1:-20}"
+
+    banner
+    echo ""
+    echo -e "${WHITE}Last $count Metrics:${NC}"
+    echo ""
+
+    if [ ! -f "$METRICS_FILE" ]; then
+        echo "No metrics collected yet. Run 'cece-metrics collect' first."
+        return
+    fi
+
+    printf "  ${CYAN}%-20s %6s %6s %6s %6s %6s${NC}\n" "TIMESTAMP" "CPU" "MEM" "DISK" "TEMP" "LOAD"
+    echo "  ──────────────────────────────────────────────────────────"
+
+    tail -n "$count" "$METRICS_FILE" | while read -r line; do
+        local ts=$(echo "$line" | jq -r '.timestamp')
+        local time=$(date -d "@$ts" '+%Y-%m-%d %H:%M' 2>/dev/null || date -r "$ts" '+%Y-%m-%d %H:%M')
+        local cpu=$(echo "$line" | jq -r '.cpu')
+        local mem=$(echo "$line" | jq -r '.memory')
+        local disk=$(echo "$line" | jq -r '.disk')
+        local temp=$(echo "$line" | jq -r '.temp')
+        local load=$(echo "$line" | jq -r '.load')
+
+        printf "  %-20s %5.1f%% %5.1f%% %5.0f%% %4.0f°C %5.2f\n" "$time" "$cpu" "$mem" "$disk" "$temp" "$load"
+    done
+}
+
+# Export to InfluxDB line protocol
+cmd_export_influx() {
+    local output="${1:-$METRICS_DIR/influx-export.txt}"
+
+    echo -e "${CYAN}Exporting to InfluxDB line protocol...${NC}"
+
+    > "$output"
+
+    while read -r line; do
+        local ts=$(echo "$line" | jq -r '.timestamp')
+        local host=$(echo "$line" | jq -r '.host')
+        local cpu=$(echo "$line" | jq -r '.cpu')
+        local memory=$(echo "$line" | jq -r '.memory')
+        local disk=$(echo "$line" | jq -r '.disk')
+        local temp=$(echo "$line" | jq -r '.temp')
+        local load=$(echo "$line" | jq -r '.load')
+        local net_rx=$(echo "$line" | jq -r '.net_rx')
+        local net_tx=$(echo "$line" | jq -r '.net_tx')
+
+        # InfluxDB line protocol
+        echo "system,host=$host cpu=$cpu,memory=$memory,disk=$disk,temp=$temp,load=$load,net_rx=${net_rx}i,net_tx=${net_tx}i ${ts}000000000" >> "$output"
+    done < "$METRICS_FILE"
+
+    local count=$(wc -l < "$output")
+    echo -e "${GREEN}✓${NC} Exported $count metrics to $output"
+}
+
+# Push to InfluxDB
+cmd_push() {
+    echo -e "${CYAN}Pushing metrics to InfluxDB...${NC}"
+
+    if ! curl -s "$INFLUX_URL/ping" &>/dev/null; then
+        echo -e "${RED}Error:${NC} Cannot connect to InfluxDB at $INFLUX_URL"
+        return 1
+    fi
+
+    # Create temporary line protocol file
+    local tmp=$(mktemp)
+    cmd_export_influx "$tmp" > /dev/null
+
+    # Push to InfluxDB
+    curl -s -XPOST "$INFLUX_URL/write?db=$INFLUX_DB" --data-binary @"$tmp"
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓${NC} Metrics pushed to InfluxDB"
+    else
+        echo -e "${RED}✗${NC} Failed to push metrics"
+    fi
+
+    rm -f "$tmp"
+}
+
+# Show statistics
+cmd_stats() {
+    banner
+    echo ""
+
+    if [ ! -f "$METRICS_FILE" ]; then
+        echo "No metrics collected yet."
+        return
+    fi
+
+    local count=$(wc -l < "$METRICS_FILE")
+    local first=$(head -1 "$METRICS_FILE" | jq -r '.timestamp')
+    local last=$(tail -1 "$METRICS_FILE" | jq -r '.timestamp')
+    local size=$(du -sh "$METRICS_FILE" | awk '{print $1}')
+
+    local first_date=$(date -d "@$first" '+%Y-%m-%d %H:%M' 2>/dev/null || date -r "$first" '+%Y-%m-%d %H:%M')
+    local last_date=$(date -d "@$last" '+%Y-%m-%d %H:%M' 2>/dev/null || date -r "$last" '+%Y-%m-%d %H:%M')
+
+    echo -e "${WHITE}Metrics Statistics:${NC}"
+    echo ""
+    echo -e "  ${CYAN}Total Records:${NC}  $count"
+    echo -e "  ${CYAN}File Size:${NC}      $size"
+    echo -e "  ${CYAN}First Record:${NC}   $first_date"
+    echo -e "  ${CYAN}Last Record:${NC}    $last_date"
+
+    # Calculate averages
+    echo ""
+    echo -e "${WHITE}Averages (all time):${NC}"
+
+    local avg_cpu=$(jq -s 'map(.cpu) | add / length' "$METRICS_FILE" 2>/dev/null)
+    local avg_mem=$(jq -s 'map(.memory) | add / length' "$METRICS_FILE" 2>/dev/null)
+    local avg_temp=$(jq -s 'map(.temp) | add / length' "$METRICS_FILE" 2>/dev/null)
+    local max_cpu=$(jq -s 'map(.cpu) | max' "$METRICS_FILE" 2>/dev/null)
+    local max_temp=$(jq -s 'map(.temp) | max' "$METRICS_FILE" 2>/dev/null)
+
+    printf "  ${CYAN}Avg CPU:${NC}    %.1f%%\n" "$avg_cpu"
+    printf "  ${CYAN}Avg Memory:${NC} %.1f%%\n" "$avg_mem"
+    printf "  ${CYAN}Avg Temp:${NC}   %.0f°C\n" "$avg_temp"
+    printf "  ${CYAN}Max CPU:${NC}    %.1f%%\n" "$max_cpu"
+    printf "  ${CYAN}Max Temp:${NC}   %.0f°C\n" "$max_temp"
+}
+
+# Daemon mode - collect metrics periodically
+cmd_daemon() {
+    local interval="${1:-60}"
+
+    echo -e "${CYAN}Starting metrics daemon (interval: ${interval}s)...${NC}"
+
+    while true; do
+        cmd_collect
+        sleep "$interval"
+    done
+}
+
+# Clear old metrics
+cmd_prune() {
+    local keep="${1:-1000}"
+
+    local total=$(wc -l < "$METRICS_FILE" 2>/dev/null || echo 0)
+
+    if [ "$total" -le "$keep" ]; then
+        echo "Only $total records, nothing to prune."
+        return
+    fi
+
+    local tmp=$(mktemp)
+    tail -n "$keep" "$METRICS_FILE" > "$tmp"
+    mv "$tmp" "$METRICS_FILE"
+
+    local deleted=$((total - keep))
+    echo -e "${GREEN}✓${NC} Pruned $deleted old records, kept $keep"
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "${WHITE}Usage:${NC} cece-metrics <command> [args]"
+    echo ""
+    echo -e "${CYAN}Commands:${NC}"
+    echo "  now               Show current metrics"
+    echo "  collect           Collect and store metrics"
+    echo "  history [n]       Show last n records (default: 20)"
+    echo "  stats             Show statistics and averages"
+    echo "  daemon [sec]      Continuous collection (default: 60s)"
+    echo "  export [file]     Export to InfluxDB line protocol"
+    echo "  push              Push metrics to InfluxDB"
+    echo "  prune [keep]      Delete old records (keep last n)"
+    echo ""
+    echo -e "${WHITE}Environment:${NC}"
+    echo "  INFLUX_URL        InfluxDB URL (default: http://localhost:8086)"
+    echo "  INFLUX_DB         Database name (default: cece)"
+}
+
+# Main
+main() {
+    local cmd="${1:-now}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        now|current) cmd_now ;;
+        collect) cmd_collect ;;
+        history|hist) cmd_history "$@" ;;
+        stats) cmd_stats ;;
+        daemon|watch) cmd_daemon "$@" ;;
+        export) cmd_export_influx "$@" ;;
+        push) cmd_push ;;
+        prune|clean) cmd_prune "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

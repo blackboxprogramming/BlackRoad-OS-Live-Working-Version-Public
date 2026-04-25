@@ -1,0 +1,58 @@
+# Tailscale — BlackRoad OS Integration
+# https://tailscale.com/api
+
+name: tailscale
+category: infrastructure
+status: active
+api_base: https://api.tailscale.com/api/v2
+
+auth:
+  type: bearer_token
+  env: TAILSCALE_API_KEY
+  tailnet_env: TAILSCALE_TAILNET
+
+endpoints:
+  devices:
+    list: GET /tailnet/{tailnet}/devices
+    get: GET /device/{deviceId}
+    delete: DELETE /device/{deviceId}
+    routes: GET /device/{deviceId}/routes
+    authorize: POST /device/{deviceId}/authorized
+  keys:
+    list: GET /tailnet/{tailnet}/keys
+    create: POST /tailnet/{tailnet}/keys
+    get: GET /tailnet/{tailnet}/keys/{keyId}
+    delete: DELETE /tailnet/{tailnet}/keys/{keyId}
+  acl:
+    get: GET /tailnet/{tailnet}/acl
+    set: POST /tailnet/{tailnet}/acl
+  dns:
+    nameservers: GET /tailnet/{tailnet}/dns/nameservers
+    searchpaths: GET /tailnet/{tailnet}/dns/searchpaths
+    preferences: GET /tailnet/{tailnet}/dns/preferences
+
+network:
+  devices:
+    - name: blackroad-pi
+      ip: 100.x.x.x
+      role: primary
+    - name: lucidia-pi
+      ip: 100.x.x.x
+      role: secondary
+    - name: macbook
+      ip: 100.x.x.x
+      role: dev
+    - name: iphone
+      ip: 100.x.x.x
+      role: mobile
+  features:
+    - mesh_vpn
+    - exit_nodes
+    - subnet_routing
+    - magic_dns
+    - acl_policies
+
+health_check:
+  endpoint: GET /tailnet/{tailnet}/devices
+  interval: 300
+  timeout: 10

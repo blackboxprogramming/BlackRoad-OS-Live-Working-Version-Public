@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — BlackRoad</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛤️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gray-950: #0a0a0a;
+      --gray-900: #171717;
+      --gray-800: #262626;
+      --gray-700: #404040;
+      --gray-600: #525252;
+      --gray-500: #737373;
+      --gray-400: #a3a3a3;
+      --gray-300: #d4d4d4;
+      --gray-100: #f5f5f5;
+      --accent-6: #1e90ff;
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--gray-950);
+      color: var(--gray-100);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+    }
+    .auth-header { text-align: center; margin-bottom: 40px; }
+    .auth-logo {
+      font-family: var(--font-headline);
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .auth-logo span {
+      background: linear-gradient(90deg, #ff8700, #ff0087, #1e90ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .auth-title { font-size: 14px; color: var(--gray-500); }
+    .auth-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; color: var(--gray-400); }
+    .form-input {
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: var(--gray-100);
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .form-input:focus { outline: none; border-color: var(--gray-600); }
+    .btn {
+      background: var(--gray-100);
+      color: var(--gray-900);
+      border: none;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+    .btn:hover { background: var(--gray-300); }
+    .auth-footer { text-align: center; margin-top: 24px; font-size: 14px; color: var(--gray-500); }
+    .auth-footer a { color: var(--accent-6); }
+    .auth-footer a:hover { text-decoration: underline; }
+    .error { background: rgba(255, 0, 87, 0.1); border: 1px solid rgba(255, 0, 87, 0.3); color: #ff5f87; padding: 12px; border-radius: 8px; font-size: 14px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-header">
+      <a href="/" class="auth-logo"><span>BlackRoad</span></a>
+      <p class="auth-title">Sign in to your account</p>
+    </div>
+    <div class="error" id="error"></div>
+    <form class="auth-form" id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn">Sign In</button>
+    </form>
+    <p class="auth-footer">Don't have an account? <a href="/signup">Sign up</a></p>
+  </div>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const errorEl = document.getElementById('error');
+      
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: data.get('email'),
+            password: data.get('password')
+          })
+        });
+        const result = await res.json();
+        if (result.success) {
+          window.location.href = '/dashboard';
+        } else {
+          errorEl.textContent = result.error || 'Login failed';
+          errorEl.style.display = 'block';
+        }
+      } catch (err) {
+        errorEl.textContent = 'Network error';
+        errorEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

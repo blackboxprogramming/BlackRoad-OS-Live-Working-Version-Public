@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animation Shape Library</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; color: #fff; font-family: 'Courier New', monospace; min-height: 100vh; padding: 24px; }
+
+h1 { text-align: center; font-size: 1.4rem; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; opacity: 0.9; }
+.subtitle { text-align: center; font-size: 0.7rem; letter-spacing: 4px; opacity: 0.4; margin-bottom: 40px; }
+
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+gap: 24px;
+max-width: 1200px;
+margin: 0 auto;
+}
+
+.card {
+border: 1px solid rgba(255,255,255,0.08);
+border-radius: 12px;
+padding: 20px;
+display: flex;
+flex-direction: column;
+align-items: center;
+background: rgba(255,255,255,0.02);
+transition: background 0.3s, border-color 0.3s;
+}
+.card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+
+.shape-container {
+width: 120px; height: 120px;
+display: flex; align-items: center; justify-content: center;
+margin-bottom: 14px;
+}
+
+.label { font-size: 0.65rem; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; }
+
+/* ── SHAPES ── */
+
+/* 1. Pulse Circle */
+.pulse-circle {
+width: 50px; height: 50px; border-radius: 50%;
+background: #fff;
+animation: circlePulse 2s ease-in-out infinite;
+}
+@keyframes circlePulse {
+0%, 100% { transform: scale(1); opacity: 1; }
+50% { transform: scale(1.4); opacity: 0.4; }
+}
+
+/* 2. Spin Square */
+.spin-square {
+width: 50px; height: 50px;
+border: 2px solid #fff;
+animation: spinSquare 3s linear infinite;
+}
+@keyframes spinSquare {
+to { transform: rotate(360deg); }
+}
+
+/* 3. Morph Blob */
+.morph-blob {
+width: 60px; height: 60px; background: #fff;
+animation: morph 4s ease-in-out infinite;
+}
+@keyframes morph {
+0%, 100% { border-radius: 50% 50% 50% 50%; }
+25% { border-radius: 30% 70% 40% 60%; }
+50% { border-radius: 60% 40% 70% 30%; }
+75% { border-radius: 40% 60% 30% 70%; }
+}
+
+/* 4. Breathing Ring */
+.breathing-ring {
+width: 60px; height: 60px; border-radius: 50%;
+border: 2px solid #fff;
+animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+0%, 100% { transform: scale(0.6); opacity: 0.3; border-width: 2px; }
+50% { transform: scale(1.2); opacity: 1; border-width: 1px; }
+}
+
+  /* 5. Bounce Triangle */
+  .bounce-tri {
+  width: 0; height: 0;
+  border-left: 28px solid transparent;
+  border-right: 28px solid transparent;
+  border-bottom: 48px solid #fff;
+  animation: bounceTri 1.5s ease-in-out infinite;
+  }
+  @keyframes bounceTri {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+  }
+
+/* 6. Flip Diamond */
+.flip-diamond {
+width: 44px; height: 44px; background: #fff;
+animation: flipDiamond 2.5s ease-in-out infinite;
+}
+@keyframes flipDiamond {
+0%, 100% { transform: rotate(45deg) scale(1); }
+50% { transform: rotate(45deg) scale(0.6) rotateY(180deg); }
+}
+
+/* 7. Orbit Dots */
+.orbit-dots {
+width: 80px; height: 80px; position: relative;
+animation: orbitSpin 3s linear infinite;
+}
+.orbit-dots::before, .orbit-dots::after {
+content: ''; position: absolute;
+width: 10px; height: 10px; border-radius: 50%; background: #fff;
+}
+.orbit-dots::before { top: 0; left: 50%; transform: translateX(-50%); }
+.orbit-dots::after { bottom: 0; left: 50%; transform: translateX(-50%); }
+@keyframes orbitSpin { to { transform: rotate(360deg); } }
+
+/* 8. Wave Line */
+.wave-line {
+display: flex; gap: 4px; align-items: center;
+}
+.wave-line span {
+width: 3px; background: #fff; border-radius: 2px;
+height: 40px;
+transform-origin: bottom;
+animation: wave 1.2s ease-in-out infinite;
+}
+.wave-line span:nth-child(1) { animation-delay: 0s; }
+.wave-line span:nth-child(2) { animation-delay: 0.1s; }
+.wave-line span:nth-child(3) { animation-delay: 0.2s; }
+.wave-line span:nth-child(4) { animation-delay: 0.3s; }
+.wave-line span:nth-child(5) { animation-delay: 0.4s; }
+.wave-line span:nth-child(6) { animation-delay: 0.5s; }
+.wave-line span:nth-child(7) { animation-delay: 0.6s; }
+@keyframes wave {
+0%, 100% { transform: scaleY(0.25); opacity: 0.4; }
+50% { transform: scaleY(1); opacity: 1; }
+}
+
+/* 9. Ripple */
+.ripple { width: 80px; height: 80px; position: relative; }
+.ripple span {
+position: absolute; inset: 0;
+border: 1px solid #fff; border-radius: 50%;
+animation: rippleOut 2.5s ease-out infinite;
+}
+.ripple span:nth-child(2) { animation-delay: 0.5s; }
+.ripple span:nth-child(3) { animation-delay: 1s; }
+@keyframes rippleOut {
+0% { transform: scale(0.2); opacity: 1; }
+100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* 10. Glitch Rect */
+.glitch-rect {
+width: 50px; height: 30px; background: #fff;
+animation: glitch 0.8s steps(4) infinite;
+}
+@keyframes glitch {
+0% { transform: translate(0); clip-path: inset(0); }
+25% { transform: translate(-3px, 2px); clip-path: inset(20% 0 30% 0); }
+50% { transform: translate(3px, -1px); clip-path: inset(40% 0 10% 0); }
+75% { transform: translate(-2px, 1px); clip-path: inset(10% 0 50% 0); }
+100% { transform: translate(0); clip-path: inset(0); }
+}
+
+/* 11. Pendulum */
+.pendulum-wrap { width: 60px; height: 80px; position: relative; }
+.pendulum-line {
+width: 2px; height: 50px; background: rgba(255,255,255,0.3);
+position: absolute; top: 0; left: 50%; transform-origin: top center;
+animation: swing 2s ease-in-out infinite;
+}
+.pendulum-line::after {
+content: ''; position: absolute; bottom: -8px; left: -7px;
+width: 16px; height: 16px; border-radius: 50%; background: #fff;
+}
+@keyframes swing {
+0%, 100% { transform: translateX(-50%) rotate(30deg); }
+50% { transform: translateX(-50%) rotate(-30deg); }
+}
+
+/* 12. Hexagon Spin */
+.hex-spin {
+width: 50px; height: 58px;
+clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+background: #fff;
+animation: hexSpin 4s ease-in-out infinite;
+}
+@keyframes hexSpin {
+0%, 100% { transform: rotate(0deg) scale(1); }
+25% { transform: rotate(90deg) scale(0.8); }
+50% { transform: rotate(180deg) scale(1); }
+75% { transform: rotate(270deg) scale(0.8); }
+}
+
+/* 13. Dash Circle */
+.dash-circle {
+width: 60px; height: 60px;
+}
+.dash-circle svg { animation: dashSpin 2s linear infinite; }
+.dash-circle circle {
+fill: none; stroke: #fff; stroke-width: 2;
+stroke-dasharray: 20 10;
+animation: dashMove 1.5s linear infinite;
+}
+@keyframes dashSpin { to { transform: rotate(360deg); } }
+@keyframes dashMove { to { stroke-dashoffset: -90; } }
+
+/* 14. Cross Rotate */
+.cross-rotate {
+width: 50px; height: 50px; position: relative;
+animation: crossRot 3s linear infinite;
+}
+.cross-rotate::before, .cross-rotate::after {
+content: ''; position: absolute; background: #fff; border-radius: 2px;
+}
+.cross-rotate::before { width: 100%; height: 6px; top: 50%; transform: translateY(-50%); }
+.cross-rotate::after { width: 6px; height: 100%; left: 50%; transform: translateX(-50%); }
+@keyframes crossRot { to { transform: rotate(360deg); } }
+
+/* 15. Scale Star */
+.scale-star {
+width: 50px; height: 50px;
+clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+background: #fff;
+animation: starPulse 2s ease-in-out infinite;
+}
+@keyframes starPulse {
+0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+50% { transform: scale(0.5) rotate(36deg); opacity: 0.5; }
+}
+
+/* 16. Expanding Square */
+.expand-square {
+width: 40px; height: 40px; border: 2px solid #fff;
+animation: expandSq 2s ease-in-out infinite;
+}
+@keyframes expandSq {
+0%, 100% { transform: scale(0.5) rotate(0); opacity: 0.4; }
+50% { transform: scale(1.3) rotate(90deg); opacity: 1; }
+}
+
+/* 17. Loading Dots */
+.loading-dots { display: flex; gap: 8px; }
+.loading-dots span {
+width: 10px; height: 10px; border-radius: 50%; background: #fff;
+animation: loadDot 1.4s ease-in-out infinite;
+}
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes loadDot {
+0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
+40% { transform: scale(1); opacity: 1; }
+}
+
+/* 18. Infinity Loop */
+.infinity-loop {
+width: 80px; height: 40px; position: relative;
+}
+.infinity-loop::before, .infinity-loop::after {
+content: ''; position: absolute; top: 0;
+width: 36px; height: 36px; border: 2px solid #fff; border-radius: 50%;
+}
+.infinity-loop::before { left: 0; }
+.infinity-loop::after { right: 0; }
+.infinity-dot {
+width: 8px; height: 8px; border-radius: 50%; background: #fff;
+position: absolute; top: 50%; left: 50%; margin-top: -4px; margin-left: -4px;
+animation: infinityPath 3s linear infinite;
+}
+@keyframes infinityPath {
+  /* Smooth figure-eight (∞) path around the center of .infinity-loop */
+  0%   { transform: translate(-18px, 0); }      /* leftmost point */
+  12.5% { transform: translate(-12px, -8px); }  /* upper-left */
+  25%  { transform: translate(0, 0); }          /* center crossover */
+  37.5% { transform: translate(12px, -8px); }   /* upper-right */
+  50%  { transform: translate(18px, 0); }       /* rightmost point */
+  62.5% { transform: translate(12px, 8px); }    /* lower-right */
+  75%  { transform: translate(0, 0); }          /* center crossover */
+  87.5% { transform: translate(-12px, 8px); }   /* lower-left */
+  100% { transform: translate(-18px, 0); }      /* back to leftmost */
+}
+
+/* 19. Scan Line */
+.scan-line {
+width: 60px; height: 60px; border: 1px solid rgba(255,255,255,0.2);
+position: relative; overflow: hidden;
+}
+.scan-line::after {
+content: ''; position: absolute; left: 0; top: 0; width: 100%; height: 2px;
+background: #fff; box-shadow: 0 0 8px #fff;
+animation: scan 1.5s ease-in-out infinite;
+}
+@keyframes scan {
+0% { transform: translateY(0); opacity: 1; }
+100% { transform: translateY(58px); opacity: 0.3; }
+}
+
+/* 20. Spiral Grow */
+.spiral-grow {
+width: 60px; height: 60px; position: relative;
+}
+.spiral-grow span {
+position: absolute; border: 1.5px solid #fff; border-radius: 50%;
+top: 50%; left: 50%;
+animation: spiralPulse 3s ease-in-out infinite;
+}
+.spiral-grow span:nth-child(1) { width: 15px; height: 15px; margin: -7.5px; animation-delay: 0s; }
+.spiral-grow span:nth-child(2) { width: 30px; height: 30px; margin: -15px; animation-delay: 0.3s; }
+.spiral-grow span:nth-child(3) { width: 45px; height: 45px; margin: -22.5px; animation-delay: 0.6s; }
+.spiral-grow span:nth-child(4) { width: 60px; height: 60px; margin: -30px; animation-delay: 0.9s; }
+@keyframes spiralPulse {
+0%, 100% { transform: scale(0.8) rotate(0); opacity: 0.3; }
+50% { transform: scale(1.1) rotate(90deg); opacity: 1; }
+}
+
+/* 21. Typewriter Cursor */
+.typewriter-cursor {
+width: 3px; height: 40px; background: #fff;
+animation: cursorBlink 1s step-end infinite;
+}
+@keyframes cursorBlink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0; }
+}
+
+/* 22. Shutter */
+.shutter {
+width: 60px; height: 60px; display: flex; flex-direction: column; gap: 3px;
+overflow: hidden;
+}
+.shutter span {
+flex: 1; background: #fff;
+animation: shutterSlide 2s ease-in-out infinite alternate;
+}
+.shutter span:nth-child(odd) { animation-direction: alternate-reverse; }
+@keyframes shutterSlide {
+0% { transform: scaleX(0.2); }
+100% { transform: scaleX(1); }
+}
+
+/* 23. Arrow Bounce */
+.arrow-bounce {
+width: 0; height: 0;
+border-left: 16px solid transparent;
+border-right: 16px solid transparent;
+border-top: 24px solid #fff;
+animation: arrowDrop 1s ease-in-out infinite;
+}
+@keyframes arrowDrop {
+0%, 100% { transform: translateY(-10px); opacity: 0.4; }
+50% { transform: translateY(10px); opacity: 1; }
+}
+
+/* 24. DNA Helix */
+.dna-helix { display: flex; gap: 6px; align-items: center; }
+.dna-helix span {
+width: 6px; height: 6px; border-radius: 50%; background: #fff;
+animation: helix 1.5s ease-in-out infinite;
+}
+.dna-helix span:nth-child(1) { animation-delay: 0s; }
+.dna-helix span:nth-child(2) { animation-delay: 0.15s; }
+.dna-helix span:nth-child(3) { animation-delay: 0.3s; }
+.dna-helix span:nth-child(4) { animation-delay: 0.45s; }
+.dna-helix span:nth-child(5) { animation-delay: 0.6s; }
+.dna-helix span:nth-child(6) { animation-delay: 0.75s; }
+.dna-helix span:nth-child(7) { animation-delay: 0.9s; }
+@keyframes helix {
+0%, 100% { transform: translateY(-12px) scale(1); opacity: 1; }
+50% { transform: translateY(12px) scale(0.5); opacity: 0.3; }
+}
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      animation-play-state: paused !important;
+      transition: none !important;
+    }
+  }
+</style>
+
+</head>
+<body>
+
+<h1>Shape Library</h1>
+<p class="subtitle">Animated Primitives · BlackRoad OS</p>
+
+<div class="grid">
+
+  <div class="card">
+    <div class="shape-container"><div class="pulse-circle"></div></div>
+    <div class="label">Pulse Circle</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="spin-square"></div></div>
+    <div class="label">Spin Square</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="morph-blob"></div></div>
+    <div class="label">Morph Blob</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="breathing-ring"></div></div>
+    <div class="label">Breathing Ring</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="bounce-tri"></div></div>
+    <div class="label">Bounce Triangle</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="flip-diamond"></div></div>
+    <div class="label">Flip Diamond</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="orbit-dots"></div></div>
+    <div class="label">Orbit Dots</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="wave-line"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">Wave Line</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="ripple"><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">Ripple</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="glitch-rect"></div></div>
+    <div class="label">Glitch Rect</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="pendulum-wrap"><div class="pendulum-line"></div></div>
+    </div>
+    <div class="label">Pendulum</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="hex-spin"></div></div>
+    <div class="label">Hexagon Spin</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="dash-circle">
+        <svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="26"/></svg>
+      </div>
+    </div>
+    <div class="label">Dash Circle</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="cross-rotate"></div></div>
+    <div class="label">Cross Rotate</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="scale-star"></div></div>
+    <div class="label">Scale Star</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="expand-square"></div></div>
+    <div class="label">Expand Square</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">Loading Dots</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="infinity-loop"><div class="infinity-dot"></div></div>
+    </div>
+    <div class="label">Infinity Loop</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="scan-line"></div></div>
+    <div class="label">Scan Line</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="spiral-grow"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">Spiral Grow</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="typewriter-cursor"></div></div>
+    <div class="label">Typewriter Cursor</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="shutter"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">Shutter</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container"><div class="arrow-bounce"></div></div>
+    <div class="label">Arrow Bounce</div>
+  </div>
+
+  <div class="card">
+    <div class="shape-container">
+      <div class="dna-helix"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="label">DNA Helix</div>
+  </div>
+
+</div>
+
+</body>
+</html>

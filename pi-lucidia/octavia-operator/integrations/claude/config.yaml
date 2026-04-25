@@ -1,0 +1,51 @@
+# Claude (Anthropic) — BlackRoad OS Integration
+# https://docs.anthropic.com/en/docs
+
+name: claude
+category: ai-providers
+status: active
+api_base: https://api.anthropic.com/v1
+
+auth:
+  type: api_key
+  env: ANTHROPIC_API_KEY
+  header: x-api-key
+
+headers:
+  anthropic-version: "2024-10-22"
+
+endpoints:
+  messages:
+    create: POST /messages
+  models:
+    list: GET /models
+
+models:
+  - id: claude-opus-4-6
+    name: Claude Opus 4.6
+    context: 200000
+    purpose: complex-reasoning-coding
+  - id: claude-sonnet-4-6
+    name: Claude Sonnet 4.6
+    context: 200000
+    purpose: balanced-performance
+  - id: claude-haiku-4-5-20251001
+    name: Claude Haiku 4.5
+    context: 200000
+    purpose: fast-lightweight
+
+features:
+  - tool_use
+  - vision
+  - extended_thinking
+  - computer_use
+  - batch_api
+  - streaming
+
+gateway_route: /v1/anthropic
+default_model: claude-sonnet-4-6
+
+health_check:
+  endpoint: POST /messages (minimal prompt)
+  interval: 300
+  timeout: 30

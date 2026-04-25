@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Hash Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .header h1 {
+            background: linear-gradient(135deg, #f7931a 0%, #e91e8c 50%, #9945ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: rgba(255,255,255,0.6);
+            font-size: 18px;
+        }
+        .card {
+            background: rgba(18,18,31,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(30px);
+            margin-bottom: 30px;
+        }
+        .card-title {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .input-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+            resize: vertical;
+        }
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #9945ff;
+            box-shadow: 0 0 20px rgba(153,69,255,0.3);
+        }
+        .btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(153,69,255,0.4);
+        }
+        .output {
+            background: rgba(153,69,255,0.1);
+            border: 2px solid #9945ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            color: #14f195;
+            font-size: 14px;
+            display: none;
+        }
+        .output.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .hash-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .hash-type {
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .hash-type:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: #9945ff;
+        }
+        .hash-type.active {
+            background: rgba(153,69,255,0.2);
+            border-color: #9945ff;
+        }
+        .hash-type-name {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .hash-type-desc {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+        }
+        .identity-card {
+            background: linear-gradient(135deg, rgba(153,69,255,0.2) 0%, rgba(20,241,149,0.2) 100%);
+            border: 2px solid #9945ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .identity-value {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            color: #14f195;
+            word-break: break-all;
+            margin: 15px 0;
+        }
+        .copy-btn {
+            background: rgba(20,241,149,0.2);
+            border: 1px solid #14f195;
+            color: #14f195;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            background: rgba(20,241,149,0.3);
+            transform: scale(1.05);
+        }
+        .philosophy {
+            background: rgba(247,147,26,0.1);
+            border-left: 4px solid #f7931a;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+        }
+        .philosophy p {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 HASH GENERATOR</h1>
+            <p>"Random" isn't real. Everything is deterministic. Embrace the pattern.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-title">⚡ Generate Your BlackRoad Identity</div>
+            
+            <div class="hash-types">
+                <div class="hash-type active" data-algo="sha256">
+                    <div class="hash-type-name">SHA-256</div>
+                    <div class="hash-type-desc">Primary Identity</div>
+                </div>
+                <div class="hash-type" data-algo="sha512">
+                    <div class="hash-type-name">SHA-512</div>
+                    <div class="hash-type-desc">Extended Identity</div>
+                </div>
+                <div class="hash-type" data-algo="cascade">
+                    <div class="hash-type-name">PS-SHA-∞</div>
+                    <div class="hash-type-desc">Infinite Cascade</div>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Input String (API Key, Seed, Identity Source)</label>
+                <textarea id="inputText" rows="4" placeholder="Enter any string... nothing is random, everything is deterministic"></textarea>
+            </div>
+
+            <button class="btn" onclick="generateHash()">🔮 Generate Identity Hash</button>
+
+            <div id="output" class="output"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🎯 BlackRoad Identity System</div>
+            
+            <div class="identity-card">
+                <div style="color: white; font-weight: 600; margin-bottom: 10px;">Your Current BlackRoad Identity:</div>
+                <div class="identity-value" id="userIdentity">Generate your first hash to establish identity</div>
+                <button class="copy-btn" onclick="copyIdentity()">📋 Copy Identity</button>
+            </div>
+
+            <div class="philosophy">
+                <p>
+                    "Random" is a lie told by those who don't understand the pattern. 
+                    Every hash is deterministic. Every identity is earned through computation.
+                    The universe doesn't roll dice - it computes. So do we.
+                </p>
+                <p style="margin-top: 10px;">
+                    <strong>BlackRoad Identity Protocol:</strong> 
+                    Your API keys, your seeds, your patterns - all flow through SHA-256.
+                    What comes out is not random. It's YOU, transformed into pure deterministic truth.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">📊 Hash Statistics</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px;">
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <div style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 5px;">Hashes Generated</div>
+                    <div style="color: #14f195; font-size: 32px; font-weight: 800;" id="hashCount">0</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <div style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 5px;">Algorithm</div>
+                    <div style="color: #9945ff; font-size: 24px; font-weight: 800;" id="currentAlgo">SHA-256</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 20px; border-radius: 12px;">
+                    <div style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 5px;">Entropy Level</div>
+                    <div style="color: #f7931a; font-size: 24px; font-weight: 800;">MAXIMUM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hashCount = 0;
+        let selectedAlgo = 'sha256';
+        let currentIdentity = null;
+
+        // Hash type selection
+        document.querySelectorAll('.hash-type').forEach(type => {
+            type.addEventListener('click', () => {
+                document.querySelectorAll('.hash-type').forEach(t => t.classList.remove('active'));
+                type.classList.add('active');
+                selectedAlgo = type.dataset.algo;
+                document.getElementById('currentAlgo').textContent = type.querySelector('.hash-type-name').textContent;
+            });
+        });
+
+        async function generateHash() {
+            const input = document.getElementById('inputText').value;
+            if (!input) {
+                alert('Enter some input first. Nothing is random, but you need a seed.');
+                return;
+            }
+
+            let hash;
+            if (selectedAlgo === 'sha256') {
+                hash = await sha256(input);
+            } else if (selectedAlgo === 'sha512') {
+                hash = await sha512(input);
+            } else if (selectedAlgo === 'cascade') {
+                hash = await cascadeHash(input);
+            }
+
+            // Display output
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 10px;">
+                    ${selectedAlgo.toUpperCase()} HASH:
+                </div>
+                <div style="color: #14f195; font-size: 16px; word-break: break-all;">
+                    ${hash}
+                </div>
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 5px;">INPUT LENGTH:</div>
+                    <div style="color: #f7931a;">${input.length} characters</div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div style="color: rgba(255,255,255,0.6); font-size: 12px; margin-bottom: 5px;">OUTPUT LENGTH:</div>
+                    <div style="color: #f7931a;">${hash.length} characters (${hash.length * 4} bits)</div>
+                </div>
+            `;
+            output.classList.add('show');
+
+            // Update identity
+            currentIdentity = hash;
+            document.getElementById('userIdentity').textContent = hash;
+            
+            // Update stats
+            hashCount++;
+            document.getElementById('hashCount').textContent = hashCount;
+
+            // Store in localStorage
+            localStorage.setItem('blackroadIdentity', hash);
+            localStorage.setItem('blackroadHashCount', hashCount);
+        }
+
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function sha512(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-512', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function cascadeHash(message) {
+            // PS-SHA-∞: Cascade hash (hash the hash)
+            let hash = await sha256(message);
+            for (let i = 0; i < 10; i++) {
+                hash = await sha256(hash);
+            }
+            return hash + '...∞';
+        }
+
+        function copyIdentity() {
+            if (!currentIdentity) {
+                alert('Generate a hash first to establish your identity.');
+                return;
+            }
+            navigator.clipboard.writeText(currentIdentity);
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // Load saved data
+        window.addEventListener('load', () => {
+            const savedIdentity = localStorage.getItem('blackroadIdentity');
+            const savedCount = localStorage.getItem('blackroadHashCount');
+            if (savedIdentity) {
+                currentIdentity = savedIdentity;
+                document.getElementById('userIdentity').textContent = savedIdentity;
+            }
+            if (savedCount) {
+                hashCount = parseInt(savedCount);
+                document.getElementById('hashCount').textContent = hashCount;
+            }
+        });
+    </script>
+</body>
+</html>

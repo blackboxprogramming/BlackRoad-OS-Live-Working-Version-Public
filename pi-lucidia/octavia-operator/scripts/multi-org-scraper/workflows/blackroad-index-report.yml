@@ -1,0 +1,126 @@
+name: BlackRoad Index & Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Report type (inventory, dependencies, security, all)'
+        required: false
+        default: 'all'
+  push:
+    branches: [main, master]
+    paths:
+      - 'package.json'
+      - 'requirements.txt'
+      - 'pyproject.toml'
+      - 'Cargo.toml'
+      - 'go.mod'
+
+permissions:
+  contents: read
+
+jobs:
+  index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Full Repository Index
+        id: index
+        run: |
+          echo "=== BlackRoad Full Index ==="
+
+          # Basic info
+          echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
+          echo "branch=$(git branch --show-current)" >> $GITHUB_OUTPUT
+          echo "commit=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          echo "commit_date=$(git log -1 --format=%ci)" >> $GITHUB_OUTPUT
+
+          # File inventory
+          total=$(find . -type f -not -path './.git/*' -not -path './node_modules/*' -not -path './.next/*' -not -path './dist/*' -not -path './build/*' -not -path './__pycache__/*' | wc -l)
+          echo "file_count=${total}" >> $GITHUB_OUTPUT
+
+          # Language breakdown
+          echo "--- Language breakdown ---"
+          find . -type f -not -path './.git/*' -not -path './node_modules/*' | sed 's/.*\.//' | sort | uniq -c | sort -rn | head -20
+
+          # Directory structure (top 2 levels)
+          echo "--- Structure ---"
+          find . -maxdepth 2 -type d -not -path './.git*' -not -path './node_modules*' | head -30
+
+          # Dependency count
+          if [ -f "package.json" ]; then
+            deps=$(node -e "const p=require('./package.json'); console.log(Object.keys(p.dependencies||{}).length)" 2>/dev/null || echo 0)
+            devdeps=$(node -e "const p=require('./package.json'); console.log(Object.keys(p.devDependencies||{}).length)" 2>/dev/null || echo 0)
+            echo "npm_deps=${deps}" >> $GITHUB_OUTPUT
+            echo "npm_devdeps=${devdeps}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -f "requirements.txt" ]; then
+            pydeps=$(grep -c -v '^#\|^$' requirements.txt 2>/dev/null || echo 0)
+            echo "python_deps=${pydeps}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Scan for Integrations
+        id: integrations
+        run: |
+          echo "=== Integration Scan ==="
+
+          # Stripe
+          if grep -r "stripe" --include="*.ts" --include="*.js" --include="*.py" --include="*.json" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "stripe=true" >> $GITHUB_OUTPUT
+            echo "Found: Stripe integration"
+          fi
+
+          # Clerk
+          if grep -r "@clerk\|clerk" --include="*.ts" --include="*.js" --include="*.json" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "clerk=true" >> $GITHUB_OUTPUT
+            echo "Found: Clerk auth"
+          fi
+
+          # Database
+          if grep -r "prisma\|drizzle\|typeorm\|sequelize\|knex" --include="*.ts" --include="*.js" --include="*.json" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "orm=true" >> $GITHUB_OUTPUT
+          fi
+
+          if grep -r "postgres\|mysql\|sqlite\|mongodb\|redis" --include="*.ts" --include="*.js" --include="*.py" --include="*.json" --include="*.toml" --include="*.yml" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "database=true" >> $GITHUB_OUTPUT
+          fi
+
+          # AI/ML
+          if grep -r "openai\|anthropic\|ollama\|huggingface\|transformers\|torch\|tensorflow" --include="*.ts" --include="*.js" --include="*.py" --include="*.json" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "ai_ml=true" >> $GITHUB_OUTPUT
+            echo "Found: AI/ML integration"
+          fi
+
+          # Cloud
+          if grep -r "cloudflare\|vercel\|railway\|aws\|gcp" --include="*.ts" --include="*.js" --include="*.py" --include="*.json" --include="*.toml" --include="*.yml" -l 2>/dev/null | head -1 > /dev/null; then
+            echo "cloud=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Index Report
+        run: |
+          echo "## BlackRoad Index: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Files | ${{ steps.index.outputs.file_count }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | ${{ steps.index.outputs.branch }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ steps.index.outputs.commit }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NPM Deps | ${{ steps.index.outputs.npm_deps }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| NPM DevDeps | ${{ steps.index.outputs.npm_devdeps }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Python Deps | ${{ steps.index.outputs.python_deps }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Integrations" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration | Found |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Stripe | ${{ steps.integrations.outputs.stripe || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Clerk | ${{ steps.integrations.outputs.clerk || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ORM | ${{ steps.integrations.outputs.orm || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Database | ${{ steps.integrations.outputs.database || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| AI/ML | ${{ steps.integrations.outputs.ai_ml || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cloud | ${{ steps.integrations.outputs.cloud || 'false' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Owner**: BlackRoad OS, Inc." >> $GITHUB_STEP_SUMMARY

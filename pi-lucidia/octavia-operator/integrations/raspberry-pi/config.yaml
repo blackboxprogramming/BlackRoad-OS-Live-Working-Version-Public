@@ -1,0 +1,66 @@
+# Raspberry Pi Fleet — BlackRoad OS Integration
+
+name: raspberry-pi
+category: infrastructure
+status: active
+
+auth:
+  type: ssh_key
+  key_path_env: PI_SSH_KEY_PATH
+
+fleet:
+  - hostname: blackroad-pi
+    alias: lucidia.local
+    ip: 192.168.4.64
+    user: pi
+    role: primary
+    services:
+      - cloudflared (tunnel)
+      - ollama
+      - agent-runtime
+      - memory-system
+    agent_capacity: 7500
+    tailscale: enabled
+
+  - hostname: aria64
+    ip: 192.168.4.38
+    user: pi
+    role: secondary
+    services:
+      - ollama
+      - agent-runtime
+    agent_capacity: 22500
+    tailscale: enabled
+
+  - hostname: alice
+    alias: raspberrypi.local
+    ip: 192.168.4.49
+    user: alice
+    role: tertiary
+    services:
+      - agent-runtime
+    tailscale: enabled
+
+  - hostname: lucidia-alt
+    ip: 192.168.4.99
+    user: lucidia
+    role: alternate
+    services:
+      - failover
+    tailscale: enabled
+
+commands:
+  deploy_all: ./pi-deploy/deploy-to-pis.sh
+  deploy_one: ./deploy-to-pi.sh {hostname} {ip}
+  ssh: ssh {user}@{ip}
+  health: curl http://{ip}:11434/api/tags
+
+monitoring:
+  ollama_port: 11434
+  agent_port: 8080
+  ssh_port: 22
+
+health_check:
+  method: ssh_ping
+  interval: 60
+  timeout: 5

@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# BlackRoad Cross-Repo Sync CLI
+# Version: 1.0.0
+
+set -euo pipefail
+
+SYNC_HOME="$HOME/.blackroad-sync"
+DEPENDENCY_GRAPH="$SYNC_HOME/dependency-graph.json"
+REPO_CACHE="$SYNC_HOME/repo-cache.json"
+SYNC_HISTORY="$SYNC_HOME/sync-history.db"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+
+# Ensure directories exist
+mkdir -p "$SYNC_HOME"
+
+# Usage
+usage() {
+    cat << EOF
+${CYAN}br-sync${NC} - BlackRoad Cross-Repo Coordination Tool
+
+${YELLOW}USAGE:${NC}
+    br-sync <command> [options]
+
+${YELLOW}COMMANDS:${NC}
+    ${GREEN}discover${NC}        Discover all repos and build dependency graph
+    ${GREEN}map${NC}             Show dependency map
+    ${GREEN}files${NC}           Sync files across repos
+    ${GREEN}version${NC}         Coordinate version bumps
+    ${GREEN}config${NC}          Sync configuration
+    ${GREEN}feature${NC}         Multi-repo feature rollout
+    ${GREEN}status${NC}          Show sync status
+    ${GREEN}history${NC}         Show sync history
+
+${YELLOW}EXAMPLES:${NC}
+    # Discover repos and build dependency graph
+    br-sync discover
+
+    # Show dependency map
+    br-sync map
+
+    # Sync GitHub workflows to all repos (dry-run)
+    br-sync files --pattern=".github/workflows/*" --dry-run
+
+    # Sync for real
+    br-sync files --pattern=".github/workflows/*"
+
+    # Bump versions across dependent repos
+    br-sync version --bump=minor --propagate
+
+    # Multi-repo feature rollout
+    br-sync feature --branch=feat/new-api --repos=roadapi,roadauth
+
+${YELLOW}OPTIONS:${NC}
+    -h, --help          Show this help message
+    -v, --version       Show version
+    --dry-run           Show what would happen without doing it
+    --force             Force operation without confirmation
+
+${YELLOW}DOCS:${NC}
+    ~/.blackroad-sync/  - Sync data directory
+
+EOF
+    exit 0
+}
+
+# Version
+version() {
+    echo "br-sync version 1.0.0"
+    exit 0
+}
+
+# Command router
+case "${1:-help}" in
+    discover)
+        shift
+        "$SYNC_HOME/scripts/discover.sh" "$@"
+        ;;
+    map)
+        shift
+        "$SYNC_HOME/scripts/map.sh" "$@"
+        ;;
+    files)
+        shift
+        "$SYNC_HOME/scripts/sync-files.sh" "$@"
+        ;;
+    version)
+        shift
+        "$SYNC_HOME/scripts/sync-version.sh" "$@"
+        ;;
+    config)
+        shift
+        "$SYNC_HOME/scripts/sync-config.sh" "$@"
+        ;;
+    feature)
+        shift
+        "$SYNC_HOME/scripts/feature-rollout.sh" "$@"
+        ;;
+    status)
+        shift
+        "$SYNC_HOME/scripts/status.sh" "$@"
+        ;;
+    history)
+        shift
+        "$SYNC_HOME/scripts/history.sh" "$@"
+        ;;
+    -v|--version)
+        version
+        ;;
+    -h|--help|help|*)
+        usage
+        ;;
+esac

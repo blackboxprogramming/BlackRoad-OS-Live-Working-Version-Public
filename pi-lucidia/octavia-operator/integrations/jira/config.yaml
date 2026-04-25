@@ -1,0 +1,52 @@
+# Jira — BlackRoad OS Integration
+# https://developer.atlassian.com/cloud/jira/platform/rest/v3
+
+name: jira
+category: project-management
+status: active
+api_base: https://{domain}.atlassian.net/rest/api/3
+
+auth:
+  type: basic_auth
+  domain_env: JIRA_DOMAIN
+  email_env: JIRA_EMAIL
+  token_env: JIRA_API_TOKEN
+
+endpoints:
+  issues:
+    create: POST /issue
+    get: GET /issue/{issueIdOrKey}
+    update: PUT /issue/{issueIdOrKey}
+    delete: DELETE /issue/{issueIdOrKey}
+    transition: POST /issue/{issueIdOrKey}/transitions
+    assign: PUT /issue/{issueIdOrKey}/assignee
+    comments: GET /issue/{issueIdOrKey}/comment
+    add_comment: POST /issue/{issueIdOrKey}/comment
+  search:
+    jql: POST /search
+  projects:
+    list: GET /project
+    get: GET /project/{projectIdOrKey}
+  boards:
+    list: GET /rest/agile/1.0/board
+    get: GET /rest/agile/1.0/board/{boardId}
+    sprints: GET /rest/agile/1.0/board/{boardId}/sprint
+  sprints:
+    issues: GET /rest/agile/1.0/sprint/{sprintId}/issue
+  users:
+    search: GET /user/search?query={query}
+
+webhooks:
+  events:
+    - jira:issue_created
+    - jira:issue_updated
+    - jira:issue_deleted
+    - sprint_started
+    - sprint_closed
+  endpoint: /webhooks/jira
+  secret_env: JIRA_WEBHOOK_SECRET
+
+health_check:
+  endpoint: GET /myself
+  interval: 300
+  timeout: 10

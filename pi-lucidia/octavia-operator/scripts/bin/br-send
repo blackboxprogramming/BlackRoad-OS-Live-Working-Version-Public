@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+target="${1:-}"
+shift || true
+cmd="${*:-}"
+
+if [[ -z "$target" || -z "$cmd" ]]; then
+  echo "Usage: br-send <aria|lucidia|alice> <command...>"
+  echo ""
+  echo "Examples:"
+  echo "  br-send aria 'hostname; uptime'"
+  echo "  br-send lucidia 'docker ps'"
+  echo "  br-send alice 'systemctl status ollama'"
+  exit 1
+fi
+
+# find pane by title
+pane="$(tmux list-panes -a -F '#{pane_id} #{pane_title}' | awk -v t="$target" '$2==t {print $1; exit}')"
+
+if [[ -z "${pane:-}" ]]; then
+  echo "❌ No tmux pane titled '$target' found."
+  echo ""
+  echo "Set it with:"
+  echo "  tmux select-pane -T $target"
+  echo ""
+  echo "Available panes:"
+  tmux list-panes -a -F '#{pane_id} #{pane_title}'
+  exit 1
+fi
+
+tmux send-keys -t "$pane" "$cmd" C-m
+echo "✅ Sent to $target ($pane): $cmd"

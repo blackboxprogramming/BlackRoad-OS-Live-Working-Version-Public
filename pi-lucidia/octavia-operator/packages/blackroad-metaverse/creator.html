@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creator Studio — BlackRoad Metaverse</title>
+    <meta name="description" content="Create anything you can imagine in the BlackRoad Metaverse">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sunrise-orange: #FF9D00;
+            --hot-pink: #FF0066;
+            --vivid-purple: #7700FF;
+            --cyber-blue: #0066FF;
+            --pure-black: #000000;
+            --deep-black: #0A0A0A;
+            --charcoal: #1A1A1A;
+            --pure-white: #FFFFFF;
+            --gray-300: #A0A0A0;
+            --gradient-full: linear-gradient(180deg, #FF9D00 0%, #FF6B00 14%, #FF0066 28%, #FF006B 42%, #D600AA 57%, #7700FF 71%, #0066FF 100%);
+            --space-md: 21px;
+            --space-lg: 34px;
+            --space-xl: 55px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--pure-black);
+            color: var(--pure-white);
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-lg);
+        }
+
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            font-weight: 900;
+            background: var(--gradient-full);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+        }
+
+        .nav-link {
+            color: var(--gray-300);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--hot-pink);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--pure-white);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            margin-top: 70px;
+            padding: var(--space-xl);
+        }
+
+        .hero {
+            text-align: center;
+            padding: var(--space-xl) 0;
+            margin-bottom: var(--space-xl);
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 900;
+            background: var(--gradient-full);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: var(--space-md);
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--gray-300);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ===== CREATION CATEGORIES ===== */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .category-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-full);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .category-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 0, 102, 0.3);
+        }
+
+        .category-card:hover::before {
+            opacity: 1;
+        }
+
+        .category-icon {
+            font-size: 48px;
+            margin-bottom: var(--space-md);
+        }
+
+        .category-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .category-desc {
+            color: var(--gray-300);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-actions {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-xl);
+        }
+
+        .btn {
+            padding: var(--space-md) var(--space-lg);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--hot-pink), var(--vivid-purple));
+            color: var(--pure-white);
+            box-shadow: 0 4px 15px rgba(255, 0, 102, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(255, 0, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--pure-white);
+            border: 2px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--glass-bg);
+            border-color: var(--pure-white);
+        }
+
+        /* ===== RECENT CREATIONS ===== */
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--space-lg);
+            color: var(--pure-white);
+        }
+
+        .creations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+        }
+
+        .creation-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .creation-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(119, 0, 255, 0.3);
+        }
+
+        .creation-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--vivid-purple), var(--cyber-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .creation-info {
+            padding: var(--space-md);
+        }
+
+        .creation-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .creation-author {
+            font-size: 12px;
+            color: var(--gray-300);
+        }
+
+        /* ===== FEATURED BANNER ===== */
+        .featured-banner {
+            background: var(--gradient-full);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            text-align: center;
+        }
+
+        .featured-banner h2 {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: var(--space-md);
+        }
+
+        .featured-banner p {
+            font-size: 18px;
+            margin-bottom: var(--space-lg);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+
+            .categories {
+                grid-template-columns: 1fr;
+            }
+
+            .nav {
+                display: none;
+            }
+        }
+
+        /* ===== LOADING ANIMATION ===== */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo">BlackRoad</div>
+        <nav class="nav">
+            <a href="index.html" class="nav-link">Explore</a>
+            <a href="creator.html" class="nav-link active">Create</a>
+            <a href="gallery.html" class="nav-link">Gallery</a>
+            <a href="profile.html" class="nav-link">Profile</a>
+        </nav>
+        <div class="user-menu">
+            <span class="user-name" id="userName">Loading...</span>
+            <a href="login.html" class="btn btn-secondary" style="padding: 10px 20px; font-size: 12px;">Logout</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero -->
+        <section class="hero">
+            <h1>Create Anything</h1>
+            <p>Build worlds, design objects, craft experiences. Your imagination is the only limit.</p>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions">
+            <button class="btn btn-primary" onclick="startQuickCreate('3D Object')">🎨 Quick 3D Object</button>
+            <button class="btn btn-primary" onclick="startQuickCreate('World')">🌍 New World</button>
+            <button class="btn btn-primary" onclick="startQuickCreate('Game')">🎮 Build Game</button>
+            <button class="btn btn-secondary" onclick="window.location.href='gallery.html'">📚 Browse Templates</button>
+        </section>
+
+        <!-- Creation Categories -->
+        <h2 class="section-title">What would you like to create?</h2>
+        <section class="categories">
+            <div class="category-card" onclick="openCreator('3d-objects')">
+                <div class="category-icon">🎨</div>
+                <h3 class="category-title">3D Objects</h3>
+                <p class="category-desc">Design custom 3D models, sculptures, and props for your worlds</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('worlds')">
+                <div class="category-icon">🌍</div>
+                <h3 class="category-title">Worlds & Environments</h3>
+                <p class="category-desc">Build entire universes with custom terrain, lighting, and atmosphere</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('games')">
+                <div class="category-icon">🎮</div>
+                <h3 class="category-title">Interactive Games</h3>
+                <p class="category-desc">Create playable experiences with logic, physics, and gameplay</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('ai-agents')">
+                <div class="category-icon">🤖</div>
+                <h3 class="category-title">AI Agents</h3>
+                <p class="category-desc">Design intelligent characters with personalities and behaviors</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('music')">
+                <div class="category-icon">🎵</div>
+                <h3 class="category-title">Music & Sound</h3>
+                <p class="category-desc">Compose soundtracks, sound effects, and audio experiences</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('stories')">
+                <div class="category-icon">📖</div>
+                <h3 class="category-title">Stories & Quests</h3>
+                <p class="category-desc">Write narratives, dialogue, and interactive storylines</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('particles')">
+                <div class="category-icon">✨</div>
+                <h3 class="category-title">Visual Effects</h3>
+                <p class="category-desc">Create particle systems, shaders, and stunning visual effects</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('physics')">
+                <div class="category-icon">⚛️</div>
+                <h3 class="category-title">Physics Simulations</h3>
+                <p class="category-desc">Design realistic physics, forces, and dynamic interactions</p>
+            </div>
+
+            <div class="category-card" onclick="openCreator('economy')">
+                <div class="category-icon">💰</div>
+                <h3 class="category-title">Virtual Economies</h3>
+                <p class="category-desc">Build marketplaces, currencies, and trading systems</p>
+            </div>
+        </section>
+
+        <!-- Featured Banner -->
+        <section class="featured-banner">
+            <h2>🏆 Creator Challenge</h2>
+            <p>Build something amazing this week and win exclusive rewards!</p>
+            <button class="btn btn-primary">Join Challenge</button>
+        </section>
+
+        <!-- Recent Creations -->
+        <h2 class="section-title">Your Recent Creations</h2>
+        <section class="creations-grid" id="recentCreations">
+            <!-- Will be populated by JavaScript -->
+        </section>
+
+        <!-- Community Showcase -->
+        <h2 class="section-title">Community Showcase</h2>
+        <section class="creations-grid" id="communityCreations">
+            <!-- Will be populated by JavaScript -->
+        </section>
+    </main>
+
+    <!-- Authentication -->
+    <script src="auth.js"></script>
+
+    <script>
+        // ===== AUTHENTICATION CHECK =====
+        const user = blackRoadAuth.getCurrentUser();
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('userName').textContent = user.username;
+        }
+
+        // ===== QUICK CREATE =====
+        function startQuickCreate(type) {
+            console.log('🚀 Starting quick create:', type);
+            alert(`🎨 Quick ${type} Creator\n\nThis will open an AI-assisted creator that helps you build a ${type} in minutes!\n\n(Creator interface coming next...)`);
+            // Will open specialized creator interface
+        }
+
+        // ===== OPEN CREATOR =====
+        function openCreator(category) {
+            console.log('🎨 Opening creator for:', category);
+            localStorage.setItem('creator_category', category);
+            window.location.href = 'builder.html?category=' + category;
+        }
+
+        // ===== LOAD RECENT CREATIONS =====
+        function loadRecentCreations() {
+            const container = document.getElementById('recentCreations');
+            const creations = [
+                { title: 'My First World', author: user.username, icon: '🌍' },
+                { title: 'Crystal Palace', author: user.username, icon: '🏰' },
+                { title: 'Flying Machine', author: user.username, icon: '✈️' },
+                { title: 'Magic Sword', author: user.username, icon: '⚔️' }
+            ];
+
+            if (creations.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-300); grid-column: 1/-1; text-align: center; padding: var(--space-xl);">You haven\'t created anything yet. Click a category above to get started!</p>';
+                return;
+            }
+
+            container.innerHTML = creations.map(creation => `
+                <div class="creation-card">
+                    <div class="creation-thumbnail">${creation.icon}</div>
+                    <div class="creation-info">
+                        <div class="creation-title">${creation.title}</div>
+                        <div class="creation-author">by ${creation.author}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== LOAD COMMUNITY CREATIONS =====
+        function loadCommunityCreations() {
+            const container = document.getElementById('communityCreations');
+            const creations = [
+                { title: 'Neon City', author: 'Alice', icon: '🌆' },
+                { title: 'Dragon Mount', author: 'Aria', icon: '🐉' },
+                { title: 'Quantum Lab', author: 'Lucidia', icon: '⚛️' },
+                { title: 'Space Station', author: 'Nova', icon: '🛸' },
+                { title: 'Forest Temple', author: 'Echo', icon: '🏛️' },
+                { title: 'Cyber Bike', author: 'Phantom', icon: '🏍️' }
+            ];
+
+            container.innerHTML = creations.map(creation => `
+                <div class="creation-card">
+                    <div class="creation-thumbnail">${creation.icon}</div>
+                    <div class="creation-info">
+                        <div class="creation-title">${creation.title}</div>
+                        <div class="creation-author">by ${creation.author}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ===== INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRecentCreations();
+            loadCommunityCreations();
+            console.log('🎨 Creator Studio initialized!');
+        });
+
+        // ===== KEYBOARD SHORTCUTS =====
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 'n':
+                        e.preventDefault();
+                        startQuickCreate('3D Object');
+                        break;
+                    case 'g':
+                        e.preventDefault();
+                        window.location.href = 'gallery.html';
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

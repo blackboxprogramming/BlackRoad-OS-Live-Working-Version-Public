@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+SESSION=$(gum input --prompt "Session name: " --value "auto-plus")
+BASE="$HOME/lucidia-phase2/sessions/$SESSION"
+mkdir -p "$BASE"
+
+echo ""
+echo "🔁 AUTO+ SESSION: $SESSION"
+echo "---------------------------"
+echo ""
+
+echo "🧠 [Lucidia] Framing"
+ollama run lucidia | tee -a "$BASE/lucidia.log"
+
+echo ""
+echo "🧪 [Alice] Exploration"
+ollama run alice | tee -a "$BASE/alice.log"
+
+echo ""
+echo "🛡️ [Enclave] Boundary check"
+ollama run enclave | tee -a "$BASE/enclave.log"
+
+CHOICE=$(printf "Approve execution\nAbort\n" | gum choose --header "Enclave decision")
+
+if [[ "$CHOICE" == "Approve execution" ]]; then
+  echo ""
+  echo "⚙️ [Octavia] Execution"
+  ollama run octavia | tee -a "$BASE/octavia.log"
+else
+  echo ""
+  echo "⛔ Execution aborted (AUTO+)"
+fi
+
+echo ""
+echo "🔚 AUTO+ COMPLETE"

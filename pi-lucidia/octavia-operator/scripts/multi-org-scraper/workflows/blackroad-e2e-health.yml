@@ -1,0 +1,80 @@
+name: BlackRoad E2E Health Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+permissions:
+  contents: read
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Deployment Status
+        id: health
+        run: |
+          echo "=== BlackRoad E2E Health Check ==="
+          echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
+
+          # Check if buildable
+          if [ -f "package.json" ]; then
+            echo "buildable=true" >> $GITHUB_OUTPUT
+
+            # Check for build script
+            if node -e "const p=require('./package.json'); process.exit(p.scripts?.build ? 0 : 1)" 2>/dev/null; then
+              echo "has_build=true" >> $GITHUB_OUTPUT
+            fi
+
+            # Check for start script
+            if node -e "const p=require('./package.json'); process.exit(p.scripts?.start ? 0 : 1)" 2>/dev/null; then
+              echo "has_start=true" >> $GITHUB_OUTPUT
+            fi
+
+            # Check for test script
+            if node -e "const p=require('./package.json'); process.exit(p.scripts?.test ? 0 : 1)" 2>/dev/null; then
+              echo "has_test=true" >> $GITHUB_OUTPUT
+            fi
+
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "buildable=true" >> $GITHUB_OUTPUT
+          fi
+
+          # Check for env requirements
+          if [ -f ".env.example" ]; then
+            env_vars=$(grep -c '=' .env.example 2>/dev/null || echo 0)
+            echo "env_vars=${env_vars}" >> $GITHUB_OUTPUT
+            echo "has_env_example=true" >> $GITHUB_OUTPUT
+          fi
+
+          # Check for health endpoints
+          if grep -r 'health' --include="*.ts" --include="*.js" --include="*.py" -l 2>/dev/null | head -1; then
+            echo "has_health_endpoint=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Score Production Readiness
+        run: |
+          score=0
+          reasons=""
+
+          # Scoring
+          [ "${{ steps.health.outputs.buildable }}" = "true" ] && score=$((score + 2)) && reasons="${reasons}buildable,"
+          [ "${{ steps.health.outputs.has_build }}" = "true" ] && score=$((score + 2)) && reasons="${reasons}has-build,"
+          [ "${{ steps.health.outputs.has_start }}" = "true" ] && score=$((score + 2)) && reasons="${reasons}has-start,"
+          [ "${{ steps.health.outputs.has_test }}" = "true" ] && score=$((score + 2)) && reasons="${reasons}has-tests,"
+          [ "${{ steps.health.outputs.has_env_example }}" = "true" ] && score=$((score + 1)) && reasons="${reasons}env-documented,"
+          [ "${{ steps.health.outputs.has_health_endpoint }}" = "true" ] && score=$((score + 2)) && reasons="${reasons}health-endpoint,"
+
+          echo "Production Readiness Score: ${score}/11"
+          echo "Reasons: ${reasons}"
+
+          # Write summary
+          echo "## BlackRoad E2E Health: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Score**: ${score}/11" >> $GITHUB_STEP_SUMMARY
+          echo "**Reasons**: ${reasons}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Owner**: BlackRoad OS, Inc." >> $GITHUB_STEP_SUMMARY

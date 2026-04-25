@@ -1,0 +1,328 @@
+#!/bin/bash
+# 📡 CECE-STREAM v1.0 - Real-time Event Streaming
+# Pub/sub event system for CECE components
+
+# BlackRoad Color Palette
+BR_ORANGE=208
+BR_PINK=198
+BR_MAGENTA=163
+BR_BLUE=33
+BR_WHITE=255
+
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'
+BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+STREAM_DIR="$CECE_HOME/stream"
+EVENTS_FILE="$STREAM_DIR/events.jsonl"
+SUBSCRIPTIONS_FILE="$STREAM_DIR/subscriptions.json"
+
+mkdir -p "$STREAM_DIR"
+
+# Initialize subscriptions file
+[ ! -f "$SUBSCRIPTIONS_FILE" ] && echo '{}' > "$SUBSCRIPTIONS_FILE"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)📡 CECE-STREAM - Event Streaming${RESET}             $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+generate_id() {
+    date +%s%N | sha256sum | head -c 12
+}
+
+# Publish an event
+cmd_publish() {
+    local channel="$1"
+    local data="$2"
+
+    if [ -z "$channel" ] || [ -z "$data" ]; then
+        echo "Usage: cece-stream publish <channel> <data>"
+        echo "Example: cece-stream publish system.status '{\"cpu\": 25}'"
+        return 1
+    fi
+
+    local id=$(generate_id)
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    local event=$(cat << EOF
+{"id":"$id","time":"$timestamp","channel":"$channel","data":$data}
+EOF
+)
+
+    echo "$event" >> "$EVENTS_FILE"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Event published to $(fg $BR_WHITE)$channel${RESET}"
+    echo "  ID: $id"
+
+    # Notify subscribers
+    notify_subscribers "$channel" "$event"
+}
+
+# Subscribe to a channel
+cmd_subscribe() {
+    local channel="$1"
+    local callback="${2:-echo}"
+
+    if [ -z "$channel" ]; then
+        echo "Usage: cece-stream subscribe <channel> [callback]"
+        return 1
+    fi
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Subscribing to:${RESET} $channel"
+    echo -e "$(fg $BR_WHITE)Waiting for events... (Ctrl+C to stop)${RESET}"
+    echo ""
+
+    # Watch for new events
+    local last_line=$(wc -l < "$EVENTS_FILE" 2>/dev/null || echo 0)
+
+    while true; do
+        local current_line=$(wc -l < "$EVENTS_FILE" 2>/dev/null || echo 0)
+
+        if [ "$current_line" -gt "$last_line" ]; then
+            tail -n $((current_line - last_line)) "$EVENTS_FILE" | while read -r event; do
+                local event_channel=$(echo "$event" | jq -r '.channel')
+
+                # Check if channel matches (support wildcards)
+                if [[ "$event_channel" == $channel ]] || [[ "$channel" == "*" ]]; then
+                    local time=$(echo "$event" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+                    local data=$(echo "$event" | jq -c '.data')
+
+                    echo -e "$(fg $BR_BLUE)[$time]${RESET} $(fg $BR_MAGENTA)$event_channel${RESET}"
+                    echo "  $data"
+                    echo ""
+
+                    # Execute callback if provided
+                    if [ "$callback" != "echo" ]; then
+                        eval "$callback '$event'"
+                    fi
+                fi
+            done
+            last_line=$current_line
+        fi
+
+        sleep 0.5
+    done
+}
+
+# List recent events
+cmd_list() {
+    local count="${1:-20}"
+    local channel="${2:-*}"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Recent Events:${RESET}"
+    echo ""
+
+    if [ ! -f "$EVENTS_FILE" ]; then
+        echo "No events yet."
+        return
+    fi
+
+    tail -n "$count" "$EVENTS_FILE" | while read -r event; do
+        local event_channel=$(echo "$event" | jq -r '.channel')
+
+        if [[ "$event_channel" == $channel ]] || [[ "$channel" == "*" ]]; then
+            local time=$(echo "$event" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+            local id=$(echo "$event" | jq -r '.id')
+            local data=$(echo "$event" | jq -c '.data' | cut -c1-50)
+
+            echo -e "  $(fg $BR_BLUE)[$time]${RESET} $(fg $BR_MAGENTA)$event_channel${RESET} $(fg $BR_WHITE)$id${RESET}"
+            echo "    $data"
+        fi
+    done
+}
+
+# List channels
+cmd_channels() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Active Channels:${RESET}"
+    echo ""
+
+    if [ ! -f "$EVENTS_FILE" ]; then
+        echo "No events yet."
+        return
+    fi
+
+    jq -r '.channel' "$EVENTS_FILE" 2>/dev/null | sort | uniq -c | sort -rn | while read -r count channel; do
+        echo -e "  $(fg $BR_MAGENTA)$channel${RESET} $(fg $BR_WHITE)($count events)${RESET}"
+    done
+}
+
+# Replay events from a channel
+cmd_replay() {
+    local channel="$1"
+    local count="${2:-10}"
+
+    if [ -z "$channel" ]; then
+        echo "Usage: cece-stream replay <channel> [count]"
+        return 1
+    fi
+
+    echo -e "$(fg $BR_BLUE)Replaying last $count events from $channel:${RESET}"
+    echo ""
+
+    grep "\"channel\":\"$channel\"" "$EVENTS_FILE" 2>/dev/null | tail -n "$count" | while read -r event; do
+        local time=$(echo "$event" | jq -r '.time')
+        local data=$(echo "$event" | jq '.data')
+
+        echo -e "$(fg $BR_MAGENTA)$time${RESET}"
+        echo "$data"
+        echo ""
+    done
+}
+
+# Clear events
+cmd_clear() {
+    local channel="$1"
+
+    if [ -z "$channel" ]; then
+        echo -e "$(fg $BR_PINK)Warning: This will clear ALL events!${RESET}"
+        read -p "Are you sure? (yes/no) " confirm
+        [ "$confirm" != "yes" ] && return
+
+        > "$EVENTS_FILE"
+        echo -e "$(fg $BR_BLUE)✓${RESET} All events cleared"
+    else
+        local tmp=$(mktemp)
+        grep -v "\"channel\":\"$channel\"" "$EVENTS_FILE" > "$tmp" 2>/dev/null
+        mv "$tmp" "$EVENTS_FILE"
+        echo -e "$(fg $BR_BLUE)✓${RESET} Events cleared for channel: $channel"
+    fi
+}
+
+# Notify subscribers (internal function)
+notify_subscribers() {
+    local channel="$1"
+    local event="$2"
+
+    # In a real implementation, this would notify via webhooks, sockets, etc.
+    # For now, we just log it
+    :
+}
+
+# Emit common system events
+cmd_emit() {
+    local event_type="$1"
+
+    case "$event_type" in
+        heartbeat)
+            local data=$(cat << EOF
+{"host":"$(hostname)","time":"$(date -u +"%Y-%m-%dT%H:%M:%SZ")","uptime":$(cat /proc/uptime | awk '{print $1}')}
+EOF
+)
+            cmd_publish "cece.heartbeat" "$data"
+            ;;
+        metrics)
+            local cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | sed 's/%//' 2>/dev/null || echo 0)
+            local mem=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100}' 2>/dev/null || echo 0)
+            local temp=0
+            [ -f /sys/class/thermal/thermal_zone0/temp ] && temp=$(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))
+
+            local data="{\"cpu\":$cpu,\"memory\":$mem,\"temp\":$temp}"
+            cmd_publish "cece.metrics" "$data"
+            ;;
+        status)
+            local data="{\"status\":\"online\",\"host\":\"$(hostname)\"}"
+            cmd_publish "cece.status" "$data"
+            ;;
+        *)
+            echo "Usage: cece-stream emit <heartbeat|metrics|status>"
+            ;;
+    esac
+}
+
+# Watch mode - emit events periodically
+cmd_watch() {
+    local interval="${1:-60}"
+
+    echo -e "$(fg $BR_BLUE)Emitting events every ${interval}s...${RESET}"
+    echo -e "$(fg $BR_WHITE)Press Ctrl+C to stop${RESET}"
+
+    while true; do
+        cmd_emit heartbeat
+        cmd_emit metrics
+        sleep "$interval"
+    done
+}
+
+# Stats
+cmd_stats() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Stream Statistics:${RESET}"
+    echo ""
+
+    local total=$(wc -l < "$EVENTS_FILE" 2>/dev/null || echo 0)
+    local channels=$(jq -r '.channel' "$EVENTS_FILE" 2>/dev/null | sort -u | wc -l)
+    local size=$(du -sh "$EVENTS_FILE" 2>/dev/null | awk '{print $1}')
+
+    echo -e "  $(fg $BR_BLUE)Total Events:${RESET}  $total"
+    echo -e "  $(fg $BR_BLUE)Channels:${RESET}      $channels"
+    echo -e "  $(fg $BR_BLUE)File Size:${RESET}     $size"
+
+    if [ "$total" -gt 0 ]; then
+        local first=$(head -1 "$EVENTS_FILE" | jq -r '.time')
+        local last=$(tail -1 "$EVENTS_FILE" | jq -r '.time')
+        echo -e "  $(fg $BR_BLUE)First Event:${RESET}   $first"
+        echo -e "  $(fg $BR_BLUE)Last Event:${RESET}    $last"
+    fi
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-stream <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  publish <channel> <data>   Publish event to channel"
+    echo "  subscribe <channel>        Subscribe to channel events"
+    echo "  list [n] [channel]         List recent events"
+    echo "  channels                   List all channels"
+    echo "  replay <channel> [n]       Replay events"
+    echo "  emit <type>                Emit system event"
+    echo "  watch [sec]                Emit events periodically"
+    echo "  stats                      Show stream statistics"
+    echo "  clear [channel]            Clear events"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Channels:${RESET}"
+    echo "  cece.heartbeat    Heartbeat events"
+    echo "  cece.metrics      System metrics"
+    echo "  cece.status       Status changes"
+    echo "  cece.task.*       Task events"
+    echo "  cece.memory.*     Memory events"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Examples:${RESET}"
+    echo "  cece-stream publish user.login '{\"user\":\"alice\"}'"
+    echo "  cece-stream subscribe 'cece.*'"
+    echo "  cece-stream emit metrics"
+}
+
+# Main
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        publish|pub|emit_raw) cmd_publish "$@" ;;
+        subscribe|sub|listen) cmd_subscribe "$@" ;;
+        list|ls) cmd_list "$@" ;;
+        channels) cmd_channels ;;
+        replay) cmd_replay "$@" ;;
+        emit) cmd_emit "$@" ;;
+        watch) cmd_watch "$@" ;;
+        stats) cmd_stats ;;
+        clear) cmd_clear "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,356 @@
+#!/bin/bash
+# 🤖 CECE-AGENT v1.0 - AI Agent with Tool Use
+# Autonomous agent that can use CECE tools to accomplish tasks
+
+# BlackRoad Color Palette
+BR_ORANGE=208
+BR_PINK=198
+BR_MAGENTA=163
+BR_BLUE=33
+BR_WHITE=255
+
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'
+BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+AGENT_DIR="$CECE_HOME/agent"
+AGENT_LOG="$AGENT_DIR/agent.log"
+AGENT_HISTORY="$AGENT_DIR/history.jsonl"
+MODEL="${CECE_MODEL:-llama3.2}"
+
+mkdir -p "$AGENT_DIR"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)🤖 CECE-AGENT - AI with Tools${RESET}                 $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+log_agent() {
+    echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$AGENT_LOG"
+}
+
+# Available tools for the agent
+declare -A TOOLS=(
+    ["remember"]="Store a memory: remember <text>"
+    ["recall"]="Search memories: recall [query]"
+    ["task_add"]="Add a task: task_add <text>"
+    ["task_list"]="List all tasks"
+    ["db_set"]="Store in database: db_set <key> <value>"
+    ["db_get"]="Get from database: db_get <key>"
+    ["metrics"]="Get system metrics"
+    ["notify"]="Send notification: notify <title> <message>"
+    ["backup"]="Create backup"
+    ["status"]="Get system status"
+    ["fleet"]="List device fleet"
+    ["search"]="Search files: search <pattern>"
+    ["time"]="Get current time"
+    ["weather"]="Get weather (simulated)"
+)
+
+# Execute a tool
+execute_tool() {
+    local tool="$1"
+    shift
+    local args="$*"
+
+    case "$tool" in
+        remember)
+            ~/cece/apps/cece-db set "memory_$(date +%s)" "$args" 2>/dev/null
+            echo "Stored memory: $args"
+            ;;
+        recall)
+            ~/blackroad-os/bin/cece recall "$args" 2>/dev/null
+            ;;
+        task_add)
+            ~/blackroad-os/bin/cece task add "$args" 2>/dev/null
+            echo "Task added: $args"
+            ;;
+        task_list)
+            ~/blackroad-os/bin/cece tasks 2>/dev/null
+            ;;
+        db_set)
+            local key=$(echo "$args" | awk '{print $1}')
+            local value=$(echo "$args" | cut -d' ' -f2-)
+            ~/cece/apps/cece-db set "$key" "$value" 2>/dev/null
+            ;;
+        db_get)
+            ~/cece/apps/cece-db get "$args" 2>/dev/null
+            ;;
+        metrics)
+            ~/cece/apps/cece-metrics now 2>/dev/null
+            ;;
+        notify)
+            local title=$(echo "$args" | awk '{print $1}')
+            local message=$(echo "$args" | cut -d' ' -f2-)
+            echo "Notification: $title - $message"
+            ;;
+        backup)
+            ~/cece/apps/cece-backup create 2>/dev/null
+            ;;
+        status)
+            ~/blackroad-os/bin/cece status 2>/dev/null
+            ;;
+        fleet)
+            ~/cece/apps/cece-fleet list 2>/dev/null
+            ;;
+        search)
+            find ~/cece -name "*$args*" 2>/dev/null | head -10
+            ;;
+        time)
+            date '+%Y-%m-%d %H:%M:%S %Z'
+            ;;
+        weather)
+            echo "Weather: Sunny, 22°C (simulated)"
+            ;;
+        *)
+            echo "Unknown tool: $tool"
+            return 1
+            ;;
+    esac
+}
+
+# Parse AI response for tool calls
+parse_tool_calls() {
+    local response="$1"
+
+    # Look for patterns like [TOOL: toolname args]
+    echo "$response" | grep -oP '\[TOOL:\s*\K[^\]]+' | while read -r call; do
+        local tool=$(echo "$call" | awk '{print $1}')
+        local args=$(echo "$call" | cut -d' ' -f2-)
+
+        echo -e "$(fg $BR_BLUE)→ Executing:${RESET} $tool $args"
+        execute_tool "$tool" "$args"
+    done
+}
+
+# Build the system prompt with available tools
+build_system_prompt() {
+    cat << 'EOF'
+You are CECE-AGENT, an AI assistant with access to tools. You can accomplish tasks by using tools.
+
+AVAILABLE TOOLS:
+- remember <text>: Store information for later
+- recall [query]: Search stored memories
+- task_add <text>: Add a new task to the todo list
+- task_list: Show all tasks
+- db_set <key> <value>: Store a key-value pair
+- db_get <key>: Retrieve a value by key
+- metrics: Get current system metrics (CPU, memory, temp)
+- notify <title> <message>: Send a notification
+- backup: Create a system backup
+- status: Get CECE system status
+- fleet: List all devices in the fleet
+- search <pattern>: Search for files
+- time: Get current date and time
+- weather: Get weather information
+
+TO USE A TOOL, write: [TOOL: toolname args]
+
+Examples:
+- To remember something: [TOOL: remember The user prefers dark mode]
+- To add a task: [TOOL: task_add Review the project documentation]
+- To get time: [TOOL: time]
+- To check metrics: [TOOL: metrics]
+
+You can use multiple tools in one response. Always explain what you're doing before using tools.
+Be helpful, concise, and proactive in using tools when they would help accomplish the user's goal.
+EOF
+}
+
+# Single task execution
+cmd_task() {
+    local task="$*"
+
+    if [ -z "$task" ]; then
+        echo "Usage: cece-agent task <description>"
+        return 1
+    fi
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Task:${RESET} $task"
+    echo ""
+
+    # Build prompt
+    local system_prompt=$(build_system_prompt)
+    local full_prompt="$system_prompt
+
+USER TASK: $task
+
+Think step by step about how to accomplish this task using the available tools. Then execute the necessary tools."
+
+    echo -e "$(fg $BR_MAGENTA)Thinking...${RESET}"
+    echo ""
+
+    # Get AI response
+    local response=$(ollama run "$MODEL" "$full_prompt" 2>/dev/null)
+
+    if [ -z "$response" ]; then
+        echo -e "$(fg $BR_PINK)Error: Could not get AI response${RESET}"
+        return 1
+    fi
+
+    echo -e "$(fg $BR_WHITE)Agent Response:${RESET}"
+    echo "$response"
+    echo ""
+
+    # Execute any tool calls
+    parse_tool_calls "$response"
+
+    # Log
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "{\"time\":\"$timestamp\",\"task\":\"$task\",\"response\":$(echo "$response" | jq -Rs .)}" >> "$AGENT_HISTORY"
+
+    log_agent "TASK: $task"
+}
+
+# Interactive agent mode
+cmd_chat() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Interactive Agent Mode${RESET}"
+    echo -e "$(fg $BR_WHITE)I can use tools to help you. Type 'exit' to quit.${RESET}"
+    echo ""
+
+    local system_prompt=$(build_system_prompt)
+    local context=""
+
+    while true; do
+        echo -ne "$(fg $BR_BLUE)You:${RESET} "
+        read -r input
+
+        [ -z "$input" ] && continue
+        [ "$input" = "exit" ] || [ "$input" = "quit" ] && break
+
+        # Special commands
+        case "$input" in
+            /tools)
+                echo -e "\n$(fg $BR_WHITE)Available Tools:${RESET}"
+                for tool in "${!TOOLS[@]}"; do
+                    echo "  • $tool: ${TOOLS[$tool]}"
+                done
+                echo ""
+                continue
+                ;;
+            /history)
+                tail -5 "$AGENT_HISTORY" 2>/dev/null | jq -r '.task'
+                continue
+                ;;
+            /clear)
+                context=""
+                echo "Context cleared."
+                continue
+                ;;
+        esac
+
+        # Build prompt with context
+        local full_prompt="$system_prompt
+
+$context
+
+USER: $input
+
+Respond helpfully. Use tools when they would help accomplish the user's request."
+
+        echo ""
+
+        # Get response
+        local response=$(ollama run "$MODEL" "$full_prompt" 2>/dev/null)
+
+        if [ -n "$response" ]; then
+            echo -e "$(fg $BR_MAGENTA)CECE:${RESET} $response"
+            echo ""
+
+            # Execute tools
+            parse_tool_calls "$response"
+
+            # Update context
+            context="$context
+USER: $input
+CECE: $response"
+        else
+            echo -e "$(fg $BR_PINK)Error getting response${RESET}"
+        fi
+    done
+
+    echo -e "$(fg $BR_PINK)Goodbye!${RESET}"
+}
+
+# Run a tool directly
+cmd_tool() {
+    local tool="$1"
+    shift
+    local args="$*"
+
+    if [ -z "$tool" ]; then
+        echo "Available tools:"
+        for t in "${!TOOLS[@]}"; do
+            echo "  • $t: ${TOOLS[$t]}"
+        done
+        return
+    fi
+
+    execute_tool "$tool" "$args"
+}
+
+# Show agent history
+cmd_history() {
+    local count="${1:-10}"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Recent Agent Tasks:${RESET}"
+    echo ""
+
+    if [ -f "$AGENT_HISTORY" ]; then
+        tail -n "$count" "$AGENT_HISTORY" | while read -r line; do
+            local time=$(echo "$line" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+            local task=$(echo "$line" | jq -r '.task' | cut -c1-60)
+            echo -e "  $(fg $BR_BLUE)[$time]${RESET} $task"
+        done
+    else
+        echo "No history yet."
+    fi
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-agent <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  task <desc>     Execute a task using AI + tools"
+    echo "  chat            Interactive agent mode"
+    echo "  tool <name>     Run a specific tool directly"
+    echo "  history [n]     Show recent tasks"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Available Tools:${RESET}"
+    for tool in "${!TOOLS[@]}"; do
+        echo "  • $tool"
+    done
+    echo ""
+    echo -e "$(fg $BR_WHITE)Examples:${RESET}"
+    echo "  cece-agent task 'Check system status and create a backup'"
+    echo "  cece-agent task 'Add a reminder to review code tomorrow'"
+    echo "  cece-agent chat"
+}
+
+# Main
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        task|run|do) cmd_task "$@" ;;
+        chat|interactive) cmd_chat ;;
+        tool) cmd_tool "$@" ;;
+        history) cmd_history "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) cmd_task "$cmd $@" ;;  # Treat as task
+    esac
+}
+
+main "$@"

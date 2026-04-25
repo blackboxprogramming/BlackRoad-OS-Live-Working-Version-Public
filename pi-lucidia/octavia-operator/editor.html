@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>BR · Editor</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg:    #000;
+  --bg1:   #0a0a0a;
+  --bg2:   #111;
+  --bg3:   #181818;
+  --line:  rgba(255,255,255,0.07);
+  --dim:   rgba(255,255,255,0.2);
+  --mid:   rgba(255,255,255,0.45);
+  --fg:    #fff;
+  --grad:  linear-gradient(90deg,#FF8400,#FF4400,#FF0066,#CC00AA,#8800FF,#0066FF,#2233CC);
+  --font:  'JetBrains Mono', monospace;
+  --sz:    13px;
+  --lh:    1.65;
+}
+html, body { background:#000!important; color:#fff; font-family:var(--font); font-size:var(--sz); height:100%; }
+body { display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+
+/* ── TITLE BAR ── */
+.titlebar {
+  display:flex; align-items:center; gap:0;
+  height:38px; background:var(--bg); border-bottom:1px solid var(--line);
+  flex-shrink:0; position:relative; user-select:none;
+}
+.titlebar-grad { position:absolute; bottom:0; left:0; right:0; height:1px; background:var(--grad); }
+.title-logo {
+  padding:0 16px; font-size:11px; font-weight:700; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--fg); flex-shrink:0; opacity:0.9;
+}
+.title-logo span { opacity:0.4; }
+.title-file { flex:1; text-align:center; font-size:11px; color:var(--mid); letter-spacing:0.06em; }
+.title-file.modified::after { content:' \25CF'; color:var(--fg); opacity:0.5; }
+.title-actions { display:flex; align-items:center; gap:2px; padding-right:12px; }
+.ta-btn {
+  padding:5px 10px; font-family:var(--font); font-size:10px; font-weight:700;
+  letter-spacing:0.1em; text-transform:uppercase; color:var(--dim);
+  background:none; border:none; cursor:pointer; transition:color 0.15s;
+}
+.ta-btn:hover { color:var(--fg); }
+.ta-btn.accent {
+  background:var(--fg); color:#000; padding:4px 10px;
+}
+.ta-btn.accent:hover { opacity:0.85; }
+.ta-sep { width:1px; height:16px; background:var(--line); margin:0 4px; }
+
+/* ── TABS ── */
+.tabs {
+  display:flex; align-items:flex-end; background:var(--bg);
+  border-bottom:1px solid var(--line); flex-shrink:0; overflow-x:auto;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar { display:none; }
+.tab {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 16px; font-size:11px; letter-spacing:0.04em;
+  color:var(--dim); cursor:pointer; white-space:nowrap;
+  border-right:1px solid var(--line); transition:color 0.15s, background 0.15s;
+  position:relative; flex-shrink:0;
+}
+.tab:hover { color:var(--mid); background:rgba(255,255,255,0.02); }
+.tab.active {
+  color:var(--fg); background:var(--bg1);
+  border-bottom:1px solid var(--bg1); margin-bottom:-1px;
+}
+.tab.active::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:var(--grad);
+}
+.tab-dot { width:5px; height:5px; border-radius:50%; background:currentColor; opacity:0.4; }
+.tab-dot.modified { opacity:1; }
+.tab-close {
+  font-size:13px; line-height:1; color:var(--dim); opacity:0;
+  background:none; border:none; cursor:pointer; color:inherit; padding:0 2px;
+  transition:opacity 0.15s;
+}
+.tab:hover .tab-close { opacity:0.5; }
+.tab-close:hover { opacity:1!important; }
+.tab-new {
+  padding:8px 14px; font-size:16px; color:var(--dim); cursor:pointer;
+  background:none; border:none; font-family:var(--font); transition:color 0.15s;
+  flex-shrink:0;
+}
+.tab-new:hover { color:var(--fg); }
+
+/* ── EDITOR LAYOUT ── */
+.editor-layout {
+  flex:1; display:flex; overflow:hidden; background:var(--bg1);
+}
+
+/* ── GUTTER ── */
+.gutter {
+  width:52px; background:var(--bg); border-right:1px solid var(--line);
+  overflow:hidden; flex-shrink:0; padding-top:14px;
+  display:flex; flex-direction:column;
+}
+.gutter-inner {
+  width:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-width:none; /* hide scrollbar in Firefox while allowing scrollTop sync */
+}
+.gutter-inner::-webkit-scrollbar {
+  display:none; /* hide scrollbar in WebKit/Blink while allowing scrollTop sync */
+}
+.line-num {
+  display:block; text-align:right; padding-right:12px;
+  font-size:11px; color:rgba(255,255,255,0.2);
+  line-height:calc(var(--sz) * var(--lh));
+  user-select:none; transition:color 0.1s;
+}
+.line-num.current { color:rgba(255,255,255,0.7); }
+
+/* ── CODE AREA ── */
+.code-wrap {
+  flex:1; position:relative; overflow:hidden;
+}
+.code-area {
+  position:absolute; inset:0;
+  padding:14px 20px 60px 20px;
+  font-family:var(--font); font-size:var(--sz); line-height:var(--lh);
+  color:var(--fg); background:transparent;
+  border:none; outline:none; resize:none;
+  overflow:auto; tab-size:2; white-space:pre;
+  caret-color:#fff;
+  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.1) transparent;
+}
+.code-area::selection { background:rgba(255,255,255,0.12); }
+.code-area::-webkit-scrollbar { width:8px; height:8px; }
+.code-area::-webkit-scrollbar-track { background:transparent; }
+.code-area::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:0; }
+.code-area::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,0.15); }
+
+/* ── CURRENT LINE HIGHLIGHT ── */
+.current-line-hl {
+  position:absolute; left:0; right:0; height:calc(var(--sz) * var(--lh));
+  background:rgba(255,255,255,0.03); pointer-events:none;
+  transition:top 0.05s;
+}
+
+/* ── FIND BAR ── */
+.find-bar {
+  position:absolute; top:10px; right:14px; z-index:10;
+  background:var(--bg2); border:1px solid rgba(255,255,255,0.15);
+  padding:8px 10px; display:none; align-items:center; gap:8px;
+  min-width:280px;
+}
+.find-bar.open { display:flex; }
+.find-bar::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:var(--grad);
+}
+.find-input {
+  flex:1; background:transparent; border:none; outline:none;
+  font-family:var(--font); font-size:11px; color:var(--fg);
+  caret-color:#fff;
+}
+.find-input::placeholder { color:var(--dim); }
+.find-btn {
+  font-family:var(--font); font-size:9px; font-weight:700;
+  letter-spacing:0.12em; text-transform:uppercase; color:var(--dim);
+  background:none; border:none; cursor:pointer; transition:color 0.15s;
+  padding:2px 6px;
+}
+.find-btn:hover { color:var(--fg); }
+.find-count { font-size:10px; color:var(--dim); white-space:nowrap; min-width:40px; }
+
+/* ── STATUS BAR ── */
+.statusbar {
+  height:26px; background:var(--bg); border-top:1px solid var(--line);
+  display:flex; align-items:center; gap:0; flex-shrink:0;
+  font-size:10px; letter-spacing:0.05em; user-select:none;
+  position:relative;
+}
+.statusbar-grad { position:absolute; top:0; left:0; right:0; height:1px; background:var(--grad); }
+.sb-item {
+  padding:0 14px; color:var(--dim); border-right:1px solid var(--line);
+  height:100%; display:flex; align-items:center; gap:6px; white-space:nowrap;
+  transition:color 0.15s, background 0.15s; cursor:default;
+}
+.sb-item:hover { color:var(--mid); background:rgba(255,255,255,0.03); }
+.sb-item.accent { color:var(--fg); }
+.sb-right { margin-left:auto; border-right:none; border-left:1px solid var(--line); }
+.sb-dot { width:5px; height:5px; border-radius:50%; background:var(--fg); opacity:0.5; }
+.sb-dot.ok { background:#4eff91; opacity:0.8; }
+.sb-dot.busy { background:#FFB800; opacity:0.8; animation:pulse-dot 1.2s infinite; }
+
+/* ── SAVE FLASH ── */
+.save-flash {
+  position:absolute; bottom:30px; left:50%; transform:translateX(-50%);
+  background:var(--fg); color:#000; font-size:10px; font-weight:700;
+  letter-spacing:0.15em; text-transform:uppercase;
+  padding:6px 16px; opacity:0; pointer-events:none;
+  transition:opacity 0.2s;
+}
+.save-flash.show { opacity:1; }
+
+/* ── MINIMAP (decorative) ── */
+.minimap {
+  width:60px; background:var(--bg); border-left:1px solid var(--line);
+  flex-shrink:0; overflow:hidden; padding:14px 8px;
+  display:flex; flex-direction:column; gap:2px;
+}
+.mm-line {
+  height:2px; border-radius:0; background:rgba(255,255,255,0.08);
+}
+.mm-line.bright { background:rgba(255,255,255,0.25); }
+.mm-line.comment { background:rgba(255,255,255,0.04); }
+
+/* ── COMMAND PALETTE ── */
+.palette-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.7);
+  display:none; align-items:flex-start; justify-content:center;
+  padding-top:80px; z-index:100;
+}
+.palette-overlay.open { display:flex; }
+.palette {
+  width:560px; background:var(--bg2);
+  border:1px solid rgba(255,255,255,0.18); position:relative;
+}
+.palette::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:var(--grad);
+}
+.palette-input {
+  width:100%; padding:14px 16px; background:transparent;
+  border:none; border-bottom:1px solid var(--line);
+  font-family:var(--font); font-size:14px; color:var(--fg);
+  outline:none; caret-color:#fff;
+}
+.palette-input::placeholder { color:var(--dim); }
+.palette-item {
+  padding:10px 16px; display:flex; align-items:center; gap:12px;
+  cursor:pointer; transition:background 0.1s; font-size:12px;
+}
+.palette-item:hover, .palette-item.selected { background:rgba(255,255,255,0.06); }
+.palette-item-icon { width:16px; font-size:11px; color:var(--dim); flex-shrink:0; }
+.palette-item-label { flex:1; color:var(--fg); }
+.palette-item-shortcut { font-size:10px; color:var(--dim); }
+.palette-footer {
+  padding:8px 16px; border-top:1px solid var(--line);
+  font-size:10px; color:var(--dim); display:flex; gap:12px;
+}
+
+@keyframes pulse-dot { 0%,100%{opacity:0.8} 50%{opacity:0.3} }
+
+/* ── SCROLLBAR SYNC ── */
+.sync-scroll { overflow:hidden; }
+</style>
+</head>
+<body>
+
+<!-- TITLE BAR -->
+<div class="titlebar">
+  <div class="title-logo">BR<span>&middot;</span>ED</div>
+  <div class="title-file" id="title-file">agent-core.js</div>
+  <div class="title-actions">
+    <button class="ta-btn" onclick="newFile()">New</button>
+    <div class="ta-sep"></div>
+    <button class="ta-btn" onclick="toggleFind()">Find</button>
+    <button class="ta-btn" onclick="togglePalette()">Palette (Ctrl+K / ⌘K)</button>
+    <div class="ta-sep"></div>
+    <button class="ta-btn accent" onclick="saveFile()">Save</button>
+  </div>
+  <div class="titlebar-grad"></div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs"></div>
+
+<!-- EDITOR LAYOUT -->
+<div class="editor-layout">
+
+  <!-- GUTTER -->
+  <div class="gutter">
+    <div class="gutter-inner" id="gutter"></div>
+  </div>
+
+  <!-- CODE WRAP -->
+  <div class="code-wrap">
+    <div class="current-line-hl" id="cur-line-hl"></div>
+    <textarea class="code-area" id="editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+
+    <!-- FIND BAR -->
+    <div class="find-bar" id="find-bar">
+      <input class="find-input" id="find-input" placeholder="find in file&hellip;">
+      <span class="find-count" id="find-count"></span>
+      <button class="find-btn" onclick="findPrev()">&uarr;</button>
+      <button class="find-btn" onclick="findNext()">&darr;</button>
+      <button class="find-btn" onclick="toggleFind()">&times;</button>
+    </div>
+  </div>
+
+  <!-- MINIMAP -->
+  <div class="minimap" id="minimap"></div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="statusbar-grad"></div>
+  <div class="sb-item accent">
+    <div class="sb-dot ok" id="sb-dot"></div>
+    <span id="sb-mode">NORMAL</span>
+  </div>
+  <div class="sb-item" id="sb-lang">JS</div>
+  <div class="sb-item" id="sb-pos">Ln 1, Col 1</div>
+  <div class="sb-item" id="sb-words">0 words</div>
+  <div class="sb-item" id="sb-lines">0 lines</div>
+  <div class="sb-item sb-right" id="sb-encoding">UTF-8</div>
+</div>
+
+<!-- SAVE FLASH -->
+<div class="save-flash" id="save-flash">SAVED</div>
+
+<!-- COMMAND PALETTE -->
+<div class="palette-overlay" id="palette-overlay" onclick="if(event.target===this)togglePalette()">
+  <div class="palette">
+    <input class="palette-input" id="palette-input" placeholder="Type a command&hellip;" oninput="filterPalette(this.value)">
+    <div id="palette-list"></div>
+    <div class="palette-footer">
+      <span>&uarr;&darr; navigate</span>
+      <span>&crarr; execute</span>
+      <span>Esc close</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── FILES ──
+const FILES = {
+  'agent-core.js': {lang:'JS', content:`// blackroad \u00b7 agent-core.js
+// core agent orchestration layer
+
+import { EventBus } from './event-bus.js';
+import { Memory } from './memory.js';
+
+const AGENT_VERSION = '1.0.0';
+
+export class Agent {
+  constructor(id, config = {}) {
+    this.id = id;
+    this.name = config.name ?? \`agent-\${id}\`;
+    this.state = 'idle';
+    this.memory = new Memory(id);
+    this.bus = EventBus.getInstance();
+    this.capabilities = config.capabilities ?? [];
+    this._handlers = new Map();
+  }
+
+  async init() {
+    await this.memory.restore();
+    this.bus.subscribe(\`agent:\${this.id}\`, this._handle.bind(this));
+    this.state = 'ready';
+    this._emit('ready', { id: this.id, name: this.name });
+    return this;
+  }
+
+  async _handle(event) {
+    const handler = this._handlers.get(event.type);
+    if (!handler) return;
+    this.state = 'busy';
+    try {
+      const result = await handler(event.payload);
+      this._emit('response', { id: this.id, result });
+    } catch (err) {
+      this._emit('error', { id: this.id, error: err.message });
+    } finally {
+      this.state = 'idle';
+    }
+  }
+
+  on(type, fn) {
+    this._handlers.set(type, fn);
+    return this;
+  }
+
+  _emit(type, payload) {
+    this.bus.publish('system', { type, payload });
+  }
+
+  serialize() {
+    return {
+      id: this.id,
+      name: this.name,
+      state: this.state,
+      capabilities: this.capabilities,
+      version: AGENT_VERSION
+    };
+  }
+}
+
+export function createAgent(id, config) {
+  return new Agent(id, config).init();
+}`},
+
+  'memory.py': {lang:'PY', content:`# blackroad \u00b7 memory.py
+# PS-SHA\u221e persistent memory layer
+
+import hashlib
+import json
+import time
+from pathlib import Path
+from typing import Any, Optional
+
+JOURNAL_DIR = Path(".blackroad/memory")
+JOURNAL_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def ps_sha(data: str, depth: int = 3) -> str:
+    """Recursive hash ladder for memory integrity."""
+    h = data
+    for _ in range(depth):
+        h = hashlib.sha256(h.encode()).hexdigest()
+    return h
+
+
+class Memory:
+    def __init__(self, agent_id: str):
+        self.agent_id = agent_id
+        self.path = JOURNAL_DIR / f"{agent_id}.journal"
+        self._store: dict[str, Any] = {}
+        self._commits: list[dict] = []
+
+    def set(self, key: str, value: Any) -> str:
+        """Write a truth-state commit."""
+        ts = time.time_ns()
+        payload = json.dumps({"key": key, "value": value, "ts": ts})
+        digest = ps_sha(payload)
+
+        commit = {
+            "digest": digest,
+            "ts": ts,
+            "key": key,
+            "value": value
+        }
+        self._store[key] = value
+        self._commits.append(commit)
+        self._flush()
+        return digest
+
+    def get(self, key: str, default: Optional[Any] = None) -> Any:
+        return self._store.get(key, default)
+
+    def _flush(self):
+        with open(self.path, "w") as f:
+            for commit in self._commits:
+                f.write(json.dumps(commit) + "\\n")
+
+    def restore(self):
+        if not self.path.exists():
+            return
+        with open(self.path) as f:
+            for line in f:
+                try:
+                    commit = json.loads(line)
+                    self._store[commit["key"]] = commit["value"]
+                    self._commits.append(commit)
+                except json.JSONDecodeError:
+                    continue
+        return self`},
+
+  'README.md': {lang:'MD', content:`# blackroad-os
+
+> distributed AI agent operating system
+
+## architecture
+
+BlackRoad OS implements a trinary logic substrate (1/0/\u22121)
+with PS-SHA\u221e cryptographic memory persistence and paraconsistent
+reasoning for contradiction handling.
+
+## agents
+
+| agent    | model   | role              |
+|----------|---------|-------------------|
+| cecilia  | claude  | reasoning + arch  |
+| cadence  | gpt-4o  | synthesis         |
+| eve      | grok    | lateral + search  |
+| gematria | gemini  | multimodal        |
+
+## stack
+
+- **orchestration** \u00b7 K3s / Traefik
+- **messaging**     \u00b7 NATS event bus
+- **memory**        \u00b7 PS-SHA\u221e journal
+- **inference**     \u00b7 Ollama (Pi 5 cluster)
+- **edge**          \u00b7 Cloudflare Workers (85+)
+
+## hardware
+
+\`\`\`
+octavia  \u00b7 Pi 5 + Hailo-8 + NVMe (primary inference)
+cecilia  \u00b7 Pi 5 + Hailo-8 + NVMe (agent host)
+alice    \u00b7 Pi 400 (gateway / K3s control)
+olympia  \u00b7 Pi 4B (storage)
+\`\`\`
+
+## Z-framework
+
+Z := yx \u2212 w
+
+Where Z=\u2205 indicates equilibrium; Z\u2260\u2205 triggers adaptation.
+The system continuously minimizes |Z| across all agent states.
+
+---
+
+*built by alexa amundson \u00b7 blackroad os inc \u00b7 2025*`}
+};
+
+let activeTab = 'agent-core.js';
+let openTabs = ['agent-core.js', 'memory.py', 'README.md'];
+let modified = new Set();
+let findMatches = [];
+let findIndex = 0;
+
+const editor = document.getElementById('editor');
+const gutterEl = document.getElementById('gutter');
+const minimapEl = document.getElementById('minimap');
+const titleFile = document.getElementById('title-file');
+
+// ── TABS ──
+function renderTabs() {
+  const cont = document.getElementById('tabs');
+  cont.innerHTML = '';
+  openTabs.forEach(name => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (name === activeTab ? ' active' : '');
+    const dot = document.createElement('div');
+    dot.className = 'tab-dot' + (modified.has(name) ? ' modified' : '');
+    const label = document.createElement('span');
+    label.textContent = name;
+    const close = document.createElement('button');
+    close.className = 'tab-close';
+    close.textContent = '\u00d7';
+    close.onclick = (e) => { e.stopPropagation(); closeTab(name); };
+    tab.appendChild(dot);
+    tab.appendChild(label);
+    tab.appendChild(close);
+    tab.onclick = () => switchTab(name);
+    cont.appendChild(tab);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'tab-new';
+  addBtn.textContent = '+';
+  addBtn.onclick = newFile;
+  cont.appendChild(addBtn);
+}
+
+function switchTab(name) {
+  if (activeTab && FILES[activeTab]) FILES[activeTab].content = editor.value;
+  activeTab = name;
+  editor.value = FILES[name].content;
+  document.getElementById('sb-lang').textContent = FILES[name].lang;
+  titleFile.textContent = name;
+  titleFile.className = 'title-file' + (modified.has(name) ? ' modified' : '');
+  updateGutter();
+  updateStatus();
+  renderMinimap();
+  renderTabs();
+  editor.focus();
+}
+
+function closeTab(name) {
+  const idx = openTabs.indexOf(name);
+  if (idx === -1) return;
+  openTabs.splice(idx, 1);
+  modified.delete(name);
+  if (openTabs.length === 0) { newFile(); return; }
+  if (activeTab === name) switchTab(openTabs[Math.min(idx, openTabs.length-1)]);
+  else renderTabs();
+}
+
+// ── GUTTER ──
+function updateGutter() {
+  const lines = editor.value.split('\n');
+  const curLine = getCurrentLine();
+  gutterEl.innerHTML = '';
+  lines.forEach((_, i) => {
+    const span = document.createElement('span');
+    span.className = 'line-num' + (i+1 === curLine ? ' current' : '');
+    span.textContent = i+1;
+    gutterEl.appendChild(span);
+  });
+  // sync scroll
+  gutterEl.scrollTop = editor.scrollTop;
+  updateCurrentLineHL();
+}
+
+function getCurrentLine() {
+  const val = editor.value.substring(0, editor.selectionStart);
+  return val.split('\n').length;
+}
+
+function getCurrentCol() {
+  const val = editor.value.substring(0, editor.selectionStart);
+  const lines = val.split('\n');
+  return lines[lines.length-1].length + 1;
+}
+
+function updateCurrentLineHL() {
+  const lineH = parseFloat(getComputedStyle(editor).lineHeight);
+  const curLine = getCurrentLine();
+  const hl = document.getElementById('cur-line-hl');
+  const top = 14 + (curLine - 1) * lineH - editor.scrollTop;
+  hl.style.top = top + 'px';
+  hl.style.height = lineH + 'px';
+}
+
+// ── STATUS ──
+function updateStatus() {
+  const text = editor.value;
+  const lines = text.split('\n');
+  const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+  document.getElementById('sb-pos').textContent = `Ln ${getCurrentLine()}, Col ${getCurrentCol()}`;
+  document.getElementById('sb-words').textContent = `${words} word${words!==1?'s':''}`;
+  document.getElementById('sb-lines').textContent = `${lines.length} line${lines.length!==1?'s':''}`;
+}
+
+// ── MINIMAP ──
+function renderMinimap() {
+  minimapEl.innerHTML = '';
+  const lines = editor.value.split('\n').slice(0, 80);
+  lines.forEach(line => {
+    const div = document.createElement('div');
+    const len = line.trimStart().length;
+    div.className = 'mm-line' +
+      (line.trimStart().startsWith('//') || line.trimStart().startsWith('#') ? ' comment' :
+       len > 20 ? ' bright' : '');
+    div.style.width = Math.min(44, Math.max(4, len * 0.7)) + 'px';
+    minimapEl.appendChild(div);
+  });
+}
+
+// ── EVENTS ──
+editor.addEventListener('input', () => {
+  updateGutter();
+  updateStatus();
+  renderMinimap();
+  modified.add(activeTab);
+  FILES[activeTab].content = editor.value;
+  titleFile.className = 'title-file modified';
+  renderTabs();
+  if (document.getElementById('find-bar').classList.contains('open')) doFind();
+});
+
+editor.addEventListener('keydown', (e) => {
+  // Tab / Shift+Tab -> indent / unindent
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    // Shift+Tab: unindent current line by up to 2 spaces
+    if (e.shiftKey) {
+      const s = editor.selectionStart;
+      const ePos = editor.selectionEnd;
+      // Only handle simple caret case; with selection we currently do nothing
+      if (s === ePos) {
+        const value = editor.value;
+        const lineStart = value.lastIndexOf('\n', s - 1) + 1;
+        let remove = 0;
+        while (remove < 2 && value[lineStart + remove] === ' ') remove++;
+        if (remove > 0) {
+          editor.value = value.slice(0, lineStart) + value.slice(lineStart + remove);
+          const newPos = s - Math.min(remove, s - lineStart);
+          editor.selectionStart = editor.selectionEnd = newPos;
+          editor.dispatchEvent(new Event('input'));
+        }
+      }
+    } else {
+      // Tab: insert 2 spaces at cursor
+      const s = editor.selectionStart;
+      editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(editor.selectionEnd);
+      editor.selectionStart = editor.selectionEnd = s + 2;
+      editor.dispatchEvent(new Event('input'));
+    }
+  }
+  // Ctrl/Cmd+S -> save
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveFile(); }
+  // Ctrl/Cmd+F -> find
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault(); toggleFind(); }
+  // Ctrl/Cmd+K -> palette
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); togglePalette(); }
+  // Escape -> close panels
+  if (e.key === 'Escape') {
+    document.getElementById('find-bar').classList.remove('open');
+    closePalette();
+  }
+});
+
+editor.addEventListener('keyup', () => { updateGutter(); updateStatus(); });
+editor.addEventListener('click', () => { updateGutter(); updateStatus(); });
+editor.addEventListener('scroll', () => {
+  gutterEl.scrollTop = editor.scrollTop;
+  updateCurrentLineHL();
+});
+
+// ── SAVE ──
+function saveFile() {
+  modified.delete(activeTab);
+  titleFile.className = 'title-file';
+  renderTabs();
+  const flash = document.getElementById('save-flash');
+  flash.classList.add('show');
+  setTimeout(() => flash.classList.remove('show'), 1200);
+}
+
+// ── NEW FILE ──
+let newCount = 1;
+function newFile() {
+  const name = `untitled-${newCount++}.js`;
+  FILES[name] = { lang:'JS', content:'' };
+  openTabs.push(name);
+  switchTab(name);
+}
+
+// ── FIND ──
+function toggleFind() {
+  const bar = document.getElementById('find-bar');
+  bar.classList.toggle('open');
+  if (bar.classList.contains('open')) {
+    document.getElementById('find-input').focus();
+    doFind();
+  }
+}
+
+const findInputEl = document.getElementById('find-input');
+findInputEl.addEventListener('input', () => doFind());
+findInputEl.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' || event.key === 'Esc') {
+    event.preventDefault();
+    const bar = document.getElementById('find-bar');
+    if (bar.classList.contains('open')) {
+      bar.classList.remove('open');
+    }
+    editor.focus();
+  }
+});
+
+function doFind() {
+  const q = document.getElementById('find-input').value;
+  const countEl = document.getElementById('find-count');
+  if (!q) { countEl.textContent=''; findMatches=[]; findIndex=0; return; }
+  const text = editor.value;
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');
+  findMatches = [];
+  let m;
+  while((m = re.exec(text)) !== null) findMatches.push(m.index);
+  if (findMatches.length) {
+    findIndex = Math.max(0, Math.min(findIndex, findMatches.length - 1));
+  } else {
+    findIndex = 0;
+  }
+  countEl.textContent = findMatches.length ? `${Math.min(findIndex+1,findMatches.length)} / ${findMatches.length}` : '0 results';
+  if (findMatches.length) highlightFind();
+}
+
+function findNext() { if(!findMatches.length)return; findIndex=(findIndex+1)%findMatches.length; highlightFind(); }
+function findPrev() { if(!findMatches.length)return; findIndex=(findIndex-1+findMatches.length)%findMatches.length; highlightFind(); }
+
+function highlightFind() {
+  const q = document.getElementById('find-input').value;
+  if (!q || !findMatches.length) return;
+  const pos = findMatches[findIndex];
+  editor.focus();
+  editor.setSelectionRange(pos, pos + q.length);
+  document.getElementById('find-count').textContent = `${findIndex+1} / ${findMatches.length}`;
+}
+
+// ── COMMAND PALETTE ──
+const COMMANDS = [
+  { icon:'\u25c8', label:'New File',              shortcut:'\u2318N', fn: newFile },
+  { icon:'\u25b2', label:'Save File',             shortcut:'\u2318S', fn: saveFile },
+  { icon:'\u25ce', label:'Find in File',          shortcut:'\u2318F', fn: toggleFind },
+  { icon:'\u25d1', label:'Switch: agent-core.js', shortcut:'',       fn: ()=>switchTab('agent-core.js') },
+  { icon:'\u25d1', label:'Switch: memory.py',     shortcut:'',       fn: ()=>switchTab('memory.py') },
+  { icon:'\u25d1', label:'Switch: README.md',     shortcut:'',       fn: ()=>switchTab('README.md') },
+  { icon:'\u229e', label:'Toggle Minimap',        shortcut:'',       fn: ()=>{ minimapEl.style.display = minimapEl.style.display==='none'?'':'none'; } },
+  { icon:'\u2300', label:'Close Tab',             shortcut:'',       fn: ()=>closeTab(activeTab) },
+];
+let palSel = 0;
+let filteredCmds = [...COMMANDS];
+
+function togglePalette() {
+  const overlay = document.getElementById('palette-overlay');
+  overlay.classList.toggle('open');
+  if (overlay.classList.contains('open')) {
+    palSel = 0;
+    filteredCmds = [...COMMANDS];
+    renderPalette();
+    document.getElementById('palette-input').value = '';
+    document.getElementById('palette-input').focus();
+  }
+}
+
+function closePalette() {
+  document.getElementById('palette-overlay').classList.remove('open');
+}
+
+function renderPalette() {
+  const list = document.getElementById('palette-list');
+  list.innerHTML = '';
+  filteredCmds.forEach((cmd, i) => {
+    const item = document.createElement('div');
+    item.className = 'palette-item' + (i===palSel?' selected':'');
+    const iconSpan = document.createElement('span');
+    iconSpan.className = 'palette-item-icon';
+    iconSpan.textContent = cmd.icon;
+    const labelSpan = document.createElement('span');
+    labelSpan.className = 'palette-item-label';
+    labelSpan.textContent = cmd.label;
+    const shortcutSpan = document.createElement('span');
+    shortcutSpan.className = 'palette-item-shortcut';
+    shortcutSpan.textContent = cmd.shortcut || '';
+    item.appendChild(iconSpan);
+    item.appendChild(labelSpan);
+    item.appendChild(shortcutSpan);
+    item.onclick = () => { cmd.fn(); closePalette(); };
+    list.appendChild(item);
+  });
+}
+
+function filterPalette(q) {
+  filteredCmds = COMMANDS.filter(c => c.label.toLowerCase().includes(q.toLowerCase()));
+  palSel = 0;
+  renderPalette();
+}
+
+document.getElementById('palette-input').addEventListener('keydown', (e) => {
+  if (e.key==='ArrowDown') { palSel=Math.min(palSel+1,filteredCmds.length-1); renderPalette(); }
+  if (e.key==='ArrowUp')   { palSel=Math.max(palSel-1,0); renderPalette(); }
+  if (e.key==='Enter' && filteredCmds[palSel]) { filteredCmds[palSel].fn(); closePalette(); }
+  if (e.key==='Escape') closePalette();
+});
+
+// ── INIT ──
+switchTab('agent-core.js');
+</script>
+</body>
+</html>

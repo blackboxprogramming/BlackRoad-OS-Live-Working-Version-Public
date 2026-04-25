@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LangChain Studio - BlackRoad AI Workflow Builder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #000;
+            color: #FFF;
+            line-height: 1.618;
+        }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 89px 34px;
+            background: linear-gradient(135deg, rgba(41,121,255,0.1) 0%, rgba(156,39,176,0.1) 100%);
+            text-align: center;
+        }
+        h1 {
+            font-size: 55px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 21px;
+        }
+        .subtitle { font-size: 24px; opacity: 0.8; margin-bottom: 55px; max-width: 900px; }
+        .btn {
+            padding: 21px 55px;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            color: #FFF;
+            border: none;
+            border-radius: 13px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 13px 34px rgba(41,121,255,0.4); }
+        .features {
+            padding: 144px 34px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .section-title {
+            font-size: 55px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 89px;
+            background: linear-gradient(135deg, #2979FF 38.2%, #9C27B0 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 34px;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+            transition: all 0.3s;
+        }
+        .feature-card:hover {
+            border-color: #2979FF;
+            transform: translateY(-5px);
+            box-shadow: 0 13px 34px rgba(41,121,255,0.2);
+        }
+        .feature-icon { font-size: 55px; margin-bottom: 21px; }
+        .feature-title { font-size: 24px; font-weight: 600; margin-bottom: 13px; color: #9C27B0; }
+        .feature-desc { font-size: 16px; opacity: 0.8; line-height: 1.618; }
+        .builder {
+            padding: 144px 34px;
+            background: rgba(255,255,255,0.02);
+        }
+        .builder-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+        }
+        .chain-blocks {
+            display: flex;
+            gap: 21px;
+            flex-wrap: wrap;
+            margin-top: 34px;
+        }
+        .chain-block {
+            background: rgba(41,121,255,0.1);
+            border: 2px solid rgba(41,121,255,0.3);
+            border-radius: 8px;
+            padding: 21px;
+            min-width: 250px;
+            cursor: grab;
+        }
+        .chain-block:active { cursor: grabbing; }
+        .block-title { font-size: 18px; font-weight: 600; color: #2979FF; margin-bottom: 8px; }
+        .block-desc { font-size: 14px; opacity: 0.7; }
+        footer {
+            padding: 89px 34px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        footer a { color: #FFF; text-decoration: none; opacity: 0.7; transition: opacity 0.3s; }
+        footer a:hover { opacity: 1; color: #2979FF; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div style="font-size: 89px; margin-bottom: 21px;">🔗</div>
+        <h1>LangChain Studio</h1>
+        <p class="subtitle">Build AI Workflows. Chain Models. Orchestrate Agents. Zero Code Required.</p>
+        <a href="#builder" class="btn">Start Building</a>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">Powerful AI Orchestration</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3 class="feature-title">Chain Builder</h3>
+                <p class="feature-desc">Drag-and-drop AI workflow builder. Chain prompts, models, tools. Visual pipeline editor with real-time execution.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">Agent Coordination</h3>
+                <p class="feature-desc">Multi-agent workflows. Parallel execution. Task delegation. Hierarchical agent swarms with 30k capacity.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3 class="feature-title">Prompt Templates</h3>
+                <p class="feature-desc">Reusable prompt library. Variable injection. Few-shot examples. Version control for prompts.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔌</div>
+                <h3 class="feature-title">Tool Integration</h3>
+                <p class="feature-desc">Connect to APIs, databases, search engines. Custom tools. Webhook triggers. Real-time data access.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Analytics & Monitoring</h3>
+                <p class="feature-desc">Track workflow execution. Token usage. Latency metrics. Cost analysis. Debug with trace logs.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3 class="feature-title">Memory & Context</h3>
+                <p class="feature-desc">Persistent memory stores. Context windows. Vector databases. Conversation history management.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="builder" id="builder">
+        <h2 class="section-title">Workflow Builder</h2>
+        <div class="builder-container">
+            <p style="opacity: 0.8; margin-bottom: 21px;">Drag blocks to create AI workflows. Connect chains. Deploy instantly.</p>
+            <div class="chain-blocks">
+                <div class="chain-block">
+                    <div class="block-title">Input</div>
+                    <div class="block-desc">User prompt or data source</div>
+                </div>
+                <div class="chain-block">
+                    <div class="block-title">Prompt Template</div>
+                    <div class="block-desc">Format and inject variables</div>
+                </div>
+                <div class="chain-block">
+                    <div class="block-title">LLM Model</div>
+                    <div class="block-desc">Claude, GPT-4, Llama, Mistral</div>
+                </div>
+                <div class="chain-block">
+                    <div class="block-title">Tool Call</div>
+                    <div class="block-desc">API, database, search, custom</div>
+                </div>
+                <div class="chain-block">
+                    <div class="block-title">Agent</div>
+                    <div class="block-desc">Autonomous AI agent with tools</div>
+                </div>
+                <div class="chain-block">
+                    <div class="block-title">Output</div>
+                    <div class="block-desc">Response formatting & delivery</div>
+                </div>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 34px;">Deploy Workflow</button>
+        </div>
+    </section>
+
+    <footer>
+        <div style="font-size: 34px; margin-bottom: 21px;">🔗 LangChain Studio</div>
+        <div style="display: flex; gap: 34px; justify-content: center; margin-bottom: 21px; flex-wrap: wrap;">
+            <a href="#">Docs</a>
+            <a href="#">Templates</a>
+            <a href="#">API</a>
+            <a href="#">Support</a>
+        </div>
+        <p style="opacity: 0.6; font-size: 14px;">Built by BlackRoad OS | AI workflow orchestration</p>
+        <p style="opacity: 0.6; font-size: 14px; margin-top: 13px;">🖤🛣️ Build. Chain. Deploy.</p>
+    </footer>
+
+    <script>
+        // Make blocks draggable
+        document.querySelectorAll('.chain-block').forEach(block => {
+            block.addEventListener('dragstart', () => {
+                block.style.opacity = '0.5';
+            });
+            block.addEventListener('dragend', () => {
+                block.style.opacity = '1';
+            });
+        });
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Animate cards
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>

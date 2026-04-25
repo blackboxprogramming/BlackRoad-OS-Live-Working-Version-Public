@@ -1,0 +1,54 @@
+# Hello 3D World - Your First BlackRoad Program
+# This creates a simple 3D scene with a rotating cube
+
+## Define a 3D Scene
+space HelloWorld:
+    ## The Cube (Hot Pink!)
+    cube Box:
+        position: vec3(0, 0, 0)
+        rotation: vec3(0, 0, 0)
+        scale: vec3(1, 1, 1)
+        color: #FF1D6C  # BlackRoad Hot Pink
+
+    ## The Ground
+    plane Ground:
+        position: vec3(0, -2, 0)
+        scale: vec3(10, 10, 1)
+        color: #333333
+
+    ## Lighting
+    light Sun:
+        type: point
+        position: vec3(3, 5, 3)
+        color: #FFFFFF
+        intensity: 2.0
+
+    ## Camera
+    camera MainCamera:
+        position: vec3(0, 2, 5)
+        lookAt: vec3(0, 0, 0)
+        fov: 75
+
+## Animation Function
+fun animate(delta: float):
+    # Rotate the cube
+    let box = HelloWorld.Box
+    box.rotation.y = box.rotation.y + (45.0 * delta)  # 45 degrees per second
+    box.rotation.x = box.rotation.x + (30.0 * delta)  # 30 degrees per second
+
+## Main Function
+fun main():
+    print("Hello, BlackRoad 3D World! 🖤🛣️")
+
+    # Animation loop
+    while true:
+        let delta = time.deltaTime()
+
+        # Animate
+        animate(delta)
+
+        # Render the scene
+        render(HelloWorld, camera: MainCamera)
+
+        # 60 FPS
+        time.sleep(1.0 / 60.0)

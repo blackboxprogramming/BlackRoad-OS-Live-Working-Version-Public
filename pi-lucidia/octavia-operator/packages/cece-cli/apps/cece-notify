@@ -1,0 +1,264 @@
+#!/bin/bash
+# 🔔 CECE-NOTIFY v1.0 - Push Notifications Across Devices
+# Send notifications to all fleet devices, desktop, and mobile
+
+# BlackRoad Color Palette (xterm-256)
+BR_ORANGE=208
+BR_AMBER=202
+BR_PINK=198
+BR_MAGENTA=163
+BR_BLUE=33
+BR_WHITE=255
+BR_BLACK=0
+
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'
+BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+NOTIFY_DIR="$CECE_HOME/notifications"
+NOTIFY_LOG="$NOTIFY_DIR/notifications.jsonl"
+NOTIFY_QUEUE="$NOTIFY_DIR/queue.jsonl"
+
+mkdir -p "$NOTIFY_DIR"
+
+# Devices
+DEVICES=(alice aria lucidia octavia cecilia)
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)🔔 CECE-NOTIFY - Push Notifications${RESET}            $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+generate_id() {
+    date +%s%N | sha256sum | head -c 8
+}
+
+# Send notification to a single device
+send_to_device() {
+    local device="$1"
+    local title="$2"
+    local message="$3"
+    local priority="${4:-normal}"
+
+    # Try SSH notification
+    ssh "$device" "bash --norc --noprofile -c '
+        # Desktop notification (if available)
+        if command -v notify-send &>/dev/null; then
+            notify-send \"$title\" \"$message\" 2>/dev/null
+        fi
+
+        # Terminal bell
+        echo -e \"\\a\"
+
+        # Log to device
+        mkdir -p ~/cece/notifications
+        echo \"{\\\"time\\\":\\\"$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\\\",\\\"title\\\":\\\"$title\\\",\\\"message\\\":\\\"$message\\\",\\\"from\\\":\\\"$(hostname)\\\"}\" >> ~/cece/notifications/received.jsonl
+    '" 2>/dev/null
+
+    return $?
+}
+
+# Send notification to all devices
+cmd_send() {
+    local title="$1"
+    local message="$2"
+    local priority="${3:-normal}"
+
+    if [ -z "$title" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Please provide notification title"
+        echo "Usage: cece-notify send <title> [message] [priority]"
+        return 1
+    fi
+
+    [ -z "$message" ] && message="$title"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Sending notification to fleet...${RESET}"
+    echo -e "  $(fg $BR_WHITE)Title:${RESET} $title"
+    echo -e "  $(fg $BR_WHITE)Message:${RESET} $message"
+    echo ""
+
+    local id=$(generate_id)
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local sent=0
+    local failed=0
+
+    for device in "${DEVICES[@]}"; do
+        echo -n "  $device: "
+
+        if ping -c 1 -W 1 "$device" &>/dev/null; then
+            if send_to_device "$device" "$title" "$message" "$priority"; then
+                echo -e "$(fg $BR_BLUE)✓${RESET}"
+                ((sent++))
+            else
+                echo -e "$(fg $BR_AMBER)○${RESET} (no notify-send)"
+                ((sent++))
+            fi
+        else
+            echo -e "$(fg $BR_PINK)✗${RESET} offline"
+            ((failed++))
+        fi
+    done
+
+    # Log notification
+    echo "{\"id\":\"$id\",\"time\":\"$timestamp\",\"title\":\"$title\",\"message\":\"$message\",\"priority\":\"$priority\",\"sent\":$sent,\"failed\":$failed}" >> "$NOTIFY_LOG"
+
+    echo ""
+    echo -e "$(fg $BR_WHITE)Result:${RESET} $sent sent, $failed failed"
+}
+
+# Send to specific device
+cmd_to() {
+    local device="$1"
+    local title="$2"
+    local message="${3:-$title}"
+
+    if [ -z "$device" ] || [ -z "$title" ]; then
+        echo "Usage: cece-notify to <device> <title> [message]"
+        return 1
+    fi
+
+    echo -n "Sending to $device... "
+
+    if send_to_device "$device" "$title" "$message"; then
+        echo -e "$(fg $BR_BLUE)✓${RESET}"
+    else
+        echo -e "$(fg $BR_PINK)✗${RESET}"
+    fi
+}
+
+# Show notification history
+cmd_history() {
+    local count="${1:-20}"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Recent Notifications:${RESET}"
+    echo ""
+
+    if [ ! -f "$NOTIFY_LOG" ]; then
+        echo "No notifications sent yet."
+        return
+    fi
+
+    tail -n "$count" "$NOTIFY_LOG" | while read -r line; do
+        local time=$(echo "$line" | jq -r '.time' | cut -d'T' -f1,2 | tr 'T' ' ' | cut -c1-16)
+        local title=$(echo "$line" | jq -r '.title')
+        local sent=$(echo "$line" | jq -r '.sent')
+        local failed=$(echo "$line" | jq -r '.failed')
+
+        echo -e "  $(fg $BR_BLUE)[$time]${RESET} $title $(fg $BR_WHITE)($sent sent)${RESET}"
+    done
+}
+
+# Queue a notification for later
+cmd_queue() {
+    local title="$1"
+    local message="$2"
+    local send_at="$3"
+
+    if [ -z "$title" ] || [ -z "$send_at" ]; then
+        echo "Usage: cece-notify queue <title> <message> <send_at>"
+        echo "Example: cece-notify queue 'Meeting' 'Team standup' '09:00'"
+        return 1
+    fi
+
+    local id=$(generate_id)
+    echo "{\"id\":\"$id\",\"title\":\"$title\",\"message\":\"$message\",\"send_at\":\"$send_at\",\"status\":\"pending\"}" >> "$NOTIFY_QUEUE"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Notification queued for ${BOLD}$send_at${RESET}"
+}
+
+# Show received notifications
+cmd_inbox() {
+    local inbox="$CECE_HOME/notifications/received.jsonl"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Received Notifications:${RESET}"
+    echo ""
+
+    if [ ! -f "$inbox" ]; then
+        echo "No notifications received."
+        return
+    fi
+
+    tail -n 20 "$inbox" | while read -r line; do
+        local time=$(echo "$line" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+        local from=$(echo "$line" | jq -r '.from')
+        local title=$(echo "$line" | jq -r '.title')
+
+        echo -e "  $(fg $BR_BLUE)[$time]${RESET} $(fg $BR_MAGENTA)$from${RESET}: $title"
+    done
+}
+
+# Clear notifications
+cmd_clear() {
+    > "$CECE_HOME/notifications/received.jsonl"
+    echo -e "$(fg $BR_BLUE)✓${RESET} Notifications cleared"
+}
+
+# Broadcast emergency alert
+cmd_alert() {
+    local message="$*"
+
+    if [ -z "$message" ]; then
+        echo "Usage: cece-notify alert <message>"
+        return 1
+    fi
+
+    echo -e "$(fg $BR_PINK)${BOLD}⚠️  EMERGENCY ALERT ⚠️${RESET}"
+    cmd_send "🚨 ALERT" "$message" "critical"
+}
+
+# Test notification
+cmd_test() {
+    echo -e "$(fg $BR_BLUE)Sending test notification...${RESET}"
+    cmd_send "CECE Test" "This is a test notification from $(hostname)" "normal"
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-notify <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  send <title> [msg]     Send to all devices"
+    echo "  to <device> <title>    Send to specific device"
+    echo "  alert <message>        Emergency broadcast"
+    echo "  test                   Send test notification"
+    echo "  history [n]            Show sent notifications"
+    echo "  inbox                  Show received notifications"
+    echo "  queue <title> <time>   Queue for later"
+    echo "  clear                  Clear received notifications"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Devices:${RESET}"
+    for d in "${DEVICES[@]}"; do
+        echo "  • $d"
+    done
+}
+
+# Main
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        send) cmd_send "$@" ;;
+        to) cmd_to "$@" ;;
+        alert|emergency) cmd_alert "$@" ;;
+        test) cmd_test ;;
+        history|hist) cmd_history "$@" ;;
+        inbox|received) cmd_inbox ;;
+        queue) cmd_queue "$@" ;;
+        clear) cmd_clear ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

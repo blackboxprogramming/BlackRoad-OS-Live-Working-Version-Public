@@ -1,0 +1,51 @@
+# Vercel — BlackRoad OS Integration
+# https://vercel.com/docs/rest-api
+
+name: vercel
+category: cloud-deploy
+status: active
+api_base: https://api.vercel.com
+
+auth:
+  type: bearer_token
+  env: VERCEL_TOKEN
+  org_id_env: VERCEL_ORG_ID
+
+endpoints:
+  deployments:
+    list: GET /v6/deployments
+    get: GET /v13/deployments/{id}
+    create: POST /v13/deployments
+    cancel: PATCH /v12/deployments/{id}/cancel
+  projects:
+    list: GET /v9/projects
+    get: GET /v9/projects/{idOrName}
+    create: POST /v10/projects
+    update: PATCH /v9/projects/{idOrName}
+    delete: DELETE /v9/projects/{idOrName}
+  domains:
+    list: GET /v5/domains
+    add: POST /v10/projects/{idOrName}/domains
+    remove: DELETE /v9/projects/{idOrName}/domains/{domain}
+  env_vars:
+    list: GET /v9/projects/{idOrName}/env
+    create: POST /v10/projects/{idOrName}/env
+    get: GET /v1/projects/{idOrName}/env/{envId}
+    update: PATCH /v9/projects/{idOrName}/env/{envId}
+    delete: DELETE /v9/projects/{idOrName}/env/{envId}
+  logs:
+    get: GET /v2/deployments/{id}/events
+
+projects:
+  - blackroad-os-prism-console
+  - blackroad-os
+  - blackroad-os-mesh
+  - blackroad-os-helper
+  - blackroad-os-landing-worker
+  - containers-template
+  - clerk-docs
+
+health_check:
+  endpoint: GET /v2/user
+  interval: 300
+  timeout: 10

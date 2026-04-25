@@ -1,0 +1,89 @@
+#!/bin/bash
+# BR-Pixel - Procedural pixel art world generator
+clear
+trap 'printf "\033[?25h\033[0m"; clear; exit' INT TERM EXIT
+printf '\033[?25l'
+COLS=$(( $(tput cols) / 2 )) LINES=$(( $(tput lines) - 2 ))
+
+# Terrain colors
+SKY=33 CLOUD=231 SUN=226
+MOUNT=240 MOUNT2=245
+TREE_TRUNK=94 TREE_LEAF=34
+GRASS=28 GRASS2=22
+WATER=27 WATER2=33
+SAND=222 FLOWER1=205 FLOWER2=214
+
+generate() {
+  printf '\033[H'
+  # Sky gradient
+  sky_h=$((LINES * 40 / 100))
+  for ((y=0;y<sky_h;y++)); do
+    line=""
+    shade=$((17 + y * 3 / sky_h))
+    for ((x=0;x<COLS;x++)); do
+      if (( RANDOM % 40 == 0 && y > 1 && y < sky_h/2 )); then
+        line+="\033[48;5;${CLOUD}m  "
+      elif (( x == COLS/3 && y == 2 )); then
+        line+="\033[48;5;${SUN}m  "
+      else
+        line+="\033[48;5;${shade}m  "
+      fi
+    done
+    printf '%b\033[0m\n' "$line"
+  done
+
+  # Mountains
+  mount_h=$((LINES * 15 / 100))
+  peak=$((RANDOM % COLS))
+  for ((y=0;y<mount_h;y++)); do
+    line=""
+    w=$((y * COLS / mount_h / 2))
+    for ((x=0;x<COLS;x++)); do
+      dist=$((x - peak)); (( dist < 0 )) && dist=$((-dist))
+      if (( dist < w )); then
+        line+="\033[48;5;${MOUNT}m  "
+      elif (( RANDOM % 3 == 0 && dist < w+2 )); then
+        line+="\033[48;5;${MOUNT2}m  "
+      else
+        line+="\033[48;5;${SKY}m  "
+      fi
+    done
+    printf '%b\033[0m\n' "$line"
+  done
+
+  # Ground
+  ground_h=$((LINES - sky_h - mount_h))
+  water_start=$((RANDOM % (COLS/2) + COLS/4))
+  water_w=$((RANDOM % 8 + 4))
+  for ((y=0;y<ground_h;y++)); do
+    line=""
+    for ((x=0;x<COLS;x++)); do
+      # Water
+      if (( x >= water_start && x < water_start + water_w && y > ground_h/3 )); then
+        c=$WATER; (( RANDOM % 3 == 0 )) && c=$WATER2
+        line+="\033[48;5;${c}m  "
+      # Sand near water
+      elif (( x >= water_start-2 && x < water_start+water_w+2 && y > ground_h/3 )); then
+        line+="\033[48;5;${SAND}m  "
+      # Trees
+      elif (( RANDOM % 15 == 0 && y > 0 )); then
+        line+="\033[48;5;${TREE_LEAF}m  "
+      # Flowers
+      elif (( RANDOM % 30 == 0 )); then
+        c=$FLOWER1; (( RANDOM % 2 == 0 )) && c=$FLOWER2
+        line+="\033[48;5;${c}m  "
+      else
+        c=$GRASS; (( RANDOM % 4 == 0 )) && c=$GRASS2
+        line+="\033[48;5;${c}m  "
+      fi
+    done
+    printf '%b\033[0m\n' "$line"
+  done
+  printf '\033[38;5;205m🎨 BR-Pixel World \033[38;5;69m[Enter=regenerate, q=quit]\033[0m'
+}
+
+while true; do
+  generate
+  read -rsn1 K
+  [[ "$K" == "q" ]] && exit
+done

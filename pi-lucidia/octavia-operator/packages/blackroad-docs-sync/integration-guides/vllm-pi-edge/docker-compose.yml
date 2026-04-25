@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-edge
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models
+      - ./cache:/root/.cache
+    environment:
+      - MODEL_NAME=TinyLlama/TinyLlama-1.1B-Chat-v1.0
+      - MAX_MODEL_LEN=2048
+      - TENSOR_PARALLEL_SIZE=1
+    command: --model TinyLlama/TinyLlama-1.1B-Chat-v1.0 --host 0.0.0.0 --port 8000 --max-model-len 2048
+    networks:
+      - blackroad-net
+
+networks:
+  blackroad-net:
+    driver: bridge

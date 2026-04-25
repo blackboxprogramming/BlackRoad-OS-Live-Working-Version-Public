@@ -1,0 +1,29 @@
+name               = "blackroad-kpi-agents"
+main               = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id         = "848cf0b18d51e0170e0d1537aec3505a"
+
+[vars]
+INSTANCE = "kpi-agents"
+
+# Durable Objects for agent state
+[[durable_objects.bindings]]
+name       = "AGENT_FLEET"
+class_name = "AgentFleet"
+
+[[migrations]]
+tag         = "v1"
+new_classes = ["AgentFleet"]
+
+# KV for agent snapshots
+[[kv_namespaces]]
+binding = "AGENT_CACHE"
+id      = "PLACEHOLDER_KV_ID"
+
+# Analytics Engine for agent metrics
+[[analytics_engine_datasets]]
+binding = "AGENT_ANALYTICS"
+
+# Cron triggers for fleet heartbeat
+[triggers]
+crons = ["* * * * *"]

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Admin Dashboard - 300+ Products</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.618;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            border-right: 1px solid rgba(255, 29, 108, 0.2);
+            padding: 34px 21px;
+        }
+        
+        .logo {
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 55px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-item {
+            padding: 13px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+        
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 29, 108, 0.1);
+            border-left: 3px solid #FF1D6C;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 240px;
+            padding: 34px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 34px;
+        }
+        
+        h1 {
+            font-size: 34px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 21px;
+            margin-bottom: 34px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 29, 108, 0.2);
+            border-radius: 13px;
+            padding: 21px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+        }
+        
+        .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 34px;
+            font-weight: 700;
+            color: #FF1D6C;
+        }
+        
+        .stat-change {
+            font-size: 12px;
+            color: #4CAF50;
+            margin-top: 8px;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 29, 108, 0.2);
+            border-radius: 13px;
+            padding: 21px;
+            margin-bottom: 21px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 21px;
+            color: #FF1D6C;
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 200px;
+        }
+        
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #FF1D6C 0%, #F5A623 100%);
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            min-height: 20px;
+            transition: all 0.3s;
+        }
+        
+        .bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+        
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            white-space: nowrap;
+        }
+        
+        /* Recent Activity */
+        .activity-feed {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 29, 108, 0.2);
+            border-radius: 13px;
+            padding: 21px;
+        }
+        
+        .activity-item {
+            padding: 13px;
+            border-left: 2px solid #FF1D6C;
+            margin-bottom: 13px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .activity-text {
+            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 13px 34px;
+            background: linear-gradient(135deg, #FF1D6C 38.2%, #F5A623 61.8%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 21px rgba(255, 29, 108, 0.4);
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 13px;
+            border-radius: 13px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .status-badge.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+        }
+        
+        .status-badge.info {
+            background: rgba(41, 121, 255, 0.2);
+            color: #2979FF;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">🖤🛣️ BlackRoad</div>
+        <div class="nav-item active">📊 Dashboard</div>
+        <div class="nav-item">📦 Products</div>
+        <div class="nav-item">🚀 Deployments</div>
+        <div class="nav-item">📈 Analytics</div>
+        <div class="nav-item">🤝 Collaboration</div>
+        <div class="nav-item">⚙️ Settings</div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p style="color: rgba(255,255,255,0.6); margin-top: 8px;">Welcome back! Empire status: OPERATIONAL</p>
+            </div>
+            <button class="btn">Deploy New Product</button>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Products</div>
+                <div class="stat-value">300</div>
+                <div class="stat-change">↑ 50 this session</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Categories</div>
+                <div class="stat-value">40</div>
+                <div class="stat-change">↑ 7 new</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">GitHub Repos</div>
+                <div class="stat-value">500+</div>
+                <div class="stat-change">↑ 90 deployed</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">Active Deployments</div>
+                <div class="stat-value">150</div>
+                <div class="stat-change">✅ Live on Cloudflare</div>
+            </div>
+        </div>
+        
+        <!-- Deployment Status -->
+        <div class="chart-container">
+            <div class="chart-title">Deployment Status by Platform</div>
+            <div class="bar-chart">
+                <div class="bar" style="height: 100%;">
+                    <div class="bar-label">GitHub</div>
+                </div>
+                <div class="bar" style="height: 60%;">
+                    <div class="bar-label">Cloudflare</div>
+                </div>
+                <div class="bar" style="height: 0%;">
+                    <div class="bar-label">HuggingFace</div>
+                </div>
+                <div class="bar" style="height: 0%;">
+                    <div class="bar-label">Pis</div>
+                </div>
+                <div class="bar" style="height: 0%;">
+                    <div class="bar-label">GDrive</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="activity-feed">
+            <div class="chart-title">Recent Activity</div>
+            
+            <div class="activity-item">
+                <div class="activity-time">2 minutes ago</div>
+                <div class="activity-text">
+                    <span class="status-badge success">SUCCESS</span>
+                    Wave 5 completed - 50 new products built
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-time">15 minutes ago</div>
+                <div class="activity-text">
+                    <span class="status-badge success">SUCCESS</span>
+                    Admin dashboard deployed
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-time">30 minutes ago</div>
+                <div class="activity-text">
+                    <span class="status-badge info">INFO</span>
+                    Perfect collaboration with Persephone - 150 products on Cloudflare
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-time">1 hour ago</div>
+                <div class="activity-text">
+                    <span class="status-badge success">SUCCESS</span>
+                    BlackRoad CLI and Search Engine deployed
+                </div>
+            </div>
+            
+            <div class="activity-item">
+                <div class="activity-time">2 hours ago</div>
+                <div class="activity-text">
+                    <span class="status-badge warning">READY</span>
+                    HuggingFace deployer ready - awaiting authentication
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

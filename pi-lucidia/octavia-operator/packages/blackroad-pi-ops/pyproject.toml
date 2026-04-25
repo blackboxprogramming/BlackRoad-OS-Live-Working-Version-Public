@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blackroad-pi-ops"
+version = "0.1.0"
+description = "Edge device management for Raspberry Pi and Jetson - LED control, screen rendering, and hardware interfaces"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "BlackRoad OS", email = "hello@blackroad.io" }
+]
+keywords = [
+    "raspberry-pi",
+    "jetson",
+    "edge-computing",
+    "iot",
+    "led",
+    "hardware",
+    "embedded"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Hardware",
+    "Topic :: Home Automation",
+]
+dependencies = [
+    "flask>=2.3.0",
+    "pyyaml>=6.0",
+    "pillow>=9.0.0",
+]
+
+[project.optional-dependencies]
+rpi = [
+    "RPi.GPIO>=0.7.0",
+    "rpi_ws281x>=4.3.0",
+    "spidev>=3.6",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+pi-ops = "app:main"
+led-bridge = "led_bridge:main"
+
+[project.urls]
+Homepage = "https://blackroad.io"
+Documentation = "https://docs.blackroad.io/pi-ops"
+Repository = "https://github.com/BlackRoad-OS/blackroad-pi-ops"
+Issues = "https://github.com/BlackRoad-OS/blackroad-pi-ops/issues"
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "N", "W"]

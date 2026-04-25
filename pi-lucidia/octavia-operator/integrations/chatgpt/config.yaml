@@ -1,0 +1,60 @@
+# ChatGPT (OpenAI) — BlackRoad OS Integration
+# https://platform.openai.com/docs/api-reference
+
+name: chatgpt
+category: ai-providers
+status: active
+api_base: https://api.openai.com/v1
+
+auth:
+  type: bearer_token
+  env: OPENAI_API_KEY
+
+endpoints:
+  chat:
+    create: POST /chat/completions
+  completions:
+    create: POST /completions
+  embeddings:
+    create: POST /embeddings
+  images:
+    generate: POST /images/generations
+    edit: POST /images/edits
+  audio:
+    transcribe: POST /audio/transcriptions
+    translate: POST /audio/translations
+    speech: POST /audio/speech
+  files:
+    list: GET /files
+    upload: POST /files
+    get: GET /files/{file_id}
+    delete: DELETE /files/{file_id}
+  models:
+    list: GET /models
+
+models:
+  - id: gpt-4.5-preview
+    purpose: general-reasoning
+  - id: o3
+    purpose: deep-reasoning
+  - id: o3-mini
+    purpose: fast-reasoning
+  - id: gpt-4o
+    purpose: multimodal
+  - id: gpt-4o-mini
+    purpose: fast-cheap
+
+features:
+  - function_calling
+  - vision
+  - audio
+  - structured_outputs
+  - streaming
+
+gateway_route: /v1/openai
+default_model: gpt-4o
+
+health_check:
+  endpoint: GET /models
+  interval: 300
+  timeout: 10

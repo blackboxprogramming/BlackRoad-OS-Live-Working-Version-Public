@@ -1,0 +1,184 @@
+name: "Deploy Workflows to All Repos"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_orgs:
+        description: "Comma-separated org names (or 'all')"
+        required: true
+        default: "all"
+      dry_run:
+        description: "Dry run (no actual pushes)"
+        required: true
+        default: "true"
+        type: boolean
+      workflow_set:
+        description: "Which workflow set to deploy"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - standard
+          - e2e
+          - scrapers
+          - all
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  GH_TOKEN: ${{ secrets.CROSS_ORG_TOKEN }}
+
+jobs:
+  prepare:
+    name: "Prepare deployment manifest"
+    runs-on: ubuntu-latest
+    outputs:
+      repos: ${{ steps.list.outputs.repos }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: List target repos
+        id: list
+        run: |
+          ORGS="${{ inputs.target_orgs }}"
+          if [ "$ORGS" = "all" ]; then
+            ORGS="BlackRoad-OS-Inc,BlackRoad-OS,blackboxprogramming,BlackRoad-AI,BlackRoad-Cloud,BlackRoad-Security,BlackRoad-Media,BlackRoad-Foundation,BlackRoad-Interactive,BlackRoad-Hardware,BlackRoad-Labs,BlackRoad-Studio,BlackRoad-Ventures,BlackRoad-Education,BlackRoad-Gov,Blackbox-Enterprises,BlackRoad-Archive"
+          fi
+
+          REPOS="[]"
+          IFS=',' read -ra ORG_ARRAY <<< "$ORGS"
+          for org in "${ORG_ARRAY[@]}"; do
+            org=$(echo "$org" | xargs)
+            echo "Fetching repos for: ${org}"
+            ORG_REPOS=$(gh api --paginate "orgs/${org}/repos?per_page=100" \
+              --jq '[.[] | select(.archived != true) | .full_name]' 2>/dev/null || echo '[]')
+            REPOS=$(echo "$REPOS" "$ORG_REPOS" | jq -s 'add | unique')
+          done
+
+          # Limit matrix to 256 for GitHub Actions
+          TOTAL=$(echo "$REPOS" | jq 'length')
+          echo "Total repos: ${TOTAL}"
+          if [ "$TOTAL" -gt 256 ]; then
+            REPOS=$(echo "$REPOS" | jq '.[0:256]')
+          fi
+
+          echo "repos=$(echo "$REPOS" | jq -c .)" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: "Deploy to ${{ matrix.repo }}"
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        repo: ${{ fromJson(needs.prepare.outputs.repos) }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Deploy workflow files
+        run: |
+          REPO="${{ matrix.repo }}"
+          DRY_RUN="${{ inputs.dry_run }}"
+          WORKFLOW_SET="${{ inputs.workflow_set }}"
+
+          echo "Deploying ${WORKFLOW_SET} workflows to ${REPO}..."
+
+          if [ "$DRY_RUN" = "true" ]; then
+            echo "[DRY RUN] Would deploy to ${REPO}"
+            exit 0
+          fi
+
+          # Clone target repo
+          TMPDIR=$(mktemp -d)
+          gh repo clone "${REPO}" "${TMPDIR}/repo" -- --depth 1 2>/dev/null || {
+            echo "Could not clone ${REPO}, skipping"
+            exit 0
+          }
+
+          cd "${TMPDIR}/repo"
+          mkdir -p .github/workflows
+
+          # Copy appropriate workflow files
+          case "$WORKFLOW_SET" in
+            standard|all)
+              cp "${{ github.workspace }}/.github/workflows/ci.yml" .github/workflows/ 2>/dev/null || true
+              ;;
+            e2e|all)
+              # Create an E2E check workflow
+              cat > .github/workflows/blackroad-e2e-check.yml << 'WFEOF'
+          name: "BlackRoad E2E Check"
+          on:
+            push:
+              branches: [main, master]
+            pull_request:
+          jobs:
+            check:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v6
+                - name: Detect stack
+                  run: |
+                    [ -f package.json ] && echo "STACK=node" >> $GITHUB_ENV
+                    [ -f requirements.txt ] && echo "STACK=python" >> $GITHUB_ENV
+                    [ -f go.mod ] && echo "STACK=go" >> $GITHUB_ENV
+                - name: Report to operator
+                  run: |
+                    echo "Repo: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+                    echo "Stack: ${STACK:-unknown}" >> $GITHUB_STEP_SUMMARY
+          WFEOF
+              ;;
+            scrapers|all)
+              # Create a scraper reporting workflow
+              cat > .github/workflows/blackroad-report.yml << 'WFEOF'
+          name: "Report to BlackRoad Operator"
+          on:
+            schedule:
+              - cron: "0 3 * * 1"
+          jobs:
+            report:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v6
+                - name: Generate report
+                  run: |
+                    echo '{"repo":"${{ github.repository }}","time":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > /tmp/report.json
+                    cat /tmp/report.json
+          WFEOF
+              ;;
+          esac
+
+          # Commit and push
+          git config user.name "blackroad-bot"
+          git config user.email "bot@blackroad.io"
+          git add .github/workflows/
+          if git diff --cached --quiet; then
+            echo "No changes for ${REPO}"
+          else
+            git commit -m "chore: add BlackRoad E2E workflows [operator-deploy]"
+            git push || echo "Push failed for ${REPO}"
+          fi
+
+          rm -rf "${TMPDIR}"
+
+      - name: Log result
+        run: |
+          echo "## Deploy Result" >> $GITHUB_STEP_SUMMARY
+          echo "- **Repo:** ${{ matrix.repo }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow set:** ${{ inputs.workflow_set }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry run:** ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+
+  summary:
+    name: "Deployment summary"
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report
+        run: |
+          echo "## Workflow Deployment Complete" >> $GITHUB_STEP_SUMMARY
+          echo "- **Orgs:** ${{ inputs.target_orgs }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Returns to:** BlackRoad-OS-Inc/blackroad-operator" >> $GITHUB_STEP_SUMMARY

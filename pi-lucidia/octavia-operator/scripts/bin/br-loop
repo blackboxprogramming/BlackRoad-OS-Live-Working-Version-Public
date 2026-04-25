@@ -1,0 +1,40 @@
+#!/bin/bash
+# usage: br-loop [ROUNDS]
+
+ROUNDS="${1:-5}"
+
+AGENT_A="blackroad-operator"
+AGENT_B="blackroad-analyst"
+
+A_X=2
+A_Y=1
+B_X=36
+B_Y=1
+W=30
+H=10
+
+CTX_A="/tmp/br_a.txt"
+CTX_B="/tmp/br_b.txt"
+
+# initial input comes from stdin
+cat > "$CTX_A"
+
+clear
+
+for ((i=1; i<=ROUNDS; i++)); do
+  # --- A turn ---
+  cat "$CTX_A" \
+  | ./br-run "$AGENT_A" \
+  | tee "$CTX_B" \
+  | ./br-turn "$AGENT_A" "$A_X" "$A_Y" "$W" "$H"
+
+  sleep 0.6
+
+  # --- B turn ---
+  cat "$CTX_B" \
+  | ./br-run "$AGENT_B" \
+  | tee "$CTX_A" \
+  | ./br-turn "$AGENT_B" "$B_X" "$B_Y" "$W" "$H"
+
+  sleep 0.8
+done

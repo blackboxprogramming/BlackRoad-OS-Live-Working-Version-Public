@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Data & Schema Templates - BlackRoad OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-primary: #020308;
+      --bg-secondary: rgba(6, 10, 30, 0.92);
+      --bg-card: rgba(12, 18, 40, 0.85);
+      --text-primary: #f5f5ff;
+      --text-muted: rgba(245, 245, 255, 0.7);
+      --accent-cyan: #00e5ff;
+      --accent-green: #1af59d;
+      --accent-yellow: #ffc400;
+      --accent-purple: #a855f7;
+      --accent-orange: #ff9d00;
+      --accent-pink: #ff0066;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #050816 0, #020308 45%, #000000 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+    .nav { margin-bottom: 24px; }
+    .nav a { color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; }
+    .nav a:hover { text-decoration: underline; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    h1 .icon { font-size: 2.2rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+    .template-list { display: flex; flex-direction: column; gap: 20px; }
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.2s ease;
+    }
+    .template-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .template-name { font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .template-file {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255, 196, 0, 0.1);
+      border: 1px solid rgba(255, 196, 0, 0.3);
+      color: var(--accent-yellow);
+    }
+    .template-desc { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }
+
+    .preview-block {
+      margin-top: 16px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .preview-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-yellow);
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    /* Graph visualization */
+    .graph-viz {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .graph-node {
+      text-align: center;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 0.8rem;
+    }
+    .graph-node .node-icon { font-size: 1.4rem; margin-bottom: 4px; }
+    .graph-node .node-label { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Table list */
+    .table-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .table-pill {
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: "JetBrains Mono", monospace;
+      background: rgba(255, 196, 0, 0.06);
+      border: 1px solid rgba(255, 196, 0, 0.15);
+      color: var(--accent-yellow);
+    }
+
+    /* Stats row */
+    .schema-stats {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .schema-stat {
+      text-align: center;
+    }
+    .schema-stat .s-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      font-family: "JetBrains Mono", monospace;
+      color: var(--accent-cyan);
+    }
+    .schema-stat .s-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .footer {
+      text-align: center; margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="nav"><a href="index.html">&larr; Template Showcase</a></div>
+
+    <h1><span class="icon">🧱</span> Data & Schema Templates</h1>
+    <p class="subtitle">Graph database schemas modeling the entire template system as queryable data - template structures, domain routing, component topologies, and the 127-emoji reference.</p>
+
+    <div class="template-list">
+
+      <!-- GraphSQL Schema -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🧱 Template System GraphSQL Schema</div>
+          <div class="template-file">TEMPLATE-SYSTEM-GRAPHSQL-SCHEMA.sql</div>
+        </div>
+        <div class="template-desc">
+          A complete graph database schema that models three template structures as nodes and edges. Each template is broken down into its sections (nodes) and their reading order/dependencies (edges). The schema also includes a master catalog of all templates and the full 127-emoji reference as queryable data.
+        </div>
+
+        <div class="preview-label">Database Tables</div>
+        <div class="table-list">
+          <span class="table-pill">template_001_nodes</span>
+          <span class="table-pill">template_001_edges</span>
+          <span class="table-pill">template_001_step_nodes</span>
+          <span class="table-pill">template_002_nodes</span>
+          <span class="table-pill">template_002_edges</span>
+          <span class="table-pill">template_002_component_nodes</span>
+          <span class="table-pill">template_002_component_edges</span>
+          <span class="table-pill">template_003_domain_nodes</span>
+          <span class="table-pill">template_003_subdomain_nodes</span>
+          <span class="table-pill">template_003_routing_edges</span>
+          <span class="table-pill">template_catalog</span>
+          <span class="table-pill">template_dependencies</span>
+          <span class="table-pill">emoji_reference</span>
+        </div>
+
+        <div class="schema-stats">
+          <div class="schema-stat">
+            <div class="s-value">13</div>
+            <div class="s-label">Tables</div>
+          </div>
+          <div class="schema-stat">
+            <div class="s-value">3</div>
+            <div class="s-label">Views</div>
+          </div>
+          <div class="schema-stat">
+            <div class="s-value">470+</div>
+            <div class="s-label">Lines of SQL</div>
+          </div>
+          <div class="schema-stat">
+            <div class="s-value">127</div>
+            <div class="s-label">Emojis Indexed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Template 001 Graph -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🚀 Graph: Infra Runbook (Template 001)</div>
+        </div>
+        <div class="template-desc">
+          The infrastructure runbook modeled as a directed acyclic graph. 11 section nodes connected by "flows_to" edges representing the reading order, plus a sub-graph of step pipeline nodes for the execution sequence.
+        </div>
+        <div class="graph-viz">
+          <div class="graph-node"><div class="node-icon">🛣</div><div class="node-label">Header Bar</div></div>
+          <div class="graph-node"><div class="node-icon">⛅️</div><div class="node-label">Context Line</div></div>
+          <div class="graph-node"><div class="node-icon">📦</div><div class="node-label">Service Bindings</div></div>
+          <div class="graph-node"><div class="node-icon">📡</div><div class="node-label">Infra Status</div></div>
+          <div class="graph-node"><div class="node-icon">🚀</div><div class="node-label">Execute Steps</div></div>
+          <div class="graph-node"><div class="node-icon">💎</div><div class="node-label">Value Delivered</div></div>
+          <div class="graph-node"><div class="node-icon">📚</div><div class="node-label">Documentation</div></div>
+          <div class="graph-node"><div class="node-icon">🗒</div><div class="node-label">Checklist</div></div>
+          <div class="graph-node"><div class="node-icon">🎯</div><div class="node-label">Next Steps</div></div>
+          <div class="graph-node"><div class="node-icon">💡</div><div class="node-label">Tips</div></div>
+          <div class="graph-node"><div class="node-icon">🔥</div><div class="node-label">Footer</div></div>
+        </div>
+      </div>
+
+      <!-- Template 002 Graph -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🏗 Graph: Architecture (Template 002)</div>
+        </div>
+        <div class="template-desc">
+          System architecture modeled as two subgraphs: a document structure graph (sections in reading order) and a component topology graph (services, databases, integrations connected by protocol edges like HTTPS, SQL, Queue).
+        </div>
+        <div class="preview-label">Component Topology</div>
+        <div class="preview-block">    👤 Users
+        │ HTTPS
+        ▼
+    ⛅️ Edge/Gateway
+      ├─ HTTPS ─→ 🛰 Core API
+      │               ├─ SQL ──→ 🧱 Databases
+      │               ├─ Queue ─→ 📨 Queues
+      │               ├─ HTTP ──→ 🗂 Storage
+      │               └─ HTTPS ─→ 🧩 Integrations
+      └─ HTTPS ─→ 🖥 Web/UI
+                      └─ HTTPS ─→ 🛰 Core API</div>
+      </div>
+
+      <!-- Template 003 Graph -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🌐 Graph: Domain Routing (Template 003)</div>
+        </div>
+        <div class="template-desc">
+          All 16 primary domains and their subdomains modeled as a graph. Domain nodes contain metadata (purpose, status, Cloudflare zone), subdomain nodes contain routing details (category, backend, full URL), and routing edges define DNS/worker/service connections.
+        </div>
+        <div class="preview-label">Example Query: Get all subdomains for blackroad.io</div>
+        <div class="preview-block">SELECT subdomain, full_url, emoji, category, status
+FROM template_003_subdomain_nodes
+WHERE domain_id = 'blackroad-io'
+ORDER BY category, subdomain;
+
+-- Results:
+-- api    | https://api.blackroad.io     | 🔌 | api       | live
+-- agents | https://agents.blackroad.io  | 🤖 | agents    | live
+-- auth   | https://auth.blackroad.io    | 🔐 | auth      | live
+-- docs   | https://docs.blackroad.io    | 📚 | docs      | live
+-- ...</div>
+      </div>
+
+      <!-- Emoji Reference DB -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">🧠 Emoji Reference Database</div>
+        </div>
+        <div class="template-desc">
+          All 127 canonical emojis stored as queryable rows with fields for emoji character, name, category (1 of 10), meaning, and usage context. Categories: Layout & Pointers, Context/Platform, Actions, Status/Severity, Resources & Infra, Docs & Learning, People & Roles, Time & Scheduling, Observability, Meta/Vibe.
+        </div>
+        <div class="preview-label">Sample Emoji Records</div>
+        <div class="preview-block">SELECT emoji, name, category, meaning FROM emoji_reference;
+
+-- 🚀 | Deploy/launch  | Actions          | Ship to environment
+-- ✅ | OK/done        | Status/Severity  | Succeeded, safe, verified
+-- ⛅️ | Cloudflare     | Context/Platform | Workers, R2, D1, Wrangler
+-- 🧱 | Database       | Resources/Infra  | D1 tables, infra blocks
+-- 💡 | Tip/insight    | Docs & Learning  | Pro tips, best practice
+-- 🔥 | Epic done      | Meta / Vibe      | Big milestone achieved</div>
+      </div>
+
+      <!-- Views -->
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-name">📊 Queryable Views</div>
+        </div>
+        <div class="template-desc">
+          Four pre-built views for common queries across the template system:
+        </div>
+        <div class="preview-block">-- Templates grouped by category with counts
+CREATE VIEW templates_by_category AS
+SELECT category, COUNT(*) AS template_count
+FROM template_catalog
+GROUP BY category;
+
+-- Top 10 most-used templates
+CREATE VIEW most_used_templates AS
+SELECT name, emoji, usage_count
+FROM template_catalog
+WHERE usage_count > 0
+ORDER BY usage_count DESC
+LIMIT 10;
+
+-- Template dependency graph
+CREATE VIEW template_dependency_graph AS
+SELECT
+  t.template_id,
+  t.name           AS template_name,
+  d.depends_on_id  AS depends_on_template_id,
+  dp.name          AS depends_on_template_name
+FROM template_dependencies d
+JOIN template_catalog t  ON t.template_id  = d.template_id
+JOIN template_catalog dp ON dp.template_id = d.depends_on_id;
+
+-- Domain statistics with live/pending counts
+CREATE VIEW domain_stats AS
+SELECT
+  domain,
+  emoji,
+  purpose,
+  COUNT(*) AS subdomain_count,
+  SUM(CASE WHEN status = 'live' THEN 1 ELSE 0 END)    AS live,
+  SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending
+FROM template_003_domain_nodes
+GROUP BY domain, emoji, purpose;</div>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <p>BlackRoad OS Template Showcase &middot; Data & Schemas &middot; <span class="mono">&copy; 2026 BlackRoad OS, Inc.</span></p>
+    </div>
+  </div>
+</body>
+</html>

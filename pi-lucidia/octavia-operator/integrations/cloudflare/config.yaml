@@ -1,0 +1,65 @@
+# Cloudflare — BlackRoad OS Integration
+# https://developers.cloudflare.com/api
+
+name: cloudflare
+category: cloud-deploy
+status: active
+api_base: https://api.cloudflare.com/client/v4
+
+auth:
+  type: bearer_token
+  env: CLOUDFLARE_API_TOKEN
+  account_id_env: CLOUDFLARE_ACCOUNT_ID
+
+endpoints:
+  workers:
+    list: GET /accounts/{account_id}/workers/scripts
+    get: GET /accounts/{account_id}/workers/scripts/{name}
+    deploy: PUT /accounts/{account_id}/workers/scripts/{name}
+    delete: DELETE /accounts/{account_id}/workers/scripts/{name}
+    tail: GET /accounts/{account_id}/workers/scripts/{name}/tails
+  pages:
+    list: GET /accounts/{account_id}/pages/projects
+    get: GET /accounts/{account_id}/pages/projects/{name}
+    create: POST /accounts/{account_id}/pages/projects
+    deploy: POST /accounts/{account_id}/pages/projects/{name}/deployments
+  dns:
+    list: GET /zones/{zone_id}/dns_records
+    create: POST /zones/{zone_id}/dns_records
+    update: PATCH /zones/{zone_id}/dns_records/{record_id}
+    delete: DELETE /zones/{zone_id}/dns_records/{record_id}
+  r2:
+    list_buckets: GET /accounts/{account_id}/r2/buckets
+    create_bucket: POST /accounts/{account_id}/r2/buckets
+  kv:
+    list_namespaces: GET /accounts/{account_id}/storage/kv/namespaces
+    list_keys: GET /accounts/{account_id}/storage/kv/namespaces/{namespace_id}/keys
+    read: GET /accounts/{account_id}/storage/kv/namespaces/{namespace_id}/values/{key}
+    write: PUT /accounts/{account_id}/storage/kv/namespaces/{namespace_id}/values/{key}
+  d1:
+    list: GET /accounts/{account_id}/d1/database
+    query: POST /accounts/{account_id}/d1/database/{database_id}/query
+  tunnels:
+    list: GET /accounts/{account_id}/cfd_tunnel
+    get: GET /accounts/{account_id}/cfd_tunnel/{tunnel_id}
+    create: POST /accounts/{account_id}/cfd_tunnel
+  zones:
+    list: GET /zones
+    get: GET /zones/{zone_id}
+
+infrastructure:
+  account_id: "848cf0b18d51e0170e0d1537aec3505a"
+  primary_zone: blackroad.io
+  workers_count: 75+
+  pages_projects: 10+
+  r2_buckets:
+    - blackroad-models (135GB LLMs)
+  tunnel:
+    id: "52915859-da18-4aa6-add5-7bd9fcac2e0b"
+    name: blackroad
+    running_on: blackroad-pi
+
+health_check:
+  endpoint: GET /user/tokens/verify
+  interval: 120
+  timeout: 10

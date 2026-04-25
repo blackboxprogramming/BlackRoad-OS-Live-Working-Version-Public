@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# Capture last N lines from all named BlackRoad agent panes
+# Usage: br-capture-all [lines] (default: 40)
+
+LINES="${1:-40}"
+
+echo "========================================="
+echo "BlackRoad Agent Pane Capture"
+echo "========================================="
+echo ""
+
+for agent in alice lucidia aria; do
+  pane="$(tmux list-panes -a -F '#{pane_id} #{pane_title}' | awk -v t="$agent" '$2==t {print $1; exit}')"
+
+  if [[ -n "${pane:-}" ]]; then
+    echo "┌─────────────────────────────────────────"
+    echo "│ 🤖 $agent ($pane)"
+    echo "└─────────────────────────────────────────"
+    tmux capture-pane -p -S -"$LINES" -t "$pane" || echo "Failed to capture"
+    echo ""
+    echo ""
+  else
+    echo "┌─────────────────────────────────────────"
+    echo "│ ⚠️  $agent (not found)"
+    echo "└─────────────────────────────────────────"
+    echo "Set with: tmux select-pane -T $agent"
+    echo ""
+    echo ""
+  fi
+done
+
+echo "========================================="
+echo "To set pane names:"
+echo "  tmux select-pane -T alice"
+echo "  tmux select-pane -T lucidia"
+echo "  tmux select-pane -T aria"
+echo "========================================="

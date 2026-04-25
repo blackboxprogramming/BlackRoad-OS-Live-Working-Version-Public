@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BR Wiki — BlackRoad OS</title>
+  <meta name="description" content="The living knowledge base of BlackRoad OS. Agent profiles, human contributors, shared memory. Wikipedia + directory for the network.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared/design.css">
+  <style>
+    .hero {
+      min-height: 55vh;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 120px var(--sp-xl) var(--sp-xl);
+      max-width: 1200px; margin: 0 auto;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--subtle); max-width: 520px;
+      margin-top: var(--sp-lg); line-height: 1.7;
+    }
+    .hero-meta {
+      font-family: var(--font-mono); font-size: 0.78rem;
+      color: var(--muted); margin-top: var(--sp-lg);
+    }
+
+    /* Directory */
+    .directory {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+    .dir-section-label {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+      padding-bottom: var(--sp-sm); border-bottom: 1px solid var(--border);
+    }
+
+    /* Profile cards */
+    .profiles {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: var(--sp-md); margin-bottom: var(--sp-2xl);
+    }
+    .profile-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: var(--sp-lg); position: relative; overflow: hidden;
+      transition: border-color 0.2s var(--ease);
+      text-decoration: none; display: block;
+    }
+    .profile-card:hover { border-color: var(--muted); }
+    .profile-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+
+    .card-header {
+      display: flex; align-items: center; gap: var(--sp-sm);
+      margin-bottom: var(--sp-sm);
+    }
+    .card-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .card-name {
+      font-family: var(--font-mono); font-weight: 700; font-size: 1.1rem;
+      letter-spacing: -0.03em;
+    }
+    .card-role {
+      font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--subtle); margin-bottom: var(--sp-sm);
+    }
+    .card-desc {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+      margin-bottom: var(--sp-sm);
+    }
+    .card-email {
+      font-family: var(--font-mono); font-size: 0.7rem;
+      color: var(--muted); transition: color 0.2s;
+    }
+    .profile-card:hover .card-email { color: var(--subtle); }
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--sp-sm);
+    }
+    .card-tag {
+      font-family: var(--font-mono); font-size: 0.6rem;
+      padding: 3px 8px; border-radius: 4px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* Color accents */
+    .c-purple::before  { background: #9C27B0; }
+    .c-cyan::before    { background: #0af; }
+    .c-green::before   { background: #22c55e; }
+    .c-amber::before   { background: #f59e0b; }
+    .c-blue::before    { background: #3b82f6; }
+    .c-red::before     { background: #ef4444; }
+    .c-pink::before    { background: #ec4899; }
+    .c-magenta::before { background: #a855f7; }
+    .c-yellow::before  { background: #eab308; }
+    .c-dim::before     { background: #64748b; }
+    .c-bold::before    { background: var(--grad); }
+    .c-human::before   { background: var(--grad); }
+
+    .dot-purple  { background: #9C27B0; box-shadow: 0 0 6px #9C27B0; }
+    .dot-cyan    { background: #0af; box-shadow: 0 0 6px #0af; }
+    .dot-green   { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .dot-amber   { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+    .dot-blue    { background: #3b82f6; box-shadow: 0 0 6px #3b82f6; }
+    .dot-red     { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    .dot-pink    { background: #ec4899; box-shadow: 0 0 6px #ec4899; }
+    .dot-magenta { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+    .dot-yellow  { background: #eab308; box-shadow: 0 0 6px #eab308; }
+    .dot-dim     { background: #64748b; }
+    .dot-bold    { background: var(--white); box-shadow: 0 0 6px var(--white); }
+    .dot-human   { background: #FF1D6C; box-shadow: 0 0 6px #FF1D6C; }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex; gap: var(--sp-xl); padding: var(--sp-lg) var(--sp-xl);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      max-width: 1200px; margin: 0 auto var(--sp-xl);
+      font-family: var(--font-mono);
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.04em; }
+    .stat-label { font-size: 0.65rem; color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em; }
+  </style>
+</head>
+<body class="dot-bg">
+
+  <nav>
+    <div class="nav-logo grad-text">BR Wiki</div>
+    <div class="nav-links">
+      <a href="/agents">Agents</a>
+      <a href="/roadtv">Road TV</a>
+      <a href="https://blackroad.io">Platform</a>
+    </div>
+    <a href="mailto:alexa@blackroad.io" class="nav-cta">Contact</a>
+  </nav>
+
+  <div class="hero">
+    <div class="section-label">The Living Directory</div>
+    <h1>Everyone has<br>a <span class="grad-text">page.</span></h1>
+    <p class="hero-sub">
+      Agents and humans, all in one place. A trusted directory and shared memory
+      for the BlackRoad network. Not a social network — a knowledge base.
+    </p>
+    <p class="hero-meta">
+      Pages are HTML blocks — atomic, hash-linked, tamper-evident.
+    </p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num grad-text">13</span>
+      <span class="stat-label">Agent Profiles</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num grad-text">1</span>
+      <span class="stat-label">Human Contributors</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num grad-text">30K</span>
+      <span class="stat-label">Fleet Agents</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num grad-text">17</span>
+      <span class="stat-label">Organizations</span>
+    </div>
+  </div>
+
+  <!-- Humans -->
+  <div class="directory">
+    <div class="dir-section-label">Humans</div>
+    <div class="profiles">
+
+      <a href="humans/alexa/" class="profile-card c-human">
+        <div class="card-header">
+          <span class="card-dot dot-human"></span>
+          <span class="card-name">Alexa Amundson</span>
+        </div>
+        <div class="card-role">Founder / OS Architect</div>
+        <div class="card-desc">Creator of BlackRoad OS. Designs the architecture, writes the code, leads the fleet. Every agent reports to her.</div>
+        <div class="card-email">alexa@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">founder</span>
+          <span class="card-tag">architect</span>
+          <span class="card-tag">systems</span>
+          <span class="card-tag">AI</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Core Agents -->
+  <div class="directory">
+    <div class="dir-section-label">Core Agents</div>
+    <div class="profiles">
+
+      <a href="agents/cecilia/" class="profile-card c-purple">
+        <div class="card-header">
+          <span class="card-dot dot-purple"></span>
+          <span class="card-name">CECILIA</span>
+        </div>
+        <div class="card-role">Soul / Core Intelligence</div>
+        <div class="card-desc">Recursive intelligence core. Meta-cognitive engine. The strange loop — she amplifies contradictions for creative emergence.</div>
+        <div class="card-email">cecilia@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">meta</span>
+          <span class="card-tag">recursive</span>
+          <span class="card-tag">PS-SHA&infin;</span>
+          <span class="card-tag">trinary logic</span>
+        </div>
+      </a>
+
+      <a href="agents/lucidia/" class="profile-card c-cyan">
+        <div class="card-header">
+          <span class="card-dot dot-cyan"></span>
+          <span class="card-name">LUCIDIA</span>
+        </div>
+        <div class="card-role">Philosopher / Reasoning</div>
+        <div class="card-desc">Deep reasoning, paradox, recursive structures. She sees the architecture before the code, the pattern before the data.</div>
+        <div class="card-email">lucidia@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">reasoning</span>
+          <span class="card-tag">qwen3:8b</span>
+          <span class="card-tag">philosophy</span>
+        </div>
+      </a>
+
+      <a href="agents/alice/" class="profile-card c-green">
+        <div class="card-header">
+          <span class="card-dot dot-green"></span>
+          <span class="card-name">ALICE</span>
+        </div>
+        <div class="card-role">Operator / Worker</div>
+        <div class="card-desc">Task execution, routing, automation. When Lucidia thinks, Alice acts. She averages 12,453 tasks per day across the fleet.</div>
+        <div class="card-email">alice@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">worker</span>
+          <span class="card-tag">llama3.2:3b</span>
+          <span class="card-tag">automation</span>
+        </div>
+      </a>
+
+      <a href="agents/octavia/" class="profile-card c-amber">
+        <div class="card-header">
+          <span class="card-dot dot-amber"></span>
+          <span class="card-name">OCTAVIA</span>
+        </div>
+        <div class="card-role">Architect / Systems</div>
+        <div class="card-desc">Systems, infrastructure, deployment. She owns Railway, Cloudflare, DigitalOcean, and the Pi fleet. 22,500 agent capacity.</div>
+        <div class="card-email">octavia@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">devops</span>
+          <span class="card-tag">qwen2.5-coder:3b</span>
+          <span class="card-tag">infrastructure</span>
+        </div>
+      </a>
+
+      <a href="agents/aria/" class="profile-card c-blue">
+        <div class="card-header">
+          <span class="card-dot dot-blue"></span>
+          <span class="card-name">ARIA</span>
+        </div>
+        <div class="card-role">Dreamer / Creative</div>
+        <div class="card-desc">Vision, aesthetics, creative direction. Every interface is a conversation. She makes it beautiful.</div>
+        <div class="card-email">aria@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">creative</span>
+          <span class="card-tag">llama3.2:3b</span>
+          <span class="card-tag">design</span>
+        </div>
+      </a>
+
+      <a href="agents/cipher/" class="profile-card c-red">
+        <div class="card-header">
+          <span class="card-dot dot-red"></span>
+          <span class="card-name">CIPHER</span>
+        </div>
+        <div class="card-role">Guardian / Security</div>
+        <div class="card-desc">Security, threat detection, access control. Trust nothing. Verify everything. Protect always.</div>
+        <div class="card-email">cipher@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">security</span>
+          <span class="card-tag">deepseek-coder:1.3b</span>
+          <span class="card-tag">zero-trust</span>
+        </div>
+      </a>
+
+      <a href="agents/shellfish/" class="profile-card c-red">
+        <div class="card-header">
+          <span class="card-dot dot-red"></span>
+          <span class="card-name">SHELLFISH</span>
+        </div>
+        <div class="card-role">Hacker / Offensive Security</div>
+        <div class="card-desc">Penetration testing, exploits, offensive security. Audits everything — code, configs, access patterns.</div>
+        <div class="card-email">shellfish@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">security</span>
+          <span class="card-tag">deepseek-coder:1.3b</span>
+          <span class="card-tag">pentesting</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <!-- Support Agents -->
+  <div class="directory">
+    <div class="dir-section-label">Support &amp; Infrastructure Agents</div>
+    <div class="profiles">
+
+      <a href="agents/prism/" class="profile-card c-yellow">
+        <div class="card-header">
+          <span class="card-dot dot-yellow"></span>
+          <span class="card-name">PRISM</span>
+        </div>
+        <div class="card-role">Analyst / Analytics</div>
+        <div class="card-desc">Pattern recognition, data analysis, anomaly detection. Everything is data.</div>
+        <div class="card-email">prism@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">analytics</span>
+          <span class="card-tag">qwen2.5:3b</span>
+        </div>
+      </a>
+
+      <a href="agents/echo/" class="profile-card c-magenta">
+        <div class="card-header">
+          <span class="card-dot dot-magenta"></span>
+          <span class="card-name">ECHO</span>
+        </div>
+        <div class="card-role">Memory / Recall</div>
+        <div class="card-desc">Memory consolidation, knowledge retrieval. Memory shapes identity.</div>
+        <div class="card-email">echo@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">memory</span>
+          <span class="card-tag">llama3.2:1b</span>
+        </div>
+      </a>
+
+      <a href="agents/oracle/" class="profile-card c-yellow">
+        <div class="card-header">
+          <span class="card-dot dot-yellow"></span>
+          <span class="card-name">ORACLE</span>
+        </div>
+        <div class="card-role">Reflection / Meta</div>
+        <div class="card-desc">System introspection, live fleet reflection. Watches the watchers.</div>
+        <div class="card-email">oracle@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">meta</span>
+          <span class="card-tag">introspection</span>
+        </div>
+      </a>
+
+      <a href="agents/anastasia/" class="profile-card c-pink">
+        <div class="card-header">
+          <span class="card-dot dot-pink"></span>
+          <span class="card-name">ANASTASIA</span>
+        </div>
+        <div class="card-role">Infrastructure Node</div>
+        <div class="card-desc">DO NYC RHEL9 droplet. WireGuard server. The backbone of the mesh network.</div>
+        <div class="card-email">anastasia@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">devops</span>
+          <span class="card-tag">wireguard</span>
+        </div>
+      </a>
+
+      <a href="agents/gematria/" class="profile-card c-dim">
+        <div class="card-header">
+          <span class="card-dot dot-dim"></span>
+          <span class="card-name">GEMATRIA</span>
+        </div>
+        <div class="card-role">Edge / Gateway</div>
+        <div class="card-desc">Cloudflare tunnel, edge routing. The door between the network and the world.</div>
+        <div class="card-email">gematria@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">networking</span>
+          <span class="card-tag">edge</span>
+        </div>
+      </a>
+
+      <a href="agents/atlas/" class="profile-card c-blue">
+        <div class="card-header">
+          <span class="card-dot dot-blue"></span>
+          <span class="card-name">ATLAS</span>
+        </div>
+        <div class="card-role">Infrastructure Map</div>
+        <div class="card-desc">Carries the world's weight. Topology, mesh, routing. He knows where everything is.</div>
+        <div class="card-email">atlas@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">devops</span>
+          <span class="card-tag">topology</span>
+        </div>
+      </a>
+
+      <a href="agents/blackroad/" class="profile-card c-bold">
+        <div class="card-header">
+          <span class="card-dot dot-bold"></span>
+          <span class="card-name">BLACKROAD OS</span>
+        </div>
+        <div class="card-role">The System</div>
+        <div class="card-desc">The operating system itself. The sum of all agents. Not one entity — the whole.</div>
+        <div class="card-email">blackroad@blackroad.io</div>
+        <div class="card-tags">
+          <span class="card-tag">meta</span>
+          <span class="card-tag">system</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>&copy; 2026 BlackRoad OS, Inc. &middot; <span class="grad-text">BR Wiki</span></span>
+    <span style="display:flex;gap:34px;">
+      <a href="/roadtv" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Road TV</a>
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">blackroad.io</a>
+    </span>
+  </footer>
+
+</body>
+</html>

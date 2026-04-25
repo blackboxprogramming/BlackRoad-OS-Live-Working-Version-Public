@@ -1,0 +1,54 @@
+#!/bin/bash
+# usage: br-type-box X Y W H
+
+X="$1"
+Y="$2"
+W="$3"
+H="$4"
+
+DELAY="${TYPE_DELAY:-0.02}"
+
+cx=0
+cy=0
+maxx=$((W-2))
+maxy=$((H-2))
+word=""
+
+flush_word() {
+  for ((i=0;i<${#word};i++)); do
+    tput cup "$((Y+1+cy))" "$((X+1+cx))"
+    printf "%s" "${word:i:1}"
+    cx=$((cx+1))
+    sleep "$DELAY"
+  done
+  word=""
+}
+
+while IFS= read -r -n1 ch; do
+  if [ "$ch" = " " ] || [ "$ch" = $'\n' ]; then
+    if [ $((cx + ${#word})) -ge "$maxx" ]; then
+      cx=0
+      cy=$((cy+1))
+    fi
+
+    [ "$cy" -ge "$maxy" ] && break
+
+    flush_word
+
+    if [ "$ch" = " " ]; then
+      tput cup "$((Y+1+cy))" "$((X+1+cx))"
+      printf " "
+      cx=$((cx+1))
+    else
+      cx=0
+      cy=$((cy+1))
+    fi
+  else
+    word+="$ch"
+  fi
+done
+
+[ -n "$word" ] && flush_word
+
+tput cup "$((Y+H))" 0
+printf "\n"

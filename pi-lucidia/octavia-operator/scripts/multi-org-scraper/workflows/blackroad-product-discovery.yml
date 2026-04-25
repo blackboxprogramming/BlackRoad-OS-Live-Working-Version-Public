@@ -1,0 +1,140 @@
+name: BlackRoad Product Discovery
+
+on:
+  workflow_dispatch:
+    inputs:
+      scan_depth:
+        description: 'Scan depth (shallow, standard, deep)'
+        required: false
+        default: 'standard'
+  schedule:
+    - cron: '0 6 * * 1'  # Weekly Monday 6AM UTC
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Stack
+        id: detect
+        run: |
+          echo "=== BlackRoad Product Discovery ==="
+          echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
+
+          # Detect language/framework
+          if [ -f "package.json" ]; then
+            echo "runtime=node" >> $GITHUB_OUTPUT
+            echo "pkg_manager=$([ -f 'pnpm-lock.yaml' ] && echo 'pnpm' || ([ -f 'yarn.lock' ] && echo 'yarn' || echo 'npm'))" >> $GITHUB_OUTPUT
+
+            # Check for frameworks
+            if grep -q '"next"' package.json 2>/dev/null; then
+              echo "framework=nextjs" >> $GITHUB_OUTPUT
+            elif grep -q '"react"' package.json 2>/dev/null; then
+              echo "framework=react" >> $GITHUB_OUTPUT
+            elif grep -q '"vue"' package.json 2>/dev/null; then
+              echo "framework=vue" >> $GITHUB_OUTPUT
+            elif grep -q '"express"' package.json 2>/dev/null; then
+              echo "framework=express" >> $GITHUB_OUTPUT
+            fi
+
+            # Check for key integrations
+            if grep -q '"stripe"' package.json 2>/dev/null; then
+              echo "has_stripe=true" >> $GITHUB_OUTPUT
+            fi
+            if grep -q '"@clerk"' package.json 2>/dev/null; then
+              echo "has_clerk=true" >> $GITHUB_OUTPUT
+            fi
+            if grep -q '"prisma"' package.json 2>/dev/null; then
+              echo "has_prisma=true" >> $GITHUB_OUTPUT
+            fi
+
+          elif [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
+            echo "runtime=python" >> $GITHUB_OUTPUT
+            if grep -q "fastapi" requirements.txt pyproject.toml 2>/dev/null; then
+              echo "framework=fastapi" >> $GITHUB_OUTPUT
+            elif grep -q "django" requirements.txt pyproject.toml 2>/dev/null; then
+              echo "framework=django" >> $GITHUB_OUTPUT
+            elif grep -q "flask" requirements.txt pyproject.toml 2>/dev/null; then
+              echo "framework=flask" >> $GITHUB_OUTPUT
+            fi
+
+          elif [ -f "go.mod" ]; then
+            echo "runtime=go" >> $GITHUB_OUTPUT
+          elif [ -f "Cargo.toml" ]; then
+            echo "runtime=rust" >> $GITHUB_OUTPUT
+          fi
+
+          # Detect deployment configs
+          [ -f "railway.toml" ] && echo "deploy_railway=true" >> $GITHUB_OUTPUT
+          [ -f "vercel.json" ] && echo "deploy_vercel=true" >> $GITHUB_OUTPUT
+          [ -f "wrangler.toml" ] && echo "deploy_cloudflare=true" >> $GITHUB_OUTPUT
+          [ -f "Dockerfile" ] && echo "has_docker=true" >> $GITHUB_OUTPUT
+          [ -f "docker-compose.yml" ] || [ -f "docker-compose.yaml" ] && echo "has_compose=true" >> $GITHUB_OUTPUT
+
+          # Count files for size assessment
+          total_files=$(find . -type f -not -path './.git/*' -not -path './node_modules/*' | wc -l)
+          echo "total_files=${total_files}" >> $GITHUB_OUTPUT
+
+          # Check for tests
+          if [ -d "tests" ] || [ -d "test" ] || [ -d "__tests__" ]; then
+            echo "has_tests=true" >> $GITHUB_OUTPUT
+          fi
+
+          # Check for CI/CD
+          if [ -d ".github/workflows" ]; then
+            wf_count=$(ls .github/workflows/*.yml 2>/dev/null | wc -l)
+            echo "workflow_count=${wf_count}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate Product Report
+        run: |
+          cat > product-report.json << 'REPORT_EOF'
+          {
+            "repository": "${{ github.repository }}",
+            "scan_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "runtime": "${{ steps.detect.outputs.runtime }}",
+            "framework": "${{ steps.detect.outputs.framework }}",
+            "package_manager": "${{ steps.detect.outputs.pkg_manager }}",
+            "total_files": "${{ steps.detect.outputs.total_files }}",
+            "integrations": {
+              "stripe": "${{ steps.detect.outputs.has_stripe }}",
+              "clerk": "${{ steps.detect.outputs.has_clerk }}",
+              "prisma": "${{ steps.detect.outputs.has_prisma }}"
+            },
+            "deployment": {
+              "railway": "${{ steps.detect.outputs.deploy_railway }}",
+              "vercel": "${{ steps.detect.outputs.deploy_vercel }}",
+              "cloudflare": "${{ steps.detect.outputs.deploy_cloudflare }}",
+              "docker": "${{ steps.detect.outputs.has_docker }}",
+              "compose": "${{ steps.detect.outputs.has_compose }}"
+            },
+            "quality": {
+              "has_tests": "${{ steps.detect.outputs.has_tests }}",
+              "workflow_count": "${{ steps.detect.outputs.workflow_count }}"
+            },
+            "owner": "BlackRoad OS, Inc."
+          }
+          REPORT_EOF
+
+          echo "=== Product Report ==="
+          cat product-report.json
+
+      - name: Report to BlackRoad-OS-Inc
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.BLACKROAD_OPERATOR_TOKEN }}
+        run: |
+          # Create or update issue in operator repo
+          gh api repos/BlackRoad-OS-Inc/blackroad-operator/dispatches \
+            -X POST \
+            -f event_type=product-discovery \
+            -f "client_payload[repo]=${{ github.repository }}" \
+            -f "client_payload[runtime]=${{ steps.detect.outputs.runtime }}" \
+            -f "client_payload[framework]=${{ steps.detect.outputs.framework }}" \
+            -f "client_payload[files]=${{ steps.detect.outputs.total_files }}" \
+            2>/dev/null || echo "Could not report to operator (token may not be set)"

@@ -1,0 +1,106 @@
+{
+  "$schema": "https://railway.app/schema/project.json",
+  "name": "blackroad-os-production",
+  "description": "BlackRoad OS Production Infrastructure",
+  "services": {
+    "blackroad-os-web": {
+      "name": "blackroad-os-web",
+      "source": {
+        "repo": "BlackRoad-OS/blackroad-os-web",
+        "branch": "main"
+      },
+      "buildCommand": "npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/api/health",
+      "port": 3000,
+      "domains": [
+        "blackroad.io",
+        "www.blackroad.io",
+        "app.blackroad.io",
+        "console.blackroad.io",
+        "finance.blackroad.io",
+        "studio.blackroad.io",
+        "edu.blackroad.io"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "API_URL": "http://blackroad-os-api-gateway.railway.internal:8080",
+        "NEXT_PUBLIC_API_URL": "https://api.blackroad.io"
+      }
+    },
+    "blackroad-os-api-gateway": {
+      "name": "blackroad-os-api-gateway",
+      "source": {
+        "repo": "BlackRoad-OS/blackroad-os-api-gateway",
+        "branch": "main"
+      },
+      "buildCommand": "npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/health",
+      "port": 8080,
+      "domains": [
+        "api.blackroad.io"
+      ],
+      "env": {
+        "NODE_ENV": "production",
+        "CORE_URL": "http://blackroad-os-core.railway.internal:9000",
+        "OPERATOR_URL": "http://blackroad-os-operator.railway.internal:9001",
+        "MESH_URL": "http://blackroad-os-mesh.railway.internal:9002"
+      }
+    },
+    "blackroad-os-core": {
+      "name": "blackroad-os-core",
+      "source": {
+        "repo": "BlackRoad-OS/blackroad-os-core",
+        "branch": "main"
+      },
+      "buildCommand": "npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/health",
+      "port": 9000,
+      "private": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    },
+    "blackroad-os-operator": {
+      "name": "blackroad-os-operator",
+      "source": {
+        "repo": "BlackRoad-OS/blackroad-os-operator",
+        "branch": "main"
+      },
+      "buildCommand": "npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/health",
+      "port": 9001,
+      "private": true,
+      "env": {
+        "NODE_ENV": "production",
+        "ANTHROPIC_API_KEY": "${{ANTHROPIC_API_KEY}}",
+        "OPENAI_API_KEY": "${{OPENAI_API_KEY}}",
+        "CORE_URL": "http://blackroad-os-core.railway.internal:9000"
+      }
+    },
+    "blackroad-os-mesh": {
+      "name": "blackroad-os-mesh",
+      "source": {
+        "repo": "BlackRoad-OS/blackroad-os-mesh",
+        "branch": "main"
+      },
+      "buildCommand": "npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/health",
+      "port": 9002,
+      "private": true,
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  },
+  "variables": {
+    "shared": {
+      "RAILWAY_ENVIRONMENT": "production",
+      "LOG_LEVEL": "info"
+    }
+  }
+}

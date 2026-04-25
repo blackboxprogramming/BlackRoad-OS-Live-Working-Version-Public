@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlackRoad — Animation Dictionary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      background: #000000;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    /* brand colors */
+    :root {
+      --br-orange:  #FF8400;
+      --br-red:     #FF4400;
+      --br-pink:    #FF0066;
+      --br-magenta: #CC00AA;
+      --br-purple:  #8800FF;
+      --br-blue:    #0066FF;
+      --br-navy:    #2233CC;
+      --br-grad: linear-gradient(90deg, #FF8400, #FF0066, #8800FF, #0066FF);
+    }
+
+    header {
+      background: #000000;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+    }
+
+    nav { font-size: 0.65rem; display: flex; gap: 20px; }
+    nav a { color: #888888; text-decoration: none; }
+    nav a:hover { color: #ffffff; }
+
+    /* gradient rule under logo */
+    .grad-rule {
+      height: 3px;
+      background: var(--br-grad);
+    }
+
+    .hero {
+      background: #000000;
+      padding: 48px 24px 36px;
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .hero-label { font-size: 0.6rem; color: #555555; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; }
+    .hero h1 { font-size: 2rem; font-weight: 700; color: #ffffff; line-height: 1.05; }
+    .hero p { margin-top: 12px; font-size: 0.7rem; color: #666666; line-height: 1.9; }
+
+    /* rule */
+    .brand-rule {
+      height: 2px;
+      background: var(--br-grad);
+      margin-top: 20px;
+      max-width: 200px;
+    }
+
+    /* legend */
+    .legend {
+      background: #000000;
+      padding: 24px 24px;
+      border-bottom: 1px solid #ffffff;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .legend-label { font-size: 0.58rem; color: #555555; letter-spacing: 0.15em; text-transform: uppercase; margin-right: 8px; }
+
+    .swatch {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.58rem;
+      color: #888888;
+    }
+
+    .swatch-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .rule-note {
+      font-size: 0.58rem;
+      color: #555555;
+      border-left: 1px solid #333333;
+      padding-left: 16px;
+      margin-left: auto;
+    }
+
+    /* grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .card {
+      background: #000000;
+      border-right: 1px solid #ffffff;
+      border-bottom: 1px solid #ffffff;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* 1-col mobile: no stray right borders */
+    @media (max-width: 599px) { .card { border-right: none; } }
+    /* 2-col: remove right border from every 2nd card */
+    @media (min-width: 600px) and (max-width: 899px) { .card:nth-child(2n) { border-right: none; } }
+    /* 3-col: remove right border from every 3rd card */
+    @media (min-width: 900px) {
+      .card:nth-child(3n) { border-right: none; }
+    }
+
+    .card-label { font-size: 0.58rem; color: #555555; letter-spacing: 0.2em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+    .card-label::after { content: ''; flex: 1; height: 1px; background: #222222; }
+
+    .card-name { font-size: 0.8rem; font-weight: 700; color: #ffffff; }
+    .card-desc { font-size: 0.62rem; color: #666666; line-height: 1.8; margin-top: 4px; }
+
+    /* stage */
+    .stage {
+      background: #000000;
+      border: 1px solid #222222;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* shapes */
+    .dot   { width: 14px; height: 14px; border-radius: 50%; }
+    .sq    { width: 16px; height: 16px; }
+    .bar   { width: 3px; height: 36px; }
+    .line  { width: 48px; height: 3px; }
+    .ring  { width: 20px; height: 20px; border-radius: 50%; border: 3px solid; background: transparent; }
+    .tri   {
+      width: 0; height: 0;
+      border-left: 9px solid transparent;
+      border-right: 9px solid transparent;
+      border-bottom: 16px solid;
+      background: transparent !important;
+    }
+
+    /* ── KEYFRAMES ── */
+    @keyframes fade      { 0%,100%{opacity:1} 50%{opacity:0} }
+    @keyframes slideX    { 0%{transform:translateX(-44px);opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{transform:translateX(44px);opacity:0} }
+    @keyframes slideY    { 0%{transform:translateY(-32px);opacity:0} 20%{opacity:1} 80%{opacity:1} 100%{transform:translateY(32px);opacity:0} }
+    @keyframes pulse     { 0%,100%{transform:scale(1)} 50%{transform:scale(2)} }
+    @keyframes spin      { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    @keyframes blink     { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    @keyframes bounce    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-30px)} }
+    @keyframes grow      { 0%,100%{transform:scaleX(0.08)} 50%{transform:scaleX(1)} }
+    @keyframes shake     { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    @keyframes orbit     { from{transform:rotate(0deg) translateX(30px) rotate(0deg)} to{transform:rotate(360deg) translateX(30px) rotate(-360deg)} }
+    @keyframes cursor    { 0%,49%,100%{opacity:1} 50%,99%{opacity:0} }
+    @keyframes wave      { 0%,100%{transform:scaleY(0.15)} 50%{transform:scaleY(1)} }
+    @keyframes flip      { 0%{transform:rotateY(0deg)} 100%{transform:rotateY(360deg)} }
+    @keyframes colorCycle {
+      0%   { background: #FF8400; }
+      25%  { background: #FF0066; }
+      50%  { background: #8800FF; }
+      75%  { background: #0066FF; }
+      100% { background: #FF8400; }
+    }
+    @keyframes gradShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes borderPulse {
+      0%,100% { border-color: #FF8400; box-shadow: 0 0 8px #FF840055; }
+      33%     { border-color: #FF0066; box-shadow: 0 0 8px #FF006655; }
+      66%     { border-color: #0066FF; box-shadow: 0 0 8px #0066FF55; }
+    }
+
+    .anim-fade     { animation: fade 2s ease-in-out infinite; }
+    .anim-slideX   { animation: slideX 2s ease-in-out infinite; }
+    .anim-slideY   { animation: slideY 2s ease-in-out infinite; }
+    .anim-pulse    { animation: pulse 1.5s ease-in-out infinite; }
+    .anim-spin     { animation: spin 2s linear infinite; }
+    .anim-blink    { animation: blink 1s step-end infinite; }
+    .anim-bounce   { animation: bounce 1s ease-in-out infinite; }
+    .anim-grow     { animation: grow 2s ease-in-out infinite; transform-origin: left center; }
+    .anim-shake    { animation: shake 1s ease-in-out infinite; }
+    .anim-orbit    { animation: orbit 2s linear infinite; position: absolute; }
+    .anim-cursor   { animation: cursor 0.8s step-end infinite; }
+    .anim-wave1    { animation: wave 1s ease-in-out infinite; animation-delay: 0s; }
+    .anim-wave2    { animation: wave 1s ease-in-out infinite; animation-delay: 0.15s; }
+    .anim-wave3    { animation: wave 1s ease-in-out infinite; animation-delay: 0.3s; }
+    .anim-wave4    { animation: wave 1s ease-in-out infinite; animation-delay: 0.45s; }
+    .anim-wave5    { animation: wave 1s ease-in-out infinite; animation-delay: 0.6s; }
+    .anim-flip     { animation: flip 2s ease-in-out infinite; }
+    .anim-colorCycle { animation: colorCycle 3s linear infinite; }
+    .anim-gradShift {
+      background: var(--br-grad);
+      background-size: 300% 300%;
+      animation: gradShift 3s ease infinite;
+    }
+    .anim-borderPulse { animation: borderPulse 2s ease-in-out infinite; }
+
+    .wave-group { display: flex; align-items: center; gap: 5px; height: 40px; }
+
+    .orbit-wrap { position: relative; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; }
+    .orbit-center { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; position: absolute; }
+
+    .type-row { display: flex; align-items: center; gap: 2px; }
+    .type-text { font-size: 0.8rem; color: #ffffff; }
+    .cursor-bar { width: 2px; height: 18px; background: #ffffff; }
+
+    /* text rule card */
+    .text-demo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .text-demo .t-white { font-size: 0.85rem; font-weight: 700; color: #ffffff; }
+    .text-demo .t-black-bg {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #000000;
+      background: #ffffff;
+      padding: 2px 8px;
+    }
+
+    .grad-text {
+      font-size: 1rem;
+      font-weight: 700;
+      background: var(--br-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    footer {
+      background: #000000;
+      padding: 20px 24px;
+      border-top: 1px solid #333333;
+      font-size: 0.58rem;
+      color: #444444;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    @media (min-width: 768px) {
+      header { padding: 20px 40px; }
+      .hero  { padding: 56px 40px 44px; }
+      .hero h1 { font-size: 2.4rem; }
+      .card  { padding: 36px 40px; }
+      .legend { padding: 24px 40px; }
+      footer { padding: 20px 40px; flex-direction: row; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span class="logo">BlackRoad</span>
+    <nav>
+      <a href="#">motion</a>
+      <a href="#">colors</a>
+      <a href="#">docs</a>
+    </nav>
+  </header>
+  <div class="grad-rule"></div>
+
+  <div class="hero">
+    <div class="hero-label">Animation Dictionary v1.0</div>
+    <h1>Motion<br>Index</h1>
+    <p>Shapes move in color. Text stays white or black.</p>
+    <div class="brand-rule"></div>
+  </div>
+
+  <!-- COLOR LEGEND -->
+
+  <div class="legend">
+    <span class="legend-label">palette</span>
+    <div class="swatch"><div class="swatch-dot" style="background:#FF8400"></div>#FF8400</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#FF4400"></div>#FF4400</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#FF0066"></div>#FF0066</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#CC00AA"></div>#CC00AA</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#8800FF"></div>#8800FF</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#0066FF"></div>#0066FF</div>
+    <div class="swatch"><div class="swatch-dot" style="background:#2233CC"></div>#2233CC</div>
+    <div class="rule-note">text → #ffffff or #000000 only</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 01 FADE -->
+    <div class="card">
+      <div class="card-label">01</div>
+      <div class="stage">
+        <div class="dot" style="animation: fade 2s ease-in-out infinite, colorCycle 2s linear infinite;"></div>
+      </div>
+      <div>
+        <div class="card-name">fade</div>
+        <div class="card-desc">opacity 1 → 0 → 1<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+    <!-- 02 SLIDE X -->
+    <div class="card">
+      <div class="card-label">02</div>
+      <div class="stage">
+        <div class="dot anim-slideX" style="background:#FF0066"></div>
+      </div>
+      <div>
+        <div class="card-name">slide-x</div>
+        <div class="card-desc">translateX -44 → 44<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+    <!-- 03 SLIDE Y -->
+    <div class="card">
+      <div class="card-label">03</div>
+      <div class="stage">
+        <div class="dot anim-slideY" style="background:#8800FF"></div>
+      </div>
+      <div>
+        <div class="card-name">slide-y</div>
+        <div class="card-desc">translateY -32 → 32<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+    <!-- 04 PULSE -->
+    <div class="card">
+      <div class="card-label">04</div>
+      <div class="stage">
+        <div class="dot anim-pulse" style="background:#FF8400"></div>
+      </div>
+      <div>
+        <div class="card-name">pulse</div>
+        <div class="card-desc">scale 1 → 2 → 1<br>ease-in-out · 1.5s</div>
+      </div>
+    </div>
+
+    <!-- 05 SPIN -->
+    <div class="card">
+      <div class="card-label">05</div>
+      <div class="stage">
+        <div class="sq anim-spin" style="background:#0066FF"></div>
+      </div>
+      <div>
+        <div class="card-name">spin</div>
+        <div class="card-desc">rotate 0 → 360°<br>linear · 2s</div>
+      </div>
+    </div>
+
+    <!-- 06 BLINK -->
+    <div class="card">
+      <div class="card-label">06</div>
+      <div class="stage">
+        <div class="dot anim-blink" style="background:#CC00AA"></div>
+      </div>
+      <div>
+        <div class="card-name">blink</div>
+        <div class="card-desc">opacity hard cut<br>step-end · 1s</div>
+      </div>
+    </div>
+
+    <!-- 07 BOUNCE -->
+    <div class="card">
+      <div class="card-label">07</div>
+      <div class="stage">
+        <div class="dot anim-bounce" style="background:#FF4400"></div>
+      </div>
+      <div>
+        <div class="card-name">bounce</div>
+        <div class="card-desc">translateY 0 → -30 → 0<br>ease-in-out · 1s</div>
+      </div>
+    </div>
+
+    <!-- 08 GROW -->
+    <div class="card">
+      <div class="card-label">08</div>
+      <div class="stage">
+        <div class="line anim-grow" style="height:4px;width:80px;border-radius:2px;"></div>
+      </div>
+      <div>
+        <div class="card-name">grow</div>
+        <div class="card-desc">scaleX 0.08 → 1 → 0.08<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+    <!-- 09 SHAKE -->
+    <div class="card">
+      <div class="card-label">09</div>
+      <div class="stage">
+        <div class="dot anim-shake" style="background:#FF0066"></div>
+      </div>
+      <div>
+        <div class="card-name">shake</div>
+        <div class="card-desc">translateX ±9px stagger<br>ease-in-out · 1s</div>
+      </div>
+    </div>
+
+    <!-- 10 ORBIT -->
+    <div class="card">
+      <div class="card-label">10</div>
+      <div class="stage">
+        <div class="orbit-wrap">
+          <div class="orbit-center"></div>
+          <div class="dot anim-orbit" style="width:10px;height:10px;background:#8800FF;"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card-name">orbit</div>
+        <div class="card-desc">rotate + translateX 30px<br>linear · 2s</div>
+      </div>
+    </div>
+
+    <!-- 11 CURSOR -->
+    <div class="card">
+      <div class="card-label">11</div>
+      <div class="stage">
+        <div class="type-row">
+          <span class="type-text">blackroad</span>
+          <div class="cursor-bar anim-cursor"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card-name">cursor</div>
+        <div class="card-desc">text white · cursor white<br>step-end · 0.8s</div>
+      </div>
+    </div>
+
+    <!-- 12 WAVE -->
+    <div class="card">
+      <div class="card-label">12</div>
+      <div class="stage">
+        <div class="wave-group">
+          <div class="bar anim-wave1" style="background:#FF8400"></div>
+          <div class="bar anim-wave2" style="background:#FF0066"></div>
+          <div class="bar anim-wave3" style="background:#CC00AA"></div>
+          <div class="bar anim-wave4" style="background:#8800FF"></div>
+          <div class="bar anim-wave5" style="background:#0066FF"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card-name">wave</div>
+        <div class="card-desc">scaleY staggered bars<br>ease-in-out · 1s</div>
+      </div>
+    </div>
+
+    <!-- 13 FLIP -->
+    <div class="card">
+      <div class="card-label">13</div>
+      <div class="stage">
+        <div class="sq anim-flip" style="background:#FF8400"></div>
+      </div>
+      <div>
+        <div class="card-name">flip</div>
+        <div class="card-desc">rotateY 0 → 360°<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+    <!-- 14 COLOR CYCLE -->
+    <div class="card">
+      <div class="card-label">14</div>
+      <div class="stage">
+        <div class="dot anim-colorCycle" style="width:20px;height:20px;"></div>
+      </div>
+      <div>
+        <div class="card-name">color-cycle</div>
+        <div class="card-desc">orange → pink → purple → blue<br>linear · 3s</div>
+      </div>
+    </div>
+
+    <!-- 15 GRAD SHIFT -->
+    <div class="card">
+      <div class="card-label">15</div>
+      <div class="stage">
+        <div class="anim-gradShift" style="width:80px;height:20px;border-radius:10px;"></div>
+      </div>
+      <div>
+        <div class="card-name">grad-shift</div>
+        <div class="card-desc">gradient background sweep<br>ease · 3s</div>
+      </div>
+    </div>
+
+    <!-- 16 TEXT RULE -->
+    <div class="card">
+      <div class="card-label">16</div>
+      <div class="stage">
+        <div class="text-demo">
+          <span class="t-white">BlackRoad</span>
+          <span class="t-black-bg">BlackRoad</span>
+          <span class="grad-text">BlackRoad</span>
+        </div>
+      </div>
+      <div>
+        <div class="card-name">text rule</div>
+        <div class="card-desc">white on black · black on white<br>grad on black (accent only)</div>
+      </div>
+    </div>
+
+    <!-- 17 BORDER PULSE -->
+    <div class="card">
+      <div class="card-label">17</div>
+      <div class="stage">
+        <div class="ring anim-borderPulse" style="width:36px;height:36px;border-width:3px;"></div>
+      </div>
+      <div>
+        <div class="card-name">border-pulse</div>
+        <div class="card-desc">border-color cycles palette<br>ease-in-out · 2s</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>BlackRoad OS, Inc.</span>
+    <span>17 primitives · shapes in color · text in white/black</span>
+  </footer>
+
+</body>
+</html>

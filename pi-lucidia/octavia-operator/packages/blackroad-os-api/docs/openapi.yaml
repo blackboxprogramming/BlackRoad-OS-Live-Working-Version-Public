@@ -1,0 +1,253 @@
+openapi: 3.1.0
+info:
+  title: BlackRoad OS Public API
+  version: "1.0.0"
+  description: >-
+    Public-facing gateway for BlackRoad services. All endpoints return JSON and require
+    an API key unless otherwise specified.
+servers:
+  - url: https://api.blackroad.systems
+    description: Production
+  - url: http://localhost:8000
+    description: Local development
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Health
+    description: Liveness and version metadata
+  - name: Agents
+    description: Agent catalog and operator proxy endpoints
+  - name: Packs
+    description: Pack catalog and install orchestration
+paths:
+  /v1/health:
+    get:
+      operationId: getHealth
+      summary: Health and uptime
+      description: Returns gateway uptime and version metadata.
+      tags: [Health]
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/agents:
+    get:
+      operationId: listAgents
+      summary: List agents from operator
+      description: Proxy call to the operator's /agents endpoint.
+      tags: [Agents]
+      responses:
+        "200":
+          description: Agents available to the operator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentListResponse'
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "502":
+          description: Operator upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/packs:
+    get:
+      operationId: listPacks
+      summary: List installed packs
+      description: Lists installed packs discovered via PACK_INDEX_URL sources.
+      tags: [Packs]
+      responses:
+        "200":
+          description: Installed packs matching blackroad-os-pack-* prefix
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackListResponse'
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "502":
+          description: Pack index unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /v1/packs/{id}/install:
+    post:
+      operationId: installPack
+      summary: Enqueue pack install via operator
+      description: Creates an install job for the given pack id in the operator service.
+      tags: [Packs]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            description: Pack identifier (without blackroad-os-pack- prefix)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackInstallRequest'
+      responses:
+        "202":
+          description: Install job accepted by operator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackInstallResponse'
+        "400":
+          description: Invalid pack id or payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "502":
+          description: Operator upstream unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-BR-KEY
+  schemas:
+    HealthResponse:
+      type: object
+      required: [ok, uptime, version]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        uptime:
+          type: number
+          description: Uptime in seconds
+        version:
+          type: string
+          description: Git SHA or semantic version string
+    Agent:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          description: Optional status from operator
+        metadata:
+          type: object
+          additionalProperties: true
+    AgentListResponse:
+      type: object
+      required: [ok, agents]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        source:
+          type: string
+          description: Operator URL used for lookup
+    Pack:
+      type: object
+      required: [id, name, version]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+    PackListResponse:
+      type: object
+      required: [ok, packs]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        packs:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pack'
+        retrievedAt:
+          type: string
+          format: date-time
+    PackInstallRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          description: Explicit pack version to install
+        options:
+          type: object
+          additionalProperties: true
+    PackInstallResponse:
+      type: object
+      required: [ok, jobId]
+      properties:
+        ok:
+          type: boolean
+          const: true
+        jobId:
+          type: string
+        operatorUrl:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [ok, error]
+      properties:
+        ok:
+          type: boolean
+          const: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+            requestId:
+              type: string
+              description: Optional request identifier for tracing/debugging

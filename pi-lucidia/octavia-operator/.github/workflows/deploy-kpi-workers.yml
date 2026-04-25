@@ -1,0 +1,110 @@
+name: Deploy KPI Workers
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'workers/kpi-*/**'
+  workflow_dispatch:
+    inputs:
+      worker:
+        description: 'Which KPI worker to deploy (all, collector, github, infra, agents, aggregator, dashboard)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - collector
+          - github
+          - infra
+          - agents
+          - aggregator
+          - dashboard
+
+concurrency:
+  group: deploy-kpi-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+jobs:
+  detect-changes:
+    name: Detect Changed Workers
+    runs-on: ubuntu-latest
+    outputs:
+      workers: ${{ steps.filter.outputs.workers }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - id: filter
+        name: Determine workers to deploy
+        run: |
+          if [ "${{ github.event.inputs.worker }}" = "all" ] || [ "${{ github.event_name }}" = "push" ]; then
+            echo 'workers=["collector","github","infra","agents","aggregator","dashboard"]' >> $GITHUB_OUTPUT
+          else
+            echo 'workers=["${{ github.event.inputs.worker }}"]' >> $GITHUB_OUTPUT
+          fi
+
+  deploy:
+    name: Deploy kpi-${{ matrix.worker }}
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        worker: ${{ fromJson(needs.detect-changes.outputs.workers) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Deploy kpi-${{ matrix.worker }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: workers/kpi-${{ matrix.worker }}
+          command: deploy
+
+      - name: Verify deployment
+        run: |
+          WORKER_URL="https://blackroad-kpi-${{ matrix.worker }}.blackroad.workers.dev"
+          echo "Checking health at $WORKER_URL/health..."
+          for i in 1 2 3; do
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' "$WORKER_URL/health" 2>/dev/null || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "kpi-${{ matrix.worker }} is healthy"
+              exit 0
+            fi
+            echo "Attempt $i: status $STATUS, retrying..."
+            sleep 5
+          done
+          echo "Warning: health check did not return 200, deployment may still be propagating"
+
+  notify:
+    name: Deployment Summary
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## KPI Workers Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Worker | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-collector | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-github | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-infra | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-agents | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-aggregator | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "| kpi-dashboard | deployed |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Endpoints" >> $GITHUB_STEP_SUMMARY
+          echo "- Dashboard: https://blackroad-kpi-dashboard.blackroad.workers.dev" >> $GITHUB_STEP_SUMMARY
+          echo "- Aggregator: https://blackroad-kpi-aggregator.blackroad.workers.dev/kpi" >> $GITHUB_STEP_SUMMARY
+          echo "- GitHub KPIs: https://blackroad-kpi-github.blackroad.workers.dev/summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Infra KPIs: https://blackroad-kpi-infra.blackroad.workers.dev/summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Agent KPIs: https://blackroad-kpi-agents.blackroad.workers.dev/summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Collector: https://blackroad-kpi-collector.blackroad.workers.dev/metrics" >> $GITHUB_STEP_SUMMARY

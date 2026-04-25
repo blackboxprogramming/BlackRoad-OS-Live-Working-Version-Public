@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  roadbilling:
+    image: node:18-alpine
+    container_name: roadbilling
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: node server.js
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+      - PI_NAME=blackroad-pi
+      - SERVICE_NAME=roadbilling
+    networks:
+      - blackroad-net
+
+networks:
+  blackroad-net:
+    driver: bridge

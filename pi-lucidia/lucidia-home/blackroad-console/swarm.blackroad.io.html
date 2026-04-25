@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad Agent Swarm</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .header h1 {
+            background: linear-gradient(135deg, #f7931a 0%, #e91e8c 50%, #9945ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 48px;
+            font-weight: 800;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: rgba(18,18,31,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #9945ff 0%, #14f195 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            color: rgba(255,255,255,0.6);
+            margin-top: 10px;
+        }
+        .cluster-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .cluster-card {
+            background: rgba(18,18,31,0.95);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .cluster-card:hover {
+            transform: translateY(-5px);
+            border-color: #9945ff;
+            box-shadow: 0 20px 40px rgba(153,69,255,0.3);
+        }
+        .cluster-name {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .cluster-range {
+            color: #14f195;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+        .cluster-count {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+        .agent-list {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .agent-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #9945ff;
+        }
+        .agent-id {
+            color: #14f195;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+        .agent-name {
+            color: white;
+            font-weight: 600;
+            margin: 5px 0;
+        }
+        .agent-role {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AGENT SWARM</h1>
+            <p style="color: rgba(255,255,255,0.6); font-size: 18px;">1,250 Agents • 10 Canonical Clusters • Emotional Capacity Tracking</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">1,250</div>
+                <div class="stat-label">Total Agents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1,173</div>
+                <div class="stat-label">Manifest-Based</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Canonical Clusters</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">0</div>
+                <div class="stat-label">Currently Active</div>
+            </div>
+        </div>
+
+        <h2 style="color: white; font-size: 32px; margin-bottom: 30px; text-align: center;">Canonical Clusters</h2>
+
+        <div class="cluster-grid" id="clusters"></div>
+
+        <h2 style="color: white; font-size: 32px; margin: 50px 0 30px; text-align: center;">Foundation Agents</h2>
+        
+        <div class="agent-list">
+            <div class="agent-item">
+                <div class="agent-id">P11</div>
+                <div class="agent-name">Lucidia</div>
+                <div class="agent-role">Analysis & Clarity (llama-3-8b)</div>
+            </div>
+            <div class="agent-item">
+                <div class="agent-id">P12</div>
+                <div class="agent-name">Magnus</div>
+                <div class="agent-role">Architecture & Strategy (falcon-7b)</div>
+            </div>
+            <div class="agent-item">
+                <div class="agent-id">P13</div>
+                <div class="agent-name">Ophelia</div>
+                <div class="agent-role">Philosophy & Emotion (mistral-7b-instruct)</div>
+            </div>
+            <div class="agent-item">
+                <div class="agent-id">P14</div>
+                <div class="agent-name">Persephone</div>
+                <div class="agent-role">Transitions & Migrations (gemma-7b)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const clusters = [
+            { name: 'aether', range: 'P15-P131', count: 117, color: '#9945ff' },
+            { name: 'athenaeum', range: 'P132-P248', count: 117, color: '#e91e8c' },
+            { name: 'aurum', range: 'P249-P365', count: 117, color: '#f7931a' },
+            { name: 'blackroad', range: 'P366-P482', count: 117, color: '#14f195' },
+            { name: 'continuum', range: 'P483-P599', count: 117, color: '#9945ff' },
+            { name: 'eidos', range: 'P600-P716', count: 117, color: '#e91e8c' },
+            { name: 'mycelia', range: 'P717-P833', count: 117, color: '#f7931a' },
+            { name: 'parallax', range: 'P834-P950', count: 117, color: '#14f195' },
+            { name: 'soma', range: 'P951-P1067', count: 117, color: '#9945ff' },
+            { name: 'lucidia', range: 'P1068-P1184', count: 117, color: '#e91e8c' }
+        ];
+
+        const container = document.getElementById('clusters');
+        clusters.forEach(cluster => {
+            const card = document.createElement('div');
+            card.className = 'cluster-card';
+            card.innerHTML = `
+                <div class="cluster-name">${cluster.name.toUpperCase()}</div>
+                <div class="cluster-range">${cluster.range}</div>
+                <div class="cluster-count">${cluster.count} agents</div>
+            `;
+            card.style.borderColor = cluster.color;
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>

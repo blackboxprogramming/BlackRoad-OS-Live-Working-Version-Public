@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Platform Integration Templates - BlackRoad OS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-primary: #020308;
+      --bg-secondary: rgba(6, 10, 30, 0.92);
+      --bg-card: rgba(12, 18, 40, 0.85);
+      --text-primary: #f5f5ff;
+      --text-muted: rgba(245, 245, 255, 0.7);
+      --accent-cyan: #00e5ff;
+      --accent-green: #1af59d;
+      --accent-yellow: #ffc400;
+      --accent-purple: #a855f7;
+      --accent-orange: #ff9d00;
+      --accent-pink: #ff0066;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      background: radial-gradient(circle at top, #050816 0, #020308 45%, #000000 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+    .page { max-width: 1000px; margin: 0 auto; padding: 24px 16px 80px; }
+    .nav { margin-bottom: 24px; }
+    .nav a { color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; }
+    .nav a:hover { text-decoration: underline; }
+    h1 { font-size: 1.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    h1 .icon { font-size: 2.2rem; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
+    .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+
+    /* Platform Sections */
+    .platform-section {
+      margin-bottom: 32px;
+    }
+    .platform-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .platform-header .p-icon { font-size: 1.6rem; }
+    .platform-header .p-name { font-size: 1.2rem; font-weight: 600; }
+    .platform-header .p-count {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: var(--accent-purple);
+      margin-left: auto;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .template-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
+      transition: all 0.2s ease;
+    }
+    .template-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .template-card .t-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .template-card .t-file {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.7rem;
+      color: var(--accent-cyan);
+      margin-bottom: 8px;
+      word-break: break-all;
+    }
+    .template-card .t-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    .template-card .t-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .field-pill {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+    }
+
+    .preview-block {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    .preview-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-purple);
+      margin-top: 12px;
+      margin-bottom: 4px;
+    }
+
+    .footer {
+      text-align: center; margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="nav"><a href="index.html">&larr; Template Showcase</a></div>
+
+    <h1><span class="icon">🧩</span> Platform Integration Templates</h1>
+    <p class="subtitle">Ready-to-use templates for Notion, GitHub, Google Drive, and Airtable. Import directly into each platform or use as reference structures.</p>
+
+    <!-- Notion -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <span class="p-icon">📓</span>
+        <span class="p-name">Notion</span>
+        <span class="p-count">3 templates</span>
+      </div>
+      <div class="template-grid">
+
+        <div class="template-card">
+          <div class="t-name">📊 Project Dashboard</div>
+          <div class="t-file">notion/TEMPLATE-DASHBOARD-PROJECT.json</div>
+          <div class="t-desc">Notion page template for project management dashboards with status callouts, progress tracking, and phase indicators. Uses Notion's native block structure.</div>
+          <div class="t-fields">
+            <span class="field-pill">heading_1</span>
+            <span class="field-pill">paragraph</span>
+            <span class="field-pill">callout</span>
+            <span class="field-pill">{{PROJECT_NAME}}</span>
+            <span class="field-pill">{{STATUS}}</span>
+            <span class="field-pill">{{PROGRESS}}</span>
+          </div>
+          <div class="preview-label">Notion API JSON (simplified)</div>
+          <div class="preview-block">{
+  "parent": {
+    "database_id": "YOUR_PROJECTS_DATABASE_ID"
+  },
+  "properties": {
+    "Name": {
+      "title": [
+        {
+          "text": { "content": "{{PROJECT_NAME}}" }
+        }
+      ]
+    },
+    "Status": {
+      "select": {
+        "name": "{{STATUS}}"
+      }
+    },
+    "Progress": {
+      "number": {{PROGRESS}}
+    }
+  },
+  "icon": { "emoji": "🎯" },
+  "children": [
+    {
+      "object": "block",
+      "type": "heading_1",
+      "heading_1": {
+        "rich_text": [
+          {
+            "text": { "content": "📊 Project Dashboard" }
+          }
+        ]
+      }
+    },
+    {
+      "object": "block",
+      "type": "paragraph",
+      "paragraph": {
+        "rich_text": [
+          {
+            "text": { "content": "{{PROJECT_DESCRIPTION}}" }
+          }
+        ]
+      }
+    },
+    {
+      "object": "block",
+      "type": "callout",
+      "callout": {
+        "icon": { "emoji": "🚦" },
+        "rich_text": [
+          {
+            "text": { "content": "Status: {{STATUS}}" }
+          }
+        ]
+      }
+    }
+  ]
+}</div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">📋 Tasks Database</div>
+          <div class="t-file">notion/TEMPLATE-DATABASE-TASKS.json</div>
+          <div class="t-desc">Task tracking database template with fields for status, priority, assignees, dates, and tags. Ready for Notion API import.</div>
+          <div class="t-fields">
+            <span class="field-pill">Task Name</span>
+            <span class="field-pill">Status</span>
+            <span class="field-pill">Priority</span>
+            <span class="field-pill">Assignee</span>
+            <span class="field-pill">Due Date</span>
+            <span class="field-pill">Tags</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">🤖 Agent Profile Page</div>
+          <div class="t-file">notion/TEMPLATE-PAGE-AGENT-PROFILE.json</div>
+          <div class="t-desc">AI agent profile page template with properties for agent name, status, personality traits, and capabilities. Includes detailed documentation blocks.</div>
+          <div class="t-fields">
+            <span class="field-pill">Agent Name</span>
+            <span class="field-pill">Status</span>
+            <span class="field-pill">Personality</span>
+            <span class="field-pill">Capabilities</span>
+            <span class="field-pill">History</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- GitHub -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <span class="p-icon">🐙</span>
+        <span class="p-name">GitHub</span>
+        <span class="p-count">3 templates</span>
+      </div>
+      <div class="template-grid">
+
+        <div class="template-card">
+          <div class="t-name">🐛 Bug Report</div>
+          <div class="t-file">github/ISSUE_TEMPLATE/bug_report.md</div>
+          <div class="t-desc">GitHub issue template for bug reports with structured sections for description, reproduction steps, expected vs actual behavior, and environment details.</div>
+          <div class="t-fields">
+            <span class="field-pill">Description</span>
+            <span class="field-pill">Repro Steps</span>
+            <span class="field-pill">Expected</span>
+            <span class="field-pill">Actual</span>
+            <span class="field-pill">Environment</span>
+            <span class="field-pill">Screenshots</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">✨ Feature Request</div>
+          <div class="t-file">github/ISSUE_TEMPLATE/feature_request.md</div>
+          <div class="t-desc">Feature request template with problem statement, proposed solution, use cases, and acceptance criteria sections.</div>
+          <div class="t-fields">
+            <span class="field-pill">Problem</span>
+            <span class="field-pill">Solution</span>
+            <span class="field-pill">Use Cases</span>
+            <span class="field-pill">Alternatives</span>
+            <span class="field-pill">Acceptance Criteria</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">📥 Pull Request</div>
+          <div class="t-file">github/PULL_REQUEST_TEMPLATE.md</div>
+          <div class="t-desc">PR template with description, change type checkboxes, testing checklist, and review requirements. Ensures consistent PR quality across all repos.</div>
+          <div class="t-fields">
+            <span class="field-pill">Description</span>
+            <span class="field-pill">Change Type</span>
+            <span class="field-pill">Testing</span>
+            <span class="field-pill">Checklist</span>
+            <span class="field-pill">Screenshots</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Google Drive -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <span class="p-icon">📁</span>
+        <span class="p-name">Google Drive</span>
+        <span class="p-count">4 templates</span>
+      </div>
+      <div class="template-grid">
+
+        <div class="template-card">
+          <div class="t-name">📂 Project Structure</div>
+          <div class="t-file">google-drive/PROJECT-STRUCTURE-TEMPLATE.json</div>
+          <div class="t-desc">Complete Google Drive project folder hierarchy with nested directories for documents, spreadsheets, presentations, meeting notes, deliverables, and resources.</div>
+          <div class="t-fields">
+            <span class="field-pill">00-Charter</span>
+            <span class="field-pill">01-Roadmap</span>
+            <span class="field-pill">02-Team</span>
+            <span class="field-pill">03-Meetings</span>
+            <span class="field-pill">04-Deliverables</span>
+            <span class="field-pill">05-Resources</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">📘 Technical Spec</div>
+          <div class="t-file">google-drive/TEMPLATE-DOC-TECHNICAL-SPEC.json</div>
+          <div class="t-desc">Technical specification document template with sections for overview, requirements, architecture, API design, data model, and implementation plan.</div>
+          <div class="t-fields">
+            <span class="field-pill">Overview</span>
+            <span class="field-pill">Requirements</span>
+            <span class="field-pill">Architecture</span>
+            <span class="field-pill">API Design</span>
+            <span class="field-pill">Data Model</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">📙 User Guide</div>
+          <div class="t-file">google-drive/TEMPLATE-DOC-USER-GUIDE.json</div>
+          <div class="t-desc">User documentation template with getting started, feature walkthroughs, FAQ, and troubleshooting sections.</div>
+          <div class="t-fields">
+            <span class="field-pill">Getting Started</span>
+            <span class="field-pill">Features</span>
+            <span class="field-pill">FAQ</span>
+            <span class="field-pill">Troubleshooting</span>
+          </div>
+        </div>
+
+        <div class="template-card">
+          <div class="t-name">📝 Meeting Notes</div>
+          <div class="t-file">google-drive/TEMPLATE-DOC-MEETING-NOTES.json</div>
+          <div class="t-desc">Meeting notes document template with attendees, agenda, discussion points, action items, and follow-up tracking.</div>
+          <div class="t-fields">
+            <span class="field-pill">Attendees</span>
+            <span class="field-pill">Agenda</span>
+            <span class="field-pill">Discussion</span>
+            <span class="field-pill">Action Items</span>
+            <span class="field-pill">Follow-ups</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Airtable -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <span class="p-icon">🗂</span>
+        <span class="p-name">Airtable</span>
+        <span class="p-count">1 template</span>
+      </div>
+      <div class="template-grid">
+
+        <div class="template-card" style="grid-column: 1 / -1;">
+          <div class="t-name">🗂 Complete CRM Base</div>
+          <div class="t-file">airtable/TEMPLATE-CRM-COMPLETE.json</div>
+          <div class="t-desc">Full CRM base with three linked tables: Contacts (name, email, phone, company, role, status, tags), Deals (deal name, contact link, amount, stage, probability, close date, owner), and Activities (activity type, contact link, deal link, date, duration, notes). All tables are properly linked with multi-record relationships.</div>
+          <div class="t-fields">
+            <span class="field-pill">Contacts Table</span>
+            <span class="field-pill">Deals Table</span>
+            <span class="field-pill">Activities Table</span>
+            <span class="field-pill">Record Links</span>
+            <span class="field-pill">Single Select</span>
+            <span class="field-pill">Currency</span>
+            <span class="field-pill">Percent</span>
+            <span class="field-pill">Date</span>
+          </div>
+          <div class="preview-label">Deal Pipeline Stages</div>
+          <div class="preview-block">Lead  →  Qualified  →  Proposal  →  Negotiation  →  Closed Won
+                                                              ↘  Closed Lost</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>BlackRoad OS Template Showcase &middot; Platform Integrations &middot; <span class="mono">&copy; 2026 BlackRoad OS, Inc.</span></p>
+    </div>
+  </div>
+</body>
+</html>

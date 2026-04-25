@@ -1,0 +1,344 @@
+<!-- ─────────────────────────────────────────
+     COMPONENT: post-body.html
+     Usage: the main article content column
+     Supports: prose, h2/h3, code, blockquote, hr, lists
+───────────────────────────────────────── -->
+
+<style>
+  .br-post-body {
+    padding: 36px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.95;
+    color: #aaaaaa;
+    max-width: 100%;
+  }
+
+  /* ── Headings ── */
+  .br-post-body h2 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 40px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #1a1a1a;
+    letter-spacing: 0.02em;
+  }
+
+  .br-post-body h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #cccccc;
+    margin: 28px 0 12px;
+  }
+
+  /* ── Prose ── */
+  .br-post-body p {
+    margin-bottom: 18px;
+    color: #999999;
+  }
+
+  .br-post-body p:last-child { margin-bottom: 0; }
+
+  .br-post-body a {
+    color: #ffffff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: #333333;
+  }
+
+  .br-post-body a:hover {
+    text-decoration-color: #ffffff;
+  }
+
+  .br-post-body strong {
+    color: #ffffff;
+    font-weight: 700;
+  }
+
+  .br-post-body em {
+    font-style: normal;
+    color: #888888;
+    border-bottom: 1px solid #333333;
+  }
+
+  /* ── Inline code ── */
+  .br-post-body code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: #ffffff;
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    padding: 1px 5px;
+  }
+
+  /* ── Code block ── */
+  .br-post-body pre {
+    background: #000000;
+    border: 1px solid #222222;
+    border-left: 2px solid #ffffff;
+    padding: 20px;
+    margin: 24px 0;
+    overflow-x: auto;
+    font-size: 0.68rem;
+    line-height: 1.7;
+  }
+
+  .br-post-body pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #cccccc;
+    font-size: inherit;
+  }
+
+  .br-post-body pre .comment  { color: #444444; }
+  .br-post-body pre .keyword  { color: #ffffff; font-weight: 700; }
+  .br-post-body pre .string   { color: #888888; }
+  .br-post-body pre .number   { color: #aaaaaa; }
+  .br-post-body pre .function { color: #dddddd; }
+
+  /* ── Code block label ── */
+  .br-code-block {
+    margin: 24px 0;
+  }
+
+  .br-code-block__label {
+    font-size: 0.55rem;
+    color: #444444;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    background: #000000;
+    border: 1px solid #222222;
+    border-bottom: none;
+    display: inline-block;
+  }
+
+  .br-code-block pre {
+    margin: 0;
+    border-top: none;
+  }
+
+  /* ── Blockquote ── */
+  .br-post-body blockquote {
+    margin: 28px 0;
+    padding: 16px 20px;
+    border-left: 2px solid #ffffff;
+    background: #000000;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    border-right: 1px solid #1a1a1a;
+  }
+
+  .br-post-body blockquote p {
+    color: #888888;
+    font-size: 0.75rem;
+    line-height: 1.8;
+    margin-bottom: 0;
+  }
+
+  .br-post-body blockquote cite {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.58rem;
+    color: #444444;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Horizontal rule ── */
+  .br-post-body hr {
+    border: none;
+    border-top: 1px solid #1a1a1a;
+    margin: 40px 0;
+  }
+
+  /* ── Lists ── */
+  .br-post-body ul,
+  .br-post-body ol {
+    margin: 16px 0 20px 0;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .br-post-body ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    color: #999999;
+    font-size: 0.76rem;
+  }
+
+  .br-post-body ul li::before {
+    content: '\2014';
+    position: absolute;
+    left: 0;
+    color: #333333;
+    font-size: 0.6rem;
+    top: 2px;
+  }
+
+  .br-post-body ol {
+    counter-reset: br-ol;
+  }
+
+  .br-post-body ol li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 8px;
+    color: #999999;
+    font-size: 0.76rem;
+    counter-increment: br-ol;
+  }
+
+  .br-post-body ol li::before {
+    content: counter(br-ol, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    color: #444444;
+    font-size: 0.6rem;
+    top: 2px;
+  }
+
+  /* ── Key-value callout ── */
+  .br-callout {
+    border: 1px solid #1a1a1a;
+    border-left: 2px solid #555555;
+    padding: 16px 18px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .br-callout__label {
+    font-size: 0.55rem;
+    color: #444444;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .br-callout__content {
+    font-size: 0.72rem;
+    color: #888888;
+    line-height: 1.8;
+  }
+
+  @media (min-width: 768px) {
+    .br-post-body { padding: 40px 40px 40px 40px; }
+  }
+</style>
+
+<article class="br-post-body">
+
+  <p>
+    Every agent in the BlackRoad OS mesh needs to remember what it was doing. Not just at runtime &mdash;
+    across reboots, across cluster migrations, across power failures on the Pi 5 nodes. Traditional
+    approaches reach for Redis or SQLite. We tried both. Neither was the right abstraction.
+  </p>
+
+  <h2 id="problem">The Problem With Mutable State</h2>
+
+  <p>
+    Key-value stores like Redis are fast and ergonomic, but they're inherently mutable. An agent
+    writes its state, the node crashes, and you're left asking: <strong>was that write committed?</strong>
+    You add persistence flags. Then you add AOF logging. Then you're basically reimplementing a journal
+    on top of a store that wasn't designed to be one.
+  </p>
+
+  <p>
+    SQLite is better &mdash; it's ACID-compliant and file-backed. But it's still row-oriented, which means
+    deletes and updates destroy history. For agents, history <em>is</em> the state. You can't diff
+    two snapshots if you only kept the latest.
+  </p>
+
+  <div class="br-callout">
+    <div class="br-callout__label">&mdash; constraint</div>
+    <div class="br-callout__content">
+      Agent memory must survive: power loss, node migration, concurrent writes from sub-agents,
+      and rollback requests from the orchestration layer. Mutable stores fail at least two of these.
+    </div>
+  </div>
+
+  <h2 id="ps-sha">PS-SHA&#8734;: Append-Only by Design</h2>
+
+  <p>
+    PS-SHA&#8734; is a cryptographically-chained append-only journal. Every memory write is a new entry
+    that includes the SHA hash of the previous entry. You get an immutable, verifiable chain where
+    any tampering is detectable and the full history is always recoverable.
+  </p>
+
+  <div class="br-code-block">
+    <div class="br-code-block__label">journal entry schema</div>
+    <pre><code><span class="comment"># Each entry in the PS-SHA&#8734; journal</span>
+{
+  <span class="string">"seq"</span>:       <span class="number">1024</span>,
+  <span class="string">"ts"</span>:        <span class="string">"2025-11-14T03:22:11Z"</span>,
+  <span class="string">"agent_id"</span>:  <span class="string">"cecilia-01"</span>,
+  <span class="string">"payload"</span>:   { &hellip; },
+  <span class="string">"prev_hash"</span>: <span class="string">"sha256:9f3a&hellip;"</span>,
+  <span class="string">"hash"</span>:      <span class="string">"sha256:4b7c&hellip;"</span>
+}</code></pre>
+  </div>
+
+  <p>
+    The <code>prev_hash</code> field is the key. It creates a hard dependency between entries &mdash; you
+    cannot insert, delete, or reorder without breaking the chain. This makes the journal self-auditing.
+  </p>
+
+  <h3 id="write-path">Write path</h3>
+
+  <p>
+    Writes are sequential and synchronous at the journal level, but agents interact through a
+    NATS event bus message queue, so concurrency is handled upstream. The journal itself never
+    sees a race condition.
+  </p>
+
+  <div class="br-code-block">
+    <div class="br-code-block__label">write path (python)</div>
+    <pre><code><span class="keyword">def</span> <span class="function">commit</span>(agent_id: str, payload: dict) -&gt; JournalEntry:
+    prev = journal.tail(agent_id)
+    entry = JournalEntry(
+        seq       = prev.seq + <span class="number">1</span>,
+        ts        = utcnow(),
+        agent_id  = agent_id,
+        payload   = payload,
+        prev_hash = prev.hash,
+    )
+    entry.hash = sha256(entry.canonical_bytes())
+    journal.append(entry)
+    <span class="keyword">return</span> entry</code></pre>
+  </div>
+
+  <h2 id="recovery">Recovery Across Power Cycles</h2>
+
+  <p>
+    On boot, each agent reads its journal tail and resumes from the last committed entry. Because
+    partial writes leave a broken hash chain, they're automatically detected and truncated. No
+    recovery scripts. No integrity checks that themselves need to be trusted.
+  </p>
+
+  <blockquote>
+    <p>
+      The journal doesn't need a separate integrity layer because integrity is structural.
+      A broken chain is immediately visible. A valid chain is immediately trustworthy.
+    </p>
+    <cite>&mdash; internal design doc, BlackRoad-OS/lucidia-memory</cite>
+  </blockquote>
+
+  <h2 id="tradeoffs">Tradeoffs</h2>
+
+  <ul>
+    <li>Journals grow forever &mdash; we compact on a 30-day rolling window, archiving cold entries to R2</li>
+    <li>Read performance requires indexing &mdash; we maintain a separate seq&rarr;hash index in SQLite</li>
+    <li>Cross-agent reads require a merge strategy &mdash; currently earliest-wins for conflicts</li>
+  </ul>
+
+  <hr>
+
+  <p>
+    The full implementation lives in <a href="https://github.com/BlackRoad-OS/lucidia-memory" target="_blank" rel="noopener noreferrer">BlackRoad-OS/lucidia-memory</a>.
+    Next post covers the NATS event bus architecture that feeds the journal.
+  </p>
+
+</article>

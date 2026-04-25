@@ -1,0 +1,33 @@
+name               = "blackroad-kpi-aggregator"
+main               = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id         = "848cf0b18d51e0170e0d1537aec3505a"
+
+[vars]
+INSTANCE           = "kpi-aggregator"
+KPI_COLLECTOR_URL  = "https://blackroad-kpi-collector.blackroad.workers.dev"
+KPI_GITHUB_URL     = "https://blackroad-kpi-github.blackroad.workers.dev"
+KPI_INFRA_URL      = "https://blackroad-kpi-infra.blackroad.workers.dev"
+KPI_AGENTS_URL     = "https://blackroad-kpi-agents.blackroad.workers.dev"
+
+# Durable Objects for WebSocket hub
+[[durable_objects.bindings]]
+name       = "WS_HUB"
+class_name = "WebSocketHub"
+
+[[migrations]]
+tag         = "v1"
+new_classes = ["WebSocketHub"]
+
+# KV for aggregated snapshots
+[[kv_namespaces]]
+binding = "AGG_CACHE"
+id      = "PLACEHOLDER_KV_ID"
+
+# Analytics Engine for aggregate metrics
+[[analytics_engine_datasets]]
+binding = "AGG_ANALYTICS"
+
+# Cron triggers for aggregation sweeps
+[triggers]
+crons = ["* * * * *"]

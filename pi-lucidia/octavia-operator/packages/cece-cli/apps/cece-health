@@ -1,0 +1,360 @@
+#!/bin/bash
+# 🏥 CECE-HEALTH v1.0 - Health Checks & Alerting
+# Monitor services, endpoints, and system health
+
+# BlackRoad Colors
+BR_ORANGE=208; BR_AMBER=202; BR_PINK=198; BR_MAGENTA=163; BR_BLUE=33; BR_WHITE=255
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'; BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+HEALTH_DIR="$CECE_HOME/health"
+CHECKS_FILE="$HEALTH_DIR/checks.json"
+HISTORY_FILE="$HEALTH_DIR/history.jsonl"
+ALERTS_FILE="$HEALTH_DIR/alerts.jsonl"
+
+mkdir -p "$HEALTH_DIR"
+[ ! -f "$CHECKS_FILE" ] && echo '{"checks":[]}' > "$CHECKS_FILE"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)🏥 CECE-HEALTH - Health Monitoring${RESET}            $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+gen_id() { date +%s%N | sha256sum | head -c 6; }
+
+# Built-in health checks
+check_cpu() {
+    local threshold="${1:-80}"
+    local cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print int($2)}' 2>/dev/null || echo 0)
+    [ "$cpu" -lt "$threshold" ] && echo "ok:CPU at ${cpu}%" || echo "fail:CPU at ${cpu}% (threshold: ${threshold}%)"
+}
+
+check_memory() {
+    local threshold="${1:-90}"
+    local mem=$(free | grep Mem | awk '{printf "%d", $3/$2 * 100}' 2>/dev/null || echo 0)
+    [ "$mem" -lt "$threshold" ] && echo "ok:Memory at ${mem}%" || echo "fail:Memory at ${mem}% (threshold: ${threshold}%)"
+}
+
+check_disk() {
+    local threshold="${1:-90}"
+    local disk=$(df / | tail -1 | awk '{print int($5)}' 2>/dev/null || echo 0)
+    [ "$disk" -lt "$threshold" ] && echo "ok:Disk at ${disk}%" || echo "fail:Disk at ${disk}% (threshold: ${threshold}%)"
+}
+
+check_temp() {
+    local threshold="${1:-70}"
+    local temp=0
+    [ -f /sys/class/thermal/thermal_zone0/temp ] && temp=$(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))
+    [ "$temp" -lt "$threshold" ] && echo "ok:Temp at ${temp}°C" || echo "fail:Temp at ${temp}°C (threshold: ${threshold}°C)"
+}
+
+check_service() {
+    local svc="$1"
+    if systemctl is-active --quiet "$svc" 2>/dev/null; then
+        echo "ok:$svc is running"
+    else
+        echo "fail:$svc is not running"
+    fi
+}
+
+check_http() {
+    local url="$1"
+    local timeout="${2:-5}"
+    local code=$(curl -s -o /dev/null -w '%{http_code}' --connect-timeout "$timeout" "$url" 2>/dev/null)
+    [ "$code" = "200" ] && echo "ok:$url returned $code" || echo "fail:$url returned $code"
+}
+
+check_ping() {
+    local host="$1"
+    if ping -c 1 -W 2 "$host" &>/dev/null; then
+        echo "ok:$host is reachable"
+    else
+        echo "fail:$host is unreachable"
+    fi
+}
+
+check_port() {
+    local host="$1"
+    local port="$2"
+    if nc -z -w 2 "$host" "$port" 2>/dev/null; then
+        echo "ok:$host:$port is open"
+    else
+        echo "fail:$host:$port is closed"
+    fi
+}
+
+# Run all built-in system checks
+cmd_check() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)System Health Check:${RESET}"
+    echo ""
+
+    local passed=0
+    local failed=0
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    local results=()
+
+    # System checks
+    for check in "cpu:80" "memory:90" "disk:90" "temp:70"; do
+        local name="${check%:*}"
+        local threshold="${check#*:}"
+        local result=$(check_$name "$threshold")
+        local status="${result%%:*}"
+        local message="${result#*:}"
+
+        if [ "$status" = "ok" ]; then
+            echo -e "  $(fg $BR_BLUE)✓${RESET} $message"
+            ((passed++))
+        else
+            echo -e "  $(fg $BR_PINK)✗${RESET} $message"
+            ((failed++))
+        fi
+        results+=("\"$name\":\"$status\"")
+    done
+
+    # Service checks
+    echo ""
+    echo -e "$(fg $BR_WHITE)Services:${RESET}"
+    for svc in cece-api cece-heartbeat ollama cloudflared; do
+        local result=$(check_service "$svc")
+        local status="${result%%:*}"
+        local message="${result#*:}"
+
+        if [ "$status" = "ok" ]; then
+            echo -e "  $(fg $BR_BLUE)✓${RESET} $message"
+            ((passed++))
+        else
+            echo -e "  $(fg $BR_PINK)✗${RESET} $message"
+            ((failed++))
+        fi
+        results+=("\"svc_$svc\":\"$status\"")
+    done
+
+    # Device checks
+    echo ""
+    echo -e "$(fg $BR_WHITE)Fleet:${RESET}"
+    for device in alice aria lucidia octavia; do
+        local result=$(check_ping "$device")
+        local status="${result%%:*}"
+
+        if [ "$status" = "ok" ]; then
+            echo -e "  $(fg $BR_BLUE)✓${RESET} $device online"
+            ((passed++))
+        else
+            echo -e "  $(fg $BR_PINK)✗${RESET} $device offline"
+            ((failed++))
+        fi
+    done
+
+    # Summary
+    echo ""
+    echo -e "$(fg $BR_WHITE)────────────────────────────────────────${RESET}"
+    local total=$((passed + failed))
+    if [ $failed -eq 0 ]; then
+        echo -e "$(fg $BR_BLUE)✓ All $total checks passed${RESET}"
+    else
+        echo -e "$(fg $BR_PINK)⚠ $failed/$total checks failed${RESET}"
+    fi
+
+    # Log history
+    echo "{\"time\":\"$timestamp\",\"passed\":$passed,\"failed\":$failed,\"total\":$total}" >> "$HISTORY_FILE"
+
+    # Create alert if failures
+    if [ $failed -gt 0 ]; then
+        echo "{\"time\":\"$timestamp\",\"type\":\"health_check\",\"failed\":$failed,\"acknowledged\":false}" >> "$ALERTS_FILE"
+    fi
+}
+
+# Add custom check
+cmd_add() {
+    local name="$1"
+    local type="$2"
+    local target="$3"
+
+    [ -z "$name" ] || [ -z "$type" ] || [ -z "$target" ] && {
+        echo "Usage: cece-health add <name> <type> <target>"
+        echo "Types: http, ping, port, service"
+        echo "Examples:"
+        echo "  cece-health add api http http://localhost:3100/health"
+        echo "  cece-health add database ping postgres.local"
+        echo "  cece-health add redis port localhost:6379"
+        return 1
+    }
+
+    local id=$(gen_id)
+    local tmp=$(mktemp)
+
+    jq --arg id "$id" --arg name "$name" --arg type "$type" --arg target "$target" \
+        '.checks += [{"id":$id,"name":$name,"type":$type,"target":$target,"enabled":true}]' \
+        "$CHECKS_FILE" > "$tmp"
+    mv "$tmp" "$CHECKS_FILE"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Added check: $(fg $BR_WHITE)$name${RESET} ($type: $target)"
+}
+
+# List custom checks
+cmd_list() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Custom Health Checks:${RESET}"
+    echo ""
+
+    local checks=$(jq -r '.checks[] | "\(.id) \(.name) \(.type) \(.target) \(.enabled)"' "$CHECKS_FILE" 2>/dev/null)
+
+    if [ -z "$checks" ]; then
+        echo "  No custom checks. Add with: cece-health add <name> <type> <target>"
+        return
+    fi
+
+    printf "  $(fg $BR_BLUE)%-8s %-15s %-10s %-30s %s${RESET}\n" "ID" "NAME" "TYPE" "TARGET" "ENABLED"
+    echo "  ────────────────────────────────────────────────────────────────────"
+
+    echo "$checks" | while read -r id name type target enabled; do
+        local status_icon="$(fg $BR_BLUE)●${RESET}"
+        [ "$enabled" = "false" ] && status_icon="$(fg $BR_PINK)○${RESET}"
+        printf "  %-8s %-15s %-10s %-30s %b\n" "$id" "$name" "$type" "$target" "$status_icon"
+    done
+}
+
+# Run custom checks
+cmd_run() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Running custom health checks...${RESET}"
+    echo ""
+
+    local passed=0
+    local failed=0
+
+    jq -c '.checks[] | select(.enabled == true)' "$CHECKS_FILE" 2>/dev/null | while read -r check; do
+        local name=$(echo "$check" | jq -r '.name')
+        local type=$(echo "$check" | jq -r '.type')
+        local target=$(echo "$check" | jq -r '.target')
+
+        echo -n "  $name: "
+
+        local result
+        case "$type" in
+            http) result=$(check_http "$target") ;;
+            ping) result=$(check_ping "$target") ;;
+            port)
+                local host="${target%:*}"
+                local port="${target#*:}"
+                result=$(check_port "$host" "$port")
+                ;;
+            service) result=$(check_service "$target") ;;
+            *) result="fail:Unknown check type" ;;
+        esac
+
+        local status="${result%%:*}"
+        local message="${result#*:}"
+
+        if [ "$status" = "ok" ]; then
+            echo -e "$(fg $BR_BLUE)✓${RESET} $message"
+        else
+            echo -e "$(fg $BR_PINK)✗${RESET} $message"
+        fi
+    done
+}
+
+# Show alerts
+cmd_alerts() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Recent Alerts:${RESET}"
+    echo ""
+
+    [ ! -f "$ALERTS_FILE" ] && { echo "  No alerts."; return; }
+
+    tail -20 "$ALERTS_FILE" | while read -r alert; do
+        local time=$(echo "$alert" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+        local type=$(echo "$alert" | jq -r '.type')
+        local failed=$(echo "$alert" | jq -r '.failed')
+        local ack=$(echo "$alert" | jq -r '.acknowledged')
+
+        local icon="$(fg $BR_PINK)●${RESET}"
+        [ "$ack" = "true" ] && icon="$(fg $BR_BLUE)○${RESET}"
+
+        echo -e "  $icon $(fg $BR_WHITE)[$time]${RESET} $type - $failed failures"
+    done
+}
+
+# Show history
+cmd_history() {
+    local count="${1:-10}"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Health Check History:${RESET}"
+    echo ""
+
+    [ ! -f "$HISTORY_FILE" ] && { echo "  No history."; return; }
+
+    tail -n "$count" "$HISTORY_FILE" | while read -r entry; do
+        local time=$(echo "$entry" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+        local passed=$(echo "$entry" | jq -r '.passed')
+        local failed=$(echo "$entry" | jq -r '.failed')
+        local total=$(echo "$entry" | jq -r '.total')
+
+        if [ "$failed" -eq 0 ]; then
+            echo -e "  $(fg $BR_BLUE)✓${RESET} $(fg $BR_WHITE)[$time]${RESET} $passed/$total passed"
+        else
+            echo -e "  $(fg $BR_PINK)✗${RESET} $(fg $BR_WHITE)[$time]${RESET} $failed/$total failed"
+        fi
+    done
+}
+
+# Daemon mode
+cmd_daemon() {
+    local interval="${1:-300}"
+
+    echo -e "$(fg $BR_BLUE)Starting health monitor (interval: ${interval}s)...${RESET}"
+
+    while true; do
+        cmd_check > /dev/null 2>&1
+        sleep "$interval"
+    done
+}
+
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-health <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  check               Run system health check"
+    echo "  run                 Run custom checks only"
+    echo "  add <n> <t> <tgt>   Add custom check"
+    echo "  list                List custom checks"
+    echo "  alerts              Show recent alerts"
+    echo "  history [n]         Show check history"
+    echo "  daemon [sec]        Continuous monitoring"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Check Types:${RESET}"
+    echo "  http     HTTP endpoint (expects 200)"
+    echo "  ping     ICMP ping"
+    echo "  port     TCP port check"
+    echo "  service  Systemd service"
+}
+
+main() {
+    local cmd="${1:-check}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        check) cmd_check ;;
+        run) cmd_run ;;
+        add) cmd_add "$@" ;;
+        list|ls) cmd_list ;;
+        alerts) cmd_alerts ;;
+        history) cmd_history "$@" ;;
+        daemon|watch) cmd_daemon "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) cmd_check ;;
+    esac
+}
+
+main "$@"

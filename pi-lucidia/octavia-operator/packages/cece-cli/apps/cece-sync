@@ -1,0 +1,329 @@
+#!/bin/bash
+# 🔄 CECE-SYNC v1.0 - Cross-Device Synchronization
+# Syncs memories, tasks, heartbeats, and state across all BlackRoad devices
+
+set -e
+
+PINK='\033[38;5;205m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+SYNC_LOG="$CECE_HOME/data/sync.log"
+SYNC_STATE="$CECE_HOME/data/sync-state.json"
+
+# BlackRoad device fleet
+DEVICES=(
+    "alice:192.168.4.49"
+    "aria:192.168.4.82"
+    "lucidia:192.168.4.38"
+    "octavia:192.168.4.81"
+    "cecilia:192.168.4.89"
+)
+
+# Tailscale IPs for remote sync
+DEVICES_TS=(
+    "alice:100.77.210.18"
+    "aria:100.109.14.17"
+    "lucidia:100.66.235.47"
+    "octavia:100.83.149.86"
+    "cecilia:100.72.180.98"
+)
+
+log_sync() {
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "[$timestamp] $1" >> "$SYNC_LOG"
+}
+
+banner() {
+    echo -e "${PINK}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PINK}║${NC}            ${WHITE}🔄 CECE-SYNC - Device Synchronization${NC}          ${PINK}║${NC}"
+    echo -e "${PINK}╚════════════════════════════════════════════════════════════╝${NC}"
+}
+
+# Check device reachability
+check_device() {
+    local name="$1"
+    local ip="$2"
+
+    if ping -c 1 -W 2 "$ip" &>/dev/null; then
+        echo -e "  ${GREEN}●${NC} $name ($ip)"
+        return 0
+    else
+        echo -e "  ${RED}○${NC} $name ($ip) - unreachable"
+        return 1
+    fi
+}
+
+# Sync memories to a device
+sync_memories_to() {
+    local device="$1"
+    local ip="$2"
+
+    local src="$CECE_HOME/memory/memories.jsonl"
+    local dst="$device:~/cece/memory/"
+
+    if [ -f "$src" ]; then
+        rsync -az --timeout=10 "$src" "$dst" 2>/dev/null && return 0
+    fi
+    return 1
+}
+
+# Sync tasks to a device
+sync_tasks_to() {
+    local device="$1"
+    local ip="$2"
+
+    local src="$CECE_HOME/data/tasks.jsonl"
+    local dst="$device:~/cece/data/"
+
+    if [ -f "$src" ]; then
+        rsync -az --timeout=10 "$src" "$dst" 2>/dev/null && return 0
+    fi
+    return 1
+}
+
+# Pull memories from a device
+pull_memories_from() {
+    local device="$1"
+    local ip="$2"
+
+    local src="$device:~/cece/memory/memories.jsonl"
+    local dst="$CECE_HOME/memory/incoming-$device.jsonl"
+
+    rsync -az --timeout=10 "$src" "$dst" 2>/dev/null && return 0
+    return 1
+}
+
+# Merge incoming memories
+merge_memories() {
+    local master="$CECE_HOME/memory/memories.jsonl"
+    local merged="$CECE_HOME/memory/memories-merged.jsonl"
+
+    # Collect all memories
+    cat "$master" "$CECE_HOME"/memory/incoming-*.jsonl 2>/dev/null | \
+        sort -t'"' -k4 | uniq > "$merged"
+
+    # Replace master
+    mv "$merged" "$master"
+    rm -f "$CECE_HOME"/memory/incoming-*.jsonl 2>/dev/null
+}
+
+# Status command
+cmd_status() {
+    banner
+    echo ""
+    echo -e "${WHITE}Device Fleet Status:${NC}"
+    echo ""
+
+    local reachable=0
+    local total=${#DEVICES[@]}
+
+    for entry in "${DEVICES[@]}"; do
+        local name="${entry%%:*}"
+        local ip="${entry#*:}"
+
+        if check_device "$name" "$ip"; then
+            ((reachable++)) || true
+        fi
+    done
+
+    echo ""
+    echo -e "${WHITE}Summary:${NC} $reachable/$total devices reachable"
+
+    # Show last sync
+    if [ -f "$SYNC_STATE" ]; then
+        local last_sync=$(jq -r '.last_sync // "Never"' "$SYNC_STATE" 2>/dev/null)
+        echo -e "${WHITE}Last Sync:${NC} $last_sync"
+    fi
+
+    log_sync "STATUS: $reachable/$total devices reachable"
+}
+
+# Push command - sync from this device to all others
+cmd_push() {
+    banner
+    echo ""
+    echo -e "${CYAN}Pushing data to all devices...${NC}"
+    echo ""
+
+    local success=0
+    local failed=0
+    local hostname=$(hostname)
+
+    for entry in "${DEVICES[@]}"; do
+        local name="${entry%%:*}"
+        local ip="${entry#*:}"
+
+        # Skip self
+        [[ "$name" == "$hostname" ]] && continue
+
+        echo -n "  $name: "
+
+        if ping -c 1 -W 2 "$ip" &>/dev/null; then
+            local synced=""
+
+            # Sync memories
+            if sync_memories_to "$name" "$ip"; then
+                synced+="memories "
+            fi
+
+            # Sync tasks
+            if sync_tasks_to "$name" "$ip"; then
+                synced+="tasks "
+            fi
+
+            if [ -n "$synced" ]; then
+                echo -e "${GREEN}✓${NC} $synced"
+                ((success++)) || true
+            else
+                echo -e "${YELLOW}○${NC} nothing to sync"
+            fi
+        else
+            echo -e "${RED}✗${NC} unreachable"
+            ((failed++)) || true
+        fi
+    done
+
+    echo ""
+    echo -e "${WHITE}Push complete:${NC} $success synced, $failed failed"
+
+    # Update sync state
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "{\"last_sync\":\"$timestamp\",\"type\":\"push\",\"success\":$success,\"failed\":$failed}" > "$SYNC_STATE"
+
+    log_sync "PUSH: $success synced, $failed failed"
+}
+
+# Pull command - pull data from all devices and merge
+cmd_pull() {
+    banner
+    echo ""
+    echo -e "${CYAN}Pulling data from all devices...${NC}"
+    echo ""
+
+    local success=0
+    local failed=0
+    local hostname=$(hostname)
+
+    for entry in "${DEVICES[@]}"; do
+        local name="${entry%%:*}"
+        local ip="${entry#*:}"
+
+        # Skip self
+        [[ "$name" == "$hostname" ]] && continue
+
+        echo -n "  $name: "
+
+        if ping -c 1 -W 2 "$ip" &>/dev/null; then
+            if pull_memories_from "$name" "$ip"; then
+                echo -e "${GREEN}✓${NC} pulled"
+                ((success++)) || true
+            else
+                echo -e "${YELLOW}○${NC} no data"
+            fi
+        else
+            echo -e "${RED}✗${NC} unreachable"
+            ((failed++)) || true
+        fi
+    done
+
+    echo ""
+    echo -e "${CYAN}Merging memories...${NC}"
+    merge_memories
+    echo -e "${GREEN}✓${NC} Memories merged"
+
+    echo ""
+    echo -e "${WHITE}Pull complete:${NC} $success pulled, $failed failed"
+
+    # Update sync state
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "{\"last_sync\":\"$timestamp\",\"type\":\"pull\",\"success\":$success,\"failed\":$failed}" > "$SYNC_STATE"
+
+    log_sync "PULL: $success pulled, $failed failed"
+}
+
+# Full sync - push then pull
+cmd_sync() {
+    banner
+    echo ""
+    echo -e "${CYAN}Full bidirectional sync...${NC}"
+    echo ""
+
+    cmd_push
+    echo ""
+    cmd_pull
+
+    log_sync "FULL SYNC completed"
+}
+
+# Watch mode - continuous sync
+cmd_watch() {
+    local interval="${1:-300}"  # Default 5 minutes
+
+    banner
+    echo ""
+    echo -e "${CYAN}Watch mode: syncing every ${interval}s${NC}"
+    echo -e "${YELLOW}Press Ctrl+C to stop${NC}"
+    echo ""
+
+    while true; do
+        local timestamp=$(date '+%H:%M:%S')
+        echo -e "${WHITE}[$timestamp]${NC} Starting sync..."
+
+        cmd_sync 2>/dev/null
+
+        echo -e "${WHITE}[$timestamp]${NC} Next sync in ${interval}s"
+        sleep "$interval"
+    done
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "${WHITE}Usage:${NC} cece-sync <command>"
+    echo ""
+    echo -e "${CYAN}Commands:${NC}"
+    echo "  status        Show device fleet status"
+    echo "  push          Push data to all devices"
+    echo "  pull          Pull data from all devices"
+    echo "  sync          Full bidirectional sync"
+    echo "  watch [sec]   Continuous sync (default: 300s)"
+    echo ""
+    echo -e "${WHITE}Synced Data:${NC}"
+    echo "  • Memories (memories.jsonl)"
+    echo "  • Tasks (tasks.jsonl)"
+    echo "  • Heartbeats (heartbeat.jsonl)"
+    echo ""
+    echo -e "${WHITE}Devices:${NC}"
+    for entry in "${DEVICES[@]}"; do
+        local name="${entry%%:*}"
+        local ip="${entry#*:}"
+        echo "  • $name ($ip)"
+    done
+}
+
+# Main
+main() {
+    mkdir -p "$CECE_HOME/data" "$CECE_HOME/memory"
+
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        status) cmd_status ;;
+        push) cmd_push ;;
+        pull) cmd_pull ;;
+        sync) cmd_sync ;;
+        watch) cmd_watch "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

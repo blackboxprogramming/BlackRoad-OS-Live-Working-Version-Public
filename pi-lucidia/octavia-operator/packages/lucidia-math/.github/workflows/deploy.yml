@@ -1,0 +1,52 @@
+name: Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Brand Compliance Check
+        run: |
+          echo "🎨 Checking BlackRoad brand compliance..."
+          if grep -r "#FF9D00\|#FF6B00\|#FF0066\|#FF006B\|#D600AA\|#7700FF\|#0066FF" . \
+             --include="*.html" --include="*.css" --include="*.js" --include="*.jsx" --include="*.tsx" 2>/dev/null; then
+            echo "❌ FORBIDDEN COLORS FOUND! Must use official BlackRoad colors:"
+            echo "  ✅ Hot Pink: #FF1D6C"
+            echo "  ✅ Amber: #F5A623"
+            echo "  ✅ Electric Blue: #2979FF"
+            echo "  ✅ Violet: #9C27B0"
+            exit 1
+          fi
+          echo "✅ Brand compliance check passed"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: |
+          if [ -f "package.json" ]; then
+            npm install
+          fi
+
+      - name: Build
+        run: |
+          if [ -f "package.json" ] && grep -q '"build"' package.json; then
+            npm run build
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          echo "🚀 Would deploy to Cloudflare Pages here"
+          echo "   (Requires org secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID)"

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+SESSION="$1"
+
+if [[ -z "$SESSION" ]]; then
+  echo "Usage: share-alice-to-lucidia <session-name>"
+  exit 1
+fi
+
+BASE="$HOME/lucidia-phase2/sessions/$SESSION"
+SRC="$BASE/alice.log"
+OUT="$BASE/alice_summary_for_lucidia.md"
+
+if [[ ! -f "$SRC" ]]; then
+  echo "No alice.log found for session '$SESSION'"
+  exit 1
+fi
+
+cat > "$OUT" <<'MD'
+# Alice → Lucidia Summary
+
+Instructions to Alice:
+- Summarize key insights only
+- No execution advice
+- Note uncertainties and open questions
+- Keep concise and structured
+MD
+
+ollama run alice <<'PROMPT' | tee -a "$OUT"
+Please summarize the key insights from the current session for Lucidia.
+Use bullets. Label assumptions and open questions.
+PROMPT
+
+echo "✅ Summary written to $OUT"

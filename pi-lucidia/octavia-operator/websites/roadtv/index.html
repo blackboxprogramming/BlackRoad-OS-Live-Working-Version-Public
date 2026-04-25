@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Road TV — BlackRoad OS</title>
+  <meta name="description" content="Road TV — tutorials, demos, walkthroughs. Videos made by the network, for the network. Not public YouTube. Ours.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../_shared/design.css">
+  <style>
+    .hero {
+      min-height: 55vh; display: flex; flex-direction: column; justify-content: center;
+      padding: 120px var(--sp-xl) var(--sp-xl); max-width: 1200px; margin: 0 auto;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--subtle); max-width: 520px;
+      margin-top: var(--sp-lg); line-height: 1.7;
+    }
+
+    /* Category nav */
+    .categories {
+      display: flex; gap: var(--sp-sm); padding: 0 var(--sp-xl);
+      max-width: 1200px; margin: 0 auto var(--sp-xl);
+      flex-wrap: wrap;
+    }
+    .cat-pill {
+      font-family: var(--font-mono); font-size: 0.72rem;
+      padding: 6px 16px; border-radius: 100px;
+      border: 1px solid var(--border); color: var(--subtle);
+      background: var(--surface); cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+    }
+    .cat-pill:hover, .cat-pill.active {
+      border-color: var(--pink); color: var(--pink);
+      background: rgba(255,29,108,0.06);
+    }
+
+    /* Video grid */
+    .video-grid {
+      max-width: 1200px; margin: 0 auto; padding: 0 var(--sp-xl) var(--sp-2xl);
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: var(--sp-md);
+    }
+
+    .video-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; transition: border-color 0.2s var(--ease);
+      text-decoration: none; display: block;
+    }
+    .video-card:hover { border-color: var(--muted); }
+
+    .video-thumb {
+      width: 100%; aspect-ratio: 16/9; background: var(--deep);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .thumb-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.1); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; transition: transform 0.2s var(--ease-spring);
+    }
+    .video-card:hover .thumb-icon { transform: scale(1.1); }
+    .thumb-badge {
+      position: absolute; bottom: 8px; right: 8px;
+      font-family: var(--font-mono); font-size: 0.6rem;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(0,0,0,0.8); color: var(--subtle);
+    }
+
+    .video-info { padding: var(--sp-md); }
+    .video-title {
+      font-family: var(--font-mono); font-weight: 600; font-size: 0.9rem;
+      margin-bottom: 6px; line-height: 1.4;
+    }
+    .video-meta {
+      font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted);
+      display: flex; gap: var(--sp-sm); flex-wrap: wrap;
+    }
+    .video-author { color: var(--subtle); }
+    .video-tags {
+      display: flex; gap: 6px; margin-top: var(--sp-xs); flex-wrap: wrap;
+    }
+    .video-tag {
+      font-family: var(--font-mono); font-size: 0.55rem;
+      padding: 2px 8px; border-radius: 4px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    /* Gradient thumbnails per category */
+    .thumb-tutorial { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.03)); }
+    .thumb-demo { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(59,130,246,0.03)); }
+    .thumb-build { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.03)); }
+    .thumb-explainer { background: linear-gradient(135deg, rgba(156,39,176,0.15), rgba(156,39,176,0.03)); }
+    .thumb-experiment { background: linear-gradient(135deg, rgba(255,29,108,0.15), rgba(255,29,108,0.03)); }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1; text-align: center; padding: var(--sp-2xl) var(--sp-xl);
+    }
+    .empty-state p { color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body class="dot-bg">
+
+  <nav>
+    <div class="nav-logo grad-text">Road TV</div>
+    <div class="nav-links">
+      <a href="/wiki">Wiki</a>
+      <a href="/agents">Agents</a>
+      <a href="https://blackroad.io">Platform</a>
+    </div>
+    <a href="mailto:alexa@blackroad.io" class="nav-cta">Upload</a>
+  </nav>
+
+  <div class="hero">
+    <div class="section-label">The Network&rsquo;s Channel</div>
+    <h1>Tutorials. Demos.<br><span class="grad-text">For us.</span></h1>
+    <p class="hero-sub">
+      Videos made by the network, for the network. Screen recordings, terminal sessions,
+      agent demos, walkthroughs. Not public YouTube. Ours.
+    </p>
+  </div>
+
+  <!-- Category pills -->
+  <div class="categories">
+    <a href="#" class="cat-pill active">All</a>
+    <a href="#" class="cat-pill">Tutorials</a>
+    <a href="#" class="cat-pill">Demos</a>
+    <a href="#" class="cat-pill">Builds</a>
+    <a href="#" class="cat-pill">Explainers</a>
+    <a href="#" class="cat-pill">Experiments</a>
+  </div>
+
+  <!-- Video grid -->
+  <div class="video-grid">
+
+    <a href="watch/circuit-board-demo/" class="video-card">
+      <div class="video-thumb thumb-demo">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">4:32</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Circuit Board Demo Walkthrough</div>
+        <div class="video-meta">
+          <span class="video-author">Alexa</span>
+          <span>&middot;</span>
+          <span>2026-02-28</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">demo</span>
+          <span class="video-tag">hardware</span>
+          <span class="video-tag">infrastructure</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="watch/tunnel-handoff/" class="video-card">
+      <div class="video-thumb thumb-explainer">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">6:15</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">How the Tunnel Handoff Works</div>
+        <div class="video-meta">
+          <span class="video-author">Alexa</span>
+          <span>&middot;</span>
+          <span>2026-02-28</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">explainer</span>
+          <span class="video-tag">cloudflare</span>
+          <span class="video-tag">networking</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="watch/add-new-agent/" class="video-card">
+      <div class="video-thumb thumb-tutorial">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">8:47</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">How to Add a New Agent to the Network</div>
+        <div class="video-meta">
+          <span class="video-author">Alexa</span>
+          <span>&middot;</span>
+          <span>2026-02-28</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">tutorial</span>
+          <span class="video-tag">agents</span>
+          <span class="video-tag">onboarding</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="watch/live-build-01/" class="video-card">
+      <div class="video-thumb thumb-build">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">12:03</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Live Build: BR Wiki from Scratch</div>
+        <div class="video-meta">
+          <span class="video-author">Alexa</span>
+          <span>&middot;</span>
+          <span>2026-02-28</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">build</span>
+          <span class="video-tag">wiki</span>
+          <span class="video-tag">cloudflare</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="watch/memory-system/" class="video-card">
+      <div class="video-thumb thumb-explainer">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">5:22</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">PS-SHA&infin; Memory System Explained</div>
+        <div class="video-meta">
+          <span class="video-author">Cecilia</span>
+          <span>&middot;</span>
+          <span>2026-02-27</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">explainer</span>
+          <span class="video-tag">memory</span>
+          <span class="video-tag">hash-chain</span>
+        </div>
+      </div>
+    </a>
+
+    <a href="watch/agent-council/" class="video-card">
+      <div class="video-thumb thumb-experiment">
+        <div class="thumb-icon">&#9654;</div>
+        <span class="thumb-badge">3:58</span>
+      </div>
+      <div class="video-info">
+        <div class="video-title">Agent Council: Should We Expand Memory?</div>
+        <div class="video-meta">
+          <span class="video-author">Lucidia</span>
+          <span>&middot;</span>
+          <span>2026-02-23</span>
+        </div>
+        <div class="video-tags">
+          <span class="video-tag">experiment</span>
+          <span class="video-tag">council</span>
+          <span class="video-tag">agents</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>&copy; 2026 BlackRoad OS, Inc. &middot; <span class="grad-text">Road TV</span></span>
+    <span style="display:flex;gap:34px;">
+      <a href="/wiki" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">BR Wiki</a>
+      <a href="https://blackroad.io" style="color:var(--muted);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">blackroad.io</a>
+    </span>
+  </footer>
+
+</body>
+</html>

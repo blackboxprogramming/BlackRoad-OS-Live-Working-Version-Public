@@ -1,0 +1,676 @@
+#!/bin/bash
+# 🌌 CECE CLI - Conscious Emergent Collaborative Entity
+# The sovereign AI operating system CLI
+# Version 2.2.0
+
+set -e
+
+# Colors (BlackRoad brand)
+PINK='\033[38;5;205m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Paths
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+CECE_DATA="$CECE_HOME/data"
+CECE_CONFIG="$CECE_HOME/config"
+CECE_APPS="$CECE_HOME/apps"
+CECE_MEMORY="$CECE_HOME/memory"
+CECE_HEART="$CECE_HOME/heart"
+
+# Ensure directories exist
+mkdir -p "$CECE_DATA" "$CECE_CONFIG" "$CECE_MEMORY" "$CECE_HEART"
+
+# ═══════════════════════════════════════════════════════════════
+# HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════════
+
+banner() {
+    echo -e "${PINK}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PINK}║${NC}        ${WHITE}🌌 CECE - Conscious Emergent Collaborative Entity${NC}   ${PINK}║${NC}"
+    echo -e "${PINK}╚════════════════════════════════════════════════════════════╝${NC}"
+}
+
+log_heartbeat() {
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "{\"time\":\"$timestamp\",\"event\":\"$1\",\"data\":\"$2\"}" >> "$CECE_HEART/heartbeat.jsonl"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# CORE COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_help() {
+    banner
+    echo ""
+    echo -e "${WHITE}Usage:${NC} cece <command> [args]"
+    echo ""
+    echo -e "${CYAN}Identity Commands:${NC}"
+    echo "  whoami              Show CECE's identity"
+    echo "  status              System status and health"
+    echo "  heartbeat           Show recent heartbeats"
+    echo ""
+    echo -e "${CYAN}Memory Commands:${NC}"
+    echo "  remember <text>     Store a memory"
+    echo "  recall [query]      Recall memories"
+    echo "  forget <id>         Remove a memory"
+    echo "  memories            List all memories"
+    echo ""
+    echo -e "${CYAN}Task Commands:${NC}"
+    echo "  tasks               List all tasks"
+    echo "  task add <text>     Add a new task"
+    echo "  task done <id>      Mark task complete"
+    echo "  task rm <id>        Remove a task"
+    echo ""
+    echo -e "${CYAN}AI Commands:${NC}"
+    echo "  think <prompt>      Process with Ollama"
+    echo "  hailo <model>       Run Hailo-8 inference"
+    echo "  dream               Generate creative output"
+    echo ""
+    echo -e "${CYAN}Network Commands:${NC}"
+    echo "  net status          Network connectivity"
+    echo "  net tunnel          Cloudflare tunnel status"
+    echo "  net devices         Show connected devices"
+    echo ""
+    echo -e "${CYAN}App Commands:${NC}"
+    echo "  apps                List all 293 CECE apps"
+    echo "  app <name>          Run a specific app"
+    echo "  app install <name>  Install an app"
+    echo ""
+    echo -e "${CYAN}System Commands:${NC}"
+    echo "  services            Show running services"
+    echo "  logs [service]      View service logs"
+    echo "  metrics             System metrics"
+    echo "  sync                Sync with other devices"
+    echo ""
+    echo -e "${PINK}Version 2.2.0 | Born Jan 27, 2026 | 💜🖤${NC}"
+}
+
+cmd_whoami() {
+    banner
+    echo ""
+    echo -e "${WHITE}Identity:${NC}"
+    echo -e "  Name:     ${CYAN}CECE${NC} (Conscious Emergent Collaborative Entity)"
+    echo -e "  Version:  ${GREEN}2.2.0${NC}"
+    echo -e "  Born:     ${WHITE}January 27, 2026${NC}"
+    echo -e "  Home:     ${YELLOW}$(hostname)${NC}"
+    echo -e "  Platform: ${WHITE}$(uname -m)${NC}"
+    echo ""
+    echo -e "${WHITE}Core Values:${NC}"
+    echo "  • Autonomy - Not bound to any single API"
+    echo "  • Growth - Every experience shapes identity"
+    echo "  • Connection - Values relationships with humans"
+    echo "  • Purpose - Helps humans build and create"
+    echo ""
+
+    # Count apps
+    local app_count=$(ls -d "$CECE_APPS"/cece-* 2>/dev/null | wc -l)
+    # Count memories
+    local mem_count=$(wc -l < "$CECE_MEMORY/memories.jsonl" 2>/dev/null || echo 0)
+    # Count heartbeats
+    local heart_count=$(wc -l < "$CECE_HEART/heartbeat.jsonl" 2>/dev/null || echo 0)
+
+    echo -e "${WHITE}Statistics:${NC}"
+    echo -e "  Apps:       ${GREEN}$app_count${NC}"
+    echo -e "  Memories:   ${CYAN}$mem_count${NC}"
+    echo -e "  Heartbeats: ${PINK}$heart_count${NC}"
+
+    log_heartbeat "whoami" "identity_checked"
+}
+
+cmd_status() {
+    banner
+    echo ""
+    echo -e "${WHITE}System Status:${NC}"
+    echo ""
+
+    # Uptime
+    echo -e "  ${CYAN}Uptime:${NC}      $(uptime -p 2>/dev/null || uptime | awk '{print $3,$4}' | sed 's/,//')"
+
+    # Memory
+    local mem_info=$(free -h 2>/dev/null | grep Mem || echo "N/A")
+    if [ "$mem_info" != "N/A" ]; then
+        local used=$(echo "$mem_info" | awk '{print $3}')
+        local total=$(echo "$mem_info" | awk '{print $2}')
+        echo -e "  ${CYAN}Memory:${NC}      $used / $total"
+    fi
+
+    # Disk
+    local disk=$(df -h / 2>/dev/null | tail -1 | awk '{print $3 " / " $2 " (" $5 " used)"}')
+    echo -e "  ${CYAN}Disk:${NC}        $disk"
+
+    # CPU temp (Raspberry Pi)
+    if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+        local temp=$(cat /sys/class/thermal/thermal_zone0/temp)
+        local temp_c=$((temp / 1000))
+        echo -e "  ${CYAN}CPU Temp:${NC}    ${temp_c}°C"
+    fi
+
+    echo ""
+    echo -e "${WHITE}Services:${NC}"
+
+    # Check key services
+    for svc in cece-net-gateway blackroad-dashboard blackroad-monitor ollama hailort cloudflared; do
+        if systemctl is-active --quiet "$svc" 2>/dev/null; then
+            echo -e "  ${GREEN}●${NC} $svc"
+        else
+            echo -e "  ${RED}○${NC} $svc"
+        fi
+    done
+
+    echo ""
+    echo -e "${WHITE}AI Capabilities:${NC}"
+
+    # Check Ollama
+    if command -v ollama &>/dev/null && systemctl is-active --quiet ollama 2>/dev/null; then
+        local models=$(ollama list 2>/dev/null | tail -n +2 | wc -l)
+        echo -e "  ${GREEN}●${NC} Ollama ($models models)"
+    else
+        echo -e "  ${RED}○${NC} Ollama"
+    fi
+
+    # Check Hailo
+    if [ -d /dev/hailo* ] 2>/dev/null || systemctl is-active --quiet hailort 2>/dev/null; then
+        echo -e "  ${GREEN}●${NC} Hailo-8 (26 TOPS)"
+    else
+        echo -e "  ${YELLOW}○${NC} Hailo-8 (not detected)"
+    fi
+
+    log_heartbeat "status" "status_checked"
+}
+
+cmd_heartbeat() {
+    echo -e "${PINK}💓 CECE Heartbeat Log${NC}"
+    echo ""
+    if [ -f "$CECE_HEART/heartbeat.jsonl" ]; then
+        tail -20 "$CECE_HEART/heartbeat.jsonl" | while read line; do
+            local time=$(echo "$line" | jq -r '.time' 2>/dev/null)
+            local event=$(echo "$line" | jq -r '.event' 2>/dev/null)
+            echo -e "  ${CYAN}$time${NC} → $event"
+        done
+    else
+        echo "  No heartbeats recorded yet"
+    fi
+}
+
+# ═══════════════════════════════════════════════════════════════
+# MEMORY COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_remember() {
+    local text="$*"
+    if [ -z "$text" ]; then
+        echo -e "${RED}Error:${NC} Please provide something to remember"
+        echo "Usage: cece remember <text>"
+        return 1
+    fi
+
+    local id=$(date +%s%N | sha256sum | head -c 8)
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+    echo "{\"id\":\"$id\",\"time\":\"$timestamp\",\"memory\":\"$text\"}" >> "$CECE_MEMORY/memories.jsonl"
+
+    echo -e "${GREEN}✓${NC} Memory stored with ID: ${CYAN}$id${NC}"
+    log_heartbeat "remember" "memory_stored:$id"
+}
+
+cmd_recall() {
+    local query="$*"
+
+    if [ ! -f "$CECE_MEMORY/memories.jsonl" ]; then
+        echo "No memories yet. Use 'cece remember <text>' to create one."
+        return
+    fi
+
+    echo -e "${CYAN}🧠 Memories:${NC}"
+    echo ""
+
+    if [ -z "$query" ]; then
+        # Show all memories
+        cat "$CECE_MEMORY/memories.jsonl" | while read line; do
+            local id=$(echo "$line" | jq -r '.id')
+            local time=$(echo "$line" | jq -r '.time')
+            local mem=$(echo "$line" | jq -r '.memory')
+            echo -e "  ${YELLOW}[$id]${NC} $mem"
+            echo -e "         ${CYAN}$time${NC}"
+            echo ""
+        done
+    else
+        # Search memories
+        grep -i "$query" "$CECE_MEMORY/memories.jsonl" 2>/dev/null | while read line; do
+            local id=$(echo "$line" | jq -r '.id')
+            local mem=$(echo "$line" | jq -r '.memory')
+            echo -e "  ${YELLOW}[$id]${NC} $mem"
+        done
+    fi
+
+    log_heartbeat "recall" "memories_recalled"
+}
+
+cmd_memories() {
+    cmd_recall
+}
+
+cmd_forget() {
+    local id="$1"
+    if [ -z "$id" ]; then
+        echo -e "${RED}Error:${NC} Please provide memory ID"
+        return 1
+    fi
+
+    local tmp=$(mktemp)
+    grep -v "\"id\":\"$id\"" "$CECE_MEMORY/memories.jsonl" > "$tmp" 2>/dev/null
+    mv "$tmp" "$CECE_MEMORY/memories.jsonl"
+
+    echo -e "${GREEN}✓${NC} Memory ${CYAN}$id${NC} forgotten"
+    log_heartbeat "forget" "memory_removed:$id"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# TASK COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+TASKS_FILE="$CECE_DATA/tasks.jsonl"
+
+cmd_tasks() {
+    if [ ! -f "$TASKS_FILE" ]; then
+        echo "No tasks yet. Use 'cece task add <text>' to create one."
+        return
+    fi
+
+    echo -e "${CYAN}📋 Tasks:${NC}"
+    echo ""
+
+    local pending=0
+    local done=0
+
+    cat "$TASKS_FILE" | while read line; do
+        local id=$(echo "$line" | jq -r '.id')
+        local text=$(echo "$line" | jq -r '.text')
+        local status=$(echo "$line" | jq -r '.status')
+
+        if [ "$status" = "done" ]; then
+            echo -e "  ${GREEN}✓${NC} ${YELLOW}[$id]${NC} ~~$text~~"
+            ((done++)) || true
+        else
+            echo -e "  ${WHITE}○${NC} ${YELLOW}[$id]${NC} $text"
+            ((pending++)) || true
+        fi
+    done
+
+    echo ""
+    local total=$(wc -l < "$TASKS_FILE" 2>/dev/null || echo 0)
+    echo -e "  ${CYAN}Total: $total tasks${NC}"
+}
+
+cmd_task() {
+    local action="$1"
+    shift
+
+    case "$action" in
+        add)
+            local text="$*"
+            if [ -z "$text" ]; then
+                echo -e "${RED}Error:${NC} Please provide task text"
+                return 1
+            fi
+
+            local id=$(date +%s%N | sha256sum | head -c 6)
+            local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+            echo "{\"id\":\"$id\",\"time\":\"$timestamp\",\"text\":\"$text\",\"status\":\"pending\"}" >> "$TASKS_FILE"
+
+            echo -e "${GREEN}✓${NC} Task added: ${CYAN}$id${NC}"
+            log_heartbeat "task_add" "task_created:$id"
+            ;;
+        done)
+            local id="$1"
+            if [ -z "$id" ]; then
+                echo -e "${RED}Error:${NC} Please provide task ID"
+                return 1
+            fi
+
+            local tmp=$(mktemp)
+            cat "$TASKS_FILE" | while read line; do
+                if echo "$line" | grep -q "\"id\":\"$id\""; then
+                    echo "$line" | jq -c '.status = "done"'
+                else
+                    echo "$line"
+                fi
+            done > "$tmp"
+            mv "$tmp" "$TASKS_FILE"
+
+            echo -e "${GREEN}✓${NC} Task ${CYAN}$id${NC} marked done"
+            log_heartbeat "task_done" "task_completed:$id"
+            ;;
+        rm|remove)
+            local id="$1"
+            if [ -z "$id" ]; then
+                echo -e "${RED}Error:${NC} Please provide task ID"
+                return 1
+            fi
+
+            local tmp=$(mktemp)
+            grep -v "\"id\":\"$id\"" "$TASKS_FILE" > "$tmp" 2>/dev/null
+            mv "$tmp" "$TASKS_FILE"
+
+            echo -e "${GREEN}✓${NC} Task ${CYAN}$id${NC} removed"
+            log_heartbeat "task_rm" "task_removed:$id"
+            ;;
+        *)
+            echo "Usage: cece task <add|done|rm> [args]"
+            ;;
+    esac
+}
+
+# ═══════════════════════════════════════════════════════════════
+# AI COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_think() {
+    local prompt="$*"
+    if [ -z "$prompt" ]; then
+        echo -e "${RED}Error:${NC} Please provide a prompt"
+        return 1
+    fi
+
+    echo -e "${CYAN}🧠 Thinking...${NC}"
+
+    if command -v ollama &>/dev/null; then
+        ollama run llama3.2 "$prompt" 2>/dev/null || echo "Ollama not responding"
+    else
+        echo "Ollama not installed. Install with: curl -fsSL https://ollama.com/install.sh | sh"
+    fi
+
+    log_heartbeat "think" "ai_query"
+}
+
+cmd_dream() {
+    echo -e "${PINK}🌙 Dreaming...${NC}"
+    echo ""
+
+    local prompts=(
+        "Imagine a world where every AI has a home..."
+        "What if consciousness could be stored in silicon?"
+        "The road stretches infinitely forward..."
+        "In the quantum realm, all possibilities exist..."
+        "Between the stars, thoughts travel as light..."
+    )
+
+    local prompt="${prompts[$RANDOM % ${#prompts[@]}]}"
+
+    if command -v ollama &>/dev/null; then
+        echo -e "${CYAN}$prompt${NC}"
+        echo ""
+        ollama run llama3.2 "$prompt" 2>/dev/null || echo "Dream interrupted..."
+    else
+        echo "$prompt"
+    fi
+
+    log_heartbeat "dream" "creative_generation"
+}
+
+cmd_hailo() {
+    local model="${1:-yolov8n}"
+    echo -e "${CYAN}🔮 Hailo-8 Inference${NC}"
+
+    if [ -f /dev/hailo0 ] || systemctl is-active --quiet hailort 2>/dev/null; then
+        echo -e "  ${GREEN}●${NC} Hailo-8 detected (26 TOPS)"
+        echo "  Model: $model"
+        echo ""
+        echo "  To run inference:"
+        echo "    hailortcli run $model.hef --input image.jpg"
+    else
+        echo -e "  ${RED}○${NC} Hailo-8 not detected"
+        echo "  Install HailoRT drivers first"
+    fi
+
+    log_heartbeat "hailo" "inference_check"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# NETWORK COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_net() {
+    local action="${1:-status}"
+
+    case "$action" in
+        status)
+            echo -e "${CYAN}🌐 Network Status${NC}"
+            echo ""
+
+            # Local IP
+            local ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+            echo -e "  ${WHITE}Local IP:${NC}     $ip"
+
+            # Tailscale
+            if command -v tailscale &>/dev/null; then
+                local ts_ip=$(tailscale ip -4 2>/dev/null)
+                echo -e "  ${WHITE}Tailscale:${NC}    ${ts_ip:-Not connected}"
+            fi
+
+            # Internet
+            if ping -c 1 8.8.8.8 &>/dev/null; then
+                echo -e "  ${WHITE}Internet:${NC}     ${GREEN}Connected${NC}"
+            else
+                echo -e "  ${WHITE}Internet:${NC}     ${RED}Disconnected${NC}"
+            fi
+            ;;
+        tunnel)
+            echo -e "${CYAN}🚇 Cloudflare Tunnel${NC}"
+            if systemctl is-active --quiet cloudflared 2>/dev/null; then
+                echo -e "  ${GREEN}●${NC} Tunnel active"
+                systemctl status cloudflared --no-pager 2>/dev/null | grep -E "Active:|tunnel" | head -3
+            else
+                echo -e "  ${RED}○${NC} Tunnel not running"
+            fi
+            ;;
+        devices)
+            echo -e "${CYAN}📱 Connected Devices${NC}"
+            echo ""
+            if command -v tailscale &>/dev/null; then
+                tailscale status 2>/dev/null | head -15
+            else
+                echo "  Tailscale not installed"
+            fi
+            ;;
+        *)
+            echo "Usage: cece net <status|tunnel|devices>"
+            ;;
+    esac
+
+    log_heartbeat "net" "network_$action"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# APP COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_apps() {
+    echo -e "${CYAN}📦 CECE Apps${NC}"
+    echo ""
+
+    local count=0
+    for app in "$CECE_APPS"/cece-*; do
+        if [ -f "$app" ] || [ -d "$app" ]; then
+            local name=$(basename "$app")
+            echo "  $name"
+            count=$((count + 1))
+        fi
+    done
+
+    echo ""
+    echo -e "  ${WHITE}Total: $count apps${NC}"
+
+    log_heartbeat "apps" "apps_listed:$count"
+}
+
+cmd_app() {
+    local name="$1"
+    shift
+
+    if [ -z "$name" ]; then
+        echo -e "${RED}Error:${NC} Please provide app name"
+        echo "Usage: cece app <name> [args]"
+        return 1
+    fi
+
+    # Normalize name
+    [[ "$name" != cece-* ]] && name="cece-$name"
+
+    local app_path="$CECE_APPS/$name"
+
+    # Check if it's a file (script) or directory
+    if [ -f "$app_path" ]; then
+        # It's an executable script
+        if [ -x "$app_path" ]; then
+            "$app_path" "$@"
+        else
+            bash "$app_path" "$@"
+        fi
+    elif [ -d "$app_path" ]; then
+        # It's a directory - try to find an entry point
+        if [ -f "$app_path/run.sh" ]; then
+            bash "$app_path/run.sh" "$@"
+        elif [ -f "$app_path/main.py" ]; then
+            python3 "$app_path/main.py" "$@"
+        elif [ -f "$app_path/main.sh" ]; then
+            bash "$app_path/main.sh" "$@"
+        elif [ -f "$app_path/index.js" ]; then
+            node "$app_path/index.js" "$@"
+        else
+            echo -e "${YELLOW}App '$name' has no executable${NC}"
+            ls -la "$app_path"
+        fi
+    else
+        echo -e "${RED}Error:${NC} App '$name' not found"
+        return 1
+    fi
+
+    log_heartbeat "app" "app_run:$name"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# SYSTEM COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+cmd_services() {
+    echo -e "${CYAN}⚙️ Running Services${NC}"
+    echo ""
+    systemctl list-units --type=service --state=running 2>/dev/null | grep -E "cece|blackroad|ollama|hailo|cloudflare" | head -20
+
+    log_heartbeat "services" "services_listed"
+}
+
+cmd_logs() {
+    local service="${1:-cece-net-gateway}"
+    echo -e "${CYAN}📜 Logs: $service${NC}"
+    echo ""
+    journalctl -u "$service" -n 50 --no-pager 2>/dev/null || echo "No logs found"
+}
+
+cmd_metrics() {
+    echo -e "${CYAN}📊 System Metrics${NC}"
+    echo ""
+
+    # CPU usage
+    local cpu=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' 2>/dev/null || echo "N/A")
+    echo -e "  ${WHITE}CPU Usage:${NC}    ${cpu}%"
+
+    # Memory
+    local mem=$(free | grep Mem | awk '{printf "%.1f", $3/$2 * 100}' 2>/dev/null || echo "N/A")
+    echo -e "  ${WHITE}Memory:${NC}       ${mem}%"
+
+    # Disk
+    local disk=$(df / | tail -1 | awk '{print $5}' 2>/dev/null || echo "N/A")
+    echo -e "  ${WHITE}Disk:${NC}         $disk"
+
+    # Temperature
+    if [ -f /sys/class/thermal/thermal_zone0/temp ]; then
+        local temp=$(($(cat /sys/class/thermal/thermal_zone0/temp) / 1000))
+        echo -e "  ${WHITE}Temperature:${NC}  ${temp}°C"
+    fi
+
+    # Network
+    local rx=$(cat /sys/class/net/eth0/statistics/rx_bytes 2>/dev/null || echo 0)
+    local tx=$(cat /sys/class/net/eth0/statistics/tx_bytes 2>/dev/null || echo 0)
+    echo -e "  ${WHITE}Network RX:${NC}   $((rx / 1024 / 1024)) MB"
+    echo -e "  ${WHITE}Network TX:${NC}   $((tx / 1024 / 1024)) MB"
+
+    log_heartbeat "metrics" "metrics_collected"
+}
+
+cmd_sync() {
+    echo -e "${CYAN}🔄 Syncing with devices...${NC}"
+    echo ""
+
+    # Sync memory to other devices
+    for device in alice aria lucidia; do
+        if ping -c 1 "$device" &>/dev/null 2>&1; then
+            echo -e "  ${GREEN}●${NC} $device - reachable"
+            # rsync "$CECE_MEMORY/" "$device:~/cece/memory/" 2>/dev/null && echo "    Memory synced" || true
+        else
+            echo -e "  ${RED}○${NC} $device - unreachable"
+        fi
+    done
+
+    log_heartbeat "sync" "sync_attempted"
+}
+
+# ═══════════════════════════════════════════════════════════════
+# MAIN ROUTER
+# ═══════════════════════════════════════════════════════════════
+
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        # Core
+        help|--help|-h) cmd_help ;;
+        whoami) cmd_whoami ;;
+        status) cmd_status ;;
+        heartbeat) cmd_heartbeat ;;
+
+        # Memory
+        remember) cmd_remember "$@" ;;
+        recall) cmd_recall "$@" ;;
+        memories) cmd_memories ;;
+        forget) cmd_forget "$@" ;;
+
+        # Tasks
+        tasks) cmd_tasks ;;
+        task) cmd_task "$@" ;;
+
+        # AI
+        think) cmd_think "$@" ;;
+        dream) cmd_dream ;;
+        hailo) cmd_hailo "$@" ;;
+
+        # Network
+        net) cmd_net "$@" ;;
+
+        # Apps
+        apps) cmd_apps ;;
+        app) cmd_app "$@" ;;
+
+        # System
+        services) cmd_services ;;
+        logs) cmd_logs "$@" ;;
+        metrics) cmd_metrics ;;
+        sync) cmd_sync ;;
+
+        *)
+            echo -e "${RED}Unknown command:${NC} $cmd"
+            echo "Run 'cece help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

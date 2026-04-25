@@ -1,0 +1,179 @@
+# Quantum Hello World - BlackRoad's First Quantum Program!
+# Creates a Bell state and demonstrates quantum entanglement
+
+## Create Bell State (Entangled Qubits)
+fun create_bell_state():
+    print("🌌 Creating Bell State (Quantum Entanglement)...")
+
+    # Initialize two qubits in |0⟩ state
+    let q1: qubit = |0⟩
+    let q2: qubit = |0⟩
+
+    print("Initial state: |00⟩")
+
+    # Apply Hadamard to first qubit (creates superposition)
+    H(q1)
+    print("After Hadamard: (|00⟩ + |10⟩) / √2")
+
+    # Apply CNOT (creates entanglement)
+    CNOT(q1, q2)
+    print("After CNOT: (|00⟩ + |11⟩) / √2 ← ENTANGLED! ✨")
+
+    # Get probabilities
+    let probs = probabilities([q1, q2])
+    print("\nProbabilities:")
+    print("  |00⟩: {probs[0]}")  # 50%
+    print("  |11⟩: {probs[3]}")  # 50%
+
+    # Measure
+    let result = measure([q1, q2])
+    print("\nMeasurement: |{result[0]}{result[1]}⟩")
+    print("(Both qubits always match due to entanglement!)")
+
+## Quantum Superposition Demo
+fun superposition_demo():
+    print("\n🎲 Quantum Superposition Demo...")
+
+    let q: qubit = |0⟩
+
+    # Create superposition
+    H(q)
+    print("State: |+⟩ = (|0⟩ + |1⟩) / √2")
+
+    # Show probabilities
+    let probs = probabilities(q)
+    print("Probability of |0⟩: {probs[0]}")  # 50%
+    print("Probability of |1⟩: {probs[1]}")  # 50%
+
+    # Measure many times
+    print("\nMeasuring 10 times:")
+    for i in 0..10:
+        let q_fresh: qubit = |0⟩
+        H(q_fresh)
+        let result = measure(q_fresh)
+        print("  Shot {i+1}: {result}")
+
+## Qutrit Demo (3-dimensional quantum state)
+fun qutrit_demo():
+    print("\n🎯 Qutrit Demo (3-level quantum system)...")
+
+    let qt: qutrit = |0⟩
+    print("Initial state: |0⟩")
+
+    # Create equal superposition over 3 states
+    H3(qt)
+    print("After H3: (|0⟩ + |1⟩ + |2⟩) / √3")
+
+    # Get probabilities
+    let probs = probabilities(qt)
+    print("\nProbabilities:")
+    print("  |0⟩: {probs[0]}")  # 33.3%
+    print("  |1⟩: {probs[1]}")  # 33.3%
+    print("  |2⟩: {probs[2]}")  # 33.3%
+
+    # Measure
+    let result = measure(qt)
+    print("\nMeasurement: |{result}⟩")
+    print("(Could be 0, 1, or 2!)")
+
+## Quantum Teleportation
+fun quantum_teleportation():
+    print("\n📡 Quantum Teleportation Demo...")
+
+    # Alice has a qubit in unknown state
+    let alice_qubit: qubit = |0⟩
+    RY(alice_qubit, 0.7)  # Create arbitrary state
+    print("Alice's qubit: in superposition state")
+
+    # Create entangled pair (Alice and Bob)
+    let alice_epr: qubit = |0⟩
+    let bob_epr: qubit = |0⟩
+    H(alice_epr)
+    CNOT(alice_epr, bob_epr)
+    print("Entangled pair created between Alice and Bob")
+
+    # Alice performs Bell measurement
+    CNOT(alice_qubit, alice_epr)
+    H(alice_qubit)
+    let m1 = measure(alice_qubit)
+    let m2 = measure(alice_epr)
+    print("Alice measures: {m1}, {m2}")
+    print("(Alice's qubit is now destroyed)")
+
+    # Bob applies corrections based on Alice's measurements
+    if m2 == 1:
+        X(bob_epr)
+    if m1 == 1:
+        Z(bob_epr)
+
+    print("Bob applies corrections")
+    print("✨ Teleportation complete! Bob now has the exact state! ✨")
+
+## Grover's Search
+fun grovers_search():
+    print("\n🔍 Grover's Algorithm (Quantum Search)...")
+
+    # Search for element "3" in list of 8 elements
+    let n_qubits = 3  # 2^3 = 8 elements
+    let target = 3
+
+    print("Searching for element {target} in 8-element list")
+    print("Classical search: O(N) = 8 operations")
+    print("Quantum search: O(√N) = ~3 operations")
+
+    # Initialize register
+    let register: qreg[3] = |000⟩
+
+    # Create superposition
+    for q in register:
+        H(q)
+
+    # Grover iterations (√N ≈ 2.8, so 3 iterations)
+    for iter in 0..3:
+        # Oracle (marks target state)
+        if target == 3:  # |011⟩
+            Z(register[0])
+            Z(register[1])
+
+        # Diffusion operator
+        for q in register:
+            H(q)
+        for q in register:
+            X(q)
+        MCZ(register[0..2], register[2])
+        for q in register:
+            X(q)
+        for q in register:
+            H(q)
+
+    # Measure
+    let result = measure(register)
+    print("\nFound: {result}")
+    print("✨ Quantum speedup achieved! ✨")
+
+## Main Program
+fun main():
+    print("╔════════════════════════════════════════════╗")
+    print("║  🌌 BlackRoad Quantum Computing Demo 🌌   ║")
+    print("╚════════════════════════════════════════════╝")
+    print("")
+
+    # Configure quantum backend
+    quantum.backend = "simulator"
+    quantum.shots = 1024
+
+    # Run demos
+    create_bell_state()
+    superposition_demo()
+    qutrit_demo()
+    quantum_teleportation()
+    grovers_search()
+
+    print("\n╔════════════════════════════════════════════╗")
+    print("║  ✨ Quantum Computing on BlackRoad! ✨    ║")
+    print("╚════════════════════════════════════════════╝")
+    print("")
+    print("Next: Try quantum_ml.road for machine learning!")
+    print("Or: quantum_chemistry.road for molecular simulation!")
+    print("")
+    print("🖤🛣️ BlackRoad OS Language - Classical meets Quantum!")

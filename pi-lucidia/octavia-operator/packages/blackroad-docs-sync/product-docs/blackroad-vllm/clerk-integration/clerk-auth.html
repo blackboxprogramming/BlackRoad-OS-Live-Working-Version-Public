@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - BlackRoad</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Pro Display', -apple-system, sans-serif;
+            background: #000;
+            color: #FFF;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 34px;
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 34px;
+        }
+        .auth-logo {
+            font-size: 55px;
+            margin-bottom: 21px;
+        }
+        .auth-title {
+            font-size: 34px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #F5A623 38.2%, #2979FF 61.8%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 13px;
+        }
+        .auth-subtitle {
+            font-size: 16px;
+            opacity: 0.7;
+        }
+        #clerk-auth {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 13px;
+            padding: 34px;
+        }
+        .loading {
+            text-align: center;
+            padding: 55px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="auth-logo">🖤</div>
+            <h1 class="auth-title">Welcome to BlackRoad</h1>
+            <p class="auth-subtitle">Sign in to continue</p>
+        </div>
+        <div id="clerk-auth">
+            <div class="loading">Loading authentication...</div>
+        </div>
+    </div>
+
+    <!-- Clerk SDK -->
+    <script
+        async
+        crossorigin="anonymous"
+        data-clerk-publishable-key="pk_test_YOUR_PUBLISHABLE_KEY"
+        src="https://YOUR_FRONTEND_API/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+        type="text/javascript"
+    ></script>
+
+    <script>
+        window.addEventListener('load', async () => {
+            await Clerk.load();
+
+            const signInDiv = document.getElementById('clerk-auth');
+
+            // Mount Clerk sign-in component
+            Clerk.mountSignIn(signInDiv, {
+                appearance: {
+                    elements: {
+                        rootBox: 'w-full',
+                        card: 'bg-transparent border-none shadow-none'
+                    },
+                    variables: {
+                        colorPrimary: '#F5A623',
+                        colorText: '#FFFFFF',
+                        colorBackground: '#000000',
+                        fontFamily: 'SF Pro Display, -apple-system, sans-serif'
+                    }
+                },
+                afterSignInUrl: '/dashboard',
+                signUpUrl: '/sign-up'
+            });
+
+            // Check if user is already signed in
+            if (Clerk.user) {
+                window.location.href = '/dashboard';
+            }
+        });
+    </script>
+</body>
+</html>

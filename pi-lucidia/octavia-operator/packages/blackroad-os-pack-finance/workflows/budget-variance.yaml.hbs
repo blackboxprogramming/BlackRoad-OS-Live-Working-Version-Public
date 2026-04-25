@@ -1,0 +1,32 @@
+---
+name: Budget Variance
+on:
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Month to compute variance"
+        required: true
+
+env:
+  REQUIRED_SECRETS: DATA_WAREHOUSE_URL
+
+jobs:
+  variance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: pnpm install
+      - name: Render variance report
+        run: |
+          pnpm ts-node agents/forecast.ts
+          echo "{{month}} variance computed" > variance.txt
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: variance
+          path: variance.txt

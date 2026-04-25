@@ -1,0 +1,334 @@
+#!/bin/bash
+# ⚡ CECE-WORKFLOW v1.0 - Workflow Automation Engine
+# Chain commands, conditionals, and parallel execution
+
+# BlackRoad Colors (xterm-256)
+BR_ORANGE=208; BR_AMBER=202; BR_PINK=198; BR_MAGENTA=163; BR_BLUE=33; BR_WHITE=255
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'; BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+WORKFLOW_DIR="$CECE_HOME/workflows"
+WORKFLOW_LOG="$WORKFLOW_DIR/runs.jsonl"
+
+mkdir -p "$WORKFLOW_DIR"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)⚡ CECE-WORKFLOW - Automation Engine${RESET}           $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+gen_id() { date +%s | sha256sum | head -c 8; }
+
+# Create a new workflow
+cmd_create() {
+    local name="$1"
+    [ -z "$name" ] && { echo "Usage: cece-workflow create <name>"; return 1; }
+
+    local file="$WORKFLOW_DIR/$name.workflow"
+
+    cat > "$file" << 'EOF'
+# CECE Workflow Definition
+# name: example
+# description: Example workflow
+
+# Steps are executed in order
+# Use 'parallel:' prefix for concurrent execution
+# Use 'if:' for conditionals
+
+steps:
+  - name: "Check System"
+    run: cece status
+
+  - name: "Collect Metrics"
+    run: cece-metrics collect
+
+  - name: "Backup if healthy"
+    if: "exit_code == 0"
+    run: cece-backup create
+EOF
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Created: $(fg $BR_WHITE)$file${RESET}"
+    echo "  Edit the file to define your workflow steps"
+}
+
+# List workflows
+cmd_list() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Available Workflows:${RESET}"
+    echo ""
+
+    local count=0
+    for f in "$WORKFLOW_DIR"/*.workflow 2>/dev/null; do
+        [ -f "$f" ] || continue
+        local name=$(basename "$f" .workflow)
+        local steps=$(grep -c "^  - name:" "$f" 2>/dev/null || echo 0)
+        echo -e "  $(fg $BR_MAGENTA)$name${RESET} ($steps steps)"
+        ((count++))
+    done
+
+    [ $count -eq 0 ] && echo "  No workflows. Create one with: cece-workflow create <name>"
+    echo ""
+}
+
+# Run a workflow
+cmd_run() {
+    local name="$1"
+    [ -z "$name" ] && { echo "Usage: cece-workflow run <name>"; return 1; }
+
+    local file="$WORKFLOW_DIR/$name.workflow"
+    [ ! -f "$file" ] && { echo -e "$(fg $BR_PINK)Workflow not found:${RESET} $name"; return 1; }
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_BLUE)Running workflow:${RESET} $name"
+    echo ""
+
+    local run_id=$(gen_id)
+    local start_time=$(date +%s)
+    local step_num=0
+    local failed=0
+    local last_exit=0
+
+    # Parse and execute steps
+    local in_steps=false
+    local current_step=""
+    local current_cmd=""
+    local current_if=""
+
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "${line// }" ]] && continue
+
+        if [[ "$line" == "steps:" ]]; then
+            in_steps=true
+            continue
+        fi
+
+        if $in_steps; then
+            if [[ "$line" =~ ^[[:space:]]*-[[:space:]]*name:[[:space:]]*\"(.*)\" ]]; then
+                # Execute previous step if exists
+                if [ -n "$current_cmd" ]; then
+                    execute_step "$current_step" "$current_cmd" "$current_if" "$last_exit"
+                    last_exit=$?
+                    [ $last_exit -ne 0 ] && ((failed++))
+                fi
+
+                current_step="${BASH_REMATCH[1]}"
+                current_cmd=""
+                current_if=""
+                ((step_num++))
+
+            elif [[ "$line" =~ ^[[:space:]]*run:[[:space:]]*(.+) ]]; then
+                current_cmd="${BASH_REMATCH[1]}"
+
+            elif [[ "$line" =~ ^[[:space:]]*if:[[:space:]]*\"(.*)\" ]]; then
+                current_if="${BASH_REMATCH[1]}"
+            fi
+        fi
+    done < "$file"
+
+    # Execute last step
+    if [ -n "$current_cmd" ]; then
+        execute_step "$current_step" "$current_cmd" "$current_if" "$last_exit"
+        last_exit=$?
+        [ $last_exit -ne 0 ] && ((failed++))
+    fi
+
+    local end_time=$(date +%s)
+    local duration=$((end_time - start_time))
+
+    echo ""
+    echo -e "$(fg $BR_WHITE)────────────────────────────────────────${RESET}"
+    if [ $failed -eq 0 ]; then
+        echo -e "$(fg $BR_BLUE)✓ Workflow completed${RESET} ($step_num steps, ${duration}s)"
+    else
+        echo -e "$(fg $BR_PINK)✗ Workflow failed${RESET} ($failed/$step_num steps failed)"
+    fi
+
+    # Log run
+    echo "{\"id\":\"$run_id\",\"workflow\":\"$name\",\"time\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"steps\":$step_num,\"failed\":$failed,\"duration\":$duration}" >> "$WORKFLOW_LOG"
+}
+
+execute_step() {
+    local name="$1"
+    local cmd="$2"
+    local condition="$3"
+    local prev_exit="$4"
+
+    echo -ne "  $(fg $BR_WHITE)→${RESET} $name... "
+
+    # Check condition
+    if [ -n "$condition" ]; then
+        local exit_code=$prev_exit
+        if ! eval "[[ $condition ]]" 2>/dev/null; then
+            echo -e "$(fg $BR_AMBER)skipped${RESET} (condition not met)"
+            return 0
+        fi
+    fi
+
+    # Execute
+    local output
+    output=$(eval "$cmd" 2>&1)
+    local exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        echo -e "$(fg $BR_BLUE)done${RESET}"
+    else
+        echo -e "$(fg $BR_PINK)failed${RESET} (exit $exit_code)"
+    fi
+
+    return $exit_code
+}
+
+# Show workflow content
+cmd_show() {
+    local name="$1"
+    [ -z "$name" ] && { echo "Usage: cece-workflow show <name>"; return 1; }
+
+    local file="$WORKFLOW_DIR/$name.workflow"
+    [ ! -f "$file" ] && { echo -e "$(fg $BR_PINK)Not found:${RESET} $name"; return 1; }
+
+    cat "$file"
+}
+
+# Edit workflow
+cmd_edit() {
+    local name="$1"
+    [ -z "$name" ] && { echo "Usage: cece-workflow edit <name>"; return 1; }
+
+    local file="$WORKFLOW_DIR/$name.workflow"
+    ${EDITOR:-nano} "$file"
+}
+
+# Delete workflow
+cmd_delete() {
+    local name="$1"
+    [ -z "$name" ] && { echo "Usage: cece-workflow delete <name>"; return 1; }
+
+    rm -f "$WORKFLOW_DIR/$name.workflow"
+    echo -e "$(fg $BR_BLUE)✓${RESET} Deleted: $name"
+}
+
+# Show run history
+cmd_history() {
+    local count="${1:-10}"
+
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Recent Workflow Runs:${RESET}"
+    echo ""
+
+    [ ! -f "$WORKFLOW_LOG" ] && { echo "  No runs yet."; return; }
+
+    tail -n "$count" "$WORKFLOW_LOG" | while read -r line; do
+        local name=$(echo "$line" | jq -r '.workflow')
+        local time=$(echo "$line" | jq -r '.time' | cut -d'T' -f2 | cut -c1-8)
+        local steps=$(echo "$line" | jq -r '.steps')
+        local failed=$(echo "$line" | jq -r '.failed')
+        local duration=$(echo "$line" | jq -r '.duration')
+
+        if [ "$failed" -eq 0 ]; then
+            echo -e "  $(fg $BR_BLUE)✓${RESET} $(fg $BR_WHITE)$name${RESET} [$time] ${steps} steps, ${duration}s"
+        else
+            echo -e "  $(fg $BR_PINK)✗${RESET} $(fg $BR_WHITE)$name${RESET} [$time] $failed/$steps failed"
+        fi
+    done
+}
+
+# Built-in workflow templates
+cmd_template() {
+    local template="$1"
+    local name="${2:-$template}"
+
+    case "$template" in
+        backup)
+            cat > "$WORKFLOW_DIR/$name.workflow" << 'EOF'
+# Daily Backup Workflow
+steps:
+  - name: "Check disk space"
+    run: df -h / | tail -1
+  - name: "Create backup"
+    run: ~/cece/apps/cece-backup create
+  - name: "Sync to remote"
+    run: ~/cece/apps/cece-backup remote lucidia
+  - name: "Clean old backups"
+    run: ~/cece/apps/cece-backup prune 5
+EOF
+            ;;
+        health)
+            cat > "$WORKFLOW_DIR/$name.workflow" << 'EOF'
+# Health Check Workflow
+steps:
+  - name: "System status"
+    run: ~/blackroad-os/bin/cece status
+  - name: "Collect metrics"
+    run: ~/cece/apps/cece-metrics collect
+  - name: "Check services"
+    run: systemctl is-active cece-api cece-heartbeat ollama
+  - name: "Fleet ping"
+    run: ~/cece/apps/cece-fleet list
+EOF
+            ;;
+        sync)
+            cat > "$WORKFLOW_DIR/$name.workflow" << 'EOF'
+# Fleet Sync Workflow
+steps:
+  - name: "Push memories"
+    run: ~/cece/apps/cece-sync push
+  - name: "Pull updates"
+    run: ~/cece/apps/cece-sync pull
+  - name: "Emit sync event"
+    run: ~/cece/apps/cece-stream emit status
+EOF
+            ;;
+        *)
+            echo "Templates: backup, health, sync"
+            echo "Usage: cece-workflow template <name> [workflow-name]"
+            return 1
+            ;;
+    esac
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Created workflow from template: $(fg $BR_WHITE)$name${RESET}"
+}
+
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-workflow <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  create <name>         Create new workflow"
+    echo "  list                  List all workflows"
+    echo "  run <name>            Execute a workflow"
+    echo "  show <name>           Display workflow"
+    echo "  edit <name>           Edit workflow"
+    echo "  delete <name>         Delete workflow"
+    echo "  history [n]           Show run history"
+    echo "  template <t> [name]   Create from template"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Templates:${RESET} backup, health, sync"
+}
+
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        create|new) cmd_create "$@" ;;
+        list|ls) cmd_list ;;
+        run|exec) cmd_run "$@" ;;
+        show|cat) cmd_show "$@" ;;
+        edit) cmd_edit "$@" ;;
+        delete|rm) cmd_delete "$@" ;;
+        history) cmd_history "$@" ;;
+        template|tpl) cmd_template "$@" ;;
+        help|--help|-h) cmd_help ;;
+        *) cmd_run "$cmd" ;;
+    esac
+}
+
+main "$@"

@@ -1,0 +1,274 @@
+#!/usr/bin/env python3
+"""
+br-palette
+Interactive TUI palette viewer with arrow key navigation and live semantic preview.
+Enhanced with BR shape grammar integration.
+"""
+
+import sys
+import tty
+import termios
+
+RESET = "\x1b[0m"
+CLEAR = "\x1b[2J\x1b[H"
+BOLD = "\x1b[1m"
+DIM = "\x1b[2m"
+
+# Zone definitions from BR_COLOR_SPEC.md
+ZONES = {
+    "OS_LAYER": (0, 15, "Core system primitives", "█"),
+    "PERCEPTION": (16, 51, "Input, sensors, listeners", "▓"),
+    "EXECUTION": (52, 87, "Actions, mutations, writes", "▶"),
+    "MEMORY": (88, 123, "State, cache, persistence", "●"),
+    "AUTONOMY": (124, 159, "Agents, decision, delegation", "◆"),
+    "TENSION": (160, 195, "Warnings, drift, uncertainty", "▲"),
+    "PARADOX": (196, 231, "Errors, contradiction, halt", "✖"),
+    "META": (232, 255, "Null, silence, void, escape", "◌"),
+}
+
+# Extended token definitions
+TOKENS = {
+    0: "NULL", 1: "ERROR", 2: "SUCCESS", 3: "WARN", 4: "INFO", 5: "DEBUG",
+    6: "SYSCALL", 7: "NEUTRAL",
+    16: "RAW_SENSOR", 28: "VALID_INPUT", 40: "STREAM_LIVE",
+    64: "EXEC_HIGH", 76: "EXEC_ATOMIC", 202: "EXEC_FORCE",
+    88: "MEM_VOLATILE", 100: "MEM_PERSIST", 118: "MEM_ARCHIVE",
+    130: "AGENT_THINK", 136: "AGENT_EXEC", 154: "AGENT_META",
+    166: "WARN_MEMORY", 178: "WARN_DRIFT", 190: "WARN_DEGRADE",
+    196: "ERROR_FATAL", 208: "ERROR_DATA", 226: "ERROR_CASCADE",
+    232: "META_NULL", 244: "META_ESCAPE", 255: "META_BRIGHT",
+}
+
+# Canonical BR shape mapping
+ZONE_SHAPES = {
+    range(0, 16): "█", range(16, 52): "▓", range(52, 88): "▶",
+    range(88, 124): "●", range(124, 160): "◆", range(160, 196): "▲",
+    range(196, 232): "✖", range(232, 256): "◌",
+}
+
+# Special semantic glyphs
+SPECIAL_SHAPES = {
+    0: "∅", 1: "✗", 2: "✓", 3: "⚠", 4: "ⓘ",
+    196: "✗", 202: "⚡", 226: "★", 232: "∅", 255: "◉",
+}
+
+def get_zone_info(color):
+    """Get zone name, description, and default shape for a color."""
+    for zone_name, (start, end, desc, shape) in ZONES.items():
+        if start <= color <= end:
+            return zone_name, desc, shape
+    return "UNKNOWN", "", "?"
+
+def get_shape(color):
+    """Get semantic shape glyph for a color."""
+    if color in SPECIAL_SHAPES:
+        return SPECIAL_SHAPES[color]
+    for color_range, shape in ZONE_SHAPES.items():
+        if color in color_range:
+            return shape
+    return "?"
+
+def get_key():
+    """Get single keypress."""
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+        if ch == '\x1b':  # Escape sequence
+            ch2 = sys.stdin.read(1)
+            if ch2 == '[':
+                ch3 = sys.stdin.read(1)
+                return f'[{ch3}'
+        return ch
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+def render_palette(current_color, mode="full"):
+    """Render full palette with current selection highlighted."""
+    print(CLEAR)
+    
+    # Header with mode indicator
+    print("═" * 78)
+    print(f"{BOLD}BR COLOR PALETTE{RESET} — {DIM}Visual Programming Language{RESET}")
+    print("─" * 78)
+    print("Controls: ↑↓←→ Navigate | Z: Zone | F: Full | S: Shape | Q: Quit | ?: Help")
+    print("═" * 78)
+    
+    if mode == "zone":
+        # Show only current zone
+        zone_name, _, _ = get_zone_info(current_color)
+        for zn, (start, end, desc, zone_shape) in ZONES.items():
+            if zn == zone_name:
+                print(f"\n{BOLD}{zone_name}{RESET} ({start}–{end}): {desc}")
+                print(f"Zone shape: {zone_shape}\n")
+                
+                for i in range(start, end + 1):
+                    render_color_cell(i, current_color)
+                    if (i - start + 1) % 6 == 0:
+                        print()
+                print()
+                break
+    elif mode == "shape":
+        # Show all zones with shapes prominently
+        for zone_name, (start, end, desc, zone_shape) in ZONES.items():
+            in_zone = start <= current_color <= end
+            marker = "▶ " if in_zone else "  "
+            print(f"\n{marker}{BOLD if in_zone else ''}{zone_name:12}{RESET} {zone_shape}  {desc}")
+    else:
+        # Full view
+        for zone_name, (start, end, desc, zone_shape) in ZONES.items():
+            in_zone = start <= current_color <= end
+            zone_display = f"{BOLD}{zone_name}{RESET}" if in_zone else zone_name
+            print(f"\n{zone_display} ({start}–{end}): {desc} {DIM}[{zone_shape}]{RESET}")
+            print()
+            
+            for i in range(start, end + 1):
+                render_color_cell(i, current_color)
+                if (i - start + 1) % 6 == 0:
+                    print()
+            print()
+    
+    # Enhanced current color detail panel
+    render_detail_panel(current_color)
+
+def render_color_cell(color, current_color):
+    """Render a single color cell."""
+    bg = f"\x1b[48;5;{color}m"
+    fg_color = 255 if color < 128 else 0
+    fg = f"\x1b[38;5;{fg_color}m"
+    
+    # Highlight current selection
+    if color == current_color:
+        marker = "▶"
+        highlight = BOLD
+    else:
+        marker = " "
+        highlight = ""
+    
+    shape = get_shape(color)
+    print(f"{marker}{highlight}{bg}{fg} {shape:^3} {RESET}", end=" ")
+
+def render_detail_panel(current_color):
+    """Render detailed semantic panel for current color."""
+    print("\n" + "═" * 78)
+    
+    zone, desc, zone_shape = get_zone_info(current_color)
+    token = TOKENS.get(current_color, f"COLOR_{current_color}")
+    shape = get_shape(current_color)
+    
+    # Large color swatch
+    bg = f"\x1b[48;5;{current_color}m"
+    fg_color = 255 if current_color < 128 else 0
+    fg = f"\x1b[38;5;{fg_color}m"
+    
+    print(f"{BOLD}CURRENT SELECTION{RESET}")
+    print(f"\n  {bg}{fg}    {shape}  {current_color:>3}    {RESET}\n")
+    
+    # Semantic details
+    print(f"  Color:  {current_color}")
+    print(f"  Token:  {BOLD}{token}{RESET}")
+    print(f"  Shape:  {shape}  {DIM}(zone default: {zone_shape}){RESET}")
+    print(f"  Zone:   {zone}")
+    print(f"  Desc:   {desc}")
+    
+    # Show related colors if special
+    if current_color in SPECIAL_SHAPES:
+        print(f"  {DIM}Special operator glyph{RESET}")
+    
+    # Context examples
+    print(f"\n{DIM}Use in sequence: br-shape ... {current_color} ...{RESET}")
+    
+    print("═" * 78)
+
+def show_help():
+    """Show help screen."""
+    print(CLEAR)
+    print("═" * 78)
+    print(f"{BOLD}BR COLOR PALETTE — HELP{RESET}")
+    print("═" * 78)
+    print()
+    print(f"{BOLD}NAVIGATION{RESET}")
+    print("  ↑/↓         Move up/down by 6 (grid row)")
+    print("  ←/→         Move left/right by 1")
+    print("  PgUp/PgDn   Move by 36 (large jump)")
+    print("  Home        Jump to start (color 0)")
+    print("  End         Jump to end (color 255)")
+    print()
+    print(f"{BOLD}VIEW MODES{RESET}")
+    print("  f           Full palette view (default)")
+    print("  z           Zone-only view (current zone)")
+    print("  s           Shape reference view (all zones)")
+    print()
+    print(f"{BOLD}COMMANDS{RESET}")
+    print("  q           Quit")
+    print("  ?           Show this help")
+    print("  Enter       Show detailed info")
+    print()
+    print(f"{BOLD}BR SHAPE GRAMMAR{RESET}")
+    print("  █  OS_LAYER    Core system primitives")
+    print("  ▓  PERCEPTION  Input, sensors, listeners")
+    print("  ▶  EXECUTION   Actions, mutations, writes")
+    print("  ●  MEMORY      State, cache, persistence")
+    print("  ◆  AUTONOMY    Agents, decision, delegation")
+    print("  ▲  TENSION     Warnings, drift, uncertainty")
+    print("  ✖  PARADOX     Errors, contradiction, halt")
+    print("  ◌  META        Null, silence, void, escape")
+    print()
+    print(f"{DIM}Special glyphs: ∅ ✗ ✓ ⚠ ⚡ ★ ◉{RESET}")
+    print()
+    print("Press any key to return...")
+    print("═" * 78)
+    get_key()
+
+def main():
+    current = 0
+    mode = "full"  # full, zone, shape
+    
+    print("\x1b[?25l")  # Hide cursor
+    
+    try:
+        while True:
+            render_palette(current, mode=mode)
+            
+            key = get_key()
+            
+            if key == 'q' or key == 'Q':
+                break
+            elif key == '?':
+                show_help()
+            elif key == 'f' or key == 'F':
+                mode = "full"
+            elif key == 'z' or key == 'Z':
+                mode = "zone"
+            elif key == 's' or key == 'S':
+                mode = "shape"
+            elif key == '[A':  # Up
+                current = max(0, current - 6)
+            elif key == '[B':  # Down
+                current = min(255, current + 6)
+            elif key == '[C':  # Right
+                current = min(255, current + 1)
+            elif key == '[D':  # Left
+                current = max(0, current - 1)
+            elif key == '[5':  # Page Up
+                current = max(0, current - 36)
+            elif key == '[6':  # Page Down
+                current = min(255, current + 36)
+            elif key == '[H':  # Home
+                current = 0
+            elif key == '[F':  # End
+                current = 255
+            elif key == '\n':  # Enter - show detail
+                pass  # Already showing detail in panel
+                
+    except KeyboardInterrupt:
+        pass
+    finally:
+        print(CLEAR)
+        print("\x1b[?25h")  # Show cursor
+        print(f"{BOLD}BR Palette closed.{RESET}\n")
+        print(f"{DIM}Use 'br-shape <color>' for CLI queries{RESET}\n")
+
+if __name__ == "__main__":
+    main()

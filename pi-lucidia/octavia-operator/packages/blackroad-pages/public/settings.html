@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings — BlackRoad</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛤️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gray-950: #0a0a0a;
+      --gray-900: #171717;
+      --gray-800: #262626;
+      --gray-700: #404040;
+      --gray-600: #525252;
+      --gray-500: #737373;
+      --gray-400: #a3a3a3;
+      --gray-300: #d4d4d4;
+      --gray-100: #f5f5f5;
+      --accent-6: #1e90ff;
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--gray-950); color: var(--gray-100); font-family: var(--font-body); min-height: 100vh; }
+    .container { max-width: 600px; margin: 0 auto; padding: 0 24px; }
+    header { padding: 16px 0; border-bottom: 1px solid var(--gray-800); margin-bottom: 48px; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .logo { font-family: var(--font-headline); font-size: 20px; font-weight: 700; }
+    .logo span { background: linear-gradient(90deg, #ff8700, #ff0087, #1e90ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .back-link { font-size: 14px; color: var(--gray-400); text-decoration: none; }
+    .back-link:hover { color: var(--gray-100); }
+    .page-title { font-family: var(--font-headline); font-size: 28px; font-weight: 700; margin-bottom: 32px; }
+    .form-section { margin-bottom: 40px; }
+    .section-title { font-size: 14px; font-weight: 600; color: var(--gray-300); margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-800); }
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; color: var(--gray-400); margin-bottom: 6px; }
+    .form-input {
+      width: 100%;
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 15px;
+      color: var(--gray-100);
+      font-family: inherit;
+    }
+    .form-input:focus { outline: none; border-color: var(--gray-600); }
+    .btn {
+      background: var(--gray-100);
+      color: var(--gray-900);
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .btn:hover { background: var(--gray-300); }
+    .message { padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 16px; display: none; }
+    .message.success { background: rgba(30, 144, 255, 0.1); border: 1px solid rgba(30, 144, 255, 0.3); color: var(--accent-6); }
+    .message.error { background: rgba(255, 0, 87, 0.1); border: 1px solid rgba(255, 0, 87, 0.3); color: #ff5f87; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo"><span>BlackRoad</span></a>
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="page-title">Settings</h1>
+
+    <div class="message" id="message"></div>
+
+    <form id="profileForm" class="form-section">
+      <h2 class="section-title">Profile</h2>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" id="nameInput" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" id="emailInput" class="form-input" disabled>
+      </div>
+      <button type="submit" class="btn">Update Profile</button>
+    </form>
+
+    <form id="passwordForm" class="form-section">
+      <h2 class="section-title">Change Password</h2>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" name="password" class="form-input" minlength="8" required>
+      </div>
+      <button type="submit" class="btn">Update Password</button>
+    </form>
+  </main>
+
+  <script>
+    const messageEl = document.getElementById('message');
+
+    function showMessage(text, type) {
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + type;
+      messageEl.style.display = 'block';
+      setTimeout(() => { messageEl.style.display = 'none'; }, 3000);
+    }
+
+    async function loadUser() {
+      const res = await fetch('/api/me');
+      const data = await res.json();
+      if (!data.user) {
+        window.location.href = '/login';
+        return;
+      }
+      document.getElementById('nameInput').value = data.user.name;
+      document.getElementById('emailInput').value = data.user.email;
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('nameInput').value;
+      const res = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      const data = await res.json();
+      showMessage(data.success ? 'Profile updated' : data.error, data.success ? 'success' : 'error');
+    });
+
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = e.target.password.value;
+      const res = await fetch('/api/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      showMessage(data.success ? 'Password updated' : data.error, data.success ? 'success' : 'error');
+      if (data.success) e.target.reset();
+    });
+
+    loadUser();
+  </script>
+</body>
+</html>

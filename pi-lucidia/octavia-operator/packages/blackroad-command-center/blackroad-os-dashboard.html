@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad OS</title>
+    <style>
+        /* ============================================
+           BLACKROAD OS - COLOR SYSTEM
+           Grayscale-first, color as intentional layer
+           ============================================ */
+        :root {
+            /* Grayscale palette */
+            --black: #000000;
+            --gray-900: #0a0a0a;
+            --gray-850: #111111;
+            --gray-800: #1a1a1a;
+            --gray-700: #2a2a2a;
+            --gray-600: #3a3a3a;
+            --gray-500: #555555;
+            --gray-400: #777777;
+            --gray-300: #999999;
+            --gray-200: #bbbbbb;
+            --gray-100: #dddddd;
+            --white: #ffffff;
+
+            /* Accent gradient colors (used sparingly) */
+            --amber: #F5A623;
+            --hot-pink: #FF1D6C;
+            --violet: #9C27B0;
+            --electric-blue: #2979FF;
+
+            /* Semantic colors */
+            --surface: var(--gray-850);
+            --surface-elevated: var(--gray-800);
+            --border: var(--gray-700);
+            --text-primary: var(--white);
+            --text-secondary: var(--gray-400);
+            --text-muted: var(--gray-500);
+
+            /* Golden ratio spacing */
+            --space-xs: 5px;
+            --space-sm: 8px;
+            --space-md: 13px;
+            --space-lg: 21px;
+            --space-xl: 34px;
+            --space-2xl: 55px;
+
+            /* Typography */
+            --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           LAYOUT STRUCTURE
+           ============================================ */
+        .os-container {
+            display: grid;
+            grid-template-rows: auto 3px 1fr;
+            height: 100vh;
+        }
+
+        /* ============================================
+           A) TOP NAVIGATION BAR
+           ============================================ */
+        .nav-bar {
+            background: var(--gray-900);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-lg);
+            height: 48px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-version {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            background: var(--gray-800);
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .nav-items {
+            display: flex;
+            gap: var(--space-xs);
+        }
+
+        .nav-item {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: var(--gray-800);
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+            background: var(--gray-800);
+            border-color: var(--gray-600);
+        }
+
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .status-dot.warning { background: var(--amber); }
+        .status-dot.error { background: #ef4444; }
+
+        /* ============================================
+           E) ACCENT GRADIENT STRIP
+           The ONLY color element - intentional
+           ============================================ */
+        .accent-strip {
+            height: 3px;
+            background: linear-gradient(
+                90deg,
+                var(--amber) 0%,
+                var(--hot-pink) 38.2%,
+                var(--violet) 61.8%,
+                var(--electric-blue) 100%
+            );
+        }
+
+        /* ============================================
+           MAIN CONTENT AREA
+           ============================================ */
+        .main-content {
+            display: grid;
+            grid-template-columns: 320px 1fr 280px;
+            gap: 1px;
+            background: var(--gray-700);
+            overflow: hidden;
+        }
+
+        /* ============================================
+           B) LEFT PANEL - AGENTS & CHAT
+           ============================================ */
+        .panel-left {
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .agents-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-sm);
+        }
+
+        .agent-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .agent-item:hover {
+            background: var(--gray-800);
+        }
+
+        .agent-item.active {
+            background: var(--gray-700);
+        }
+
+        .agent-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            background: var(--gray-700);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .agent-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .agent-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .agent-role {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .agent-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .agent-status.idle { background: var(--gray-500); }
+        .agent-status.busy { background: var(--amber); }
+
+        /* Chat area */
+        .chat-area {
+            border-top: 1px solid var(--border);
+            padding: var(--space-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            max-height: 200px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .chat-message {
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: var(--space-sm);
+            background: var(--gray-800);
+            border-radius: 4px;
+        }
+
+        .chat-message .sender {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .chat-input-wrap {
+            display: flex;
+            gap: var(--space-sm);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--gray-800);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--gray-500);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .chat-send {
+            background: var(--gray-700);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .chat-send:hover {
+            background: var(--gray-600);
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           C) CENTER PANEL - CONTROL ROOM
+           ============================================ */
+        .panel-center {
+            background: var(--black);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .control-room {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1px;
+            padding: 1px;
+            background: var(--gray-700);
+        }
+
+        .control-module {
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .module-header {
+            padding: var(--space-sm) var(--space-md);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .module-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .module-actions {
+            display: flex;
+            gap: var(--space-xs);
+        }
+
+        .module-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            background: var(--gray-700);
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .module-btn:hover {
+            background: var(--gray-600);
+            color: var(--text-primary);
+        }
+
+        .module-content {
+            flex: 1;
+            padding: var(--space-md);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            overflow: hidden;
+        }
+
+        /* Terminal module */
+        .terminal-content {
+            color: var(--gray-300);
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .terminal-prompt {
+            color: var(--text-primary);
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--text-primary);
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Metrics module */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-md);
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Status bars */
+        .status-bar {
+            height: 4px;
+            background: var(--gray-700);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: var(--space-sm);
+        }
+
+        .status-fill {
+            height: 100%;
+            background: var(--gray-400);
+            border-radius: 2px;
+        }
+
+        /* Fleet visualization */
+        .fleet-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-sm);
+        }
+
+        .fleet-node {
+            aspect-ratio: 1;
+            background: var(--gray-800);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            font-size: 20px;
+            position: relative;
+        }
+
+        .fleet-node-name {
+            font-size: 9px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .fleet-node-status {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .fleet-node-status.offline {
+            background: var(--gray-600);
+        }
+
+        /* ============================================
+           D) RIGHT PANEL - MODULES GRID
+           ============================================ */
+        .panel-right {
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modules-grid {
+            flex: 1;
+            padding: var(--space-sm);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--space-sm);
+            overflow-y: auto;
+        }
+
+        .mini-module {
+            background: var(--gray-800);
+            border-radius: 4px;
+            padding: var(--space-sm);
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .mini-module:hover {
+            background: var(--gray-700);
+        }
+
+        .mini-module-icon {
+            font-size: 20px;
+            margin-bottom: var(--space-xs);
+        }
+
+        .mini-module-name {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: auto;
+        }
+
+        .mini-module-value {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .mini-module-unit {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Quick actions */
+        .quick-actions {
+            border-top: 1px solid var(--border);
+            padding: var(--space-md);
+        }
+
+        .action-btn {
+            width: 100%;
+            background: var(--gray-800);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: var(--space-sm) var(--space-md);
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            cursor: pointer;
+            margin-bottom: var(--space-sm);
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .action-btn:hover {
+            background: var(--gray-700);
+            color: var(--text-primary);
+            border-color: var(--gray-600);
+        }
+
+        .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ============================================
+           SCROLLBAR STYLING
+           ============================================ */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-600);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-500);
+        }
+    </style>
+</head>
+<body>
+    <div class="os-container">
+        <!-- A) TOP NAVIGATION BAR -->
+        <nav class="nav-bar">
+            <div class="nav-brand">
+                <span class="nav-logo">BlackRoad</span>
+                <span class="nav-version">OS v1.0</span>
+            </div>
+            <div class="nav-items">
+                <div class="nav-item active">Dashboard</div>
+                <div class="nav-item">Repositories</div>
+                <div class="nav-item">Files</div>
+                <div class="nav-item">Terminal</div>
+                <div class="nav-item">Tools</div>
+                <div class="nav-item">Agents</div>
+            </div>
+            <div class="nav-status">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>6/7 nodes</span>
+                </div>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span>all services</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- E) ACCENT GRADIENT STRIP - The only color -->
+        <div class="accent-strip"></div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- B) LEFT PANEL - AGENTS -->
+            <div class="panel-left">
+                <div class="panel-header">Fleet Agents</div>
+                <div class="agents-list">
+                    <div class="agent-item active">
+                        <div class="agent-avatar">👸</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Cecilia</div>
+                            <div class="agent-role">primary node</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">🌙</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Lucidia</div>
+                            <div class="agent-role">ai inference</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">🎵</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Aria</div>
+                            <div class="agent-role">harmony node</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">🐙</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Octavia</div>
+                            <div class="agent-role">multi-arm</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">👧</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Alice</div>
+                            <div class="agent-role">gateway</div>
+                        </div>
+                        <div class="agent-status idle"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">🐚</div>
+                        <div class="agent-info">
+                            <div class="agent-name">Shellfish</div>
+                            <div class="agent-role">edge node</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                    <div class="agent-item">
+                        <div class="agent-avatar">♾️</div>
+                        <div class="agent-info">
+                            <div class="agent-name">BlackRoad OS</div>
+                            <div class="agent-role">cloud node</div>
+                        </div>
+                        <div class="agent-status"></div>
+                    </div>
+                </div>
+                <div class="chat-area">
+                    <div class="chat-messages">
+                        <div class="chat-message">
+                            <span class="sender">lucidia:</span> hailo-8 ready, 26 TOPS
+                        </div>
+                        <div class="chat-message">
+                            <span class="sender">cecilia:</span> sync complete
+                        </div>
+                    </div>
+                    <div class="chat-input-wrap">
+                        <input type="text" class="chat-input" placeholder="send command...">
+                        <button class="chat-send">send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- C) CENTER PANEL - CONTROL ROOM -->
+            <div class="panel-center">
+                <div class="control-room">
+                    <!-- Terminal -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">Terminal</span>
+                            <div class="module-actions">
+                                <button class="module-btn">−</button>
+                                <button class="module-btn">□</button>
+                            </div>
+                        </div>
+                        <div class="module-content">
+                            <div class="terminal-content"><span class="terminal-prompt">blackroad@cecilia:~$</span> br status
+Fleet Status: 6/7 online
+├─ cecilia   online  42°C
+├─ lucidia   online  38°C
+├─ aria      online  35°C
+├─ octavia   online  41°C
+├─ alice     offline
+├─ shellfish online
+└─ blackroad os     online
+
+<span class="terminal-prompt">blackroad@cecilia:~$</span> <span class="terminal-cursor"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- System Metrics -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">System Metrics</span>
+                        </div>
+                        <div class="module-content">
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <div class="metric-value">156</div>
+                                    <div class="metric-label">TOPS Total</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">7</div>
+                                    <div class="metric-label">Nodes</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">12</div>
+                                    <div class="metric-label">Services</div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-value">4.2</div>
+                                    <div class="metric-label">TB Storage</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fleet Map -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">Fleet</span>
+                        </div>
+                        <div class="module-content">
+                            <div class="fleet-grid">
+                                <div class="fleet-node">
+                                    👸
+                                    <span class="fleet-node-name">cece</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    🌙
+                                    <span class="fleet-node-name">luci</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    🎵
+                                    <span class="fleet-node-name">aria</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    🐙
+                                    <span class="fleet-node-name">octa</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    👧
+                                    <span class="fleet-node-name">alice</span>
+                                    <div class="fleet-node-status offline"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    🐚
+                                    <span class="fleet-node-name">shell</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node">
+                                    ♾️
+                                    <span class="fleet-node-name">blackroad os</span>
+                                    <div class="fleet-node-status"></div>
+                                </div>
+                                <div class="fleet-node" style="background: var(--gray-900);">
+                                    +
+                                    <span class="fleet-node-name">add</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">Services</span>
+                        </div>
+                        <div class="module-content">
+                            <div class="terminal-content" style="font-size: 11px;">ollama      ● running  lucidia
+hailo-rt    ● running  lucidia
+nats        ● running  cecilia
+docker      ● running  all
+influxdb    ● running  cecilia
+cloudflared ● running  shellfish
+nginx       ● running  blackroad os</div>
+                        </div>
+                    </div>
+
+                    <!-- Network -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">Network</span>
+                        </div>
+                        <div class="module-content">
+                            <div class="terminal-content" style="font-size: 11px;">192.168.4.x LAN
+├─ .89  cecilia
+├─ .81  lucidia
+├─ .82  aria
+├─ .83  octavia
+├─ .84  alice (down)
+├─ .85  dns
+
+cloud endpoints
+├─ shellfish.blackroad.io
+└─ blackroad os.blackroad.io</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Status -->
+                    <div class="control-module">
+                        <div class="module-header">
+                            <span class="module-title">AI Inference</span>
+                        </div>
+                        <div class="module-content">
+                            <div style="margin-bottom: var(--space-md);">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                    <span style="color: var(--text-secondary);">Hailo-8</span>
+                                    <span>26 TOPS</span>
+                                </div>
+                                <div class="status-bar">
+                                    <div class="status-fill" style="width: 45%;"></div>
+                                </div>
+                            </div>
+                            <div style="font-size: 11px; color: var(--text-muted);">
+                                Models loaded: 3<br>
+                                llama3:8b, mistral, codellama
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- D) RIGHT PANEL - MODULES GRID -->
+            <div class="panel-right">
+                <div class="panel-header">Modules</div>
+                <div class="modules-grid">
+                    <div class="mini-module">
+                        <span class="mini-module-icon">🌡️</span>
+                        <span class="mini-module-name">Temp</span>
+                        <span class="mini-module-value">38<span class="mini-module-unit">°C</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">💾</span>
+                        <span class="mini-module-name">Disk</span>
+                        <span class="mini-module-value">67<span class="mini-module-unit">%</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">🧠</span>
+                        <span class="mini-module-name">CPU</span>
+                        <span class="mini-module-value">23<span class="mini-module-unit">%</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">📡</span>
+                        <span class="mini-module-name">Net</span>
+                        <span class="mini-module-value">1.2<span class="mini-module-unit">Gb</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">🐳</span>
+                        <span class="mini-module-name">Docker</span>
+                        <span class="mini-module-value">14</span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">📦</span>
+                        <span class="mini-module-name">Repos</span>
+                        <span class="mini-module-value">200<span class="mini-module-unit">+</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">⚡</span>
+                        <span class="mini-module-name">Power</span>
+                        <span class="mini-module-value">42<span class="mini-module-unit">W</span></span>
+                    </div>
+                    <div class="mini-module">
+                        <span class="mini-module-icon">🔒</span>
+                        <span class="mini-module-name">VPN</span>
+                        <span class="mini-module-value">ON</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <button class="action-btn">▶ Deploy All</button>
+                    <button class="action-btn">🔄 Sync Fleet</button>
+                    <button class="action-btn">📊 Full Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Minimal interactivity - nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Agent selection
+        document.querySelectorAll('.agent-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.agent-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+            });
+        });
+
+        // Chat input
+        const chatInput = document.querySelector('.chat-input');
+        const chatSend = document.querySelector('.chat-send');
+        const chatMessages = document.querySelector('.chat-messages');
+
+        function sendMessage() {
+            const msg = chatInput.value.trim();
+            if (msg) {
+                const div = document.createElement('div');
+                div.className = 'chat-message';
+                div.innerHTML = `<span class="sender">you:</span> ${msg}`;
+                chatMessages.appendChild(div);
+                chatInput.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+
+        chatSend.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>

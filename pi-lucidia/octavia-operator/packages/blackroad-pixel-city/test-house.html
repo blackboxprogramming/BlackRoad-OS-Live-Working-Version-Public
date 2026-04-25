@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stardew Valley House</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #6B8E23;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+        }
+        canvas {
+            border: 4px solid #8B4513;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawFarmhouse(x, y) {
+            const width = 128;
+            const height = 96;
+
+            // Colors
+            const woodDark = '#654321';
+            const woodLight = '#8B5A2B';
+            const roofRed = '#8B2525';
+            const roofDark = '#641414';
+            const stoneGray = '#808080';
+            const windowBlue = '#ADD8E6';
+            const doorBrown = '#654321';
+            const chimneyBrick = '#8B4513';
+
+            // Foundation
+            ctx.fillStyle = stoneGray;
+            ctx.fillRect(x + 10, y + 70, 108, 26);
+
+            // Main walls
+            ctx.fillStyle = woodLight;
+            ctx.fillRect(x + 15, y + 35, 98, 35);
+
+            // Wood plank lines
+            ctx.strokeStyle = woodDark;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 12; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + 15 + i * 8, y + 35);
+                ctx.lineTo(x + 15 + i * 8, y + 70);
+                ctx.stroke();
+            }
+
+            // Roof
+            ctx.fillStyle = roofRed;
+            ctx.beginPath();
+            ctx.moveTo(x + 64, y + 5);
+            ctx.lineTo(x + 5, y + 35);
+            ctx.lineTo(x + 123, y + 35);
+            ctx.closePath();
+            ctx.fill();
+
+            // Roof shingles
+            ctx.strokeStyle = roofDark;
+            for (let row = 0; row < 8; row++) {
+                const yPos = y + 10 + row * 3;
+                ctx.beginPath();
+                ctx.moveTo(x + 15 + row * 5, yPos);
+                ctx.lineTo(x + 113 - row * 5, yPos);
+                ctx.stroke();
+            }
+
+            // Chimney
+            ctx.fillStyle = chimneyBrick;
+            ctx.fillRect(x + 85, y + 8, 10, 22);
+            
+            // Chimney bricks pattern
+            ctx.strokeStyle = '#654321';
+            for (let i = 0; i < 6; i++) {
+                ctx.beginPath();
+                ctx.moveTo(x + 85, y + 8 + i * 4);
+                ctx.lineTo(x + 95, y + 8 + i * 4);
+                ctx.stroke();
+            }
+
+            // Smoke
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.6)';
+            ctx.beginPath();
+            ctx.arc(x + 90, y + 5, 4, 0, Math.PI * 2);
+            ctx.arc(x + 92, y + 2, 3, 0, Math.PI * 2);
+            ctx.arc(x + 88, y + 1, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Door
+            ctx.fillStyle = doorBrown;
+            ctx.fillRect(x + 55, y + 50, 18, 20);
+            ctx.strokeStyle = '#000';
+            ctx.strokeRect(x + 55, y + 50, 18, 20);
+            
+            // Door panels
+            ctx.strokeRect(x + 57, y + 52, 6, 6);
+            ctx.strokeRect(x + 65, y + 52, 6, 6);
+            ctx.strokeRect(x + 57, y + 61, 6, 6);
+            ctx.strokeRect(x + 65, y + 61, 6, 6);
+
+            // Door knob
+            ctx.fillStyle = '#FFD700';
+            ctx.beginPath();
+            ctx.arc(x + 70, y + 60, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Windows
+            const windows = [
+                [x + 25, y + 45, 15, 15],
+                [x + 88, y + 45, 15, 15],
+                [x + 25, y + 25, 12, 12],
+                [x + 91, y + 25, 12, 12]
+            ];
+
+            windows.forEach(([wx, wy, ww, wh]) => {
+                // Window glass
+                ctx.fillStyle = windowBlue;
+                ctx.fillRect(wx, wy, ww, wh);
+                
+                // Window frame
+                ctx.strokeStyle = '#503020';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(wx, wy, ww, wh);
+                
+                // Cross bars
+                ctx.beginPath();
+                ctx.moveTo(wx + ww/2, wy);
+                ctx.lineTo(wx + ww/2, wy + wh);
+                ctx.moveTo(wx, wy + wh/2);
+                ctx.lineTo(wx + ww, wy + wh/2);
+                ctx.stroke();
+
+                // Shine
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(wx + 2, wy + 2, 3, 3);
+            });
+
+            // Steps
+            ctx.fillStyle = '#A0A0A0';
+            ctx.fillRect(x + 45, y + 70, 38, 3);
+            ctx.fillStyle = '#909090';
+            ctx.fillRect(x + 45, y + 73, 38, 3);
+            ctx.fillStyle = '#7F7F7F';
+            ctx.fillRect(x + 45, y + 76, 38, 3);
+
+            // Flower boxes
+            ctx.fillStyle = woodLight;
+            ctx.fillRect(x + 25, y + 61, 15, 4);
+            ctx.fillRect(x + 88, y + 61, 15, 4);
+
+            // Flowers
+            const flowerColors = ['#FF0000', '#FFFF00', '#FFB6C1'];
+            [x + 25, x + 88].forEach(fx => {
+                flowerColors.forEach((color, i) => {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(fx + 3 + i * 5, fy - 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Stem
+                    ctx.strokeStyle = '#008000';
+                    ctx.beginPath();
+                    ctx.moveTo(fx + 3 + i * 5, fy - 2);
+                    ctx.lineTo(fx + 3 + i * 5, fy + 2);
+                    ctx.stroke();
+                });
+            });
+
+            // Mailbox
+            ctx.fillStyle = '#606060';
+            ctx.fillRect(x + 3, y + 75, 2, 15);
+            ctx.fillRect(x + 1, y + 75, 10, 6);
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(x + 9, y + 76, 4, 3);
+
+            // Bushes
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.arc(x + 8, y + 65, 8, 0, Math.PI * 2);
+            ctx.arc(x + 120, y + 65, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw grass background
+        ctx.fillStyle = '#6B8E23';
+        ctx.fillRect(0, 0, 800, 600);
+
+        // Add grass texture
+        ctx.fillStyle = '#5A7A1E';
+        for (let i = 0; i < 1000; i++) {
+            const x = Math.random() * 800;
+            const y = Math.random() * 600;
+            ctx.fillRect(x, y, 2, 2);
+        }
+
+        // Draw the farmhouse
+        drawFarmhouse(336, 250);
+
+        // Add title
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 24px "Courier New"';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 4;
+        ctx.textAlign = 'center';
+        ctx.fillText('Stardew Valley Farmhouse', 400, 50);
+    </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+#!/bin/bash
+# 🗄️ CECE-DB v1.0 - Simple Key-Value Database
+# Fast, persistent key-value storage for CECE
+
+# BlackRoad Color Palette (xterm-256)
+BR_ORANGE=208
+BR_AMBER=202
+BR_PINK=198
+BR_MAGENTA=163
+BR_BLUE=33
+BR_WHITE=255
+
+fg() { echo -e "\033[38;5;${1}m"; }
+RESET='\033[0m'
+BOLD='\033[1m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+DB_DIR="$CECE_HOME/db"
+DEFAULT_DB="$DB_DIR/default.db"
+CURRENT_DB="${CECE_DB:-$DEFAULT_DB}"
+
+mkdir -p "$DB_DIR"
+
+banner() {
+    echo -e "${BOLD}$(fg $BR_PINK)╔════════════════════════════════════════════════════════════╗${RESET}"
+    echo -e "$(fg $BR_PINK)║${RESET}            ${BOLD}$(fg $BR_WHITE)🗄️  CECE-DB - Key-Value Database${RESET}              $(fg $BR_PINK)║${RESET}"
+    echo -e "$(fg $BR_PINK)╚════════════════════════════════════════════════════════════╝${RESET}"
+}
+
+# Initialize database file
+init_db() {
+    [ ! -f "$CURRENT_DB" ] && echo "{}" > "$CURRENT_DB"
+}
+
+# Set a key-value pair
+cmd_set() {
+    local key="$1"
+    local value="$2"
+
+    if [ -z "$key" ] || [ -z "$value" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Missing key or value"
+        echo "Usage: cece-db set <key> <value>"
+        return 1
+    fi
+
+    init_db
+
+    # Update or insert using jq
+    local tmp=$(mktemp)
+    jq --arg k "$key" --arg v "$value" '.[$k] = $v' "$CURRENT_DB" > "$tmp"
+    mv "$tmp" "$CURRENT_DB"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Set $(fg $BR_WHITE)$key${RESET} = $(fg $BR_MAGENTA)$value${RESET}"
+}
+
+# Get a value by key
+cmd_get() {
+    local key="$1"
+
+    if [ -z "$key" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Please specify key"
+        return 1
+    fi
+
+    init_db
+
+    local value=$(jq -r --arg k "$key" '.[$k] // empty' "$CURRENT_DB")
+
+    if [ -n "$value" ]; then
+        echo "$value"
+    else
+        echo -e "$(fg $BR_AMBER)Key not found:${RESET} $key" >&2
+        return 1
+    fi
+}
+
+# Delete a key
+cmd_del() {
+    local key="$1"
+
+    if [ -z "$key" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Please specify key"
+        return 1
+    fi
+
+    init_db
+
+    local tmp=$(mktemp)
+    jq --arg k "$key" 'del(.[$k])' "$CURRENT_DB" > "$tmp"
+    mv "$tmp" "$CURRENT_DB"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Deleted $(fg $BR_WHITE)$key${RESET}"
+}
+
+# Check if key exists
+cmd_exists() {
+    local key="$1"
+
+    if [ -z "$key" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Please specify key"
+        return 1
+    fi
+
+    init_db
+
+    local exists=$(jq -r --arg k "$key" 'has($k)' "$CURRENT_DB")
+
+    if [ "$exists" = "true" ]; then
+        echo -e "$(fg $BR_BLUE)✓${RESET} Key exists: $key"
+        return 0
+    else
+        echo -e "$(fg $BR_PINK)✗${RESET} Key not found: $key"
+        return 1
+    fi
+}
+
+# List all keys
+cmd_keys() {
+    init_db
+    jq -r 'keys[]' "$CURRENT_DB" 2>/dev/null
+}
+
+# List all key-value pairs
+cmd_list() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Database: $(fg $BR_BLUE)$(basename "$CURRENT_DB")${RESET}"
+    echo ""
+
+    init_db
+
+    local count=$(jq 'length' "$CURRENT_DB")
+
+    if [ "$count" = "0" ]; then
+        echo "Database is empty."
+        return
+    fi
+
+    echo -e "$(fg $BR_WHITE)Contents:${RESET}"
+    echo ""
+
+    jq -r 'to_entries[] | "  \(.key) = \(.value)"' "$CURRENT_DB" | while read -r line; do
+        local key=$(echo "$line" | cut -d'=' -f1 | xargs)
+        local val=$(echo "$line" | cut -d'=' -f2- | xargs)
+        echo -e "  $(fg $BR_WHITE)$key${RESET} = $(fg $BR_MAGENTA)$val${RESET}"
+    done
+
+    echo ""
+    echo -e "  $(fg $BR_WHITE)Total: $count keys${RESET}"
+}
+
+# Search for keys matching pattern
+cmd_search() {
+    local pattern="$1"
+
+    if [ -z "$pattern" ]; then
+        echo "Usage: cece-db search <pattern>"
+        return 1
+    fi
+
+    init_db
+
+    echo -e "$(fg $BR_BLUE)Searching for:${RESET} $pattern"
+    echo ""
+
+    jq -r --arg p "$pattern" 'to_entries[] | select(.key | test($p; "i")) | "\(.key) = \(.value)"' "$CURRENT_DB" 2>/dev/null | while read -r line; do
+        local key=$(echo "$line" | cut -d'=' -f1 | xargs)
+        local val=$(echo "$line" | cut -d'=' -f2- | xargs)
+        echo -e "  $(fg $BR_WHITE)$key${RESET} = $(fg $BR_MAGENTA)$val${RESET}"
+    done
+}
+
+# Increment a numeric value
+cmd_incr() {
+    local key="$1"
+    local amount="${2:-1}"
+
+    if [ -z "$key" ]; then
+        echo "Usage: cece-db incr <key> [amount]"
+        return 1
+    fi
+
+    init_db
+
+    local current=$(jq -r --arg k "$key" '.[$k] // "0"' "$CURRENT_DB")
+    local new=$((current + amount))
+
+    cmd_set "$key" "$new" > /dev/null
+    echo "$new"
+}
+
+# Decrement a numeric value
+cmd_decr() {
+    local key="$1"
+    local amount="${2:-1}"
+    cmd_incr "$key" "-$amount"
+}
+
+# Export database to JSON
+cmd_export() {
+    local output="${1:-$DB_DIR/export-$(date +%Y%m%d).json}"
+
+    init_db
+    cp "$CURRENT_DB" "$output"
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Exported to $(fg $BR_WHITE)$output${RESET}"
+}
+
+# Import from JSON
+cmd_import() {
+    local input="$1"
+
+    if [ -z "$input" ] || [ ! -f "$input" ]; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} File not found: $input"
+        return 1
+    fi
+
+    # Validate JSON
+    if ! jq empty "$input" 2>/dev/null; then
+        echo -e "$(fg $BR_PINK)Error:${RESET} Invalid JSON file"
+        return 1
+    fi
+
+    # Merge with existing
+    init_db
+    local tmp=$(mktemp)
+    jq -s '.[0] * .[1]' "$CURRENT_DB" "$input" > "$tmp"
+    mv "$tmp" "$CURRENT_DB"
+
+    local count=$(jq 'length' "$input")
+    echo -e "$(fg $BR_BLUE)✓${RESET} Imported $count keys"
+}
+
+# Clear database
+cmd_clear() {
+    echo -e "$(fg $BR_AMBER)Warning: This will delete all data!${RESET}"
+    read -p "Are you sure? (yes/no) " confirm
+
+    if [ "$confirm" = "yes" ]; then
+        echo "{}" > "$CURRENT_DB"
+        echo -e "$(fg $BR_BLUE)✓${RESET} Database cleared"
+    else
+        echo "Cancelled."
+    fi
+}
+
+# Switch database
+cmd_use() {
+    local name="$1"
+
+    if [ -z "$name" ]; then
+        echo "Current database: $(basename "$CURRENT_DB")"
+        echo ""
+        echo "Available databases:"
+        ls -1 "$DB_DIR"/*.db 2>/dev/null | while read -r f; do
+            local base=$(basename "$f")
+            local count=$(jq 'length' "$f" 2>/dev/null || echo 0)
+            echo "  • $base ($count keys)"
+        done
+        return
+    fi
+
+    CURRENT_DB="$DB_DIR/$name.db"
+    export CECE_DB="$CURRENT_DB"
+    init_db
+
+    echo -e "$(fg $BR_BLUE)✓${RESET} Now using: $(fg $BR_WHITE)$name${RESET}"
+}
+
+# Database stats
+cmd_stats() {
+    banner
+    echo ""
+
+    init_db
+
+    local count=$(jq 'length' "$CURRENT_DB")
+    local size=$(du -sh "$CURRENT_DB" | awk '{print $1}')
+    local db_count=$(ls -1 "$DB_DIR"/*.db 2>/dev/null | wc -l)
+
+    echo -e "$(fg $BR_WHITE)Database Statistics:${RESET}"
+    echo ""
+    echo -e "  $(fg $BR_BLUE)Current DB:${RESET}    $(basename "$CURRENT_DB")"
+    echo -e "  $(fg $BR_BLUE)Keys:${RESET}          $count"
+    echo -e "  $(fg $BR_BLUE)File Size:${RESET}     $size"
+    echo -e "  $(fg $BR_BLUE)Total DBs:${RESET}     $db_count"
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "$(fg $BR_WHITE)Usage:${RESET} cece-db <command> [args]"
+    echo ""
+    echo -e "$(fg $BR_BLUE)Commands:${RESET}"
+    echo "  set <key> <value>    Set a value"
+    echo "  get <key>            Get a value"
+    echo "  del <key>            Delete a key"
+    echo "  exists <key>         Check if key exists"
+    echo "  keys                 List all keys"
+    echo "  list                 List all key-value pairs"
+    echo "  search <pattern>     Search keys"
+    echo "  incr <key> [n]       Increment numeric value"
+    echo "  decr <key> [n]       Decrement numeric value"
+    echo "  export [file]        Export to JSON"
+    echo "  import <file>        Import from JSON"
+    echo "  use [name]           Switch/list databases"
+    echo "  stats                Show statistics"
+    echo "  clear                Clear database"
+    echo ""
+    echo -e "$(fg $BR_WHITE)Examples:${RESET}"
+    echo "  cece-db set name 'CECE'"
+    echo "  cece-db get name"
+    echo "  cece-db incr counter"
+    echo "  cece-db use sessions"
+}
+
+# Main
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        set|put) cmd_set "$@" ;;
+        get) cmd_get "$@" ;;
+        del|delete|rm) cmd_del "$@" ;;
+        exists|has) cmd_exists "$@" ;;
+        keys) cmd_keys ;;
+        list|ls|all) cmd_list ;;
+        search|find) cmd_search "$@" ;;
+        incr|increment) cmd_incr "$@" ;;
+        decr|decrement) cmd_decr "$@" ;;
+        export) cmd_export "$@" ;;
+        import) cmd_import "$@" ;;
+        use|switch) cmd_use "$@" ;;
+        stats|info) cmd_stats ;;
+        clear) cmd_clear ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

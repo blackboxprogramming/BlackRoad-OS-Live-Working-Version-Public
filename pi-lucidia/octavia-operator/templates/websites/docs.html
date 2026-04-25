@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation — BlackRoad OS</title>
+  <meta name="description" content="BlackRoad OS documentation. Guides, API reference, and architecture.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../websites/_shared/design-bw.css">
+  <style>
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      padding-top: 65px;
+    }
+    @media (max-width: 900px) {
+      .docs-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; top: 65px; left: 0; bottom: 0;
+      width: 260px; overflow-y: auto;
+      padding: var(--sp-lg) var(--sp-md);
+      border-right: 1px solid var(--border);
+      background: var(--deep);
+    }
+    .sidebar-section { margin-bottom: var(--sp-lg); }
+    .sidebar-heading {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: var(--sp-sm);
+      padding-left: 12px;
+    }
+    .sidebar-link {
+      display: block;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      color: var(--subtle);
+      border-radius: var(--radius-sm);
+      transition: color 0.15s, background 0.15s;
+      margin-bottom: 2px;
+    }
+    .sidebar-link:hover { color: var(--white); background: var(--surface); }
+    .sidebar-link.active {
+      color: var(--white);
+      background: var(--surface);
+      font-weight: 600;
+    }
+
+    /* Main content */
+    .docs-main {
+      margin-left: 260px;
+      padding: var(--sp-xl) var(--sp-xl) var(--sp-2xl);
+      max-width: 820px;
+    }
+    @media (max-width: 900px) { .docs-main { margin-left: 0; } }
+
+    .docs-main h1 {
+      font-size: 2.2rem; margin-bottom: var(--sp-md);
+    }
+    .docs-main h2 {
+      font-size: 1.4rem;
+      margin-top: var(--sp-xl);
+      margin-bottom: var(--sp-sm);
+      padding-bottom: var(--sp-xs);
+      border-bottom: 1px solid var(--border);
+    }
+    .docs-main h3 {
+      font-size: 1.1rem;
+      margin-top: var(--sp-lg);
+      margin-bottom: var(--sp-xs);
+    }
+    .docs-main p {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--light);
+      margin-bottom: var(--sp-md);
+    }
+    .docs-main code {
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+      background: var(--surface);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .docs-main pre {
+      background: var(--deep);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--sp-lg);
+      overflow-x: auto;
+      margin: var(--sp-md) 0 var(--sp-lg);
+    }
+    .docs-main pre code {
+      background: none; border: none; padding: 0;
+      font-size: 0.82rem; line-height: 1.7;
+      color: var(--light);
+    }
+    .docs-main ul, .docs-main ol {
+      margin: var(--sp-sm) 0 var(--sp-lg);
+      padding-left: var(--sp-lg);
+    }
+    .docs-main li {
+      font-size: 0.95rem; line-height: 1.75;
+      color: var(--light); margin-bottom: 4px;
+    }
+
+    /* Callouts */
+    .callout {
+      border-left: 3px solid var(--muted);
+      background: var(--surface);
+      padding: var(--sp-md);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: var(--sp-md) 0;
+    }
+    .callout-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--subtle);
+      margin-bottom: 6px;
+    }
+    .callout p { margin-bottom: 0; font-size: 0.88rem; }
+
+    /* Table */
+    .docs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: var(--sp-md) 0 var(--sp-lg);
+      font-size: 0.88rem;
+    }
+    .docs-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid var(--border);
+    }
+    .docs-table td {
+      padding: var(--sp-sm) var(--sp-md);
+      border-bottom: 1px solid var(--border);
+      color: var(--light);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-md);
+    }
+    .breadcrumb a { color: var(--subtle); transition: color 0.15s; }
+    .breadcrumb a:hover { color: var(--white); }
+    .breadcrumb-sep { margin: 0 6px; }
+
+    /* Next/Prev */
+    .doc-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-md);
+      margin-top: var(--sp-2xl);
+      padding-top: var(--sp-lg);
+      border-top: 1px solid var(--border);
+    }
+    .doc-nav-link {
+      padding: var(--sp-md);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: border-color 0.2s;
+      display: block;
+    }
+    .doc-nav-link:hover { border-color: var(--muted); }
+    .doc-nav-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .doc-nav-title { font-weight: 600; font-size: 0.95rem; }
+    .doc-nav-link.next { text-align: right; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">BlackRoad OS</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/agents">Agents</a>
+      <a href="/pricing">Pricing</a>
+    </div>
+    <a href="/docs" class="nav-cta">Get Started</a>
+  </nav>
+
+  <div class="docs-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Getting Started</div>
+        <a href="/docs" class="sidebar-link active">Introduction</a>
+        <a href="/docs/installation" class="sidebar-link">Installation</a>
+        <a href="/docs/quickstart" class="sidebar-link">Quick Start</a>
+        <a href="/docs/concepts" class="sidebar-link">Core Concepts</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-heading">CLI</div>
+        <a href="/docs/cli" class="sidebar-link">br CLI Overview</a>
+        <a href="/docs/cli/tools" class="sidebar-link">84 Tools Reference</a>
+        <a href="/docs/cli/deploy" class="sidebar-link">Deployment</a>
+        <a href="/docs/cli/nodes" class="sidebar-link">Fleet Management</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Agents</div>
+        <a href="/docs/agents" class="sidebar-link">Agent System</a>
+        <a href="/docs/agents/fleet" class="sidebar-link">The Fleet</a>
+        <a href="/docs/agents/cece" class="sidebar-link">CECE Identity</a>
+        <a href="/docs/agents/memory" class="sidebar-link">Memory (PS-SHA)</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-heading">Architecture</div>
+        <a href="/docs/gateway" class="sidebar-link">Tokenless Gateway</a>
+        <a href="/docs/infrastructure" class="sidebar-link">Infrastructure</a>
+        <a href="/docs/security" class="sidebar-link">Security</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-heading">API</div>
+        <a href="/docs/api" class="sidebar-link">API Reference</a>
+        <a href="/docs/api/agents" class="sidebar-link">Agents API</a>
+        <a href="/docs/api/memory" class="sidebar-link">Memory API</a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="docs-main">
+      <div class="breadcrumb">
+        <a href="/docs">Docs</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Introduction</span>
+      </div>
+
+      <h1>Introduction</h1>
+      <p>BlackRoad OS is an AI-native developer platform for running, orchestrating, and managing AI agents on your own hardware. This guide covers everything from installation to deploying a fleet of 30,000 agents.</p>
+
+      <div class="callout">
+        <div class="callout-label">Note</div>
+        <p>BlackRoad OS runs on macOS, Linux, and Raspberry Pi OS. Windows support is available through WSL.</p>
+      </div>
+
+      <h2>What is BlackRoad OS?</h2>
+      <p>BlackRoad OS is three things:</p>
+      <ul>
+        <li><strong>A CLI</strong> &mdash; 84 tools unified under the <code>br</code> command for deployment, monitoring, agent management, and more</li>
+        <li><strong>An agent runtime</strong> &mdash; infrastructure for running up to 30,000 AI agents across distributed hardware</li>
+        <li><strong>A trust architecture</strong> &mdash; the tokenless gateway ensures agents never handle API keys directly</li>
+      </ul>
+
+      <h2>Quick Start</h2>
+      <pre><code>$ git clone git@github.com:BlackRoad-OS-Inc/blackroad.git
+$ cd blackroad
+$ br nodes status
+  * lucidia    192.168.4.81  online
+  * aria        192.168.4.82  online
+  - octavia    192.168.4.89  offline</code></pre>
+
+      <h2>Key Concepts</h2>
+      <table class="docs-table">
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Agent</strong></td>
+            <td>An autonomous unit with identity, email, memory, and capabilities</td>
+          </tr>
+          <tr>
+            <td><strong>Gateway</strong></td>
+            <td>The tokenless trust boundary between agents and AI providers</td>
+          </tr>
+          <tr>
+            <td><strong>PS-SHA</strong></td>
+            <td>Hash-chained, append-only memory journals for tamper-evident logging</td>
+          </tr>
+          <tr>
+            <td><strong>CECE</strong></td>
+            <td>Portable AI identity system that persists across sessions and providers</td>
+          </tr>
+          <tr>
+            <td><strong>Fleet</strong></td>
+            <td>The collection of all agents across all hardware nodes</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Architecture overview</h3>
+      <pre><code>[Agent CLIs] ---> [Gateway :8787] ---> [Ollama / Claude / OpenAI]
+                        |
+                  [PS-SHA Memory]
+                        |
+                 [CECE Identity DB]</code></pre>
+
+      <p>The gateway is the single point of provider communication. Agents call the gateway; the gateway holds the secrets. Every call is logged. Every action is hash-chained.</p>
+
+      <div class="callout">
+        <div class="callout-label">Tip</div>
+        <p>Run <code>br geb oracle</code> to ask the system what it cannot know about itself. Yes, we built Hofstadter into the CLI.</p>
+      </div>
+
+      <!-- Nav -->
+      <div class="doc-nav">
+        <div></div>
+        <a href="/docs/installation" class="doc-nav-link next">
+          <div class="doc-nav-label">Next</div>
+          <div class="doc-nav-title">Installation</div>
+        </a>
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>

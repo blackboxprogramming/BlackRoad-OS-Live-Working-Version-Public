@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — BlackRoad</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛤️</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gray-950: #0a0a0a;
+      --gray-900: #171717;
+      --gray-800: #262626;
+      --gray-700: #404040;
+      --gray-600: #525252;
+      --gray-500: #737373;
+      --gray-400: #a3a3a3;
+      --gray-300: #d4d4d4;
+      --gray-100: #f5f5f5;
+      --accent-6: #1e90ff;
+      --font-headline: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--gray-950);
+      color: var(--gray-100);
+      font-family: var(--font-body);
+      min-height: 100vh;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    header {
+      padding: 16px 0;
+      border-bottom: 1px solid var(--gray-800);
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+    }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-family: var(--font-headline); font-size: 20px; font-weight: 700; }
+    .logo span {
+      background: linear-gradient(90deg, #ff8700, #ff0087, #1e90ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-nav { display: flex; align-items: center; gap: 24px; }
+    .header-nav a { font-size: 14px; color: var(--gray-400); }
+    .header-nav a:hover { color: var(--gray-100); }
+    .user-menu { display: flex; align-items: center; gap: 12px; }
+    .user-name { font-size: 14px; color: var(--gray-300); }
+    .logout-btn {
+      font-size: 13px;
+      color: var(--gray-500);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    .logout-btn:hover { color: var(--gray-300); }
+    main { padding: 48px 0; }
+    .page-title { font-family: var(--font-headline); font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .page-subtitle { color: var(--gray-500); margin-bottom: 48px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .stat-card {
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .stat-value { font-family: var(--font-headline); font-size: 36px; font-weight: 700; color: var(--accent-6); }
+    .stat-label { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+    .section-title { font-family: var(--font-headline); font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 8px;
+      padding: 16px;
+      transition: all 0.15s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .quick-link:hover { border-color: var(--gray-600); background: var(--gray-800); }
+    .quick-link-icon { font-size: 20px; }
+    .quick-link-text { font-size: 14px; }
+    .domains-list { display: grid; gap: 8px; }
+    .domain-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .domain-name { font-family: var(--font-mono); font-size: 13px; }
+    .domain-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(30, 144, 255, 0.15);
+      color: var(--accent-6);
+    }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container header-inner">
+      <a href="/" class="logo"><span>BlackRoad</span></a>
+      <div class="header-nav">
+        <a href="/dashboard">Dashboard</a>
+        <a href="/settings">Settings</a>
+        <div class="user-menu">
+          <span class="user-name" id="userName">Loading...</span>
+          <button class="logout-btn" onclick="logout()">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">Welcome back to BlackRoad OS</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">1,000</div>
+          <div class="stat-label">AI Agents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">21</div>
+          <div class="stat-label">Domains</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">16</div>
+          <div class="stat-label">GitHub Orgs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">40+</div>
+          <div class="stat-label">Repositories</div>
+        </div>
+      </div>
+
+      <h2 class="section-title">Quick Links</h2>
+      <div class="quick-links">
+        <a href="https://github.com/BlackRoad-OS" class="quick-link" target="_blank">
+          <span class="quick-link-icon">📦</span>
+          <span class="quick-link-text">GitHub</span>
+        </a>
+        <a href="https://instagram.com/blackroad.io" class="quick-link" target="_blank">
+          <span class="quick-link-icon">📸</span>
+          <span class="quick-link-text">Instagram</span>
+        </a>
+        <a href="https://dash.cloudflare.com" class="quick-link" target="_blank">
+          <span class="quick-link-icon">☁️</span>
+          <span class="quick-link-text">Cloudflare</span>
+        </a>
+        <a href="https://notion.so" class="quick-link" target="_blank">
+          <span class="quick-link-icon">📝</span>
+          <span class="quick-link-text">Notion</span>
+        </a>
+      </div>
+
+      <h2 class="section-title">Recent Domains</h2>
+      <div class="domains-list">
+        <div class="domain-item">
+          <span class="domain-name">blackroad.io</span>
+          <span class="domain-badge">Primary</span>
+        </div>
+        <div class="domain-item">
+          <span class="domain-name">lucidia.earth</span>
+          <span class="domain-badge">Active</span>
+        </div>
+        <div class="domain-item">
+          <span class="domain-name">roadchain.io</span>
+          <span class="domain-badge">Active</span>
+        </div>
+        <div class="domain-item">
+          <span class="domain-name">aliceqi.com</span>
+          <span class="domain-badge">Active</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/me');
+        const data = await res.json();
+        if (!data.user) {
+          window.location.href = '/login';
+          return;
+        }
+        document.getElementById('userName').textContent = data.user.name;
+      } catch (e) {
+        window.location.href = '/login';
+      }
+    }
+
+    async function logout() {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/';
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

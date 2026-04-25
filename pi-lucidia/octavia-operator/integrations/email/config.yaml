@@ -1,0 +1,56 @@
+# Email (SendGrid + SMTP) — BlackRoad OS Integration
+# https://docs.sendgrid.com/api-reference
+
+name: email
+category: communication
+status: active
+api_base: https://api.sendgrid.com/v3
+
+auth:
+  type: bearer_token
+  env: SENDGRID_API_KEY
+
+from:
+  address_env: EMAIL_FROM_ADDRESS
+  name_env: EMAIL_FROM_NAME
+  default_address: noreply@blackroad.io
+  default_name: BlackRoad OS
+
+endpoints:
+  mail:
+    send: POST /mail/send
+  templates:
+    list: GET /templates
+    get: GET /templates/{template_id}
+    create: POST /templates
+  contacts:
+    add: PUT /marketing/contacts
+    search: POST /marketing/contacts/search
+    list: GET /marketing/lists
+  stats:
+    global: GET /stats
+    categories: GET /categories/stats
+
+templates:
+  welcome: configured
+  alert: configured
+  deployment: configured
+  invoice: configured
+  agent_report: configured
+
+smtp:
+  host: smtp.sendgrid.net
+  port: 587
+  tls: true
+  username: apikey
+  password_env: SENDGRID_API_KEY
+
+domains:
+  - blackroad.io
+  - blackroad.ai
+  - blackroad.systems
+
+health_check:
+  endpoint: GET /scopes
+  interval: 600
+  timeout: 10

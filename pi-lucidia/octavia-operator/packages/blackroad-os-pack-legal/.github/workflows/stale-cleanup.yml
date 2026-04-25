@@ -1,0 +1,69 @@
+name: Stale Issue Cleanup
+
+# Automatically flags and closes stale issues
+# Keeps your board clean without manual gardening
+
+on:
+  schedule:
+    # Run daily at midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    # Allow manual trigger
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mark and close stale issues
+        uses: actions/stale@v9
+        with:
+          # Issues
+          stale-issue-message: |
+            ⏰ **This issue has been inactive for 14 days.**
+            
+            If this is still needed, please comment or update the issue.
+            Otherwise, it will be closed in 7 days.
+            
+            To keep this open: add a comment or remove the `stale` label.
+          close-issue-message: |
+            🗂️ **Closed due to inactivity.**
+            
+            If this is still needed, reopen the issue or create a new one.
+          stale-issue-label: 'stale'
+          days-before-issue-stale: 14
+          days-before-issue-close: 7
+          
+          # PRs - more aggressive since they should flow fast
+          stale-pr-message: |
+            ⏰ **This PR has been inactive for 7 days.**
+            
+            If CI is failing, fix it. If it's blocked, add the `blocked` label.
+            Otherwise, this PR will be closed in 3 days.
+          close-pr-message: |
+            🗂️ **Closed due to inactivity.**
+            
+            If this work is still needed, create a new PR.
+          stale-pr-label: 'stale'
+          days-before-pr-stale: 7
+          days-before-pr-close: 3
+          
+          # Exemptions
+          exempt-issue-labels: 'pinned,security,blocked,p0-now'
+          exempt-pr-labels: 'pinned,security,blocked'
+          
+          # Don't mark issues that have recent commits on linked branches
+          exempt-all-pr-milestones: true
+          
+          # Operations per run (GitHub API limits)
+          operations-per-run: 100
+
+      - name: Report cleanup stats
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('Stale cleanup completed');
+            console.log('Check the Actions log for details on marked/closed items');

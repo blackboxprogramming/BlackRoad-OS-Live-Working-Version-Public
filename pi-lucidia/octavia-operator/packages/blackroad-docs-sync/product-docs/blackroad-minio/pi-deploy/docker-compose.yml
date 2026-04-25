@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  blackroad-minio:
+    image: node:18-alpine
+    container_name: blackroad-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: node server.js
+    environment:
+      - NODE_ENV=production
+      - PORT=9000
+      - PI_NAME=lucidia-alt
+      - SERVICE_NAME=blackroad-minio
+    networks:
+      - blackroad-net
+
+networks:
+  blackroad-net:
+    driver: bridge

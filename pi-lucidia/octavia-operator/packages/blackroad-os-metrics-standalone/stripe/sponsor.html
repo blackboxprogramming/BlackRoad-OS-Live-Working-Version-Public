@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support BlackRoad OS</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        .header {
+            background: white;
+            padding: 40px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+        }
+
+        .content {
+            background: white;
+            padding: 40px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .pricing-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pricing-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .pricing-card.featured {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+        }
+
+        .pricing-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .pricing-amount {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .pricing-interval {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .pricing-description {
+            color: #666;
+            margin: 15px 0;
+            font-size: 0.95em;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .pricing-features li {
+            padding: 8px 0;
+            color: #555;
+        }
+
+        .pricing-features li:before {
+            content: "✓ ";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+        }
+    </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--black:#000;--ink:#0A0A0A;--surface:#111;--border:#1A1A1A;--dim:#666;--sub:#999;--white:#FFF;--pink:#FF1D6C;--amber:#F5A623;--violet:#9C27B0;--blue:#2979FF;--green:#00FF88;--gradient:linear-gradient(135deg,#F5A623 0%,#FF1D6C 38.2%,#9C27B0 61.8%,#2979FF 100%);--xs:8px;--sm:13px;--md:21px;--lg:34px;--xl:55px;--xxl:89px}
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'JetBrains Mono',monospace;background:#000;color:#fff;line-height:1.618;overflow-x:hidden;-webkit-font-smoothing:antialiased;padding-top:70px}
+    h1{font-size:clamp(40px,8vw,100px);font-weight:600;letter-spacing:-.02em;line-height:1.1;background:linear-gradient(135deg,#F5A623 0%,#FF1D6C 38.2%,#9C27B0 61.8%,#2979FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:21px}
+    h2{font-size:clamp(24px,4vw,48px);font-weight:600;letter-spacing:-.02em;color:#fff;margin-bottom:21px}
+    h3{font-size:clamp(16px,2vw,24px);font-weight:600;color:#fff;margin-bottom:13px}
+    h4,h5,h6{color:#fff}
+    p{color:#999;line-height:1.8;margin-bottom:21px}
+    a{color:#2979FF;text-decoration:none;transition:color .2s}
+    a:hover{color:#FF1D6C}
+    strong{color:#fff}
+    code{font-family:inherit;background:#111;color:#00FF88;padding:2px 6px;border:1px solid #1A1A1A}
+    pre{background:#0A0A0A;border:1px solid #1A1A1A;border-left:2px solid #FF1D6C;padding:21px 34px;color:#00FF88;overflow-x:auto;margin-bottom:34px}
+    hr{border:none;height:1px;background:linear-gradient(135deg,#F5A623,#FF1D6C,#9C27B0,#2979FF);opacity:.3;margin:55px 0}
+    nav,.nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:21px 55px;background:rgba(0,0,0,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid #1A1A1A}
+    nav a,.nav a{color:#999;font-size:13px}
+    nav a:hover,.nav a:hover{color:#fff}
+    .logo{font-size:20px;font-weight:700;background:linear-gradient(135deg,#F5A623 0%,#FF1D6C 38.2%,#9C27B0 61.8%,#2979FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    header{padding:21px 55px 0;display:flex;justify-content:space-between;align-items:center}
+    header .logo{font-size:22px;font-weight:700;background:linear-gradient(135deg,#F5A623 0%,#FF1D6C 38.2%,#9C27B0 61.8%,#2979FF 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    header nav{position:static;background:none;backdrop-filter:none;border:none;padding:0;display:flex;gap:34px}
+    .hero,section.hero{min-height:90vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:89px 55px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;background:radial-gradient(circle,rgba(255,29,108,.15) 0%,rgba(156,39,176,.1) 40%,transparent 70%);pointer-events:none;animation:orb 8s ease-in-out infinite}
+    @keyframes orb{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.6}50%{transform:translate(-50%,-50%) scale(1.3);opacity:1}}
+    .hero p,.tagline{font-size:18px;max-width:600px;color:#999;margin-bottom:55px;position:relative;z-index:1}
+    .hero h1{position:relative;z-index:1}
+    .earth-glow,.hero-glow,.neural-bg{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(255,29,108,.07) 0%,transparent 60%);pointer-events:none}
+    section{padding:89px 55px;position:relative}
+    section:not(.hero){max-width:1200px;margin-left:auto;margin-right:auto}
+    section h2{color:#fff;-webkit-text-fill-color:#fff}
+    .btn,.btn-primary{display:inline-block;padding:13px 34px;font-family:inherit;font-size:14px;font-weight:600;background:#FF1D6C;color:#fff;text-decoration:none;border:none;cursor:pointer;transition:all .2s;position:relative;z-index:1}
+    .btn:hover,.btn-primary:hover{background:#fff;color:#000;transform:translateY(-2px)}
+    .features-grid,.ai-features,.pillars{display:flex;flex-wrap:wrap;gap:34px;justify-content:center}
+    .feature-card,.ai-feature,.pillar{background:rgba(255,255,255,.02);border:1px solid #1A1A1A;padding:55px;transition:all .3s;flex:1;min-width:220px;max-width:360px}
+    .feature-card:hover,.ai-feature:hover,.pillar:hover{background:rgba(255,255,255,.05);border-color:rgba(255,29,108,.4);transform:translateY(-4px)}
+    .feature-icon,.ai-feature-icon,.pillar-icon{font-size:28px;margin-bottom:21px;display:block}
+    .feature-card h3,.ai-feature-title,.pillar-name{color:#fff;margin-bottom:8px}
+    .feature-card p,.ai-feature-desc{font-size:14px;color:#666}
+    .badge,.ai-badge{display:inline-block;padding:4px 13px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;border:1px solid #1A1A1A;color:#999;margin-bottom:21px}
+    footer,.footer{padding:55px;border-top:1px solid #1A1A1A;color:#666;font-size:13px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:21px}
+    footer a,.footer a{color:#999}
+    footer a:hover,.footer a:hover{color:#FF1D6C}
+    @media(max-width:768px){nav,.nav{padding:21px}.hero,section.hero{padding:89px 21px}.features-grid,.ai-features,.pillars{flex-direction:column}.feature-card,.ai-feature{min-width:unset;max-width:unset}footer,.footer{flex-direction:column;text-align:center;padding:34px 21px}}
+  </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Support BlackRoad OS</h1>
+            <p class="subtitle">Help build the future of AI infrastructure</p>
+        </div>
+
+        <div class="content">
+            <h2 style="margin-bottom: 10px;">One-Time Support</h2>
+            <p style="color: #666; margin-bottom: 25px;">Make a one-time contribution to support development</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card" onclick="checkout('one_time_10')">
+                    <div class="pricing-title">Coffee</div>
+                    <div class="pricing-amount">$10</div>
+                    <div class="pricing-description">Buy us a coffee ☕</div>
+                    <button>Support $10</button>
+                </div>
+
+                <div class="pricing-card" onclick="checkout('one_time_50')">
+                    <div class="pricing-title">Supporter</div>
+                    <div class="pricing-amount">$50</div>
+                    <div class="pricing-description">Meaningful support 🙏</div>
+                    <button>Support $50</button>
+                </div>
+
+                <div class="pricing-card featured" onclick="checkout('one_time_500')">
+                    <span class="badge">Most Popular</span>
+                    <div class="pricing-title">Champion</div>
+                    <div class="pricing-amount">$500</div>
+                    <div class="pricing-description">Serious impact 🚀</div>
+                    <button>Support $500</button>
+                </div>
+            </div>
+
+            <h2 style="margin: 50px 0 10px;">Monthly Support</h2>
+            <p style="color: #666; margin-bottom: 25px;">Recurring support for sustainable development</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card" onclick="checkout('monthly_5')">
+                    <div class="pricing-title">Friend</div>
+                    <div class="pricing-amount">$5<span class="pricing-interval">/mo</span></div>
+                    <div class="pricing-description">Join the community</div>
+                    <button>Subscribe $5/mo</button>
+                </div>
+
+                <div class="pricing-card featured" onclick="checkout('monthly_25')">
+                    <span class="badge">Recommended</span>
+                    <div class="pricing-title">Supporter</div>
+                    <div class="pricing-amount">$25<span class="pricing-interval">/mo</span></div>
+                    <div class="pricing-description">Sustainable support</div>
+                    <button>Subscribe $25/mo</button>
+                </div>
+
+                <div class="pricing-card" onclick="checkout('monthly_100')">
+                    <div class="pricing-title">Sponsor</div>
+                    <div class="pricing-amount">$100<span class="pricing-interval">/mo</span></div>
+                    <div class="pricing-description">Major sponsor recognition</div>
+                    <button>Subscribe $100/mo</button>
+                </div>
+            </div>
+
+            <h2 style="margin: 50px 0 10px;">Commercial Licensing</h2>
+            <p style="color: #666; margin-bottom: 25px;">Use BlackRoad OS in your commercial products</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card" onclick="checkout('license_startup')">
+                    <div class="pricing-title">Startup</div>
+                    <div class="pricing-amount">$499<span class="pricing-interval">/year</span></div>
+                    <div class="pricing-description">For startups < $1M revenue</div>
+                    <ul class="pricing-features">
+                        <li>Commercial use license</li>
+                        <li>Email support</li>
+                        <li>Updates & patches</li>
+                    </ul>
+                    <button>Get License</button>
+                </div>
+
+                <div class="pricing-card featured" onclick="checkout('license_business')">
+                    <span class="badge">Best Value</span>
+                    <div class="pricing-title">Business</div>
+                    <div class="pricing-amount">$999<span class="pricing-interval">/year</span></div>
+                    <div class="pricing-description">For established businesses</div>
+                    <ul class="pricing-features">
+                        <li>Commercial use license</li>
+                        <li>Priority support</li>
+                        <li>Custom integrations</li>
+                        <li>Dedicated account manager</li>
+                    </ul>
+                    <button>Get License</button>
+                </div>
+
+                <div class="pricing-card" onclick="checkout('license_enterprise')">
+                    <div class="pricing-title">Enterprise</div>
+                    <div class="pricing-amount">$2,499<span class="pricing-interval">/year</span></div>
+                    <div class="pricing-description">For large organizations</div>
+                    <ul class="pricing-features">
+                        <li>Unlimited commercial use</li>
+                        <li>24/7 priority support</li>
+                        <li>Custom development</li>
+                        <li>SLA guarantee</li>
+                        <li>On-site training</li>
+                    </ul>
+                    <button>Contact Sales</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© 2023-2025 BlackRoad OS, Inc. All Rights Reserved.</p>
+            <p style="margin-top: 10px; opacity: 0.8;">
+                Payments processed securely by <strong>Stripe</strong>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('pk_live_YOUR_PUBLISHABLE_KEY_HERE');
+
+        // Stripe checkout URLs (replace with your actual Stripe product links)
+        const checkoutUrls = {
+            'one_time_10': 'https://buy.stripe.com/YOUR_LINK',
+            'one_time_50': 'https://buy.stripe.com/YOUR_LINK',
+            'one_time_500': 'https://buy.stripe.com/YOUR_LINK',
+            'monthly_5': 'https://buy.stripe.com/YOUR_LINK',
+            'monthly_25': 'https://buy.stripe.com/YOUR_LINK',
+            'monthly_100': 'https://buy.stripe.com/YOUR_LINK',
+            'license_startup': 'https://buy.stripe.com/YOUR_LINK',
+            'license_business': 'https://buy.stripe.com/YOUR_LINK',
+            'license_enterprise': 'mailto:blackroad.systems@gmail.com?subject=Enterprise%20License%20Inquiry'
+        };
+
+        function checkout(priceId) {
+            const url = checkoutUrls[priceId];
+            if (url.startsWith('mailto:')) {
+                window.location.href = url;
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+</body>
+</html>

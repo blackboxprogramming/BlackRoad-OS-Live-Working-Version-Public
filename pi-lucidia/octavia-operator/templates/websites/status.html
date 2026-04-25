@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Status — BlackRoad OS</title>
+  <meta name="description" content="BlackRoad OS system status. Real-time health of all services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../websites/_shared/design-bw.css">
+  <style>
+    .hero {
+      padding: 120px var(--sp-xl) var(--sp-xl);
+      max-width: 900px; margin: 0 auto;
+      text-align: center;
+    }
+    .hero h1 { margin-bottom: var(--sp-md); }
+
+    .status-banner {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-xl);
+    }
+    .banner-inner {
+      display: flex; align-items: center; justify-content: center; gap: var(--sp-md);
+      padding: var(--sp-lg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+    .banner-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 0 8px rgba(255,255,255,0.3);
+    }
+    .banner-text { font-size: 1.1rem; font-weight: 600; }
+    .banner-time {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .services {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+
+    .service-group { margin-bottom: var(--sp-xl); }
+    .group-title {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-bottom: var(--sp-md);
+    }
+    .service-list {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    .service-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--sp-md) var(--sp-lg);
+      border-bottom: 1px solid var(--border);
+    }
+    .service-row:last-child { border-bottom: none; }
+    .service-name {
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .service-status {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+    .s-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .s-up   { background: var(--white); box-shadow: 0 0 6px rgba(255,255,255,0.3); }
+    .s-down { background: var(--muted); }
+    .s-deg  { background: var(--subtle); }
+    .s-text-up   { color: var(--white); }
+    .s-text-down { color: var(--muted); }
+    .s-text-deg  { color: var(--subtle); }
+
+    /* Uptime bars */
+    .uptime-section {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+    .uptime-row {
+      margin-bottom: var(--sp-lg);
+    }
+    .uptime-header {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: var(--sp-xs);
+    }
+    .uptime-name { font-size: 0.88rem; font-weight: 500; }
+    .uptime-pct {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--subtle);
+    }
+    .uptime-bar {
+      display: flex; gap: 2px; height: 28px;
+    }
+    .uptime-day {
+      flex: 1;
+      background: var(--white);
+      border-radius: 2px;
+      transition: opacity 0.2s;
+    }
+    .uptime-day:hover { opacity: 0.7; }
+    .uptime-day.partial { background: var(--subtle); }
+    .uptime-day.down { background: var(--muted); }
+    .uptime-legend {
+      display: flex; justify-content: space-between;
+      margin-top: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+    }
+
+    /* Incidents */
+    .incidents {
+      max-width: 760px; margin: 0 auto;
+      padding: 0 var(--sp-xl) var(--sp-2xl);
+    }
+    .incident {
+      padding: var(--sp-lg) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .incident:last-child { border-bottom: none; }
+    .incident-date {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-bottom: var(--sp-xs);
+    }
+    .incident-title { font-weight: 600; margin-bottom: var(--sp-xs); }
+    .incident-body { font-size: 0.88rem; color: var(--subtle); line-height: 1.65; }
+    .incident-resolved {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--subtle);
+      margin-top: var(--sp-xs);
+    }
+  </style>
+</head>
+<body class="dot-bg">
+
+  <nav>
+    <div class="nav-logo">BlackRoad OS</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/changelog">Changelog</a>
+    </div>
+    <a href="/docs" class="nav-cta">Get Started</a>
+  </nav>
+
+  <div class="hero">
+    <div class="label">System Status</div>
+    <h1>All systems operational.</h1>
+  </div>
+
+  <!-- Banner -->
+  <div class="status-banner">
+    <div class="banner-inner">
+      <span class="banner-dot"></span>
+      <span class="banner-text">All Systems Operational</span>
+      <span class="banner-time">Updated 2 min ago</span>
+    </div>
+  </div>
+
+  <!-- Services -->
+  <div class="services">
+    <div class="service-group">
+      <div class="group-title">Core Services</div>
+      <div class="service-list">
+        <div class="service-row">
+          <span class="service-name">Tokenless Gateway</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Agent Runtime</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">PS-SHA Memory</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">CECE Identity</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-group">
+      <div class="group-title">Infrastructure</div>
+      <div class="service-list">
+        <div class="service-row">
+          <span class="service-name">Cloudflare Workers (75+)</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Railway Services</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Pi Cluster</span>
+          <span class="service-status s-text-deg"><span class="s-dot s-deg"></span>Degraded</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">DigitalOcean Droplet</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="service-group">
+      <div class="group-title">API &amp; Integrations</div>
+      <div class="service-list">
+        <div class="service-row">
+          <span class="service-name">GitHub API</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">Ollama (Local)</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+        <div class="service-row">
+          <span class="service-name">MCP Bridge</span>
+          <span class="service-status s-text-up"><span class="s-dot s-up"></span>Operational</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Uptime -->
+  <div class="uptime-section">
+    <div class="label mb-lg">90-Day Uptime</div>
+
+    <div class="uptime-row">
+      <div class="uptime-header">
+        <span class="uptime-name">Gateway</span>
+        <span class="uptime-pct">99.98%</span>
+      </div>
+      <div class="uptime-bar">
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day partial"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      </div>
+      <div class="uptime-legend">
+        <span>30 days ago</span>
+        <span>Today</span>
+      </div>
+    </div>
+
+    <div class="uptime-row">
+      <div class="uptime-header">
+        <span class="uptime-name">Agent Runtime</span>
+        <span class="uptime-pct">99.95%</span>
+      </div>
+      <div class="uptime-bar">
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day partial"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+        <div class="uptime-day"></div><div class="uptime-day"></div><div class="uptime-day"></div>
+      </div>
+      <div class="uptime-legend">
+        <span>30 days ago</span>
+        <span>Today</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Incidents -->
+  <div class="incidents">
+    <div class="label mb-lg">Recent Incidents</div>
+
+    <div class="incident">
+      <div class="incident-date">Feb 22, 2026</div>
+      <div class="incident-title">Pi Cluster Node Offline</div>
+      <div class="incident-body">Octavia Pi (10.x.x.x) went offline due to SD card failure. Agent workload redistributed to Lucidia Pi. Replacement hardware deployed.</div>
+      <div class="incident-resolved">Resolved &mdash; Feb 22, 14:32 UTC &mdash; Duration: 2h 15m</div>
+    </div>
+
+    <div class="incident">
+      <div class="incident-date">Feb 14, 2026</div>
+      <div class="incident-title">Gateway Latency Spike</div>
+      <div class="incident-body">Tokenless gateway experienced elevated latency (p95 > 500ms) during v3.0 deployment. Caused by concurrent model loading on Ollama backend.</div>
+      <div class="incident-resolved">Resolved &mdash; Feb 14, 09:18 UTC &mdash; Duration: 12m</div>
+    </div>
+  </div>
+
+  <footer>
+    <span>&copy; 2026 BlackRoad OS, Inc.</span>
+    <span style="display:flex;gap:var(--sp-lg);">
+      <a href="/">Home</a>
+      <a href="/docs">Docs</a>
+      <a href="/contact">Contact</a>
+    </span>
+  </footer>
+
+</body>
+</html>

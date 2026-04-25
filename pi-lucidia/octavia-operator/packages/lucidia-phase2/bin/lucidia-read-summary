@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+SESSION="$1"
+FILE="$HOME/lucidia-phase2/sessions/$SESSION/alice_summary_for_lucidia.md"
+
+if [[ ! -f "$FILE" ]]; then
+  echo "No summary found for session '$SESSION'"
+  exit 1
+fi
+
+ollama run lucidia <<PROMPT
+Please read the following Alice summary and decide next steps.
+Do not execute. Cite constraints if applicable.
+
+$(cat "$FILE")
+PROMPT

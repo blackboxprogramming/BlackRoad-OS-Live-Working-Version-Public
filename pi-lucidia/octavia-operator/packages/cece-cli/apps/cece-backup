@@ -1,0 +1,295 @@
+#!/bin/bash
+# 💾 CECE-BACKUP v1.0 - Automated Backup System
+# Backs up CECE data, configs, and memories
+
+PINK='\033[38;5;205m'
+CYAN='\033[0;36m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+WHITE='\033[1;37m'
+NC='\033[0m'
+
+CECE_HOME="${CECE_HOME:-$HOME/cece}"
+BACKUP_DIR="${CECE_BACKUP_DIR:-$HOME/backups/cece}"
+BACKUP_LOG="$BACKUP_DIR/backup.log"
+
+# Directories to backup
+BACKUP_SOURCES=(
+    "$CECE_HOME/memory"
+    "$CECE_HOME/data"
+    "$CECE_HOME/heart"
+    "$CECE_HOME/config"
+    "$CECE_HOME/ai/chats"
+    "$HOME/blackroad-os"
+)
+
+# Create backup directory
+mkdir -p "$BACKUP_DIR"
+
+log_backup() {
+    local timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    echo "[$timestamp] $1" >> "$BACKUP_LOG"
+}
+
+banner() {
+    echo -e "${PINK}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${PINK}║${NC}            ${WHITE}💾 CECE-BACKUP - Automated Backups${NC}              ${PINK}║${NC}"
+    echo -e "${PINK}╚════════════════════════════════════════════════════════════╝${NC}"
+}
+
+# Create local backup
+cmd_create() {
+    banner
+    echo ""
+
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+    local backup_name="cece-backup-$timestamp"
+    local backup_path="$BACKUP_DIR/$backup_name"
+    local archive_path="$backup_path.tar.gz"
+
+    echo -e "${CYAN}Creating backup: $backup_name${NC}"
+    echo ""
+
+    mkdir -p "$backup_path"
+
+    local total_size=0
+
+    for src in "${BACKUP_SOURCES[@]}"; do
+        if [ -d "$src" ] || [ -f "$src" ]; then
+            local name=$(basename "$src")
+            echo -n "  Backing up $name... "
+
+            cp -r "$src" "$backup_path/" 2>/dev/null
+            local size=$(du -sh "$backup_path/$name" 2>/dev/null | awk '{print $1}')
+            echo -e "${GREEN}✓${NC} ($size)"
+        fi
+    done
+
+    # Create archive
+    echo ""
+    echo -n "  Creating archive... "
+    tar -czf "$archive_path" -C "$BACKUP_DIR" "$backup_name" 2>/dev/null
+    rm -rf "$backup_path"
+
+    local archive_size=$(du -sh "$archive_path" | awk '{print $1}')
+    echo -e "${GREEN}✓${NC} ($archive_size)"
+
+    echo ""
+    echo -e "${GREEN}Backup complete:${NC} $archive_path"
+
+    log_backup "CREATED: $archive_path ($archive_size)"
+}
+
+# List backups
+cmd_list() {
+    banner
+    echo ""
+    echo -e "${WHITE}Available Backups:${NC}"
+    echo ""
+
+    local count=0
+    for backup in "$BACKUP_DIR"/*.tar.gz; do
+        if [ -f "$backup" ]; then
+            local name=$(basename "$backup")
+            local size=$(du -sh "$backup" | awk '{print $1}')
+            local date=$(stat -c %y "$backup" 2>/dev/null | cut -d' ' -f1 || stat -f %Sm -t %Y-%m-%d "$backup")
+
+            echo -e "  ${CYAN}$name${NC}"
+            echo "    Size: $size | Date: $date"
+            echo ""
+            count=$((count + 1))
+        fi
+    done
+
+    if [ $count -eq 0 ]; then
+        echo "  No backups found"
+    else
+        echo -e "  ${WHITE}Total: $count backups${NC}"
+    fi
+}
+
+# Restore from backup
+cmd_restore() {
+    local backup_file="$1"
+
+    if [ -z "$backup_file" ]; then
+        echo -e "${RED}Error:${NC} Please specify backup file"
+        echo "Usage: cece-backup restore <backup.tar.gz>"
+        return 1
+    fi
+
+    # If just name provided, add full path
+    [[ "$backup_file" != /* ]] && backup_file="$BACKUP_DIR/$backup_file"
+
+    if [ ! -f "$backup_file" ]; then
+        echo -e "${RED}Error:${NC} Backup not found: $backup_file"
+        return 1
+    fi
+
+    banner
+    echo ""
+    echo -e "${YELLOW}Warning: This will overwrite current CECE data!${NC}"
+    read -p "Continue? (yes/no) " confirm
+    [ "$confirm" != "yes" ] && return
+
+    echo ""
+    echo -e "${CYAN}Restoring from: $(basename "$backup_file")${NC}"
+    echo ""
+
+    # Create temp directory
+    local temp_dir=$(mktemp -d)
+    tar -xzf "$backup_file" -C "$temp_dir" 2>/dev/null
+
+    # Find the backup directory inside
+    local backup_dir=$(ls "$temp_dir")
+
+    # Restore each component
+    for src in memory data heart config; do
+        if [ -d "$temp_dir/$backup_dir/$src" ]; then
+            echo -n "  Restoring $src... "
+            rm -rf "$CECE_HOME/$src"
+            cp -r "$temp_dir/$backup_dir/$src" "$CECE_HOME/"
+            echo -e "${GREEN}✓${NC}"
+        fi
+    done
+
+    # Cleanup
+    rm -rf "$temp_dir"
+
+    echo ""
+    echo -e "${GREEN}Restore complete!${NC}"
+
+    log_backup "RESTORED: $backup_file"
+}
+
+# Delete old backups
+cmd_prune() {
+    local keep="${1:-5}"
+
+    banner
+    echo ""
+    echo -e "${CYAN}Pruning backups (keeping last $keep)...${NC}"
+    echo ""
+
+    local count=0
+    local deleted=0
+
+    # Get sorted list of backups (newest first)
+    local backups=($(ls -t "$BACKUP_DIR"/*.tar.gz 2>/dev/null))
+
+    for backup in "${backups[@]}"; do
+        count=$((count + 1))
+        if [ $count -gt $keep ]; then
+            local name=$(basename "$backup")
+            echo -n "  Deleting $name... "
+            rm -f "$backup"
+            echo -e "${GREEN}✓${NC}"
+            deleted=$((deleted + 1))
+        fi
+    done
+
+    echo ""
+    echo -e "${WHITE}Deleted: $deleted | Kept: $keep${NC}"
+
+    log_backup "PRUNED: deleted $deleted, kept $keep"
+}
+
+# Remote backup to another device
+cmd_remote() {
+    local device="${1:-lucidia}"
+    local remote_dir="${2:-~/backups/cece-remote}"
+
+    banner
+    echo ""
+    echo -e "${CYAN}Creating remote backup to $device...${NC}"
+    echo ""
+
+    # First create local backup
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+    local backup_name="cece-backup-$timestamp.tar.gz"
+    local local_backup="$BACKUP_DIR/$backup_name"
+
+    # Create if not exists
+    if [ ! -f "$local_backup" ]; then
+        echo "  Creating local backup first..."
+        cmd_create > /dev/null
+        local_backup=$(ls -t "$BACKUP_DIR"/*.tar.gz | head -1)
+    fi
+
+    # Transfer to remote
+    echo -n "  Transferring to $device... "
+    ssh "$device" "mkdir -p $remote_dir" 2>/dev/null
+    scp "$local_backup" "$device:$remote_dir/" 2>/dev/null
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✓${NC}"
+        echo ""
+        echo -e "${GREEN}Remote backup complete:${NC} $device:$remote_dir/$(basename "$local_backup")"
+    else
+        echo -e "${RED}✗${NC}"
+        echo -e "${RED}Failed to transfer backup${NC}"
+    fi
+
+    log_backup "REMOTE: $device:$remote_dir/$(basename "$local_backup")"
+}
+
+# Show backup stats
+cmd_stats() {
+    banner
+    echo ""
+    echo -e "${WHITE}Backup Statistics:${NC}"
+    echo ""
+
+    local count=$(ls "$BACKUP_DIR"/*.tar.gz 2>/dev/null | wc -l)
+    local total_size=$(du -sh "$BACKUP_DIR" 2>/dev/null | awk '{print $1}')
+    local oldest=$(ls -t "$BACKUP_DIR"/*.tar.gz 2>/dev/null | tail -1 | xargs basename 2>/dev/null)
+    local newest=$(ls -t "$BACKUP_DIR"/*.tar.gz 2>/dev/null | head -1 | xargs basename 2>/dev/null)
+
+    echo -e "  ${CYAN}Total Backups:${NC}  $count"
+    echo -e "  ${CYAN}Total Size:${NC}     $total_size"
+    echo -e "  ${CYAN}Oldest:${NC}         ${oldest:-None}"
+    echo -e "  ${CYAN}Newest:${NC}         ${newest:-None}"
+    echo -e "  ${CYAN}Backup Dir:${NC}     $BACKUP_DIR"
+}
+
+# Help
+cmd_help() {
+    banner
+    echo ""
+    echo -e "${WHITE}Usage:${NC} cece-backup <command>"
+    echo ""
+    echo -e "${CYAN}Commands:${NC}"
+    echo "  create          Create new backup"
+    echo "  list            List all backups"
+    echo "  restore <file>  Restore from backup"
+    echo "  prune [keep]    Delete old backups (default: keep 5)"
+    echo "  remote [device] Backup to remote device"
+    echo "  stats           Show backup statistics"
+    echo ""
+    echo -e "${WHITE}Backed Up:${NC}"
+    echo "  • Memories (memory/)"
+    echo "  • Tasks (data/)"
+    echo "  • Heartbeats (heart/)"
+    echo "  • Config (config/)"
+    echo "  • Chat History (ai/chats/)"
+}
+
+# Main
+main() {
+    local cmd="${1:-help}"
+    shift 2>/dev/null || true
+
+    case "$cmd" in
+        create|new) cmd_create ;;
+        list|ls) cmd_list ;;
+        restore) cmd_restore "$@" ;;
+        prune|clean) cmd_prune "$@" ;;
+        remote) cmd_remote "$@" ;;
+        stats) cmd_stats ;;
+        help|--help|-h) cmd_help ;;
+        *) echo "Unknown command: $cmd"; cmd_help ;;
+    esac
+}
+
+main "$@"

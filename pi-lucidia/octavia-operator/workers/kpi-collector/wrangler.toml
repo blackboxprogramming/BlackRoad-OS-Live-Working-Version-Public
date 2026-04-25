@@ -1,0 +1,25 @@
+name               = "blackroad-kpi-collector"
+main               = "src/index.js"
+compatibility_date = "2024-12-01"
+account_id         = "848cf0b18d51e0170e0d1537aec3505a"
+
+[vars]
+INSTANCE = "kpi-collector"
+
+# Durable Objects for real-time state
+[[durable_objects.bindings]]
+name       = "KPI_STORE"
+class_name = "KpiStore"
+
+[[migrations]]
+tag         = "v1"
+new_classes = ["KpiStore"]
+
+# KV for metric snapshots
+[[kv_namespaces]]
+binding = "KPI_SNAPSHOTS"
+id      = "PLACEHOLDER_KV_ID"
+
+# Analytics Engine for time-series
+[[analytics_engine_datasets]]
+binding = "KPI_ANALYTICS"

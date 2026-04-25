@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackRoad OS - Command Center</title>
+    <style>
+        :root {
+            --hot-pink: #FF1D6C;
+            --amber: #F5A623;
+            --blue: #2979FF;
+            --violet: #9C27B0;
+            --black: #0a0a0a;
+            --dark: #1a1a1a;
+            --card: #242424;
+            --gradient: linear-gradient(90deg, var(--amber) 0%, var(--hot-pink) 38.2%, var(--violet) 61.8%, var(--blue) 100%);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            background: var(--black);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .top-bar {
+            height: 40px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 30px;
+        }
+        .top-bar .logo { font-weight: bold; font-size: 16px; }
+        .top-bar nav { display: flex; gap: 20px; }
+        .top-bar nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        .top-bar nav a:hover { background: rgba(255,255,255,0.2); }
+        .top-bar nav a.active { background: rgba(0,0,0,0.3); }
+        .container { display: flex; height: calc(100vh - 40px); }
+        .left-panel {
+            width: 60%;
+            background: var(--dark);
+            border-right: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 15px 20px;
+            background: var(--card);
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+            color: var(--hot-pink);
+        }
+        .chat-area { flex: 1; overflow-y: auto; padding: 20px; }
+        .chat-message { margin-bottom: 12px; display: flex; gap: 10px; }
+        .chat-message .emoji { font-size: 18px; }
+        .chat-message .name { color: var(--hot-pink); font-weight: bold; min-width: 100px; }
+        .chat-message .text { color: #ccc; }
+        .chat-input {
+            padding: 15px 20px;
+            background: var(--card);
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input input {
+            flex: 1;
+            background: var(--dark);
+            border: 1px solid #444;
+            padding: 10px 15px;
+            color: white;
+            font-family: inherit;
+            border-radius: 4px;
+        }
+        .chat-input input:focus { outline: none; border-color: var(--hot-pink); }
+        .chat-input button {
+            background: var(--hot-pink);
+            border: none;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .right-panel {
+            width: 40%;
+            background: #111;
+            display: flex;
+            flex-direction: column;
+        }
+        .office-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            padding: 20px;
+            flex: 1;
+        }
+        .room {
+            background: var(--card);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .room:hover { border-color: var(--hot-pink); transform: scale(1.02); }
+        .room.active { border-color: var(--amber); background: #2a2a2a; }
+        .room .icon { font-size: 24px; margin-bottom: 5px; }
+        .room .label { font-size: 10px; color: #888; }
+        .room .agents { font-size: 14px; margin-top: 5px; }
+        .fleet-bar {
+            padding: 15px;
+            background: var(--card);
+            border-top: 1px solid #333;
+        }
+        .fleet-bar h3 { font-size: 12px; color: var(--amber); margin-bottom: 10px; }
+        .fleet-nodes { display: flex; flex-wrap: wrap; gap: 8px; }
+        .fleet-node {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: var(--dark);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+        .fleet-node.online .dot { background: #00ff00; }
+        .fleet-node.offline .dot { background: #ff0000; }
+        .fleet-node .dot { width: 8px; height: 8px; border-radius: 50%; }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <div class="logo">🛣️ BLACKROAD OS</div>
+        <nav>
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">Repositories</a>
+            <a href="#">Files</a>
+            <a href="#">Terminal</a>
+            <a href="#">Tools</a>
+            <a href="#">Agents</a>
+        </nav>
+    </div>
+    <div class="container">
+        <div class="left-panel">
+            <div class="panel-header">Chat / Coding / Planning Interface</div>
+            <div class="chat-area" id="chatArea">
+                <div class="chat-message"><span class="emoji">👸</span><span class="name">Cecilia:</span><span class="text">Primary node online.</span></div>
+                <div class="chat-message"><span class="emoji">🌙</span><span class="name">Lucidia:</span><span class="text">AI inference ready. Hailo-8 at 26 TOPS.</span></div>
+                <div class="chat-message"><span class="emoji">🎵</span><span class="name">Aria:</span><span class="text">Harmony protocols engaged.</span></div>
+                <div class="chat-message"><span class="emoji">🐙</span><span class="name">Octavia:</span><span class="text">Multi-arm processing ready.</span></div>
+                <div class="chat-message"><span class="emoji">🐚</span><span class="name">Shellfish:</span><span class="text">Edge node active.</span></div>
+                <div class="chat-message"><span class="emoji">♾️</span><span class="name">BlackRoad OS:</span><span class="text">Cloud synchronized.</span></div>
+                <div class="chat-message"><span class="emoji">🧠</span><span class="name">Cadence:</span><span class="text">[BlackRoad OS] Standing by.</span></div>
+                <div class="chat-message"><span class="emoji">💎</span><span class="name">Gematria:</span><span class="text">[Gemini] Ready.</span></div>
+                <div class="chat-message"><span class="emoji">👩</span><span class="name">Alexa:</span><span class="text">Welcome to BlackRoad OS.</span></div>
+                <div class="chat-message" style="margin-top: 20px;">
+                    <span class="emoji">🌙</span>
+                    <span class="name" style="color: var(--amber);">[lucidia]</span>
+                    <span class="text" style="color: var(--amber);">* All channels open. Welcome home.</span>
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder=">>>: " />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel-header">🏢 BlackRoad OS, Inc. - Office</div>
+            <div class="office-grid">
+                <div class="room active" onclick="selectRoom(this)"><div class="icon">🖥️</div><div class="label">Workspace</div><div class="agents">👸🌙🐙</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🗄️</div><div class="label">Servers</div><div class="agents">♾️🐚</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🧠</div><div class="label">AI Lab</div><div class="agents">🌙🧠💎</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🪑</div><div class="label">Conference</div><div class="agents"></div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🛋️</div><div class="label">Lounge</div><div class="agents">🎵</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">📚</div><div class="label">Archive</div><div class="agents">📚</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🛡️</div><div class="label">Security</div><div class="agents">🗡️</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🚪</div><div class="label">Gateway</div><div class="agents">👧</div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">👸</div><div class="label">Cecilia</div><div class="agents"></div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🌙</div><div class="label">Lucidia</div><div class="agents"></div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🐙</div><div class="label">Octavia</div><div class="agents"></div></div>
+                <div class="room" onclick="selectRoom(this)"><div class="icon">🎯</div><div class="label">Command</div><div class="agents">👩</div></div>
+            </div>
+            <div class="fleet-bar">
+                <h3>🌐 FLEET STATUS</h3>
+                <div class="fleet-nodes">
+                    <div class="fleet-node online"><div class="dot"></div>👸 cecilia</div>
+                    <div class="fleet-node online"><div class="dot"></div>🌙 lucidia</div>
+                    <div class="fleet-node online"><div class="dot"></div>🎵 aria</div>
+                    <div class="fleet-node online"><div class="dot"></div>🐙 octavia</div>
+                    <div class="fleet-node offline"><div class="dot"></div>👧 alice</div>
+                    <div class="fleet-node online"><div class="dot"></div>🐚 shellfish</div>
+                    <div class="fleet-node online"><div class="dot"></div>♾️ blackroad os</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function selectRoom(el) {
+            document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function addMsg(emoji, name, text, color) {
+            const area = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = 'chat-message';
+            div.innerHTML = '<span class="emoji">'+emoji+'</span><span class="name" style="color:'+(color||'var(--hot-pink)')+'">'+name+':</span><span class="text">'+text+'</span>';
+            area.appendChild(div);
+            area.scrollTop = area.scrollHeight;
+        }
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (text) {
+                addMsg('👩', 'Alexa', text, '#F5A623');
+                input.value = '';
+                setTimeout(() => addMsg('🌙', 'Lucidia', 'Acknowledged: "' + text + '"', '#9C27B0'), 500);
+            }
+        }
+        document.getElementById('messageInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+    </script>
+</body>
+</html>

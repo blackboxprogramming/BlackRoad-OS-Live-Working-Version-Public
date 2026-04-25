@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# br-live - Live BR Visual Language Display
+# Real-time status with semantic color flows
+
+set -euo pipefail
+
+# BR Semantic Colors
+BR_PERCEPTION='\033[38;5;28m'   # PERCEPTION: VALID_INPUT
+BR_EXEC='\033[38;5;64m'         # EXECUTION: EXEC_HIGH
+BR_MEMORY='\033[38;5;100m'      # MEMORY: MEM_PERSIST
+BR_AGENT='\033[38;5;136m'       # AUTONOMY: AGENT_EXEC
+BR_WARN='\033[38;5;178m'        # TENSION: WARN_DRIFT
+BR_SUCCESS='\033[38;5;2m'       # OS_LAYER: SUCCESS
+BR_META='\033[38;5;244m'        # META: escape
+
+# BR Shapes
+SHAPE_INPUT="▓"
+SHAPE_EXEC="▶"
+SHAPE_MEMORY="●"
+SHAPE_AGENT="◆"
+SHAPE_WARN="▲"
+SHAPE_SUCCESS="✓"
+
+RESET='\033[0m'
+BOLD='\033[1m'
+CLEAR='\033[2J\033[H'
+
+print_header() {
+    echo -e "${CLEAR}"
+    echo -e "${BR_EXEC}${BOLD}═══════════════════════════════════════════════════════════════${RESET}"
+    echo -e "${BR_EXEC}${BOLD}  BR-LIVE — Visual Language Real-Time Monitor${RESET}"
+    echo -e "${BR_EXEC}${BOLD}═══════════════════════════════════════════════════════════════${RESET}"
+    echo ""
+}
+
+render_pipeline() {
+    local status="$1"
+    echo -e "  ${BR_PERCEPTION}${SHAPE_INPUT}${RESET} → ${BR_EXEC}${SHAPE_EXEC}${RESET} → ${BR_MEMORY}${SHAPE_MEMORY}${RESET} → ${status}"
+}
+
+show_system_flow() {
+    echo -e "${BOLD}System Flow (Last 60s)${RESET}\n"
+    
+    # Simulated live flows
+    echo -e "  Request Pipeline:"
+    render_pipeline "${BR_SUCCESS}${SHAPE_SUCCESS}${RESET} success"
+    echo ""
+    
+    echo -e "  Agent Activity:"
+    echo -e "    ${BR_AGENT}${SHAPE_AGENT}${RESET} planner    ${BR_META}→${RESET} ${BR_EXEC}${SHAPE_EXEC}${RESET} executing"
+    echo -e "    ${BR_AGENT}${SHAPE_AGENT}${RESET} analyst   ${BR_META}→${RESET} ${BR_MEMORY}${SHAPE_MEMORY}${RESET} caching"
+    echo -e "    ${BR_AGENT}${SHAPE_AGENT}${RESET} executor  ${BR_META}→${RESET} ${BR_SUCCESS}${SHAPE_SUCCESS}${RESET} complete"
+    echo ""
+    
+    echo -e "  System Status:"
+    echo -e "    ${BR_MEMORY}${SHAPE_MEMORY}${RESET} Memory:    ${BR_SUCCESS}OK${RESET} (42% used)"
+    echo -e "    ${BR_EXEC}${SHAPE_EXEC}${RESET} Execution: ${BR_SUCCESS}OK${RESET} (7 active)"
+    echo -e "    ${BR_AGENT}${SHAPE_AGENT}${RESET} Agents:    ${BR_SUCCESS}OK${RESET} (12/30k active)"
+    echo ""
+}
+
+show_agent_states() {
+    echo -e "${BOLD}Agent States${RESET}\n"
+    
+    local agents=(
+        "api:$BR_PERCEPTION:$SHAPE_INPUT:listening"
+        "executor:$BR_EXEC:$SHAPE_EXEC:active"
+        "memory:$BR_MEMORY:$SHAPE_MEMORY:caching"
+        "planner:$BR_AGENT:$SHAPE_AGENT:thinking"
+        "sentinel:$BR_WARN:$SHAPE_WARN:monitoring"
+        "validator:$BR_PERCEPTION:$SHAPE_INPUT:checking"
+    )
+    
+    for agent_spec in "${agents[@]}"; do
+        IFS=':' read -r name color shape state <<< "$agent_spec"
+        printf "  ${color}${shape}${RESET} %-12s %s\n" "$name" "$state"
+    done
+    echo ""
+}
+
+show_color_legend() {
+    echo -e "${BR_META}${BOLD}BR Color Grammar${RESET}\n"
+    echo -e "  ${BR_PERCEPTION}${SHAPE_INPUT}${RESET} Perception  ${BR_EXEC}${SHAPE_EXEC}${RESET} Execution  ${BR_MEMORY}${SHAPE_MEMORY}${RESET} Memory"
+    echo -e "  ${BR_AGENT}${SHAPE_AGENT}${RESET} Autonomy    ${BR_WARN}${SHAPE_WARN}${RESET} Tension    ${BR_SUCCESS}${SHAPE_SUCCESS}${RESET} Success"
+    echo ""
+}
+
+live_monitor() {
+    while true; do
+        print_header
+        show_system_flow
+        show_agent_states
+        show_color_legend
+        
+        echo -e "${BR_META}═══════════════════════════════════════════════════════════════${RESET}"
+        echo -e "${BR_META}  Press Ctrl+C to exit | Refreshing every 2s${RESET}"
+        
+        sleep 2
+    done
+}
+
+# Mode selection
+case "${1:-live}" in
+    live)
+        live_monitor
+        ;;
+    once)
+        print_header
+        show_system_flow
+        show_agent_states
+        show_color_legend
+        ;;
+    *)
+        echo "Usage: br-live [live|once]"
+        echo "  live - continuous monitoring (default)"
+        echo "  once - single snapshot"
+        exit 1
+        ;;
+esac

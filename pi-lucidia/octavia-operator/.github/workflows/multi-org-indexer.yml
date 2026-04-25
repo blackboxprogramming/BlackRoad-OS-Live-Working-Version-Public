@@ -1,0 +1,191 @@
+name: Multi-Org Indexer
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode: scrape, deploy-workflows, full'
+        required: false
+        default: 'full'
+  repository_dispatch:
+    types: [product-discovery]
+  schedule:
+    - cron: '0 0 * * *'  # Daily midnight UTC
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  scrape-all-orgs:
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        org:
+          - BlackRoad-OS-Inc
+          - BlackRoad-OS
+          - blackboxprogramming
+          - BlackRoad-AI
+          - BlackRoad-Cloud
+          - BlackRoad-Security
+          - BlackRoad-Media
+          - BlackRoad-Foundation
+          - BlackRoad-Interactive
+          - BlackRoad-Hardware
+          - BlackRoad-Labs
+          - BlackRoad-Studio
+          - BlackRoad-Ventures
+          - BlackRoad-Education
+          - BlackRoad-Gov
+          - Blackbox-Enterprises
+          - BlackRoad-Archive
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Scrape ${{ matrix.org }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== Scraping ${{ matrix.org }} ==="
+          mkdir -p index/${{ matrix.org }}
+
+          gh api "orgs/${{ matrix.org }}/repos" \
+            --paginate \
+            -q '.[] | {
+              name: .name,
+              full_name: .full_name,
+              description: .description,
+              language: .language,
+              topics: .topics,
+              stargazers_count: .stargazers_count,
+              forks_count: .forks_count,
+              size: .size,
+              fork: .fork,
+              archived: .archived,
+              private: .private,
+              html_url: .html_url,
+              homepage: .homepage,
+              has_pages: .has_pages,
+              pushed_at: .pushed_at,
+              updated_at: .updated_at
+            }' > index/${{ matrix.org }}/repos.jsonl 2>/dev/null || echo "[]" > index/${{ matrix.org }}/repos.jsonl
+
+          count=$(wc -l < index/${{ matrix.org }}/repos.jsonl)
+          echo "Found ${count} repos in ${{ matrix.org }}"
+
+      - name: Upload Index
+        uses: actions/upload-artifact@v7
+        with:
+          name: index-${{ matrix.org }}
+          path: index/${{ matrix.org }}/
+          retention-days: 30
+
+  consolidate:
+    needs: scrape-all-orgs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Download All Indexes
+        uses: actions/download-artifact@v8
+        with:
+          path: index/
+
+      - name: Generate Master Index
+        run: |
+          python3 << 'PYEOF'
+          import json, os, glob
+          from datetime import datetime, timezone
+
+          index = {
+              "generated_at": datetime.now(timezone.utc).isoformat(),
+              "owner": "BlackRoad OS, Inc.",
+              "organizations": {},
+              "totals": {"repos": 0, "original": 0, "forks": 0, "archived": 0}
+          }
+
+          for org_dir in sorted(glob.glob("index/index-*/")):
+              org_name = os.path.basename(os.path.normpath(org_dir)).replace("index-", "")
+              repos_file = os.path.join(org_dir, "repos.jsonl")
+              repos = []
+              if os.path.exists(repos_file):
+                  with open(repos_file) as f:
+                      for line in f:
+                          try:
+                              repos.append(json.loads(line))
+                          except:
+                              pass
+
+              original = [r for r in repos if not r.get("fork")]
+              forks = [r for r in repos if r.get("fork")]
+              archived = [r for r in repos if r.get("archived")]
+
+              index["organizations"][org_name] = {
+                  "total": len(repos),
+                  "original": len(original),
+                  "forks": len(forks),
+                  "archived": len(archived),
+                  "languages": {},
+                  "repos": repos
+              }
+
+              for r in repos:
+                  lang = r.get("language") or "Unknown"
+                  index["organizations"][org_name]["languages"][lang] = \
+                      index["organizations"][org_name]["languages"].get(lang, 0) + 1
+
+              index["totals"]["repos"] += len(repos)
+              index["totals"]["original"] += len(original)
+              index["totals"]["forks"] += len(forks)
+              index["totals"]["archived"] += len(archived)
+
+          with open("index/MASTER-INDEX.json", "w") as f:
+              json.dump(index, f, indent=2)
+
+          print(f"Total repos: {index['totals']['repos']}")
+          print(f"Original: {index['totals']['original']}")
+          print(f"Forks: {index['totals']['forks']}")
+          PYEOF
+
+      - name: Commit Index
+        run: |
+          git config user.name "BlackRoad Operator"
+          git config user.email "blackroad.systems@gmail.com"
+          git add index/
+          git commit -m "chore: update multi-org index $(date +%Y-%m-%d)" || echo "No changes"
+          git push || echo "Push failed - may need token"
+
+  receive-discovery:
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Process Discovery Report
+        run: |
+          echo "=== Received Product Discovery Report ==="
+          echo "Repo: ${{ github.event.client_payload.repo }}"
+          echo "Runtime: ${{ github.event.client_payload.runtime }}"
+          echo "Framework: ${{ github.event.client_payload.framework }}"
+          echo "Files: ${{ github.event.client_payload.files }}"
+
+          mkdir -p index/discoveries
+          cat > "index/discoveries/$(echo '${{ github.event.client_payload.repo }}' | tr '/' '-').json" << EOF
+          {
+            "repo": "${{ github.event.client_payload.repo }}",
+            "runtime": "${{ github.event.client_payload.runtime }}",
+            "framework": "${{ github.event.client_payload.framework }}",
+            "files": "${{ github.event.client_payload.files }}",
+            "received_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Commit Discovery
+        run: |
+          git config user.name "BlackRoad Operator"
+          git config user.email "blackroad.systems@gmail.com"
+          git add index/
+          git commit -m "chore: received discovery from ${{ github.event.client_payload.repo }}" || echo "No changes"
+          git push || echo "Push failed"

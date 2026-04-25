@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-interpreter:
+    name: Test Interpreter (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Run tests
+        run: pytest tests/ -v --cov=. --cov-report=term-missing
+
+  build-compiler:
+    name: Build C Compiler
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compile roadc (C99, zero dependencies)
+        run: gcc -std=c99 -O2 -Wall -Wextra -o roadc roadc.c
+
+      - name: Verify binary
+        run: ls -la roadc && file roadc
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - name: Run Ruff
+        run: ruff check *.py --select E,F,W --ignore E501
+        continue-on-error: true

@@ -1,0 +1,63 @@
+# DigitalOcean (Droplet Oceans) — BlackRoad OS Integration
+# https://docs.digitalocean.com/reference/api
+
+name: digitalocean
+category: cloud-deploy
+status: active
+api_base: https://api.digitalocean.com/v2
+
+auth:
+  type: bearer_token
+  env: DIGITALOCEAN_ACCESS_TOKEN
+
+endpoints:
+  droplets:
+    list: GET /droplets
+    get: GET /droplets/{droplet_id}
+    create: POST /droplets
+    delete: DELETE /droplets/{droplet_id}
+    actions: GET /droplets/{droplet_id}/actions
+    snapshots: GET /droplets/{droplet_id}/snapshots
+    power_on: POST /droplets/{droplet_id}/actions (type: power_on)
+    power_off: POST /droplets/{droplet_id}/actions (type: power_off)
+    reboot: POST /droplets/{droplet_id}/actions (type: reboot)
+  domains:
+    list: GET /domains
+    create: POST /domains
+    records: GET /domains/{domain_name}/records
+    create_record: POST /domains/{domain_name}/records
+  firewalls:
+    list: GET /firewalls
+    create: POST /firewalls
+    get: GET /firewalls/{firewall_id}
+  load_balancers:
+    list: GET /load_balancers
+    create: POST /load_balancers
+  spaces:
+    list_buckets: GET https://{region}.digitaloceanspaces.com
+  databases:
+    list: GET /databases
+    create: POST /databases
+  apps:
+    list: GET /apps
+    create: POST /apps
+    get: GET /apps/{app_id}
+  ssh_keys:
+    list: GET /account/keys
+    create: POST /account/keys
+
+infrastructure:
+  droplets:
+    - name: blackroad-os-infinity
+      ip: "159.65.43.12"
+      role: primary-server
+      size: s-4vcpu-8gb
+  spaces:
+    region: nyc3
+    key_env: DIGITALOCEAN_SPACES_KEY
+    secret_env: DIGITALOCEAN_SPACES_SECRET
+
+health_check:
+  endpoint: GET /account
+  interval: 300
+  timeout: 10

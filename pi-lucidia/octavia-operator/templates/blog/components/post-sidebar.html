@@ -1,0 +1,195 @@
+<!-- ─────────────────────────────────────────
+     COMPONENT: post-sidebar.html
+     Usage: place inside .br-post-layout__sidebar
+     Slots: table of contents, related posts, tags
+───────────────────────────────────────── -->
+
+<style>
+  .br-post-sidebar {
+    font-family: 'JetBrains Mono', monospace;
+    border-top: 1px solid #ffffff;
+  }
+
+  .br-sidebar-section {
+    padding: 24px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .br-sidebar-label {
+    font-size: 0.55rem;
+    color: #555555;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .br-sidebar-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #1a1a1a;
+  }
+
+  /* Table of contents */
+  .br-toc {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .br-toc__item {
+    font-size: 0.65rem;
+    color: #666666;
+    text-decoration: none;
+    padding: 6px 0;
+    border-bottom: 1px solid #0d0d0d;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .br-toc__item:hover  { color: #ffffff; }
+  .br-toc__item.active { color: #ffffff; }
+
+  .br-toc__item--h3 {
+    padding-left: 12px;
+    font-size: 0.6rem;
+    color: #444444;
+  }
+
+  .br-toc__item--h3::before {
+    content: '\2514';
+    color: #222222;
+    font-size: 0.55rem;
+  }
+
+  /* Related posts */
+  .br-related {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .br-related__item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-bottom: 1px solid #0d0d0d;
+    text-decoration: none;
+  }
+
+  .br-related__item:last-child { border-bottom: none; }
+  .br-related__item:hover .br-related__title { color: #ffffff; }
+
+  .br-related__date {
+    font-size: 0.55rem;
+    color: #444444;
+  }
+
+  .br-related__title {
+    font-size: 0.68rem;
+    color: #888888;
+    line-height: 1.4;
+  }
+
+  .br-related__tag {
+    font-size: 0.55rem;
+    color: #444444;
+  }
+
+  /* Tag pills */
+  .br-sidebar-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .br-sidebar-tag {
+    font-size: 0.56rem;
+    color: #555555;
+    border: 1px solid #1a1a1a;
+    padding: 3px 8px;
+    text-decoration: none;
+  }
+
+  .br-sidebar-tag:hover {
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+
+  /* Back link */
+  .br-back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.62rem;
+    color: #555555;
+    text-decoration: none;
+    padding: 16px 24px;
+    border-bottom: 1px solid #1a1a1a;
+  }
+
+  .br-back-link:hover { color: #ffffff; }
+
+  @media (min-width: 768px) {
+    .br-post-sidebar {
+      border-top: none;
+      border-left: 1px solid #ffffff;
+    }
+    .br-sidebar-section { padding: 24px 20px; }
+    .br-back-link { padding: 16px 20px; }
+  }
+</style>
+
+<aside class="br-post-sidebar">
+
+  <a class="br-back-link" href="/blog">&larr; back to blog</a>
+
+  <!-- TABLE OF CONTENTS -->
+
+  <div class="br-sidebar-section">
+    <div class="br-sidebar-label">contents</div>
+    <nav class="br-toc">
+      <a class="br-toc__item active" href="#problem">The Problem With Mutable State</a>
+      <a class="br-toc__item"        href="#ps-sha">PS-SHA&#8734;: Append-Only by Design</a>
+      <a class="br-toc__item br-toc__item--h3" href="#write-path">Write path</a>
+      <a class="br-toc__item"        href="#recovery">Recovery Across Power Cycles</a>
+      <a class="br-toc__item"        href="#tradeoffs">Tradeoffs</a>
+    </nav>
+  </div>
+
+  <!-- RELATED POSTS -->
+
+  <div class="br-sidebar-section">
+    <div class="br-sidebar-label">related</div>
+    <div class="br-related">
+      <a class="br-related__item" href="#">
+        <span class="br-related__date">2025-11-08</span>
+        <span class="br-related__title">Naming Agents: Identity, Persona, and Operational Role</span>
+        <span class="br-related__tag">agents</span>
+      </a>
+      <a class="br-related__item" href="#">
+        <span class="br-related__date">2025-10-22</span>
+        <span class="br-related__title">Hailo-8 on the Pi 5: Benchmarks and Bottlenecks</span>
+        <span class="br-related__tag">hardware</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- TAGS -->
+
+  <div class="br-sidebar-section">
+    <div class="br-sidebar-label">tags</div>
+    <div class="br-sidebar-tags">
+      <a class="br-sidebar-tag" href="/blog?tag=infrastructure">infrastructure</a>
+      <a class="br-sidebar-tag" href="/blog?tag=agents">agents</a>
+      <a class="br-sidebar-tag" href="/blog?tag=os">os</a>
+      <a class="br-sidebar-tag" href="/blog?tag=hardware">hardware</a>
+      <a class="br-sidebar-tag" href="/blog?tag=networking">networking</a>
+    </div>
+  </div>
+
+</aside>

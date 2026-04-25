@@ -1,0 +1,34 @@
+# Caddy reverse proxy configuration
+
+# Local development (HTTP only)
+:80 {
+    # Proxy to frontend nginx container
+    reverse_proxy frontend:80
+
+    # Logs
+    log {
+        output file /data/access.log
+    }
+}
+
+# Production with domain (uncomment when ready)
+# console.blackroad.io {
+#     # Automatic HTTPS via Let's Encrypt
+#     reverse_proxy frontend:80
+#
+#     # HSTS header
+#     header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#
+#     # Logs
+#     log {
+#         output file /data/console-access.log
+#     }
+# }
+
+# app.blackroad.io {
+#     reverse_proxy frontend:80
+#     header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+#     log {
+#         output file /data/app-access.log
+#     }
+# }

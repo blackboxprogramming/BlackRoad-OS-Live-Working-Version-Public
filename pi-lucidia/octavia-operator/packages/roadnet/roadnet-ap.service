@@ -1,0 +1,18 @@
+[Unit]
+Description=RoadNet WiFi Access Point
+After=network-online.target
+Wants=network-online.target
+Before=roadnet-failover.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStartPre=/bin/bash -c 'iw dev uap0 del 2>/dev/null || true'
+ExecStartPre=/bin/sleep 1
+ExecStartPre=/sbin/iw dev wlan0 interface add uap0 type __ap
+ExecStartPre=/sbin/ip link set uap0 up
+ExecStart=/usr/sbin/hostapd -B /etc/hostapd/hostapd-roadnet.conf
+ExecStop=/bin/bash -c 'killall hostapd 2>/dev/null; iw dev uap0 del 2>/dev/null; true'
+
+[Install]
+WantedBy=multi-user.target

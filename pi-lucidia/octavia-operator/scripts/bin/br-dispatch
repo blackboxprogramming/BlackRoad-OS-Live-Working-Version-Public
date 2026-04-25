@@ -1,0 +1,40 @@
+#!/bin/bash
+
+CONF_THRESHOLD=0.90
+FUNNEL="./br-funnel"
+
+BOX_X=2
+BOX_Y=1
+BOX_W=30
+BOX_H=10
+
+if [ "$#" -eq 0 ]; then
+  INPUT=$(cat)
+else
+  INPUT="$*"
+fi
+
+ROUTE_OUT="$($FUNNEL <<< "$INPUT")"
+
+AGENT=$(printf "%s\n" "$ROUTE_OUT" | awk '/- agent:/{print $3}')
+CONF_RAW=$(printf "%s\n" "$ROUTE_OUT" | awk '/- confidence:/{print $3}')
+CONF_CLEAN=$(printf "%s" "$CONF_RAW" | tr -d '%')
+
+if [ "$CONF_CLEAN" -gt 1 ] 2>/dev/null; then
+  CONF=$(awk "BEGIN{printf \"%.2f\", $CONF_CLEAN/100}")
+else
+  CONF="$CONF_CLEAN"
+fi
+
+awk "BEGIN{exit !($CONF >= $CONF_THRESHOLD)}" || {
+  echo "DISPATCH BLOCKED"
+  echo "$ROUTE_OUT"
+  exit 1
+}
+
+CMD="./$AGENT/run"
+[ ! -x "$CMD" ] && echo "AGENT ENTRYPOINT NOT FOUND: $CMD" && exit 2
+
+clear
+./br-box "$BOX_X" "$BOX_Y" "$BOX_W" "$BOX_H"
+printf "%s\n" "$INPUT" | "$CMD" | ./br-type-box "$BOX_X" "$BOX_Y" "$BOX_W" "$BOX_H"

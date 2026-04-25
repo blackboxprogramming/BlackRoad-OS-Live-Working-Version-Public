@@ -1,0 +1,258 @@
+#!/usr/bin/env bash
+# br-stats - BlackRoad Portfolio Statistics CLI (BR Visual Language Enhanced)
+# Display professional achievements with semantic color coding
+
+set -euo pipefail
+
+# BR Color Language Integration
+BR_COLOR_LIB="/Users/alexa/br-color"
+
+# Legacy ANSI colors (fallback)
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+BOLD='\033[1m'
+DIM='\033[2m'
+RESET='\033[0m'
+
+# BR Semantic Colors (xterm-256)
+BR_SUCCESS='\033[38;5;2m'       # OS_LAYER: SUCCESS (green)
+BR_EXEC='\033[38;5;64m'         # EXECUTION: EXEC_HIGH
+BR_MEMORY='\033[38;5;100m'      # MEMORY: MEM_PERSIST
+BR_AGENT='\033[38;5;136m'       # AUTONOMY: AGENT_EXEC
+BR_BRAND='\033[38;5;202m'       # PARADOX: EXEC_FORCE (brand hot)
+BR_META='\033[38;5;244m'        # META: escape/commentary
+
+# BR Shapes
+SHAPE_SUCCESS="✓"
+SHAPE_EXEC="▶"
+SHAPE_MEMORY="●"
+SHAPE_AGENT="◆"
+SHAPE_METRIC="█"
+
+# Function to print header with BR shapes
+print_header() {
+    echo -e "${BR_BRAND}${BOLD}"
+    cat << 'EOF'
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║   ██████╗ ██╗      █████╗  ██████╗██╗  ██╗██████╗  ██████╗  ║
+║   ██╔══██╗██║     ██╔══██╗██╔════╝██║ ██╔╝██╔══██╗██╔═══██╗ ║
+║   ██████╔╝██║     ███████║██║     █████╔╝ ██████╔╝██║   ██║ ║
+║   ██╔══██╗██║     ██╔══██║██║     ██╔═██╗ ██╔══██╗██║   ██║ ║
+║   ██████╔╝███████╗██║  ██║╚██████╗██║  ██╗██║  ██║╚██████╔╝ ║
+║   ╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝  ║
+║                                                              ║
+║        PORTFOLIO STATISTICS — Visual Language Mode           ║
+║                  Alexa Amundson - 2026                       ║
+╚══════════════════════════════════════════════════════════════╝
+EOF
+    echo -e "${RESET}"
+}
+
+# Function to print section header with BR shapes
+print_section() {
+    local title="$1"
+    local shape="${2:-$SHAPE_METRIC}"
+    echo ""
+    echo -e "${BR_EXEC}${BOLD}═══════════════════════════════════════════════════════════════${RESET}"
+    echo -e "${WHITE}${BOLD}  $shape $title${RESET}"
+    echo -e "${BR_EXEC}${BOLD}═══════════════════════════════════════════════════════════════${RESET}"
+    echo ""
+}
+
+# Function to print metric with BR semantic colors
+print_metric() {
+    local emoji="$1"
+    local label="$2"
+    local value="$3"
+    local br_color="${4:-$WHITE}"
+    local shape="${5:-$SHAPE_METRIC}"
+    
+    printf "  ${shape} ${emoji}  ${DIM}%-33s${RESET} ${br_color}${BOLD}%s${RESET}\n" "$label" "$value"
+}
+
+# Function to print progress bar with BR shapes
+print_progress() {
+    local label="$1"
+    local current="$2"
+    local total="$3"
+    local width=30
+    
+    local percentage=$((current * 100 / total))
+    local filled=$((width * current / total))
+    local empty=$((width - filled))
+    
+    # Use BR shapes for progress
+    printf "  ${SHAPE_AGENT} %-28s [" "$label"
+    
+    # Color progress by zone
+    if [ "$percentage" -lt 50 ]; then
+        color="$BR_MEMORY"
+    elif [ "$percentage" -lt 75 ]; then
+        color="$BR_EXEC"
+    else
+        color="$BR_SUCCESS"
+    fi
+    
+    printf "${color}"
+    printf "%${filled}s" | tr ' ' '█'
+    printf "${RESET}"
+    printf "%${empty}s" | tr ' ' '░'
+    printf "] %3d%%\n" "$percentage"
+}
+
+# Main stats display with BR visual language
+show_stats() {
+    clear
+    print_header
+    
+    # Infrastructure Scale (MEMORY zone - state/persistence)
+    print_section "INFRASTRUCTURE SCALE" "$SHAPE_MEMORY"
+    print_metric "📦" "Total Repositories" "1,094" "$BR_BRAND" "$SHAPE_MEMORY"
+    print_metric "🏢" "GitHub Organizations" "15" "$BR_SUCCESS" "$SHAPE_MEMORY"
+    print_metric "💾" "Infrastructure Size" "60GB+" "$BR_MEMORY" "$SHAPE_MEMORY"
+    print_metric "🔧" "Components in BlackRoad OS" "8,789" "$BR_EXEC" "$SHAPE_MEMORY"
+    print_metric "⚡" "Automation Scripts" "356" "$BR_BRAND" "$SHAPE_EXEC"
+    print_metric "🌐" "Production Domains" "8+" "$BR_AGENT" "$SHAPE_MEMORY"
+    
+    # Agent Platform (AUTONOMY zone - agents/decision)
+    print_section "AI AGENT PLATFORM" "$SHAPE_AGENT"
+    print_metric "🧠" "Agent Capacity" "30,000" "$BR_BRAND" "$SHAPE_AGENT"
+    print_metric "📝" "Documented Agents" "1,000+" "$BR_SUCCESS" "$SHAPE_AGENT"
+    print_metric "🖥️" "Distributed Nodes" "7" "$BR_MEMORY" "$SHAPE_AGENT"
+    print_metric "📦" "Production Containers" "27+" "$BR_EXEC" "$SHAPE_AGENT"
+    print_metric "⏱️" "Production Uptime" "74+ days" "$BR_SUCCESS" "$SHAPE_AGENT"
+    print_metric "⚡" "Load Average (Sustained)" "27+" "$BR_BRAND" "$SHAPE_AGENT"
+    
+    # Business Impact (EXECUTION zone - actions/results)
+    print_section "BUSINESS IMPACT" "$SHAPE_EXEC"
+    print_metric "💵" "Enterprise Sales Generated" "\$23M+" "$BR_SUCCESS" "$SHAPE_EXEC"
+    print_metric "📈" "AUM Opportunities Identified" "\$18.4M" "$BR_EXEC" "$SHAPE_EXEC"
+    print_metric "🎯" "Sales Goal Achievement" "92%" "$BR_SUCCESS" "$SHAPE_EXEC"
+    print_metric "⭐" "Client Satisfaction Rating" "97%" "$BR_SUCCESS" "$SHAPE_EXEC"
+    print_metric "📊" "Efficiency Improvement" "33%" "$BR_EXEC" "$SHAPE_EXEC"
+    print_metric "🚀" "Workflow Speed Increase" "50%+" "$BR_BRAND" "$SHAPE_EXEC"
+    
+    # Credentials (OS_LAYER zone - core system)
+    print_section "CREDENTIALS & LICENSES" "$SHAPE_SUCCESS"
+    print_metric "✅" "FINRA Series 7" "Active" "$BR_SUCCESS" "$SHAPE_SUCCESS"
+    print_metric "✅" "FINRA Series 63" "Active" "$BR_SUCCESS" "$SHAPE_SUCCESS"
+    print_metric "✅" "FINRA Series 65" "Active" "$BR_SUCCESS" "$SHAPE_SUCCESS"
+    print_metric "✅" "FINRA SIE" "Active" "$BR_SUCCESS" "$SHAPE_SUCCESS"
+    print_metric "🏥" "Life & Health Insurance (MN)" "Active" "$BR_SUCCESS" "$SHAPE_SUCCESS"
+    print_metric "🎓" "B.A. Strategic Communication" "UMN 2022" "$BR_EXEC" "$SHAPE_SUCCESS"
+    
+    # Agent Breakdown with BR visual progress
+    print_section "AGENT DISTRIBUTION (30k capacity)" "$SHAPE_AGENT"
+    echo ""
+    print_progress "AI Research Agents" 12592 30000
+    print_progress "Code Deployment Agents" 8407 30000
+    print_progress "Infrastructure Agents" 5401 30000
+    print_progress "Monitoring Agents" 3600 30000
+    echo ""
+    
+    # Quick Links
+    print_section "QUICK LINKS" "$SHAPE_MEMORY"
+    echo -e "  ${SHAPE_MEMORY} ${BOLD}GitHub:${RESET}   https://github.com/blackboxprogramming"
+    echo -e "  ${SHAPE_MEMORY} ${BOLD}LinkedIn:${RESET} https://linkedin.com/in/alexaamundson"
+    echo -e "  ${SHAPE_MEMORY} ${BOLD}Website:${RESET}  https://blackroad.io"
+    echo -e "  ${SHAPE_MEMORY} ${BOLD}Email:${RESET}    amundsonalexa@gmail.com"
+    echo -e "  ${SHAPE_MEMORY} ${BOLD}Phone:${RESET}    (507) 828-0842"
+    echo ""
+    
+    # Footer with BR meta commentary
+    echo -e "${BR_META}═══════════════════════════════════════════════════════════════${RESET}"
+    echo -e "${BR_META}  Built 1,094 repositories in under 2 years using AI as team${RESET}"
+    echo -e "${BR_META}  AI isn't the future—it's the engineering team${RESET}"
+    echo -e "${BR_META}  ${DIM}Colors: ✓ success ▶ execution ● memory ◆ agents █ metrics${RESET}"
+    echo -e "${BR_META}═══════════════════════════════════════════════════════════════${RESET}"
+    echo ""
+}
+
+# Function to show specific section
+show_section() {
+    case "$1" in
+        infra|infrastructure)
+            print_section "INFRASTRUCTURE SCALE" "$SHAPE_MEMORY"
+            print_metric "📦" "Total Repositories" "1,094" "$BR_BRAND" "$SHAPE_MEMORY"
+            print_metric "🏢" "GitHub Organizations" "15" "$BR_SUCCESS" "$SHAPE_MEMORY"
+            print_metric "💾" "Infrastructure Size" "60GB+" "$BR_MEMORY" "$SHAPE_MEMORY"
+            print_metric "🔧" "Components in BlackRoad OS" "8,789" "$BR_EXEC" "$SHAPE_MEMORY"
+            print_metric "⚡" "Automation Scripts" "356" "$BR_BRAND" "$SHAPE_EXEC"
+            print_metric "🌐" "Production Domains" "8+" "$BR_AGENT" "$SHAPE_MEMORY"
+            ;;
+        agents)
+            print_section "AI AGENT PLATFORM" "$SHAPE_AGENT"
+            print_metric "🧠" "Agent Capacity" "30,000" "$BR_BRAND" "$SHAPE_AGENT"
+            print_metric "📝" "Documented Agents" "1,000+" "$BR_SUCCESS" "$SHAPE_AGENT"
+            print_metric "🖥️" "Distributed Nodes" "7" "$BR_MEMORY" "$SHAPE_AGENT"
+            print_metric "📦" "Production Containers" "27+" "$BR_EXEC" "$SHAPE_AGENT"
+            print_metric "⏱️" "Production Uptime" "74+ days" "$BR_SUCCESS" "$SHAPE_AGENT"
+            print_metric "⚡" "Load Average (Sustained)" "27+" "$BR_BRAND" "$SHAPE_AGENT"
+            echo ""
+            print_progress "AI Research Agents" 12592 30000
+            print_progress "Code Deployment Agents" 8407 30000
+            print_progress "Infrastructure Agents" 5401 30000
+            print_progress "Monitoring Agents" 3600 30000
+            ;;
+        business|sales)
+            print_section "BUSINESS IMPACT" "$SHAPE_EXEC"
+            print_metric "💵" "Enterprise Sales Generated" "\$23M+" "$BR_SUCCESS" "$SHAPE_EXEC"
+            print_metric "📈" "AUM Opportunities Identified" "\$18.4M" "$BR_EXEC" "$SHAPE_EXEC"
+            print_metric "🎯" "Sales Goal Achievement" "92%" "$BR_SUCCESS" "$SHAPE_EXEC"
+            print_metric "⭐" "Client Satisfaction Rating" "97%" "$BR_SUCCESS" "$SHAPE_EXEC"
+            print_metric "📊" "Efficiency Improvement" "33%" "$BR_EXEC" "$SHAPE_EXEC"
+            print_metric "🚀" "Workflow Speed Increase" "50%+" "$BR_BRAND" "$SHAPE_EXEC"
+            ;;
+        *)
+            echo "Usage: br-stats [infra|agents|business|json]"
+            echo "Run without arguments for full dashboard"
+            exit 1
+            ;;
+    esac
+    echo ""
+}
+
+# Function to export stats as JSON
+export_json() {
+    cat << 'EOF'
+{
+  "name": "Alexa Amundson",
+  "infrastructure": {
+    "repositories": 1094,
+    "organizations": 15,
+    "size_gb": 60,
+    "blackroad os_components": 8789,
+    "scripts": 356
+  },
+  "agent_platform": {
+    "capacity": 30000,
+    "documented": 1000,
+    "nodes": 7,
+    "containers": 27,
+    "uptime_days": 74
+  },
+  "business": {
+    "sales_millions": 23,
+    "aum_millions": 18.4,
+    "goal_pct": 92,
+    "satisfaction_pct": 97
+  },
+  "br_visual_language": "enabled"
+}
+EOF
+}
+
+# Main
+if [ $# -eq 0 ]; then
+    show_stats
+elif [ "$1" = "json" ]; then
+    export_json
+else
+    show_section "$1"
+fi

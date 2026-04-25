@@ -1,0 +1,23 @@
+#!/bin/bash
+# usage: br-box X Y W H
+
+X="$1"
+Y="$2"
+W="$3"
+H="$4"
+
+# top
+tput cup "$Y" "$X"; printf "╔"
+printf "%*s" "$((W-2))" "" | tr ' ' '═'
+printf "╗"
+
+# sides
+for ((i=1;i<=H-2;i++)); do
+  tput cup "$((Y+i))" "$X"; printf "║"
+  tput cup "$((Y+i))" "$((X+W-1))"; printf "║"
+done
+
+# bottom
+tput cup "$((Y+H-1))" "$X"; printf "╚"
+printf "%*s" "$((W-2))" "" | tr ' ' '═'
+printf "╝"

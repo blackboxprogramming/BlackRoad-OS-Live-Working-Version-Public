@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BR</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%;
+  background: #000 !important;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+</style>
+</head>
+<body>
+<canvas id="c" aria-hidden="true">
+  Animated background visualization for the BlackRoad interface.
+</canvas>
+<script>
+const C = document.getElementById('c');
+const X = C.getContext('2d');
+const PI2 = Math.PI * 2;
+let W, H, frame = 0;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  const rect = C.getBoundingClientRect();
+  W = rect.width;
+  H = rect.height;
+  C.width  = W * dpr;
+  C.height = H * dpr;
+  X.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ─── math ───────────────────────────────────────────────
+const lerp = (a,b,t) => a+(b-a)*t;
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const eio = t => t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const eo  = t => 1-Math.pow(1-t,3);
+const ei  = t => t*t*t;
+const map = (v,a,b,c,d) => lerp(c,d,clamp((v-a)/(b-a),0,1));
+
+// ─── draw primitives ────────────────────────────────────
+function box(x,y,w,h,a=1,lw=1) {
+  if(a<=0) return;
+  X.save(); X.globalAlpha=a;
+  X.strokeStyle='#fff'; X.lineWidth=lw;
+  X.strokeRect(x-w/2, y-h/2, w, h);
+  X.restore();
+}
+function fillbox(x,y,w,h,a=1) {
+  if(a<=0) return;
+  X.save(); X.globalAlpha=a;
+  X.fillStyle='#fff';
+  X.fillRect(x-w/2, y-h/2, w, h);
+  X.restore();
+}
+function arc(x,y,r,a=1,lw=1,sa=0,ea=PI2) {
+  if(a<=0||r<=0) return;
+  X.save(); X.globalAlpha=a;
+  X.strokeStyle='#fff'; X.lineWidth=lw;
+  X.beginPath(); X.arc(x,y,r,sa,ea); X.stroke();
+  X.restore();
+}
+function dot(x,y,r,a=1) {
+  if(a<=0||r<=0) return;
+  X.save(); X.globalAlpha=a;
+  X.fillStyle='#fff';
+  X.beginPath(); X.arc(x,y,r,0,PI2); X.fill();
+  X.restore();
+}
+function ln(x1,y1,x2,y2,a=1,lw=.8) {
+  if(a<=0) return;
+  X.save(); X.globalAlpha=a;
+  X.strokeStyle='#fff'; X.lineWidth=lw;
+  X.beginPath(); X.moveTo(x1,y1); X.lineTo(x2,y2); X.stroke();
+  X.restore();
+}
+function hln(cx,cy,w,a=1,lw=.8) { ln(cx-w/2,cy,cx+w/2,cy,a,lw); }
+function vln(cx,cy,h,a=1,lw=.8) { ln(cx,cy-h/2,cx,cy+h/2,a,lw); }
+
+// Animated line that draws itself in from left
+function drawLn(x1,y1,w,p,a=1,lw=.8) {
+  const pp = clamp(p,0,1);
+  ln(x1,y1,x1+w*pp,y1,a,lw);
+}
+
+// ─── SCENE CONFIG ────────────────────────────────────────
+// 4 templates × ~4s each = 16s loop at 60fps = 960 frames
+// Each template: 240 frames
+// build:0-120, hold:120-180, exit:180-240
+const LOOP   = 960;   // legacy "frame" based loop length (at 60fps)
+const SEG    = 240;   // legacy "frame" based segment length (at 60fps)
+
+// Time-based durations derived from the original 60fps assumptions
+const FPS_TARGET = 60;
+const LOOP_MS    = (LOOP / FPS_TARGET) * 1000; // ~16000ms
+const SEG_MS     = (SEG  / FPS_TARGET) * 1000; // ~4000ms
+
+// Start time for the looping scene animation
+let SCENE_START_MS = null;
+
+// scene index and local progress 0..1
+// NOTE: `f` is kept for backwards compatibility but is no longer used
+function scene(f) {
+  if (SCENE_START_MS === null) {
+    SCENE_START_MS = performance.now();
+  }
+  const now = performance.now();
+  // Elapsed time within the loop, wrapped to [0, LOOP_MS)
+  let elapsed = now - SCENE_START_MS;
+  if (elapsed < 0) elapsed = 0;
+  const ee = ((elapsed % LOOP_MS) + LOOP_MS) % LOOP_MS;
+  const si  = Math.floor(ee / SEG_MS);
+  const sp  = (ee % SEG_MS) / SEG_MS;
+  return [si, sp];
+}
+
+// ─── TEMPLATES ───────────────────────────────────────────
+// 0 = PROFILE   1 = WIKI   2 = ROAD TV   3 = DIRECTORY
+
+function templateBounds() {
+  // Template "page" centered on screen
+  const pw = Math.min(W*.65, 640);
+  const ph = pw * 1.3;
+  const px = W/2;
+  const py = H/2;
+  return { px, py, pw, ph };
+}
+
+// ── 0. PROFILE ───────────────────────────────────────────
+function drawProfile(sp) {
+  const { px, py, pw, ph } = templateBounds();
+  const build = clamp(sp*2.5, 0, 1);
+  const exit  = map(sp, .75, 1, 0, 1);
+
+  const a = eo(build) * (1 - eio(exit));
+
+  // Outer page border
+  box(px, py, pw*eo(clamp(build*3,0,1)), ph*eo(clamp(build*3,0,1)), a*.5);
+
+  // ── Top bar (nav skeleton)
+  const tbh = ph*.055;
+  const tby = py - ph/2 + tbh/2;
+  box(px, tby, pw, tbh, a*.35, .5);
+  // 3 nav dots
+  [-1,0,1].forEach(i => dot(px + i*pw*.12, tby, 2.5, a*.4));
+  // Left logo square
+  box(px - pw/2 + pw*.07, tby, pw*.07, tbh*.55, a*.3, .8);
+
+  // ── Hero section — avatar + name lines
+  const heroY = py - ph*.12;
+  const avatarR = pw*.09;
+
+  // Avatar circle
+  const ap = clamp((build-.15)/.5, 0, 1);
+  arc(px - pw*.22, heroY, avatarR*eo(ap), a*.75, 1.5);
+  // Double ring (identity verified)
+  arc(px - pw*.22, heroY, avatarR*1.35*eo(ap), a*.2, .8);
+
+  // Name line (thick)
+  const nlx = px;
+  const nlp = clamp((build-.25)/.4, 0, 1);
+  drawLn(nlx - pw*.28, heroY - pw*.04, pw*.42, eo(nlp), a*.7, 2);
+  // Sub-name line (thin)
+  drawLn(nlx - pw*.28, heroY + pw*.025, pw*.28, eo(clamp((build-.35)/.4,0,1)), a*.3, 1);
+
+  // Status dot
+  const sdp = clamp((build-.4)/.3, 0, 1);
+  dot(px + pw*.12, heroY - pw*.04, 4*eo(sdp), a*.6);
+  ln(px + pw*.12 + 8, heroY - pw*.04, px + pw*.22, heroY - pw*.04, eo(sdp)*a*.25);
+
+  // ── Divider
+  const dp = clamp((build-.45)/.2, 0, 1);
+  drawLn(px - pw*.38, heroY + ph*.1, pw*.76, eo(dp), a*.15, .8);
+
+  // ── Stats row (3 blocks)
+  const sry = heroY + ph*.18;
+  const bw = pw*.18, bh = ph*.1;
+  [-1,0,1].forEach((i,idx) => {
+    const sbp = clamp((build - .5 - idx*.07)/.3, 0, 1);
+    const sbx = px + i*(bw + pw*.04);
+    box(sbx, sry, bw*eo(sbp), bh*eo(sbp), a*.3, .7);
+    // Label line
+    drawLn(sbx - bw*.3, sry - bh*.15, bw*.6, eo(sbp), a*.25, .8);
+    // Value thick line
+    drawLn(sbx - bw*.35, sry + bh*.08, bw*.4*(.4+idx*.3), eo(sbp), a*.5, 2.5);
+  });
+
+  // ── Content lines (activity / about)
+  const cly = sry + ph*.17;
+  const lineWidths = [.68,.52,.61,.45,.56,.38];
+  lineWidths.forEach((lw, i) => {
+    const llp = clamp((build - .65 - i*.04)/.3, 0, 1);
+    const ly = cly + i*ph*.052;
+    drawLn(px - pw*.38, ly, pw*lw, eo(llp), a*.2, .8);
+  });
+
+  // ── Right sidebar - connected nodes
+  const sbx = px + pw*.28;
+  const nodes = [-.2, 0, .15];
+  nodes.forEach((ny, i) => {
+    const np = clamp((build-.7-i*.05)/.3, 0, 1);
+    const nx = sbx - pw*.01;
+    const ncy = sry + ny*ph;
+    arc(nx, ncy, 5*eo(np), a*.35, 1);
+    if(i < nodes.length-1) {
+      const np2 = clamp((build-.75-i*.05)/.3, 0, 1);
+      ln(nx, ncy+5, nx, sry + nodes[i+1]*ph - 5, eo(np2)*a*.12);
+    }
+  });
+}
+
+// ── 1. WIKI / ARTICLE ────────────────────────────────────
+function drawWiki(sp) {
+  const { px, py, pw, ph } = templateBounds();
+  const build = clamp(sp*2.5, 0, 1);
+  const exit  = map(sp, .75, 1, 0, 1);
+  const a = eo(build) * (1 - eio(exit));
+
+  // Outer page border
+  box(px, py, pw*eo(clamp(build*3,0,1)), ph*eo(clamp(build*3,0,1)), a*.5);
+
+  // ── Top nav bar
+  const tbh = ph*.05;
+  const tby = py - ph/2 + tbh/2;
+  box(px, tby, pw, tbh, a*.3, .5);
+  dot(px - pw*.35, tby, 3, a*.35);
+  drawLn(px - pw*.27, tby, pw*.1, 1, a*.3, 1.5);
+  // search box
+  box(px + pw*.18, tby, pw*.28, tbh*.55, a*.25, .7);
+
+  // ── Breadcrumb line
+  const bcy = tby + tbh/2 + ph*.035;
+  const bcp = clamp((build-.1)/.3, 0, 1);
+  [0,1,2].forEach(i => {
+    drawLn(px - pw*.37 + i*pw*.12, bcy, pw*.08, eo(bcp), a*.18, .7);
+    if(i<2) ln(px - pw*.37 + i*pw*.12 + pw*.08 + pw*.008, bcy, px - pw*.37 + (i+1)*pw*.12 - pw*.01, bcy, eo(bcp)*a*.15, .5);
+  });
+
+  // ── Big title block
+  const titY = bcy + ph*.065;
+  const tp = clamp((build-.2)/.4, 0, 1);
+  drawLn(px - pw*.38, titY, pw*.7, eo(tp), a*.7, 3);
+  drawLn(px - pw*.38, titY + ph*.042, pw*.48, eo(clamp((build-.28)/.35,0,1)), a*.5, 3);
+
+  // Metadata line below title
+  const mp = clamp((build-.35)/.3, 0, 1);
+  [0,1,2].forEach(i => drawLn(px - pw*.38 + i*pw*.14, titY + ph*.09, pw*.1, eo(mp), a*.2, .8));
+
+  // ── Divider
+  const dp2 = clamp((build-.4)/.2, 0, 1);
+  drawLn(px - pw*.38, titY + ph*.12, pw*.76, eo(dp2), a*.1, .8);
+
+  // ── 2-col layout: main body | sidebar
+  const bodyX = px - pw*.08;
+  const sideX = px + pw*.3;
+  const bodyY = titY + ph*.17;
+  const bodyW = pw*.58;
+
+  // Body content lines (article paragraphs)
+  const paraLines = [.9,.75,.82,.65,.88,.7,.8,.6,.85,.72,.9,.55];
+  paraLines.forEach((lw, i) => {
+    const grp = Math.floor(i/4); // paragraph grouping
+    const llp = clamp((build - .45 - i*.025)/.4, 0, 1);
+    const ly = bodyY + i*ph*.05 + grp*ph*.03; // paragraph spacing
+    drawLn(bodyX - bodyW/2, ly, bodyW*lw, eo(llp), a*.18, .8);
+  });
+
+  // ── Sidebar
+  // TOC box
+  const tocp = clamp((build-.5)/.35, 0, 1);
+  box(sideX, bodyY + ph*.08, pw*.22, ph*.28, eo(tocp)*a*.3, .7);
+  // TOC inner lines
+  [0,1,2,3,4].forEach(i => {
+    const tlp = clamp((build-.55-i*.03)/.35, 0, 1);
+    drawLn(sideX - pw*.07, bodyY + ph*.04 + i*ph*.05, pw*.1*(i===0?.7:.5), eo(tlp), a*.2, .8);
+  });
+
+  // Tags at bottom
+  const tagY = bodyY + ph*.72;
+  const tagp = clamp((build-.8)/.2, 0, 1);
+  [pw*.12, pw*.09, pw*.11].forEach((tw,i) => {
+    const tx = px - pw*.35 + i*(tw + pw*.03) + tw/2;
+    box(tx, tagY, tw, ph*.038, eo(tagp)*a*.3, .7);
+  });
+}
+
+// ── 2. ROAD TV ────────────────────────────────────────────
+function drawTV(sp) {
+  const { px, py, pw, ph } = templateBounds();
+  const build = clamp(sp*2.5, 0, 1);
+  const exit  = map(sp, .75, 1, 0, 1);
+  const a = eo(build) * (1 - eio(exit));
+
+  // Outer page border
+  box(px, py, pw*eo(clamp(build*3,0,1)), ph*eo(clamp(build*3,0,1)), a*.5);
+
+  // ── Top nav
+  const tbh = ph*.05;
+  const tby = py - ph/2 + tbh/2;
+  box(px, tby, pw, tbh, a*.3, .5);
+  dot(px - pw*.37, tby, 3, a*.4);
+  drawLn(px - pw*.29, tby, pw*.08, 1, a*.35, 2);
+
+  // ── HERO VIDEO — big 16:9 rect
+  const vw = pw*.92, vh = vw * .5625;
+  const vy = tby + tbh/2 + vh/2 + ph*.04;
+  const vp = clamp((build-.1)/.5, 0, 1);
+  box(px, vy, vw*eo(vp), vh*eo(vp), a*.6, 1.5);
+
+  // Play button (triangle via 3 lines)
+  if(vp > .5) {
+    const pa = eo(clamp((vp-.5)/.5, 0, 1));
+    const pr = vh*.18;
+    X.save(); X.globalAlpha = a*pa*.65;
+    X.strokeStyle = '#fff'; X.lineWidth = 1.5;
+    X.beginPath();
+    X.moveTo(px - pr*.55, vy - pr*.75);
+    X.lineTo(px + pr*.9,  vy);
+    X.lineTo(px - pr*.55, vy + pr*.75);
+    X.closePath(); X.stroke();
+    X.restore();
+  }
+
+  // Scan line on video
+  const scanY = vy - vh/2 + ((frame*0.5)%vh);
+  ln(px-vw/2, scanY, px+vw/2, scanY, a*.06, .5);
+
+  // Progress bar
+  const pby = vy + vh/2 + ph*.018;
+  const pbp = clamp((build-.5)/.3, 0, 1);
+  hln(px, pby, vw*.9, a*pbp*.2, .8);
+  const prog = (.3 + frame*.001) % 1;
+  drawLn(px - vw*.45, pby, vw*.9*prog, pbp, a*.55, 1.5);
+  dot(px - vw*.45 + vw*.9*prog, pby, 3.5, a*pbp*.65);
+
+  // ── Info row below video (title + meta)
+  const iry = pby + ph*.05;
+  drawLn(px - pw*.43, iry, pw*.6, eo(clamp((build-.55)/.3,0,1)), a*.55, 2.5);
+  const mrow = [pw*.09, pw*.08, pw*.1];
+  mrow.forEach((mw,i) => {
+    drawLn(px - pw*.43 + i*(mw+pw*.03), iry+ph*.045, mw, eo(clamp((build-.6)/.3,0,1)), a*.2, .8);
+  });
+
+  // ── Thumbnail grid below
+  const gridY = iry + ph*.14;
+  const cols=3, rows=2, tw=pw*.26, th=tw*.5625, gapX=pw*.04, gapY=ph*.03;
+  const totalW = cols*tw+(cols-1)*gapX;
+  const gox = px - totalW/2;
+
+  for(let r=0; r<rows; r++) {
+    for(let c=0; c<cols; c++) {
+      const idx = r*cols+c;
+      const tp = clamp((build - .65 - idx*.04)/.35, 0, 1);
+      const tx = gox + c*(tw+gapX) + tw/2;
+      const ty = gridY + r*(th+gapY) + th/2;
+      box(tx, ty, tw*eo(tp), th*eo(tp), a*.3, .8);
+      // mini play indicator
+      if(tp > .6) {
+        dot(tx, ty, 3*eo(clamp((tp-.6)/.4,0,1)), a*.25);
+      }
+    }
+  }
+}
+
+// ── 3. DIRECTORY ─────────────────────────────────────────
+function drawDirectory(sp) {
+  const { px, py, pw, ph } = templateBounds();
+  const build = clamp(sp*2.5, 0, 1);
+  const exit  = map(sp, .75, 1, 0, 1);
+  const a = eo(build) * (1 - eio(exit));
+
+  // Outer page border
+  box(px, py, pw*eo(clamp(build*3,0,1)), ph*eo(clamp(build*3,0,1)), a*.5);
+
+  // ── Top nav + search
+  const tbh = ph*.055;
+  const tby = py - ph/2 + tbh/2;
+  box(px, tby, pw, tbh, a*.3, .5);
+  // Big search box (this is a directory/home)
+  const swid = pw*.55;
+  box(px, tby, swid, tbh*.6, a*.25, .8);
+  dot(px - swid/2 + pw*.03, tby, 3, a*.3);
+
+  // ── Filter chips row
+  const fry = tby + tbh/2 + ph*.04;
+  const chips = [pw*.1, pw*.08, pw*.13, pw*.09, pw*.11];
+  let cx2 = px - pw*.39;
+  chips.forEach((cw,i) => {
+    const cp = clamp((build-.1-i*.04)/.35,0,1);
+    box(cx2+cw/2, fry, cw, ph*.035, eo(cp)*a*.3, .7);
+    cx2 += cw + pw*.025;
+  });
+
+  // ── Card grid — the directory listing
+  const cols=2, rows=3;
+  const cw=pw*.41, ch=ph*.22, gapX=pw*.05, gapY=ph*.03;
+  const totalW=cols*cw+(cols-1)*gapX;
+  const gox=px-totalW/2;
+  const goy=fry+ph*.07;
+
+  for(let r=0; r<rows; r++) {
+    for(let c=0; c<cols; c++) {
+      const idx=r*cols+c;
+      const cp=clamp((build-.2-idx*.05)/.45,0,1);
+      const bx=gox+c*(cw+gapX)+cw/2;
+      const by=goy+r*(ch+gapY)+ch/2;
+
+      // Card border
+      box(bx, by, cw*eo(cp), ch*eo(cp), a*.35, .8);
+
+      if(cp>.3) {
+        const ia=eo(clamp((cp-.3)/.7,0,1));
+
+        // Avatar circle in card top-left
+        arc(bx-cw*.3, by-ch*.25, cw*.1*ia, a*ia*.5, 1);
+
+        // Name lines
+        drawLn(bx-cw*.14, by-ch*.25, cw*.38, ia, a*ia*.5, 1.5);
+        drawLn(bx-cw*.14, by-ch*.25+ch*.075, cw*.28, ia, a*ia*.3, .8);
+
+        // Status dot
+        dot(bx+cw*.35, by-ch*.25, 3*ia, a*ia*.4);
+
+        // Divider
+        hln(bx, by-ch*.08, cw*.8, a*ia*.1, .6);
+
+        // Content lines
+        [0,1].forEach(i => {
+          drawLn(bx-cw*.38, by+ch*.05+i*ch*.09, cw*.7*(i===0?.9:.6), ia, a*ia*.2, .7);
+        });
+
+        // Bottom tags
+        [cw*.12, cw*.1].forEach((tw,i) => {
+          box(bx - cw*.38 + i*(tw+cw*.03) + tw/2, by+ch*.3, tw, ch*.07, ia*a*.2, .6);
+        });
+      }
+    }
+  }
+}
+
+// ─── PERSISTENT UI LAYER ─────────────────────────────────
+function drawPersist() {
+  // Corner brackets
+  const bl=22, bo=16;
+  const corners=[[bo,bo,1,1],[W-bo,bo,-1,1],[bo,H-bo,1,-1],[W-bo,H-bo,-1,-1]];
+  X.save(); X.strokeStyle='#fff'; X.lineWidth=1; X.globalAlpha=.15;
+  corners.forEach(([x,y,dx,dy])=>{
+    X.beginPath(); X.moveTo(x+dx*bl,y); X.lineTo(x,y); X.lineTo(x,y+dy*bl); X.stroke();
+  });
+  X.restore();
+
+  // Scan line
+  const sy = (frame * .3) % H;
+  ln(0, sy, W, sy, .03, .5);
+
+  // Scene indicator dots (bottom center)
+  const [si] = scene(frame);
+  const dotSpacing = 16;
+  const dotsX = W/2 - (3*dotSpacing)/2;
+  for(let i=0;i<4;i++){
+    const active = i===si;
+    const dx = dotsX + i*dotSpacing;
+    const dy = H - 32;
+    if(active) dot(dx, dy, 3.5, .5);
+    else       arc(dx, dy, 3, .2, .8);
+  }
+
+  // Frame counter tick (top-right, ultra subtle)
+  const tf = (frame % 60) / 60;
+  arc(W-bo, bo, 6, .08, .8, -Math.PI/2, -Math.PI/2 + tf*PI2);
+}
+
+// ─── TRANSITIONS ─────────────────────────────────────────
+function drawTransition(sp) {
+  // Wipe line during exit (sp 0.78..1.0)
+  if(sp > .78) {
+    const tp = map(sp, .78, 1, 0, 1);
+    // Expanding horizontal bands
+    const bands = 5;
+    for(let i=0;i<bands;i++){
+      const by = H*(i/bands);
+      const bh = H/bands;
+      X.save(); X.globalAlpha=eio(tp)*.85;
+      X.fillStyle='#000';
+      X.fillRect(0, by, W*((i%2===0)?tp:1-tp), bh);
+      X.restore();
+    }
+  }
+}
+
+// ─── MAIN ────────────────────────────────────────────────
+function draw() {
+  frame++;
+  X.clearRect(0,0,W,H);
+  X.fillStyle='#000';
+  X.fillRect(0,0,W,H);
+
+  const [si, sp] = scene(frame);
+
+  // Draw active template
+  if(si===0) drawProfile(sp);
+  if(si===1) drawWiki(sp);
+  if(si===2) drawTV(sp);
+  if(si===3) drawDirectory(sp);
+
+  // Transitions
+  drawTransition(sp);
+
+  // Always-on layer
+  drawPersist();
+
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

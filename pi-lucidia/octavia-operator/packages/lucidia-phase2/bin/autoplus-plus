@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+SESSION=$(gum input --prompt "Session name: " --value "auto-plus-plus")
+BASE="$HOME/lucidia-phase2/sessions/$SESSION"
+mkdir -p "$BASE"
+
+SUMMARY="$BASE/alice_summary_for_lucidia.md"
+
+echo ""
+echo "🔁 AUTO++ SESSION: $SESSION"
+echo "----------------------------"
+echo ""
+
+if [[ -f "$SUMMARY" ]]; then
+  echo "📌 Prior summary found — feeding to Lucidia"
+  ollama run lucidia <<PROMPT | tee -a "$BASE/lucidia.log"
+You are resuming a session.
+Read the following summary from Alice, then frame next steps.
+Do not execute.
+
+$(cat "$SUMMARY")
+PROMPT
+else
+  echo "🧠 [Lucidia] Initial framing"
+  ollama run lucidia | tee -a "$BASE/lucidia.log"
+fi
+
+echo ""
+echo "🧪 [Alice] Exploration"
+ollama run alice | tee -a "$BASE/alice.log"
+
+echo ""
+echo "✍️  [Alice] Writing summary for Lucidia"
+cat > "$SUMMARY" <<'MD'
+# Alice → Lucidia Summary
+
+Guidelines:
+- Key insights only
+- No execution advice
+- Note assumptions and open questions
+MD
+
+ollama run alice <<'PROMPT' | tee -a "$SUMMARY"
+Summarize the key insights from this session for Lucidia.
+Use bullets. Label assumptions and open questions.
+PROMPT
+
+echo ""
+echo "🛡️ [Enclave] Boundary check"
+ollama run enclave | tee -a "$BASE/enclave.log"
+
+CHOICE=$(printf "Approve execution\nAbort\n" | gum choose --header "Enclave decision")
+
+if [[ "$CHOICE" == "Approve execution" ]]; then
+  echo ""
+  echo "⚙️ [Octavia] Execution"
+  ollama run octavia | tee -a "$BASE/octavia.log"
+else
+  echo ""
+  echo "⛔ Execution aborted (AUTO++)"
+fi
+
+echo ""
+echo "🔚 AUTO++ COMPLETE"
