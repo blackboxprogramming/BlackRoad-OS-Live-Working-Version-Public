@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad Platform API — api.blackroad.io</title>
+  <meta name="description" content="The shared infrastructure layer for all 18 BlackRoad products. Authentication, agents, events, analytics — one API gateway." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+  <style>
+    /* ── CSS vars ──────────────────────────────────────────────────── */
+    :root {
+      --g: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+      --g135: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+      --bg:       #000;
+      --surface:  #0a0a0a;
+      --elevated: #111;
+      --raised:   #1a1a1a;
+      --border:   #1a1a1a;
+      --muted:    #444;
+      --sub:      #737373;
+      --text:     #f5f5f5;
+      --white:    #fff;
+      --sg: 'Space Grotesk', sans-serif;
+      --jb: 'JetBrains Mono', monospace;
+      --radius: 8px;
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sg);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: var(--raised); border-radius: 2px; }
+    a { color: var(--text); text-decoration: none; }
+    button { font-family: var(--sg); cursor: pointer; border: none; }
+
+    /* ── Gradient top bar ──────────────────────────────────────────── */
+    .grad-bar { height: 3px; background: var(--g); position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+
+    /* ── Layout helpers ────────────────────────────────────────────── */
+    .container { max-width: 1040px; width: 100%; margin: 0 auto; padding: 0 28px; }
+    .section { padding: 88px 0; }
+    .section + .section { border-top: 1px solid var(--border); }
+
+    /* ── NAV ───────────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 3px; left: 0; right: 0; z-index: 100;
+      padding: 10px 28px;
+    }
+    .nav-inner {
+      max-width: 1040px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 20px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--jb); font-size: 13px; font-weight: 500; color: var(--white);
+    }
+    .nav-status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--g); /* gradient via pseudo trick — use inline style */
+      background: #00D4FF;
+      box-shadow: 0 0 6px #00D4FF88;
+      flex-shrink: 0;
+      animation: blink 3s ease-in-out infinite;
+    }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .nav-links {
+      display: flex; align-items: center; gap: 28px;
+    }
+    .nav-links a {
+      font-size: 13px; font-weight: 500; color: var(--sub);
+      transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    /* gradient-border button */
+    .btn-grad-border {
+      position: relative; display: inline-flex; align-items: center;
+      padding: 7px 16px; border-radius: 6px;
+      font-size: 12px; font-weight: 600; color: var(--white);
+      background: var(--bg); cursor: pointer;
+      isolation: isolate;
+    }
+    .btn-grad-border::before {
+      content: ''; position: absolute; inset: -1px;
+      border-radius: 8px;
+      background: var(--g);
+      z-index: -1;
+    }
+    .btn-grad-border:hover { background: var(--surface); }
+
+    .btn-ghost {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--sub); font-size: 12px; font-weight: 500;
+      padding: 7px 14px; border-radius: 6px;
+      transition: all .15s;
+    }
+    .btn-ghost:hover { border-color: #444; color: var(--text); }
+
+    /* ── ⌘K SEARCH MODAL ───────────────────────────────────────────── */
+    .search-trigger {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 12px;
+      cursor: pointer; transition: border-color .15s;
+    }
+    .search-trigger:hover { border-color: var(--raised); }
+    .search-trigger-label { font-size: 12px; color: var(--muted); }
+    .search-trigger-kbd {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      background: var(--raised); border: 1px solid #333;
+      padding: 2px 5px; border-radius: 3px;
+    }
+    .search-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px);
+      align-items: flex-start; justify-content: center; padding-top: 80px;
+    }
+    .search-overlay.open { display: flex; }
+    .search-box {
+      width: 100%; max-width: 560px; background: var(--surface);
+      border: 1px solid #333; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,.8);
+    }
+    .search-input-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+    }
+    .search-icon { color: var(--muted); font-size: 15px; }
+    .search-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      font-family: var(--jb); font-size: 14px; color: var(--white);
+    }
+    .search-input::placeholder { color: var(--muted); }
+    .search-results { padding: 10px 0; }
+    .search-result-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 18px; cursor: pointer; transition: background .1s;
+    }
+    .search-result-item:hover { background: var(--elevated); }
+    .search-result-tag {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      background: var(--raised); border: 1px solid var(--border);
+      padding: 2px 6px; border-radius: 3px; flex-shrink: 0;
+    }
+    .search-result-label { font-size: 13px; color: var(--text); }
+    .search-close-hint {
+      padding: 10px 18px; border-top: 1px solid var(--border);
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      display: flex; gap: 16px;
+    }
+
+    /* ── HERO ──────────────────────────────────────────────────────── */
+    .hero {
+      padding: 160px 28px 100px;
+      max-width: 1040px; margin: 0 auto;
+    }
+    .hero-label {
+      font-family: var(--jb); font-size: 11px; color: var(--muted);
+      letter-spacing: .12em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+    }
+    .hero-label-sep { color: var(--border); }
+    .hero-version-badge {
+      font-family: var(--jb); font-size: 10px; color: var(--sub);
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 2px 8px; border-radius: 3px;
+    }
+    .hero-title {
+      font-size: clamp(40px, 6vw, 68px); font-weight: 700; color: var(--white);
+      letter-spacing: -.03em; line-height: 1.05; margin-bottom: 18px;
+      max-width: 680px;
+    }
+    .hero-sub {
+      font-size: 16px; color: var(--sub); max-width: 520px;
+      line-height: 1.75; margin-bottom: 32px;
+    }
+
+    /* health pill */
+    .health-pill {
+      display: inline-flex; align-items: center; gap: 10px;
+      position: relative; padding: 8px 16px;
+      border-radius: 16px; background: var(--bg);
+      margin-bottom: 36px; isolation: isolate;
+      cursor: default;
+    }
+    .health-pill::before {
+      content: ''; position: absolute; inset: -1px;
+      border-radius: 16px; background: var(--g); z-index: -1;
+    }
+    .health-pill::after {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 16px; background: var(--bg); z-index: -1;
+    }
+    .health-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #00D4FF; box-shadow: 0 0 8px #00D4FF99;
+      animation: blink 2.5s ease-in-out infinite;
+    }
+    .health-text {
+      font-family: var(--jb); font-size: 11px; color: var(--text);
+      letter-spacing: .04em;
+    }
+    .health-uptime { color: var(--sub); margin-left: 4px; }
+
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 22px; border-radius: 6px;
+      font-size: 13px; font-weight: 600; color: var(--white);
+      background: var(--elevated); border: 1px solid #333;
+      transition: all .15s; cursor: pointer;
+    }
+    .btn-primary:hover { background: var(--raised); border-color: #525252; }
+
+    /* ── LIVE STATUS STRIP ─────────────────────────────────────────── */
+    .status-strip {
+      background: var(--surface); border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 28px;
+    }
+    .status-strip-inner {
+      max-width: 1040px; margin: 0 auto;
+      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+    .status-entry {
+      display: flex; align-items: center; gap: 8px;
+      font-family: var(--jb); font-size: 11px; color: var(--sub);
+    }
+    .status-method { color: var(--text); }
+    .status-path   { color: var(--text); }
+    .status-ok     { color: var(--text); }
+    .status-ms     { color: var(--muted); }
+    .status-sep    { color: var(--border); margin: 0 4px; }
+    .status-last {
+      margin-left: auto; font-family: var(--jb); font-size: 10px;
+      color: var(--muted); white-space: nowrap;
+    }
+    .status-refresh-dot {
+      display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+      background: var(--muted); margin-right: 4px;
+      animation: blink 1.2s ease-in-out infinite;
+    }
+
+    /* ── SECTION HEADERS ───────────────────────────────────────────── */
+    .section-eyebrow {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 28px; font-weight: 700; color: var(--white);
+      letter-spacing: -.02em; margin-bottom: 8px;
+    }
+    .section-desc {
+      font-size: 14px; color: var(--sub); max-width: 480px; line-height: 1.75;
+      margin-bottom: 40px;
+    }
+
+    /* ── ENDPOINT GRID ─────────────────────────────────────────────── */
+    .endpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    @media (max-width: 800px) { .endpoint-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 520px) { .endpoint-grid { grid-template-columns: 1fr; } }
+
+    .endpoint-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      position: relative; cursor: pointer;
+      transition: border-color .2s, background .2s;
+      overflow: hidden;
+    }
+    .endpoint-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--g); opacity: 0; transition: opacity .2s;
+    }
+    .endpoint-card:hover { border-color: var(--raised); background: var(--surface); }
+    .endpoint-card:hover::before { opacity: 1; }
+
+    .ep-icon { font-size: 18px; margin-bottom: 10px; display: block; }
+    .ep-path {
+      font-family: var(--jb); font-size: 12px; color: var(--text);
+      margin-bottom: 6px; display: block;
+    }
+    .ep-desc { font-size: 12px; color: var(--sub); line-height: 1.6; margin-bottom: 12px; }
+    .ep-badge {
+      display: inline-flex; align-items: center;
+      font-family: var(--jb); font-size: 9px; color: var(--muted);
+      background: var(--elevated); border: 1px solid var(--border);
+      padding: 2px 7px; border-radius: 3px;
+    }
+
+    /* ── QUICKSTART TABS ───────────────────────────────────────────── */
+    .qs-tabs {
+      display: flex; gap: 2px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px 8px 0 0; border-bottom: none;
+      padding: 6px 6px 0;
+    }
+    .qs-tab {
+      font-family: var(--jb); font-size: 11px; font-weight: 500;
+      padding: 8px 16px; border-radius: 6px 6px 0 0; cursor: pointer;
+      color: var(--sub); background: transparent; border: none;
+      transition: all .15s; position: relative; top: 1px;
+    }
+    .qs-tab.active {
+      color: var(--white); background: var(--elevated);
+      border: 1px solid var(--border); border-bottom: 1px solid var(--elevated);
+    }
+    .qs-tab:not(.active):hover { color: var(--text); }
+
+    .qs-body {
+      background: var(--elevated); border: 1px solid var(--border);
+      border-radius: 0 8px 8px 8px; overflow: hidden;
+    }
+    .qs-panel { display: none; }
+    .qs-panel.active { display: block; }
+
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px; background: var(--raised);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-header-label {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      letter-spacing: .08em;
+    }
+    .code-header-actions { display: flex; gap: 8px; align-items: center; }
+
+    .copy-btn {
+      font-family: var(--jb); font-size: 10px; color: var(--sub);
+      background: var(--border); border: 1px solid #333;
+      padding: 4px 10px; border-radius: 4px; cursor: pointer;
+      transition: all .15s;
+    }
+    .copy-btn:hover { color: var(--white); background: #333; }
+    .copy-btn.copied { color: var(--text); border-color: #00D4FF44; }
+
+    .playground-link {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      text-decoration: none; transition: color .15s;
+    }
+    .playground-link:hover { color: var(--text); }
+
+    pre {
+      padding: 24px 22px; overflow-x: auto;
+      font-family: var(--jb); font-size: 12.5px; line-height: 1.75;
+      color: var(--text);
+    }
+    .tok-comment  { color: var(--muted); }
+    .tok-string   { color: var(--text); }
+    .tok-keyword  { color: var(--sub); }
+    .tok-method   { color: var(--text); }
+    .tok-var      { color: var(--text); }
+    .tok-punct    { color: var(--sub); }
+    .tok-import   { color: var(--text); }
+    .tok-fn       { color: var(--sub); }
+
+    /* ── AUTH TABLE ────────────────────────────────────────────────── */
+    .data-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px;
+    }
+    .data-table th {
+      text-align: left; font-family: var(--jb); font-size: 10px;
+      font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #080808; }
+
+    .td-mono {
+      font-family: var(--jb); font-size: 11px; color: var(--text);
+    }
+    .td-desc { font-size: 12px; color: var(--sub); line-height: 1.6; }
+
+    .badge-err {
+      font-family: var(--jb); font-size: 10px; padding: 2px 6px; border-radius: 3px;
+      font-weight: 600; display: inline-block;
+    }
+    .err-401 { background: #FF225518; color: var(--sub); border: 1px solid #FF225533; }
+    .err-403 { background: #CC00AA18; color: var(--sub); border: 1px solid #CC00AA33; }
+    .err-429 { background: #FF6B2B18; color: var(--text); border: 1px solid #FF6B2B33; }
+    .err-500 { background: #73737318; color: var(--sub); border: 1px solid #44444444; }
+
+    .table-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 16px;
+    }
+    .table-card-header {
+      padding: 12px 16px; background: var(--elevated);
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--sub);
+      font-family: var(--jb); text-transform: uppercase; letter-spacing: .1em;
+    }
+
+    .rate-limit-bar {
+      display: flex; align-items: center; gap: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      margin-top: 16px;
+    }
+    .rate-limit-item {
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .rate-limit-label {
+      font-family: var(--jb); font-size: 9px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .rate-limit-val {
+      font-family: var(--jb); font-size: 16px; font-weight: 600; color: var(--white);
+    }
+    .rate-sep { width: 1px; height: 36px; background: var(--border); }
+
+    /* ── SDK CARDS ─────────────────────────────────────────────────── */
+    .sdk-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+    }
+    @media (max-width: 640px) { .sdk-grid { grid-template-columns: 1fr; } }
+
+    .sdk-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 22px; overflow: hidden;
+      transition: border-color .2s;
+    }
+    .sdk-card:hover { border-color: var(--raised); }
+
+    .sdk-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .sdk-lang-name {
+      font-size: 14px; font-weight: 700; color: var(--white);
+    }
+    .sdk-lang-sub {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      margin-top: 2px;
+    }
+    .sdk-icon { font-size: 24px; }
+
+    .sdk-install {
+      background: var(--elevated); border: 1px solid var(--border);
+      border-radius: 5px; padding: 10px 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .sdk-install-cmd {
+      font-family: var(--jb); font-size: 11px; color: var(--text);
+      flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sdk-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 14px;
+    }
+    .sdk-gh-link {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      transition: color .15s;
+    }
+    .sdk-gh-link:hover { color: var(--text); }
+    .sdk-status {
+      font-family: var(--jb); font-size: 9px; text-transform: uppercase;
+      letter-spacing: .1em; padding: 2px 6px; border-radius: 3px;
+    }
+    .sdk-status-stable { color: var(--text); background: #00D4FF11; border: 1px solid #00D4FF33; }
+    .sdk-status-beta   { color: var(--text); background: #FF6B2B11; border: 1px solid #FF6B2B33; }
+
+    /* ── CHANGELOG ─────────────────────────────────────────────────── */
+    .changelog-entry {
+      display: flex; gap: 24px;
+      padding: 20px 0; border-bottom: 1px solid var(--border);
+    }
+    .changelog-entry:last-child { border-bottom: none; }
+    .cl-meta { flex-shrink: 0; min-width: 100px; }
+    .cl-version {
+      font-family: var(--jb); font-size: 12px; font-weight: 600;
+      color: var(--white); margin-bottom: 4px;
+    }
+    .cl-date {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+    }
+    .cl-badge {
+      font-family: var(--jb); font-size: 9px; text-transform: uppercase;
+      letter-spacing: .08em; padding: 2px 6px; border-radius: 3px;
+      margin-top: 6px; display: inline-block;
+    }
+    .cl-minor   { color: var(--text); background: #4488FF11; border: 1px solid #4488FF33; }
+    .cl-patch   { color: var(--sub); background: var(--elevated); border: 1px solid var(--border); }
+    .cl-breaking{ color: var(--sub); background: #FF225511; border: 1px solid #FF225533; }
+
+    .cl-body { flex: 1; }
+    .cl-title {
+      font-size: 14px; font-weight: 600; color: var(--white); margin-bottom: 6px;
+    }
+    .cl-items { list-style: none; padding: 0; }
+    .cl-items li {
+      font-size: 13px; color: var(--sub); padding: 3px 0;
+      display: flex; gap: 8px; line-height: 1.6;
+    }
+    .cl-items li::before { content: '—'; color: var(--border); flex-shrink: 0; }
+
+    /* ── FOOTER ────────────────────────────────────────────────────── */
+    footer {
+      background: var(--surface); border-top: 1px solid var(--border);
+      padding: 28px 28px;
+    }
+    .footer-inner {
+      max-width: 1040px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 20px; flex-wrap: wrap;
+    }
+    .footer-left {
+      font-family: var(--jb); font-size: 11px; color: var(--muted);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .footer-sep { color: var(--border); }
+    .footer-right {
+      display: flex; gap: 20px; align-items: center;
+    }
+    .footer-right a {
+      font-family: var(--jb); font-size: 10px; color: var(--muted);
+      transition: color .15s;
+    }
+    .footer-right a:hover { color: var(--sub); }
+  </style>
+</head>
+<body>
+
+<!-- ── GRADIENT TOP BAR ───────────────────────────────────────────── -->
+<div class="grad-bar"></div>
+
+<!-- ── NAV ───────────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-status-dot"></div>
+      api.blackroad.io
+    </div>
+
+    <div class="nav-links">
+      <a href="#endpoints">Reference</a>
+      <a href="#sdks">SDKs</a>
+      <a href="#changelog">Changelog</a>
+      <a href="#auth">Status</a>
+    </div>
+
+    <div class="nav-right">
+      <button class="search-trigger" id="searchTrigger">
+        <span class="search-icon">⌘</span>
+        <span class="search-trigger-label">Search docs…</span>
+        <span class="search-trigger-kbd">K</span>
+      </button>
+      <button class="btn-grad-border">Get API Key</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-label">
+    <span class="hero-version-badge">api.blackroad.io</span>
+    <span class="hero-label-sep">·</span>
+    <span>v1.4.2</span>
+    <span class="hero-label-sep">·</span>
+    <span>Production</span>
+  </div>
+
+  <h1 class="hero-title">BlackRoad Platform API</h1>
+  <p class="hero-sub">
+    The shared infrastructure layer for all 18 BlackRoad products. One gateway for auth, agents, events, users, analytics, and more.
+  </p>
+
+  <div class="health-pill" style="margin-bottom:36px;">
+    <div class="health-dot"></div>
+    <span class="health-text">
+      Operational
+      <span class="health-uptime">· 99.97% uptime (30d)</span>
+    </span>
+  </div>
+
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('endpoints').scrollIntoView({behavior:'smooth'})">
+      View Reference →
+    </button>
+    <button class="btn-grad-border" style="padding:11px 22px;font-size:13px;">
+      Get API Key
+    </button>
+  </div>
+</section>
+
+<!-- ── LIVE STATUS STRIP ──────────────────────────────────────────── -->
+<div class="status-strip">
+  <div class="status-strip-inner">
+    <div class="status-entry">
+      <span class="status-method">GET</span>
+      <span class="status-path">/health</span>
+      <span class="status-sep">→</span>
+      <span class="status-ok">200 OK</span>
+      <span class="status-ms" id="ms1">· 12ms</span>
+    </div>
+    <div class="status-entry">
+      <span class="status-method">GET</span>
+      <span class="status-path">/v1/agents</span>
+      <span class="status-sep">→</span>
+      <span class="status-ok">200 OK</span>
+      <span class="status-ms" id="ms2">· 47ms</span>
+    </div>
+    <div class="status-entry">
+      <span class="status-method" style="color:#CC00AA;">POST</span>
+      <span class="status-path">/v1/events</span>
+      <span class="status-sep">→</span>
+      <span class="status-ok">200 OK</span>
+      <span class="status-ms" id="ms3">· 23ms</span>
+    </div>
+    <div class="status-last">
+      <span class="status-refresh-dot"></span>
+      Last checked: <span id="lastChecked">just now</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── SECTION 1 — ENDPOINTS OVERVIEW ────────────────────────────── -->
+<section class="section" id="endpoints">
+  <div class="container">
+    <div class="section-eyebrow">01 — Endpoints</div>
+    <h2 class="section-title">API Reference</h2>
+    <p class="section-desc">
+      Every BlackRoad product talks to these endpoints. All routes are versioned under <code style="font-family:var(--jb);font-size:12px;color:var(--text);">/v1</code> and return JSON.
+    </p>
+
+    <div class="endpoint-grid">
+
+      <div class="endpoint-card">
+        <span class="ep-icon">🔐</span>
+        <span class="ep-path">/v1/auth</span>
+        <p class="ep-desc">Bearer token issuance, OAuth flows, session management, and token introspection.</p>
+        <span class="ep-badge">4 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">🤖</span>
+        <span class="ep-path">/v1/agents</span>
+        <p class="ep-desc">List, create, update, and orchestrate BlackRoad agents across the fleet.</p>
+        <span class="ep-badge">8 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">📦</span>
+        <span class="ep-path">/v1/products</span>
+        <p class="ep-desc">Read the canonical index of all 18 BlackRoad products with metadata and status.</p>
+        <span class="ep-badge">3 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">⚡</span>
+        <span class="ep-path">/v1/events</span>
+        <p class="ep-desc">Publish and subscribe to platform events. SSE streaming supported.</p>
+        <span class="ep-badge">5 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">👤</span>
+        <span class="ep-path">/v1/users</span>
+        <p class="ep-desc">User identity, profile data, preferences, and cross-product session context.</p>
+        <span class="ep-badge">6 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">🏢</span>
+        <span class="ep-path">/v1/orgs</span>
+        <p class="ep-desc">Organization management, member roles, billing seats, and org-level settings.</p>
+        <span class="ep-badge">4 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">🔑</span>
+        <span class="ep-path">/v1/keys</span>
+        <p class="ep-desc">Issue, rotate, and revoke API keys. Scopes and expiry configurable per key.</p>
+        <span class="ep-badge">3 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">📊</span>
+        <span class="ep-path">/v1/analytics</span>
+        <p class="ep-desc">Ingest pageview and event analytics. Powers the unified BlackRoad analytics dashboard.</p>
+        <span class="ep-badge">2 endpoints</span>
+      </div>
+
+      <div class="endpoint-card">
+        <span class="ep-icon">❤️</span>
+        <span class="ep-path">/health</span>
+        <p class="ep-desc">Liveness and readiness probes. Unversioned. No auth required.</p>
+        <span class="ep-badge">2 endpoints</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2 — QUICKSTART ─────────────────────────────────────── -->
+<section class="section" id="quickstart">
+  <div class="container">
+    <div class="section-eyebrow">02 — Quickstart</div>
+    <h2 class="section-title">Make your first request</h2>
+    <p class="section-desc">
+      Get your API key from <strong style="color:var(--text);">CarKeys</strong>, then call any endpoint. Every SDK wraps the same REST layer.
+    </p>
+
+    <div class="qs-tabs" role="tablist">
+      <button class="qs-tab active" role="tab" data-tab="curl" onclick="switchTab('curl')">cURL</button>
+      <button class="qs-tab"        role="tab" data-tab="js"   onclick="switchTab('js')">JavaScript</button>
+      <button class="qs-tab"        role="tab" data-tab="py"   onclick="switchTab('py')">Python</button>
+    </div>
+
+    <div class="qs-body">
+
+      <!-- cURL -->
+      <div class="qs-panel active" id="panel-curl">
+        <div class="code-header">
+          <span class="code-header-label">BASH</span>
+          <div class="code-header-actions">
+            <button class="copy-btn" onclick="copyCode('code-curl', this)">Copy</button>
+            <a class="playground-link" href="#">Run in playground ↗</a>
+          </div>
+        </div>
+        <pre id="code-curl"><span class="tok-comment"># Get your API key from CarKeys → carkeys.blackroad.io</span>
+
+<span class="tok-method">curl</span> https://api.blackroad.io/v1/agents <span class="tok-punct">\</span>
+  <span class="tok-keyword">-H</span> <span class="tok-string">"Authorization: Bearer $BLACKROAD_API_KEY"</span> <span class="tok-punct">\</span>
+  <span class="tok-keyword">-H</span> <span class="tok-string">"Content-Type: application/json"</span> <span class="tok-punct">\</span>
+  <span class="tok-keyword">-H</span> <span class="tok-string">"X-BlackRoad-Version: 2026-04-11"</span></pre>
+      </div>
+
+      <!-- JavaScript -->
+      <div class="qs-panel" id="panel-js">
+        <div class="code-header">
+          <span class="code-header-label">JAVASCRIPT / TYPESCRIPT</span>
+          <div class="code-header-actions">
+            <button class="copy-btn" onclick="copyCode('code-js', this)">Copy</button>
+            <a class="playground-link" href="#">Run in playground ↗</a>
+          </div>
+        </div>
+        <pre id="code-js"><span class="tok-import">import</span> <span class="tok-punct">{</span> BlackRoad <span class="tok-punct">}</span> <span class="tok-import">from</span> <span class="tok-string">'@blackroad/sdk'</span>
+
+<span class="tok-keyword">const</span> br <span class="tok-punct">=</span> <span class="tok-keyword">new</span> <span class="tok-fn">BlackRoad</span><span class="tok-punct">({</span>
+  apiKey<span class="tok-punct">:</span> process<span class="tok-punct">.</span>env<span class="tok-punct">.</span>BLACKROAD_API_KEY<span class="tok-punct">,</span>
+<span class="tok-punct">})</span>
+
+<span class="tok-comment">// List all agents on the platform</span>
+<span class="tok-keyword">const</span> agents <span class="tok-punct">=</span> <span class="tok-keyword">await</span> br<span class="tok-punct">.</span>agents<span class="tok-punct">.</span><span class="tok-fn">list</span><span class="tok-punct">()</span>
+console<span class="tok-punct">.</span><span class="tok-fn">log</span><span class="tok-punct">(</span>agents<span class="tok-punct">.</span>data<span class="tok-punct">)</span>
+
+<span class="tok-comment">// Post an event</span>
+<span class="tok-keyword">await</span> br<span class="tok-punct">.</span>events<span class="tok-punct">.</span><span class="tok-fn">publish</span><span class="tok-punct">({</span>
+  type<span class="tok-punct">:</span>    <span class="tok-string">'agent.invoked'</span><span class="tok-punct">,</span>
+  agentId<span class="tok-punct">:</span> <span class="tok-string">'road'</span><span class="tok-punct">,</span>
+<span class="tok-punct">})</span></pre>
+      </div>
+
+      <!-- Python -->
+      <div class="qs-panel" id="panel-py">
+        <div class="code-header">
+          <span class="code-header-label">PYTHON</span>
+          <div class="code-header-actions">
+            <button class="copy-btn" onclick="copyCode('code-py', this)">Copy</button>
+            <a class="playground-link" href="#">Run in playground ↗</a>
+          </div>
+        </div>
+        <pre id="code-py"><span class="tok-import">import</span> os
+<span class="tok-import">import</span> blackroad
+
+<span class="tok-comment"># Initialise with your API key from CarKeys</span>
+br <span class="tok-punct">=</span> blackroad<span class="tok-punct">.</span><span class="tok-fn">Client</span><span class="tok-punct">(</span>
+    api_key<span class="tok-punct">=</span>os<span class="tok-punct">.</span>environ<span class="tok-punct">[</span><span class="tok-string">"BLACKROAD_API_KEY"</span><span class="tok-punct">]</span>
+<span class="tok-punct">)</span>
+
+<span class="tok-comment"># List all agents</span>
+agents <span class="tok-punct">=</span> br<span class="tok-punct">.</span>agents<span class="tok-punct">.</span><span class="tok-fn">list</span><span class="tok-punct">()</span>
+<span class="tok-keyword">for</span> agent <span class="tok-keyword">in</span> agents<span class="tok-punct">.</span>data<span class="tok-punct">:</span>
+    <span class="tok-fn">print</span><span class="tok-punct">(</span>agent<span class="tok-punct">.</span>id<span class="tok-punct">,</span> agent<span class="tok-punct">.</span>status<span class="tok-punct">)</span>
+
+<span class="tok-comment"># Post an event</span>
+br<span class="tok-punct">.</span>events<span class="tok-punct">.</span><span class="tok-fn">publish</span><span class="tok-punct">(</span>type_<span class="tok-punct">=</span><span class="tok-string">"agent.invoked"</span><span class="tok-punct">,</span> agent_id<span class="tok-punct">=</span><span class="tok-string">"road"</span><span class="tok-punct">)</span></pre>
+      </div>
+
+    </div><!-- /.qs-body -->
+  </div>
+</section>
+
+<!-- ── SECTION 3 — AUTHENTICATION ────────────────────────────────── -->
+<section class="section" id="auth">
+  <div class="container">
+    <div class="section-eyebrow">03 — Authentication</div>
+    <h2 class="section-title">Bearer token auth</h2>
+    <p class="section-desc">
+      All API requests require a Bearer token issued by <strong style="color:var(--text);">CarKeys</strong>. Tokens are scoped, rotatable, and audit-logged on every request.
+    </p>
+
+    <!-- Request headers table -->
+    <div class="table-card" style="margin-bottom:20px;">
+      <div class="table-card-header">Required headers</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Header</th>
+            <th>Value</th>
+            <th>Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-mono">Authorization</td>
+            <td class="td-desc"><code style="font-family:var(--jb);font-size:11px;color:var(--text);">Bearer &lt;token&gt;</code> — your CarKeys API key</td>
+            <td class="td-mono" style="color:#00D4FF;">Yes</td>
+          </tr>
+          <tr>
+            <td class="td-mono">Content-Type</td>
+            <td class="td-desc"><code style="font-family:var(--jb);font-size:11px;color:var(--text);">application/json</code></td>
+            <td class="td-mono" style="color:#00D4FF;">Yes</td>
+          </tr>
+          <tr>
+            <td class="td-mono">X-BlackRoad-Version</td>
+            <td class="td-desc"><code style="font-family:var(--jb);font-size:11px;color:var(--text);">2026-04-11</code> — pin the API schema version</td>
+            <td class="td-mono" style="color:var(--muted);">Recommended</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Error codes table -->
+    <div class="table-card">
+      <div class="table-card-header">Error codes</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Status</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge-err err-401">401</span></td>
+            <td class="td-mono">Unauthorized</td>
+            <td class="td-desc">Missing or invalid Bearer token. Re-issue from CarKeys.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-err err-403">403</span></td>
+            <td class="td-mono">Forbidden</td>
+            <td class="td-desc">Token is valid but lacks the required scope for this endpoint.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-err err-429">429</span></td>
+            <td class="td-mono">Rate Limited</td>
+            <td class="td-desc">Request rate exceeded. Retry after the <code style="font-family:var(--jb);font-size:11px;">Retry-After</code> header value.</td>
+          </tr>
+          <tr>
+            <td><span class="badge-err err-500">500</span></td>
+            <td class="td-mono">Server Error</td>
+            <td class="td-desc">Unexpected platform error. Check status.blackroad.io and retry.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Rate limits -->
+    <div class="rate-limit-bar">
+      <div class="rate-limit-item">
+        <span class="rate-limit-label">Standard plan</span>
+        <span class="rate-limit-val">1,000 <span style="font-size:11px;color:var(--muted);">req/min</span></span>
+      </div>
+      <div class="rate-sep"></div>
+      <div class="rate-limit-item">
+        <span class="rate-limit-label">Enterprise plan</span>
+        <span class="rate-limit-val">10,000 <span style="font-size:11px;color:var(--muted);">req/min</span></span>
+      </div>
+      <div class="rate-sep"></div>
+      <div class="rate-limit-item">
+        <span class="rate-limit-label">Burst window</span>
+        <span class="rate-limit-val">60s</span>
+      </div>
+      <div style="margin-left:auto;">
+        <p style="font-family:var(--jb);font-size:10px;color:var(--muted);">
+          Rate limit headers on every response:<br>
+          <code style="color:var(--sub);">X-RateLimit-Limit</code> ·
+          <code style="color:var(--sub);">X-RateLimit-Remaining</code> ·
+          <code style="color:var(--sub);">X-RateLimit-Reset</code>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── SECTION 4 — SDKs ───────────────────────────────────────────── -->
+<section class="section" id="sdks">
+  <div class="container">
+    <div class="section-eyebrow">04 — SDKs</div>
+    <h2 class="section-title">Official client libraries</h2>
+    <p class="section-desc">
+      First-party SDKs with full TypeScript types, automatic retries, and idiomatic wrappers for every endpoint group.
+    </p>
+
+    <div class="sdk-grid">
+
+      <!-- JS/TS -->
+      <div class="sdk-card">
+        <div class="sdk-header">
+          <div>
+            <div class="sdk-lang-name">JavaScript / TypeScript</div>
+            <div class="sdk-lang-sub">Node.js 18+ · Edge-compatible</div>
+          </div>
+          <div class="sdk-icon">🟨</div>
+        </div>
+        <div class="sdk-install">
+          <span class="sdk-install-cmd">npm install @blackroad/sdk</span>
+          <button class="copy-btn" onclick="copyText('npm install @blackroad/sdk', this)">Copy</button>
+        </div>
+        <div class="sdk-footer">
+          <a class="sdk-gh-link" href="#">github.com/blackroadosinc/sdk-js ↗</a>
+          <span class="sdk-status sdk-status-stable">Stable</span>
+        </div>
+      </div>
+
+      <!-- Python -->
+      <div class="sdk-card">
+        <div class="sdk-header">
+          <div>
+            <div class="sdk-lang-name">Python</div>
+            <div class="sdk-lang-sub">Python 3.9+ · async/await ready</div>
+          </div>
+          <div class="sdk-icon">🐍</div>
+        </div>
+        <div class="sdk-install">
+          <span class="sdk-install-cmd">pip install blackroad</span>
+          <button class="copy-btn" onclick="copyText('pip install blackroad', this)">Copy</button>
+        </div>
+        <div class="sdk-footer">
+          <a class="sdk-gh-link" href="#">github.com/blackroadosinc/sdk-python ↗</a>
+          <span class="sdk-status sdk-status-stable">Stable</span>
+        </div>
+      </div>
+
+      <!-- Go -->
+      <div class="sdk-card">
+        <div class="sdk-header">
+          <div>
+            <div class="sdk-lang-name">Go</div>
+            <div class="sdk-lang-sub">Go 1.21+ · context-aware</div>
+          </div>
+          <div class="sdk-icon">🔵</div>
+        </div>
+        <div class="sdk-install">
+          <span class="sdk-install-cmd">go get github.com/blackroadosinc/sdk-go</span>
+          <button class="copy-btn" onclick="copyText('go get github.com/blackroadosinc/sdk-go', this)">Copy</button>
+        </div>
+        <div class="sdk-footer">
+          <a class="sdk-gh-link" href="#">github.com/blackroadosinc/sdk-go ↗</a>
+          <span class="sdk-status sdk-status-beta">Beta</span>
+        </div>
+      </div>
+
+      <!-- REST -->
+      <div class="sdk-card">
+        <div class="sdk-header">
+          <div>
+            <div class="sdk-lang-name">REST</div>
+            <div class="sdk-lang-sub">OpenAPI 3.1 · no dependencies</div>
+          </div>
+          <div class="sdk-icon">🌐</div>
+        </div>
+        <div class="sdk-install">
+          <span class="sdk-install-cmd">curl https://api.blackroad.io/openapi.json</span>
+          <button class="copy-btn" onclick="copyText('curl https://api.blackroad.io/openapi.json', this)">Copy</button>
+        </div>
+        <div class="sdk-footer">
+          <a class="sdk-gh-link" href="#">Download OpenAPI spec ↗</a>
+          <span class="sdk-status sdk-status-stable">Stable</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 5 — CHANGELOG ──────────────────────────────────────── -->
+<section class="section" id="changelog">
+  <div class="container">
+    <div class="section-eyebrow">05 — Changelog</div>
+    <h2 class="section-title">What's changed</h2>
+    <p class="section-desc">
+      All breaking changes are announced 30 days in advance. Pin <code style="font-family:var(--jb);font-size:12px;color:var(--text);">X-BlackRoad-Version</code> to avoid surprises.
+    </p>
+
+    <!-- Entry 1 -->
+    <div class="changelog-entry">
+      <div class="cl-meta">
+        <div class="cl-version">v1.4.2</div>
+        <div class="cl-date">2026-04-11</div>
+        <span class="cl-badge cl-patch">Patch</span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-title">Performance &amp; stability</div>
+        <ul class="cl-items">
+          <li>Reduced <code style="font-family:var(--jb);font-size:11px;">/v1/agents</code> p99 latency from 120ms → 47ms via edge cache warm-up</li>
+          <li>Fixed race condition in token introspection under high concurrency</li>
+          <li>Health endpoint now returns <code style="font-family:var(--jb);font-size:11px;">db_status</code> and <code style="font-family:var(--jb);font-size:11px;">queue_depth</code> fields</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Entry 2 -->
+    <div class="changelog-entry">
+      <div class="cl-meta">
+        <div class="cl-version">v1.4.0</div>
+        <div class="cl-date">2026-03-18</div>
+        <span class="cl-badge cl-minor">Minor</span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-title">Analytics ingestion + SSE streaming</div>
+        <ul class="cl-items">
+          <li>Added <code style="font-family:var(--jb);font-size:11px;">POST /v1/analytics/events</code> for normalized pageview ingestion</li>
+          <li>Added SSE stream endpoint <code style="font-family:var(--jb);font-size:11px;">GET /v1/events/stream</code> for real-time subscribers</li>
+          <li>New <code style="font-family:var(--jb);font-size:11px;">X-RateLimit-*</code> headers on every response</li>
+          <li>Python SDK updated to 1.4.0 with async support</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Entry 3 -->
+    <div class="changelog-entry">
+      <div class="cl-meta">
+        <div class="cl-version">v1.3.0</div>
+        <div class="cl-date">2026-02-02</div>
+        <span class="cl-badge cl-minor">Minor</span>
+      </div>
+      <div class="cl-body">
+        <div class="cl-title">Orgs API + scoped API keys</div>
+        <ul class="cl-items">
+          <li>Introduced <code style="font-family:var(--jb);font-size:11px;">/v1/orgs</code> resource — list, create, and manage organizations</li>
+          <li>API keys now support granular scope strings (e.g. <code style="font-family:var(--jb);font-size:11px;">agents:read</code>, <code style="font-family:var(--jb);font-size:11px;">events:write</code>)</li>
+          <li>Deprecated <code style="font-family:var(--jb);font-size:11px;">/v1/auth/session</code> in favour of <code style="font-family:var(--jb);font-size:11px;">/v1/auth/token</code> — removal in v2.0</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <span>api.blackroad.io</span>
+      <span class="footer-sep">·</span>
+      <span>v1.4.2</span>
+      <span class="footer-sep">·</span>
+      <span>© BlackRoad OS, Inc.</span>
+    </div>
+    <div class="footer-right">
+      <a href="#">Status</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">CarKeys ↗</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ── ⌘K SEARCH OVERLAY ──────────────────────────────────────────── -->
+<div class="search-overlay" id="searchOverlay" onclick="closeSearch(event)">
+  <div class="search-box" id="searchBox">
+    <div class="search-input-row">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-input"
+        id="searchInput"
+        type="text"
+        placeholder="Search endpoints, guides, SDKs…"
+        autocomplete="off"
+        oninput="filterResults(this.value)"
+      />
+    </div>
+    <div class="search-results" id="searchResults">
+      <div class="search-result-item"><span class="search-result-tag">endpoint</span><span class="search-result-label">/v1/auth — Authentication &amp; tokens</span></div>
+      <div class="search-result-item"><span class="search-result-tag">endpoint</span><span class="search-result-label">/v1/agents — Agent management</span></div>
+      <div class="search-result-item"><span class="search-result-tag">endpoint</span><span class="search-result-label">/v1/events — Event streaming</span></div>
+      <div class="search-result-item"><span class="search-result-tag">endpoint</span><span class="search-result-label">/v1/products — Product index</span></div>
+      <div class="search-result-item"><span class="search-result-tag">sdk</span><span class="search-result-label">JavaScript / TypeScript SDK</span></div>
+      <div class="search-result-item"><span class="search-result-tag">sdk</span><span class="search-result-label">Python SDK</span></div>
+      <div class="search-result-item"><span class="search-result-tag">guide</span><span class="search-result-label">Authentication — Bearer token setup</span></div>
+      <div class="search-result-item"><span class="search-result-tag">guide</span><span class="search-result-label">Rate limits &amp; retry strategy</span></div>
+    </div>
+    <div class="search-close-hint">
+      <span>↑↓ navigate</span>
+      <span>↵ select</span>
+      <span>esc close</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── JS ─────────────────────────────────────────────────────────── -->
+<script>
+  /* ─ Tab switching ─────────────────────────────────────────────── */
+  function switchTab(name) {
+    document.querySelectorAll('.qs-tab').forEach(t => t.classList.remove('active'))
+    document.querySelectorAll('.qs-panel').forEach(p => p.classList.remove('active'))
+    document.querySelector(`[data-tab="${name}"]`).classList.add('active')
+    document.getElementById(`panel-${name}`).classList.add('active')
+  }
+
+  /* ─ Copy button ───────────────────────────────────────────────── */
+  function copyCode(id, btn) {
+    const el = document.getElementById(id)
+    const text = el.innerText || el.textContent
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'
+      btn.classList.add('copied')
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied') }, 1800)
+    })
+  }
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!'
+      btn.classList.add('copied')
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied') }, 1800)
+    })
+  }
+
+  /* ─ Live status strip ────────────────────────────────────────── */
+  let checkCount = 0
+  const msValues = [
+    [10, 45, 21], [13, 51, 19], [11, 43, 24],
+    [9,  48, 22], [14, 46, 20], [12, 52, 25],
+    [10, 44, 23], [11, 49, 18], [13, 47, 22],
+  ]
+  function refreshStatus() {
+    checkCount++
+    const row = msValues[checkCount % msValues.length]
+    document.getElementById('ms1').textContent = `· ${row[0]}ms`
+    document.getElementById('ms2').textContent = `· ${row[1]}ms`
+    document.getElementById('ms3').textContent = `· ${row[2]}ms`
+    const el = document.getElementById('lastChecked')
+    if (checkCount === 1) {
+      el.textContent = 'just now'
+    } else {
+      el.textContent = `${checkCount * 5}s ago`
+      // reset to "just now" feel after a couple cycles
+      if (checkCount % 4 === 0) { el.textContent = 'just now'; checkCount = 0 }
+    }
+  }
+  setInterval(refreshStatus, 5000)
+
+  /* ─ ⌘K search ────────────────────────────────────────────────── */
+  function openSearch() {
+    document.getElementById('searchOverlay').classList.add('open')
+    setTimeout(() => document.getElementById('searchInput').focus(), 50)
+  }
+  function closeSearch(e) {
+    if (e && e.target !== document.getElementById('searchOverlay')) return
+    document.getElementById('searchOverlay').classList.remove('open')
+    document.getElementById('searchInput').value = ''
+    filterResults('')
+  }
+
+  document.getElementById('searchTrigger').addEventListener('click', openSearch)
+
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault()
+      openSearch()
+    }
+    if (e.key === 'Escape') {
+      document.getElementById('searchOverlay').classList.remove('open')
+    }
+  })
+
+  const allResults = [
+    { tag: 'endpoint', label: '/v1/auth — Authentication & tokens' },
+    { tag: 'endpoint', label: '/v1/agents — Agent management' },
+    { tag: 'endpoint', label: '/v1/events — Event streaming' },
+    { tag: 'endpoint', label: '/v1/products — Product index' },
+    { tag: 'endpoint', label: '/v1/users — User management' },
+    { tag: 'endpoint', label: '/v1/orgs — Organization management' },
+    { tag: 'endpoint', label: '/v1/keys — API key management' },
+    { tag: 'endpoint', label: '/v1/analytics — Analytics events' },
+    { tag: 'endpoint', label: '/health — Health & readiness' },
+    { tag: 'sdk',      label: 'JavaScript / TypeScript SDK' },
+    { tag: 'sdk',      label: 'Python SDK' },
+    { tag: 'sdk',      label: 'Go SDK' },
+    { tag: 'sdk',      label: 'REST / OpenAPI spec' },
+    { tag: 'guide',    label: 'Authentication — Bearer token setup' },
+    { tag: 'guide',    label: 'Rate limits & retry strategy' },
+    { tag: 'guide',    label: 'Quickstart — first request in 60 seconds' },
+    { tag: 'changelog',label: 'v1.4.2 — Performance & stability' },
+    { tag: 'changelog',label: 'v1.4.0 — Analytics ingestion + SSE' },
+  ]
+
+  function filterResults(query) {
+    const container = document.getElementById('searchResults')
+    const q = query.toLowerCase()
+    const filtered = q
+      ? allResults.filter(r => r.label.toLowerCase().includes(q) || r.tag.includes(q))
+      : allResults.slice(0, 8)
+    container.innerHTML = filtered.map(r =>
+      `<div class="search-result-item">
+        <span class="search-result-tag">${r.tag}</span>
+        <span class="search-result-label">${r.label}</span>
+      </div>`
+    ).join('')
+  }
+
+  /* ─ Keyboard nav in search results ──────────────────────────── */
+  let selectedIdx = -1
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    const items = document.querySelectorAll('.search-result-item')
+    if (e.key === 'ArrowDown') {
+      selectedIdx = Math.min(selectedIdx + 1, items.length - 1)
+    } else if (e.key === 'ArrowUp') {
+      selectedIdx = Math.max(selectedIdx - 1, -1)
+    }
+    items.forEach((el, i) => {
+      el.style.background = i === selectedIdx ? 'var(--elevated)' : ''
+    })
+  })
+
+  /* ─ Smooth nav highlight on scroll ──────────────────────────── */
+  const sections = document.querySelectorAll('section[id]')
+  const navLinks = document.querySelectorAll('.nav-links a')
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => {
+          a.style.color = a.getAttribute('href') === `#${entry.target.id}`
+            ? 'var(--white)' : ''
+        })
+      }
+    })
+  }, { threshold: 0.4 })
+  sections.forEach(s => io.observe(s))
+</script>
+
+</body>
+</html>

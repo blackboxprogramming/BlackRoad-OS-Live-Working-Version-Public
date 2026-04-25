@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OneWay — Data Portability</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%2300D4FF'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+  <style>
+    html, body { height: 100%; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+
+    .top-bar { height: 3px; background: var(--g); flex-shrink: 0; }
+    .app-shell { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Top Navigation ──────────────────────────────────────── */
+    .top-nav {
+      height: 56px; background: rgba(0,0,0,0.95); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; flex-shrink: 0;
+    }
+    .top-nav-left { display: flex; align-items: center; gap: 20px; }
+    .logo { font-weight: 700; font-size: 17px; color: var(--white); display: flex; align-items: center; gap: 8px; }
+    .logo-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--g135); }
+    .logo-sub { font-family: var(--jb); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-left: 4px; }
+    .top-nav-right { display: flex; align-items: center; gap: 12px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%; background: var(--elevated);
+      border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--sub);
+    }
+    .user-name { font-size: 13px; color: var(--text); font-weight: 500; }
+
+    /* ── Main Content ────────────────────────────────────────── */
+    .main-content {
+      flex: 1; overflow-y: auto; padding: 32px;
+      display: flex; flex-direction: column; gap: 28px;
+      max-width: 960px; margin: 0 auto; width: 100%;
+    }
+
+    /* ── Page Header ─────────────────────────────────────────── */
+    .page-header { margin-bottom: 8px; }
+    .page-title { font-size: 24px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+    .page-subtitle { font-size: 14px; color: var(--sub); line-height: 1.5; }
+    .page-tagline { font-family: var(--jb); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 8px; }
+
+    /* ── Storage Meter ───────────────────────────────────────── */
+    .storage-meter {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px;
+    }
+    .storage-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .storage-title { font-size: 14px; font-weight: 600; color: var(--white); }
+    .storage-amount { font-family: var(--jb); font-size: 13px; color: var(--sub); }
+    .storage-bar { height: 8px; background: var(--elevated); border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .storage-fill { height: 100%; border-radius: 4px; background: var(--g); transition: width 0.5s; }
+    .storage-breakdown { display: flex; gap: 20px; flex-wrap: wrap; }
+    .storage-segment { display: flex; align-items: center; gap: 8px; }
+    .storage-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .storage-segment-label { font-size: 12px; color: var(--sub); }
+    .storage-segment-size { font-family: var(--jb); font-size: 11px; color: var(--muted); }
+
+    /* ── Tab Bar ──────────────────────────────────────────────── */
+    .tab-bar {
+      display: flex; gap: 0; border-bottom: 1px solid var(--border);
+      background: transparent;
+    }
+    .tab {
+      padding: 12px 20px; font-size: 13px; font-weight: 500;
+      color: var(--sub); cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all 0.2s; white-space: nowrap;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--white); border-bottom-color: #00D4FF; }
+
+    /* ── View Panels ─────────────────────────────────────────── */
+    .view-panel { display: none; flex-direction: column; gap: 16px; }
+    .view-panel.active { display: flex; }
+
+    /* ── Data Category Cards ─────────────────────────────────── */
+    .data-grid { display: flex; flex-direction: column; gap: 10px; }
+    .data-category {
+      display: grid; grid-template-columns: auto 1fr auto auto auto auto;
+      align-items: center; gap: 16px;
+      padding: 18px 20px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; transition: border-color 0.2s; cursor: pointer;
+    }
+    .data-category:hover { border-color: #333; }
+    .data-checkbox {
+      width: 18px; height: 18px; border-radius: 4px;
+      border: 1.5px solid var(--border); background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .data-checkbox.checked { background: #00D4FF; border-color: #00D4FF; }
+    .data-checkbox.checked::after { content: ''; width: 8px; height: 5px; border-left: 2px solid #000; border-bottom: 2px solid #000; transform: rotate(-45deg) translateY(-1px); }
+    .data-info { display: flex; flex-direction: column; gap: 2px; }
+    .data-name { font-size: 14px; font-weight: 600; color: var(--white); }
+    .data-desc { font-size: 12px; color: var(--muted); }
+    .data-size { font-family: var(--jb); font-size: 12px; color: var(--sub); white-space: nowrap; }
+    .data-last-export { font-family: var(--jb); font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .data-formats { display: flex; gap: 4px; }
+    .format-badge {
+      font-family: var(--jb); font-size: 9px; padding: 2px 6px;
+      border-radius: 3px; background: var(--elevated); color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .data-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--elevated); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ── Action Bar ───────────────────────────────────────────── */
+    .action-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .action-left { display: flex; align-items: center; gap: 12px; }
+    .action-right { display: flex; align-items: center; gap: 10px; }
+    .btn {
+      padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s; border: none; font-family: var(--sg);
+    }
+    .btn-primary { background: var(--g135); color: var(--white); }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-secondary { background: var(--elevated); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: #333; }
+    .btn-ghost { background: transparent; color: var(--sub); }
+    .btn-ghost:hover { color: var(--text); }
+    .select-info { font-family: var(--jb); font-size: 12px; color: var(--sub); }
+
+    /* ── Transfer Section ────────────────────────────────────── */
+    .transfer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .transfer-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; transition: border-color 0.2s;
+    }
+    .transfer-card:hover { border-color: #333; }
+    .transfer-icon { width: 48px; height: 48px; border-radius: 10px; background: var(--elevated); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+    .transfer-title { font-size: 16px; font-weight: 600; color: var(--white); margin-bottom: 8px; }
+    .transfer-desc { font-size: 13px; color: var(--sub); line-height: 1.5; margin-bottom: 16px; }
+
+    /* ── Import Sources ──────────────────────────────────────── */
+    .import-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .import-source {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 18px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .import-source:hover { border-color: #333; }
+    .import-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--elevated); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+    .import-name { font-size: 13px; font-weight: 500; color: var(--white); }
+    .import-status { font-family: var(--jb); font-size: 10px; color: var(--muted); }
+
+    /* ── Export History ───────────────────────────────────────── */
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-row {
+      display: grid; grid-template-columns: 1fr auto auto auto auto;
+      align-items: center; gap: 16px;
+      padding: 14px 18px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 8px; transition: border-color 0.2s;
+    }
+    .history-row:hover { border-color: #333; }
+    .history-name { font-size: 13px; font-weight: 500; color: var(--white); }
+    .history-date { font-family: var(--jb); font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .history-size { font-family: var(--jb); font-size: 11px; color: var(--sub); white-space: nowrap; }
+    .history-format { font-family: var(--jb); font-size: 10px; padding: 2px 8px; border-radius: 3px; background: var(--elevated); color: var(--muted); text-transform: uppercase; }
+    .history-download {
+      font-family: var(--jb); font-size: 11px; color: var(--text); cursor: pointer;
+      background: none; border: none; padding: 0;
+    }
+    .history-download:hover { text-decoration: underline; }
+
+    /* ── Schedule Export ──────────────────────────────────────── */
+    .schedule-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px;
+    }
+    .schedule-title { font-size: 15px; font-weight: 600; color: var(--white); margin-bottom: 12px; }
+    .schedule-options { display: flex; gap: 10px; margin-bottom: 16px; }
+    .schedule-option {
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--sub); font-family: var(--sg); transition: all 0.15s;
+    }
+    .schedule-option.active { background: var(--elevated); color: var(--white); border-color: #00D4FF; }
+    .schedule-option:hover:not(.active) { border-color: #333; }
+    .schedule-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    @media (max-width: 768px) {
+      .main-content { padding: 16px; }
+      .data-category { grid-template-columns: auto 1fr auto; }
+      .data-last-export, .data-formats, .data-size { display: none; }
+      .transfer-grid { grid-template-columns: 1fr; }
+      .import-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar"></div>
+
+  <div class="top-nav">
+    <div class="top-nav-left">
+      <div class="logo">
+        <div class="logo-mark"></div>
+        OneWay
+        <span class="logo-sub">Data Portability</span>
+      </div>
+    </div>
+    <div class="top-nav-right">
+      <span class="user-name">Alexa Amundson</span>
+      <div class="avatar">AA</div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <main class="main-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-title">Your Data</div>
+        <div class="page-subtitle">Export, transfer, or download everything you have created in BlackRoad OS. Your data belongs to you.</div>
+        <div class="page-tagline">The ownership school. Your data goes where you go.</div>
+      </div>
+
+      <!-- Storage Meter -->
+      <div class="storage-meter">
+        <div class="storage-header">
+          <span class="storage-title">Total Data Size</span>
+          <span class="storage-amount">847 MB of 5 GB</span>
+        </div>
+        <div class="storage-bar">
+          <div class="storage-fill" style="width: 17%"></div>
+        </div>
+        <div class="storage-breakdown">
+          <div class="storage-segment">
+            <div class="storage-dot" style="background:#FF6B2B"></div>
+            <span class="storage-segment-label">Content</span>
+            <span class="storage-segment-size">312 MB</span>
+          </div>
+          <div class="storage-segment">
+            <div class="storage-dot" style="background:#4488FF"></div>
+            <span class="storage-segment-label">Files</span>
+            <span class="storage-segment-size">284 MB</span>
+          </div>
+          <div class="storage-segment">
+            <div class="storage-dot" style="background:#CC00AA"></div>
+            <span class="storage-segment-label">Messages</span>
+            <span class="storage-segment-size">128 MB</span>
+          </div>
+          <div class="storage-segment">
+            <div class="storage-dot" style="background:#8844FF"></div>
+            <span class="storage-segment-label">Activity</span>
+            <span class="storage-segment-size">89 MB</span>
+          </div>
+          <div class="storage-segment">
+            <div class="storage-dot" style="background:#00D4FF"></div>
+            <span class="storage-segment-label">Settings</span>
+            <span class="storage-segment-size">34 MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <div class="tab active" data-tab="export">Export</div>
+        <div class="tab" data-tab="transfer">Transfer</div>
+        <div class="tab" data-tab="import">Import</div>
+        <div class="tab" data-tab="history">History</div>
+        <div class="tab" data-tab="schedule">Schedule</div>
+      </div>
+
+      <!-- Export Panel -->
+      <div class="view-panel active" id="panel-export">
+        <div class="action-bar">
+          <div class="action-left">
+            <button class="btn btn-ghost" onclick="toggleAll()">Select All</button>
+            <span class="select-info" id="selectInfo">0 of 7 selected</span>
+          </div>
+          <div class="action-right">
+            <button class="btn btn-secondary">Export Selected</button>
+            <button class="btn btn-primary">Download Archive</button>
+          </div>
+        </div>
+
+        <div class="data-grid">
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="profile"></div>
+            <div class="data-info">
+              <div class="data-name">Profile</div>
+              <div class="data-desc">Account info, preferences, authentication data, agent assignments</div>
+            </div>
+            <div class="data-size">12 MB</div>
+            <div class="data-last-export">Apr 5, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">json</span>
+              <span class="format-badge">csv</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="content"></div>
+            <div class="data-info">
+              <div class="data-name">Content</div>
+              <div class="data-desc">Blog posts, articles, drafts, collections, published works (70+ posts, 82K words)</div>
+            </div>
+            <div class="data-size">312 MB</div>
+            <div class="data-last-export">Apr 3, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">json</span>
+              <span class="format-badge">pdf</span>
+              <span class="format-badge">md</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="files"></div>
+            <div class="data-info">
+              <div class="data-name">Files</div>
+              <div class="data-desc">Uploaded documents, images, pixel art assets, design files, code repositories</div>
+            </div>
+            <div class="data-size">284 MB</div>
+            <div class="data-last-export">Mar 28, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">zip</span>
+              <span class="format-badge">tar</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="messages"></div>
+            <div class="data-info">
+              <div class="data-name">Messages</div>
+              <div class="data-desc">Chat history with agents, RoadTrip conversations, collaboration threads (7,632 entries)</div>
+            </div>
+            <div class="data-size">128 MB</div>
+            <div class="data-last-export">Apr 8, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">json</span>
+              <span class="format-badge">csv</span>
+              <span class="format-badge">pdf</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="activity"></div>
+            <div class="data-info">
+              <div class="data-name">Activity</div>
+              <div class="data-desc">Journal entries, codex solutions, TIL broadcasts, search history, analytics events</div>
+            </div>
+            <div class="data-size">89 MB</div>
+            <div class="data-last-export">Apr 1, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">json</span>
+              <span class="format-badge">csv</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="settings"></div>
+            <div class="data-info">
+              <div class="data-name">Settings</div>
+              <div class="data-desc">Product configurations, agent preferences, notification rules, theme customizations</div>
+            </div>
+            <div class="data-size">34 MB</div>
+            <div class="data-last-export">Apr 7, 2026</div>
+            <div class="data-formats">
+              <span class="format-badge">json</span>
+            </div>
+          </div>
+
+          <div class="data-category" onclick="toggleCheck(this)">
+            <div class="data-checkbox" data-cat="credentials"></div>
+            <div class="data-info">
+              <div class="data-name">Credentials</div>
+              <div class="data-desc">API keys, SSH keys, tokens, OAuth grants (encrypted export only)</div>
+            </div>
+            <div class="data-size">2 MB</div>
+            <div class="data-last-export">Never</div>
+            <div class="data-formats">
+              <span class="format-badge">enc</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Transfer Panel -->
+      <div class="view-panel" id="panel-transfer">
+        <div class="transfer-grid">
+          <div class="transfer-card">
+            <div class="transfer-icon" style="color:#00D4FF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <div class="transfer-title">Download Archive</div>
+            <div class="transfer-desc">Download a complete archive of all your data as a single ZIP file. Includes all categories in their original formats plus a manifest.json index.</div>
+            <button class="btn btn-primary" style="width:100%">Download Full Archive (847 MB)</button>
+          </div>
+          <div class="transfer-card">
+            <div class="transfer-icon" style="color:#8844FF">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 3 21 3 21 9"/><line x1="21" y1="3" x2="14" y2="10"/><path d="M21 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h6"/></svg>
+            </div>
+            <div class="transfer-title">Transfer to Another Service</div>
+            <div class="transfer-desc">Move your data to another platform or service. We format the export to be compatible with common import formats. Standard JSON, CSV, and Markdown.</div>
+            <button class="btn btn-secondary" style="width:100%">Start Transfer Wizard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Import Panel -->
+      <div class="view-panel" id="panel-import">
+        <div style="margin-bottom:8px">
+          <div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:4px">Import Data</div>
+          <div style="font-size:13px;color:var(--sub)">Bring your data from other platforms into BlackRoad OS.</div>
+        </div>
+        <div class="import-grid">
+          <div class="import-source">
+            <div class="import-icon" style="color:#FF6B2B">G</div>
+            <div><div class="import-name">Google Takeout</div><div class="import-status">Upload ZIP</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#4488FF">N</div>
+            <div><div class="import-name">Notion</div><div class="import-status">Upload export</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#CC00AA">S</div>
+            <div><div class="import-name">Substack</div><div class="import-status">Upload archive</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#8844FF">M</div>
+            <div><div class="import-name">Medium</div><div class="import-status">Upload export</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#00D4FF">GH</div>
+            <div><div class="import-name">GitHub</div><div class="import-status">API import</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#FF2255">SL</div>
+            <div><div class="import-name">Slack</div><div class="import-status">Upload export</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:#28c840">E</div>
+            <div><div class="import-name">Evernote</div><div class="import-status">Upload .enex</div></div>
+          </div>
+          <div class="import-source">
+            <div class="import-icon" style="color:var(--sub)">CSV</div>
+            <div><div class="import-name">CSV / JSON</div><div class="import-status">Manual upload</div></div>
+          </div>
+        </div>
+        <div class="transfer-card" style="margin-top:8px">
+          <div class="transfer-icon" style="color:#4488FF">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div class="transfer-title">Upload Import File</div>
+          <div class="transfer-desc">Drag and drop any export file here, or click to browse. Supported formats: ZIP, JSON, CSV, ENEX, MD, HTML. Maximum file size: 2 GB.</div>
+          <button class="btn btn-secondary" style="width:100%">Browse Files</button>
+        </div>
+      </div>
+
+      <!-- History Panel -->
+      <div class="view-panel" id="panel-history">
+        <div style="font-size:15px;font-weight:600;color:var(--white);margin-bottom:12px">Export History</div>
+        <div class="history-list">
+          <div class="history-row">
+            <span class="history-name">Full Archive Export</span>
+            <span class="history-date">Apr 8, 2026</span>
+            <span class="history-size">812 MB</span>
+            <span class="history-format">zip</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Messages Export (JSON)</span>
+            <span class="history-date">Apr 8, 2026</span>
+            <span class="history-size">128 MB</span>
+            <span class="history-format">json</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Content Export (Markdown)</span>
+            <span class="history-date">Apr 5, 2026</span>
+            <span class="history-size">48 MB</span>
+            <span class="history-format">md</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Settings Backup</span>
+            <span class="history-date">Apr 7, 2026</span>
+            <span class="history-size">34 MB</span>
+            <span class="history-format">json</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Profile Export</span>
+            <span class="history-date">Apr 5, 2026</span>
+            <span class="history-size">12 MB</span>
+            <span class="history-format">json</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Content Export (PDF)</span>
+            <span class="history-date">Apr 3, 2026</span>
+            <span class="history-size">156 MB</span>
+            <span class="history-format">pdf</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Activity Log Export</span>
+            <span class="history-date">Apr 1, 2026</span>
+            <span class="history-size">89 MB</span>
+            <span class="history-format">csv</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Full Archive Export</span>
+            <span class="history-date">Mar 28, 2026</span>
+            <span class="history-size">724 MB</span>
+            <span class="history-format">zip</span>
+            <button class="history-download">Download</button>
+          </div>
+          <div class="history-row">
+            <span class="history-name">Files Export</span>
+            <span class="history-date">Mar 28, 2026</span>
+            <span class="history-size">284 MB</span>
+            <span class="history-format">tar</span>
+            <button class="history-download">Download</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Panel -->
+      <div class="view-panel" id="panel-schedule">
+        <div class="schedule-card">
+          <div class="schedule-title">Automatic Export Schedule</div>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:16px">Set up recurring exports so you always have a fresh backup of your data.</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-family:var(--jb);text-transform:uppercase;letter-spacing:0.08em">Frequency</div>
+          <div class="schedule-options">
+            <button class="schedule-option" onclick="setSchedule(this)">Daily</button>
+            <button class="schedule-option active" onclick="setSchedule(this)">Weekly</button>
+            <button class="schedule-option" onclick="setSchedule(this)">Monthly</button>
+            <button class="schedule-option" onclick="setSchedule(this)">Off</button>
+          </div>
+          <div class="schedule-note">Next scheduled export: April 14, 2026 at 03:00 UTC. Exports include all data categories and are retained for 90 days. You will receive a notification when each export completes.</div>
+        </div>
+        <div class="schedule-card">
+          <div class="schedule-title">Export Format</div>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:16px">Choose the default format for scheduled exports.</div>
+          <div class="schedule-options">
+            <button class="schedule-option active" onclick="setFormat(this)">ZIP Archive</button>
+            <button class="schedule-option" onclick="setFormat(this)">JSON</button>
+            <button class="schedule-option" onclick="setFormat(this)">CSV</button>
+          </div>
+        </div>
+        <div class="schedule-card">
+          <div class="schedule-title">Retention Policy</div>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:16px">How long to keep export archives before automatic deletion.</div>
+          <div class="schedule-options">
+            <button class="schedule-option" onclick="setRetention(this)">30 days</button>
+            <button class="schedule-option active" onclick="setRetention(this)">90 days</button>
+            <button class="schedule-option" onclick="setRetention(this)">1 year</button>
+            <button class="schedule-option" onclick="setRetention(this)">Forever</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script defer>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById('panel-' + tab.dataset.tab);
+        if (target) target.classList.add('active');
+      });
+    });
+
+    // Checkbox toggle
+    function toggleCheck(row) {
+      const cb = row.querySelector('.data-checkbox');
+      cb.classList.toggle('checked');
+      updateSelectInfo();
+    }
+
+    function toggleAll() {
+      const cbs = document.querySelectorAll('.data-checkbox');
+      const allChecked = [...cbs].every(cb => cb.classList.contains('checked'));
+      cbs.forEach(cb => {
+        if (allChecked) cb.classList.remove('checked');
+        else cb.classList.add('checked');
+      });
+      updateSelectInfo();
+    }
+
+    function updateSelectInfo() {
+      const total = document.querySelectorAll('.data-checkbox').length;
+      const checked = document.querySelectorAll('.data-checkbox.checked').length;
+      document.getElementById('selectInfo').textContent = checked + ' of ' + total + ' selected';
+    }
+
+    // Schedule options
+    function setSchedule(btn) {
+      btn.parentElement.querySelectorAll('.schedule-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function setFormat(btn) {
+      btn.parentElement.querySelectorAll('.schedule-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function setRetention(btn) {
+      btn.parentElement.querySelectorAll('.schedule-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  </script>
+  <script src="nav.js" defer></script>
+  <script src="footer.js" defer></script>
+  <script src="pulse.js" defer></script>
+</body>
+</html>

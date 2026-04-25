@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Brand Verifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--hover:#181818;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6}
+.grad-bar{height:4px;background:var(--g)}
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+.hero{text-align:center;padding:60px 0 32px}
+.hero h1{font-size:36px;font-weight:700;color:var(--white)}
+.hero p{font-size:14px;color:var(--sub);margin-top:8px;max-width:560px;margin-left:auto;margin-right:auto}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.card-grad{height:3px;background:var(--g)}
+.card-body{padding:20px}
+.card-title{font-weight:600;font-size:15px;color:var(--white);margin-bottom:12px}
+textarea{width:100%;min-height:280px;padding:16px;background:#000;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--jb);font-size:12px;line-height:1.6;outline:none;resize:vertical}
+textarea:focus{border-color:#333}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:6px;font-weight:600;font-size:14px;border:none;cursor:pointer;font-family:var(--sg)}
+.btn-white{background:var(--white);color:#000}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-row{display:flex;gap:8px;margin:12px 0;flex-wrap:wrap}
+.sample-btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.sample-btn{padding:5px 10px;border-radius:4px;font-size:11px;background:var(--elevated);border:1px solid var(--border);color:var(--sub);cursor:pointer;font-family:var(--jb)}
+.sample-btn:hover{border-color:#333;color:var(--white)}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.stat-box{background:var(--elevated);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center}
+.stat-num{font-size:24px;font-weight:700;color:var(--white)}
+.stat-label{font-family:var(--jb);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.result-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.score{font-size:48px;font-weight:700;color:var(--white)}
+.score-label{font-size:13px;color:var(--sub)}
+.check-group{margin-bottom:20px}
+.check-group-title{font-family:var(--jb);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.check{display:flex;align-items:flex-start;gap:10px;padding:6px 0;font-size:13px}
+.ci{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700;background:var(--elevated);border:1px solid #333;color:var(--text)}
+.check-detail{font-family:var(--jb);font-size:10px;color:var(--muted);margin-top:2px}
+.verdict{font-size:24px;font-weight:700;color:var(--white)}
+.verdict-sub{font-size:12px;color:var(--sub)}
+.footer{padding:32px 0;border-top:1px solid var(--border);margin-top:32px;text-align:center}
+.footer-copy{font-family:var(--jb);font-size:10px;color:var(--muted)}
+@media(max-width:768px){.stat-row{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<div class="container">
+<div class="hero"><h1>Brand Verifier</h1><p>Paste HTML, CSS, or JSX. Checks against brand.blackroad.io + DESIGN-RULES.md + BlackRoadBrandSystem.jsx.</p></div>
+<div class="card"><div class="card-grad"></div><div class="card-body">
+<div class="card-title">Input (HTML / CSS / JSX)</div>
+<textarea id="input" placeholder="Paste HTML, CSS, or JSX here..."></textarea>
+<div class="sample-btns">
+<div class="sample-btn" onclick="loadSample('hg')">Good HTML</div>
+<div class="sample-btn" onclick="loadSample('hb')">Bad HTML</div>
+<div class="sample-btn" onclick="loadSample('jg')">Good JSX</div>
+<div class="sample-btn" onclick="loadSample('jb')">Bad JSX</div>
+<div class="sample-btn" onclick="document.getElementById('fi').click()">Upload</div>
+<input type="file" id="fi" accept=".html,.css,.jsx,.tsx,.js" style="display:none" onchange="loadFile(event)">
+</div>
+<div class="btn-row">
+<button class="btn btn-white" onclick="verify()">Verify</button>
+<button class="btn btn-outline" onclick="document.getElementById('input').value='';document.getElementById('results').innerHTML=''">Clear</button>
+</div>
+</div></div>
+<div id="results"></div>
+</div>
+<div class="container"><div class="footer"><div class="footer-copy">BlackRoad Brand Verifier | brand.blackroad.io + DESIGN-RULES.md + BrandSystem.jsx</div></div></div>
+<script>
+var C={bg:['#000','#000000','#0a0a0a','#0d0d0d','#111','#111111','#141414','#181818'],bd:['#1a1a1a','#222','#222222','#333','#333333','#444','#444444'],tx:['#fff','#ffffff','#f5f5f5','#e0e0e0','#e5e5e5','#ddd','#ccc','#bbb','#aaa','#999','#888','#777','#737373','#666','#555','#444','#333'],gr:['#ff6b2b','#ff2255','#cc00aa','#8844ff','#4488ff','#00d4ff'],sem:['#22c55e','#28c840','#f5a623','#ff3b30','#ff6b6b'],ff:['arial','helvetica','times','georgia','verdana','tahoma','roboto','open sans','lato','montserrat','poppins','nunito','raleway','ubuntu','fira','dm sans','work sans','outfit','plus jakarta','pt sans'],cv:['--g','--bg','--card','--border','--muted','--sub','--text','--white','--sg','--jb'],fs:['9px','10px','11px','12px','13px','14px','15px','16px','17px','18px','20px','22px','24px','28px','32px','36px','40px','44px','48px','56px','80px'],rd:['1px','2px','3px','4px','5px','6px','7px','8px','10px','11px','12px','14px','16px','20px','50%','999px'],co:'grad-bar,container,nav-bar,nav-logo,btn,btn-white,btn-outline,btn-dark,card,card-grad,card-body,card-title,card-text,badge,badge-dot,input,input-label,textarea,select,avatar,tag,table,list,list-item,tabs,tab,accordion,alert,progress-track,progress-fill,timeline,breadcrumbs,divider,section,grid-2,grid-3,row,col,dropdown,empty-state'.split(',')};
+function allowed(){return[...C.bg,...C.bd,...C.tx,...C.gr,...C.sem]}
+function isJSX(c){return/import\s+.*from\s+['"]react|useState|useEffect|className=/i.test(c)}
+function verify(){
+var code=document.getElementById('input').value;if(!code.trim())return alert('Paste something first');
+var fmt=isJSX(code)?'JSX':/<!DOCTYPE|<html|<style/i.test(code)?'HTML':'CSS';
+var lc=code.toLowerCase(),R=[],P=0,W=0,F=0,I=0;
+function p(g,m,d){R.push({t:'p',g:g,m:m,d:d});P++}function f(g,m,d){R.push({t:'f',g:g,m:m,d:d});F++}function w(g,m,d){R.push({t:'w',g:g,m:m,d:d});W++}function i(g,m,d){R.push({t:'i',g:g,m:m,d:d});I++}
+i('Format','Detected: '+fmt,'Auto-detected');
+// COLORS
+var hex=[...new Set((code.match(/#[0-9a-fA-F]{3,8}/g)||[]).map(function(h){return h.toLowerCase()}))];
+var al=allowed();var unk=hex.filter(function(h){return h.length>=4&&!al.includes(h)});
+if(unk.length===0&&hex.length>0)p('Colors','All '+hex.length+' colors canonical',hex.slice(0,12).join(' '));
+else if(unk.length>0)f('Colors',unk.length+' non-canonical colors',unk.slice(0,8).join(' '));
+var gc=C.gr.filter(function(c){return lc.includes(c)});
+if(gc.length>=6)p('Colors','All 6 gradient colors present','FF6B2B FF2255 CC00AA 8844FF 4488FF 00D4FF');
+else if(gc.length>=3)w('Colors',gc.length+'/6 gradient colors','Missing: '+C.gr.filter(function(c){return!lc.includes(c)}).join(' '));
+// FONTS
+if(/space.grotesk/i.test(code))p('Typography','Space Grotesk found','Primary font correct');
+else f('Typography','Space Grotesk NOT found','Required for headings/display');
+if(/jetbrains.mono/i.test(code))p('Typography','JetBrains Mono found','Mono font correct');
+else f('Typography','JetBrains Mono NOT found','Required for code/mono');
+if(fmt==='JSX'&&/inter/i.test(code))p('Typography (JSX)','Inter found','Body font correct for JSX');
+else if(fmt==='JSX')w('Typography (JSX)','Inter not found','JSX body should use Inter');
+var fb=C.ff.filter(function(ff){return new RegExp(ff,'i').test(code)});
+if(fb.length===0)p('Typography','No forbidden fonts','Clean');
+else f('Typography',fb.length+' forbidden fonts',fb.join(', '));
+// FONT SIZES
+var sz=[...new Set((code.match(/font-size:\s*([0-9]+px)/g)||[]).map(function(s){return s.replace(/font-size:\s*/,'')}).concat((code.match(/fontSize:\s*['"]?([0-9]+px)/g)||[]).map(function(s){return s.replace(/fontSize:\s*['"]?/,'').replace(/['"]$/,'')})))];
+var bsz=sz.filter(function(s){return!C.fs.includes(s)});
+if(bsz.length===0&&sz.length>0)p('Typography','All font sizes canonical',sz.join(', '));
+else if(bsz.length>0)w('Typography',bsz.length+' non-standard sizes',bsz.join(', '));
+// CSS VARS
+var fv=C.cv.filter(function(v){return code.includes(v)});
+if(fv.length>=8)p('CSS Variables',fv.length+'/'+C.cv.length+' vars defined',fv.join(' '));
+else if(fv.length>=5)w('CSS Variables',fv.length+'/'+C.cv.length+' vars','Missing: '+C.cv.filter(function(v){return!code.includes(v)}).join(' '));
+else if(fmt==='JSX'&&(code.includes('SPECTRUM')||code.includes('FULL_GRAD')))p('CSS Variables (JSX)','Uses canonical constants','SPECTRUM/FULL_GRAD');
+else f('CSS Variables','Most vars missing','Need: '+C.cv.join(' '));
+// COMPONENTS
+var fc=C.co.filter(function(c){return code.includes(c)});
+if(fc.length>0)i('Components',fc.length+' canonical components',fc.slice(0,12).join(', '));
+if(code.includes('grad-bar')||(lc.includes('height:3px')&&lc.includes('gradient'))||(lc.includes('height:4px')&&lc.includes('gradient')))p('Components','Gradient bar present','Accent bar');
+else f('Components','No gradient bar','Every page needs one');
+// COLORED TEXT
+var ct=[];
+(code.match(/[^-]color\s*:\s*#[0-9a-fA-F]{3,8}/g)||[]).concat(code.match(/color:\s*['"]#[0-9a-fA-F]{3,8}['"]/g)||[]).forEach(function(d){
+var h=(d.match(/#[0-9a-fA-F]{3,8}/)||[''])[0].toLowerCase();if(!h||h.length<4)return;
+var r=parseInt(h.length>4?h.slice(1,3):h[1]+h[1],16),g=parseInt(h.length>4?h.slice(3,5):h[2]+h[2],16),b=parseInt(h.length>4?h.slice(5,7):h[3]+h[3],16);
+if(!(Math.abs(r-g)<25&&Math.abs(g-b)<25))ct.push(h);});
+ct=[...new Set(ct)];
+if(ct.length===0)p('Rules','No colored text','Text white/gray only');
+else f('Rules','Colored text: '+ct.slice(0,5).join(', '),'Text MUST be white/gray. Colors only in shapes.');
+// DARK THEME
+if(lc.includes('background:#000')||lc.includes("background:'#000")||lc.includes('--bg:#000')||lc.includes("backgroundcolor:'#000"))p('Rules','Dark theme (#000)','Correct');
+else if(lc.includes('#000'))w('Rules','#000 present','Verify it is the main background');
+else f('Rules','No #000 background','Must be pure black');
+// JSX SPECIFIC
+if(fmt==='JSX'){
+if(code.includes('className='))p('JSX','Uses className','Correct React');
+if(code.includes(' class=')&&!code.includes('className'))f('JSX','Uses class= not className','React requires className');
+if(code.includes('SPECTRUM')||code.includes('STOPS'))p('JSX','Canonical gradient constants','SPECTRUM/STOPS');
+if(code.includes('CSS_TOKENS')||code.includes('FONT_IMPORT'))p('JSX','Canonical token exports','CSS_TOKENS/FONT_IMPORT');
+}
+// BRAND
+if(/blackroad/i.test(code))p('Brand','BlackRoad branding','Present');
+else w('Brand','No BlackRoad reference','Should reference BlackRoad');
+if(code.includes('fonts.googleapis.com'))p('Brand','Google Fonts import','Correct');
+else if(fmt==='JSX')i('Brand','No Fonts import','May use bundler');
+else w('Brand','No Fonts import','Import Space Grotesk + JetBrains Mono');
+// BORDER RADIUS
+var rr=[...new Set((code.match(/border-radius:\s*([0-9]+px|50%|999px)/g)||[]).map(function(s){return s.replace(/border-radius:\s*/,'')}).concat((code.match(/borderRadius:\s*['"]?([0-9]+px|50%|999px)/g)||[]).map(function(s){return s.replace(/borderRadius:\s*['"]?/,'').replace(/['"]$/,'')})))];
+var br=rr.filter(function(r){return!C.rd.includes(r)});
+if(br.length===0&&rr.length>0)p('Spacing','All radii canonical',rr.join(', '));
+else if(br.length>0)w('Spacing',br.length+' non-standard radii',br.join(', '));
+// RENDER
+var tot=P+W+F,pct=tot>0?Math.round(P/tot*100):0;
+var v=pct>=85?'COMPLIANT':pct>=65?'NEEDS WORK':'NON-COMPLIANT';
+var html='<div class="card"><div class="card-grad"></div><div class="card-body"><div class="result-header"><div><div class="score">'+pct+'%</div><div class="score-label">'+P+' pass, '+W+' warn, '+F+' fail, '+I+' info</div></div><div><div class="verdict">'+v+'</div><div class="verdict-sub">'+fmt+' vs brand.blackroad.io</div></div></div><div class="stat-row"><div class="stat-box"><div class="stat-num">'+P+'</div><div class="stat-label">Pass</div></div><div class="stat-box"><div class="stat-num">'+W+'</div><div class="stat-label">Warn</div></div><div class="stat-box"><div class="stat-num">'+F+'</div><div class="stat-label">Fail</div></div><div class="stat-box"><div class="stat-num">'+hex.length+'</div><div class="stat-label">Colors</div></div><div class="stat-box"><div class="stat-num">'+fc.length+'</div><div class="stat-label">Components</div></div></div></div></div>';
+var groups={};R.forEach(function(r){if(!groups[r.g])groups[r.g]=[];groups[r.g].push(r)});
+for(var g in groups){html+='<div class="check-group"><div class="check-group-title">'+g+'</div>';groups[g].forEach(function(c){var icon=c.t==='p'?'&#10003;':c.t==='f'?'&#10007;':c.t==='w'?'!':'i';html+='<div class="check"><div class="ci">'+icon+'</div><div><div>'+c.m+'</div><div class="check-detail">'+c.d+'</div></div></div>'});html+='</div>'}
+document.getElementById('results').innerHTML=html}
+function loadSample(t){var s={'hg':'<!DOCTYPE html>\n<html><head>\n<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">\n<style>\n:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--card:#0a0a0a;--elevated:#111;--border:#1a1a1a;--muted:#444;--sub:#737373;--text:#f5f5f5;--white:#fff;--sg:\'Space Grotesk\',sans-serif;--jb:\'JetBrains Mono\',monospace}\nbody{background:var(--bg);color:var(--text);font-family:var(--sg)}\n.grad-bar{height:3px;background:var(--g)}\n.card{background:var(--card);border:1px solid var(--border);border-radius:10px}\n.card-grad{height:3px;background:var(--g)}\n.card-body{padding:20px}\n.card-title{font-weight:600;font-size:15px;color:var(--white)}\n.btn-white{background:var(--white);color:#000;padding:10px 22px;border-radius:6px;font-size:13px}\n</style></head><body>\n<div class="grad-bar"></div>\n<div class="card"><div class="card-grad"></div><div class="card-body">\n<div class="card-title">BlackRoad OS</div>\n<p style="font-size:13px;color:#737373">Build anything.</p>\n<button class="btn-white">Start</button>\n</div></div></body></html>','hb':'<!DOCTYPE html><html><head><style>\nbody{background:#1e1e2e;color:#cba6f7;font-family:Arial,sans-serif}\nh1{color:#f38ba8;font-size:42px}\n.card{background:#313244;border-radius:16px;padding:20px}\n.btn{background:#89b4fa;color:#1e1e2e;border-radius:12px;font-family:Roboto}\np{color:#a6e3a1}\n</style></head><body>\n<h1>Not BlackRoad</h1>\n<div class="card"><p>Wrong everything.</p></div></body></html>','jg':'import { useState } from "react";\nconst SPECTRUM=[{name:"Ember",hex:"#FF6B2B"},{name:"Flare",hex:"#FF2255"},{name:"Magenta",hex:"#CC00AA"},{name:"Orchid",hex:"#8844FF"},{name:"Arc",hex:"#4488FF"},{name:"Cyan",hex:"#00D4FF"}];\nconst FULL_GRAD="linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)";\nexport default function BlackRoadCard(){\nreturn(\n<div style={{background:\'#000\',fontFamily:"\'Space Grotesk\',sans-serif"}}>\n<div className="grad-bar" style={{height:\'3px\',background:FULL_GRAD}}/>\n<div style={{background:\'#0a0a0a\',border:\'1px solid #1a1a1a\',borderRadius:\'10px\',padding:\'20px\'}}>\n<h2 style={{color:\'#f5f5f5\',fontSize:\'15px\',fontWeight:600}}>BlackRoad OS</h2>\n<p style={{color:\'#737373\',fontSize:\'13px\',fontFamily:"\'Inter\',sans-serif"}}>Build anything.</p>\n<span style={{fontFamily:"\'JetBrains Mono\',monospace",fontSize:\'11px\',color:\'#444\'}}>v1.0</span>\n</div></div>)}','jb':'import React from "react";\nexport default function Bad(){\nreturn(\n<div style={{background:\'#1e1e2e\',fontFamily:\'Roboto\'}}>\n<h1 style={{color:\'#ff6b6b\',fontSize:\'42px\'}}>Wrong</h1>\n<div class="card" style={{background:\'#2d2d3f\',borderRadius:\'16px\'}}>\n<p style={{color:\'#a6e3a1\',fontFamily:\'Arial\'}}>Bad</p>\n</div></div>)}'};document.getElementById('input').value=s[t]||''}
+function loadFile(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){document.getElementById('input').value=ev.target.result};r.readAsText(f)}
+</script>
+</body>
+</html>

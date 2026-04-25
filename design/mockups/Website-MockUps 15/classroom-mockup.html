@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="mockup-base.css">
+  <title>RoadRoom — BlackRoad Conference Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    
+
+    :root { --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF); --sg: 'Space Grotesk',sans-serif; }
+
+    body {
+      background: #000;
+      color: #f5f5f5;
+      font-family: var(--sg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #111;
+      border-bottom: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; color: #fff; }
+    .badge {
+      background: #0a0a0a;
+      color: #000;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 16px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .topbar-center { font-size: 14px; color: #737373; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .rec-dot {
+      width: 8px; height: 8px;
+      background: #0a0a0a;
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+    .rec-label { font-size: 12px; color: #737373; letter-spacing: 0.5px; }
+    .timer { font-size: 13px; color: #e5e5e5; font-variant-numeric: tabular-nums; }
+
+    /* ── Main Area ── */
+    .main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Gallery Grid ── */
+    .gallery {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 6px;
+      padding: 10px;
+      background: #0a0a0a;
+    }
+
+    .tile {
+      background: #1a1a1a;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+    .tile:hover { border-color: #525252; }
+    .tile.speaking { border: 2px solid #fff; }
+    .tile.presenter {
+      grid-column: span 2;
+      grid-row: span 2;
+      border: 2px solid #e5e5e5;
+    }
+
+    /* avatar placeholder */
+    .avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 600;
+      color: #e5e5e5;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    .tile.presenter .avatar {
+      width: 80px; height: 80px;
+      font-size: 32px;
+    }
+
+    /* fake "video" gradient overlay */
+    .video-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      opacity: 0.6;
+    }
+    .tile-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+
+    .name-tag {
+      position: absolute;
+      bottom: 8px; left: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #f5f5f5;
+      background: rgba(0,0,0,0.65);
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    /* mic icon */
+    .mic-icon {
+      position: absolute;
+      bottom: 8px; right: 10px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .mic-icon.muted { color: #737373; }
+    .mic-icon.live { color: #fff; }
+
+    /* screen-share tile */
+    .screen-tile {
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .screen-preview {
+      width: 85%; height: 65%;
+      background: #222;
+      border-radius: 6px;
+      border: 1px solid #333333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .screen-lines {
+      position: absolute;
+      inset: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      opacity: 0.35;
+    }
+    .sl { height: 2px; background: #0a0a0a; border-radius: 0px; }
+    .sl.short { width: 60%; }
+    .sl.medium { width: 80%; }
+    .screen-label { font-size: 10px; color: #737373; letter-spacing: 0.5px; }
+
+    /* raised hand */
+    .hand-badge {
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 14px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 220px;
+      background: #111;
+      border-left: 1px solid #222;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .sidebar-tabs {
+      display: flex;
+      border-bottom: 1px solid #222;
+    }
+    .stab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #737373;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      border-bottom: 2px solid transparent;
+    }
+    .stab.active { color: #fff; border-bottom-color: #fff; }
+
+    .sidebar-content { flex: 1; overflow-y: auto; padding: 10px 8px; }
+    .sidebar-content
+    .sidebar-content
+
+    .participant-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 4px;
+      border-radius: 6px;
+    }
+    .participant-row:hover { background: #1a1a1a; }
+    .p-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: #2a2a2a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #737373;
+      flex-shrink: 0;
+    }
+    .p-name { font-size: 12px; color: #e5e5e5; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .p-icons { display: flex; gap: 4px; font-size: 11px; color: #525252; }
+    .p-icons .on { color: #737373; }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #444;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 12px 4px 4px;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #111;
+      border-top: 1px solid #222;
+      flex-shrink: 0;
+    }
+    .btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: 1px solid #2a2a2a;
+      background: #1a1a1a;
+      color: #e5e5e5;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.15s, border-color 0.15s;
+      min-width: 60px;
+    }
+    .btn span { font-size: 10px; color: #737373; letter-spacing: 0.3px; }
+    .btn:hover { background: #222222; border-color: #444; }
+    .btn.active { background: #0a0a0a; color: #000; border-color: #fff; }
+    .btn.active span { color: #333; }
+    .btn.danger { background: #222; border-color: #444; }
+    .btn.end { background: #0a0a0a; color: #000; border-color: #fff; padding: 8px 20px; }
+    .btn.end span { color: #333; }
+
+    .toolbar-divider { width: 1px; height: 40px; background: #2a2a2a; margin: 0 4px; }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo">RoadRoom</div>
+      <div class="badge">Live</div>
+    </div>
+    <div class="topbar-center">Agent Systems Seminar · Cohort 4B</div>
+    <div class="topbar-right">
+      <div class="rec-dot"></div>
+      <div class="rec-label">REC</div>
+      <div class="timer">48:12</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Gallery Grid -->
+    <div class="gallery">
+
+      <!-- Presenter / Teacher -->
+      <div class="tile presenter speaking">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">MR</div>
+          <div style="font-size:13px;color:#e5e5e5;font-weight:600;">Roadie</div>
+          <div style="font-size:10px;color:#737373;margin-top:2px;">Learning Guide</div>
+        </div>
+        <div class="name-tag">Roadie · Host</div>
+        <div class="mic-icon live">🎙</div>
+      </div>
+
+      <!-- Screen Share Tile -->
+      <div class="tile screen-tile presenter" style="grid-column: span 2; grid-row: span 2;">
+        <div class="screen-preview">
+          <div class="screen-lines">
+            <div class="sl medium"></div>
+            <div class="sl short"></div>
+            <div class="sl"></div>
+            <div class="sl medium"></div>
+            <div class="sl short"></div>
+            <div class="sl"></div>
+            <div class="sl medium"></div>
+            <div class="sl short"></div>
+          </div>
+          <div style="font-size:11px;color:#525252;position:relative;z-index:1;">Slide 12 of 28</div>
+        </div>
+        <div class="screen-label">Screen Share · Roadie</div>
+        <div class="name-tag">📺 Presentation</div>
+      </div>
+
+      <!-- Student tiles -->
+      <div class="tile speaking">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">JK</div>
+        </div>
+        <div class="name-tag">Jordan K.</div>
+        <div class="mic-icon live">🎙</div>
+        <div class="hand-badge">✋</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">SA</div>
+        </div>
+        <div class="name-tag">Sam A.</div>
+        <div class="mic-icon muted">🔇</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">TL</div>
+        </div>
+        <div class="name-tag">Taylor L.</div>
+        <div class="mic-icon muted">🔇</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">MP</div>
+        </div>
+        <div class="name-tag">Morgan P.</div>
+        <div class="mic-icon muted">🔇</div>
+        <div class="hand-badge">✋</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">CW</div>
+        </div>
+        <div class="name-tag">Casey W.</div>
+        <div class="mic-icon muted">🔇</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">RL</div>
+        </div>
+        <div class="name-tag">Riley L.</div>
+        <div class="mic-icon live">🎙</div>
+      </div>
+
+      <div class="tile">
+        <div class="video-bg"></div>
+        <div class="tile-content">
+          <div class="avatar">AJ</div>
+        </div>
+        <div class="name-tag">Alex J.</div>
+        <div class="mic-icon muted">🔇</div>
+      </div>
+
+      <div class="tile" style="background:#111111;">
+        <div class="tile-content" style="opacity:0.4;">
+          <div class="avatar" style="background:#1a1a1a;">?</div>
+        </div>
+        <div class="name-tag" style="color:#525252;">Cam Off</div>
+        <div class="mic-icon muted">🔇</div>
+      </div>
+
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-tabs">
+        <div class="stab active">Cohort</div>
+        <div class="stab">Stream</div>
+        <div class="stab">Q&amp;A</div>
+      </div>
+      <div class="sidebar-content">
+        <div class="section-label">Host (1)</div>
+        <div class="participant-row">
+          <div class="p-avatar">MR</div>
+          <div class="p-name">Roadie</div>
+          <div class="p-icons"><span class="on">🎙</span><span class="on">📹</span></div>
+        </div>
+
+        <div class="section-label">Raised Hand (2)</div>
+        <div class="participant-row">
+          <div class="p-avatar">JK</div>
+          <div class="p-name">Jordan K.</div>
+          <div class="p-icons"><span class="on">🎙</span><span>✋</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">MP</div>
+          <div class="p-name">Morgan P.</div>
+          <div class="p-icons"><span>🔇</span><span>✋</span></div>
+        </div>
+
+        <div class="section-label">Students (7)</div>
+        <div class="participant-row">
+          <div class="p-avatar">SA</div>
+          <div class="p-name">Sam A.</div>
+          <div class="p-icons"><span>🔇</span><span class="on">📹</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">TL</div>
+          <div class="p-name">Taylor L.</div>
+          <div class="p-icons"><span>🔇</span><span class="on">📹</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">CW</div>
+          <div class="p-name">Casey W.</div>
+          <div class="p-icons"><span>🔇</span><span class="on">📹</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">RL</div>
+          <div class="p-name">Riley L.</div>
+          <div class="p-icons"><span class="on">🎙</span><span class="on">📹</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">AJ</div>
+          <div class="p-name">Alex J.</div>
+          <div class="p-icons"><span>🔇</span><span class="on">📹</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar" style="opacity:0.4;">?</div>
+          <div class="p-name" style="color:#525252;">Unknown</div>
+          <div class="p-icons"><span>🔇</span><span>📷</span></div>
+        </div>
+        <div class="participant-row">
+          <div class="p-avatar">KD</div>
+          <div class="p-name">Kim D.</div>
+          <div class="p-icons"><span>🔇</span><span class="on">📹</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="btn active">
+      🎙
+      <span>Mic On</span>
+    </div>
+    <div class="btn">
+      📹
+      <span>Camera</span>
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="btn">
+      🖥
+      <span>Share</span>
+    </div>
+    <div class="btn">
+      💬
+      <span>Stream</span>
+    </div>
+    <div class="btn">
+      ✋
+      <span>Raise</span>
+    </div>
+    <div class="btn">
+      👥
+      <span>Cohort</span>
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="btn">
+      ⋯
+      <span>More</span>
+    </div>
+    <div class="btn end danger">
+      ✕
+      <span>Leave</span>
+    </div>
+  </div>
+
+</body>
+</html>
+    .grad-bar { height: 3px; background: var(--g); flex-shrink: 0; }

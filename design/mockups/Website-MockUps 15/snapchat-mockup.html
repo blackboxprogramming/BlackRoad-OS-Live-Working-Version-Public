@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="mockup-base.css">
+  <title>RoadSnap — BlackRoad Ephemeral Convoys Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root { --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF); --sg: 'Space Grotesk',sans-serif; }
+
+    body {
+      background: #000;
+      font-family: var(--sg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 30px 20px 40px;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    /* ── 3 Phone Frames side by side ── */
+    .phones-row {
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .phone-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #444;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* phone frame */
+    .phone {
+      width: 300px;
+      height: 620px;
+      background: #000;
+      border-radius: 16px;
+      border: 3px solid #2a2a2a;
+      box-shadow:
+        0 0 0 1px #111,
+        0 30px 80px rgba(0,0,0,0.8),
+        inset 0 0 0 1px #1a1a1a;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* notch */
+    .notch {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      width: 100px; height: 28px;
+      background: #000;
+      border-radius: 0 0 20px 20px;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .notch-cam {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #1a1a1a; border: 1px solid #2a2a2a;
+    }
+
+    /* status bar */
+    .status-bar {
+      height: 44px;
+      padding: 10px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    .status-time { font-size: 13px; font-weight: 700; color: #fff; }
+    .status-icons { display: flex; gap: 5px; align-items: center; font-size: 12px; color: #fff; }
+
+    /* screen fill */
+    .screen { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* ══════════════════
+       SCREEN 1 — CAMERA
+    ══════════════════ */
+    .camera-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, #111 0%, #0a0a0a 50%, #111 100%);
+    }
+    .camera-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+    }
+
+    /* bitmoji / profile top */
+    .cam-top {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 5;
+    }
+    .cam-profile {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #222; border: 2px solid #444;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #737373;
+      cursor: pointer;
+    }
+    .cam-top-icons { display: flex; gap: 10px; }
+    .cam-icon {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer;
+    }
+
+    /* snap streak badge */
+    .streak-badge {
+      position: absolute;
+      top: 52px; left: 50%; transform: translateX(-50%);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 16px;
+      padding: 5px 14px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 600; color: #fff;
+      z-index: 5;
+    }
+
+    /* viewfinder center */
+    .viewfinder {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px; height: 80px;
+      border: none;
+    }
+    .vf-corner {
+      position: absolute;
+      width: 16px; height: 16px;
+      border-color: rgba(255,255,255,0.6);
+      border-style: solid;
+      border-width: 0;
+    }
+    .vf-tl { top: 0; left: 0; border-top-width: 2px; border-left-width: 2px; }
+    .vf-tr { top: 0; right: 0; border-top-width: 2px; border-right-width: 2px; }
+    .vf-bl { bottom: 0; left: 0; border-bottom-width: 2px; border-left-width: 2px; }
+    .vf-br { bottom: 0; right: 0; border-bottom-width: 2px; border-right-width: 2px; }
+
+    /* side tools */
+    .cam-side-tools {
+      position: absolute;
+      right: 14px; top: 50%; transform: translateY(-50%);
+      display: flex; flex-direction: column; gap: 14px;
+      align-items: center;
+      z-index: 5;
+    }
+    .side-tool {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer;
+    }
+    .side-tool-label { font-size: 9px; color: rgba(255,255,255,0.6); text-align: center; }
+
+    /* bottom camera controls */
+    .cam-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0 0 16px;
+      z-index: 5;
+    }
+    .cam-pills {
+      display: flex; gap: 8px; justify-content: center;
+      padding: 0 12px 12px;
+      overflow-x: auto;
+    }
+    .cam-pills
+    .cam-pill {
+      padding: 5px 14px; border-radius: 16px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.6); white-space: nowrap; cursor: pointer;
+      flex-shrink: 0;
+    }
+    .cam-pill.active {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.6);
+      color: #fff;
+    }
+
+    .shutter-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 28px 8px;
+    }
+    .memory-btn {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer;
+    }
+    .shutter-btn {
+      width: 72px; height: 72px; border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .shutter-inner {
+      width: 56px; height: 56px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+    }
+    .flip-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; cursor: pointer;
+    }
+
+    /* nav bar */
+    .cam-nav {
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 6px 10px 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .nav-snap-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer;
+    }
+    .nav-snap-icon { font-size: 22px; }
+    .nav-snap-label { font-size: 9px; color: rgba(255,255,255,0.5); font-weight: 600; letter-spacing: 0.3px; }
+    .nav-snap-dot { width: 4px; height: 4px; border-radius: 50%; background: #111; margin-top: 2px; }
+
+    /* ══════════════════
+       SCREEN 2 — CHATS
+    ══════════════════ */
+    .chats-screen {
+      background: #000;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chats-top {
+      padding: 8px 16px 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chats-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #1a1a1a; border: 1.5px solid #333;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: #737373;
+    }
+    .chats-title { font-size: 20px; font-weight: 800; color: #fff; flex: 1; }
+    .chats-top-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #1a1a1a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer;
+    }
+
+    .chats-search {
+      margin: 0 12px 10px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 8px 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .chats-search span { font-size: 13px; color: #525252; }
+    .chats-search-text { font-size: 13px; color: #525252; }
+
+    .chats-section-label {
+      font-size: 11px; font-weight: 700; color: #525252;
+      padding: 4px 16px 6px;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    .chat-list { flex: 1; overflow-y: auto; }
+    .chat-list
+
+    .chat-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-radius: 12px;
+      margin: 0 4px 2px;
+      position: relative;
+    }
+    .chat-row:hover { background: #111111; }
+
+    .chat-avatar-wrap { position: relative; flex-shrink: 0; }
+    .chat-avatar {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: #1a1a1a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: #737373;
+      position: relative;
+    }
+    .chat-status-dot {
+      position: absolute; bottom: 1px; right: 1px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #111; border: 2px solid #000;
+    }
+    .chat-status-dot.grey { background: #444; }
+
+    /* snap icon indicator */
+    .snap-indicator {
+      position: absolute; bottom: -2px; right: -2px;
+      width: 18px; height: 18px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; border: 2px solid #000;
+    }
+    .snap-indicator.pending { background: #111; }
+    .snap-indicator.opened { background: transparent; border-color: #525252; }
+    .snap-indicator.received { background: #737373; }
+
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-name { font-size: 14px; font-weight: 700; color: #fff; }
+    .chat-sub {
+      font-size: 12px; color: #737373; margin-top: 2px;
+      display: flex; align-items: center; gap: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .chat-sub.unread { color: #e5e5e5; font-weight: 600; }
+    .chat-sub.snap-icon { }
+    .snap-arrow {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border: 2px solid;
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      margin-right: 2px;
+    }
+    .snap-arrow.sent { border-color: #737373; border-top: none; border-left: none; }
+    .snap-arrow.received { border-color: #fff; background: #111; }
+    .snap-arrow.opened { border-color: #444; }
+
+    .chat-meta { text-align: right; flex-shrink: 0; }
+    .chat-time { font-size: 11px; color: #525252; }
+    .chat-streak { font-size: 11px; color: #737373; margin-top: 2px; }
+    .unread-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #111; margin-top: 4px; margin-left: auto;
+    }
+
+    .bitmoji-section {
+      padding: 8px 14px 6px;
+      display: flex; gap: 8px; overflow-x: auto;
+    }
+    .bitmoji-section
+    .bitmoji-friend {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      flex-shrink: 0; cursor: pointer;
+    }
+    .bitmoji-ring {
+      width: 52px; height: 52px; border-radius: 50%;
+      background: #1a1a1a;
+      border: 2px solid #333;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 700; color: #737373;
+    }
+    .bitmoji-name { font-size: 10px; color: #737373; }
+
+    .chat-nav {
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 8px 10px 12px;
+      border-top: 1px solid #111;
+    }
+    .chat-nav-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      cursor: pointer;
+    }
+    .chat-nav-icon { font-size: 22px; }
+    .chat-nav-label { font-size: 9px; color: #525252; font-weight: 600; letter-spacing: 0.3px; }
+    .chat-nav-active .chat-nav-label { color: #fff; }
+
+    /* ══════════════════
+       SCREEN 3 — STORIES / DISCOVER
+    ══════════════════ */
+    .stories-screen {
+      background: #000;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stories-top {
+      padding: 8px 16px 10px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .stories-title { font-size: 20px; font-weight: 800; color: #fff; flex: 1; }
+
+    /* friends stories */
+    .friends-stories { padding: 0 8px 6px; }
+    .friends-stories-label {
+      font-size: 12px; font-weight: 700; color: #525252;
+      padding: 4px 8px 8px;
+      text-transform: uppercase; letter-spacing: 0.8px;
+    }
+
+    .story-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 8px; border-radius: 12px;
+      cursor: pointer; margin-bottom: 2px;
+    }
+    .story-item:hover { background: #111111; }
+    .story-ring {
+      width: 46px; height: 46px; border-radius: 50%; padding: 2px;
+      background: conic-gradient(#fff 0deg 200deg, #444 200deg 360deg);
+      flex-shrink: 0;
+    }
+    .story-ring.seen { background: #222; }
+    .story-avatar-inner {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: #1a1a1a; border: 2px solid #000;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: #737373;
+    }
+    .story-info { flex: 1; }
+    .story-name { font-size: 13px; font-weight: 700; color: #fff; }
+    .story-time { font-size: 11px; color: #737373; margin-top: 2px; }
+    .story-count {
+      font-size: 11px; color: #525252;
+      background: #1a1a1a; border-radius: 10px;
+      padding: 2px 7px;
+    }
+
+    /* discover grid */
+    .discover-label {
+      font-size: 12px; font-weight: 700; color: #525252;
+      padding: 8px 16px 8px;
+      text-transform: uppercase; letter-spacing: 0.8px;
+      border-top: 1px solid #111;
+    }
+    .discover-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      padding: 0 8px;
+      flex: 1;
+      overflow-y: auto;
+    }
+    .discover-grid
+    .discover-card {
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      aspect-ratio: 9/14;
+      background: #111;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .discover-card:first-child {
+      grid-column: span 2;
+      aspect-ratio: 16/9;
+    }
+    .d-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, #111 0, #111 8px, #181818 8px, #181818 16px
+      );
+    }
+    .d-icon { font-size: 30px; opacity: 0.2; position: relative; z-index: 1; }
+    .d-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 50%);
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 10px;
+      z-index: 2;
+    }
+    .d-publisher { font-size: 10px; color: #737373; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .d-headline { font-size: 12px; color: #fff; font-weight: 700; line-height: 1.3; margin-top: 2px; }
+    .d-views { font-size: 10px; color: #737373; margin-top: 3px; }
+    .d-new-badge {
+      position: absolute; top: 8px; left: 8px;
+      background: #111; color: #000;
+      font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px;
+      letter-spacing: 0.5px; z-index: 3;
+    }
+
+    .stories-nav {
+      display: flex; align-items: center; justify-content: space-around;
+      padding: 8px 10px 12px;
+      border-top: 1px solid #111;
+    }
+    .stories-nav-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer;
+    }
+    .stories-nav-icon { font-size: 22px; }
+    .stories-nav-label { font-size: 9px; color: #525252; font-weight: 600; letter-spacing: 0.3px; }
+    .stories-nav-active .stories-nav-label { color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+
+  <h1>RoadSnap — BlackRoad Mobile Convoys</h1>
+
+  <div class="phones-row">
+
+    <!-- ══════════════════════ PHONE 1 — CAMERA ══════════════════════ -->
+    <div class="phone-wrap">
+      <div class="phone-label">Capture</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-cam"></div></div>
+        <div class="status-bar">
+          <div class="status-time">9:41</div>
+          <div class="status-icons">
+            <span>●●●</span>
+            <span>WiFi</span>
+            <span>⬛</span>
+          </div>
+        </div>
+
+        <div class="screen" style="position:relative;">
+          <div class="camera-bg"></div>
+          <div class="camera-grid"></div>
+
+          <!-- Top bar -->
+          <div class="cam-top">
+            <div class="cam-profile">AR</div>
+            <div class="cam-top-icons">
+              <div class="cam-icon">⚡</div>
+              <div class="cam-icon">🔍</div>
+              <div class="cam-icon">👻</div>
+            </div>
+          </div>
+
+          <!-- Streak badge -->
+          <div class="streak-badge">
+            🔥 42 day streak with <strong>roadcanvas</strong>
+          </div>
+
+          <!-- Viewfinder -->
+          <div class="viewfinder">
+            <div class="vf-corner vf-tl"></div>
+            <div class="vf-corner vf-tr"></div>
+            <div class="vf-corner vf-bl"></div>
+            <div class="vf-corner vf-br"></div>
+          </div>
+
+          <!-- Side tools -->
+          <div class="cam-side-tools">
+            <div>
+              <div class="side-tool">🎵</div>
+              <div class="side-tool-label">Voice</div>
+            </div>
+            <div>
+              <div class="side-tool">✏️</div>
+              <div class="side-tool-label">Mark</div>
+            </div>
+            <div>
+              <div class="side-tool">😊</div>
+              <div class="side-tool-label">Mask</div>
+            </div>
+            <div>
+              <div class="side-tool">⏱</div>
+              <div class="side-tool-label">Timer</div>
+            </div>
+          </div>
+
+          <!-- Bottom controls -->
+          <div class="cam-bottom">
+            <div class="cam-pills">
+              <div class="cam-pill">Signal</div>
+              <div class="cam-pill active">Capture</div>
+              <div class="cam-pill">Video</div>
+              <div class="cam-pill">Highlights</div>
+            </div>
+
+            <div class="shutter-row">
+              <div class="memory-btn">🖼</div>
+              <div class="shutter-btn">
+                <div class="shutter-inner"></div>
+              </div>
+              <div class="flip-btn">🔄</div>
+            </div>
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="cam-nav">
+            <div class="nav-snap-btn">
+              <div class="nav-snap-icon">🗺</div>
+              <div class="nav-snap-label">Map</div>
+            </div>
+            <div class="nav-snap-btn">
+              <div class="nav-snap-icon">💬</div>
+              <div class="nav-snap-label">Convoy</div>
+              <div class="nav-snap-dot"></div>
+            </div>
+            <div class="nav-snap-btn">
+              <div class="nav-snap-icon" style="font-size:32px;color:#fff;line-height:1;margin-top:-4px;">👻</div>
+              <div class="nav-snap-label" style="color:#fff;">Snap</div>
+            </div>
+            <div class="nav-snap-btn">
+              <div class="nav-snap-icon">📖</div>
+              <div class="nav-snap-label">Signals</div>
+            </div>
+            <div class="nav-snap-btn">
+              <div class="nav-snap-icon">✨</div>
+              <div class="nav-snap-label">Highlights</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ PHONE 2 — CHATS ══════════════════════ -->
+    <div class="phone-wrap">
+      <div class="phone-label">Convoys</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-cam"></div></div>
+        <div class="status-bar">
+          <div class="status-time">9:41</div>
+          <div class="status-icons"><span>●●●</span><span>WiFi</span><span>⬛</span></div>
+        </div>
+
+        <div class="screen">
+          <div class="chats-screen">
+
+            <!-- Top -->
+            <div class="chats-top">
+              <div class="chats-avatar">AR</div>
+              <div class="chats-title">Convoys</div>
+              <div class="chats-top-icon">🔍</div>
+              <div class="chats-top-icon">✏️</div>
+            </div>
+
+            <!-- Search -->
+            <div class="chats-search">
+              <span>🔍</span>
+              <span class="chats-search-text">Search</span>
+            </div>
+
+            <!-- Quick-send Bitmoji row -->
+            <div class="bitmoji-section">
+              <div class="bitmoji-friend">
+                <div class="bitmoji-ring">MK</div>
+                <div class="bitmoji-name">roadcanvas</div>
+              </div>
+              <div class="bitmoji-friend">
+                <div class="bitmoji-ring">VF</div>
+                <div class="bitmoji-name">roadtube</div>
+              </div>
+              <div class="bitmoji-friend">
+                <div class="bitmoji-ring">TT</div>
+                <div class="bitmoji-name">roadcode</div>
+              </div>
+              <div class="bitmoji-friend">
+                <div class="bitmoji-ring">SC</div>
+                <div class="bitmoji-name">roadwork</div>
+              </div>
+              <div class="bitmoji-friend">
+                <div class="bitmoji-ring">NL</div>
+                <div class="bitmoji-name">officeroad</div>
+              </div>
+            </div>
+
+            <div class="chats-section-label">Convoys</div>
+
+            <div class="chat-list">
+
+              <!-- Unread snap received -->
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">MK</div>
+                  <div class="snap-indicator received"></div>
+                  <div class="chat-status-dot"></div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">roadcanvas_studio</div>
+                  <div class="chat-sub unread">
+                    <div class="snap-arrow received"></div>
+                    New signal received
+                  </div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">2m</div>
+                  <div class="chat-streak">🔥42</div>
+                  <div class="unread-dot"></div>
+                </div>
+              </div>
+
+              <!-- Opened -->
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">JK</div>
+                  <div class="snap-indicator opened"></div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">roadview_ops</div>
+                  <div class="chat-sub">
+                    <div class="snap-arrow opened"></div>
+                    Opened · 14m ago
+                  </div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">14m</div>
+                  <div class="chat-streak">🔥18</div>
+                </div>
+              </div>
+
+              <!-- Chat message -->
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">SC</div>
+                  <div class="chat-status-dot"></div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">roadwork</div>
+                  <div class="chat-sub unread">💬 We good for the 3pm rollout review?</div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">32m</div>
+                  <div class="unread-dot"></div>
+                </div>
+              </div>
+
+              <!-- Snap sent pending -->
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">TT</div>
+                  <div class="snap-indicator pending"></div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">roadcode</div>
+                  <div class="chat-sub">
+                    <div class="snap-arrow sent"></div>
+                    Sent · pending
+                  </div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">1h</div>
+                  <div class="chat-streak">🔥7</div>
+                </div>
+              </div>
+
+              <!-- Group -->
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar" style="font-size:12px;">👥</div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">BlackRoad Studio 🎨</div>
+                  <div class="chat-sub">RC: look at this shell pass →</div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">2h</div>
+                  <div class="unread-dot"></div>
+                </div>
+              </div>
+
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">VF</div>
+                  <div class="chat-status-dot grey"></div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">roadtube</div>
+                  <div class="chat-sub">
+                    <div class="snap-arrow opened"></div>
+                    Opened · 3h ago
+                  </div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">3h</div>
+                  <div class="chat-streak">🔥5</div>
+                </div>
+              </div>
+
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">NL</div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">officeroad</div>
+                  <div class="chat-sub">💬 runtime city looks much cleaner now</div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">5h</div>
+                </div>
+              </div>
+
+              <div class="chat-row">
+                <div class="chat-avatar-wrap">
+                  <div class="chat-avatar">KD</div>
+                </div>
+                <div class="chat-info">
+                  <div class="chat-name">backroad</div>
+                  <div class="chat-sub">
+                    <div class="snap-arrow sent"></div>
+                    Delivered
+                  </div>
+                </div>
+                <div class="chat-meta">
+                  <div class="chat-time">8h</div>
+                  <div class="chat-streak">🔥3</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="chat-nav">
+              <div class="chat-nav-btn">
+                <div class="chat-nav-icon">🗺</div>
+                <div class="chat-nav-label">Map</div>
+              </div>
+              <div class="chat-nav-btn chat-nav-active">
+                <div class="chat-nav-icon">💬</div>
+                <div class="chat-nav-label" style="color:#fff;">Convoy</div>
+              </div>
+              <div class="chat-nav-btn">
+                <div class="chat-nav-icon" style="font-size:28px;">👻</div>
+                <div class="chat-nav-label">Snap</div>
+              </div>
+              <div class="chat-nav-btn">
+                <div class="chat-nav-icon">📖</div>
+                <div class="chat-nav-label">Signals</div>
+              </div>
+              <div class="chat-nav-btn">
+                <div class="chat-nav-icon">✨</div>
+                <div class="chat-nav-label">Highlights</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════ PHONE 3 — STORIES ══════════════════════ -->
+    <div class="phone-wrap">
+      <div class="phone-label">Signals</div>
+      <div class="phone">
+        <div class="notch"><div class="notch-cam"></div></div>
+        <div class="status-bar">
+          <div class="status-time">9:41</div>
+          <div class="status-icons"><span>●●●</span><span>WiFi</span><span>⬛</span></div>
+        </div>
+
+        <div class="screen">
+          <div class="stories-screen">
+
+            <div class="stories-top">
+              <div class="chats-avatar">AR</div>
+              <div class="stories-title">Signals</div>
+              <div class="chats-top-icon">🔍</div>
+            </div>
+
+            <!-- My story -->
+            <div class="friends-stories">
+              <div class="story-item">
+                <div class="story-ring seen">
+                  <div class="story-avatar-inner" style="position:relative;">
+                    AR
+                    <div style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background: #111;color:#000;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #000;">+</div>
+                  </div>
+                </div>
+                <div class="story-info">
+                  <div class="story-name">My Signal</div>
+                  <div class="story-time">Add to your signal</div>
+                </div>
+                <div style="font-size:16px;color:#444;">›</div>
+              </div>
+
+              <div class="friends-stories-label">Convoys</div>
+
+              <div class="story-item">
+                <div class="story-ring"><div class="story-avatar-inner">MK</div></div>
+                <div class="story-info">
+                  <div class="story-name">roadcanvas_studio</div>
+                  <div class="story-time">5 min ago</div>
+                </div>
+                <div class="story-count">3 new</div>
+              </div>
+
+              <div class="story-item">
+                <div class="story-ring"><div class="story-avatar-inner">JK</div></div>
+                <div class="story-info">
+                  <div class="story-name">roadview_ops</div>
+                  <div class="story-time">22 min ago</div>
+                </div>
+                <div class="story-count">1 new</div>
+              </div>
+
+              <div class="story-item">
+                <div class="story-ring"><div class="story-avatar-inner">TT</div></div>
+                <div class="story-info">
+                  <div class="story-name">roadcode</div>
+                  <div class="story-time">1 hr ago</div>
+                </div>
+                <div class="story-count">2 new</div>
+              </div>
+
+              <div class="story-item">
+                <div class="story-ring seen"><div class="story-avatar-inner">SC</div></div>
+                <div class="story-info">
+                  <div class="story-name">roadwork</div>
+                  <div class="story-time">3 hrs ago · Seen</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Discover -->
+            <div class="discover-label">Highlights</div>
+
+            <div class="discover-grid">
+
+              <div class="discover-card">
+                <div class="d-pattern"></div>
+                <div class="d-icon">🌆</div>
+                <div class="d-new-badge">NEW</div>
+                <div class="d-overlay">
+                  <div class="d-publisher">RoadTube</div>
+                  <div class="d-headline">Inside OfficeRoad Runtime City after the latest collaboration pass</div>
+                  <div class="d-views">2.8M views</div>
+                </div>
+              </div>
+
+              <div class="discover-card">
+                <div class="d-pattern"></div>
+                <div class="d-icon">🎵</div>
+                <div class="d-overlay">
+                  <div class="d-publisher">RoadCanvas</div>
+                  <div class="d-headline">Brand system details worth stealing this week</div>
+                  <div class="d-views">1.2M views</div>
+                </div>
+              </div>
+
+              <div class="discover-card">
+                <div class="d-pattern"></div>
+                <div class="d-icon">🎮</div>
+                <div class="d-new-badge">NEW</div>
+                <div class="d-overlay">
+                  <div class="d-publisher">RoadWorld</div>
+                  <div class="d-headline">Most active worlds and rooms right now</div>
+                  <div class="d-views">980K views</div>
+                </div>
+              </div>
+
+              <div class="discover-card">
+                <div class="d-pattern"></div>
+                <div class="d-icon">✈️</div>
+                <div class="d-overlay">
+                  <div class="d-publisher">RoadTrip</div>
+                  <div class="d-headline">Convoy rooms nobody should be sleeping on</div>
+                  <div class="d-views">640K views</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="stories-nav">
+              <div class="stories-nav-btn">
+                <div class="stories-nav-icon">🗺</div>
+                <div class="stories-nav-label">Map</div>
+              </div>
+              <div class="stories-nav-btn">
+                <div class="stories-nav-icon">💬</div>
+                <div class="stories-nav-label">Convoy</div>
+              </div>
+              <div class="stories-nav-btn">
+                <div class="stories-nav-icon" style="font-size:28px;">👻</div>
+                <div class="stories-nav-label">Snap</div>
+              </div>
+              <div class="stories-nav-btn stories-nav-active">
+                <div class="stories-nav-icon">📖</div>
+                <div class="stories-nav-label" style="color:#fff;">Signals</div>
+              </div>
+              <div class="stories-nav-btn">
+                <div class="stories-nav-icon">✨</div>
+                <div class="stories-nav-label">Highlights</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
+    .grad-bar { height: 3px; background: var(--g); width: 100%; margin-bottom: 27px; }

@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RoadAPI — BlackRoad API Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="mockup-base.css" />
+  <style>
+    /* ── App shell ─────────────────────────────────────────────────── */
+    html, body { height: 100%; overflow: hidden; }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background: #000;
+    }
+
+    /* ── Top chrome bar ────────────────────────────────────────────── */
+    .top-bar {
+      height: 38px;
+      background: #0a0a0a;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .top-bar .br-dot { flex-shrink: 0; }
+    .top-bar-title {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .top-bar-spacer { flex: 1; }
+    .top-bar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .top-bar-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--sub);
+      font-family: var(--sg);
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .top-bar-btn:hover { border-color: #333; color: var(--text); }
+
+    /* ── Grad bar ──────────────────────────────────────────────────── */
+    .app-grad-bar { height: 2px; background: var(--g); flex-shrink: 0; }
+
+    /* ── Main 3-panel body ─────────────────────────────────────────── */
+    .main-panels {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── LEFT SIDEBAR ──────────────────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #0a0a0a;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .sidebar-logo-bar {
+      width: 16px;
+      height: 2px;
+      background: var(--g);
+      border-radius: 0px;
+    }
+    .sidebar-logo-text {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--white);
+      letter-spacing: -.01em;
+    }
+    .sidebar-logo-badge {
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: auto;
+    }
+
+    .sidebar-search {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 10px 6px 28px;
+      color: var(--text);
+      font-family: var(--sg);
+      font-size: 12px;
+      outline: none;
+      transition: border-color .15s;
+      position: relative;
+    }
+    .sidebar-search:focus { border-color: #333; }
+    .sidebar-search::placeholder { color: var(--muted); }
+    .search-wrap {
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 11px;
+      pointer-events: none;
+    }
+
+    .sidebar-new-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      margin-top: 8px;
+      background: var(--white);
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 10px;
+      font-family: var(--sg);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .sidebar-new-btn:hover { background: #e5e5e5; }
+    .sidebar-new-btn span { font-size: 14px; line-height: 1; }
+
+    .sidebar-collections {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .collection-group { margin-bottom: 4px; }
+
+    .collection-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      transition: background .15s;
+      user-select: none;
+    }
+    .collection-header:hover { background: var(--white05); }
+    .collection-chevron {
+      font-size: 9px;
+      color: var(--muted);
+      transition: transform .15s;
+    }
+    .collection-chevron.open { transform: rotate(90deg); }
+    .collection-icon { font-size: 12px; }
+    .collection-name { flex: 1; }
+    .collection-count {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .collection-items {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .endpoint-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px 5px 26px;
+      cursor: pointer;
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--sub);
+      transition: all .15s;
+      position: relative;
+      border-left: 2px solid transparent;
+    }
+    .endpoint-item:hover { background: var(--white05); color: var(--text); }
+    .endpoint-item.active {
+      color: var(--text);
+      background: var(--white05);
+      border-left: 2px solid transparent;
+    }
+    .endpoint-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--g);
+      border-radius: 0 1px 1px 0;
+    }
+
+    .method-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--jb);
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      color: var(--sub);
+      min-width: 38px;
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .endpoint-item.active .method-pill { color: var(--text); border-color: #333; }
+    .endpoint-item:hover .method-pill { color: var(--text); border-color: #333; }
+
+    .endpoint-path {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ── CENTER REQUEST PANEL ──────────────────────────────────────── */
+    .request-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border-right: 1px solid var(--border);
+      background: #000;
+    }
+
+    /* ── URL BAR ───────────────────────────────────────────────────── */
+    .url-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #0a0a0a;
+      flex-shrink: 0;
+    }
+
+    .method-selector {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 10px;
+      color: var(--text);
+      font-family: var(--jb);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color .15s;
+      position: relative;
+      letter-spacing: .04em;
+    }
+    .method-selector:hover { border-color: #333; }
+    .method-selector svg { margin-left: 2px; }
+
+    .method-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: #111;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 50;
+      min-width: 90px;
+      display: none;
+    }
+    .method-dropdown.open { display: block; }
+    .method-dropdown-item {
+      padding: 7px 14px;
+      font-family: var(--jb);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--sub);
+      cursor: pointer;
+      transition: background .1s;
+      letter-spacing: .04em;
+    }
+    .method-dropdown-item:hover { background: var(--white05); color: var(--text); }
+
+    .method-wrap { position: relative; }
+
+    .url-input {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 6px 12px;
+      color: var(--text);
+      font-family: var(--jb);
+      font-size: 12px;
+      outline: none;
+      transition: border-color .15s;
+      min-width: 0;
+    }
+    .url-input:focus { border-color: #333; }
+
+    .send-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--white);
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      padding: 6px 14px;
+      font-family: var(--sg);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .send-btn:hover { background: #e5e5e5; }
+    .send-btn.loading {
+      background: #1a1a1a;
+      color: var(--sub);
+      cursor: not-allowed;
+    }
+    .send-btn .spinner {
+      width: 10px;
+      height: 10px;
+      border: 1.5px solid #444;
+      border-top-color: var(--sub);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+    .send-btn.loading .spinner { display: block; }
+    .send-btn.loading .send-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Request tabs ──────────────────────────────────────────────── */
+    .panel-tabs {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 0 14px;
+      flex-shrink: 0;
+      background: #0a0a0a;
+    }
+
+    .panel-tab {
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--sub);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      position: relative;
+      bottom: -1px;
+      white-space: nowrap;
+    }
+    .panel-tab:hover { color: var(--text); }
+    .panel-tab.active {
+      color: var(--text);
+      border-bottom: 2px solid var(--white);
+    }
+    .panel-tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #1a1a1a;
+      border-radius: 3px;
+      font-family: var(--jb);
+      font-size: 9px;
+      color: var(--muted);
+      padding: 1px 4px;
+      margin-left: 4px;
+    }
+
+    /* ── Panel content areas ───────────────────────────────────────── */
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
+      display: none;
+    }
+    .panel-content.active { display: block; }
+
+    /* ── JSON editor ───────────────────────────────────────────────── */
+    .json-editor {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .json-editor-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      background: #111;
+    }
+    .json-editor-label {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .json-editor-spacer { flex: 1; }
+    .json-editor-action {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--jb);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .json-editor-action:hover { border-color: #333; color: var(--sub); }
+
+    .json-body {
+      padding: 14px 16px;
+      font-family: var(--jb);
+      font-size: 12px;
+      line-height: 1.8;
+      white-space: pre;
+    }
+
+    /* JSON syntax */
+    .jk { /* key */
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .js { color: #737373; }   /* string value */
+    .jn { color: var(--text); } /* number */
+    .jb-val { color: var(--text); } /* boolean */
+    .jnull { color: var(--muted); } /* null */
+    .jp { color: var(--muted); } /* punctuation */
+
+    /* ── Headers section ───────────────────────────────────────────── */
+    .headers-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .headers-table th {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-weight: 500;
+    }
+    .headers-table td {
+      font-family: var(--jb);
+      font-size: 11px;
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .hdr-key { color: var(--sub); width: 160px; }
+    .hdr-val { color: var(--text); word-break: break-all; }
+    .hdr-val .truncated { color: var(--muted); }
+
+    /* ── Params section ────────────────────────────────────────────── */
+    .params-empty {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ── Auth section ──────────────────────────────────────────────── */
+    .auth-section { display: flex; flex-direction: column; gap: 10px; }
+    .auth-type-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .auth-type-label { font-size: 11px; color: var(--sub); }
+    .auth-type-select {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--jb);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      outline: none;
+    }
+    .auth-field-label { font-size: 11px; color: var(--sub); margin-bottom: 3px; }
+    .auth-field-val {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--text);
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 10px;
+    }
+
+    /* ── RIGHT RESPONSE PANEL ──────────────────────────────────────── */
+    .response-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: #000;
+    }
+
+    .response-status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #0a0a0a;
+      flex-shrink: 0;
+    }
+
+    .status-200 {
+      font-family: var(--jb);
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--g);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #28c840;
+      flex-shrink: 0;
+    }
+    .status-meta {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .status-sep { color: var(--border); }
+    .response-status-spacer { flex: 1; }
+
+    .copy-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--jb);
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .copy-btn:hover { border-color: #333; color: var(--sub); }
+    .copy-btn.copied { color: var(--text); border-color: #28c840; }
+
+    /* ── Timeline ──────────────────────────────────────────────────── */
+    .timeline-section { padding: 14px; }
+    .timeline-title {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .timeline-label {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--sub);
+      width: 72px;
+      flex-shrink: 0;
+    }
+    .timeline-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: #111;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .timeline-bar {
+      height: 100%;
+      background: var(--g);
+      border-radius: 3px;
+      opacity: .7;
+    }
+    .timeline-ms {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .timeline-total {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      gap: 6px;
+      font-family: var(--jb);
+      font-size: 11px;
+    }
+    .timeline-total-label { color: var(--muted); }
+    .timeline-total-val { color: var(--text); font-weight: 600; }
+
+    /* ── BOTTOM STATUS BAR ─────────────────────────────────────────── */
+    .bottom-bar {
+      height: 34px;
+      border-top: 1px solid var(--border);
+      background: #0a0a0a;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 14px;
+      flex-shrink: 0;
+    }
+
+    .env-selector {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--jb);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+    .env-selector:hover { border-color: #333; }
+    .env-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #28c840;
+      flex-shrink: 0;
+    }
+
+    .valeria-status {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .valeria-status strong { color: var(--sub); font-weight: 500; }
+
+    .bottom-bar-spacer { flex: 1; }
+
+    .history-section {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .history-label {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+      margin-right: 3px;
+    }
+    .history-pill {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--jb);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .history-pill:hover { border-color: #333; color: var(--sub); }
+    .history-pill .hm { color: var(--border); }
+    .history-pill:hover .hm { color: var(--muted); }
+
+    /* ── Loading overlay for response ────────────────���─────────────── */
+    .response-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      gap: 12px;
+    }
+    .response-loading.show { display: flex; }
+    .loading-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #1a1a1a;
+      border-top-color: #444;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    .loading-text {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ── Empty state ───────────────────────────────────────────────── */
+    .response-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 8px;
+      color: var(--muted);
+    }
+    .response-empty-icon { font-size: 28px; opacity: .3; }
+    .response-empty-text { font-size: 12px; color: var(--muted); }
+
+    /* ── Panel tabs inner wrapper ──────────────────────────────────── */
+    .panel-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── Response panel inner ──────────────────────────────────────── */
+    .resp-panel-inner {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* Tests tab ───────────────────────────────────────────────────── */
+    .tests-section { padding: 14px; }
+    .test-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      margin-bottom: 6px;
+    }
+    .test-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .test-dot.pass { background: #28c840; }
+    .test-dot.pending { background: var(--muted); }
+    .test-name {
+      font-family: var(--jb);
+      font-size: 11px;
+      color: var(--sub);
+      flex: 1;
+    }
+    .test-status {
+      font-family: var(--jb);
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .test-status.pass { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top chrome -->
+  <div class="top-bar">
+    <div class="br-dot br-dot-red"></div>
+    <div class="br-dot br-dot-yel"></div>
+    <div class="br-dot br-dot-grn"></div>
+    <span class="top-bar-title">RoadAPI — BlackRoad API Explorer</span>
+    <div class="top-bar-spacer"></div>
+    <div class="top-bar-actions">
+      <button class="top-bar-btn">Import</button>
+      <button class="top-bar-btn">Export</button>
+      <button class="top-bar-btn">⚙ Settings</button>
+    </div>
+  </div>
+
+  <!-- Gradient stripe -->
+  <div class="app-grad-bar"></div>
+
+  <!-- 3-panel main -->
+  <div class="main-panels">
+
+    <!-- ── LEFT SIDEBAR ─────────────────────────────────────── -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-bar"></div>
+          <span class="sidebar-logo-text">RoadAPI</span>
+          <span class="sidebar-logo-badge">v1.0</span>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input class="sidebar-search" type="text" placeholder="Search endpoints…" />
+        </div>
+        <button class="sidebar-new-btn">
+          <span>＋</span> New Request
+        </button>
+      </div>
+
+      <div class="sidebar-collections" id="sidebarCollections">
+
+        <!-- CarKeys API -->
+        <div class="collection-group">
+          <div class="collection-header" onclick="toggleCollection(this)">
+            <span class="collection-chevron open">▶</span>
+            <span class="collection-icon">📁</span>
+            <span class="collection-name">CarKeys API</span>
+            <span class="collection-count">5</span>
+          </div>
+          <div class="collection-items">
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'carkeys-vault')" data-endpoint="carkeys-vault">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/vault</span>
+            </div>
+            <div class="endpoint-item active" onclick="selectEndpoint(this, 'carkeys-rotate')" data-endpoint="carkeys-rotate">
+              <span class="method-pill">POST</span>
+              <span class="endpoint-path">/vault/keys/rotate</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'carkeys-sessions')" data-endpoint="carkeys-sessions">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/vault/sessions</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'carkeys-delete-session')" data-endpoint="carkeys-delete-session">
+              <span class="method-pill">DEL</span>
+              <span class="endpoint-path">/vault/sessions/:id</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'carkeys-score')" data-endpoint="carkeys-score">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/vault/score</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RoadTrip API -->
+        <div class="collection-group">
+          <div class="collection-header" onclick="toggleCollection(this)">
+            <span class="collection-chevron open">▶</span>
+            <span class="collection-icon">📁</span>
+            <span class="collection-name">RoadTrip API</span>
+            <span class="collection-count">3</span>
+          </div>
+          <div class="collection-items">
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'roadtrip-agents')" data-endpoint="roadtrip-agents">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/agents</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'roadtrip-chat')" data-endpoint="roadtrip-chat">
+              <span class="method-pill">POST</span>
+              <span class="endpoint-path">/chat</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'roadtrip-channels')" data-endpoint="roadtrip-channels">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/channels</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Highway API -->
+        <div class="collection-group">
+          <div class="collection-header" onclick="toggleCollection(this)">
+            <span class="collection-chevron open">▶</span>
+            <span class="collection-icon">📁</span>
+            <span class="collection-name">Highway API</span>
+            <span class="collection-count">2</span>
+          </div>
+          <div class="collection-items">
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'highway-status')" data-endpoint="highway-status">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/status</span>
+            </div>
+            <div class="endpoint-item" onclick="selectEndpoint(this, 'highway-products')" data-endpoint="highway-products">
+              <span class="method-pill">GET</span>
+              <span class="endpoint-path">/products</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- ── CENTER REQUEST PANEL ──────────────────────────────── -->
+    <div class="request-panel">
+
+      <!-- URL bar -->
+      <div class="url-bar">
+        <div class="method-wrap">
+          <button class="method-selector" id="methodSelector" onclick="toggleMethodDropdown(event)">
+            <span id="methodLabel">POST</span>
+            <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
+              <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="method-dropdown" id="methodDropdown">
+            <div class="method-dropdown-item" onclick="setMethod('GET')">GET</div>
+            <div class="method-dropdown-item" onclick="setMethod('POST')">POST</div>
+            <div class="method-dropdown-item" onclick="setMethod('PUT')">PUT</div>
+            <div class="method-dropdown-item" onclick="setMethod('PATCH')">PATCH</div>
+            <div class="method-dropdown-item" onclick="setMethod('DELETE')">DELETE</div>
+          </div>
+        </div>
+        <input
+          class="url-input"
+          id="urlInput"
+          type="text"
+          value="https://carkeys.blackroad.io/api/vault/keys/rotate"
+        />
+        <button class="send-btn" id="sendBtn" onclick="sendRequest()">
+          <div class="spinner"></div>
+          <span class="send-label">Send ▶</span>
+        </button>
+      </div>
+
+      <!-- Request tabs -->
+      <div class="panel-tabs" id="reqTabs">
+        <div class="panel-tab" onclick="switchReqTab('params', this)">Params</div>
+        <div class="panel-tab" onclick="switchReqTab('headers', this)">Headers <span class="panel-tab-badge">2</span></div>
+        <div class="panel-tab active" onclick="switchReqTab('body', this)">Body <span class="panel-tab-badge">JSON</span></div>
+        <div class="panel-tab" onclick="switchReqTab('auth', this)">Auth</div>
+        <div class="panel-tab" onclick="switchReqTab('tests', this)">Tests <span class="panel-tab-badge">3</span></div>
+      </div>
+
+      <!-- Panel body -->
+      <div class="panel-body">
+
+        <!-- Params tab -->
+        <div class="panel-content" id="req-params">
+          <div class="params-empty">No query parameters for this request.</div>
+        </div>
+
+        <!-- Headers tab -->
+        <div class="panel-content" id="req-headers">
+          <table class="headers-table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="hdr-key">Authorization</td>
+                <td class="hdr-val">Bearer ck_prod_4f2a9c1e8b3d7f6e2a1c<span class="truncated">…[truncated]</span></td>
+              </tr>
+              <tr>
+                <td class="hdr-key">Content-Type</td>
+                <td class="hdr-val">application/json</td>
+              </tr>
+              <tr>
+                <td class="hdr-key">X-BlackRoad-Version</td>
+                <td class="hdr-val">2026-04-10</td>
+              </tr>
+              <tr>
+                <td class="hdr-key">Accept</td>
+                <td class="hdr-val">application/json</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Body tab -->
+        <div class="panel-content active" id="req-body">
+          <div class="json-editor">
+            <div class="json-editor-toolbar">
+              <span class="json-editor-label">JSON Body</span>
+              <span class="json-editor-spacer"></span>
+              <button class="json-editor-action">Prettify</button>
+              <button class="json-editor-action">Clear</button>
+            </div>
+            <div class="json-body" id="reqJsonBody"></div>
+          </div>
+        </div>
+
+        <!-- Auth tab -->
+        <div class="panel-content" id="req-auth">
+          <div class="auth-section">
+            <div class="auth-type-row">
+              <span class="auth-type-label">Type</span>
+              <select class="auth-type-select">
+                <option selected>Bearer Token</option>
+                <option>API Key</option>
+                <option>Basic Auth</option>
+                <option>OAuth 2.0</option>
+              </select>
+            </div>
+            <div>
+              <div class="auth-field-label">Token</div>
+              <div class="auth-field-val">ck_prod_4f2a9c1e8b3d7f6e2a1c9d5e…</div>
+            </div>
+            <div>
+              <div class="auth-field-label">Header Prefix</div>
+              <div class="auth-field-val">Bearer</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tests tab -->
+        <div class="panel-content" id="req-tests">
+          <div class="tests-section">
+            <div class="test-item">
+              <div class="test-dot pass"></div>
+              <span class="test-name">Status code is 200</span>
+              <span class="test-status pass">PASS</span>
+            </div>
+            <div class="test-item">
+              <div class="test-dot pass"></div>
+              <span class="test-name">Response has success: true</span>
+              <span class="test-status pass">PASS</span>
+            </div>
+            <div class="test-item">
+              <div class="test-dot pending"></div>
+              <span class="test-name">Key ID matches request</span>
+              <span class="test-status">PENDING</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RIGHT RESPONSE PANEL ──────────────────────────────── -->
+    <div class="response-panel">
+
+      <!-- Status bar -->
+      <div class="response-status-bar" id="responseStatusBar">
+        <div class="status-dot"></div>
+        <span class="status-200" id="statusCode">200 OK</span>
+        <span class="status-meta" id="statusMeta">
+          128ms <span class="status-sep">·</span> 842 B
+        </span>
+        <div class="response-status-spacer"></div>
+        <button class="copy-btn" id="copyBtn" onclick="copyResponse()">
+          ⎘ Copy
+        </button>
+      </div>
+
+      <!-- Response tabs -->
+      <div class="panel-tabs">
+        <div class="panel-tab active" onclick="switchRespTab('resp-body', this)">Body</div>
+        <div class="panel-tab" onclick="switchRespTab('resp-headers', this)">Headers <span class="panel-tab-badge">8</span></div>
+        <div class="panel-tab" onclick="switchRespTab('resp-timeline', this)">Timeline</div>
+      </div>
+
+      <!-- Response panel body -->
+      <div class="panel-body">
+
+        <!-- Loading state -->
+        <div class="response-loading" id="responseLoading">
+          <div class="loading-spinner"></div>
+          <span class="loading-text">Sending request…</span>
+        </div>
+
+        <!-- Body tab -->
+        <div class="panel-content active resp-panel-inner" id="resp-body">
+          <div class="json-editor">
+            <div class="json-editor-toolbar">
+              <span class="json-editor-label">Response Body</span>
+              <span class="json-editor-spacer"></span>
+              <button class="json-editor-action">Raw</button>
+              <button class="json-editor-action">Preview</button>
+            </div>
+            <div class="json-body" id="respJsonBody"></div>
+          </div>
+        </div>
+
+        <!-- Headers tab -->
+        <div class="panel-content resp-panel-inner" id="resp-headers">
+          <table class="headers-table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="hdr-key">content-type</td><td class="hdr-val">application/json; charset=utf-8</td></tr>
+              <tr><td class="hdr-key">x-request-id</td><td class="hdr-val">req_9f3b2c1a7e4d</td></tr>
+              <tr><td class="hdr-key">x-blackroad-version</td><td class="hdr-val">2026-04-10</td></tr>
+              <tr><td class="hdr-key">x-ratelimit-limit</td><td class="hdr-val">1000</td></tr>
+              <tr><td class="hdr-key">x-ratelimit-remaining</td><td class="hdr-val">997</td></tr>
+              <tr><td class="hdr-key">cache-control</td><td class="hdr-val">no-store, no-cache</td></tr>
+              <tr><td class="hdr-key">strict-transport-security</td><td class="hdr-val">max-age=31536000; includeSubDomains</td></tr>
+              <tr><td class="hdr-key">cf-ray</td><td class="hdr-val">92c4f1a3b7e2d0c1-IAD</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Timeline tab -->
+        <div class="panel-content resp-panel-inner" id="resp-timeline">
+          <div class="timeline-section">
+            <div class="timeline-title">Request Waterfall</div>
+            <div class="timeline-item">
+              <span class="timeline-label">DNS</span>
+              <div class="timeline-bar-wrap">
+                <div class="timeline-bar" style="width:1.5%"></div>
+              </div>
+              <span class="timeline-ms">2ms</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">Connect</span>
+              <div class="timeline-bar-wrap">
+                <div class="timeline-bar" style="width:6%"></div>
+              </div>
+              <span class="timeline-ms">8ms</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">TLS</span>
+              <div class="timeline-bar-wrap">
+                <div class="timeline-bar" style="width:17%"></div>
+              </div>
+              <span class="timeline-ms">22ms</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">Request</span>
+              <div class="timeline-bar-wrap">
+                <div class="timeline-bar" style="width:10.5%"></div>
+              </div>
+              <span class="timeline-ms">14ms</span>
+            </div>
+            <div class="timeline-item">
+              <span class="timeline-label">Response</span>
+              <div class="timeline-bar-wrap">
+                <div class="timeline-bar" style="width:63%"></div>
+              </div>
+              <span class="timeline-ms">82ms</span>
+            </div>
+            <div class="timeline-total">
+              <span class="timeline-total-label">Total</span>
+              <span class="timeline-total-val">128ms</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── BOTTOM BAR ──────────────────────────────────────────── -->
+  <div class="bottom-bar">
+    <button class="env-selector">
+      <div class="env-dot"></div>
+      production ▾
+    </button>
+
+    <span class="valeria-status">
+      <strong>Valeria:</strong> API key valid · expires in 91 days
+    </span>
+
+    <div class="bottom-bar-spacer"></div>
+
+    <div class="history-section">
+      <span class="history-label">History</span>
+      <button class="history-pill" onclick="selectEndpoint(document.querySelector('[data-endpoint=carkeys-vault]'), 'carkeys-vault')">
+        <span class="hm">GET</span> /vault
+      </button>
+      <button class="history-pill" onclick="selectEndpoint(document.querySelector('[data-endpoint=roadtrip-agents]'), 'roadtrip-agents')">
+        <span class="hm">GET</span> /agents
+      </button>
+      <button class="history-pill" onclick="selectEndpoint(document.querySelector('[data-endpoint=highway-status]'), 'highway-status')">
+        <span class="hm">GET</span> /status
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Endpoint data ───────────────────────────────────────────────────
+  const ENDPOINTS = {
+    'carkeys-vault': {
+      method: 'GET',
+      url: 'https://carkeys.blackroad.io/api/vault',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '64ms · 1.2 KB',
+      respBody: {
+        vault: {
+          id: 'vlt_9a3c2f1e',
+          owner: 'Atticus',
+          key_count: 4,
+          active_sessions: 12,
+          score: 94,
+          status: 'healthy'
+        },
+        keys: [
+          { id: 'pk_4f2a9c1e8b3d', algorithm: 'ECDSA', active: true },
+          { id: 'pk_7b1e3d9a2c5f', algorithm: 'Ed25519', active: true }
+        ]
+      }
+    },
+    'carkeys-rotate': {
+      method: 'POST',
+      url: 'https://carkeys.blackroad.io/api/vault/keys/rotate',
+      reqBody: {
+        keyId: 'pk_4f2a9c1e8b3d',
+        algorithm: 'ECDSA',
+        curve: 'secp256k1',
+        reason: 'scheduled_rotation',
+        notify: true
+      },
+      respStatus: '200 OK',
+      respMeta: '128ms · 842 B',
+      respBody: {
+        success: true,
+        key: {
+          id: 'pk_4f2a9c1e8b3d',
+          algorithm: 'ECDSA',
+          curve: 'secp256k1',
+          rotated_at: '2026-04-10T23:36:00Z',
+          expires_at: '2026-07-10T23:36:00Z',
+          score_impact: '+2'
+        },
+        audit: {
+          event: 'KEY_ROTATE',
+          logged_by: 'Atticus',
+          chain_ref: '0x4f2a...8c1e'
+        }
+      }
+    },
+    'carkeys-sessions': {
+      method: 'GET',
+      url: 'https://carkeys.blackroad.io/api/vault/sessions',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '42ms · 2.1 KB',
+      respBody: {
+        sessions: [
+          { id: 'sess_1a2b3c', device: 'MacBook Pro', last_seen: '2026-04-10T23:30:00Z', active: true },
+          { id: 'sess_4d5e6f', device: 'iPhone 16', last_seen: '2026-04-10T22:14:00Z', active: true },
+          { id: 'sess_7g8h9i', device: 'iPad Pro', last_seen: '2026-04-09T18:01:00Z', active: false }
+        ],
+        total: 12
+      }
+    },
+    'carkeys-delete-session': {
+      method: 'DELETE',
+      url: 'https://carkeys.blackroad.io/api/vault/sessions/:id',
+      reqBody: null,
+      respStatus: '204 No Content',
+      respMeta: '31ms · 0 B',
+      respBody: null
+    },
+    'carkeys-score': {
+      method: 'GET',
+      url: 'https://carkeys.blackroad.io/api/vault/score',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '38ms · 512 B',
+      respBody: {
+        score: 94,
+        breakdown: {
+          key_rotation: 28,
+          session_hygiene: 22,
+          mfa_coverage: 24,
+          audit_trail: 20
+        },
+        grade: 'A',
+        last_calculated: '2026-04-10T23:36:00Z'
+      }
+    },
+    'roadtrip-agents': {
+      method: 'GET',
+      url: 'https://roadtrip.blackroad.io/api/agents',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '55ms · 3.4 KB',
+      respBody: {
+        agents: [
+          { id: 'agent_road', name: 'Road', status: 'online', fleet: 'primary' },
+          { id: 'agent_valeria', name: 'Valeria', status: 'online', fleet: 'primary' },
+          { id: 'agent_atticus', name: 'Atticus', status: 'online', fleet: 'primary' },
+          { id: 'agent_nova', name: 'Nova', status: 'idle', fleet: 'secondary' }
+        ],
+        total: 69,
+        online: 47
+      }
+    },
+    'roadtrip-chat': {
+      method: 'POST',
+      url: 'https://roadtrip.blackroad.io/api/chat',
+      reqBody: {
+        agent: 'road',
+        message: 'status',
+        channel: 'general'
+      },
+      respStatus: '200 OK',
+      respMeta: '211ms · 628 B',
+      respBody: {
+        success: true,
+        response: 'All systems nominal. 47 agents online across the fleet.',
+        agent: 'road',
+        channel: 'general',
+        timestamp: '2026-04-10T23:36:02Z'
+      }
+    },
+    'roadtrip-channels': {
+      method: 'GET',
+      url: 'https://roadtrip.blackroad.io/api/channels',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '29ms · 1.1 KB',
+      respBody: {
+        channels: [
+          { id: 'general', members: 69, active: true },
+          { id: 'ops', members: 12, active: true },
+          { id: 'alerts', members: 69, active: true },
+          { id: 'builds', members: 8, active: false }
+        ]
+      }
+    },
+    'highway-status': {
+      method: 'GET',
+      url: 'https://highway.blackroad.io/api/status',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '18ms · 486 B',
+      respBody: {
+        status: 'operational',
+        uptime: '99.98%',
+        services: {
+          carkeys: 'operational',
+          roadtrip: 'operational',
+          roadcode: 'operational',
+          highway: 'operational'
+        },
+        incident_count: 0,
+        last_checked: '2026-04-10T23:36:00Z'
+      }
+    },
+    'highway-products': {
+      method: 'GET',
+      url: 'https://highway.blackroad.io/api/products',
+      reqBody: null,
+      respStatus: '200 OK',
+      respMeta: '47ms · 8.2 KB',
+      respBody: {
+        products: [
+          { id: 'carkeys', name: 'CarKeys', status: 'live', url: 'carkeys.blackroad.io' },
+          { id: 'roadtrip', name: 'RoadTrip', status: 'live', url: 'roadtrip.blackroad.io' },
+          { id: 'roadcode', name: 'RoadCode', status: 'live', url: 'roadcode.blackroad.io' },
+          { id: 'highway', name: 'Highway', status: 'live', url: 'highway.blackroad.io' }
+        ],
+        total: 18
+      }
+    }
+  }
+
+  // ── Syntax highlight ────────────────────────────────────────────────
+  function highlight(obj, indent = 0) {
+    if (obj === null) return `<span class="jnull">null</span>`
+    if (typeof obj === 'boolean') return `<span class="jb-val">${obj}</span>`
+    if (typeof obj === 'number') return `<span class="jn">${obj}</span>`
+    if (typeof obj === 'string') return `<span class="js">"${obj}"</span>`
+
+    const pad = '  '.repeat(indent)
+    const inner = '  '.repeat(indent + 1)
+
+    if (Array.isArray(obj)) {
+      if (obj.length === 0) return '[]'
+      const items = obj.map(v => inner + highlight(v, indent + 1)).join(',\n')
+      return `[\n${items}\n${pad}]`
+    }
+
+    const entries = Object.entries(obj)
+    if (entries.length === 0) return '{}'
+    const pairs = entries.map(([k, v]) =>
+      `${inner}<span class="jk">"${k}"</span><span class="jp">:</span> ${highlight(v, indent + 1)}`
+    ).join(',\n')
+    return `<span class="jp">{</span>\n${pairs}\n${pad}<span class="jp">}</span>`
+  }
+
+  function renderJson(el, data) {
+    if (!data) {
+      el.innerHTML = '<span style="color:var(--muted);font-size:12px">— No body —</span>'
+      return
+    }
+    el.innerHTML = highlight(data)
+  }
+
+  // ── Endpoint selection ──────────────────────────────────────────────
+  function selectEndpoint(el, id) {
+    if (!el || !id) return
+    document.querySelectorAll('.endpoint-item').forEach(i => i.classList.remove('active'))
+    el.classList.add('active')
+
+    const ep = ENDPOINTS[id]
+    if (!ep) return
+
+    document.getElementById('methodLabel').textContent = ep.method
+    document.getElementById('urlInput').value = ep.url
+    renderJson(document.getElementById('reqJsonBody'), ep.reqBody)
+
+    // Show right response
+    renderResponse(ep)
+  }
+
+  function renderResponse(ep) {
+    document.getElementById('statusCode').textContent = ep.respStatus
+    document.getElementById('statusMeta').innerHTML =
+      ep.respMeta.replace(' · ', ' <span class="status-sep">·</span> ')
+
+    const dot = document.querySelector('.status-dot')
+    if (ep.respStatus.startsWith('2')) {
+      dot.style.background = '#28c840'
+    } else if (ep.respStatus.startsWith('4')) {
+      dot.style.background = '#FF2255'
+    } else {
+      dot.style.background = '#F5A623'
+    }
+
+    renderJson(document.getElementById('respJsonBody'), ep.respBody)
+  }
+
+  // ── Collection toggle ───────────────────────────────────────────────
+  function toggleCollection(header) {
+    const chevron = header.querySelector('.collection-chevron')
+    const items = header.nextElementSibling
+    const isOpen = chevron.classList.contains('open')
+
+    chevron.classList.toggle('open', !isOpen)
+    items.style.display = isOpen ? 'none' : 'flex'
+  }
+
+  // ── Method dropdown ─────────────────────────────────────────────────
+  function toggleMethodDropdown(e) {
+    e.stopPropagation()
+    const dd = document.getElementById('methodDropdown')
+    dd.classList.toggle('open')
+  }
+
+  function setMethod(m) {
+    document.getElementById('methodLabel').textContent = m
+    document.getElementById('methodDropdown').classList.remove('open')
+  }
+
+  document.addEventListener('click', () => {
+    document.getElementById('methodDropdown').classList.remove('open')
+  })
+
+  // ── Tab switching ────────────────────────────────────────────────────
+  function switchReqTab(id, tabEl) {
+    document.querySelectorAll('#reqTabs .panel-tab').forEach(t => t.classList.remove('active'))
+    tabEl.classList.add('active')
+    const panel = document.querySelector('.request-panel .panel-body')
+    panel.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'))
+    const target = document.getElementById('req-' + id.replace('req-', ''))
+    if (target) target.classList.add('active')
+  }
+
+  function switchRespTab(id, tabEl) {
+    const respPanel = document.querySelector('.response-panel .panel-tabs')
+    respPanel.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'))
+    tabEl.classList.add('active')
+    const panel = document.querySelector('.response-panel .panel-body')
+    panel.querySelectorAll('.panel-content').forEach(c => c.classList.remove('active'))
+    const target = document.getElementById(id)
+    if (target) target.classList.add('active')
+  }
+
+  // ── Send request simulation ─────────────────────────────────────────
+  function sendRequest() {
+    const btn = document.getElementById('sendBtn')
+    const loading = document.getElementById('responseLoading')
+    const respBody = document.getElementById('resp-body')
+
+    btn.classList.add('loading')
+    respBody.classList.remove('active')
+    loading.classList.add('show')
+
+    const activeEndpoint = document.querySelector('.endpoint-item.active')
+    const id = activeEndpoint ? activeEndpoint.dataset.endpoint : 'carkeys-rotate'
+    const ep = ENDPOINTS[id] || ENDPOINTS['carkeys-rotate']
+
+    // Simulate latency
+    const delay = 400 + Math.random() * 400
+    setTimeout(() => {
+      btn.classList.remove('loading')
+      loading.classList.remove('show')
+      respBody.classList.add('active')
+      renderResponse(ep)
+    }, delay)
+  }
+
+  // ── Copy response ────────────────────────────────────────────────────
+  function copyResponse() {
+    const btn = document.getElementById('copyBtn')
+    const activeEndpoint = document.querySelector('.endpoint-item.active')
+    const id = activeEndpoint ? activeEndpoint.dataset.endpoint : 'carkeys-rotate'
+    const ep = ENDPOINTS[id]
+    if (ep && ep.respBody) {
+      navigator.clipboard.writeText(JSON.stringify(ep.respBody, null, 2)).catch(() => {})
+    }
+    btn.classList.add('copied')
+    btn.textContent = '✓ Copied'
+    setTimeout(() => {
+      btn.classList.remove('copied')
+      btn.innerHTML = '⎘ Copy'
+    }, 1800)
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    // Render initial state (carkeys-rotate active)
+    const ep = ENDPOINTS['carkeys-rotate']
+    renderJson(document.getElementById('reqJsonBody'), ep.reqBody)
+    renderResponse(ep)
+  })
+</script>
+</body>
+</html>

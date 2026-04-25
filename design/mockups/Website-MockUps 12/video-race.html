@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Race — Market Cap 2024</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a0a;display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Space Grotesk',sans-serif;}
+#shell{width:min(1280px,100vw);position:relative;display:flex;align-items:center;justify-content:center;}
+#stage{width:1280px;height:720px;background:#000;position:relative;overflow:hidden;transform-origin:top left;cursor:pointer;}
+#scanlines{position:absolute;inset:0;z-index:100;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);}
+#vignette{position:absolute;inset:0;z-index:98;pointer-events:none;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.7) 100%);}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:99;}
+#prog-wrap{position:absolute;bottom:0;left:0;right:0;height:2px;background:#111;z-index:200;pointer-events:none;}
+#prog-fill{height:100%;width:0;background:#fff;}
+#play-overlay{position:absolute;inset:0;z-index:150;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;background:rgba(0,0,0,.75);transition:opacity .4s;}
+#play-btn{width:72px;height:72px;border:2px solid rgba(255,255,255,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .2s;}
+#play-btn:hover{border-color:#fff;transform:scale(1.08);}
+#play-lbl{font-size:11px;letter-spacing:4px;color:#444;text-transform:uppercase;}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .4s;}
+.scene.active{opacity:1;pointer-events:auto;}
+
+/* ── Scene: Title ── */
+#s-intro-inner{text-align:center;}
+#intro-sub{font-size:11px;letter-spacing:8px;color:#333;text-transform:uppercase;margin-bottom:20px;}
+#intro-title{font-size:100px;font-weight:700;color:#fff;letter-spacing:6px;opacity:0;transform:scale(.9);transition:opacity .7s,transform .7s cubic-bezier(.16,1,.3,1);}
+#intro-title.in{opacity:1;transform:scale(1);}
+#intro-desc{font-size:12px;letter-spacing:4px;color:#2a2a2a;margin-top:20px;opacity:0;transition:opacity .8s .4s;}
+#intro-desc.in{opacity:1;}
+
+/* ── Scene: Race ── */
+#race-header{position:absolute;top:48px;left:0;right:0;text-align:center;}
+#race-eyebrow{font-size:10px;letter-spacing:7px;color:#2a2a2a;text-transform:uppercase;}
+#race-current{font-family:'Space Mono',monospace;font-size:13px;color:#1f1f1f;margin-top:4px;letter-spacing:3px;}
+
+#chart{position:absolute;top:130px;bottom:100px;left:60px;right:60px;}
+.bar-row{
+  position:absolute;left:0;right:0;height:64px;
+  transition:top .85s cubic-bezier(.16,1,.3,1);
+  display:flex;align-items:center;gap:0;
+}
+.br-rank{
+  font-family:'Space Mono',monospace;font-size:11px;color:#1e1e1e;
+  width:32px;text-align:center;flex-shrink:0;
+  transition:color .5s;
+}
+.br-rank.top{color:#fff;}
+.br-label{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:#3a3a3a;
+  width:110px;text-align:right;padding-right:14px;flex-shrink:0;
+  transition:color .5s;
+}
+.br-label.top{color:#aaa;}
+.br-track{
+  flex:1;height:28px;background:#060606;position:relative;overflow:hidden;
+}
+.br-fill{
+  position:absolute;inset:0;width:0;background:#fff;
+  transition:background .5s;
+}
+.br-val{
+  font-family:'Space Mono',monospace;font-size:10px;color:#2a2a2a;
+  width:70px;padding-left:10px;flex-shrink:0;
+  transition:color .5s;
+}
+.br-val.top{color:#777;}
+
+/* Leader pulse */
+.br-fill.leader{animation:leader-pulse 1.5s ease-in-out infinite;}
+@keyframes leader-pulse{0%,100%{opacity:1}50%{opacity:.8}}
+
+/* ── Winner card ── */
+#s-win-inner{text-align:center;}
+#win-sub{font-size:10px;letter-spacing:8px;color:#2a2a2a;text-transform:uppercase;margin-bottom:12px;opacity:0;transition:opacity .6s;}
+#win-sub.in{opacity:1;}
+#win-num{font-size:18px;letter-spacing:6px;color:#333;margin-bottom:6px;opacity:0;transition:opacity .5s .2s;}
+#win-num.in{opacity:1;}
+#win-name{font-size:80px;font-weight:700;color:#fff;letter-spacing:8px;opacity:0;transform:scale(.94);transition:opacity .7s .3s,transform .7s .3s cubic-bezier(.16,1,.3,1);}
+#win-name.in{opacity:1;transform:scale(1);}
+#win-val{font-size:14px;letter-spacing:4px;color:#444;margin-top:8px;opacity:0;transition:opacity .6s .6s;}
+#win-val.in{opacity:1;}
+#win-rule{height:1px;background:#111;margin:24px auto 0;width:0;transition:width .9s .5s;}
+#win-rule.in{width:300px;}
+#win-label{font-size:10px;letter-spacing:6px;color:#1a1a1a;text-transform:uppercase;margin-top:24px;opacity:0;transition:opacity .8s .9s;}
+#win-label.in{opacity:1;}
+</style>
+</head>
+<body>
+<div id="shell">
+<div id="stage" onclick="handleClick()">
+  <div id="scanlines"></div>
+  <div id="vignette"></div>
+  <div id="flash"></div>
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+  <div id="play-overlay">
+    <div id="play-btn">
+      <svg width="28" height="28" viewBox="0 0 28 28"><polygon points="7,3 25,14 7,25" fill="#fff"/></svg>
+    </div>
+    <div id="play-lbl">Play</div>
+  </div>
+
+  <!-- Title scene -->
+  <div class="scene" id="s-intro">
+    <div id="s-intro-inner">
+      <div id="intro-sub">Market Cap · 2024</div>
+      <div id="intro-title">THE RACE</div>
+      <div id="intro-desc">Largest Companies by Market Capitalization</div>
+    </div>
+  </div>
+
+  <!-- Race scene -->
+  <div class="scene" id="s-race">
+    <div id="race-header">
+      <div id="race-eyebrow">Market Capitalization · 2024</div>
+      <div id="race-current">$ 0 T</div>
+    </div>
+    <div id="chart"></div>
+  </div>
+
+  <!-- Winner scene -->
+  <div class="scene" id="s-win">
+    <div id="s-win-inner">
+      <div id="win-sub">Market Cap · 2024</div>
+      <div id="win-num">No. 1 Largest Company</div>
+      <div id="win-name">APPLE</div>
+      <div id="win-val">$3.1 Trillion</div>
+      <div id="win-rule"></div>
+      <div id="win-label">By Market Capitalization</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function scaleStage(){
+  const shell=document.getElementById('shell'),stage=document.getElementById('stage');
+  const sc=shell.clientWidth/1280;
+  stage.style.transform=`scale(${sc})`;
+  shell.style.height=(720*sc)+'px';
+}
+scaleStage(); window.addEventListener('resize',scaleStage);
+
+const COMPANIES = [
+  {id:'aapl', name:'APPLE',     start:2.8, final:3.1},
+  {id:'msft', name:'MICROSOFT', start:2.9, final:3.0},
+  {id:'nvda', name:'NVIDIA',    start:0.5, final:2.8},
+  {id:'goog', name:'ALPHABET',  start:1.8, final:2.0},
+  {id:'amzn', name:'AMAZON',    start:1.5, final:1.8},
+  {id:'meta', name:'META',      start:0.8, final:1.3},
+];
+
+const MAX_VAL = 3.1;
+const ROW_H   = 64;
+const MAX_BAR = 840; // px
+
+// Rank helpers (0 = first/best)
+function initRank(co){ return [...COMPANIES].sort((a,b)=>b.start-a.start).findIndex(c=>c.id===co.id); }
+function finalRank(co){ return [...COMPANIES].sort((a,b)=>b.final-a.final).findIndex(c=>c.id===co.id); }
+
+// Build chart DOM
+const chart = document.getElementById('chart');
+COMPANIES.forEach(co => {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.id = 'row-'+co.id;
+  row.style.top = (initRank(co) * ROW_H + (ROW_H * 6 - ROW_H * COMPANIES.length)/2) + 'px';
+  row.innerHTML = `
+    <div class="br-rank" id="rnk-${co.id}">${initRank(co)+1}</div>
+    <div class="br-label" id="lbl-${co.id}">${co.name}</div>
+    <div class="br-track"><div class="br-fill" id="bar-${co.id}"></div></div>
+    <div class="br-val"  id="val-${co.id}">$0.0T</div>
+  `;
+  chart.appendChild(row);
+});
+
+// Timeline engine
+const DURATION = 12;
+let playing=false, startTime=null, raf=null;
+let fired=new Set();
+const timeline=[];
+function at(sec,fn){timeline.push({sec,fn});}
+
+let reordered = false;
+
+at(0.0, ()=>{ show('s-intro'); });
+at(0.3, ()=>{
+  document.getElementById('intro-title').classList.add('in');
+  document.getElementById('intro-desc').classList.add('in');
+});
+at(2.0, ()=>{ crossFade('s-intro','s-race'); });
+at(2.5, ()=>{ /* bars start growing in tick */ });
+
+at(6.5, ()=>{
+  // Reorder to final ranks
+  reordered = true;
+  const finalSort = [...COMPANIES].sort((a,b)=>b.final-a.final);
+  const topCo = finalSort[0];
+  finalSort.forEach((co,rank)=>{
+    const row = document.getElementById('row-'+co.id);
+    row.style.top = (rank * ROW_H + (ROW_H * 6 - ROW_H * COMPANIES.length)/2) + 'px';
+    // Update rank badge
+    const rnk = document.getElementById('rnk-'+co.id);
+    rnk.textContent = rank+1;
+    if(rank===0){ rnk.classList.add('top'); document.getElementById('lbl-'+co.id).classList.add('top'); document.getElementById('val-'+co.id).classList.add('top'); }
+  });
+  // Leader bar pulse
+  document.getElementById('bar-'+topCo.id).classList.add('leader');
+});
+
+at(10.5, ()=>{
+  flash(()=>{
+    crossFade('s-race','s-win');
+    ['win-sub','win-num','win-name','win-val','win-rule','win-label'].forEach(id=>document.getElementById(id).classList.add('in'));
+  });
+});
+
+function tick(ts){
+  if(!startTime) startTime=ts;
+  const t=(ts-startTime)/1000;
+  document.getElementById('prog-fill').style.width=Math.min(t/DURATION*100,100)+'%';
+
+  // Fire timeline
+  timeline.forEach((ev,i)=>{ if(t>=ev.sec&&!fired.has(i)){fired.add(i);ev.fn();} });
+
+  // Animate bars (race runs from t=2.5 to t=10.0)
+  const tS=2.5, tE=10.0;
+  const p=Math.min(Math.max((t-tS)/(tE-tS),0),1);
+  const eased=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+
+  let maxCurrent=0;
+  COMPANIES.forEach(co=>{
+    const val = co.final * eased;
+    const w = (val / MAX_VAL) * MAX_BAR;
+    document.getElementById('bar-'+co.id).style.width=w+'px';
+    document.getElementById('val-'+co.id).textContent='$'+val.toFixed(1)+'T';
+    if(val>maxCurrent) maxCurrent=val;
+  });
+  document.getElementById('race-current').textContent='$ '+maxCurrent.toFixed(1)+' T';
+
+  // Update rank numbers during race (before formal reorder event)
+  if(!reordered && t>2.5){
+    const currentOrder=[...COMPANIES].sort((a,b)=>b.final*Math.min(Math.max((t-tS)/(tE-tS),0),1)-a.final*Math.min(Math.max((t-tS)/(tE-tS),0),1));
+    // just visual rank updates via text
+    currentOrder.forEach((co,rank)=>{
+      // soft update rank text only
+    });
+  }
+
+  if(t<DURATION+1.5) raf=requestAnimationFrame(tick); else onEnd();
+}
+
+function handleClick(){ if(!playing) startVideo(); }
+function startVideo(){
+  const ov=document.getElementById('play-overlay');
+  ov.style.opacity='0'; setTimeout(()=>ov.style.display='none',400);
+  playing=true; fired.clear(); reordered=false; resetAll();
+  raf=requestAnimationFrame(tick);
+}
+function onEnd(){
+  playing=false;
+  const ov=document.getElementById('play-overlay');
+  ov.style.display='flex'; document.getElementById('play-lbl').textContent='Replay';
+  setTimeout(()=>ov.style.opacity='1',60); fired.clear();
+}
+function resetAll(){
+  startTime=null;
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.getElementById('intro-title').classList.remove('in');
+  document.getElementById('intro-desc').classList.remove('in');
+  // Reset bar positions to initial rank
+  COMPANIES.forEach(co=>{
+    const row=document.getElementById('row-'+co.id);
+    row.style.transition='none';
+    row.style.top=(initRank(co)*ROW_H+(ROW_H*6-ROW_H*COMPANIES.length)/2)+'px';
+    document.getElementById('bar-'+co.id).style.width='0';
+    document.getElementById('bar-'+co.id).classList.remove('leader');
+    document.getElementById('val-'+co.id).textContent='$0.0T';
+    document.getElementById('rnk-'+co.id).textContent=initRank(co)+1;
+    document.getElementById('rnk-'+co.id).classList.remove('top');
+    document.getElementById('lbl-'+co.id).classList.remove('top');
+    document.getElementById('val-'+co.id).classList.remove('top');
+    setTimeout(()=>row.style.transition='top .85s cubic-bezier(.16,1,.3,1)',50);
+  });
+  ['win-sub','win-num','win-name','win-val','win-rule','win-label'].forEach(id=>document.getElementById(id).classList.remove('in'));
+  document.getElementById('prog-fill').style.width='0';
+  document.getElementById('flash').style.opacity='0';
+  document.getElementById('flash').style.transition='none';
+  document.getElementById('race-current').textContent='$ 0.0 T';
+}
+function show(id){document.getElementById(id).classList.add('active');}
+function hide(id){document.getElementById(id).classList.remove('active');}
+function crossFade(a,b){hide(a);requestAnimationFrame(()=>requestAnimationFrame(()=>show(b)));}
+function flash(cb){
+  const el=document.getElementById('flash');
+  el.style.transition='none'; el.style.opacity='1';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.style.transition='opacity .5s'; el.style.opacity='0'; cb&&cb();
+  }));
+}
+</script>
+</body>
+</html>
