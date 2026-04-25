@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Fleet — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.io/fleet.js" defer></script>
+  <script src="https://blackroad.io/search.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="The Fleet — 5 Raspberry Pi 5s, 2 DigitalOcean droplets, 52 TOPS of AI acceleration. Sovereign edge infrastructure.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #FF2255; --accent-dim: rgba(255,34,85,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(255,34,85,0.18) 0%, rgba(255,34,85,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .node-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .node-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg); position: relative; overflow: hidden;
+    }
+    .node-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    }
+    .node-name {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      font-weight: 700; color: var(--white); margin-bottom: 4px;
+    }
+    .node-type {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted); margin-bottom: var(--sp-xs);
+    }
+    .node-desc {
+      font-size: 0.8rem; color: var(--subtle); line-height: 1.6;
+    }
+    .node-ip {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: var(--muted); margin-top: var(--sp-xs);
+    }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .stat-row {
+      display: flex; gap: var(--sp-xl); margin-top: var(--sp-md);
+      flex-wrap: wrap;
+    }
+    .stat-item { display: flex; flex-direction: column; gap: 4px; }
+    .stat-num {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.6rem;
+      font-weight: 800; color: var(--accent);
+    }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Infrastructure</div>
+    <div class="concept-title">The Fleet</div>
+    <div class="concept-summary">
+      5 Raspberry Pi 5s, 2 DigitalOcean droplets, 52 TOPS of AI acceleration. Sovereign edge infrastructure that answers to no cloud provider.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Hardware</div>
+    <div class="node-grid">
+      <div class="node-card" style="border-left:3px solid #00D4FF;">
+        <div class="node-name">Alice</div>
+        <div class="node-type">Pi 400 &middot; Gateway</div>
+        <div class="node-desc">Main gateway, DNS (Pi-hole), PostgreSQL, Qdrant. 48+ domains routed. The front door of the network.</div>
+        <div class="node-ip">192.168.4.49</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #9C27B0;">
+        <div class="node-name">Cecilia</div>
+        <div class="node-type">Pi 5 &middot; AI Core</div>
+        <div class="node-desc">CECE API, TTS API, MinIO, Hailo-8 (26 TOPS). 16 Ollama models including 4 custom CECE fine-tunes.</div>
+        <div class="node-ip">192.168.4.96</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #FF6B2B;">
+        <div class="node-name">Octavia</div>
+        <div class="node-type">Pi 5 &middot; Storage</div>
+        <div class="node-desc">1TB NVMe, Hailo-8 (26 TOPS), Gitea (207 repos), NATS, Docker Swarm leader.</div>
+        <div class="node-ip">192.168.4.100</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #4488FF;">
+        <div class="node-name">Aria</div>
+        <div class="node-type">Pi 5 &middot; Orchestration</div>
+        <div class="node-desc">Portainer v2.33.6, Headscale v0.23.0, Pironman5. Container orchestration and VPN coordination.</div>
+        <div class="node-ip">192.168.4.98</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #0af;">
+        <div class="node-name">Lucidia</div>
+        <div class="node-type">Pi 5 &middot; Cognition</div>
+        <div class="node-desc">APIs, reasoning engine, 334 web apps, GitHub Actions runner. Lucidia API (FastAPI), CarPool app.</div>
+        <div class="node-ip">192.168.4.38</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #FF2255;">
+        <div class="node-name">Anastasia</div>
+        <div class="node-type">DO NYC1 &middot; Hub</div>
+        <div class="node-desc">WireGuard hub server. Headscale. Nginx for blackroad.io. The backbone of the mesh network.</div>
+        <div class="node-ip">10.8.0.1</div>
+      </div>
+      <div class="node-card" style="border-left:3px solid #888;">
+        <div class="node-name">Gematria</div>
+        <div class="node-type">DO NYC3 &middot; Edge</div>
+        <div class="node-desc">4 CPU, 8GB RAM. Edge compute node. Cloudflare tunnel endpoint.</div>
+        <div class="node-ip">10.8.0.8</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">AI Acceleration</div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <span class="stat-num">52</span>
+        <span class="stat-label">TOPS Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">2</span>
+        <span class="stat-label">Hailo-8 Units</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">27</span>
+        <span class="stat-label">Ollama Models</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">4</span>
+        <span class="stat-label">Custom Fine-tunes</span>
+      </div>
+    </div>
+    <p style="margin-top:var(--sp-md);">
+      2x Hailo-8 accelerators (26 TOPS each) on Cecilia and Octavia. 27 Ollama models distributed across the fleet. 4 custom CECE fine-tunes for identity-specific inference.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Networking</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">WireGuard Mesh</div>
+        <div class="card-body">Encrypted point-to-point tunnels. 10.8.0.x address space. Anastasia as hub. Every node connected.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cloudflare Tunnels</div>
+        <div class="card-body">18 tunnels, 100+ hostnames. Alice handles 65+. Zero-trust ingress without exposed ports.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">RoadNet WiFi</div>
+        <div class="card-body">5 access points, 5 subnets (10.10.x.0/24). Mesh WiFi across all Pi nodes. Failover connectivity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Self-Healing</div>
+    <p>
+      Autonomy scripts run on every node. Heartbeat every minute. Heal every 5 minutes. Watchdog every 30 seconds. Services auto-restart on failure. Stats-proxy monitors everything. The fleet takes care of itself.
+    </p>
+    <div class="card-grid" style="margin-top:var(--sp-md);">
+      <div class="card">
+        <div class="card-title">Heartbeat (1m)</div>
+        <div class="card-body">Every node pings in every minute. If a heartbeat is missed, the fleet knows.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Heal (5m)</div>
+        <div class="card-body">Checks critical services. Auto-restarts stats-proxy, Ollama, and other core services if down.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Watchdog (30s)</div>
+        <div class="card-body">Alice runs task_watchdog.py on a 30-second timer. Redis task queue monitoring. Nothing slips through.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <div class="section-label">Connected Agents</div>
+    <div class="conn-grid">
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#00D4FF;"></span> ALICE</a>
+      <a href="../../agents/cecilia/" class="conn-card"><span class="conn-dot" style="background:#9C27B0;"></span> CECILIA</a>
+      <a href="../../agents/octavia/" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> OCTAVIA</a>
+      <a href="../../agents/aria/" class="conn-card"><span class="conn-dot" style="background:#4488FF;"></span> ARIA</a>
+      <a href="../../agents/lucidia/" class="conn-card"><span class="conn-dot" style="background:#0af;"></span> LUCIDIA</a>
+      <a href="../../agents/anastasia/" class="conn-card"><span class="conn-dot" style="background:#FF2255;"></span> ANASTASIA</a>
+      <a href="../../agents/gematria/" class="conn-card"><span class="conn-dot" style="background:#888;"></span> GEMATRIA</a>
+      <a href="../../agents/atlas/" class="conn-card"><span class="conn-dot" style="background:#4488FF;"></span> ATLAS</a>
+      <a href="../../agents/cipher/" class="conn-card"><span class="conn-dot" style="background:#FF2255;"></span> CIPHER</a>
+    </div>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>The Fleet &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

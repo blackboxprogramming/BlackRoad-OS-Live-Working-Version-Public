@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+/**
+ * mockup-base.css — BlackRoad OS Design System
+ * Pure black and white. No color. No gradients.
+ * All mockups link this file.
+ */
+
+:root {
+  --g:         linear-gradient(90deg, #ffffff, #ffffff);
+  --g135:      linear-gradient(135deg, #ffffff, #ffffff);
+  --grad:      var(--g);
+  --grad-tint: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.06));
+
+  --bg:       #000000;
+  --card:     #0a0a0a;
+  --elevated: #111111;
+  --hover:    #181818;
+
+  --s1: #0a0a0a;
+  --s2: #111111;
+  --s3: #1a1a1a;
+  --s4: #222222;
+  --s5: #2a2a2a;
+  --s6: #333333;
+
+  --border: #1a1a1a;
+
+  --text:  #f5f5f5;
+  --sub:   #737373;
+  --muted: #444444;
+  --dim:   #525252;
+  --white: #ffffff;
+  --white80: rgba(255,255,255,0.80);
+  --white60: rgba(255,255,255,0.60);
+  --white40: rgba(255,255,255,0.40);
+  --white20: rgba(255,255,255,0.20);
+  --white10: rgba(255,255,255,0.10);
+  --white05: rgba(255,255,255,0.05);
+
+  --green:     #ffffff;
+  --green-dim: rgba(255,255,255,0.10);
+  --amber:     #999999;
+  --amber-dim: rgba(255,255,255,0.08);
+  --red:       #666666;
+  --red-dim:   rgba(255,255,255,0.06);
+  --blue:      #cccccc;
+  --blue-dim:  rgba(255,255,255,0.08);
+
+  --sg: 'Space Grotesk', -apple-system, sans-serif;
+  --jb: 'JetBrains Mono', 'Courier New', monospace;
+  --in: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sg);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a { color: var(--text); text-decoration: none; }
+button { font-family: var(--sg); cursor: pointer; }
+
+::-webkit-scrollbar       { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 2px; }
+
+.grad-bar { height: 3px; background: var(--white); }
+.grad-text { color: var(--white); }
+
+.br-nav {
+  position: fixed; top: 3px; left: 0; right: 0; z-index: 100; padding: 0 24px;
+}
+.br-nav-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(0,0,0,.9); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: 10px;
+}
+.br-nav-logo {
+  font-weight: 700; font-size: 16px; color: var(--white);
+  display: flex; align-items: center; gap: 10px; text-decoration: none;
+}
+.br-nav-logo-bar { width: 20px; height: 3px; border-radius: 2px; background: var(--white); }
+.br-nav-links { display: flex; gap: 24px; }
+.br-nav-links a { font-size: 12px; font-weight: 500; color: var(--sub); transition: color .15s; text-decoration: none; }
+.br-nav-links a:hover { color: var(--white); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; border-radius: 6px; font-weight: 600; font-size: 12px;
+  border: none; transition: all .15s; font-family: var(--sg); cursor: pointer;
+}
+.btn-white  { background: var(--white); color: #000; }
+.btn-white:hover { background: #e5e5e5; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+.btn-outline:hover { border-color: #444; }
+.btn-lg { padding: 13px 32px; font-size: 14px; border-radius: 8px; }
+
+.br-section { padding: 72px 0; }
+.br-container { max-width: 1000px; width: 100%; margin: 0 auto; padding: 0 24px; }
+.br-section-num   { font-family: var(--jb); font-size: 10px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 8px; }
+.br-section-title { font-weight: 700; font-size: 28px; color: var(--white); margin-bottom: 8px; }
+.br-section-desc  { font-size: 14px; color: var(--sub); max-width: 460px; line-height: 1.7; }
+.br-divider { height: 1px; background: var(--border); }
+
+.br-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px 24px; transition: border-color .15s;
+}
+.br-card:hover { border-color: #333; }
+
+.br-card-featured { border-color: #333; position: relative; }
+.br-card-featured::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--white); border-radius: 8px 8px 0 0;
+}
+
+.br-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; background: var(--card);
+  border: 1px solid var(--border); border-radius: 5px; transition: border-color .15s;
+}
+.br-pill:hover { border-color: #333; }
+
+.br-window { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.br-window-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 14px; background: var(--elevated);
+  border-bottom: 1px solid var(--border);
+}
+.br-dot      { width: 8px; height: 8px; border-radius: 50%; }
+.br-dot-red  { background: #666666; }
+.br-dot-yel  { background: #999999; }
+.br-dot-grn  { background: #cccccc; }
+.br-window-title { margin-left: 8px; font-family: var(--jb); font-size: 10px; color: var(--muted); }
+
+</style>
+  <title>BackRoad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --g:      linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+      --bg:     #000;
+      --s1:     #111111;
+      --s2:     #181818;
+      --s3:     #1a1a1a;
+      --s4:     #222222;
+      --s5:     #333333;
+      --border: #2a2a2a;
+      --text:   #d7dadc;
+      --muted:  #818384;
+      --dim:    #333333;
+      --white:  #ffffff;
+      --accent: #ffffff;
+      --sg:     'Space Grotesk',sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sg);
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    
+    
+    
+
+    /* ══════════════════════════════
+       TOP NAV
+    ══════════════════════════════ */
+    .topnav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 48px;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px;
+      gap: 12px;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .nav-logo-icon {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #000;
+      letter-spacing: -1px;
+    }
+    .nav-logo-text {
+      font-size: 18px; font-weight: 800; color: var(--white);
+      letter-spacing: -0.5px;
+    }
+
+    .nav-community-picker {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 4px;
+      border: 1px solid transparent;
+      cursor: pointer; color: var(--text); font-size: 14px;
+      min-width: 220px;
+      transition: border-color 0.1s;
+    }
+    .nav-community-picker:hover { border-color: var(--border); background: var(--s3); }
+    .nav-community-picker span { flex: 1; }
+    .picker-arrow { color: var(--muted); font-size: 10px; }
+
+    .nav-search {
+      flex: 1; max-width: 690px;
+      display: flex; align-items: center; gap: 8px;
+      background: var(--s3);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 8px 16px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .nav-search:focus-within {
+      background: var(--bg);
+      border-color: var(--white);
+    }
+    .nav-search span { font-size: 15px; color: var(--muted); flex-shrink: 0; }
+    .nav-search input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-size: 14px; width: 100%;
+    }
+    .nav-search input::placeholder { color: var(--muted); }
+
+    .nav-spacer { flex: 1; }
+
+    .nav-actions { display: flex; align-items: center; gap: 6px; }
+
+    .nav-icon-btn {
+      width: 36px; height: 36px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; color: var(--muted); cursor: pointer;
+      position: relative; transition: background 0.1s, color 0.1s;
+    }
+    .nav-icon-btn:hover { background: var(--s3); color: var(--text); }
+    .nav-dot {
+      position: absolute; top: 4px; right: 4px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--white); border: 2px solid var(--s1);
+    }
+
+    .nav-btn {
+      padding: 6px 14px; border-radius: 16px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      white-space: nowrap;
+    }
+    .nav-btn.outline {
+      border: 1px solid var(--muted); color: var(--muted);
+      background: none;
+    }
+    .nav-btn.outline:hover { border-color: var(--text); color: var(--text); }
+    .nav-btn.solid {
+      background: var(--white); color: #000; border: none;
+    }
+    .nav-btn.solid:hover { background: #e5e5e5; }
+
+    .nav-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--s3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; color: var(--muted);
+      cursor: pointer;
+    }
+    .nav-avatar:hover { border-color: var(--white); }
+
+    /* ══════════════════════════════
+       PAGE LAYOUT
+    ══════════════════════════════ */
+    .page {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 20px 40px;
+      gap: 24px;
+    }
+
+    /* ══════════════════════════════
+       LEFT SIDEBAR
+    ══════════════════════════════ */
+    .leftsidebar {
+      width: 270px;
+      flex-shrink: 0;
+      padding-top: 12px;
+    }
+
+    .ls-section { margin-bottom: 6px; }
+    .ls-header {
+      font-size: 10px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 8px 8px 4px;
+    }
+
+    .ls-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 8px; border-radius: 4px;
+      cursor: pointer; color: var(--text);
+      font-size: 14px; font-weight: 500;
+      transition: background 0.1s;
+    }
+    .ls-item:hover { background: var(--s3); }
+    .ls-item.active { background: var(--s3); font-weight: 700; }
+    .ls-icon { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+    .ls-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .ls-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+    .ls-create-btn {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      width: 100%; padding: 8px 16px; border-radius: 16px;
+      background: var(--white); color: #000;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      margin-top: 10px;
+    }
+    .ls-create-btn:hover { background: #e5e5e5; }
+
+    /* ══════════════════════════════
+       MAIN FEED
+    ══════════════════════════════ */
+    .feed {
+      flex: 1;
+      min-width: 0;
+      padding-top: 12px;
+    }
+
+    /* Sort bar */
+    .sort-bar {
+      display: flex; align-items: center; gap: 4px;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+    }
+    .sort-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 12px; border-radius: 16px;
+      cursor: pointer; color: var(--muted);
+      font-size: 14px; font-weight: 700;
+      transition: background 0.1s, color 0.1s;
+    }
+    .sort-btn:hover { background: var(--s4); color: var(--text); }
+    .sort-btn.active { color: var(--text); background: var(--s4); }
+    .sort-icon { font-size: 16px; }
+    .sort-spacer { flex: 1; }
+    .sort-view {
+      display: flex; align-items: center; gap: 2px;
+      padding: 4px 8px; border-radius: 4px;
+      cursor: pointer; color: var(--muted); font-size: 17px;
+    }
+    .sort-view:hover { background: var(--s4); color: var(--text); }
+
+    /* ── Post Card ── */
+    .post-card {
+      display: flex;
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.1s;
+    }
+    .post-card:hover { border-color: var(--muted); }
+
+    /* vote column */
+    .vote-col {
+      width: 40px; flex-shrink: 0;
+      background: var(--s1);
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding: 8px 4px;
+      gap: 2px;
+    }
+    .vote-btn {
+      width: 24px; height: 24px; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; cursor: pointer; color: var(--muted);
+      transition: color 0.1s, background 0.1s;
+    }
+    .vote-btn:hover { background: var(--s3); color: var(--text); }
+    .vote-btn.upvoted { color: var(--white); }
+    .vote-count {
+      font-size: 12px; font-weight: 700; color: var(--text);
+      text-align: center; line-height: 1;
+    }
+    .vote-count.upvoted { color: var(--white); }
+
+    /* post body */
+    .post-body { flex: 1; min-width: 0; padding: 8px 10px 8px 0; }
+
+    .post-meta {
+      display: flex; align-items: center; gap: 4px;
+      flex-wrap: wrap; margin-bottom: 6px;
+    }
+    .post-sub {
+      font-size: 12px; font-weight: 700; color: var(--text);
+      cursor: pointer;
+    }
+    .post-sub:hover { text-decoration: underline; }
+    .post-dot { font-size: 10px; color: var(--muted); }
+    .post-author { font-size: 12px; color: var(--muted); }
+    .post-author span { cursor: pointer; }
+    .post-author span:hover { text-decoration: underline; }
+    .post-time { font-size: 12px; color: var(--muted); }
+    .post-flair {
+      font-size: 11px; font-weight: 600; padding: 1px 7px;
+      border-radius: 2px; background: var(--s4); color: var(--muted);
+      border: 1px solid var(--s5);
+    }
+    .post-pinned { font-size: 11px; color: var(--white); font-weight: 700; display: flex; align-items: center; gap: 3px; }
+
+    .post-title {
+      font-size: 18px; font-weight: 500; color: var(--text);
+      line-height: 1.35; margin-bottom: 8px;
+    }
+    .post-title:hover { color: var(--white); }
+
+    /* image thumbnail */
+    .post-thumb {
+      width: 100%; max-height: 512px;
+      background: var(--s3);
+      border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 64px; opacity: 0.15;
+      aspect-ratio: 16/9;
+      margin-bottom: 8px;
+      position: relative; overflow: hidden;
+    }
+    .post-thumb-pattern {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 10px, var(--s4) 10px, var(--s4) 20px
+      );
+    }
+    .post-thumb-icon { position: relative; z-index: 1; font-size: 56px; opacity: 0.2; }
+
+    /* link preview */
+    .post-link {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--s3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 8px 12px;
+      margin-bottom: 8px; cursor: pointer;
+    }
+    .post-link:hover { border-color: var(--muted); }
+    .post-link-icon { font-size: 16px; color: var(--muted); }
+    .post-link-url { font-size: 12px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .post-link-ext { font-size: 12px; color: var(--muted); }
+
+    /* text body */
+    .post-text {
+      font-size: 14px; color: var(--muted);
+      line-height: 1.5; margin-bottom: 8px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .post-text .highlight { color: var(--white); font-weight: 700; }
+
+    /* awards */
+    .post-awards {
+      display: flex; align-items: center; gap: 4px;
+      margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .award-chip {
+      display: flex; align-items: center; gap: 3px;
+      font-size: 11px; color: var(--muted);
+      background: var(--s3); border-radius: 2px;
+      padding: 2px 6px;
+    }
+
+    /* action row */
+    .post-actions {
+      display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+    }
+    .pa-btn {
+      display: flex; align-items: center; gap: 4px;
+      padding: 6px 8px; border-radius: 2px;
+      cursor: pointer; color: var(--muted);
+      font-size: 12px; font-weight: 700;
+      transition: background 0.1s, color 0.1s;
+    }
+    .pa-btn:hover { background: var(--s4); color: var(--text); }
+    .pa-btn.saved { color: var(--white); }
+    .pa-icon { font-size: 15px; }
+
+    /* crosspost indicator */
+    .crosspost-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+      padding: 4px 8px 0 50px;
+      font-weight: 600;
+    }
+
+    /* stickied post */
+    .post-card.stickied { border-left: 3px solid var(--white); }
+
+    /* ── Text-only card variant ── */
+    .post-card .post-body { padding-left: 8px; }
+
+    /* ══════════════════════════════
+       RIGHT SIDEBAR
+    ══════════════════════════════ */
+    .rightsidebar {
+      width: 312px;
+      flex-shrink: 0;
+      padding-top: 12px;
+    }
+
+    .rs-card {
+      background: var(--s2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    /* community header banner */
+    .rs-banner {
+      height: 60px;
+      background: repeating-linear-gradient(
+        -45deg, var(--s3) 0, var(--s3) 10px, var(--s4) 10px, var(--s4) 20px
+      );
+    }
+    .rs-community-info { padding: 0 12px 12px; }
+    .rs-community-icon {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--s4); border: 3px solid var(--s2);
+      margin-top: -18px; margin-bottom: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .rs-community-name { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+    .rs-community-slug { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .rs-community-desc { font-size: 14px; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+
+    .rs-stats {
+      display: flex; gap: 16px;
+      padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .rs-stat { }
+    .rs-stat-num { font-size: 16px; font-weight: 700; color: var(--white); }
+    .rs-stat-label { font-size: 11px; color: var(--muted); }
+
+    .rs-online { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+    .rs-online-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--white); }
+
+    .rs-join-btn {
+      width: 100%; padding: 8px; border-radius: 16px;
+      background: var(--white); color: #000;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      text-align: center; margin-bottom: 8px;
+    }
+    .rs-join-btn:hover { background: #e5e5e5; }
+
+    .rs-create-btn {
+      width: 100%; padding: 8px; border-radius: 16px;
+      background: none; color: var(--text);
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      text-align: center; border: 1px solid var(--muted);
+    }
+    .rs-create-btn:hover { border-color: var(--text); }
+
+    /* rules card */
+    .rs-card-header {
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      font-size: 14px; font-weight: 700; color: var(--white);
+    }
+
+    .rs-rule {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 12px; border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .rs-rule:last-child { border-bottom: none; }
+    .rs-rule:hover { background: var(--s3); }
+    .rs-rule-num {
+      font-size: 14px; font-weight: 700; color: var(--muted);
+      flex-shrink: 0; width: 18px;
+    }
+    .rs-rule-text { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
+    .rs-rule-arrow { font-size: 14px; color: var(--muted); flex-shrink: 0; }
+
+    /* moderators */
+    .rs-mod-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 12px; cursor: pointer;
+    }
+    .rs-mod-row:hover { background: var(--s3); }
+    .rs-mod-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--s4); display: flex; align-items: center;
+      justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted);
+    }
+    .rs-mod-name { font-size: 13px; color: var(--text); }
+
+    /* create post card */
+    .rs-create-card {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      background: var(--s2); border: 1px solid var(--border); border-radius: 4px;
+      margin-bottom: 16px; cursor: pointer;
+    }
+    .rs-create-card:hover { border-color: var(--muted); }
+    .rs-create-avatar {
+      width: 38px; height: 38px; border-radius: 4px;
+      background: var(--s4); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; color: var(--muted);
+    }
+    .rs-create-input {
+      flex: 1; background: var(--s3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 8px 12px;
+      font-size: 14px; color: var(--muted);
+    }
+    .rs-create-actions { display: flex; gap: 4px; }
+    .rs-create-act {
+      width: 32px; height: 32px; border-radius: 2px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; color: var(--muted); cursor: pointer;
+    }
+    .rs-create-act:hover { background: var(--s3); color: var(--text); }
+    .grad-bar { height: 3px; background: var(--g); }
+  </style>
+</head>
+<body>
+  <div class="grad-bar"></div>
+
+  <!-- ══════════════════════ TOP NAV ══════════════════════ -->
+  <div class="topnav">
+
+    <div class="nav-logo">
+      <div class="nav-logo-icon">R</div>
+      <div class="nav-logo-text">roadit</div>
+    </div>
+
+    <div class="nav-community-picker">
+      <span>rv/roadcode</span>
+      <span class="picker-arrow">▾</span>
+    </div>
+
+    <div class="nav-search">
+      <span>🔍</span>
+      <input type="text" placeholder="Search RoadView" />
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-actions">
+      <div class="nav-icon-btn" title="Notifications">🔔<div class="nav-dot"></div></div>
+      <div class="nav-icon-btn" title="Chat">💬</div>
+      <div class="nav-icon-btn" title="More">⊕</div>
+      <div class="nav-icon-btn" title="Advertise">📢</div>
+      <div class="nav-btn outline">Open Desk</div>
+      <div class="nav-btn solid">Join Network</div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════ PAGE ══════════════════════ -->
+  <div class="page">
+
+    <!-- ══════════════════════ LEFT SIDEBAR ══════════════════════ -->
+    <div class="leftsidebar">
+
+      <div class="ls-section">
+        <div class="ls-item active"><span class="ls-icon">🏠</span> Home</div>
+        <div class="ls-item"><span class="ls-icon">🔥</span> Signals</div>
+        <div class="ls-item"><span class="ls-icon">🌐</span> All</div>
+      </div>
+
+      <div class="ls-divider"></div>
+
+      <div class="ls-section">
+        <div class="ls-header">Schools</div>
+        <div class="ls-item"><span class="ls-icon">💻</span> Builder</div>
+        <div class="ls-item"><span class="ls-icon">🎮</span> Worlds</div>
+        <div class="ls-item"><span class="ls-icon">🎨</span> Design</div>
+        <div class="ls-item"><span class="ls-icon">📈</span> Operations</div>
+        <div class="ls-item"><span class="ls-icon">🔬</span> Search</div>
+        <div class="ls-item"><span class="ls-icon">🎵</span> Media</div>
+      </div>
+
+      <div class="ls-divider"></div>
+
+      <div class="ls-section">
+        <div class="ls-header">Your Rooms</div>
+        <div class="ls-item">
+          <div class="ls-dot">R</div> rv/roadcode
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">V</div> rv/roadview
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">B</div> rv/backroad
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">W</div> rv/roadworld
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">C</div> rv/roadcanvas
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">R</div> rv/roadroom
+        </div>
+        <div class="ls-item">
+          <div class="ls-dot">T</div> rv/roadtrip
+        </div>
+        <div class="ls-item"><span style="color:var(--muted);font-size:13px;padding-left:4px;">+ See all rooms</span></div>
+      </div>
+
+      <div class="ls-divider"></div>
+
+      <div class="ls-section">
+        <div class="ls-item"><span class="ls-icon">⚙️</span> Settings</div>
+        <div class="ls-item"><span class="ls-icon">🌙</span> Dark Mode: On</div>
+        <div class="ls-item"><span class="ls-icon">📱</span> Open App</div>
+        <div class="ls-item"><span class="ls-icon">ℹ️</span> Help Center</div>
+      </div>
+
+      <div class="ls-create-btn">✏️ Create Signal</div>
+
+      <div style="font-size:11px;color:var(--muted);padding:12px 4px;line-height:1.6;">
+        Help · Privacy Policy · Operating Model · Rules · Careers · Press · Binder · Discovery<br>
+        © 2026 RoadView Inc. All rights reserved.
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ FEED ══════════════════════ -->
+    <div class="feed">
+
+      <!-- Create Post Bar -->
+      <div class="rs-create-card">
+        <div class="rs-create-avatar">👤</div>
+        <div class="rs-create-input">Create Signal</div>
+        <div class="rs-create-actions">
+          <div class="rs-create-act">🖼</div>
+          <div class="rs-create-act">🔗</div>
+        </div>
+      </div>
+
+      <!-- Sort Bar -->
+      <div class="sort-bar">
+        <div class="sort-btn active"><span class="sort-icon">🔥</span> Active</div>
+        <div class="sort-btn"><span class="sort-icon">✨</span> New</div>
+        <div class="sort-btn"><span class="sort-icon">📈</span> Top</div>
+        <div class="sort-btn"><span class="sort-icon">🚀</span> Emerging</div>
+        <div class="sort-spacer"></div>
+        <div class="sort-view">⊞</div>
+        <div class="sort-view">☰</div>
+      </div>
+
+      <!-- ── Post 1 — Stickied / Announcement ── -->
+      <div class="post-card stickied">
+        <div class="vote-col">
+          <div class="vote-btn">▲</div>
+          <div class="vote-count">📌</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/roadcode</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/mods</span></span>
+            <span class="post-time">3 hours ago</span>
+            <span class="post-pinned">📌 Pinned by moderators</span>
+          </div>
+          <div class="post-title">Welcome to rv/roadcode — keep posts product-grounded, source-aware, and useful to builders shipping inside BlackRoad.</div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 84 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn saved"><span class="pa-icon">🔖</span> Saved</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post 2 — Image post, upvoted ── -->
+      <div class="post-card">
+        <div class="vote-col">
+          <div class="vote-btn upvoted">▲</div>
+          <div class="vote-count upvoted">48.2K</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/roadcode</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/nolan_dev</span></span>
+            <span class="post-time">6 hours ago</span>
+            <span class="post-flair">🚀 Project</span>
+          </div>
+          <div class="post-title">RoadCode build log: how we turned the operating model into a real product shell without losing routing discipline</div>
+          <div class="post-thumb">
+            <div class="post-thumb-pattern"></div>
+            <div class="post-thumb-icon">🎮</div>
+          </div>
+          <div class="post-awards">
+            <div class="award-chip">🏅 Gold × 3</div>
+            <div class="award-chip">🌟 Platinum × 1</div>
+            <div class="award-chip">🤩 Helpful × 12</div>
+          </div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 3,941 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn"><span class="pa-icon">🔖</span> Save</div>
+            <div class="pa-btn"><span class="pa-icon">🏅</span> Award</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post 3 — Link post ── -->
+      <div class="post-card">
+        <div class="vote-col">
+          <div class="vote-btn">▲</div>
+          <div class="vote-count">22.7K</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/roadview</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/cassie_codes</span></span>
+            <span class="post-time">9 hours ago</span>
+            <span class="post-flair">📰 Article</span>
+          </div>
+          <div class="post-title">RoadView search notes: when should discovery rank canonicals over alias traffic and binder popularity?</div>
+          <div class="post-link">
+            <span class="post-link-icon">🔗</span>
+            <span class="post-link-url">devblog.microsoft.com › typescript-6-release-notes</span>
+            <span class="post-link-ext">↗</span>
+          </div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 1,204 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn saved"><span class="pa-icon">🔖</span> Saved</div>
+            <div class="pa-btn"><span class="pa-icon">🏅</span> Award</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post 4 — Text post with body ── -->
+      <div class="post-card">
+        <div class="vote-col">
+          <div class="vote-btn">▲</div>
+          <div class="vote-count">9.4K</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/backroad</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/alexa_road</span></span>
+            <span class="post-time">11 hours ago</span>
+            <span class="post-flair">🛠️ Show HN</span>
+          </div>
+          <div class="post-title">BackRoad distribution question: what actually makes a BlackRoad signal worth following instead of just another launch post?</div>
+          <div class="post-text">We keep saying distribution should feel like a school, not a spam machine. In practice that means signals need context, canonicals, and a clear route into a product room. <span class="highlight">What formats actually earn attention here?</span> Looking for concrete examples, not theory.</div>
+          <div class="post-awards">
+            <div class="award-chip">🌟 Platinum × 2</div>
+            <div class="award-chip">🤩 Helpful × 8</div>
+          </div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 2,877 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn"><span class="pa-icon">🔖</span> Save</div>
+            <div class="pa-btn"><span class="pa-icon">🏅</span> Award</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post 5 — Crosspost ── -->
+      <div style="font-size:12px;color:var(--muted);padding:4px 4px 0;display:flex;align-items:center;gap:6px;">
+        <span>🔁</span> <span>Crossposted from <strong style="color:var(--text);">rv/roadworld</strong></span>
+      </div>
+      <div class="post-card">
+        <div class="vote-col">
+          <div class="vote-btn">▲</div>
+          <div class="vote-count">14.1K</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/roadworld</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/pixel_forge</span></span>
+            <span class="post-time">1 day ago</span>
+            <span class="post-flair">🎨 Screenshot</span>
+          </div>
+          <div class="post-title">OfficeRoad Runtime City screenshots: district routing, floor logic, and agent movement after the latest systems pass</div>
+          <div class="post-thumb">
+            <div class="post-thumb-pattern"></div>
+            <div class="post-thumb-icon">🏙️</div>
+          </div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 892 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn"><span class="pa-icon">🔖</span> Save</div>
+            <div class="pa-btn"><span class="pa-icon">🏅</span> Award</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Post 6 — Text/discussion ── -->
+      <div class="post-card">
+        <div class="vote-col">
+          <div class="vote-btn">▲</div>
+          <div class="vote-count">6.8K</div>
+          <div class="vote-btn">▼</div>
+        </div>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-sub">rv/roadtrip</span>
+            <span class="post-dot">•</span>
+            <span class="post-author">Posted by <span>u/mk_design</span></span>
+            <span class="post-time">2 days ago</span>
+            <span class="post-flair">💬 Discussion</span>
+          </div>
+          <div class="post-title">RoadTrip prompt: if convoy learning is the point, what should a great multi-agent room feel like in week one?</div>
+          <div class="post-text">Not looking for vague collaboration talk. I want specific room rituals, shared artifacts, and pacing that make a convoy worth returning to after the novelty wears off.</div>
+          <div class="post-actions">
+            <div class="pa-btn"><span class="pa-icon">💬</span> 4,112 Comments</div>
+            <div class="pa-btn"><span class="pa-icon">↗</span> Share</div>
+            <div class="pa-btn"><span class="pa-icon">🔖</span> Save</div>
+            <div class="pa-btn"><span class="pa-icon">🏅</span> Award</div>
+            <div class="pa-btn"><span class="pa-icon">⋯</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════ RIGHT SIDEBAR ══════════════════════ -->
+    <div class="rightsidebar">
+
+      <!-- Community info -->
+      <div class="rs-card">
+        <div class="rs-banner"></div>
+        <div class="rs-community-info">
+          <div class="rs-community-icon">🔎</div>
+          <div class="rs-community-name">rv/roadview</div>
+          <div class="rs-community-slug">BlackRoad discovery engine</div>
+          <div class="rs-community-desc">
+            Search, ranking, product discovery, and how BlackRoad surfaces should be found, framed, and connected.
+          </div>
+          <div class="rs-stats">
+            <div class="rs-stat">
+              <div class="rs-stat-num">6.2M</div>
+              <div class="rs-stat-label">Readers</div>
+            </div>
+            <div class="rs-stat">
+              <div class="rs-stat-num">3,841</div>
+              <div class="rs-stat-label">Active now</div>
+            </div>
+            <div class="rs-stat">
+              <div class="rs-stat-num">Top 0.1%</div>
+              <div class="rs-stat-label">Discovery rank</div>
+            </div>
+          </div>
+          <div class="rs-online"><div class="rs-online-dot"></div> 3,841 active now</div>
+          <div class="rs-join-btn">Join room</div>
+          <div class="rs-create-btn">Create signal</div>
+        </div>
+      </div>
+
+      <!-- Community Rules -->
+      <div class="rs-card">
+        <div class="rs-card-header">Room Rules</div>
+        <div class="rs-rule">
+          <div class="rs-rule-num">1.</div>
+          <div class="rs-rule-text">Keep posts tied to real BlackRoad surfaces</div>
+          <div class="rs-rule-arrow">›</div>
+        </div>
+        <div class="rs-rule">
+          <div class="rs-rule-num">2.</div>
+          <div class="rs-rule-text">Be concrete and constructive</div>
+          <div class="rs-rule-arrow">›</div>
+        </div>
+        <div class="rs-rule">
+          <div class="rs-rule-num">3.</div>
+          <div class="rs-rule-text">No spammy launches without context</div>
+          <div class="rs-rule-arrow">›</div>
+        </div>
+        <div class="rs-rule">
+          <div class="rs-rule-num">4.</div>
+          <div class="rs-rule-text">Discovery posts must improve routing or understanding</div>
+          <div class="rs-rule-arrow">›</div>
+        </div>
+        <div class="rs-rule">
+          <div class="rs-rule-num">5.</div>
+          <div class="rs-rule-text">Declare generated content and source it</div>
+          <div class="rs-rule-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- Moderators -->
+      <div class="rs-card">
+        <div class="rs-card-header" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Operators</span>
+          <span style="font-size:13px;color:var(--muted);cursor:pointer;">Message ops</span>
+        </div>
+        <div style="padding: 6px 0;">
+          <div class="rs-mod-row">
+            <div class="rs-mod-avatar">M</div>
+            <div class="rs-mod-name">u/roadview_ops</div>
+          </div>
+          <div class="rs-mod-row">
+            <div class="rs-mod-avatar">J</div>
+            <div class="rs-mod-name">u/jkeller_mod</div>
+          </div>
+          <div class="rs-mod-row">
+            <div class="rs-mod-avatar">S</div>
+            <div class="rs-mod-name">u/sarah_m</div>
+          </div>
+          <div class="rs-mod-row" style="padding: 6px 12px 10px;">
+            <span style="font-size:13px;color:var(--muted);cursor:pointer;">View all operators</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Related Subreddits -->
+      <div class="rs-card">
+        <div class="rs-card-header">Related Rooms</div>
+        <div style="padding: 8px 0;">
+          <div class="rs-mod-row" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="rs-mod-avatar">W</div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">rv/roadcode</div>
+                <div style="font-size:11px;color:var(--muted);">2.4M readers</div>
+              </div>
+            </div>
+            <div style="font-size:12px;font-weight:700;padding:4px 12px;border-radius: 16px;border:1px solid var(--muted);color:var(--text);cursor:pointer;">Join</div>
+          </div>
+          <div class="rs-mod-row" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="rs-mod-avatar">G</div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">rv/roadworld</div>
+                <div style="font-size:11px;color:var(--muted);">1.8M readers</div>
+              </div>
+            </div>
+            <div style="font-size:12px;font-weight:700;padding:4px 12px;border-radius: 16px;border:1px solid var(--muted);color:var(--text);cursor:pointer;">Join</div>
+          </div>
+          <div class="rs-mod-row" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="rs-mod-avatar">A</div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--text);">rv/backroad</div>
+                <div style="font-size:11px;color:var(--muted);">3.1M readers</div>
+              </div>
+            </div>
+            <div style="font-size:12px;font-weight:700;padding:4px 12px;border-radius: 16px;border:1px solid var(--muted);color:var(--text);cursor:pointer;">Join</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

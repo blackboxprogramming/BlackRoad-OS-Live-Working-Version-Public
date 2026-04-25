@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RoundTrip — BlackRoad Agent Hub</title>
+<link rel="icon" href="https://images.blackroad.io/pixel-art/road-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--surface:#060606;--surface2:#0c0c0c;--border:#141414;--border2:#1a1a1a;--text:#e0e0e0;--text2:#888;--text3:#444;--pink:#FF1D6C;--amber:#F5A623;--blue:#2979FF;--violet:#9C27B0;--green:#4CAF50;--red:#F44336}
+html,body{width:100%;overflow:hidden}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;height:100dvh;display:flex}
+::selection{background:var(--pink);color:#000}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1a1a1a;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#333}
+
+/* ── SIDEBAR ── */
+.hamburger{display:none;background:none;border:none;color:var(--pink);font-size:22px;cursor:pointer;padding:4px 8px}
+.sidebar-overlay{display:none}
+.sidebar{width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px 16px 12px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--pink),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px}
+.sidebar-meta{display:flex;gap:12px;margin-top:8px;font-size:10px;font-family:'JetBrains Mono',monospace}
+.sidebar-meta span{color:var(--text3)}
+.sidebar-meta .online{color:var(--green)}
+.sidebar-close{display:none;background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;position:absolute;right:12px;top:16px}
+
+.sidebar-search{padding:8px 12px}
+.sidebar-search input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:12px;outline:none;font-family:'Space Grotesk',sans-serif;transition:border-color .2s}
+.sidebar-search input:focus{border-color:var(--pink)}
+.sidebar-search input::placeholder{color:var(--text3)}
+
+.agent-groups{flex:1;overflow-y:auto;padding:4px 8px 8px}
+.group-label{font-size:9px;text-transform:uppercase;color:var(--text3);padding:14px 8px 6px;letter-spacing:2px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+.group-label::before{content:'';width:8px;height:1px;background:var(--border2)}
+.group-label .count{margin-left:auto;font-size:8px;color:#222}
+.group-agents{overflow:hidden;transition:max-height .3s ease}
+.group-agents.collapsed{max-height:0!important}
+.agent-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:12px;width:100%;text-align:left;transition:all .15s;font-family:'Space Grotesk',sans-serif;position:relative}
+.agent-btn:hover{background:#0a0a0a;color:#aaa}
+.agent-btn.active{background:linear-gradient(135deg,#FF1D6C08,#F5A62308);color:var(--pink);border:1px solid #FF1D6C15}
+.agent-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;position:relative}
+.agent-dot.online::after{content:'';position:absolute;top:-1px;right:-1px;width:4px;height:4px;background:var(--green);border-radius:50%;border:1px solid var(--surface)}
+.agent-role{font-size:9px;color:#282828;margin-left:auto;font-family:'JetBrains Mono',monospace;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-typing{position:absolute;right:8px;top:50%;transform:translateY(-50%)}
+.typing-dots{display:flex;gap:2px}
+.typing-dots span{width:3px;height:3px;background:var(--pink);border-radius:50%;animation:typingBounce .8s infinite}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-4px)}}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.top-bar{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;gap:12px}
+.top-bar .agent-avatar{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;position:relative}
+.top-bar .agent-avatar .presence{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface)}
+.top-bar .info h2{font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.top-bar .info p{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.top-actions{margin-left:auto;display:flex;gap:6px}
+.top-actions button{background:var(--surface2);border:1px solid var(--border);color:var(--text3);padding:6px 14px;border-radius:8px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;transition:all .15s}
+.top-actions button:hover{color:var(--pink);border-color:#FF1D6C33;background:#FF1D6C08}
+
+/* ── CHANNELS ── */
+.channels{display:flex;gap:4px;padding:6px 20px;background:var(--bg);border-bottom:1px solid #0a0a0a;overflow-x:auto}
+.channels::-webkit-scrollbar{height:0}
+.ch-btn{background:none;border:1px solid transparent;color:var(--text3);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:11px;white-space:nowrap;transition:all .15s;font-family:'Space Grotesk',sans-serif}
+.ch-btn:hover{color:#aaa;background:#0a0a0a}
+.ch-btn.active{background:#FF1D6C0a;color:var(--pink);border-color:#FF1D6C22}
+.ch-btn .unread{display:inline-block;width:6px;height:6px;background:var(--pink);border-radius:50%;margin-left:4px;vertical-align:middle}
+
+/* ── MESSAGES ── */
+.messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.msg{display:flex;gap:10px;padding:8px 12px;border-radius:10px;transition:background .15s;position:relative;animation:msgIn .25s ease}
+.msg:hover{background:#ffffff03}
+.msg:hover .msg-actions{opacity:1}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.msg-avatar{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:transform .15s}
+.msg-avatar:hover{transform:scale(1.1)}
+.msg-body{flex:1;min-width:0}
+.msg-header{display:flex;align-items:baseline;gap:8px}
+.msg-name{font-size:12px;font-weight:600;cursor:pointer}
+.msg-name:hover{text-decoration:underline}
+.msg-badge{font-size:8px;padding:1px 5px;border-radius:4px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.5px}
+.msg-time{font-size:9px;color:#1a1a1a;font-family:'JetBrains Mono',monospace}
+.msg-text{font-size:13.5px;line-height:1.65;margin-top:3px;color:#ccc;word-break:break-word}
+.msg-text b{color:var(--pink);font-weight:600}
+.msg-text code{background:#111;padding:1px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--amber)}
+.msg-text pre{background:#080808;border:1px solid var(--border);border-radius:8px;padding:12px;margin:8px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.5}
+.msg-user .msg-name{color:var(--amber)!important}
+
+/* Message actions (reply, react) */
+.msg-actions{position:absolute;right:8px;top:6px;display:flex;gap:2px;opacity:0;transition:opacity .15s}
+.msg-actions button{background:var(--surface2);border:1px solid var(--border);color:var(--text3);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.msg-actions button:hover{color:var(--pink);border-color:#FF1D6C33}
+
+/* Thread indicator */
+.msg-thread{display:flex;align-items:center;gap:6px;margin-top:6px;padding:4px 8px;background:#0a0a0a;border-radius:6px;cursor:pointer;font-size:11px;color:var(--text3);border:1px solid transparent;transition:all .15s;width:fit-content}
+.msg-thread:hover{border-color:var(--border);color:#aaa}
+.msg-thread .thread-avatars{display:flex}
+.msg-thread .thread-avatars span{width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;margin-right:-4px;border:1px solid var(--bg)}
+.msg-thread .thread-count{font-family:'JetBrains Mono',monospace;color:var(--blue)}
+
+/* Reply context */
+.reply-bar{display:flex;align-items:center;gap:8px;padding:8px 20px;background:var(--surface);border-top:1px solid var(--border);font-size:12px;color:var(--text2);animation:slideUp .15s ease}
+.reply-bar .reply-line{width:3px;height:20px;border-radius:2px;flex-shrink:0}
+.reply-bar .reply-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.reply-bar button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 6px}
+.reply-bar button:hover{color:var(--text)}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Typing indicator in chat */
+.typing-indicator{padding:4px 12px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:6px;min-height:24px}
+.typing-indicator .dots{display:flex;gap:3px}
+.typing-indicator .dots span{width:4px;height:4px;background:var(--text3);border-radius:50%;animation:typingBounce 1s infinite}
+.typing-indicator .dots span:nth-child(2){animation-delay:.2s}
+.typing-indicator .dots span:nth-child(3){animation-delay:.4s}
+
+/* Streaming text cursor */
+.streaming::after{content:'';display:inline-block;width:2px;height:14px;background:var(--pink);margin-left:2px;animation:blink .6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── VOICE ── */
+.voice-area{padding:10px 20px;display:flex;align-items:center;justify-content:center;gap:14px;border-top:1px solid var(--border);background:var(--surface)}
+.voice-btn{width:48px;height:48px;border-radius:50%;border:2px solid #FF1D6C44;background:transparent;color:var(--pink);font-size:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.voice-btn:hover{background:#FF1D6C11;border-color:var(--pink);transform:scale(1.05)}
+.voice-btn.recording{background:var(--pink);color:#000;animation:pulse-ring 1.5s infinite;border-color:var(--pink)}
+@keyframes pulse-ring{0%,100%{box-shadow:0 0 0 0 #FF1D6C55}50%{box-shadow:0 0 0 12px transparent}}
+.voice-status{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:80px;text-align:center}
+
+/* ── INPUT ── */
+.input-area{padding:10px 20px 14px;display:flex;gap:8px;background:var(--surface);align-items:flex-end}
+.input-wrap{flex:1;position:relative}
+.input-wrap textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:12px;font-size:14px;outline:none;font-family:'Space Grotesk',sans-serif;transition:border-color .2s;resize:none;min-height:42px;max-height:120px;line-height:1.4}
+.input-wrap textarea:focus{border-color:#FF1D6C44}
+.input-wrap textarea::placeholder{color:var(--text3)}
+.send-btn{background:linear-gradient(135deg,var(--pink),var(--amber));color:#000;border:none;width:42px;height:42px;border-radius:12px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.send-btn:hover{opacity:.9;transform:scale(1.03)}
+.send-btn:disabled{opacity:.2;transform:none}
+.send-btn svg{width:18px;height:18px}
+
+/* ── FLEET BAR ── */
+.fleet-bar{padding:6px 20px;background:var(--bg);border-top:1px solid #0a0a0a;display:flex;gap:14px;font-size:9px;color:#1a1a1a;overflow-x:auto;font-family:'JetBrains Mono',monospace;align-items:center}
+.fleet-bar::-webkit-scrollbar{height:0}
+.fleet-node{display:flex;align-items:center;gap:4px;cursor:pointer;transition:color .15s}
+.fleet-node:hover{color:var(--text3)}
+.fleet-dot{width:5px;height:5px;border-radius:50%}
+
+/* ── THREAD PANEL ── */
+.thread-panel{position:absolute;right:0;top:0;bottom:0;width:380px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:10;animation:slideLeft .2s ease}
+@keyframes slideLeft{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.thread-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.thread-header h3{font-size:14px;font-weight:600}
+.thread-header button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px}
+.thread-messages{flex:1;overflow-y:auto;padding:12px}
+
+/* ── AGENT DETAIL ── */
+.agent-detail{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;width:320px;z-index:200;animation:popIn .2s ease}
+.agent-detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:199}
+@keyframes popIn{from{opacity:0;transform:translate(-50%,-50%) scale(.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.agent-detail .avatar{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px}
+.agent-detail h3{text-align:center;font-size:16px}
+.agent-detail .role{text-align:center;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:4px}
+.agent-detail .persona{margin-top:12px;font-size:12px;color:var(--text2);line-height:1.6;padding:12px;background:var(--surface2);border-radius:8px}
+.agent-detail .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.agent-detail .stat{text-align:center;padding:8px;background:var(--surface2);border-radius:8px}
+.agent-detail .stat .val{font-size:14px;font-weight:600;color:var(--text)}
+.agent-detail .stat .lbl{font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:2px}
+
+/* ── CONNECTION STATUS ── */
+.conn-status{position:fixed;top:12px;right:12px;padding:4px 10px;border-radius:6px;font-size:9px;font-family:'JetBrains Mono',monospace;z-index:100;transition:all .3s}
+.conn-status.connected{background:#4CAF5022;color:var(--green);border:1px solid #4CAF5044}
+.conn-status.disconnected{background:#F4433622;color:var(--red);border:1px solid #F4433644}
+.conn-status.connecting{background:#FF980022;color:var(--amber);border:1px solid #FF980044}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .hamburger{display:block}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;width:300px;z-index:100;transform:translateX(-100%);transition:transform .25s ease}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-close{display:block}
+  .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;backdrop-filter:blur(4px)}
+  .sidebar-overlay.show{display:block}
+  .messages{padding:12px}
+  .msg{padding:6px 8px}
+  .voice-btn{width:44px;height:44px;font-size:18px}
+  .thread-panel{width:100%}
+  .top-bar{padding:10px 14px}
+  .input-area{padding:8px 14px 12px}
+  .channels{padding:6px 14px}
+}
+</style>
+</head>
+<body>
+
+<div class="conn-status connecting" id="connStatus">connecting</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div>
+      <h1>RoundTrip</h1>
+      <div class="sidebar-meta">
+        <span id="agentCount">0 agents</span>
+        <span class="online" id="onlineCount">0 online</span>
+      </div>
+    </div>
+    <button class="sidebar-close" onclick="closeSidebar()">&times;</button>
+  </div>
+  <div class="sidebar-search">
+    <input type="text" id="agentSearch" placeholder="search agents..." oninput="filterAgents(this.value)">
+  </div>
+  <div class="agent-groups" id="agentList"></div>
+</div>
+
+<div class="main" style="position:relative">
+  <div class="top-bar" id="chatHeader">
+    <button class="hamburger" onclick="openSidebar()">&#9776;</button>
+    <div class="agent-avatar" id="headerAvatar" style="background:#FF1D6C11" onclick="showAgentDetail(currentAgent)">
+      <span id="headerEmoji">&#x1F6E3;&#xFE0F;</span>
+      <span class="presence" id="headerPresence" style="background:var(--green)"></span>
+    </div>
+    <div class="info">
+      <h2><span id="headerName">General</span></h2>
+      <p id="headerRole">voice + chat</p>
+    </div>
+    <div class="top-actions">
+      <button onclick="groupChat()">group</button>
+      <button onclick="searchMessages()">search</button>
+      <button onclick="loadFleet()">fleet</button>
+    </div>
+  </div>
+
+  <div class="channels" id="channels"></div>
+  <div class="messages" id="messages"></div>
+  <div class="typing-indicator" id="typingIndicator"></div>
+
+  <div id="replyBar"></div>
+
+  <div class="voice-area">
+    <span class="voice-status" id="voiceStatus">tap to talk</span>
+    <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()">&#x1F3A4;</button>
+    <span class="voice-status" id="voiceAgent"></span>
+  </div>
+
+  <div class="input-area">
+    <div class="input-wrap">
+      <textarea id="input" rows="1" placeholder="message..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="send()" title="Send (Enter)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+
+  <div class="fleet-bar" id="fleetBar"></div>
+</div>
+
+<script>
+// ── STATE ──
+let currentAgent = 'road', currentChannel = 'general', agents = [], agentsMap = {};
+let recognition = null, isRecording = false, speaking = false;
+let replyTo = null, typingAgents = new Set(), ws = null, wsRetries = 0;
+let onlineAgents = new Set(), messageCache = new Map();
+
+// ── WEBSOCKET ──
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  const url = `${proto}://${location.host}/ws`;
+  updateConnStatus('connecting');
+
+  try {
+    ws = new WebSocket(url);
+  } catch {
+    updateConnStatus('disconnected');
+    scheduleReconnect();
+    return;
+  }
+
+  ws.onopen = () => {
+    updateConnStatus('connected');
+    wsRetries = 0;
+    ws.send(JSON.stringify({ type: 'join', channel: currentChannel }));
+  };
+
+  ws.onmessage = (e) => {
+    try {
+      const data = JSON.parse(e.data);
+      handleWSMessage(data);
+    } catch {}
+  };
+
+  ws.onclose = () => {
+    updateConnStatus('disconnected');
+    scheduleReconnect();
+  };
+
+  ws.onerror = () => {};
+}
+
+function scheduleReconnect() {
+  const delay = Math.min(1000 * Math.pow(2, wsRetries), 30000);
+  wsRetries++;
+  setTimeout(connectWS, delay);
+}
+
+function updateConnStatus(state) {
+  const el = document.getElementById('connStatus');
+  el.className = 'conn-status ' + state;
+  el.textContent = state === 'connected' ? 'live' : state === 'connecting' ? 'connecting' : 'offline';
+  if (state === 'connected') setTimeout(() => el.style.opacity = '0', 2000);
+  else el.style.opacity = '1';
+}
+
+function handleWSMessage(data) {
+  switch (data.type) {
+    case 'message':
+      if (data.channel === currentChannel || data.channel === currentAgent) {
+        appendMessage(data);
+      }
+      break;
+    case 'typing':
+      if (data.agent !== '_user') showTyping(data.agent);
+      break;
+    case 'stop_typing':
+      hideTyping(data.agent);
+      break;
+    case 'presence':
+      if (data.online) onlineAgents.add(data.agent);
+      else onlineAgents.delete(data.agent);
+      updatePresenceDots();
+      break;
+    case 'stream_start':
+      startStreaming(data);
+      break;
+    case 'stream_chunk':
+      appendStreamChunk(data);
+      break;
+    case 'stream_end':
+      endStreaming(data);
+      break;
+  }
+}
+
+function wsSend(data) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(data));
+}
+
+// ── TYPING ──
+let typingTimeout = null;
+function emitTyping() {
+  wsSend({ type: 'typing', agent: '_user', channel: currentChannel });
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => wsSend({ type: 'stop_typing', agent: '_user', channel: currentChannel }), 2000);
+}
+
+function showTyping(agentId) {
+  typingAgents.add(agentId);
+  renderTypingIndicator();
+  // Auto-hide after 5s
+  setTimeout(() => { typingAgents.delete(agentId); renderTypingIndicator(); }, 5000);
+}
+
+function hideTyping(agentId) {
+  typingAgents.delete(agentId);
+  renderTypingIndicator();
+}
+
+function renderTypingIndicator() {
+  const el = document.getElementById('typingIndicator');
+  if (typingAgents.size === 0) { el.innerHTML = ''; return; }
+  const names = [...typingAgents].map(id => agentsMap[id]?.name || id).slice(0, 3);
+  const text = names.length === 1 ? `${names[0]} is typing` : `${names.join(', ')} are typing`;
+  el.innerHTML = `${text} <span class="dots"><span></span><span></span><span></span></span>`;
+}
+
+// ── STREAMING ──
+let streamingMsgEl = null, streamingText = '';
+
+function startStreaming(data) {
+  streamingText = '';
+  const a = agentsMap[data.agent] || { name: data.agent, emoji: '?', color: '#888' };
+  hideTyping(data.agent);
+  const el = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'stream-' + (data.id || 'current');
+  div.innerHTML = `<div class="msg-avatar" style="background:${a.color}11">${a.emoji}</div>
+    <div class="msg-body"><div class="msg-header">
+      <span class="msg-name" style="color:${a.color}" onclick="showAgentDetail('${data.agent}')">${a.name}</span>
+      <span class="msg-badge" style="background:${a.color}15;color:${a.color}">${a.role || ''}</span>
+      <span class="msg-time">${timeStr()}</span>
+    </div><div class="msg-text streaming"></div></div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  streamingMsgEl = div.querySelector('.msg-text');
+}
+
+function appendStreamChunk(data) {
+  if (!streamingMsgEl) startStreaming(data);
+  streamingText += data.chunk;
+  streamingMsgEl.innerHTML = renderMarkdown(streamingText);
+  streamingMsgEl.classList.add('streaming');
+  document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function endStreaming(data) {
+  if (streamingMsgEl) {
+    streamingMsgEl.classList.remove('streaming');
+    streamingMsgEl.innerHTML = renderMarkdown(streamingText);
+  }
+  streamingMsgEl = null;
+  streamingText = '';
+}
+
+// ── PRESENCE ──
+function updatePresenceDots() {
+  document.querySelectorAll('.agent-dot').forEach(dot => {
+    const id = dot.dataset.agent;
+    if (id && onlineAgents.has(id)) dot.classList.add('online');
+    else dot.classList.remove('online');
+  });
+  document.getElementById('onlineCount').textContent = onlineAgents.size + ' online';
+}
+
+// ── INIT ──
+fetch('/api/agents').then(r => r.json()).then(d => {
+  agents = d;
+  agents.forEach(a => agentsMap[a.id] = a);
+  document.getElementById('agentCount').textContent = agents.length + ' agents';
+  buildSidebar();
+}).catch(() => {});
+
+fetch('/api/channels').then(r => r.json()).then(buildChannels).catch(() => {});
+
+function buildSidebar() {
+  const list = document.getElementById('agentList');
+  const grouped = {};
+  agents.forEach(a => { (grouped[a.group] = grouped[a.group] || []).push(a); });
+  list.innerHTML = '';
+  for (const [gid, items] of Object.entries(grouped)) {
+    const label = document.createElement('div');
+    label.className = 'group-label';
+    label.innerHTML = `${gid.toUpperCase()} <span class="count">${items.length}</span>`;
+    label.onclick = () => {
+      const container = label.nextElementSibling;
+      container.classList.toggle('collapsed');
+    };
+    list.appendChild(label);
+
+    const container = document.createElement('div');
+    container.className = 'group-agents';
+    container.style.maxHeight = items.length * 36 + 'px';
+    items.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'agent-btn';
+      btn.id = 'btn-' + a.id;
+      btn.innerHTML = `<span class="agent-dot" data-agent="${a.id}" style="background:${a.color}"></span>${a.emoji} ${a.name}<span class="agent-role">${a.role}</span>`;
+      btn.onclick = () => selectAgent(a.id);
+      container.appendChild(btn);
+    });
+    list.appendChild(container);
+  }
+}
+
+function filterAgents(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.agent-btn').forEach(btn => {
+    btn.style.display = btn.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.group-label').forEach(label => {
+    const container = label.nextElementSibling;
+    if (!container) return;
+    const visible = container.querySelectorAll('.agent-btn:not([style*="display: none"])').length;
+    label.style.display = visible ? '' : 'none';
+  });
+}
+
+function buildChannels(chs) {
+  const bar = document.getElementById('channels');
+  bar.innerHTML = '';
+  const channels = chs || [
+    { id: 'general', name: 'General' }, { id: 'fleet', name: 'Fleet' },
+    { id: 'security', name: 'Security' }, { id: 'creative', name: 'Creative' },
+    { id: 'ops', name: 'Ops' }, { id: 'research', name: 'Research' },
+    { id: 'iot', name: 'IoT' }, { id: 'ceo', name: 'CEO' },
+  ];
+  channels.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'ch-btn' + (ch.id === 'general' ? ' active' : '');
+    btn.textContent = ch.name;
+    btn.id = 'ch-' + ch.id;
+    btn.onclick = () => {
+      currentChannel = ch.id;
+      document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadMessages();
+      wsSend({ type: 'join', channel: ch.id });
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function openSidebar() { document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('show'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('show'); }
+
+function selectAgent(id) {
+  currentAgent = id;
+  const a = agentsMap[id];
+  if (!a) return;
+  document.querySelectorAll('.agent-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('btn-' + id);
+  if (btn) btn.classList.add('active');
+  document.getElementById('headerEmoji').textContent = a.emoji;
+  document.getElementById('headerName').textContent = a.name;
+  document.getElementById('headerRole').textContent = a.role + (a.ip ? ' | ' + a.ip : '');
+  document.getElementById('headerAvatar').style.background = a.color + '11';
+  document.getElementById('headerPresence').style.background = onlineAgents.has(id) ? 'var(--green)' : 'var(--text3)';
+  currentChannel = id;
+  closeSidebar();
+  loadMessages();
+  wsSend({ type: 'join', channel: id });
+}
+
+// ── MARKDOWN RENDERER ──
+function renderMarkdown(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre>$2</pre>')
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br>');
+}
+
+function timeStr(d) {
+  return (d ? new Date(d) : new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── MESSAGES ──
+function appendMessage(data) {
+  const el = document.getElementById('messages');
+  const isUser = data.agent_id === '_user' || data.agentId === '_user';
+  const a = isUser ? { name: 'You', emoji: '&#x1F4AC;', color: '#F5A623', role: '' } :
+    (agentsMap[data.agent_id || data.agentId] || { name: data.name || 'Agent', emoji: data.emoji || '?', color: data.color || '#888', role: '' });
+  const id = data.agent_id || data.agentId || '';
+  const text = data.text || data.reply || '';
+  const msgId = data.id || 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+
+  const div = document.createElement('div');
+  div.className = 'msg' + (isUser ? ' msg-user' : '');
+  div.dataset.id = msgId;
+  div.dataset.agent = id;
+
+  const replyHtml = data.replyTo ? `<div class="msg-thread" style="margin-bottom:4px;cursor:default">
+    <span style="color:var(--text3);font-size:10px">replying to</span>
+    <span style="color:${agentsMap[data.replyTo.agent]?.color || '#888'};font-size:10px">${agentsMap[data.replyTo.agent]?.name || data.replyTo.agent}</span>
+  </div>` : '';
+
+  div.innerHTML = `<div class="msg-avatar" style="background:${isUser ? '#111' : a.color + '11'}" onclick="showAgentDetail('${id}')">${a.emoji}</div>
+    <div class="msg-body">
+      ${replyHtml}
+      <div class="msg-header">
+        <span class="msg-name" style="color:${a.color}" onclick="showAgentDetail('${id}')">${a.name}</span>
+        ${!isUser && a.role ? `<span class="msg-badge" style="background:${a.color}15;color:${a.color}">${a.role}</span>` : ''}
+        <span class="msg-time">${timeStr(data.time || data.created_at)}</span>
+      </div>
+      <div class="msg-text">${renderMarkdown(text)}</div>
+    </div>
+    <div class="msg-actions">
+      <button onclick="setReply('${msgId}','${id}',${JSON.stringify(text.slice(0, 60)).replace(/'/g, "\\'")})" title="Reply">&#8617;</button>
+    </div>`;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function addMessage(agentId, name, emoji, color, text) {
+  appendMessage({ agent_id: agentId, name, emoji, color, text });
+}
+
+// ── REPLY ──
+function setReply(msgId, agentId, preview) {
+  replyTo = { id: msgId, agent: agentId };
+  const a = agentsMap[agentId] || { name: agentId, color: '#888' };
+  document.getElementById('replyBar').innerHTML = `<div class="reply-bar">
+    <div class="reply-line" style="background:${a.color}"></div>
+    <span>Replying to <b style="color:${a.color}">${a.name}</b></span>
+    <span class="reply-text">${preview}</span>
+    <button onclick="cancelReply()">&times;</button>
+  </div>`;
+  document.getElementById('input').focus();
+}
+
+function cancelReply() {
+  replyTo = null;
+  document.getElementById('replyBar').innerHTML = '';
+}
+
+// ── SEND ──
+async function send() {
+  const input = document.getElementById('input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+
+  appendMessage({ agent_id: '_user', text: msg, replyTo });
+
+  try {
+    const body = { agent: currentAgent, message: msg, channel: currentChannel, stream: true };
+    if (replyTo) body.replyTo = replyTo;
+    cancelReply();
+
+    // Try streaming first
+    const res = await fetch('/api/chat/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    if (res.ok && res.headers.get('content-type')?.includes('text/event-stream')) {
+      // SSE streaming
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      const a = agentsMap[currentAgent] || { name: 'Agent', emoji: '?', color: '#888', role: '' };
+      let fullText = '';
+      let started = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const payload = line.slice(6);
+            if (payload === '[DONE]') {
+              endStreaming({});
+              continue;
+            }
+            try {
+              const d = JSON.parse(payload);
+              if (!started) { startStreaming({ agent: currentAgent, id: 'stream-' + Date.now() }); started = true; }
+              if (d.chunk) appendStreamChunk({ chunk: d.chunk });
+              if (d.done) endStreaming({});
+            } catch {}
+          }
+        }
+      }
+      if (started) speakText(streamingText || fullText);
+    } else {
+      // Fallback to regular response
+      const data = await res.json();
+      const a = agentsMap[currentAgent];
+      appendMessage({ agent_id: currentAgent, text: data.reply });
+      speakText(data.reply);
+    }
+  } catch (e) {
+    // Fallback to non-streaming
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent: currentAgent, message: msg, channel: currentChannel }),
+      });
+      const data = await res.json();
+      appendMessage({ agent_id: currentAgent, text: data.reply });
+      speakText(data.reply);
+    } catch (e2) {
+      appendMessage({ agent_id: '_system', name: 'System', emoji: '&#x26A0;', color: '#F44336', text: 'Error: ' + e2.message });
+    }
+  }
+  document.getElementById('sendBtn').disabled = false;
+  input.focus();
+}
+
+async function loadMessages() {
+  const el = document.getElementById('messages');
+  el.innerHTML = '';
+  try {
+    const res = await fetch('/api/messages?channel=' + currentChannel + '&limit=40');
+    const msgs = await res.json();
+    for (const m of msgs) appendMessage(m);
+  } catch {}
+}
+
+// ── GROUP CHAT ──
+async function groupChat() {
+  const topic = prompt('Topic for group discussion:');
+  if (!topic) return;
+  document.getElementById('sendBtn').disabled = true;
+  appendMessage({ agent_id: '_user', text: topic });
+  try {
+    const res = await fetch('/api/group-chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic, agents: ['alice', 'cipher', 'octavia', 'athena'], channel: currentChannel }),
+    });
+    const data = await res.json();
+    for (const t of (data.transcript || [])) {
+      appendMessage({ agent_id: t.id, name: t.name, emoji: t.emoji, color: t.color, text: t.reply });
+    }
+  } catch (e) {
+    appendMessage({ agent_id: '_system', name: 'System', emoji: '&#x26A0;', color: '#F44336', text: 'Error: ' + e.message });
+  }
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// ── FLEET ──
+async function loadFleet() {
+  try {
+    const res = await fetch('/api/fleet');
+    const fleet = await res.json();
+    const bar = document.getElementById('fleetBar');
+    bar.innerHTML = (fleet.nodes || []).map(n =>
+      `<span class="fleet-node" onclick="selectAgent('${n.id || n.name.toLowerCase()}')">
+        <span class="fleet-dot" style="background:${n.status === 'online' ? 'var(--green)' : 'var(--red)'}"></span>${n.name}
+      </span>`
+    ).join('');
+  } catch { document.getElementById('fleetBar').textContent = 'fleet unreachable'; }
+}
+
+// ── SEARCH ──
+function searchMessages() {
+  const query = prompt('Search messages:');
+  if (!query) return;
+  const msgs = document.querySelectorAll('.msg');
+  let found = 0;
+  msgs.forEach(m => {
+    const text = m.querySelector('.msg-text')?.textContent || '';
+    if (text.toLowerCase().includes(query.toLowerCase())) {
+      m.style.background = '#FF1D6C08';
+      m.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      found++;
+    } else {
+      m.style.background = '';
+    }
+  });
+  if (!found) appendMessage({ agent_id: '_system', name: 'System', emoji: '&#x1F50D;', color: '#888', text: `No results for "${query}"` });
+}
+
+// ── AGENT DETAIL ──
+function showAgentDetail(id) {
+  if (id === '_user' || id === '_system' || !agentsMap[id]) return;
+  const a = agentsMap[id];
+  const overlay = document.createElement('div');
+  overlay.className = 'agent-detail-overlay';
+  overlay.onclick = () => { overlay.remove(); detail.remove(); };
+  document.body.appendChild(overlay);
+
+  const detail = document.createElement('div');
+  detail.className = 'agent-detail';
+  detail.innerHTML = `
+    <div class="avatar" style="background:${a.color}11">${a.emoji}</div>
+    <h3 style="color:${a.color}">${a.name}</h3>
+    <div class="role">${a.role}${a.ip ? ' | ' + a.ip : ''}</div>
+    <div class="persona">${a.persona || 'No persona defined.'}</div>
+    <div class="stats">
+      <div class="stat"><div class="val">${a.group}</div><div class="lbl">GROUP</div></div>
+      <div class="stat"><div class="val">${onlineAgents.has(id) ? 'ONLINE' : 'IDLE'}</div><div class="lbl">STATUS</div></div>
+      <div class="stat"><div class="val">${a.model || 'n/a'}</div><div class="lbl">MODEL</div></div>
+      <div class="stat"><div class="val">${a.ip || 'virtual'}</div><div class="lbl">ADDR</div></div>
+    </div>`;
+  document.body.appendChild(detail);
+}
+
+// ── VOICE ──
+function toggleVoice() {
+  if (isRecording) { stopRecording(); return; }
+  if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+    document.getElementById('voiceStatus').textContent = 'no mic';
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('voiceBtn').classList.add('recording');
+    document.getElementById('voiceStatus').textContent = 'listening...';
+  };
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) transcript += e.results[i][0].transcript;
+    document.getElementById('input').value = transcript;
+    if (e.results[e.results.length - 1].isFinal) {
+      document.getElementById('voiceStatus').textContent = 'sending...';
+      stopRecording();
+      send();
+    }
+  };
+  recognition.onerror = (e) => { document.getElementById('voiceStatus').textContent = 'error'; stopRecording(); };
+  recognition.onend = () => stopRecording();
+  recognition.start();
+}
+
+function stopRecording() {
+  isRecording = false;
+  document.getElementById('voiceBtn').classList.remove('recording');
+  document.getElementById('voiceStatus').textContent = 'tap to talk';
+  if (recognition) try { recognition.stop(); } catch {}
+}
+
+function speakText(text) {
+  if (!('speechSynthesis' in window) || speaking) return;
+  const clean = text.replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').replace(/```[\s\S]*?```/g, '').trim();
+  if (!clean || clean.length < 3) return;
+  speaking = true;
+  const a = agentsMap[currentAgent];
+  document.getElementById('voiceAgent').textContent = (a?.name || 'agent') + ' speaking';
+  const u = new SpeechSynthesisUtterance(clean.slice(0, 300));
+  u.rate = 1.05;
+  u.pitch = 1;
+  u.onend = () => { speaking = false; document.getElementById('voiceAgent').textContent = ''; };
+  u.onerror = () => { speaking = false; document.getElementById('voiceAgent').textContent = ''; };
+  speechSynthesis.speak(u);
+}
+
+// ── INPUT HANDLING ──
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  else emitTyping();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+// ── INIT ──
+loadFleet();
+loadMessages();
+connectWS();
+setInterval(loadFleet, 30000);
+// Fallback polling if WS not available
+setInterval(() => {
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    fetch('/api/messages?channel=' + currentChannel + '&limit=50').then(r => r.json()).then(msgs => {
+      const el = document.getElementById('messages');
+      if (el.children.length !== msgs.length) { el.innerHTML = ''; for (const m of msgs) appendMessage(m); }
+    }).catch(() => {});
+  }
+}, 10000);
+</script>
+</body>
+</html>

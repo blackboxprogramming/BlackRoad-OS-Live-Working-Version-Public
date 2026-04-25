@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WireGuard Mesh — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.io/fleet.js" defer></script>
+  <script src="https://blackroad.io/search.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="WireGuard Mesh — Encrypted point-to-point tunnels connecting every node. Anastasia as hub. 10.8.0.x address space.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #4488FF; --accent-dim: rgba(68,136,255,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(68,136,255,0.18) 0%, rgba(68,136,255,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .topo-diagram {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-xl); margin-top: var(--sp-md);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      max-width: 520px;
+    }
+    .topo-hub {
+      color: var(--accent); font-weight: 700; font-size: 0.9rem;
+      margin-bottom: var(--sp-sm);
+    }
+    .topo-peer {
+      display: flex; align-items: center; gap: var(--sp-sm);
+      padding: 4px 0; color: var(--subtle); font-size: 0.78rem;
+    }
+    .topo-arrow { color: var(--accent); }
+    .topo-ip { color: var(--muted); }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Network Layer</div>
+    <div class="concept-title">WireGuard Mesh</div>
+    <div class="concept-summary">
+      Encrypted point-to-point tunnels connecting every node. Anastasia as hub. 10.8.0.x address space. All traffic encrypted, always.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Topology</div>
+    <p>
+      Hub-and-spoke architecture with Anastasia at center. Every peer maintains an encrypted tunnel to the hub. All inter-node traffic routes through WireGuard.
+    </p>
+    <div class="topo-diagram">
+      <div class="topo-hub">Anastasia (10.8.0.1) &mdash; Hub</div>
+      <div class="topo-peer"><span class="topo-arrow">&larr;&rarr;</span> Alice <span class="topo-ip">10.8.0.6</span></div>
+      <div class="topo-peer"><span class="topo-arrow">&larr;&rarr;</span> Cecilia <span class="topo-ip">10.8.0.3</span></div>
+      <div class="topo-peer"><span class="topo-arrow">&larr;&rarr;</span> Octavia <span class="topo-ip">10.8.0.4</span></div>
+      <div class="topo-peer"><span class="topo-arrow">&larr;&rarr;</span> Aria <span class="topo-ip">10.8.0.7</span></div>
+      <div class="topo-peer"><span class="topo-arrow">&larr;&rarr;</span> Gematria <span class="topo-ip">10.8.0.8</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Why WireGuard</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Speed</div>
+        <div class="card-body">Kernel-level implementation. ~2ms latency between nodes. No userspace overhead. Faster than OpenVPN or IPsec by an order of magnitude.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Security</div>
+        <div class="card-body">ChaCha20-Poly1305 encryption. Curve25519 key exchange. Minimal attack surface &mdash; ~4,000 lines of code vs 100,000+ for OpenVPN.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Simplicity</div>
+        <div class="card-body">Single config file per peer. No certificate authority. No complex PKI. Add a peer in 30 seconds. Remove one in 10.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Failover</div>
+    <p>
+      If Anastasia goes down, RoadNet WiFi mesh provides backup connectivity between local Pi nodes. 5 access points across the fleet create a local mesh network. Tailscale overlay serves as the secondary fallback &mdash; every node has Tailscale installed and connected.
+    </p>
+    <p style="margin-top:var(--sp-sm);">
+      Three layers of connectivity. WireGuard is primary. RoadNet is local backup. Tailscale is the last resort. The fleet stays connected.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Routes</div>
+    <p>
+      10.8.0.x routes to Alexa's Mac (.28). Fleet nodes can reach each other even across different physical networks. A node in NYC (Anastasia) can talk to a node in the living room (Alice) as if they were on the same switch.
+    </p>
+    <div class="card-grid" style="margin-top:var(--sp-md);">
+      <div class="card">
+        <div class="card-title">Local &rarr; Local</div>
+        <div class="card-body">Pi nodes on 192.168.4.x talk directly via LAN. WireGuard adds encryption. RoadNet adds WiFi mesh redundancy.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Local &rarr; Remote</div>
+        <div class="card-body">Pi nodes reach Anastasia and Gematria (DigitalOcean) through WireGuard tunnels. NAT traversal handled automatically.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Remote &rarr; Local</div>
+        <div class="card-body">Droplets reach Pi nodes through the hub. Anastasia routes traffic to the correct peer. No exposed ports on home network.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <div class="section-label">Connected Agents</div>
+    <div class="conn-grid">
+      <a href="../../agents/anastasia/" class="conn-card"><span class="conn-dot" style="background:#FF2255;"></span> ANASTASIA</a>
+      <a href="../../agents/atlas/" class="conn-card"><span class="conn-dot" style="background:#4488FF;"></span> ATLAS</a>
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#00D4FF;"></span> ALICE</a>
+      <a href="../../agents/gematria/" class="conn-card"><span class="conn-dot" style="background:#888;"></span> GEMATRIA</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Anastasia is the WireGuard hub. Atlas maps the topology. Alice is the local gateway. Gematria is the edge node.
+    </p>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>WireGuard Mesh &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

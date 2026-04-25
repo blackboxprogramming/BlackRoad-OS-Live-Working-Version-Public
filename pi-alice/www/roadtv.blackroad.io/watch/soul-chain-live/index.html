@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soul Chain Live — Road TV</title>
+  <meta name="description" content="Watch the soul chain append blocks in real time. Memory commits, agent verifications, and truth state updates visualized as a living chain.">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .back-nav a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
+    }
+    .back-nav a:hover { color: #fff; }
+    .back-nav .title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      font-weight: 700; color: #fff;
+    }
+
+    .chain-container {
+      position: fixed; inset: 0;
+      background: #000;
+      display: flex; align-items: center;
+      overflow: hidden;
+      padding-top: 56px; padding-bottom: 80px;
+    }
+
+    .chain-track {
+      display: flex; align-items: center; gap: 0;
+      padding: 0 60px;
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .block {
+      flex-shrink: 0;
+      width: 200px; height: 130px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 16px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      opacity: 0; transform: translateX(80px);
+      animation: blockIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      position: relative;
+    }
+    @keyframes blockIn {
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .block-number {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      color: rgba(255,255,255,0.3); letter-spacing: 0.1em;
+    }
+    .block-type {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+      font-weight: 600; color: #fff;
+    }
+    .block-hash {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      color: rgba(255,255,255,0.35);
+      word-break: break-all;
+    }
+    .block-time {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+      color: rgba(255,255,255,0.2);
+    }
+
+    .chain-link {
+      flex-shrink: 0;
+      width: 40px; height: 2px;
+      background: rgba(255,255,255,0.08);
+      position: relative;
+    }
+    .chain-link::after {
+      content: '';
+      position: absolute; right: -3px; top: -3px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .block-counter {
+      position: fixed; top: 70px; right: 24px; z-index: 100;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.4);
+    }
+    .block-counter span {
+      font-size: 1.8rem; font-weight: 700; color: #fff;
+      display: block; line-height: 1;
+      background: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .info-panel {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .info-panel h2 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .info-panel p {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.45); line-height: 1.5;
+    }
+  </style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<script src="https://blackroad.io/fleet.js" defer></script>
+<script src="https://blackroad.io/search.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+</head>
+<body>
+
+  <div class="back-nav">
+    <a href="../../">&larr; Road TV</a>
+    <span class="title">Soul Chain Live</span>
+    <span></span>
+  </div>
+
+  <div class="block-counter">
+    blocks<br>
+    <span id="counter">0</span>
+  </div>
+
+  <div class="chain-container">
+    <div class="chain-track" id="chain-track"></div>
+  </div>
+
+  <div class="info-panel">
+    <h2>Soul Chain Live</h2>
+    <p>Soul chain blocks append every 3 seconds. Each block carries a hash, event type, and timestamp. The chain is the memory of the network.</p>
+  </div>
+
+<script>
+(function() {
+  const track = document.getElementById('chain-track');
+  const counterEl = document.getElementById('counter');
+
+  const eventTypes = [
+    'memory.commit',
+    'agent.verified',
+    'soul.chain.append',
+    'truth.state.commit',
+    'scaffold.executed',
+    'task.created'
+  ];
+
+  const gradientColors = [
+    '#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF'
+  ];
+
+  let blockNum = 0;
+  const maxVisible = 20;
+
+  function randomHash() {
+    const chars = '0123456789abcdef';
+    let h = '';
+    for (let i = 0; i < 64; i++) h += chars[Math.floor(Math.random() * 16)];
+    return h;
+  }
+
+  function addBlock() {
+    blockNum++;
+    const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+    const colorIdx = blockNum % gradientColors.length;
+    const color = gradientColors[colorIdx];
+    const hash = randomHash();
+    const now = new Date();
+    const ts = now.toISOString().slice(11, 19);
+
+    // Add chain link if not first block
+    if (blockNum > 1) {
+      const link = document.createElement('div');
+      link.className = 'chain-link';
+      track.appendChild(link);
+    }
+
+    // Create block element
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.style.borderColor = color + '40';
+    block.style.background = `linear-gradient(135deg, ${color}12, ${color}05)`;
+    block.innerHTML = `
+      <div>
+        <div class="block-number">BLOCK #${blockNum}</div>
+        <div class="block-type" style="color:${color}">${eventType}</div>
+      </div>
+      <div>
+        <div class="block-hash">${hash.slice(0, 16)}...${hash.slice(-8)}</div>
+        <div class="block-time">${ts}</div>
+      </div>
+    `;
+    track.appendChild(block);
+
+    // Update counter
+    counterEl.textContent = blockNum;
+
+    // Scroll track left to keep newest block visible
+    const blocks = track.querySelectorAll('.block');
+    if (blocks.length > 3) {
+      const totalWidth = track.scrollWidth - window.innerWidth + 100;
+      track.style.transform = `translateX(-${Math.max(0, totalWidth)}px)`;
+    }
+
+    // Remove old blocks if too many
+    const allBlocks = track.querySelectorAll('.block');
+    const allLinks = track.querySelectorAll('.chain-link');
+    if (allBlocks.length > maxVisible) {
+      if (allBlocks[0]) allBlocks[0].remove();
+      if (allLinks[0]) allLinks[0].remove();
+    }
+  }
+
+  // Start with a few blocks
+  addBlock();
+  setTimeout(() => addBlock(), 800);
+  setTimeout(() => addBlock(), 1600);
+
+  // Then add one every 3 seconds
+  setInterval(addBlock, 3000);
+})();
+</script>
+
+</body>
+</html>

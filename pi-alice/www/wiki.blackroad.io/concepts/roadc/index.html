@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RoadC — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.io/fleet.js" defer></script>
+  <script src="https://blackroad.io/search.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="RoadC — A custom programming language with Python-style indentation. Lexer, Parser, Interpreter. Functions, recursion, pattern matching, 3D space primitives.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #00D4FF; --accent-dim: rgba(0,212,255,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(0,212,255,0.18) 0%, rgba(0,212,255,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-subtitle {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--accent); margin-bottom: var(--sp-sm);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .code-block {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg); margin-top: var(--sp-md); overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      color: var(--subtle); line-height: 1.7; margin: 0;
+    }
+    .code-block .kw { color: var(--accent); }
+    .code-block .fn { color: #FF6B2B; }
+    .code-block .num { color: #eab308; }
+    .code-block .cmt { color: var(--muted); }
+
+    .arch-steps {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .arch-step {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg); text-align: center;
+    }
+    .arch-step-num {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.4rem;
+      font-weight: 800; color: var(--accent); margin-bottom: var(--sp-xs);
+    }
+    .arch-step-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .arch-step-desc {
+      font-size: 0.78rem; color: var(--subtle); line-height: 1.6;
+    }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Programming Language</div>
+    <div class="concept-title">RoadC</div>
+    <div class="concept-subtitle">The Language of the Road</div>
+    <div class="concept-summary">
+      A custom programming language with Python-style indentation. Lexer &rarr; Parser &rarr; Interpreter. Functions, recursion, pattern matching, 3D space primitives.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">What is RoadC?</div>
+    <p>
+      A custom language designed for BlackRoad OS. Python-style colon + INDENT/DEDENT blocks define scope &mdash; no braces, no semicolons. The keyword is <code>fun</code> (not <code>fn</code>), with <code>let</code>/<code>var</code>/<code>const</code> for bindings, <code>match</code> for pattern matching, <code>spawn</code> for concurrency, and <code>space</code> for 3D primitives. Executed by a tree-walking interpreter.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Features</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Functions &amp; Recursion</div>
+        <div class="card-body">First-class functions with <code>fun</code> keyword. Full recursion support. Closures capture their environment.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">If / Elif / Else</div>
+        <div class="card-body">Branching with Python-style indentation. No parentheses required. Clean, readable control flow.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">While &amp; For Loops</div>
+        <div class="card-body">Iteration primitives. While loops for conditions, for loops for sequences. Break and continue supported.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Pattern Matching</div>
+        <div class="card-body"><code>match</code> expressions for structural pattern matching. Destructure data, guard clauses, exhaustive checking.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Spawn</div>
+        <div class="card-body">Concurrency primitive. <code>spawn</code> launches parallel execution. Designed for multi-agent coordination.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Space (3D Primitives)</div>
+        <div class="card-body"><code>space</code> keyword for 3D scene description. Vectors, transforms, meshes &mdash; language-level spatial reasoning.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Example</div>
+    <div class="code-block">
+      <pre><span class="kw">fun</span> <span class="fn">fibonacci</span>(n):
+    <span class="kw">if</span> n &lt;= <span class="num">1</span>:
+        <span class="kw">return</span> n
+    <span class="kw">return</span> <span class="fn">fibonacci</span>(n - <span class="num">1</span>) + <span class="fn">fibonacci</span>(n - <span class="num">2</span>)</pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Architecture</div>
+    <div class="arch-steps">
+      <div class="arch-step">
+        <div class="arch-step-num">1</div>
+        <div class="arch-step-title">Lexer</div>
+        <div class="arch-step-desc">Tokenizes source code into tokens. Handles INDENT/DEDENT, keywords, literals, operators.</div>
+      </div>
+      <div class="arch-step">
+        <div class="arch-step-num">2</div>
+        <div class="arch-step-title">Parser</div>
+        <div class="arch-step-desc">Builds an abstract syntax tree (AST) from the token stream. Recursive descent parsing.</div>
+      </div>
+      <div class="arch-step">
+        <div class="arch-step-num">3</div>
+        <div class="arch-step-title">Interpreter</div>
+        <div class="arch-step-desc">Tree-walks the AST and executes. Environment-based scoping. Direct evaluation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Stats</div>
+    <p>
+      Source at <code>~/roadc</code>. All working: functions, recursion, if/elif/else, while, for, strings, integers, floats. Full pipeline &mdash; lexer, parser, interpreter &mdash; built from scratch.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Connected</div>
+    <div class="conn-grid">
+      <a href="../../agents/lucidia/" class="conn-card"><span class="conn-dot" style="background:#0af;"></span> LUCIDIA</a>
+      <a href="../../agents/cecilia/" class="conn-card"><span class="conn-dot" style="background:#9C27B0;"></span> CECILIA</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Lucidia drives language design and reasoning. Cecilia contributes meta-cognitive patterns and recursive structures.
+    </p>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>RoadC &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

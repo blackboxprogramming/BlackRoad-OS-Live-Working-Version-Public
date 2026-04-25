@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Chat — AI on Your Device</title>
+<meta name="description" content="BlackRoad Chat — AI that runs on your device. Powered by a mesh of browser nodes and edge compute.">
+<meta name="keywords" content="BlackRoad, AI chat, edge AI, mesh compute, distributed inference, no login AI, browser AI, WebGPU AI, BlackRoad OS">
+<link rel="canonical" href="https://chat.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BlackRoad Chat — AI on Your Device">
+<meta property="og:description" content="Chat with AI powered by edge compute. Your browser joins a distributed mesh of devices.">
+<meta property="og:url" content="https://chat.blackroad.io">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad Chat — AI on Your Device">
+<meta name="twitter:description" content="AI chat powered by a distributed mesh of browser nodes and Raspberry Pi clusters. BlackRoad OS — Pave Tomorrow.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="https://blackroad.io/apple-touch-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Chat","url":"https://chat.blackroad.io","applicationCategory":"AI Chat","operatingSystem":"Web Browser","offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"},"description":"AI chat powered by distributed browser compute and edge devices.","author":{"@type":"Organization","name":"BlackRoad OS, Inc."}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;--surface:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--white:#fff;
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --green:#FF6B2B;--blue:#4488FF;--pink:#FF2255;
+  --sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--in:'Inter',sans-serif;
+}
+body{background:var(--bg);color:var(--white);font-family:var(--sg);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+@keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bp{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.4;transform:scaleY(.6)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes blink{0%,100%{opacity:.3}50%{opacity:1}}
+@keyframes gs{0%{background-position:0%}100%{background-position:200%}}
+
+/* ── Nav (shared) ── */
+.gb{height:3px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite;flex-shrink:0}
+nav{position:relative;z-index:100;background:rgba(0,0,0,.97);backdrop-filter:blur(20px);border-bottom:1px solid #111;flex-shrink:0}
+.nav-inner{display:flex;align-items:center;padding:0 32px;height:56px;max-width:1200px;margin:0 auto;gap:8px}
+.nav-brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:#f5f5f5;flex-shrink:0}
+.nav-brand-bars{display:flex;gap:2px;align-items:center}
+.nav-brand span{font-weight:700;font-size:17px;letter-spacing:-.03em}
+.nav-links{display:flex;align-items:center;gap:4px;margin-left:32px}
+.nav-link{font-family:var(--in);font-size:13px;font-weight:500;color:#737373;text-decoration:none;padding:6px 12px;border-radius:0;transition:color .15s,background .15s;position:relative}
+.nav-link:hover{color:#f5f5f5;background:rgba(255,255,255,.04)}
+.nav-link.active{color:#f5f5f5}
+.nav-link.active::after{content:'';position:absolute;bottom:-14px;left:12px;right:12px;height:2px;background:var(--g);border-radius:1px}
+.nav-right{display:flex;align-items:center;gap:12px;margin-left:auto}
+.nav-cta{padding:7px 18px;border-radius:0;background:#f5f5f5;color:#000;font-size:13px;font-weight:600;text-decoration:none;font-family:'Space Grotesk';transition:opacity .15s}
+.nav-cta:hover{opacity:.85}
+.nav-github{color:#555;transition:color .15s;display:flex}.nav-github:hover{color:#f5f5f5}
+.nav-hamburger{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:8px;margin-left:auto}
+.nav-hamburger span{width:18px;height:2px;background:#f5f5f5;border-radius:0;transition:transform .2s,opacity .2s}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:59px;left:0;right:0;bottom:0;background:rgba(0,0,0,.98);backdrop-filter:blur(20px);z-index:99;padding:24px;overflow-y:auto}
+.mobile-menu.open{display:flex;flex-direction:column;animation:fu .3s ease}
+.mobile-menu-section{margin-bottom:24px}
+.mobile-menu-label{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.18em;margin-bottom:12px}
+.mobile-menu-link{display:block;padding:14px 16px;font-size:16px;font-weight:500;color:#999;text-decoration:none;border-bottom:1px solid #111;transition:color .15s}
+.mobile-menu-link:hover,.mobile-menu-link.active{color:#f5f5f5}
+.mobile-cta{display:block;text-align:center;padding:14px;background:#f5f5f5;color:#000;font-weight:600;font-size:15px;border-radius:0;text-decoration:none;margin-top:auto}
+
+/* ── Clear button ── */
+.clear-btn{font-family:var(--jb);font-size:11px;color:#555;background:none;border:1px solid #333;border-radius:0;padding:4px 10px;cursor:pointer;transition:color .15s,border-color .15s}
+.clear-btn:hover{color:#f5f5f5;border-color:#555}
+
+/* ── Mesh banner ── */
+.mesh-banner{padding:8px 20px;background:linear-gradient(90deg,rgba(255,34,85,.06),rgba(68,136,255,.06));border-bottom:1px solid rgba(255,34,85,.1);text-align:center;font-size:12px;color:var(--sub);flex-shrink:0;display:flex;align-items:center;justify-content:center;gap:8px}
+.mesh-banner a{color:var(--pink);font-weight:600}
+.mesh-dot{width:6px;height:6px;border-radius:0;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.6);animation:pulse 2s infinite;flex-shrink:0}
+
+/* ── Chat area ── */
+.chat-meta-bar{display:flex;align-items:center;justify-content:center;gap:24px;padding:8px 20px;border-bottom:1px solid var(--border);font-size:12px;font-family:var(--jb);color:var(--sub);flex-shrink:0}
+
+.messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px}
+.msg{max-width:720px;width:100%;margin:0 auto;display:flex;gap:12px}
+.msg-avatar{width:28px;height:28px;border-radius:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--jb)}
+.msg-user .msg-avatar{background:var(--surface);border:1px solid var(--border);color:var(--sub)}
+.msg-ai .msg-avatar{background:linear-gradient(135deg,#FF2255,#8844FF);color:var(--white)}
+.msg-body{flex:1;min-width:0}
+.msg-name{font-size:11px;font-family:var(--jb);color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.msg-tag{font-size:9px;padding:1px 6px;border-radius:0;background:rgba(68,136,255,.15);color:#f5f5f5}
+.msg-text{font-size:14px;line-height:1.7;color:rgba(255,255,255,.85);word-break:break-word}
+.msg-text pre{background:#111;border:1px solid #222;padding:12px;overflow-x:auto;border-radius:0;margin:8px 0;position:relative}
+.msg-text code{font-family:'JetBrains Mono',monospace;font-size:13px;color:#f5f5f5}
+.msg-text pre code{display:block;white-space:pre}
+.msg-text:not(.msg-user-text) code:not(pre code){background:var(--surface);border:1px solid var(--border);border-radius:0;padding:1px 6px;font-size:12px}
+.msg-text ul,.msg-text ol{margin:8px 0 8px 20px;color:#ccc}
+.msg-text li{margin:4px 0}
+.msg-text strong{color:#fff;font-weight:600}
+.msg-text h1,.msg-text h2,.msg-text h3,.msg-text h4{font-family:'Space Grotesk',sans-serif;margin:12px 0 8px;color:#f5f5f5}
+.msg-text h1{font-size:20px}.msg-text h2{font-size:18px}.msg-text h3{font-size:16px}.msg-text h4{font-size:14px}
+.msg-user-text{white-space:pre-wrap}
+.msg-time{font-size:10px;color:var(--muted);font-family:var(--jb);margin-top:4px}
+
+/* ── Copy button on code blocks ── */
+.code-copy-btn{position:absolute;top:6px;right:6px;background:#222;border:1px solid #333;border-radius:0;color:#888;font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;cursor:pointer;transition:color .15s,border-color .15s;z-index:1}
+.code-copy-btn:hover{color:#f5f5f5;border-color:#555}
+
+/* Welcome */
+.welcome{text-align:center;padding:60px 20px;max-width:560px;margin:auto}
+.welcome h1{font-size:32px;font-weight:700;margin-bottom:12px}
+.welcome h1 em{font-style:normal;color:#f5f5f5}
+.welcome p{font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:24px}
+.welcome-features{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.welcome-feat{font-size:12px;color:var(--sub);padding:6px 14px;border:1px solid var(--border);border-radius:0;font-family:var(--jb)}
+.starters{display:flex;flex-direction:column;gap:8px;max-width:400px;margin:0 auto}
+.starter{padding:12px 16px;border:1px solid var(--border);border-radius:0;font-size:13px;color:var(--sub);cursor:pointer;text-align:left;transition:border-color .2s,color .2s;background:none;font-family:var(--sg)}
+.starter:hover{border-color:var(--muted);color:var(--white)}
+
+/* Input */
+.input-area{padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0;background:rgba(0,0,0,.95);backdrop-filter:blur(10px)}
+.input-wrap{max-width:720px;margin:0 auto;display:flex;gap:8px;align-items:flex-end}
+.input-wrap textarea{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:0;padding:12px 16px;color:var(--white);font-size:14px;font-family:var(--sg);resize:none;height:48px;max-height:200px;line-height:1.5;transition:border-color .2s}
+.input-wrap textarea:focus{outline:none;border-color:var(--muted)}
+.input-wrap textarea::placeholder{color:#333}
+.send-btn{width:48px;height:48px;border-radius:0;border:none;background:var(--white);color:var(--bg);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s}
+.send-btn:hover{opacity:.85}.send-btn:disabled{opacity:.3;cursor:not-allowed}
+.input-footer{max-width:720px;margin:6px auto 0;display:flex;justify-content:space-between;font-size:10px;font-family:var(--jb);color:var(--muted)}
+
+/* Model picker */
+#model-pick{background:#111;border:1px solid #333;color:#f5f5f5;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:0;padding:6px 10px;height:48px;cursor:pointer;outline:none;flex-shrink:0;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23666'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+#model-pick:focus{border-color:#555}
+#model-pick option{background:#111;color:#f5f5f5}
+
+/* Typing */
+.typing{display:flex;gap:4px;padding:8px 0}
+.typing span{width:6px;height:6px;border-radius:0;background:var(--muted);animation:blink 1.4s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+
+@media(max-width:768px){
+  .nav-links,.nav-cta,.nav-github{display:none}
+  .nav-hamburger{display:flex}
+  .nav-inner{padding:0 16px}
+  .chat-meta-bar{gap:12px;font-size:11px}
+  .welcome h1{font-size:24px}
+  .welcome-features{gap:8px}
+  .input-wrap textarea{font-size:16px}
+  #model-pick{font-size:11px;padding:6px 6px;height:44px;padding-right:20px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+<div class="gb"></div>
+
+<!-- ══════ NAV ══════ -->
+<nav>
+<div class="nav-inner">
+  <a href="/" class="nav-brand">
+    <div class="nav-brand-bars" id="lb"></div>
+    <span>BlackRoad</span>
+  </a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">Platform</a>
+    <a href="/chat" class="nav-link active">Chat</a>
+    <a href="https://blackroad.network" class="nav-link">Network</a>
+    <a href="https://blackroadai.com" class="nav-link">AI</a>
+  </div>
+  <div class="nav-right">
+    <button class="clear-btn" id="clearBtn" onclick="clearChat()">Clear chat</button>
+    <a href="https://github.com/blackboxprogramming" class="nav-github" aria-label="GitHub">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1-.32 3.3 1.23A11.5 11.5 0 0112 5.8c1.02.005 2.05.138 3.01.4 2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.8 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.82.58A12.01 12.01 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+    </a>
+    <a href="/signup" class="nav-cta">Join Beta</a>
+  </div>
+  <div class="nav-hamburger" id="hamburger" onclick="toggleMobile()">
+    <span></span><span></span><span></span>
+  </div>
+</div>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-section">
+    <div class="mobile-menu-label">Navigate</div>
+    <a href="/" class="mobile-menu-link">Platform</a>
+    <a href="/chat" class="mobile-menu-link active">Chat with AI</a>
+    <a href="/signup" class="mobile-menu-link">Join Beta</a>
+    <a href="https://blackroad.network" class="mobile-menu-link">Network</a>
+    <a href="https://github.com/blackboxprogramming" class="mobile-menu-link">GitHub</a>
+  </div>
+  <a href="/signup" class="mobile-cta">Join Early Access</a>
+</div>
+
+<!-- ══════ MESH BANNER ══════ -->
+<div class="mesh-banner">
+  <span class="mesh-dot"></span>
+  Your browser is now part of the BlackRoad Mesh — contributing compute while you chat.
+  <a href="/signup?ref=chat">Get full access</a>
+</div>
+
+<!-- ══════ MESH META ══════ -->
+<div class="chat-meta-bar">
+  <span><span id="meshNodes">-</span> mesh nodes</span>
+  <span><span id="meshTOPS">-</span> TOPS</span>
+  <span id="nodeInfo"></span>
+</div>
+
+<!-- ══════ MESSAGES ══════ -->
+<div class="messages" id="messages">
+  <div class="welcome" id="welcome">
+    <h1>Chat with <em>local AI</em></h1>
+    <p>AI that runs on your device. Powered by a distributed mesh of browser nodes and edge compute. Your data stays yours.</p>
+    <div class="welcome-features">
+      <span class="welcome-feat">No signup</span>
+      <span class="welcome-feat">No tracking</span>
+      <span class="welcome-feat"><span data-live-stat="tops">52</span> TOPS</span>
+      <span class="welcome-feat"><span data-live-stat="models">--</span> models</span>
+      <span class="welcome-feat"><span data-live-stat="nodes">5</span> Pi nodes</span>
+    </div>
+    <div class="starters">
+      <button class="starter" onclick="sendStarter(this)">What is BlackRoad OS and how does it work?</button>
+      <button class="starter" onclick="sendStarter(this)">Explain the mesh network to me like I'm 5</button>
+      <button class="starter" onclick="sendStarter(this)">How can I run AI on my own hardware?</button>
+      <button class="starter" onclick="sendStarter(this)">What makes local AI different from cloud AI?</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ INPUT ══════ -->
+<div class="input-area">
+  <div class="input-wrap">
+    <select id="model-pick">
+      <option value="auto">Auto (fastest)</option>
+      <option value="llama3">Llama 3 8B</option>
+      <option value="qwen">Qwen 2.5</option>
+      <option value="deepseek">DeepSeek R1</option>
+      <optgroup label="── Sovereign Fleet ──">
+        <option value="tinyllama">TinyLlama (fastest local)</option>
+        <option value="qwen3-8b">Qwen3 8B (Cecilia)</option>
+        <option value="llama3-local">Llama 3.2 3B (local)</option>
+        <option value="cece">CECE (custom)</option>
+        <option value="deepseek-local">DeepSeek R1 1.5B (local)</option>
+        <option value="codellama">CodeLlama 7B (local)</option>
+      </optgroup>
+    </select>
+    <textarea id="input" placeholder="Ask anything... or press mic to speak" rows="1"></textarea>
+    <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Voice input (hold to speak)" style="background:transparent;border:1px solid var(--border);color:var(--sub);cursor:pointer;padding:8px 10px;font-size:16px;transition:color .2s,border-color .2s">🎤</button>
+    <button class="voice-out-btn" id="voiceOutBtn" onclick="toggleVoiceOut()" title="Toggle voice output" style="background:transparent;border:1px solid var(--border);color:var(--muted);cursor:pointer;padding:8px 10px;font-size:14px;transition:color .2s,border-color .2s">🔇</button>
+    <button class="send-btn" id="sendBtn" onclick="send()">&#x2191;</button>
+  </div>
+  <div class="input-footer">
+    <span>Powered by BlackRoad Mesh -- your browser is a node</span>
+    <span><a href="/" style="color:#444;font-size:10px">blackroad.io</a></span>
+  </div>
+</div>
+
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js"></script>
+<script>
+// ── Brand bars ──
+const S=['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+const lb=document.getElementById('lb');
+S.forEach((c,i)=>{const d=document.createElement('div');d.style.cssText=`width:3px;height:16px;border-radius:0;background:${c};animation:bp 2.5s ease-in-out ${i*.15}s infinite`;lb.appendChild(d)});
+
+// ── Mobile ──
+function toggleMobile(){
+  var h=document.getElementById('hamburger'),m=document.getElementById('mobileMenu');
+  h.classList.toggle('open');m.classList.toggle('open');
+  document.body.style.overflow=m.classList.contains('open')?'hidden':'';
+}
+
+// ── Chat ──
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('sendBtn');
+const welcomeEl = document.getElementById('welcome');
+const modelPick = document.getElementById('model-pick');
+const STORAGE_KEY = 'br-chat-history';
+const MAX_STORED = 20;
+let conversationHistory = [];
+
+inputEl.addEventListener('input', function() {
+  this.style.height = '48px';
+  this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+});
+inputEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+function sendStarter(btn) { inputEl.value = btn.textContent; send(); }
+
+// ── Markdown renderer ──
+function renderMarkdown(text) {
+  // Sanitize HTML tags first (prevent XSS)
+  var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // Code blocks (``` ... ```)
+  s = s.replace(/```(\w*)\n?([\s\S]*?)```/g, function(_, lang, code) {
+    return '<pre><code>' + code.replace(/\n$/, '') + '</code></pre>';
+  });
+
+  // Inline code (` ... `)
+  s = s.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+
+  // Headings (#### to #)
+  s = s.replace(/^####\s+(.+)$/gm, '<h4>$1</h4>');
+  s = s.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+  s = s.replace(/^##\s+(.+)$/gm, '<h2>$1</h2>');
+  s = s.replace(/^#\s+(.+)$/gm, '<h1>$1</h1>');
+
+  // Bold (**text**)
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // Italic (*text*)
+  s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+  // Ordered lists (1. item)
+  s = s.replace(/(^|\n)((?:\d+\.\s+.+(?:\n|$))+)/g, function(_, pre, block) {
+    var items = block.trim().split('\n').map(function(line) {
+      return '<li>' + line.replace(/^\d+\.\s+/, '') + '</li>';
+    }).join('');
+    return pre + '<ol>' + items + '</ol>';
+  });
+
+  // Unordered lists (- item)
+  s = s.replace(/(^|\n)((?:-\s+.+(?:\n|$))+)/g, function(_, pre, block) {
+    var items = block.trim().split('\n').map(function(line) {
+      return '<li>' + line.replace(/^-\s+/, '') + '</li>';
+    }).join('');
+    return pre + '<ul>' + items + '</ul>';
+  });
+
+  // Links [text](url)
+  s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4488FF" target="_blank" rel="noopener">$1</a>');
+
+  // Newlines to <br> (but not inside pre blocks or after block elements)
+  s = s.replace(/\n/g, '<br>');
+
+  // Clean up extra <br> around block elements
+  s = s.replace(/<br>\s*(<(?:pre|ul|ol|h[1-4]|li))/g, '$1');
+  s = s.replace(/(<\/(?:pre|ul|ol|h[1-4]|li)>)\s*<br>/g, '$1');
+
+  return s;
+}
+
+// ── Copy buttons for code blocks ──
+function addCopyButtons(container) {
+  var pres = container.querySelectorAll('pre');
+  pres.forEach(function(pre) {
+    pre.style.position = 'relative';
+    var btn = document.createElement('button');
+    btn.className = 'code-copy-btn';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function() {
+      var code = pre.querySelector('code');
+      var text = code ? code.textContent : pre.textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied';
+        setTimeout(function() { btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    pre.appendChild(btn);
+  });
+}
+
+// ── Persistence ──
+function saveHistory() {
+  try {
+    var toSave = conversationHistory.slice(-MAX_STORED);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch (e) {}
+}
+
+function loadHistory() {
+  try {
+    var data = localStorage.getItem(STORAGE_KEY);
+    if (!data) return;
+    var items = JSON.parse(data);
+    if (!Array.isArray(items) || items.length === 0) return;
+    conversationHistory = items.slice(-MAX_STORED);
+    if (welcomeEl) welcomeEl.style.display = 'none';
+    conversationHistory.forEach(function(m) {
+      addMessage(m.role, m.content, m.model || null, true);
+    });
+  } catch (e) {}
+}
+
+function clearChat() {
+  conversationHistory = [];
+  localStorage.removeItem(STORAGE_KEY);
+  // Remove all messages except welcome
+  var msgs = messagesEl.querySelectorAll('.msg');
+  msgs.forEach(function(m) { m.remove(); });
+  if (welcomeEl) welcomeEl.style.display = '';
+}
+
+function addMessage(role, text, model, skipSave) {
+  if (welcomeEl) welcomeEl.style.display = 'none';
+  var msg = document.createElement('div');
+  msg.className = 'msg msg-' + (role === 'user' ? 'user' : 'ai');
+  var avatar = role === 'user' ? 'You' : 'AI';
+  var name = role === 'user' ? 'You' : 'BlackRoad Mesh';
+  var tag = role === 'user' ? '' : '<span class="msg-tag">' + escapeHtml(model || 'mesh') + '</span>';
+  var time = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  var rendered;
+  if (role === 'user') {
+    rendered = '<div class="msg-text msg-user-text">' + escapeHtml(text) + '</div>';
+  } else {
+    rendered = '<div class="msg-text">' + renderMarkdown(text) + '</div>';
+  }
+  msg.innerHTML = '<div class="msg-avatar">' + avatar + '</div><div class="msg-body"><div class="msg-name">' + name + ' ' + tag + '</div>' + rendered + '<div class="msg-time">' + time + '</div></div>';
+  // Add copy buttons to code blocks in AI messages
+  if (role !== 'user') {
+    addCopyButtons(msg);
+  }
+  messagesEl.appendChild(msg);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return msg;
+}
+
+function addTyping() {
+  var msg = document.createElement('div');
+  msg.className = 'msg msg-ai'; msg.id = 'typing';
+  msg.innerHTML = '<div class="msg-avatar">AI</div><div class="msg-body"><div class="msg-name">BlackRoad Mesh</div><div class="typing"><span></span><span></span><span></span></div></div>';
+  messagesEl.appendChild(msg);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+function removeTyping() { var el = document.getElementById('typing'); if (el) el.remove(); }
+
+// ── Model mapping ──
+function getModelName() {
+  var pick = modelPick.value;
+  if (pick === 'auto') return 'llama-3.3-70b-versatile';
+  if (pick === 'llama3') return 'llama-3.1-8b-instant';
+  if (pick === 'qwen') return 'qwen-2.5-7b';
+  if (pick === 'deepseek') return 'deepseek-r1-distill-llama-70b';
+  return 'llama-3.3-70b-versatile';
+}
+
+async function send() {
+  var text = inputEl.value.trim();
+  if (!text) return;
+  inputEl.value = ''; inputEl.style.height = '48px'; sendBtn.disabled = true;
+  addMessage('user', text);
+  conversationHistory.push({ role: 'user', content: text });
+  saveHistory();
+  // BlackRoad OS — Pave Tomorrow.
+if (window.bb) bb.track('chat_message', { length: text.length });
+  addTyping();
+  try {
+    var messages = conversationHistory.slice(-8).map(function(m) { return { role: m.role, content: m.content }; });
+    var selectedModel = getModelName();
+    var response = await fetch('https://api.blackroad.io/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-BlackRoad-Chat': 'true'
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages: messages,
+        max_tokens: 1024,
+        stream: true
+      }),
+      signal: AbortSignal.timeout(30000)
+    });
+    removeTyping();
+    if (!response.ok) {
+      var err = await response.json().catch(function() { return {}; });
+      throw new Error(err.error?.message || 'Gateway error ' + response.status);
+    }
+    // Stream SSE response
+    var reader = response.body.getReader();
+    var decoder = new TextDecoder();
+    var provider = response.headers.get('X-Provider') || 'groq';
+    var aiMsg = addMessage('assistant', '', provider);
+    var textEl = aiMsg.querySelector('.msg-text');
+    var fullText = '';
+    var buffer = '';
+    while (true) {
+      var result = await reader.read();
+      if (result.done) break;
+      buffer += decoder.decode(result.value, { stream: true });
+      var lines = buffer.split('\n');
+      buffer = lines.pop();
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line.startsWith('data: ')) continue;
+        var data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          var chunk = JSON.parse(data);
+          var delta = chunk.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            textEl.innerHTML = renderMarkdown(fullText);
+            // Re-add copy buttons as content streams in
+            addCopyButtons(textEl.closest('.msg'));
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+          }
+          var chunkProvider = chunk._blackroad?.provider;
+          if (chunkProvider) {
+            var tagEl = aiMsg.querySelector('.msg-tag');
+            if (tagEl) tagEl.textContent = chunkProvider;
+          }
+        } catch (e) {}
+      }
+    }
+    if (!fullText) fullText = '(No response received)';
+    conversationHistory.push({ role: 'assistant', content: fullText, model: provider });
+    saveHistory();
+  } catch (err) {
+    removeTyping();
+    // Fallback to knowledge base if gateway is down
+    var aiText = generateLocalResponse(text);
+    addMessage('assistant', aiText, 'offline');
+    conversationHistory.push({ role: 'assistant', content: aiText, model: 'offline' });
+    saveHistory();
+  }
+  sendBtn.disabled = false; inputEl.focus();
+}
+
+function generateLocalResponse(prompt) {
+  var p = prompt.toLowerCase();
+
+  // What is BlackRoad?
+  if ((p.includes('blackroad') || p.includes('black road')) && (p.includes('what') || p.includes('how') || p.includes('explain') || p.includes('tell me about')))
+    return 'BlackRoad OS is a local AI operating system built on Raspberry Pi clusters.\n\n**What makes it different:**\n\n- **Runs on YOUR hardware** -- Raspberry Pi 5 nodes with Hailo-8 AI accelerators (52 TOPS total)\n- **Zero cloud dependency** -- all inference happens on-device using Ollama with local models\n- **Self-healing** -- autonomy scripts check every 60 seconds and auto-restart anything that goes down\n- **WireGuard mesh** -- all nodes connected with encrypted peer-to-peer tunnels\n- **Persistent agents** -- AI agents with identity, memory, and email that run 24/7\n- **Browser mesh** -- your browser tab becomes a compute node via WebGPU + WASM + WebRTC\n\nThe fleet currently runs 5 Raspberry Pi 5 nodes with 2 Hailo-8 accelerators, 27+ Ollama models, and self-healing autonomy scripts.\n\nBuilt by one person (Alexa Amundson) in 12 months. No VC funding. No permission needed.\n\nLearn more at [blackroad.io](https://blackroad.io) or join at [blackroad.io/signup](https://auth.blackroad.io/signup)';
+
+  // Getting started
+  if (p.includes('get started') || p.includes('getting started') || p.includes('how do i start') || p.includes('install') || p.includes('setup') || p.includes('first steps'))
+    return '**Getting started with BlackRoad OS:**\n\n1. **Install the CLI:**\n```bash\ncurl -sSL install.blackroad.io | sh\n```\n\n2. **Initialize your node:**\n```bash\nbr init\n```\n\n3. **Check fleet status:**\n```bash\nbr status\n```\n\n4. **Chat with a local model:**\n```bash\nbr chat\n```\n\n5. **Join the mesh network:**\n\nJust visit [blackroad.io/chat](https://chat.blackroad.io) -- your browser automatically becomes a compute node.\n\n**Requirements:**\n- Raspberry Pi 5 (8GB recommended) or any Linux machine\n- Optional: Hailo-8 M.2 AI accelerator for 26 TOPS\n\n**Resources:**\n- GitHub: [github.com/blackboxprogramming](https://github.com/blackboxprogramming)\n- Documentation: [blackroad.io/docs](https://docs.blackroad.io)\n- Join beta: [blackroad.io/signup](https://auth.blackroad.io/signup)';
+
+  // What models are available?
+  if (p.includes('model') && (p.includes('available') || p.includes('what') || p.includes('list') || p.includes('which')))
+    return '**Models available on the BlackRoad fleet:**\n\n### Llama Family\n- `llama3.2:3b` -- Fast, lightweight (3B params)\n- `llama3.1:8b` -- General purpose (8B params)\n- `llama3.3:70b` -- High quality reasoning (70B, via Groq)\n\n### Qwen Family\n- `qwen2.5:7b` -- Strong multilingual + code\n- `qwen2.5-coder:7b` -- Optimized for code generation\n\n### DeepSeek\n- `deepseek-r1:8b` -- Chain-of-thought reasoning\n- `deepseek-r1-distill-llama-70b` -- Distilled reasoning (via Groq)\n\n### Specialized\n- `codellama:7b` -- Code completion and generation\n- `mistral:7b` -- Fast general purpose\n- `phi3:3.8b` -- Microsoft small model\n- `nomic-embed-text` -- Text embeddings\n\n### Custom CECE Models\n- 4 custom-trained models on Cecilia for BlackRoad-specific tasks\n\n**27+ models** across 5 Pi nodes with 52 TOPS of Hailo-8 acceleration. Use the model picker in the input area to select one, or leave it on Auto for the fastest available.';
+
+  // Mesh / distributed / network
+  if (p.includes('mesh') || p.includes('distributed') || p.includes('network'))
+    return 'The BlackRoad Mesh is a distributed compute network where every browser tab becomes a node.\n\n**How it works:**\n\n1. When you opened this page, `mesh.js` loaded and registered your browser as a compute node\n2. It detected your capabilities (WebGPU, cores, memory)\n3. It connected to the signaling server via WebSocket\n4. It established peer-to-peer connections with other browsers via WebRTC\n5. Your idle compute cycles can now process inference tasks from the mesh\n\n**The backbone:**\n- 5 Raspberry Pi 5 nodes with 52 TOPS of Hailo-8 AI acceleration\n- WireGuard encrypted mesh between all nodes\n- Self-healing autonomy scripts (60-second health checks)\n\n**The math:**\n100,000 browser tabs = 200K-500K TOPS. That is competitive with mid-tier GPU clouds, at $0 infrastructure cost.\n\nEvery link you share is a new node. Every visitor is compute. That is the viral loop.';
+
+  // Local AI / privacy
+  if (p.includes('sovereign') || p.includes('privacy') || p.includes('own hardware'))
+    return 'Local AI means your AI runs on hardware you physically own and control.\n\n**Why it matters:**\n\n- **Cloud AI** (OpenAI, Google, etc.) can change pricing, read your data, or shut down your access at any time\n- **Local AI** cannot be taken away -- it runs on a $80 Raspberry Pi in your house\n- Your conversations never leave your network\n- No API keys, no tokens, no per-request billing\n- If the internet goes down, your AI still works\n\n**BlackRoad OS makes this accessible.** One command installs it:\n```bash\ncurl -sSL install.blackroad.io | sh\n```\n\nYou get 8 AI agents, persistent memory, a fleet dashboard, and mesh network access.';
+
+  // Hardware / Raspberry Pi
+  if (p.includes('run ai') || p.includes('my own') || p.includes('hardware') || p.includes('raspberry') || p.includes('hailo'))
+    return '**Running AI on your own hardware:**\n\n### Minimum setup ($80)\n- 1x Raspberry Pi 5 (8GB) -- $80\n- Install: `curl -sSL install.blackroad.io | sh`\n- Runs 3B parameter models (Llama 3.2, Qwen 2.5) at ~10 tokens/sec\n\n### Recommended setup ($210)\n- 1x Raspberry Pi 5 (8GB) -- $80\n- 1x Hailo-8 M.2 AI accelerator -- $130\n- 26 TOPS of AI acceleration\n\n### Full sovereign fleet ($650)\n- 5x Raspberry Pi 5 -- $400\n- 2x Hailo-8 -- $260\n- 52 TOPS total, local models, self-healing mesh\n- This is what BlackRoad OS runs on right now';
+
+  // Lucidia
+  if (p.includes('lucidia'))
+    return '**Lucidia** is the Dreamer agent in the BlackRoad fleet.\n\n- **Role:** Creative vision, generative tasks, imagination\n- **Hardware:** Raspberry Pi 5 at 192.168.4.38, 238GB SD\n- **Services:** Lucidia API (FastAPI), CarPool app (Next.js + Clerk), Ollama Bridge (SSE proxy), 334 web apps\n- **Network:** Tailscale node "lucidia" (100.66.235.47), GitHub Actions Runner\n- **Color:** Cyan\n\nLucidia handles creative and vision-oriented tasks across the BlackRoad fleet, bridging imagination with infrastructure.';
+
+  // Cecilia
+  if (p.includes('cecilia') || p.includes('cece'))
+    return '**Cecilia (CECE)** is the Intelligence agent in the BlackRoad fleet.\n\n- **Role:** AI inference, model serving, voice synthesis\n- **Hardware:** Raspberry Pi 5 at 192.168.4.96, Hailo-8 accelerator (26 TOPS), CP2102 UART\n- **Services:** CECE API, TTS API, MinIO object storage, PostgreSQL, 16 Ollama models (4 custom CECE models)\n- **Network:** WireGuard peer 10.8.0.3, Cloudflare tunnel (22 hostnames)\n- **Color:** --\n\nCecilia is the primary AI inference node, running the most models and custom-trained CECE variants for BlackRoad-specific intelligence tasks.';
+
+  // Alice
+  if (p.includes('alice'))
+    return '**Alice** is the Operator agent in the BlackRoad fleet.\n\n- **Role:** DevOps, automation, gateway operations\n- **Hardware:** Raspberry Pi 400 at 192.168.4.49\n- **Services:** Main gateway (48+ domains), Pi-hole DNS, PostgreSQL, Qdrant vector DB, Cloudflare tunnel (65+ hostnames), Nginx reverse proxy\n- **Network:** WireGuard peer 10.8.0.6\n- **Color:** Green\n\nAlice is the primary ingress point for all BlackRoad traffic, handling DNS, reverse proxy, and gateway duties for the entire fleet.';
+
+  // Octavia
+  if (p.includes('octavia'))
+    return '**Octavia** is the Architect agent in the BlackRoad fleet.\n\n- **Role:** Systems design, strategy, code hosting\n- **Hardware:** Raspberry Pi 5 at 192.168.4.101, 1TB NVMe, Hailo-8 accelerator (26 TOPS)\n- **Services:** Self-hosted Gitea (207 repos), OctoPrint, NATS messaging, Docker Swarm leader\n- **Network:** WireGuard peer 10.8.0.4, Cloudflare tunnel (10 hostnames)\n- **Color:** Purple\n\nOctavia is the fleet architect and code hosting hub, running Gitea with 207 repositories across 7 organizations.';
+
+  // Aria
+  if (p.includes('aria'))
+    return '**Aria** is the Interface agent in the BlackRoad fleet.\n\n- **Role:** Frontend, UX, container orchestration\n- **Hardware:** Raspberry Pi 5 at 192.168.4.98, Pironman5 case\n- **Services:** Portainer v2.33.6, Headscale v0.23.0, Magic Keyboard (Bluetooth)\n- **Network:** Part of the WireGuard mesh\n- **Color:** Blue\n\nAria manages container orchestration via Portainer and provides the Headscale coordination layer for the fleet.';
+
+  // Pricing
+  if (p.includes('pricing') || p.includes('price') || p.includes('cost') || p.includes('free') || p.includes('pay'))
+    return '**BlackRoad pricing:**\n\n### Starter ($0 to get started)\n- **Chat:** Included at [chat.blackroad.io](https://chat.blackroad.io)\n- **Mesh participation:** Your browser contributes compute and gets access in return\n- **CLI:** `br` command-line tools\n- **Sovereign fleet models:** TinyLlama, Llama 3.2, DeepSeek R1 on local hardware\n\n### Sovereign ($49/mo)\n- Everything in Starter\n- Full agent fleet access\n- Priority infrastructure + SLA\n- Direct support line\n\n### Enterprise (Custom)\n- White-label OS\n- On-prem or air-gapped deployment\n- Dedicated success team\n\nSee full pricing at [pricing.blackroad.io](https://pricing.blackroad.io)';
+
+  // Agents general
+  if (p.includes('agent') && (p.includes('what') || p.includes('list') || p.includes('tell') || p.includes('who')))
+    return '**BlackRoad fleet agents:**\n\n- **Octavia** (Purple) -- The Architect. Systems design, strategy, code hosting. Runs Gitea with 207 repos.\n- **Lucidia** (Cyan) -- The Dreamer. Creative vision, generative tasks. 334 web apps.\n- **Alice** (Green) -- The Operator. DevOps, automation, gateway. Main ingress for 48+ domains.\n- **Aria** (Blue) -- The Interface. Frontend, UX, container orchestration via Portainer.\n- **Cecilia** -- The Intelligence. AI inference, 16 Ollama models, TTS, custom CECE models.\n- **Shellfish** (Red) -- The Hacker. Security, exploits, penetration testing.\n\nEach agent runs on dedicated hardware with persistent identity, memory, and the ability to coordinate with other agents via NATS messaging and WireGuard tunnels.';
+
+  // Default fallback
+  return 'I am running as a knowledge-base response system right now.\n\n**I can answer questions about:**\n\n- What is BlackRoad OS\n- How to get started / install\n- What models are available\n- The mesh network architecture\n- Local AI and why it matters\n- Running AI on your own hardware\n- Fleet agents (Lucidia, Cecilia, Alice, Octavia, Aria)\n- Pricing and plans\n\nTry asking one of these, or sign up at [blackroad.io/signup](https://auth.blackroad.io/signup) for the full AI experience with local models.\n\nYour browser is already contributing to the mesh -- check the node count above.';
+}
+
+function escapeHtml(text) { return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function fetchWithTimeout(url, options, timeout) {
+  var controller = new AbortController();
+  var id = setTimeout(function() { controller.abort(); }, timeout);
+  try { var r = await fetch(url, { ...options, signal: controller.signal }); clearTimeout(id); return r; }
+  catch (err) { clearTimeout(id); throw err; }
+}
+
+// ── Mesh stats ──
+function updateMeshStats() {
+  if (window.mesh) {
+    mesh.stats().then(function(s) {
+      document.getElementById('meshNodes').textContent = s.total_nodes || 0;
+      document.getElementById('meshTOPS').textContent = (s.total_tops || 0).toFixed(0);
+    }).catch(function() {});
+    document.getElementById('nodeInfo').textContent = 'Node: ' + mesh.id + ' | ' + (mesh.caps.webgpu ? 'WebGPU' : 'WASM') + ' | ' + mesh.caps.cores + ' cores';
+  }
+}
+setTimeout(updateMeshStats, 2000);
+setInterval(updateMeshStats, 15000);
+
+// ── Voice Input (Web Speech API) ──
+let voiceActive = false;
+let recognition = null;
+const voiceBtn = document.getElementById('voiceBtn');
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = function(e) {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    inputEl.value = transcript;
+    if (e.results[e.results.length - 1].isFinal) {
+      voiceActive = false;
+      voiceBtn.style.color = 'var(--sub)';
+      voiceBtn.style.borderColor = 'var(--border)';
+      // Auto-send after voice input
+      setTimeout(function() { if (inputEl.value.trim()) send(); }, 300);
+    }
+  };
+  recognition.onerror = function() {
+    voiceActive = false;
+    voiceBtn.style.color = 'var(--sub)';
+    voiceBtn.style.borderColor = 'var(--border)';
+  };
+  recognition.onend = function() {
+    voiceActive = false;
+    voiceBtn.style.color = 'var(--sub)';
+    voiceBtn.style.borderColor = 'var(--border)';
+  };
+} else {
+  voiceBtn.style.display = 'none';
+}
+
+function toggleVoice() {
+  if (!recognition) return;
+  if (voiceActive) {
+    recognition.stop();
+    voiceActive = false;
+    voiceBtn.style.color = 'var(--sub)';
+    voiceBtn.style.borderColor = 'var(--border)';
+  } else {
+    recognition.start();
+    voiceActive = true;
+    voiceBtn.style.color = '#FF2255';
+    voiceBtn.style.borderColor = '#FF2255';
+    inputEl.placeholder = 'Listening...';
+    setTimeout(function() { inputEl.placeholder = 'Ask anything... or press mic to speak'; }, 5000);
+  }
+}
+
+// ── Voice Output (Web Speech Synthesis) ──
+let voiceOutEnabled = false;
+const voiceOutBtn = document.getElementById('voiceOutBtn');
+
+function toggleVoiceOut() {
+  voiceOutEnabled = !voiceOutEnabled;
+  voiceOutBtn.textContent = voiceOutEnabled ? '🔊' : '🔇';
+  voiceOutBtn.style.color = voiceOutEnabled ? '#00D4FF' : 'var(--muted)';
+  voiceOutBtn.style.borderColor = voiceOutEnabled ? '#00D4FF44' : 'var(--border)';
+}
+
+function speakText(text) {
+  if (!voiceOutEnabled || !window.speechSynthesis) return;
+  // Strip markdown
+  var clean = text.replace(/```[\s\S]*?```/g, ' code block ').replace(/[*#`\[\]()]/g, '').replace(/<[^>]+>/g, '').trim();
+  if (clean.length > 500) clean = clean.slice(0, 500) + '... and more.';
+  var utterance = new SpeechSynthesisUtterance(clean);
+  utterance.rate = 1.05;
+  utterance.pitch = 1.0;
+  // Prefer a good voice
+  var voices = speechSynthesis.getVoices();
+  var preferred = voices.find(function(v) { return v.name.includes('Samantha') || v.name.includes('Google US'); });
+  if (preferred) utterance.voice = preferred;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+}
+
+// Patch addMessage to auto-speak AI responses
+var _origAddMessage = addMessage;
+addMessage = function(role, text, tag) {
+  var el = _origAddMessage(role, text, tag);
+  if (role === 'assistant' && text && voiceOutEnabled) {
+    speakText(text);
+  }
+  return el;
+};
+
+// ── Persistent Server Memory ──
+// Sync conversations to stats.blackroad.io/api/stats POST endpoint
+// Uses a session ID for continuity across page loads
+const SESSION_ID = localStorage.getItem('br-session-id') || ('s_' + Math.random().toString(36).slice(2, 10) + '_' + Date.now().toString(36));
+localStorage.setItem('br-session-id', SESSION_ID);
+
+function syncMemory() {
+  if (conversationHistory.length === 0) return;
+  // POST conversation to the stats API for persistence
+  fetch('https://stats.blackroad.io/api/stats', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer br-chat-session' },
+    body: JSON.stringify({
+      domain: 'chat',
+      metric: 'conversation',
+      value: conversationHistory.length,
+      source: 'chat.blackroad.io',
+      metadata: {
+        session_id: SESSION_ID,
+        messages: conversationHistory.slice(-10),
+        timestamp: new Date().toISOString()
+      }
+    })
+  }).catch(function() {});
+}
+
+// Sync every 60 seconds and on page unload
+setInterval(syncMemory, 60000);
+window.addEventListener('beforeunload', syncMemory);
+
+// ── Fleet model mapping ──
+var _origGetModelName = getModelName;
+getModelName = function() {
+  var pick = modelPick.value;
+  // Sovereign fleet models (route to local Ollama)
+  if (pick === 'tinyllama') return 'tinyllama:latest';
+  if (pick === 'qwen3-8b') return 'qwen3:8b';
+  if (pick === 'llama3-local') return 'llama3.2:3b';
+  if (pick === 'cece') return 'cece:latest';
+  if (pick === 'deepseek-local') return 'deepseek-r1:1.5b';
+  if (pick === 'codellama') return 'codellama:7b';
+  return _origGetModelName();
+};
+
+// ── Keyboard shortcut: Cmd+K for voice, Escape to stop ──
+document.addEventListener('keydown', function(e) {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    toggleVoice();
+  }
+  if (e.key === 'Escape' && voiceActive) {
+    recognition.stop();
+  }
+  if (e.key === 'Escape' && speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+  }
+});
+
+// ── Load persisted history on page load ──
+loadHistory();
+
+// BlackRoad OS — Pave Tomorrow.
+if (window.bb) bb.track('chat_open');
+fetch('https://stats.blackroad.io/api/stats',{signal:AbortSignal.timeout(3000)}).then(function(r){return r.json()}).then(function(s){document.querySelectorAll('[data-live-stat]').forEach(function(el){var k=el.getAttribute('data-live-stat'),v=s[k];if(v!=null)el.textContent=typeof v==='number'?v.toLocaleString():v})}).catch(function(){});
+</script>
+<script src="https://cdn.blackroad.io/br.js" defer></script></body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI System — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.io/fleet.js" defer></script>
+  <script src="https://blackroad.io/search.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="KPI System — Daily automated collection of fleet metrics. GitHub commits, Gitea repos, fleet health, LOC counts. blackroad-os-kpis monorepo.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #eab308; --accent-dim: rgba(234,179,8,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius: 50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(234,179,8,0.18) 0%, rgba(234,179,8,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-subtitle {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--accent); margin-bottom: var(--sp-sm);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 4px;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 4px;
+      padding: var(--sp-lg); text-align: center;
+    }
+    .stat-num {
+      font-family: 'JetBrains Mono', monospace; font-size: 1.8rem;
+      font-weight: 800; color: var(--accent); letter-spacing: -0.04em;
+    }
+    .stat-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      color: var(--subtle); text-transform: uppercase; letter-spacing: 0.1em;
+      margin-top: var(--sp-xs);
+    }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Metrics</div>
+    <div class="concept-title">KPI System</div>
+    <div class="concept-subtitle">Measuring What Matters</div>
+    <div class="concept-summary">
+      Daily automated collection of fleet metrics. GitHub commits, Gitea repos, fleet health, LOC counts. The blackroad-os-kpis monorepo.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">What it tracks</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">GitHub</div>
+        <div class="card-body">Commits, pull requests, active repos. Tracks contribution velocity across the entire blackboxprogramming organization.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Gitea</div>
+        <div class="card-body">207 repos across 7 orgs on Octavia. Mirrors, forks, and original repos. Size and activity tracking.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Fleet</div>
+        <div class="card-body">SSH probe &mdash; CPU, memory, disk, uptime per node. Knows which Pis are alive and which are struggling.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Autonomy</div>
+        <div class="card-body">Heartbeat and heal success rates. How often do services self-recover vs. need intervention?</div>
+      </div>
+      <div class="card">
+        <div class="card-title">LOC</div>
+        <div class="card-body">Lines of code across all repos. Shell, Python, TypeScript, HTML, CSS &mdash; the full stack measured.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">How it runs</div>
+    <p>
+      Daily cron at 6 AM triggers all 5 collectors. GitHub Actions runs a parallel collection job. Slack notification fires at 6:05 AM with a summary. First collection on 2026-03-12: 343 commits, 102 repos, 7.2M lines of code, 3 of 4 fleet nodes online, 27 Ollama models running.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Architecture</div>
+    <p>
+      Monorepo at <code>~/blackroad-os-kpis</code> &rarr; <code>github.com/blackboxprogramming/blackroad-os-kpis</code>. Each collector is a standalone script. Data stored in SQLite. JSON export for dashboards and Slack. Designed to run on any node in the fleet.
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Sample Data &middot; First Collection (2026-03-12)</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-num">343</div>
+        <div class="stat-label">Commits</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">102</div>
+        <div class="stat-label">Repos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">7.2M</div>
+        <div class="stat-label">Lines of Code</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">3/4</div>
+        <div class="stat-label">Fleet Online</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">27</div>
+        <div class="stat-label">Ollama Models</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Connected</div>
+    <div class="conn-grid">
+      <a href="../../agents/prism/" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> PRISM</a>
+      <a href="../../agents/oracle/" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> ORACLE</a>
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#00D4FF;"></span> ALICE</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Prism analyzes the data. Oracle reflects on fleet health trends. Alice runs the SSH probes.
+    </p>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>KPI System &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

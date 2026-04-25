@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gradient Wave — Road TV</title>
+  <meta name="description" content="A mesmerizing full-screen canvas animation of the BlackRoad gradient flowing as layered sine waves.">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .back-nav a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
+    }
+    .back-nav a:hover { color: #fff; }
+    .back-nav .title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      font-weight: 700; color: #fff;
+    }
+
+    .wave-container {
+      position: fixed; inset: 0;
+      background: #000;
+    }
+    .wave-container canvas {
+      width: 100%; height: 100%;
+    }
+
+    .info-panel {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .info-panel h2 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .info-panel p {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.45); line-height: 1.5;
+    }
+  </style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<script src="https://blackroad.io/fleet.js" defer></script>
+<script src="https://blackroad.io/search.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+</head>
+<body>
+
+  <div class="back-nav">
+    <a href="../../">&larr; Road TV</a>
+    <span class="title">Gradient Wave</span>
+    <span></span>
+  </div>
+
+  <div class="wave-container">
+    <canvas id="wave-canvas"></canvas>
+  </div>
+
+  <div class="info-panel">
+    <h2>Gradient Wave</h2>
+    <p>The BlackRoad gradient rendered as layered sine waves, each color flowing at its own frequency and amplitude. Pure canvas, zero libraries.</p>
+  </div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('wave-canvas');
+  const ctx = canvas.getContext('2d');
+
+  const colors = [
+    { hex: '#FF6B2B', r: 255, g: 107, b: 43 },
+    { hex: '#FF2255', r: 255, g: 34,  b: 85 },
+    { hex: '#CC00AA', r: 204, g: 0,   b: 170 },
+    { hex: '#8844FF', r: 136, g: 68,  b: 255 },
+    { hex: '#4488FF', r: 68,  g: 136, b: 255 },
+    { hex: '#00D4FF', r: 0,   g: 212, b: 255 }
+  ];
+
+  // Wave parameters for each layer
+  const waves = colors.map((c, i) => ({
+    color: c,
+    frequency: 0.003 + i * 0.0008,
+    amplitude: 60 + i * 12,
+    speed: 0.4 + i * 0.15,
+    yOffset: 0.35 + i * 0.07,
+    alpha: 0.35 - i * 0.03
+  }));
+
+  let w, h, dpr;
+  function resize() {
+    dpr = window.devicePixelRatio || 1;
+    w = canvas.width = window.innerWidth * dpr;
+    h = canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  let time = 0;
+
+  function draw() {
+    time += 0.016;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+
+    // Draw waves back to front
+    for (let wi = waves.length - 1; wi >= 0; wi--) {
+      const wave = waves[wi];
+      const c = wave.color;
+
+      // Draw multiple sub-waves per color for richness
+      for (let sub = 0; sub < 3; sub++) {
+        const freqMod = 1 + sub * 0.5;
+        const ampMod = 1 - sub * 0.25;
+        const alphaMod = 1 - sub * 0.3;
+        const speedMod = 1 + sub * 0.3;
+
+        ctx.beginPath();
+        const baseY = h * wave.yOffset + sub * 25 * dpr;
+
+        ctx.moveTo(0, h);
+        for (let x = 0; x <= w; x += 2) {
+          const y = baseY +
+            Math.sin(x * wave.frequency * freqMod + time * wave.speed * speedMod) * wave.amplitude * ampMod * dpr +
+            Math.sin(x * wave.frequency * 0.5 * freqMod + time * wave.speed * 0.7 * speedMod) * wave.amplitude * 0.5 * ampMod * dpr +
+            Math.sin(x * wave.frequency * 2.3 + time * 0.3) * 15 * dpr;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(w, h);
+        ctx.closePath();
+
+        const alpha = wave.alpha * alphaMod;
+        ctx.fillStyle = `rgba(${c.r},${c.g},${c.b},${alpha})`;
+        ctx.fill();
+      }
+    }
+
+    // Subtle horizontal glow line at center
+    const glowGrad = ctx.createLinearGradient(0, h * 0.5 - 2, 0, h * 0.5 + 2);
+    glowGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    glowGrad.addColorStop(0.5, 'rgba(255,255,255,0.03)');
+    glowGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glowGrad;
+    ctx.fillRect(0, h * 0.45, w, h * 0.1);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+</body>
+</html>

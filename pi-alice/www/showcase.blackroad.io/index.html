@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Watch BlackRoad's AI agents generate art in real-time. Four generation engines. One sovereign fleet.">
+<meta name="theme-color" content="#CC00AA">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<title>Agent Work Showcase — BlackRoad</title>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://blackroad.io/fleet.js" defer></script>
+<script src="https://blackroad.io/search.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script><style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;background:#000}
+body{background:#000;color:#f5f5f5;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
+:root{
+  --g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --b:#1a1a1a;--jb:'JetBrains Mono',monospace;--in:'Inter',sans-serif;
+}
+
+@keyframes gs{0%{background-position:0%}100%{background-position:200%}}
+@keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bp{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.4;transform:scaleY(.6)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,29,108,.4)}50%{box-shadow:0 0 0 12px rgba(255,29,108,0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%,100%{background-position:100% 0}50%{background-position:0% 0}}
+@keyframes paintStroke{0%{clip-path:inset(0 100% 0 0)}100%{clip-path:inset(0 0 0 0)}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.fi{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fi.v{opacity:1;transform:translateY(0)}
+
+/* Hero */
+.hero{text-align:center;padding:80px 24px 60px}
+.hero h1{font-size:clamp(36px,7vw,64px);font-weight:700;line-height:1.05;margin-bottom:20px;letter-spacing:-.04em;
+  color:#f5f5f5;animation:fu .6s ease .1s both}
+.hero p{font-family:var(--in);font-size:17px;color:#737373;max-width:560px;margin:0 auto 40px;line-height:1.7;animation:fu .6s ease .2s both}
+
+/* Agent badges */
+.agents-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:48px;animation:fu .6s ease .3s both}
+.agent-badge{display:flex;align-items:center;gap:8px;padding:10px 20px;border:1px solid var(--b);border-radius:4px;font-family:var(--jb);font-size:12px;transition:all .3s;cursor:default;position:relative;overflow:hidden}
+.agent-badge::before{content:'';position:absolute;inset:0;background:var(--g);opacity:0;transition:opacity .3s}
+.agent-badge:hover::before{opacity:.06}
+.agent-badge:hover{border-color:#333;transform:translateY(-2px)}
+.agent-dot{width:8px;height:8px;border-radius:50%;animation:pulse 2s ease infinite}
+.agent-badge .models{font-size:10px;color:#555}
+.agent-badge.generating{border-color:#FF2255;animation:pulse 1.5s ease infinite}
+
+/* Live draw button */
+.draw-btn{padding:16px 48px;border:none;border-radius:4px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite;color:#f5f5f5;font-size:16px;font-weight:700;cursor:pointer;font-family:'Space Grotesk';transition:transform .2s,box-shadow .2s;display:inline-flex;align-items:center;gap:10px}
+.draw-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(204,0,170,.3)}
+.draw-btn:disabled{opacity:.5;cursor:wait;transform:none}
+.draw-btn .spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.draw-btn.loading .spinner{display:block}
+.draw-btn.loading .btn-text{display:none}
+
+/* Prompt input */
+.prompt-section{max-width:700px;margin:0 auto 60px;animation:fu .6s ease .4s both}
+.prompt-row{display:flex;gap:10px;margin-bottom:12px}
+.prompt-input{flex:1;padding:16px 20px;background:#0a0a0a;color:#fff;border:1px solid var(--b);border-radius:4px;font-size:15px;font-family:var(--jb);outline:none;transition:border-color .2s}
+.prompt-input:focus{border-color:#CC00AA;box-shadow:0 0 20px rgba(204,0,170,.1)}
+.prompt-input::placeholder{color:#333}
+.options-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.opt-select{padding:10px 16px;background:#0a0a0a;color:#888;border:1px solid var(--b);border-radius:4px;font-family:var(--jb);font-size:12px;outline:none;cursor:pointer;transition:border-color .2s}
+.opt-select:focus{border-color:#4488FF}
+
+/* Canvas section */
+.canvas-section{max-width:1400px;margin:0 auto;padding:0 24px}
+.canvas-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.canvas-label{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.18em}
+.canvas-count{font-family:var(--jb);font-size:12px;color:#555}
+.canvas-count span{color:#f5f5f5}
+
+/* Gallery grid */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;margin-bottom:80px}
+
+/* Image card */
+.img-card{border:1px solid var(--b);border-radius:4px;overflow:hidden;background:#0a0a0a;transition:all .4s;position:relative;cursor:pointer}
+.img-card:hover{border-color:#333;transform:translateY(-4px);box-shadow:0 12px 40px rgba(136,68,255,.08)}
+.img-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block;background:#111}
+.img-card.painting img{animation:paintStroke 1.5s ease both}
+.img-meta{padding:16px}
+.img-prompt{font-size:12px;color:#888;line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.img-tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.tag{padding:3px 10px;border-radius:4px;font-family:var(--jb);font-size:10px;border:1px solid}
+.tag-provider{border-color:#FF225533;color:#ccc}
+.tag-model{border-color:#8844FF33;color:#ccc}
+.tag-size{border-color:#1a1a1a;color:#555}
+.tag-time{border-color:#1a1a1a;color:#444;margin-left:auto}
+
+/* Generating placeholder */
+.img-card.generating .img-placeholder{aspect-ratio:1;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;overflow:hidden}
+.img-card.generating .img-placeholder::before{content:'';position:absolute;inset:0;background:linear-gradient(45deg,transparent 40%,rgba(204,0,170,.03) 50%,transparent 60%);background-size:300% 300%;animation:gs 3s linear infinite}
+.gen-spinner{width:32px;height:32px;border:2px solid #1a1a1a;border-top-color:#CC00AA;border-radius:50%;animation:spin .8s linear infinite}
+.gen-label{font-family:var(--jb);font-size:11px;color:#333}
+.gen-agent-name{color:#ccc}
+
+/* Live log */
+.live-log{max-width:1400px;margin:0 auto 60px;padding:0 24px}
+.log-terminal{border:1px solid var(--b);border-radius:4px;overflow:hidden;max-height:200px;overflow-y:auto}
+.log-bar{display:flex;gap:6px;padding:10px 14px;border-bottom:1px solid var(--b);background:#060606}
+.log-dot{width:7px;height:7px;border-radius:50%}
+.log-title{font-family:var(--jb);font-size:10px;color:#333;margin-left:auto;text-transform:uppercase;letter-spacing:.1em}
+.log-body{padding:12px 16px;font-family:var(--jb);font-size:11px;line-height:1.8;color:#555;background:#030303}
+.log-line{margin-bottom:2px}
+.log-time{color:#333}.log-ok{color:#FF6B2B}.log-gen{color:#aaa}.log-err{color:#ff6b8a}.log-info{color:#bbb}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1000;display:none;align-items:center;justify-content:center;cursor:pointer;padding:40px}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:85vh;border-radius:4px;box-shadow:0 0 80px rgba(0,0,0,.9)}
+.lb-close{position:absolute;top:20px;right:28px;color:#555;font-size:28px;cursor:pointer;background:none;border:none;transition:color .2s}.lb-close:hover{color:#fff}
+.lb-info{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);background:#111;border:1px solid #222;border-radius:4px;padding:14px 24px;font-family:var(--jb);font-size:12px;color:#888;max-width:600px;text-align:center}
+
+/* Stats bar */
+.stats-bar{display:flex;gap:32px;justify-content:center;padding:24px;border-top:1px solid var(--b);border-bottom:1px solid var(--b);margin-bottom:60px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-val{font-size:32px;font-weight:700;letter-spacing:-.03em}
+.stat-label{font-family:var(--jb);font-size:10px;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+
+/* Filter tabs */
+.filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.filter-tab{padding:6px 16px;border:1px solid var(--b);border-radius:4px;font-family:var(--jb);font-size:11px;color:#555;cursor:pointer;background:none;transition:all .2s}
+.filter-tab:hover{border-color:#444;color:#888}
+.filter-tab.active{border-image:var(--g) 1;color:#f5f5f5}
+
+/* View toggle */
+.view-toggle{display:flex;gap:0}
+.view-btn{padding:4px 12px;border:1px solid var(--b);font-family:var(--jb);font-size:10px;color:#555;cursor:pointer;background:none;transition:all .2s;text-transform:uppercase;letter-spacing:.1em}
+.view-btn:first-child{border-radius:4px 0 0 4px}
+.view-btn:last-child{border-radius:0 4px 4px 0;border-left:none}
+.view-btn:hover{border-color:#444;color:#888}
+.view-btn.active{border-image:var(--g) 1;color:#f5f5f5}
+
+/* List view */
+.gallery.list-view{grid-template-columns:1fr;gap:10px}
+.gallery.list-view .img-card{display:flex;flex-direction:row}
+.gallery.list-view .img-card img{width:150px;aspect-ratio:auto;height:auto;min-height:100px;max-height:150px}
+.gallery.list-view .img-card .img-meta{flex:1;display:flex;flex-direction:column;justify-content:center}
+
+/* Card action bar */
+.img-actions{display:flex;gap:8px;margin-top:10px}
+.img-action-btn{padding:3px 10px;border:1px solid var(--b);border-radius:4px;font-family:var(--jb);font-size:10px;color:#444;cursor:pointer;background:none;transition:all .2s}
+.img-action-btn:hover{border-color:#555;color:#888}
+
+/* Footer */
+footer{border-top:1px solid var(--b);padding:48px 32px;max-width:1400px;margin:0 auto}
+.fti{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.ftl{display:flex;gap:24px}.ftl a{font-family:var(--in);font-size:13px;color:#737373;text-decoration:none}.ftl a:hover{color:#f5f5f5}
+
+/* Presets */
+.presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.preset{padding:6px 14px;border:1px solid var(--b);border-radius:4px;font-family:var(--jb);font-size:11px;color:#555;cursor:pointer;transition:all .2s;background:none}
+.preset:hover{border-color:#444;color:#888;transform:translateY(-1px)}
+
+@media(max-width:768px){
+  .hero{padding:60px 16px 40px}
+  .gallery{grid-template-columns:1fr 1fr;gap:10px}
+  .prompt-row{flex-direction:column}
+  .stats-bar{gap:16px;padding:16px}
+  .stat-val{font-size:24px}
+  .fti{flex-direction:column;text-align:center}
+}
+@media(max-width:480px){.gallery{grid-template-columns:1fr}}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+<section class="hero">
+  <h1>Agent Work Showcase</h1>
+  <p>Watch four AI generation agents draw in real-time. Give them a prompt, pick an engine, and see what they create.</p>
+</section>
+
+<div class="agents-row" id="agentsRow"></div>
+
+<div class="prompt-section">
+  <div class="prompt-row">
+    <input type="text" class="prompt-input" id="promptInput" placeholder="Describe what the agents should draw..." value="A futuristic robot riding a motorcycle on a neon highway through space">
+    <button class="draw-btn" id="drawBtn" onclick="generateAll()">
+      <span class="btn-text">Draw</span>
+      <div class="spinner"></div>
+    </button>
+  </div>
+  <div class="presets" id="presets"></div>
+  <div class="options-row">
+    <select class="opt-select" id="sizeSelect">
+      <option value="1024x1024">1024 x 1024</option>
+      <option value="1024x768">1024 x 768</option>
+      <option value="768x1024">768 x 1024</option>
+      <option value="1280x720">1280 x 720</option>
+    </select>
+    <select class="opt-select" id="modeSelect">
+      <option value="all">All Agents (Race)</option>
+      <option value="together">Together Only</option>
+      <option value="fal">Fal Only</option>
+      <option value="replicate">Replicate Only</option>
+      <option value="openai">OpenAI Only</option>
+    </select>
+  </div>
+</div>
+
+<div class="stats-bar fi">
+  <div class="stat"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Images Generated</div></div>
+  <div class="stat"><div class="stat-val" id="statAgents">4</div><div class="stat-label">Active Agents</div></div>
+  <div class="stat"><div class="stat-val" id="statSize">0</div><div class="stat-label">MB Created</div></div>
+  <div class="stat"><div class="stat-val" id="statProviders">0</div><div class="stat-label">Providers</div></div>
+</div>
+
+<div class="live-log">
+  <div class="log-terminal">
+    <div class="log-bar">
+      <div class="log-dot" style="background:#FF2255"></div>
+      <div class="log-dot" style="background:#FF6B2B"></div>
+      <div class="log-dot" style="background:#00D4FF"></div>
+      <div class="log-title">Agent Activity Log</div>
+    </div>
+    <div class="log-body" id="logBody">
+      <div class="log-line"><span class="log-time">[--:--:--]</span> <span class="log-info">Showcase initialized. 4 agents standing by.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="canvas-section">
+  <div class="canvas-header">
+    <div style="display:flex;align-items:center;gap:16px">
+      <div class="canvas-label">Generated Works</div>
+      <div class="view-toggle">
+        <button class="view-btn active" data-view="grid" onclick="setView('grid')">Grid</button>
+        <button class="view-btn" data-view="list" onclick="setView('list')">List</button>
+      </div>
+    </div>
+    <div class="canvas-count"><span id="galleryCount">0</span> images in gallery</div>
+  </div>
+  <div class="filter-tabs" id="filterTabs">
+    <button class="filter-tab active" data-filter="all" onclick="filterGallery('all')">All</button>
+    <button class="filter-tab" data-filter="together" onclick="filterGallery('together')">Together</button>
+    <button class="filter-tab" data-filter="fal" onclick="filterGallery('fal')">Fal</button>
+    <button class="filter-tab" data-filter="replicate" onclick="filterGallery('replicate')">Replicate</button>
+    <button class="filter-tab" data-filter="openai" onclick="filterGallery('openai')">OpenAI</button>
+    <button class="filter-tab" data-filter="brand" onclick="filterGallery('brand')">Brand</button>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- Watch on Road TV -->
+<section style="max-width:1400px;margin:0 auto 60px;padding:0 24px">
+  <div style="font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.18em;margin-bottom:20px">Watch on Road TV</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">
+    <a href="https://roadtv.blackroad.io/watch/fleet-pulse/" style="text-decoration:none;border:1px solid var(--b);border-radius:4px;padding:20px;background:#0a0a0a;transition:all .3s;display:block" onmouseover="this.style.borderColor='#333';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="font-family:var(--jb);font-size:10px;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Episode</div>
+      <div style="font-size:15px;font-weight:600;color:#f5f5f5;margin-bottom:8px">Fleet Pulse</div>
+      <div style="font-family:var(--in);font-size:12px;color:#555;line-height:1.6">Real-time node visualization</div>
+    </a>
+    <a href="https://roadtv.blackroad.io/watch/soul-chain-live/" style="text-decoration:none;border:1px solid var(--b);border-radius:4px;padding:20px;background:#0a0a0a;transition:all .3s;display:block" onmouseover="this.style.borderColor='#333';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="font-family:var(--jb);font-size:10px;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Episode</div>
+      <div style="font-size:15px;font-weight:600;color:#f5f5f5;margin-bottom:8px">Soul Chain Live</div>
+      <div style="font-family:var(--in);font-size:12px;color:#555;line-height:1.6">Block chain appending</div>
+    </a>
+    <a href="https://roadtv.blackroad.io/watch/gradient-wave/" style="text-decoration:none;border:1px solid var(--b);border-radius:4px;padding:20px;background:#0a0a0a;transition:all .3s;display:block" onmouseover="this.style.borderColor='#333';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="font-family:var(--jb);font-size:10px;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Episode</div>
+      <div style="font-size:15px;font-weight:600;color:#f5f5f5;margin-bottom:8px">Gradient Wave</div>
+      <div style="font-family:var(--in);font-size:12px;color:#555;line-height:1.6">BlackRoad gradient animation</div>
+    </a>
+    <a href="https://roadtv.blackroad.io/watch/circuit-board-demo/" style="text-decoration:none;border:1px solid var(--b);border-radius:4px;padding:20px;background:#0a0a0a;transition:all .3s;display:block" onmouseover="this.style.borderColor='#333';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='';this.style.transform=''">
+      <div style="font-family:var(--jb);font-size:10px;color:#444;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Episode</div>
+      <div style="font-size:15px;font-weight:600;color:#f5f5f5;margin-bottom:8px">Circuit Board</div>
+      <div style="font-family:var(--in);font-size:12px;color:#555;line-height:1.6">PCB trace animation</div>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div style="height:2px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite;margin-bottom:32px"></div>
+  <div class="fti">
+    <div style="font-weight:700;font-size:16px">BlackRoad</div>
+    <div class="ftl">
+      <a href="https://blackroad.io">Platform</a>
+      <a href="https://images.blackroad.io">Image Hub</a>
+      <a href="https://github.com/blackboxprogramming">GitHub</a>
+      <a href="https://db.blackroad.io">Database</a>
+    </div>
+    <div style="font-family:var(--jb);font-size:11px;color:#333">&copy; 2026 BlackRoad</div>
+  </div>
+</footer>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <button class="lb-close">&times;</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-info" id="lbInfo"></div>
+</div>
+
+<script>
+const API = 'https://images.blackroad.io';
+const $  = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const S  = ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'];
+
+// ── Fade in observer ──
+const obs = new IntersectionObserver(e => {
+  e.forEach(n => { if(n.isIntersecting){n.target.classList.add('v');obs.unobserve(n.target)} });
+}, {threshold:.1});
+$$('.fi').forEach(el => obs.observe(el));
+
+// ── Presets ──
+const presetPrompts = [
+  'A pixel robot surfing on a rainbow wave through cyberspace',
+  'Cyberpunk samurai standing on a rooftop overlooking a neon city',
+  'A glowing tree of knowledge with circuit board roots',
+  'Abstract neural network visualization, dark background, neon gradients',
+  'A fleet of tiny robots building a bridge between two floating islands',
+  'Quantum computer core with entangled particles, black and neon',
+  'An AI agent avatar meditating in a zen garden made of code',
+  'A road that turns into a galaxy, vanishing point perspective',
+];
+const presetsEl = $('#presets');
+presetPrompts.forEach(p => {
+  const btn = document.createElement('button');
+  btn.className = 'preset';
+  btn.textContent = p.slice(0, 40) + '...';
+  btn.title = p;
+  btn.onclick = () => { $('#promptInput').value = p; };
+  presetsEl.appendChild(btn);
+});
+
+// ── Agents ──
+const AGENTS = [
+  { name: 'together', color: '#FF2255', models: ['flux-schnell','flux-1.1-pro','sdxl'], defaultModel: 'flux-schnell' },
+  { name: 'fal',      color: '#00D4FF', models: ['flux-schnell','flux-pro','flux-dev'], defaultModel: 'flux-schnell' },
+  { name: 'replicate', color: '#8844FF', models: ['flux-schnell','flux-1.1-pro','sdxl'], defaultModel: 'flux-schnell' },
+  { name: 'openai',   color: '#FF6B2B', models: ['dall-e-3','dall-e-2'], defaultModel: 'dall-e-3' },
+];
+
+const agentsRow = $('#agentsRow');
+AGENTS.forEach(a => {
+  const el = document.createElement('div');
+  el.className = 'agent-badge';
+  el.id = 'badge-' + a.name;
+  el.innerHTML = `<div class="agent-dot" style="background:${a.color}"></div>
+    <span style="color:#ccc">${a.name}</span>
+    <span class="models">${a.models[0]}</span>`;
+  agentsRow.appendChild(el);
+});
+
+// ── Log ──
+function log(msg, type='info') {
+  const t = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+  const body = $('#logBody');
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">[${t}]</span> <span class="log-${type}">${msg}</span>`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
+
+// ── Stats ──
+async function loadStats() {
+  try {
+    const res = await fetch(API + '/api/stats');
+    const data = await res.json();
+    $('#statTotal').textContent = data.total_images;
+    $('#statSize').textContent = data.total_size_mb;
+    $('#statProviders').textContent = data.by_provider.length;
+  } catch(e) {}
+}
+
+// ── Load existing gallery ──
+async function loadGallery() {
+  try {
+    const res = await fetch(API + '/api/search?q=*&limit=50');
+    const data = await res.json();
+    const results = data.results || [];
+    results.forEach(img => addImageCard(img, false));
+    $('#galleryCount').textContent = results.length;
+  } catch(e) {
+    log('Failed to load gallery: ' + e.message, 'err');
+  }
+}
+
+// ── Add image card ──
+function addImageCard(img, prepend=true, animate=true) {
+  const card = document.createElement('div');
+  card.className = 'img-card' + (animate ? ' painting' : '');
+  card.setAttribute('data-provider', (img.provider || '').toLowerCase());
+  const url = img.url || `${API}/img/${img.id}.${img.format||'png'}`;
+  const timeDiff = img.created_at ? timeAgo(img.created_at) : '';
+  card.innerHTML = `
+    <img src="${url}" alt="${esc(img.prompt)}" loading="lazy">
+    <div class="img-meta">
+      <div class="img-prompt">${esc(img.prompt || 'Untitled')}</div>
+      <div class="img-tags">
+        ${img.provider ? `<span class="tag tag-provider">${esc(img.provider)}</span>` : ''}
+        ${img.model ? `<span class="tag tag-model">${esc(img.model)}</span>` : ''}
+        ${img.width ? `<span class="tag tag-size">${img.width}x${img.height}</span>` : ''}
+        ${timeDiff ? `<span class="tag tag-time">${timeDiff}</span>` : ''}
+      </div>
+      <div class="img-actions">
+        <button class="img-action-btn" onclick="event.stopPropagation();window.open('${esc(url)}','_blank')">Download</button>
+        <button class="img-action-btn" onclick="event.stopPropagation();copyLink('${esc(url)}',this)">Copy Link</button>
+      </div>
+    </div>`;
+  card.onclick = () => openLightbox(url, img.prompt || '', img.provider, img.model);
+  const gallery = $('#gallery');
+  if (prepend) gallery.prepend(card); else gallery.appendChild(card);
+  $('#galleryCount').textContent = gallery.children.length;
+}
+
+// ── Generating placeholder ──
+function addPlaceholder(agent) {
+  const card = document.createElement('div');
+  card.className = 'img-card generating';
+  card.id = 'gen-' + agent.name;
+  card.innerHTML = `
+    <div class="img-placeholder">
+      <div class="gen-spinner" style="border-top-color:${agent.color}"></div>
+      <div class="gen-label"><span class="gen-agent-name">${agent.name}</span> is drawing...</div>
+    </div>
+    <div class="img-meta">
+      <div class="img-prompt" style="color:#333">Generating...</div>
+      <div class="img-tags"><span class="tag tag-provider">${agent.name}</span></div>
+    </div>`;
+  $('#gallery').prepend(card);
+}
+
+function removePlaceholder(agentName) {
+  const el = document.getElementById('gen-' + agentName);
+  if (el) el.remove();
+}
+
+// ── Generate ──
+let generating = false;
+
+async function generateOne(agent, prompt, size) {
+  const badge = document.getElementById('badge-' + agent.name);
+  badge.classList.add('generating');
+  log(`${agent.name} started generating...`, 'gen');
+  addPlaceholder(agent);
+
+  const start = Date.now();
+  try {
+    const res = await fetch(API + '/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        prompt,
+        provider: agent.name,
+        model: agent.defaultModel,
+        size,
+        source_node: 'showcase'
+      })
+    });
+    const data = await res.json();
+    const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+
+    removePlaceholder(agent.name);
+    badge.classList.remove('generating');
+
+    if (data.ok) {
+      log(`${agent.name} finished in ${elapsed}s — ${(data.size/1024).toFixed(0)}KB`, 'ok');
+      addImageCard({
+        id: data.id,
+        url: API + data.url,
+        prompt: data.revised_prompt || prompt,
+        provider: data.provider || agent.name,
+        model: data.model || agent.defaultModel,
+        width: size.split('x')[0],
+        height: size.split('x')[1],
+        format: 'png',
+        created_at: new Date().toISOString()
+      }, true, true);
+      return true;
+    } else {
+      log(`${agent.name} error: ${data.error}`, 'err');
+      return false;
+    }
+  } catch(e) {
+    removePlaceholder(agent.name);
+    badge.classList.remove('generating');
+    log(`${agent.name} failed: ${e.message}`, 'err');
+    return false;
+  }
+}
+
+async function generateAll() {
+  if (generating) return;
+  generating = true;
+  const btn = $('#drawBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  const prompt = $('#promptInput').value.trim();
+  if (!prompt) { generating = false; btn.classList.remove('loading'); btn.disabled = false; return; }
+
+  const size = $('#sizeSelect').value;
+  const mode = $('#modeSelect').value;
+
+  log(`Prompt: "${prompt.slice(0,80)}${prompt.length>80?'...':''}"`, 'info');
+
+  const agents = mode === 'all' ? AGENTS : AGENTS.filter(a => a.name === mode);
+  log(`Dispatching to ${agents.length} agent${agents.length>1?'s':''}...`, 'info');
+
+  // Fire all agents in parallel (race mode)
+  const promises = agents.map(a => generateOne(a, prompt, size));
+  await Promise.allSettled(promises);
+
+  log('All agents finished.', 'info');
+  generating = false;
+  btn.classList.remove('loading');
+  btn.disabled = false;
+  loadStats();
+}
+
+// ── Enter key ──
+$('#promptInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') generateAll();
+});
+
+// ── Lightbox ──
+const lightbox = $('#lightbox');
+function openLightbox(url, prompt, provider, model) {
+  $('#lbImg').src = url;
+  $('#lbInfo').textContent = `${prompt || ''} — ${provider || ''} / ${model || ''}`;
+  lightbox.classList.add('open');
+}
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox || e.target.classList.contains('lb-close')) lightbox.classList.remove('open');
+});
+document.addEventListener('keydown', e => { if(e.key==='Escape') lightbox.classList.remove('open'); });
+
+// ── Helpers ──
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeAgo(iso) {
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  return Math.floor(s/86400) + 'd ago';
+}
+
+// ── Filter gallery by provider ──
+function filterGallery(provider) {
+  $$('.filter-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.filter-tab[data-filter="${provider}"]`).classList.add('active');
+  $$('#gallery .img-card').forEach(card => {
+    if (provider === 'all') {
+      card.style.display = '';
+    } else {
+      card.style.display = card.getAttribute('data-provider') === provider ? '' : 'none';
+    }
+  });
+}
+
+// ── View toggle (grid / list) ──
+function setView(mode) {
+  const gallery = $('#gallery');
+  $$('.view-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.view-btn[data-view="${mode}"]`).classList.add('active');
+  if (mode === 'list') {
+    gallery.classList.add('list-view');
+  } else {
+    gallery.classList.remove('list-view');
+  }
+}
+
+// ── Copy link to clipboard ──
+function copyLink(url, btn) {
+  navigator.clipboard.writeText(url).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  });
+}
+
+// ── Curated Brand Gallery (hardcoded) ──
+const BRAND_GALLERY = [
+  { id:'hero-neon-city', url:API+'/hero-neon-city.png', prompt:'BlackRoad neon city — mascot running the road through a cyberpunk skyline', provider:'brand', model:'ai-generated', format:'png', width:1024, height:576 },
+  { id:'app-icon', url:API+'/app-icon.png', prompt:'BlackRoad app icon — neon B road with mascot, rounded square', provider:'brand', model:'ai-generated', format:'png', width:1024, height:1024 },
+  { id:'mascot-color', url:API+'/mascot-color.png', prompt:'BlackRoad mascot — pixel robot agent in blue, running pose', provider:'brand', model:'ai-generated', format:'png', width:1024, height:1024 },
+  { id:'logo-b-bw', url:API+'/logo-b-bw.png', prompt:'BlackRoad B logo — black and white road letterform', provider:'brand', model:'vector', format:'png', width:1024, height:1024 },
+  { id:'app-icon-circle', url:API+'/app-icon-circle.png', prompt:'BlackRoad circular icon — neon B road with mascot on black circle', provider:'brand', model:'ai-generated', format:'png', width:1024, height:1024 },
+  { id:'hero-banner', url:API+'/hero-banner.png', prompt:'Agent fleet — pixel robots running on data highways through the machine', provider:'brand', model:'ai-generated', format:'png', width:1366, height:784 },
+  { id:'mascot', url:API+'/mascot.png', prompt:'BlackRoad mascot — transparent background, running pixel robot', provider:'brand', model:'ai-generated', format:'png', width:1024, height:1024 },
+  { id:'logo-b', url:API+'/logo-b.png', prompt:'BlackRoad B logo — bold black letterform with highway center line', provider:'brand', model:'vector', format:'png', width:1080, height:1080 },
+];
+
+// Load curated first, then API gallery
+BRAND_GALLERY.forEach(img => addImageCard(img, false, false));
+
+// ── Init ──
+loadStats();
+loadGallery();
+</script>
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:system-ui;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don’t collect your data because we don’t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById('br-consent').remove();localStorage.setItem('br-consent-seen','1')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button><button onclick="document.getElementById('br-consent').remove();localStorage.setItem('br-consent-seen','1')" style="padding:10px 20px;background:transparent;color:#737373;border:1px solid #222;border-radius:4px;font-size:13px;cursor:pointer;font-family:inherit">Dismiss</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+<script src="https://cdn.blackroad.io/br.js" defer></script></body>
+</html>
