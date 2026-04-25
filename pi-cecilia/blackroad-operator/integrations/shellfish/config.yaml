@@ -1,0 +1,61 @@
+# Shellfish — BlackRoad OS Integration
+# iOS SSH/SFTP client
+
+name: shellfish
+category: mobile-tools
+status: active
+
+platform: ios
+app_store: Shellfish — SSH/SFTP
+
+capabilities:
+  - ssh_terminal
+  - sftp_file_transfer
+  - port_forwarding
+  - key_management
+  - files_app_integration
+  - shortcuts_automation
+
+connections:
+  - name: blackroad-pi
+    host: 192.168.4.64
+    user: pi
+    auth: ssh_key
+    group: raspberry-pi
+
+  - name: aria64
+    host: 192.168.4.38
+    user: pi
+    auth: ssh_key
+    group: raspberry-pi
+
+  - name: alice-pi
+    host: 192.168.4.49
+    user: alice
+    auth: ssh_key
+    group: raspberry-pi
+
+  - name: infinity-droplet
+    host: 159.65.43.12
+    user: root
+    auth: ssh_key
+    group: digitalocean
+
+shortcuts:
+  - name: SSH BlackRoad Pi
+    action: connect
+    host: blackroad-pi
+  - name: Deploy to Fleet
+    action: run_command
+    host: blackroad-pi
+    command: ./pi-deploy/deploy-to-pis.sh
+  - name: Check Ollama
+    action: run_command
+    host: blackroad-pi
+    command: curl -s http://localhost:11434/api/tags
+
+notes: |
+  Shellfish provides native iOS SSH access to the entire fleet.
+  SFTP enables direct file management from iPhone/iPad.
+  Integrates with iOS Files app for seamless file transfer.
+  Shortcuts enable automated SSH operations.

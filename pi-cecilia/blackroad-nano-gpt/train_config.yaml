@@ -1,0 +1,67 @@
+# BlackRoad NanoGPT Training Configuration
+# All hyperparameters for training blackroad-nano-gpt on Raspberry Pi 5
+
+# Model architecture
+model:
+  vocab_size: 4096
+  n_embd: 512
+  n_head: 8
+  n_layer: 6
+  block_size: 512
+  dropout: 0.1
+
+# Training
+training:
+  batch_size: 4
+  gradient_accumulation_steps: 8
+  max_epochs: 15
+  learning_rate: 6.0e-4
+  min_learning_rate: 6.0e-5
+  warmup_steps: 200
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  grad_clip: 1.0
+  scheduler: cosine
+
+# Data
+data:
+  train_path: data/train.bin
+  val_path: data/val.bin
+  meta_path: data/meta.json
+  source_dir: /home/blackroad/blackroad-source
+  val_split: 0.1
+
+# Tokenizer
+tokenizer:
+  vocab_size: 4096
+  save_path: data/tokenizer.json
+
+# Checkpointing
+checkpointing:
+  dir: checkpoints
+  every_n_steps: 1000
+  keep_last_n: 5
+  save_best: true
+
+# Logging
+logging:
+  dir: logs
+  log_every_n_steps: 10
+  sample_every_n_steps: 2000
+  sample_dir: samples
+  sample_length: 256
+  sample_temperature: 0.8
+  sample_top_k: 40
+
+# Evaluation
+eval:
+  every_n_steps: 500
+  val_batches: 50
+
+# Hardware (Pi 5 optimizations)
+hardware:
+  device: cpu
+  dtype: float32
+  num_workers: 0
+  pin_memory: false

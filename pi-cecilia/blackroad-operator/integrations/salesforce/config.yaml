@@ -1,0 +1,54 @@
+# Salesforce — BlackRoad OS Integration
+# https://developer.salesforce.com/docs/atlas.en-us.api_rest.meta
+
+name: salesforce
+category: crm
+status: active
+api_base: https://{instance}.salesforce.com/services/data/v62.0
+
+auth:
+  type: oauth2
+  instance_url_env: SALESFORCE_INSTANCE_URL
+  access_token_env: SALESFORCE_ACCESS_TOKEN
+  client_id_env: SALESFORCE_CLIENT_ID
+  client_secret_env: SALESFORCE_CLIENT_SECRET
+  token_url: https://login.salesforce.com/services/oauth2/token
+
+endpoints:
+  sobjects:
+    describe: GET /sobjects
+    describe_object: GET /sobjects/{sobject}
+    create: POST /sobjects/{sobject}
+    get: GET /sobjects/{sobject}/{id}
+    update: PATCH /sobjects/{sobject}/{id}
+    delete: DELETE /sobjects/{sobject}/{id}
+  query:
+    soql: GET /query?q={soql}
+    next: GET /query/{nextRecordsUrl}
+  search:
+    sosl: GET /search?q={sosl}
+  composite:
+    batch: POST /composite/batch
+    tree: POST /composite/tree/{sobject}
+
+objects:
+  - Account
+  - Contact
+  - Opportunity
+  - Lead
+  - Case
+  - Task
+  - Event
+  - Campaign
+  - Product2
+  - PricebookEntry
+
+lwc_project:
+  path: blackroad-sf/
+  test_command: npm test
+  lint_command: npm run lint
+
+health_check:
+  endpoint: GET /limits
+  interval: 600
+  timeout: 15

@@ -1,0 +1,64 @@
+# Stripe Payments — BlackRoad OS Integration
+# https://docs.stripe.com/api
+
+name: stripe
+category: payments
+status: active
+api_base: https://api.stripe.com/v1
+
+auth:
+  type: bearer_token
+  env: STRIPE_SECRET_KEY
+  publishable_env: STRIPE_PUBLISHABLE_KEY
+
+endpoints:
+  customers:
+    list: GET /customers
+    create: POST /customers
+    get: GET /customers/{id}
+    update: POST /customers/{id}
+  charges:
+    create: POST /charges
+    list: GET /charges
+    get: GET /charges/{id}
+  subscriptions:
+    create: POST /subscriptions
+    list: GET /subscriptions
+    get: GET /subscriptions/{id}
+    cancel: DELETE /subscriptions/{id}
+  invoices:
+    create: POST /invoices
+    list: GET /invoices
+    get: GET /invoices/{id}
+    finalize: POST /invoices/{id}/finalize
+    send: POST /invoices/{id}/send
+  products:
+    create: POST /products
+    list: GET /products
+    get: GET /products/{id}
+  prices:
+    create: POST /prices
+    list: GET /prices
+  payment_intents:
+    create: POST /payment_intents
+    confirm: POST /payment_intents/{id}/confirm
+  checkout:
+    create_session: POST /checkout/sessions
+
+webhooks:
+  events:
+    - payment_intent.succeeded
+    - payment_intent.failed
+    - customer.subscription.created
+    - customer.subscription.updated
+    - customer.subscription.deleted
+    - invoice.paid
+    - invoice.payment_failed
+    - checkout.session.completed
+  endpoint: /webhooks/stripe
+  secret_env: STRIPE_WEBHOOK_SECRET
+
+health_check:
+  endpoint: GET /balance
+  interval: 300
+  timeout: 10

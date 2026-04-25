@@ -1,0 +1,43 @@
+# Grok (xAI) — BlackRoad OS Integration
+# https://docs.x.ai/api
+
+name: grok
+category: ai-providers
+status: active
+api_base: https://api.x.ai/v1
+
+auth:
+  type: bearer_token
+  env: XAI_API_KEY
+
+endpoints:
+  chat:
+    create: POST /chat/completions
+  completions:
+    create: POST /completions
+  embeddings:
+    create: POST /embeddings
+  models:
+    list: GET /models
+
+models:
+  - id: grok-3
+    purpose: advanced-reasoning
+  - id: grok-3-mini
+    purpose: fast-reasoning
+  - id: grok-2
+    purpose: general
+
+features:
+  - function_calling
+  - real_time_search
+  - streaming
+  - vision
+
+gateway_route: /v1/xai
+default_model: grok-3
+
+health_check:
+  endpoint: GET /models
+  interval: 300
+  timeout: 10

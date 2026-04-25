@@ -1,0 +1,145 @@
+{
+  "_metadata": {
+    "created_at": "2026-02-28T00:00:00Z",
+    "owner": "BlackRoad OS, Inc.",
+    "priority": "CRITICAL",
+    "target_org": "BlackRoad-OS-Inc",
+    "returns_to": "BlackRoad-OS-Inc/blackroad-operator"
+  },
+  "urgent_tasks": [
+    {
+      "id": "URGENT-001",
+      "title": "Index all 17 orgs — complete repo scrape",
+      "status": "READY",
+      "priority": "P0",
+      "command": "./scrapers/scrape-all-orgs.sh all",
+      "output": "scrapers/output/org-index.json",
+      "depends_on": [],
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-002",
+      "title": "Scan all repos for production-ready products",
+      "status": "READY",
+      "priority": "P0",
+      "command": "./scrapers/scrape-products.sh",
+      "output": "scrapers/output/products-urgent.json",
+      "depends_on": ["URGENT-001"],
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-003",
+      "title": "Deploy E2E workflows to all repos",
+      "status": "READY",
+      "priority": "P0",
+      "command": "gh workflow run deploy-to-all-repos.yml --field target_orgs=all --field dry_run=false --field workflow_set=all",
+      "depends_on": ["URGENT-002"],
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-004",
+      "title": "Configure Stripe products in dashboard",
+      "status": "BLOCKED",
+      "priority": "P0",
+      "blocker": "Needs STRIPE_SECRET_KEY in GitHub Secrets",
+      "products": [
+        {"name": "BlackRoad OS Pro", "price": "$49/mo"},
+        {"name": "BlackRoad OS Enterprise", "price": "$299/mo"},
+        {"name": "Agent Credits", "price": "$10/pack"},
+        {"name": "BlackRoad API Access", "price": "$99/mo"}
+      ],
+      "config": "integrations/stripe/stripe-config.ts",
+      "assignee": "admin"
+    },
+    {
+      "id": "URGENT-005",
+      "title": "Configure Clerk auth for BlackRoad.io",
+      "status": "BLOCKED",
+      "priority": "P0",
+      "blocker": "Needs CLERK_SECRET_KEY in GitHub Secrets",
+      "orgs_to_create": [
+        "blackroad-os-inc",
+        "blackroad-os",
+        "blackroad-ai",
+        "blackroad-cloud",
+        "blackroad-security"
+      ],
+      "config": "integrations/clerk/clerk-config.ts",
+      "assignee": "admin"
+    },
+    {
+      "id": "URGENT-006",
+      "title": "Deploy webhook handlers to Cloudflare Workers",
+      "status": "READY",
+      "priority": "P1",
+      "workers": [
+        "stripe-webhooks.blackroad.workers.dev",
+        "clerk-webhooks.blackroad.workers.dev"
+      ],
+      "config": "integrations/e2e/e2e-config.ts",
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-007",
+      "title": "Set up cross-org GitHub token for workflow deployment",
+      "status": "BLOCKED",
+      "priority": "P0",
+      "blocker": "Needs CROSS_ORG_TOKEN with admin:org scope on all 17 orgs",
+      "secret_name": "CROSS_ORG_TOKEN",
+      "assignee": "admin"
+    },
+    {
+      "id": "URGENT-008",
+      "title": "Run daily scraper via GitHub Actions schedule",
+      "status": "READY",
+      "priority": "P1",
+      "workflow": ".github/workflows/scrape-and-index.yml",
+      "schedule": "0 2 * * *",
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-009",
+      "title": "Deep scan top 50 repos for ROI scoring",
+      "status": "READY",
+      "priority": "P1",
+      "command": "for repo in $(jq -r '.products[:50][].full_name' scrapers/output/products-urgent.json); do ./scrapers/scrape-repo-deep.sh $repo >> scrapers/output/deep-scans.jsonl; done",
+      "assignee": "operator"
+    },
+    {
+      "id": "URGENT-010",
+      "title": "BlackRoad.io E2E launch checklist",
+      "status": "BLOCKED",
+      "priority": "P0",
+      "checklist": [
+        {"item": "Stripe products created", "done": false},
+        {"item": "Clerk app configured", "done": false},
+        {"item": "Database provisioned", "done": false},
+        {"item": "Domains verified", "done": false},
+        {"item": "Webhooks live", "done": false},
+        {"item": "CI/CD on all repos", "done": false},
+        {"item": "Monitoring active", "done": false},
+        {"item": "SSL/TLS verified", "done": false}
+      ],
+      "assignee": "admin"
+    }
+  ],
+  "secrets_required": {
+    "github_repo_secrets": [
+      "STRIPE_SECRET_KEY",
+      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "STRIPE_PRICE_PRO_MONTHLY",
+      "STRIPE_PRICE_ENTERPRISE_MONTHLY",
+      "STRIPE_PRICE_CREDITS",
+      "STRIPE_PRICE_API_MONTHLY",
+      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+      "CLERK_SECRET_KEY",
+      "CLERK_WEBHOOK_SECRET",
+      "CROSS_ORG_TOKEN",
+      "DATABASE_URL",
+      "REDIS_URL",
+      "SENTRY_DSN"
+    ],
+    "target_repo": "BlackRoad-OS-Inc/blackroad-operator"
+  }
+}

@@ -1,0 +1,98 @@
+name: "Scrape & Index All Orgs"
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Scan mode"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - products
+          - single-org
+      target_org:
+        description: "Target org (for single-org mode)"
+        required: false
+        default: "BlackRoad-OS-Inc"
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  scrape:
+    name: "Scrape Organizations"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq jq
+
+      - name: Authenticate gh CLI
+        run: gh auth status
+
+      - name: Run org scraper
+        run: |
+          chmod +x scrapers/scrape-all-orgs.sh
+          if [ "${{ inputs.mode }}" = "single-org" ]; then
+            ./scrapers/scrape-all-orgs.sh org "${{ inputs.target_org }}"
+          elif [ "${{ inputs.mode }}" = "products" ]; then
+            chmod +x scrapers/scrape-products.sh
+            ./scrapers/scrape-products.sh
+          else
+            ./scrapers/scrape-all-orgs.sh all
+          fi
+
+      - name: Run product scanner
+        if: inputs.mode == 'all' || inputs.mode == 'products'
+        run: |
+          chmod +x scrapers/scrape-products.sh
+          ./scrapers/scrape-products.sh
+
+      - name: Commit and push index
+        run: |
+          git config user.name "blackroad-bot"
+          git config user.email "bot@blackroad.io"
+          git add scrapers/output/ || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update org/product index [automated]"
+            git push
+          fi
+
+      - name: Upload index artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: org-index-${{ github.run_number }}
+          path: scrapers/output/
+          retention-days: 30
+
+  notify:
+    name: "Notify on completion"
+    needs: scrape
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## Scrape & Index Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode:** ${{ inputs.mode || 'scheduled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ needs.scrape.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target:** BlackRoad-OS-Inc/blackroad-operator" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date -u)" >> $GITHUB_STEP_SUMMARY

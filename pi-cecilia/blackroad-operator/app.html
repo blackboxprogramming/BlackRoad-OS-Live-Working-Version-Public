@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a12">
+  <title>BlackRoad OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a12;
+      --surface: #111118;
+      --surface2: #18182a;
+      --border: #1e1e2e;
+      --text: #ffffff;
+      --muted: #666680;
+      --subtle: #888899;
+      --amber: #F5A623;
+      --pink: #FF1D6C;
+      --violet: #9C27B0;
+      --blue: #2979FF;
+      --grad: linear-gradient(135deg, #F5A623 0%, #FF1D6C 38.2%, #9C27B0 61.8%, #2979FF 100%);
+      --grad-text: linear-gradient(135deg, #F5A623 0%, #FF1D6C 50%, #2979FF 100%);
+      --font-pixel: 'Press Start 2P', monospace;
+      --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      --nav-h: 64px;
+      --sp-xs: 8px;
+      --sp-sm: 13px;
+      --sp-md: 21px;
+      --sp-lg: 34px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    /* ===== APP SHELL ===== */
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .view {
+      position: absolute;
+      inset: 0;
+      bottom: var(--nav-h);
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      -webkit-overflow-scrolling: touch;
+    }
+    .view.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .view::-webkit-scrollbar { display: none; }
+
+    /* ===== SPLASH ===== */
+    #splash {
+      bottom: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-md);
+    }
+    #splash.fade-out {
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    #splash-canvas {
+      image-rendering: pixelated;
+      width: 320px;
+      height: 200px;
+    }
+    .splash-title {
+      font-family: var(--font-pixel);
+      font-size: 24px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 4px;
+    }
+    .splash-sub {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+    .splash-dots {
+      display: flex;
+      gap: 8px;
+      margin-top: var(--sp-sm);
+    }
+    .splash-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: dotPulse 1.2s ease infinite;
+    }
+    .splash-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .splash-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+
+    /* ===== BOTTOM NAV ===== */
+    #nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: var(--nav-h);
+      background: rgba(10, 10, 18, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 var(--sp-xs);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nav-item:active { transform: scale(0.92); }
+    .nav-item .nav-icon {
+      width: 24px;
+      height: 24px;
+      image-rendering: pixelated;
+    }
+    .nav-item .nav-label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+    .nav-item.active .nav-label { color: var(--pink); }
+    .nav-clock {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--subtle);
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== HOME VIEW ===== */
+    #home { padding: var(--sp-md); }
+
+    .home-header {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      margin-bottom: var(--sp-md);
+    }
+    .home-header canvas {
+      image-rendering: pixelated;
+      width: 32px;
+      height: 32px;
+    }
+    .home-header h1 {
+      font-family: var(--font-pixel);
+      font-size: 14px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-label {
+      font-family: var(--font-pixel);
+      font-size: 9px;
+      color: var(--subtle);
+      margin-bottom: var(--sp-sm);
+      letter-spacing: 1px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: var(--sp-md);
+      cursor: pointer;
+    }
+    .search-bar svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+    .search-bar span {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* App icons grid */
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--sp-sm);
+      margin-bottom: var(--sp-lg);
+    }
+    .app-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      padding: 6px 0;
+      border-radius: 12px;
+      transition: transform 0.15s ease;
+    }
+    .app-icon:active { transform: scale(0.9); }
+    .app-icon .icon-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .app-icon .icon-label {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--subtle);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* Scene cards */
+    .scene-section { margin-bottom: var(--sp-md); }
+    .scene-scroll {
+      display: flex;
+      gap: var(--sp-sm);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: var(--sp-xs);
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .scene-scroll::-webkit-scrollbar { display: none; }
+    .scene-card {
+      flex-shrink: 0;
+      scroll-snap-align: start;
+      width: 280px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .scene-card:active { transform: scale(0.97); }
+    .scene-card canvas {
+      width: 280px;
+      height: 180px;
+      image-rendering: pixelated;
+      display: block;
+    }
+    .scene-card .scene-info {
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .scene-card .scene-title {
+      font-family: var(--font-pixel);
+      font-size: 8px;
+      color: var(--text);
+    }
+    .scene-card .scene-tag {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--bg);
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+
+    /* ===== SEARCH VIEW ===== */
+    #search { padding: var(--sp-md); }
+
+    .search-header {
+      font-family: var(--font-pixel);
+      font-size: 18px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--sp-md);
+    }
+
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-bottom: var(--sp-md);
+    }
+    .search-input-wrap svg { width: 16px; height: 16px; color: var(--muted); flex-shrink: 0; }
+    .search-input-wrap input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--font-ui);
+    }
+    .search-input-wrap input::placeholder { color: var(--muted); }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--sp-xs);
+      margin-bottom: var(--sp-md);
+    }
+    .search-grid .app-icon .icon-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+    .search-grid .app-icon .icon-label { font-size: 6px; }
+
+    .opened-section { margin-bottom: var(--sp-md); }
+    .opened-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: var(--sp-xs);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .opened-item:hover { border-color: var(--muted); }
+    .opened-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .opened-label {
+      font-size: 13px;
+      color: var(--text);
+      flex: 1;
+    }
+    .opened-time {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--muted);
+    }
+
+    .preview-area {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: var(--sp-lg);
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--sp-sm);
+    }
+    .preview-area canvas {
+      image-rendering: pixelated;
+      width: 200px;
+      height: 140px;
+      border-radius: 8px;
+    }
+    .preview-area .preview-text {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    /* ===== CHAT VIEW ===== */
+    #chat { padding: var(--sp-md); display: flex; flex-direction: column; }
+
+    .chat-header {
+      font-family: var(--font-pixel);
+      font-size: 12px;
+      color: var(--text);
+      margin-bottom: var(--sp-md);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-xs);
+    }
+    .chat-header .online-dot {
+      width: 8px; height: 8px;
+      background: #00cc66;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-sm);
+      padding-bottom: 70px;
+    }
+    .chat-msg {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .chat-msg.agent {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .chat-msg.agent .msg-name {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--pink);
+      margin-bottom: 6px;
+    }
+    .chat-msg.user {
+      background: linear-gradient(135deg, var(--pink), var(--violet));
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-input-bar {
+      position: absolute;
+      bottom: calc(var(--nav-h) + var(--sp-xs));
+      left: var(--sp-md);
+      right: var(--sp-md);
+      display: flex;
+      gap: var(--sp-xs);
+      align-items: center;
+    }
+    .chat-input-bar input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px 18px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: var(--font-ui);
+    }
+    .chat-input-bar input::placeholder { color: var(--muted); }
+    .chat-input-bar button {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--grad);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s ease;
+    }
+    .chat-input-bar button:active { transform: scale(0.9); }
+    .chat-input-bar button svg { width: 20px; height: 20px; color: white; }
+
+    /* ===== MORE VIEW ===== */
+    #more { padding: var(--sp-md); }
+
+    .more-header {
+      font-family: var(--font-pixel);
+      font-size: 14px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--sp-md);
+    }
+
+    .more-list { display: flex; flex-direction: column; gap: var(--sp-xs); }
+    .more-item {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-sm);
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .more-item:hover { border-color: var(--muted); }
+    .more-item .mi-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .more-item .mi-label {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .more-item .mi-arrow { color: var(--muted); font-size: 14px; }
+
+    .more-footer {
+      margin-top: var(--sp-lg);
+      text-align: center;
+    }
+    .more-footer .version {
+      font-family: var(--font-pixel);
+      font-size: 7px;
+      color: var(--muted);
+    }
+    .more-footer canvas {
+      margin: var(--sp-md) auto 0;
+      image-rendering: pixelated;
+      width: 120px;
+      height: 80px;
+    }
+
+    /* ===== AGENT PROFILE CARDS (More view) ===== */
+    .agent-profiles {
+      display: flex;
+      gap: var(--sp-xs);
+      overflow-x: auto;
+      padding: var(--sp-sm) 0;
+      margin-bottom: var(--sp-md);
+      scrollbar-width: none;
+    }
+    .agent-profiles::-webkit-scrollbar { display: none; }
+    .agent-profile {
+      flex-shrink: 0;
+      width: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .agent-profile canvas {
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+    }
+    .agent-profile .ap-name {
+      font-family: var(--font-pixel);
+      font-size: 6px;
+      color: var(--subtle);
+    }
+
+    /* Desktop wrapper */
+    @media (min-width: 431px) {
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #app {
+        border-radius: 32px;
+        border: 2px solid var(--border);
+        height: 85vh;
+        max-height: 900px;
+        box-shadow: 0 0 60px rgba(0,0,0,0.5);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- SPLASH -->
+    <div id="splash" class="view active">
+      <canvas id="splash-canvas" width="320" height="200"></canvas>
+      <div class="splash-title">BLACKROAD</div>
+      <div class="splash-sub">YOUR AI. YOUR HARDWARE. YOUR RULES.</div>
+      <div class="splash-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- HOME -->
+    <div id="home" class="view">
+      <div class="home-header">
+        <canvas id="home-mascot" width="32" height="32"></canvas>
+        <h1>BlackRoad</h1>
+      </div>
+
+      <div class="section-label">EXPLORE</div>
+      <div class="search-bar" onclick="showView('search')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Search apps, agents, tools...</span>
+      </div>
+
+      <div class="app-grid" id="app-grid"></div>
+
+      <div class="scene-section">
+        <div class="section-label">WORLDS</div>
+        <div class="scene-scroll" id="scene-scroll"></div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div id="search" class="view">
+      <div class="search-header">BlackRoad</div>
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search-input" placeholder="Search..." oninput="filterSearch(this.value)">
+      </div>
+      <div class="search-grid" id="search-grid"></div>
+
+      <div class="opened-section">
+        <div class="section-label">OPENED</div>
+        <div id="opened-list"></div>
+      </div>
+
+      <div class="preview-area">
+        <canvas id="preview-canvas" width="200" height="140"></canvas>
+        <div class="preview-text">SELECT AN APP TO PREVIEW</div>
+      </div>
+    </div>
+
+    <!-- CHAT -->
+    <div id="chat" class="view">
+      <div class="chat-header">
+        <span class="online-dot"></span>
+        Chat with Agents
+      </div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-bar">
+        <input type="text" id="chat-input" placeholder="Message the agents..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MORE -->
+    <div id="more" class="view">
+      <div class="more-header">Settings</div>
+
+      <div class="section-label">AGENTS</div>
+      <div class="agent-profiles" id="agent-profiles"></div>
+
+      <div class="more-list" id="more-list"></div>
+
+      <div class="more-footer">
+        <canvas id="more-mascot" width="120" height="80"></canvas>
+        <div class="version">BLACKROAD OS v2.6.0</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div id="nav">
+      <div class="nav-item active" data-view="home" onclick="showView('home')">
+        <canvas class="nav-icon" width="24" height="24" data-icon="home"></canvas>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item" data-view="search" onclick="showView('search')">
+        <canvas class="nav-icon" width="24" height="24" data-icon="search"></canvas>
+        <span class="nav-label">Search</span>
+      </div>
+      <div class="nav-item" data-view="chat" onclick="showView('chat')">
+        <canvas class="nav-icon" width="24" height="24" data-icon="chat"></canvas>
+        <span class="nav-label">Chat</span>
+      </div>
+      <div class="nav-item" data-view="more" onclick="showView('more')">
+        <canvas class="nav-icon" width="24" height="24" data-icon="more"></canvas>
+        <span class="nav-label">More</span>
+      </div>
+      <div class="nav-clock" id="nav-clock">12:34PM</div>
+    </div>
+  </div>
+
+  <!-- Pixel art library -->
+  <script src="blackroad-os/lib/agent.js"></script>
+  <script src="blackroad-os/lib/floor.js"></script>
+  <script src="blackroad-os/lib/wall.js"></script>
+  <script src="blackroad-os/lib/desk.js"></script>
+  <script src="blackroad-os/lib/chair.js"></script>
+  <script src="blackroad-os/lib/furniture.js"></script>
+  <script src="blackroad-os/lib/lighting.js"></script>
+  <script src="blackroad-os/lib/plant.js"></script>
+  <script src="blackroad-os/lib/props.js"></script>
+  <script src="blackroad-os/lib/server.js"></script>
+
+  <script>
+    // ===== APP DATA =====
+    const apps = [
+      { name: 'Docs',      icon: '\u{1F4DA}', color: '#2979FF', url: 'blackroad-os/index.html' },
+      { name: 'Agents',    icon: '\u{1F916}', color: '#FF1D6C', url: 'websites/agents/index.html' },
+      { name: 'Dashboard', icon: '\u{1F4CA}', color: '#9C27B0', url: 'dashboard/index.html' },
+      { name: 'Terminal',  icon: '\u{1F4BB}', color: '#00cc66', url: null },
+      { name: 'Deploy',    icon: '\u{1F680}', color: '#F5A623', url: null },
+      { name: 'Monitor',   icon: '\u{1F4E1}', color: '#00d9ff', url: null },
+      { name: 'Chat',      icon: '\u{1F4AC}', color: '#e94560', url: null },
+      { name: 'Memory',    icon: '\u{1F9E0}', color: '#cc44cc', url: null },
+      { name: 'Settings',  icon: '\u{2699}\uFE0F', color: '#555570', url: null },
+      { name: 'Worlds',    icon: '\u{1F30D}', color: '#4a9a5a', url: null },
+      { name: 'Games',     icon: '\u{1F3AE}', color: '#ffa500', url: null },
+      { name: 'Skills',    icon: '\u{26A1}', color: '#aaaa00', url: null },
+    ];
+
+    const openedItems = [
+      { name: 'Dashboard',   color: '#9C27B0', time: '2m ago' },
+      { name: 'Agent Fleet', color: '#FF1D6C', time: '15m ago' },
+      { name: 'Deploy Logs', color: '#F5A623', time: '1h ago' },
+    ];
+
+    const moreItems = [
+      { icon: '\u{1F464}', label: 'Profile',        color: '#2979FF' },
+      { icon: '\u{1F512}', label: 'Security',        color: '#e94560' },
+      { icon: '\u{2601}\uFE0F', label: 'Cloud Services',  color: '#00d9ff' },
+      { icon: '\u{1F517}', label: 'Integrations',    color: '#9C27B0' },
+      { icon: '\u{1F4E6}', label: 'Packages',        color: '#F5A623' },
+      { icon: '\u{1F527}', label: 'Developer Tools', color: '#00cc66' },
+      { icon: '\u{2139}\uFE0F', label: 'About',          color: '#555570' },
+    ];
+
+    const agentList = ['LUCIDIA','ALICE','OCTAVIA','PRISM','ECHO','CIPHER'];
+
+    const chatWelcome = [
+      { agent: 'CECE', text: "Hey! I'm CECE, your AI companion. I'm connected to all 6 core agents. Ask me anything, or say hi to the crew!" },
+      { agent: 'LUCIDIA', text: "The system is operating at peak efficiency. 30,000 agents standing by." },
+      { agent: 'ALICE', text: "All routes are clear. Ready to navigate wherever you need to go." },
+    ];
+
+    // ===== VIEW ROUTING =====
+    let currentView = 'splash';
+
+    function showView(name) {
+      if (name === currentView && name !== 'splash') return;
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const el = document.getElementById(name);
+      if (el) el.classList.add('active');
+      currentView = name;
+
+      // Update nav
+      document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.toggle('active', n.dataset.view === name);
+      });
+
+      // Focus search input
+      if (name === 'search') {
+        setTimeout(() => document.getElementById('search-input').focus(), 300);
+      }
+    }
+
+    // ===== CLOCK =====
+    function updateClock() {
+      const now = new Date();
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      document.getElementById('nav-clock').textContent = h + ':' + m + ampm;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ===== DRAW NAV ICONS =====
+    function drawNavIcons() {
+      document.querySelectorAll('.nav-icon').forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        const type = canvas.dataset.icon;
+        const isActive = canvas.closest('.nav-item').classList.contains('active');
+        const color = isActive ? '#FF1D6C' : '#666680';
+
+        ctx.clearRect(0, 0, 24, 24);
+        ctx.fillStyle = color;
+
+        if (type === 'home') {
+          // House
+          ctx.fillRect(4, 12, 16, 10);
+          ctx.fillRect(10, 16, 4, 6);
+          // Roof
+          ctx.beginPath();
+          ctx.moveTo(2, 13);
+          ctx.lineTo(12, 3);
+          ctx.lineTo(22, 13);
+          ctx.fill();
+        } else if (type === 'search') {
+          // Magnifying glass
+          ctx.beginPath();
+          ctx.arc(10, 10, 7, 0, Math.PI * 2);
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = color;
+          ctx.stroke();
+          ctx.fillRect(15, 16, 7, 2);
+          ctx.save();
+          ctx.translate(18, 17);
+          ctx.rotate(Math.PI / 4);
+          ctx.fillRect(-1, 0, 2, 6);
+          ctx.restore();
+        } else if (type === 'chat') {
+          // Speech bubble
+          ctx.beginPath();
+          ctx.roundRect(2, 2, 20, 14, 4);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(6, 16);
+          ctx.lineTo(4, 22);
+          ctx.lineTo(12, 16);
+          ctx.fill();
+        } else if (type === 'more') {
+          // Three dots
+          ctx.fillRect(4, 10, 4, 4);
+          ctx.fillRect(10, 10, 4, 4);
+          ctx.fillRect(16, 10, 4, 4);
+        }
+      });
+    }
+
+    // ===== SPLASH =====
+    let splashTime = 0;
+    const splashCanvas = document.getElementById('splash-canvas');
+    const splashCtx = splashCanvas.getContext('2d');
+
+    function drawSplashRobot(ctx, x, y, frame, time) {
+      const bounce = frame === 0 ? 0 : Math.sin(time * 0.3) * 2;
+      const yy = y + bounce;
+
+      // Body
+      ctx.fillStyle = '#2a2a4a';
+      ctx.fillRect(x + 4, yy + 10, 16, 14);
+      ctx.fillStyle = '#3a3a6a';
+      ctx.fillRect(x + 6, yy + 12, 12, 10);
+
+      // Head
+      ctx.fillStyle = '#3a3a6a';
+      ctx.fillRect(x + 3, yy, 18, 12);
+      ctx.fillStyle = '#4a4a8a';
+      ctx.fillRect(x + 5, yy + 2, 14, 8);
+
+      // Eyes (screens)
+      const blink = Math.floor(time / 3) % 20 === 0;
+      if (!blink) {
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(x + 7, yy + 3, 4, 4);
+        ctx.fillRect(x + 13, yy + 3, 4, 4);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x + 8, yy + 4, 2, 2);
+        ctx.fillRect(x + 14, yy + 4, 2, 2);
+      } else {
+        ctx.fillStyle = '#006666';
+        ctx.fillRect(x + 7, yy + 5, 4, 1);
+        ctx.fillRect(x + 13, yy + 5, 4, 1);
+      }
+
+      // Antenna
+      ctx.fillStyle = '#666';
+      ctx.fillRect(x + 11, yy - 6, 2, 6);
+      const antGlow = Math.sin(time * 0.5) > 0 ? '#FF1D6C' : '#660030';
+      ctx.fillStyle = antGlow;
+      ctx.fillRect(x + 10, yy - 8, 4, 3);
+
+      // Arms
+      ctx.fillStyle = '#2a2a4a';
+      if (frame === 1) {
+        ctx.fillRect(x, yy + 10, 4, 10);
+        ctx.fillRect(x + 20, yy + 14, 4, 6);
+      } else if (frame === 3) {
+        ctx.fillRect(x, yy + 14, 4, 6);
+        ctx.fillRect(x + 20, yy + 10, 4, 10);
+      } else {
+        ctx.fillRect(x, yy + 12, 4, 8);
+        ctx.fillRect(x + 20, yy + 12, 4, 8);
+      }
+
+      // Legs
+      ctx.fillStyle = '#2a2a4a';
+      if (frame === 1) {
+        ctx.fillRect(x + 6, yy + 24, 4, 8);
+        ctx.fillRect(x + 14, yy + 22, 4, 10);
+      } else if (frame === 3) {
+        ctx.fillRect(x + 6, yy + 22, 4, 10);
+        ctx.fillRect(x + 14, yy + 24, 4, 8);
+      } else {
+        ctx.fillRect(x + 6, yy + 24, 4, 8);
+        ctx.fillRect(x + 14, yy + 24, 4, 8);
+      }
+
+      // Feet
+      ctx.fillStyle = '#1a1a3a';
+      ctx.fillRect(x + 4, yy + 30, 6, 3);
+      ctx.fillRect(x + 14, yy + 30, 6, 3);
+
+      // Chest emblem
+      ctx.fillStyle = '#FF1D6C';
+      ctx.fillRect(x + 10, yy + 14, 4, 4);
+      ctx.fillStyle = '#F5A623';
+      ctx.fillRect(x + 11, yy + 15, 2, 2);
+    }
+
+    function renderSplash() {
+      splashTime++;
+      const ctx = splashCtx;
+      const w = 320, h = 200;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Sky gradient
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, 100);
+      skyGrad.addColorStop(0, '#0a0a18');
+      skyGrad.addColorStop(1, '#1a1a3a');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, w, 100);
+
+      // Stars
+      ctx.fillStyle = '#ffffff';
+      const starSeed = [12,45,78,134,189,234,67,290,34,156,201,89,267,145,312,23,178,256];
+      for (let i = 0; i < starSeed.length; i++) {
+        const sx = starSeed[i];
+        const sy = 10 + (i * 37) % 80;
+        const twinkle = Math.sin(splashTime * 0.1 + i) > 0.3;
+        if (twinkle) ctx.fillRect(sx, sy, 1, 1);
+      }
+
+      // Mountains
+      ctx.fillStyle = '#12122a';
+      ctx.beginPath();
+      ctx.moveTo(0, 100);
+      ctx.lineTo(50, 60); ctx.lineTo(100, 85); ctx.lineTo(150, 55);
+      ctx.lineTo(200, 78); ctx.lineTo(250, 50); ctx.lineTo(300, 72);
+      ctx.lineTo(320, 65); ctx.lineTo(320, 100);
+      ctx.fill();
+
+      // Ground
+      ctx.fillStyle = '#1a1a2a';
+      ctx.fillRect(0, 100, w, 100);
+
+      // Road
+      ctx.fillStyle = '#252535';
+      ctx.fillRect(0, 120, w, 60);
+      ctx.fillStyle = '#2a2a3a';
+      ctx.fillRect(0, 118, w, 4);
+      ctx.fillRect(0, 178, w, 4);
+
+      // Road dashes (animated)
+      ctx.fillStyle = '#F5A623';
+      const dashOffset = (splashTime * 3) % 40;
+      for (let d = -40; d < w + 40; d += 40) {
+        ctx.fillRect(d - dashOffset, 148, 20, 3);
+      }
+
+      // Robot running
+      const walkFrame = Math.floor(splashTime / 6) % 4;
+      const robotX = 145;
+      const robotY = 85;
+      drawSplashRobot(ctx, robotX, robotY, walkFrame, splashTime);
+
+      // Glow under robot
+      ctx.fillStyle = 'rgba(255, 29, 108, 0.08)';
+      ctx.beginPath();
+      ctx.arc(robotX + 12, robotY + 34, 30, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ===== HOME MASCOT =====
+    function drawHomeMascot() {
+      const canvas = document.getElementById('home-mascot');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 32, 32);
+
+      // Mini robot head
+      ctx.fillStyle = '#3a3a6a';
+      ctx.fillRect(4, 6, 24, 20);
+      ctx.fillStyle = '#4a4a8a';
+      ctx.fillRect(6, 8, 20, 16);
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(9, 11, 5, 5);
+      ctx.fillRect(18, 11, 5, 5);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(10, 12, 3, 3);
+      ctx.fillRect(19, 12, 3, 3);
+      ctx.fillStyle = '#666';
+      ctx.fillRect(14, 0, 4, 6);
+      ctx.fillStyle = '#FF1D6C';
+      ctx.fillRect(13, 0, 6, 3);
+      ctx.fillStyle = '#FF1D6C';
+      ctx.fillRect(12, 20, 8, 3);
+    }
+
+    // ===== APP GRID =====
+    function buildAppGrid(container, small) {
+      container.innerHTML = '';
+      apps.forEach(app => {
+        const a = document.createElement('a');
+        a.className = 'app-icon';
+        a.href = app.url || '#';
+        if (app.url) a.target = '_blank';
+        else a.onclick = (e) => e.preventDefault();
+        a.dataset.name = app.name.toLowerCase();
+
+        const circle = document.createElement('div');
+        circle.className = 'icon-circle';
+        circle.style.background = app.color + '22';
+        circle.style.border = '1px solid ' + app.color + '44';
+        circle.textContent = app.icon;
+
+        const label = document.createElement('div');
+        label.className = 'icon-label';
+        label.textContent = app.name;
+
+        a.appendChild(circle);
+        a.appendChild(label);
+        container.appendChild(a);
+      });
+    }
+
+    // ===== SCENE CARDS =====
+    const sceneCanvases = [];
+
+    function createSceneCards() {
+      const scroll = document.getElementById('scene-scroll');
+      const scenes = [
+        { title: 'Team Meeting', tag: 'LIVE', tagColor: '#e94560', render: renderTeamMeeting },
+        { title: 'Living Room', tag: 'IDLE', tagColor: '#00cc66', render: renderLivingRoom },
+        { title: 'Hardware Lab', tag: 'ACTIVE', tagColor: '#F5A623', render: renderHardwareLab },
+      ];
+
+      scenes.forEach(scene => {
+        const card = document.createElement('div');
+        card.className = 'scene-card';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 280;
+        canvas.height = 180;
+        card.appendChild(canvas);
+
+        const info = document.createElement('div');
+        info.className = 'scene-info';
+        info.innerHTML = '<span class="scene-title">' + scene.title + '</span>' +
+          '<span class="scene-tag" style="background:' + scene.tagColor + '">' + scene.tag + '</span>';
+        card.appendChild(info);
+
+        scroll.appendChild(card);
+        sceneCanvases.push({ canvas, render: scene.render });
+      });
+    }
+
+    // Scene: Team Meeting
+    function renderTeamMeeting(ctx, time) {
+      ctx.clearRect(0, 0, 280, 180);
+
+      // Walls
+      WALL.fullWall(ctx, 0, 0, 18);
+
+      // Floor
+      FLOOR.fillCarpet(ctx, 0, 72, 18, 7, 'blue');
+
+      // Whiteboard
+      PROPS.whiteboard(ctx, 100, 10);
+
+      // 3 desks with agents
+      DESK.basic(ctx, 20, 90);
+      DESK.monitor(ctx, 30, 62, 'code', time);
+      CHAIR.facingUp(ctx, 40, 100, 'blue');
+      AGENT.draw(ctx, 42, 68, AGENT.presets.LUCIDIA, 0, time);
+      AGENT.nameBadge(ctx, 42, 68, 'LUC', '#e94560');
+
+      DESK.basic(ctx, 120, 100);
+      DESK.monitor(ctx, 130, 72, 'terminal', time);
+      CHAIR.facingUp(ctx, 140, 110, 'red');
+      AGENT.draw(ctx, 142, 78, AGENT.presets.ALICE, 0, time);
+      AGENT.nameBadge(ctx, 142, 78, 'ALI', '#00d9ff');
+
+      DESK.basic(ctx, 190, 90);
+      DESK.monitor(ctx, 200, 62, 'code', time);
+      CHAIR.facingUp(ctx, 210, 100, 'gray');
+      AGENT.draw(ctx, 212, 68, AGENT.presets.OCTAVIA, 0, time);
+      AGENT.nameBadge(ctx, 212, 68, 'OCT', '#00cc66');
+
+      // Ceiling light
+      LIGHTING.ceilingLight(ctx, 124, 0, time, true);
+
+      // Plant
+      PLANT.small(ctx, 6, 90, time, 'terra');
+    }
+
+    // Scene: Living Room
+    function renderLivingRoom(ctx, time) {
+      ctx.clearRect(0, 0, 280, 180);
+
+      // Walls
+      WALL.fullWall(ctx, 0, 0, 18);
+
+      // Floor
+      FLOOR.fillWood(ctx, 0, 72, 18, 7);
+
+      // Window
+      LIGHTING.window(ctx, 100, 4, time, true);
+
+      // Couch
+      FURNITURE.couch(ctx, 30, 100, 'blue');
+
+      // Coffee table
+      FURNITURE.coffeeTable(ctx, 40, 148);
+
+      // Bookshelf
+      FURNITURE.bookshelf(ctx, 220, 30);
+
+      // Plants
+      PLANT.large(ctx, 8, 70, time);
+      PLANT.small(ctx, 260, 88, time, 'white');
+
+      // Rug
+      FLOOR.fillCarpet(ctx, 40, 130, 6, 2, 'red');
+
+      // Props on table
+      PROPS.mug(ctx, 52, 142, true, time);
+
+      // Ceiling light
+      LIGHTING.ceilingLight(ctx, 124, 0, time, true);
+
+      // Agent relaxing
+      AGENT.draw(ctx, 60, 78, AGENT.presets.ECHO, 0, time);
+      AGENT.nameBadge(ctx, 60, 78, 'ECHO', '#cc44cc');
+    }
+
+    // Scene: Hardware Lab
+    function renderHardwareLab(ctx, time) {
+      ctx.clearRect(0, 0, 280, 180);
+
+      // Dark walls (brick)
+      WALL.fillBrick(ctx, 0, 0, 18, 5);
+
+      // Concrete floor
+      FLOOR.fillConcrete(ctx, 0, 80, 18, 7);
+
+      // Server racks
+      SERVER.rack(ctx, 10, 30, time);
+      SERVER.rack(ctx, 60, 30, time);
+      SERVER.rack(ctx, 110, 30, time);
+      SERVER.miniRack(ctx, 170, 50, time);
+
+      // Network switch
+      SERVER.networkSwitch(ctx, 200, 90, time);
+
+      // Desk with monitor
+      DESK.basic(ctx, 190, 110);
+      DESK.monitor(ctx, 200, 82, 'terminal', time);
+      DESK.keyboard(ctx, 202, 116);
+
+      // Filing cabinet
+      FURNITURE.filingCabinet(ctx, 248, 80);
+
+      // Agent
+      AGENT.draw(ctx, 215, 88, AGENT.presets.CIPHER, 0, time);
+      AGENT.nameBadge(ctx, 215, 88, 'CIPH', '#aaaa00');
+
+      // Ceiling lights (industrial)
+      LIGHTING.ceilingLight(ctx, 40, 0, time, true);
+      LIGHTING.ceilingLight(ctx, 180, 0, time, true);
+    }
+
+    // ===== OPENED LIST =====
+    function buildOpenedList() {
+      const container = document.getElementById('opened-list');
+      openedItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'opened-item';
+        div.innerHTML =
+          '<div class="opened-dot" style="background:' + item.color + '"></div>' +
+          '<span class="opened-label">' + item.name + '</span>' +
+          '<span class="opened-time">' + item.time + '</span>';
+        container.appendChild(div);
+      });
+    }
+
+    // ===== SEARCH FILTER =====
+    function filterSearch(query) {
+      const q = query.toLowerCase();
+      document.querySelectorAll('#search-grid .app-icon').forEach(icon => {
+        const name = icon.dataset.name;
+        icon.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+    }
+
+    // ===== CHAT =====
+    function buildChat() {
+      const container = document.getElementById('chat-messages');
+      chatWelcome.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'chat-msg agent';
+        div.innerHTML = '<div class="msg-name">' + msg.agent + '</div>' + msg.text;
+        container.appendChild(div);
+      });
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const container = document.getElementById('chat-messages');
+
+      // User message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.textContent = text;
+      container.appendChild(userMsg);
+      input.value = '';
+
+      // Simulate agent response
+      setTimeout(() => {
+        const agentIdx = Math.floor(Math.random() * agentList.length);
+        const agentName = agentList[agentIdx];
+        const responses = [
+          "Processing your request across the mesh network...",
+          "I've routed this to the appropriate subsystem.",
+          "Interesting. Let me analyze the data patterns here.",
+          "All systems nominal. Ready for your next command.",
+          "Memory logged. This context will persist across sessions.",
+          "Running diagnostics on your query now.",
+        ];
+        const agentMsg = document.createElement('div');
+        agentMsg.className = 'chat-msg agent';
+        agentMsg.innerHTML = '<div class="msg-name">' + agentName + '</div>' +
+          responses[Math.floor(Math.random() * responses.length)];
+        container.appendChild(agentMsg);
+        container.scrollTop = container.scrollHeight;
+      }, 800);
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ===== MORE VIEW =====
+    function buildMoreView() {
+      // Agent profiles
+      const profiles = document.getElementById('agent-profiles');
+      agentList.forEach(name => {
+        const div = document.createElement('div');
+        div.className = 'agent-profile';
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 48;
+        canvas.height = 48;
+        const ctx = canvas.getContext('2d');
+
+        // Draw agent in circle
+        ctx.fillStyle = '#111118';
+        ctx.fillRect(0, 0, 48, 48);
+        const preset = AGENT.presets[name];
+        if (preset) {
+          AGENT.draw(ctx, 16, 6, preset, 0, 0);
+        }
+
+        div.appendChild(canvas);
+        const label = document.createElement('div');
+        label.className = 'ap-name';
+        label.textContent = name;
+        div.appendChild(label);
+        profiles.appendChild(div);
+      });
+
+      // Settings items
+      const list = document.getElementById('more-list');
+      moreItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'more-item';
+        div.innerHTML =
+          '<div class="mi-icon" style="background:' + item.color + '22">' + item.icon + '</div>' +
+          '<span class="mi-label">' + item.label + '</span>' +
+          '<span class="mi-arrow">\u203A</span>';
+        list.appendChild(div);
+      });
+    }
+
+    // ===== PREVIEW CANVAS (Search view) =====
+    function renderPreview(time) {
+      const canvas = document.getElementById('preview-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 200, 140);
+
+      // Mini office scene
+      ctx.fillStyle = '#111118';
+      ctx.fillRect(0, 0, 200, 140);
+
+      FLOOR.fillWood(ctx, 0, 80, 13, 4);
+      WALL.fullWall(ctx, 0, 0, 13);
+
+      DESK.basic(ctx, 60, 80);
+      DESK.monitor(ctx, 70, 52, 'code', time);
+      AGENT.draw(ctx, 82, 56, AGENT.presets.PRISM, 0, time);
+
+      PLANT.small(ctx, 10, 80, time, 'terra');
+      SERVER.miniRack(ctx, 160, 50, time);
+    }
+
+    // ===== MORE MASCOT =====
+    function renderMoreMascot(time) {
+      const canvas = document.getElementById('more-mascot');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 120, 80);
+      drawSplashRobot(ctx, 48, 16, 0, time);
+    }
+
+    // ===== ANIMATION LOOP =====
+    let animTime = 0;
+
+    function animate() {
+      animTime++;
+
+      if (currentView === 'splash') {
+        renderSplash();
+      }
+
+      // Scene cards animate when home is visible
+      if (currentView === 'home') {
+        sceneCanvases.forEach(s => {
+          s.render(s.canvas.getContext('2d'), animTime);
+        });
+      }
+
+      // Preview
+      if (currentView === 'search') {
+        renderPreview(animTime);
+      }
+
+      // More mascot
+      if (currentView === 'more') {
+        renderMoreMascot(animTime);
+      }
+
+      // Redraw nav icons when view changes
+      drawNavIcons();
+
+      requestAnimationFrame(animate);
+    }
+
+    // ===== INIT =====
+    function init() {
+      buildAppGrid(document.getElementById('app-grid'));
+      buildAppGrid(document.getElementById('search-grid'), true);
+      createSceneCards();
+      buildOpenedList();
+      buildChat();
+      buildMoreView();
+      drawHomeMascot();
+      drawNavIcons();
+
+      // Start animation
+      animate();
+
+      // Splash -> Home after 2.8s
+      setTimeout(() => {
+        const splash = document.getElementById('splash');
+        splash.classList.add('fade-out');
+        setTimeout(() => {
+          splash.classList.remove('active');
+          splash.classList.remove('fade-out');
+          showView('home');
+        }, 600);
+      }, 2800);
+    }
+
+    // Wait for fonts then init
+    document.fonts.ready.then(init);
+  </script>
+</body>
+</html>

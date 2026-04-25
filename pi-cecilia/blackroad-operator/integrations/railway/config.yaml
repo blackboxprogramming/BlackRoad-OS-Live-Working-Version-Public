@@ -1,0 +1,60 @@
+# Railway — BlackRoad OS Integration
+# https://docs.railway.com/reference/public-api
+
+name: railway
+category: cloud-deploy
+status: active
+api_base: https://backboard.railway.com/graphql/v2
+
+auth:
+  type: bearer_token
+  env: RAILWAY_TOKEN
+
+graphql:
+  projects:
+    list: |
+      query { projects { edges { node { id name description createdAt } } } }
+    get: |
+      query($id: String!) { project(id: $id) { id name services { edges { node { id name } } } } }
+  services:
+    list: |
+      query($projectId: String!) { project(id: $projectId) { services { edges { node { id name } } } } }
+  deployments:
+    list: |
+      query($serviceId: String!) { deployments(input: { serviceId: $serviceId }) { edges { node { id status createdAt } } } }
+    trigger: |
+      mutation($serviceId: String!) { serviceInstanceRedeploy(serviceId: $serviceId) }
+  variables:
+    list: |
+      query($serviceId: String!, $environmentId: String!) {
+        variables(serviceId: $serviceId, environmentId: $environmentId)
+      }
+    set: |
+      mutation($serviceId: String!, $environmentId: String!, $name: String!, $value: String!) {
+        variableUpsert(input: { serviceId: $serviceId, environmentId: $environmentId, name: $name, value: $value })
+      }
+
+projects:
+  - id: "9d3d2549-3778-4c86-8afd-cefceaaa74d2"
+    name: RoadWork Production
+  - id: "6d4ab1b5-3e97-460e-bba0-4db86691c476"
+    name: RoadWork Staging
+  - id: "aa968fb7-ec35-4a8b-92dc-1eba70fa8478"
+    name: BlackRoad Core Services
+  - id: "e8b256aa-8708-4eb2-ba24-99eba4fe7c2e"
+    name: BlackRoad Operator
+  - id: "85e6de55-fefd-4e8d-a9ec-d20c235c2551"
+    name: BlackRoad Master
+  - id: "8ac583cb-ffad-40bd-8676-6569783274d1"
+    name: BlackRoad Beacon
+  - id: "b61ecd98-adb2-4788-a2e0-f98e322af53a"
+    name: BlackRoad Packs
+  - id: "47f557cf-09b8-40df-8d77-b34f91ba90cc"
+    name: Prism Console
+  - id: "1a039a7e-a60c-42c5-be68-e66f9e269209"
+    name: BlackRoad Home
+
+health_check:
+  endpoint: POST /graphql (query { me { id } })
+  interval: 300
+  timeout: 10

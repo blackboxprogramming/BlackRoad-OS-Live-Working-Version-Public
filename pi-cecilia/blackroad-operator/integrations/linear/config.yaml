@@ -1,0 +1,57 @@
+# Linear — BlackRoad OS Integration
+# https://developers.linear.app/docs/graphql
+
+name: linear
+category: project-management
+status: active
+api_base: https://api.linear.app/graphql
+
+auth:
+  type: bearer_token
+  env: LINEAR_API_KEY
+
+graphql:
+  issues:
+    create: |
+      mutation($title: String!, $teamId: String!, $description: String, $priority: Int) {
+        issueCreate(input: { title: $title, teamId: $teamId, description: $description, priority: $priority }) {
+          success issue { id identifier title url }
+        }
+      }
+    list: |
+      query($first: Int) {
+        issues(first: $first, orderBy: updatedAt) {
+          nodes { id identifier title state { name } priority assignee { name } }
+        }
+      }
+    update: |
+      mutation($id: String!, $stateId: String) {
+        issueUpdate(id: $id, input: { stateId: $stateId }) {
+          success issue { id identifier title state { name } }
+        }
+      }
+  projects:
+    list: |
+      query { projects(first: 50) { nodes { id name state } } }
+  teams:
+    list: |
+      query { teams { nodes { id name key } } }
+  cycles:
+    current: |
+      query($teamId: String!) {
+        team(id: $teamId) { activeCycle { id name startsAt endsAt } }
+      }
+
+webhooks:
+  events:
+    - Issue
+    - Comment
+    - Project
+    - Cycle
+  endpoint: /webhooks/linear
+  secret_env: LINEAR_WEBHOOK_SECRET
+
+health_check:
+  endpoint: POST /graphql (query { viewer { id } })
+  interval: 300
+  timeout: 10

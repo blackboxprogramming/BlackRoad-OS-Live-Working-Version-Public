@@ -1,0 +1,64 @@
+# Termius — BlackRoad OS Integration
+
+name: termius
+category: infrastructure
+status: active
+
+auth:
+  type: ssh_key
+  key_path_env: TERMIUS_SSH_KEY_PATH
+
+features:
+  - ssh_client
+  - sftp
+  - port_forwarding
+  - snippets
+  - groups
+  - vault
+  - terminal_sharing
+
+hosts:
+  - name: blackroad-pi
+    address: 192.168.4.64
+    username: pi
+    group: raspberry-pi
+
+  - name: aria64
+    address: 192.168.4.38
+    username: pi
+    group: raspberry-pi
+
+  - name: alice-pi
+    address: 192.168.4.49
+    username: alice
+    group: raspberry-pi
+
+  - name: blackroad-infinity
+    address: 159.65.43.12
+    username: root
+    group: digitalocean
+
+snippets:
+  - name: check-ollama
+    command: curl -s http://localhost:11434/api/tags | python3 -m json.tool
+  - name: check-agents
+    command: systemctl status blackroad-agent
+  - name: check-tunnel
+    command: systemctl status cloudflared
+  - name: disk-usage
+    command: df -h / | tail -1
+  - name: memory
+    command: free -h | head -2
+
+port_forwards:
+  - name: ollama
+    local_port: 11434
+    remote_port: 11434
+  - name: agent-api
+    local_port: 8080
+    remote_port: 8080
+
+notes: |
+  Termius provides cross-platform SSH access to the BlackRoad fleet.
+  All hosts are also accessible via Tailscale mesh VPN.
+  SSH keys are managed centrally via the vault.

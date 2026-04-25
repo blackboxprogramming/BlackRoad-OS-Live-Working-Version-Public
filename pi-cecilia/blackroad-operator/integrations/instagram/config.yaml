@@ -1,0 +1,42 @@
+# Instagram — BlackRoad OS Integration
+# https://developers.facebook.com/docs/instagram-platform
+
+name: instagram
+category: communication
+status: active
+api_base: https://graph.instagram.com/v21.0
+
+auth:
+  type: oauth2
+  access_token_env: INSTAGRAM_ACCESS_TOKEN
+  app_id_env: INSTAGRAM_APP_ID
+  app_secret_env: INSTAGRAM_APP_SECRET
+
+endpoints:
+  media:
+    list: GET /me/media?fields=id,caption,media_type,media_url,timestamp
+    get: GET /{media_id}?fields=id,caption,media_type,media_url,timestamp,permalink
+    publish: POST /me/media
+    publish_confirm: POST /me/media_publish
+  insights:
+    account: GET /me/insights
+    media: GET /{media_id}/insights
+  comments:
+    list: GET /{media_id}/comments
+    reply: POST /{comment_id}/replies
+  stories:
+    list: GET /me/stories
+  account:
+    info: GET /me?fields=id,username,account_type,media_count
+
+content_types:
+  - image
+  - video
+  - carousel
+  - story
+  - reel
+
+health_check:
+  endpoint: GET /me?fields=id,username
+  interval: 600
+  timeout: 15

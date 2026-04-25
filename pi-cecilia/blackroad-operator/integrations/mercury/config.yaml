@@ -1,0 +1,38 @@
+# Mercury Banking — BlackRoad OS Integration
+# https://docs.mercury.com/reference
+
+name: mercury
+category: banking
+status: active
+api_base: https://api.mercury.com/api/v1
+
+auth:
+  type: bearer_token
+  env: MERCURY_API_TOKEN
+
+endpoints:
+  accounts:
+    list: GET /accounts
+    get: GET /accounts/{id}
+  transactions:
+    list: GET /account/{id}/transactions
+    get: GET /account/{id}/transactions/{txnId}
+  recipients:
+    list: GET /recipients
+    create: POST /recipients
+  payments:
+    send: POST /account/{id}/transactions
+
+webhooks:
+  events:
+    - transaction.created
+    - transaction.updated
+    - transaction.failed
+    - account.updated
+  endpoint: /webhooks/mercury
+  secret_env: MERCURY_WEBHOOK_SECRET
+
+health_check:
+  endpoint: GET /accounts
+  interval: 300
+  timeout: 10

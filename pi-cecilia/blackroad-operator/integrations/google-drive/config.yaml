@@ -1,0 +1,46 @@
+# Google Drive — BlackRoad OS Integration
+# https://developers.google.com/drive/api/v3
+
+name: google-drive
+category: storage
+status: active
+api_base: https://www.googleapis.com/drive/v3
+
+auth:
+  type: oauth2
+  client_id_env: GOOGLE_CLIENT_ID
+  client_secret_env: GOOGLE_CLIENT_SECRET
+  refresh_token_env: GOOGLE_REFRESH_TOKEN
+  token_url: https://oauth2.googleapis.com/token
+  scopes:
+    - https://www.googleapis.com/auth/drive
+    - https://www.googleapis.com/auth/drive.file
+    - https://www.googleapis.com/auth/drive.metadata.readonly
+
+endpoints:
+  files:
+    list: GET /files
+    get: GET /files/{fileId}
+    create: POST /files
+    update: PATCH /files/{fileId}
+    delete: DELETE /files/{fileId}
+    export: GET /files/{fileId}/export
+    copy: POST /files/{fileId}/copy
+  upload:
+    simple: POST https://www.googleapis.com/upload/drive/v3/files
+    resumable: POST https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable
+  permissions:
+    list: GET /files/{fileId}/permissions
+    create: POST /files/{fileId}/permissions
+    delete: DELETE /files/{fileId}/permissions/{permissionId}
+
+folders:
+  blackroad_root: configured
+  agent_workspace: configured
+  shared_docs: configured
+  backups: configured
+
+health_check:
+  endpoint: GET /about?fields=user
+  interval: 600
+  timeout: 15

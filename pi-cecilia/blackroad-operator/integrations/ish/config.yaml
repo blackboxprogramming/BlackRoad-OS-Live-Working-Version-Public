@@ -1,0 +1,64 @@
+# iSH — BlackRoad OS Integration
+# iOS Alpine Linux shell
+
+name: ish
+category: mobile-tools
+status: active
+
+platform: ios
+app_store: iSH Shell
+
+capabilities:
+  - alpine_linux_shell
+  - apk_package_manager
+  - git
+  - python3
+  - node_js
+  - ssh_client
+  - files_app_integration
+
+packages:
+  system:
+    - git
+    - openssh
+    - curl
+    - wget
+    - jq
+    - bash
+  development:
+    - python3
+    - py3-pip
+    - nodejs
+    - npm
+  tools:
+    - vim
+    - nano
+    - tmux
+    - htop
+
+scripts:
+  - name: br-setup
+    description: Bootstrap BlackRoad CLI in iSH
+    commands:
+      - apk add git python3 py3-pip nodejs npm curl jq bash
+      - git clone https://github.com/BlackRoad-OS-Inc/blackroad-operator
+      - cd blackroad-operator && npm install
+
+  - name: br-quick
+    description: Quick status check
+    commands:
+      - curl -s http://192.168.4.64:11434/api/tags | jq '.models[].name'
+      - ssh pi@192.168.4.64 'uptime'
+
+workflows:
+  terminal_ops:
+    1_open: Launch iSH on iPhone/iPad
+    2_navigate: cd into blackroad-operator
+    3_run: Execute br commands or scripts
+    4_ssh: SSH into Pi fleet from iSH
+
+notes: |
+  iSH provides a full Alpine Linux environment on iOS.
+  Combined with Working Copy and Pyto, enables complete
+  mobile development and operations capability.
+  Runs x86 emulation — some operations are slower.

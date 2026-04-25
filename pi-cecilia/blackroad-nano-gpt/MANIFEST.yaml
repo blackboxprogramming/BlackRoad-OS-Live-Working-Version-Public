@@ -1,0 +1,120 @@
+id: research/alexa/blackroad-nano-gpt
+name: BlackRoad NanoGPT (From-Scratch LM)
+version: 0.1.0
+stage: research
+
+# Ownership
+owner:
+  type: person
+  id: alexa
+  name: Alexa Amundson
+  contact: blackroad@gmail.com
+
+# Lineage -- trained from scratch, no upstream model
+derived_from: []
+
+# Target capabilities
+capabilities:
+  - text-generation
+  - code-style-mimicry
+  - doc-pattern-completion
+  - shell-script-scaffolding
+
+# Architecture
+architecture:
+  type: decoder-only-transformer
+  family: GPT-2
+  params: 20.4M
+  vocab_size: 4096
+  n_embd: 512
+  n_head: 8
+  n_layer: 6
+  block_size: 512
+  dropout: 0.1
+  framework: PyTorch (pure, CPU-only)
+
+# Lifecycle
+lifecycle:
+  created_at: '2026-02-20T00:00:00Z'
+  expires_at: '2026-05-20T00:00:00Z'
+  promotion_target: internal/blackroad-nano-gpt/v1
+
+# Training data
+training_data:
+  classification: internal
+  sources:
+    - BlackRoad monorepo markdown (.md)
+    - BlackRoad shell scripts (.sh)
+    - BlackRoad Python code (.py)
+    - BlackRoad JavaScript/TypeScript (.js, .ts)
+    - BlackRoad YAML configs (.yaml, .yml)
+  languages:
+    - Markdown: ~40%
+    - Shell: ~25%
+    - Python: ~15%
+    - JavaScript/TypeScript: ~15%
+    - YAML: ~5%
+  estimated_tokens: 8000000
+  data_location: ./data/
+  tokenizer: custom BPE (4096 merges)
+
+# Training
+training:
+  hardware: Raspberry Pi 5 (Cecilia)
+  cpu: Cortex-A76 4-core @ 2.4GHz
+  ram: 8GB
+  accelerator: none (CPU-only training)
+  batch_size: 4
+  gradient_accumulation: 8
+  effective_batch_size: 32
+  learning_rate: 6.0e-4
+  min_learning_rate: 6.0e-5
+  warmup_steps: 200
+  scheduler: cosine
+  epochs: 15
+  estimated_time: "~9 days"
+
+# Expected performance
+performance_targets:
+  train_loss: "<3.0 after 1 epoch"
+  val_perplexity: "<50 after 5 epochs"
+  generates_recognizable_patterns: true
+
+# Artifacts
+artifacts:
+  model_code: ./model.py
+  tokenizer_code: ./tokenizer.py
+  data_prep: ./prepare_data.py
+  training_script: ./train.py
+  generation_script: ./generate.py
+  training_config: ./train_config.yaml
+  training_logs: ./logs/
+  checkpoints: ./checkpoints/
+  samples: ./samples/
+
+# Access control
+access:
+  internal_only: true
+  allowed_services: []
+  allowed_agents:
+    - agent-alexa-local-dev
+
+# License
+license:
+  type: proprietary
+  owner: BlackRoad OS, Inc.
+  usage_terms: internal-research-only
+  upstream_license: none
+  attribution_required: false
+
+# Notes
+notes: |
+  First fully sovereign language model -- trained from scratch on BlackRoad's
+  own docs and code, running entirely on the Raspberry Pi fleet.
+
+  No upstream model dependencies, no cloud training, no third-party weights.
+  Every byte of data, code, and weights belongs to BlackRoad OS, Inc.
+
+  This is a proof-of-concept demonstrating full model sovereignty at the
+  hardware level. The model will learn BlackRoad vocabulary, shell script
+  patterns, markdown structure, CLI conventions, and color codes.

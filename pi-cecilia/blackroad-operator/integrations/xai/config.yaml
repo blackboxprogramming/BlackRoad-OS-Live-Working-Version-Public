@@ -1,0 +1,34 @@
+# xAI — BlackRoad OS Integration
+# https://docs.x.ai/api
+
+name: xai
+category: ai-providers
+status: active
+api_base: https://api.x.ai/v1
+note: "Combined with grok integration — same API, same provider"
+
+auth:
+  type: bearer_token
+  env: XAI_API_KEY
+
+endpoints:
+  chat:
+    create: POST /chat/completions
+  embeddings:
+    create: POST /embeddings
+  models:
+    list: GET /models
+
+models:
+  - id: grok-3
+    purpose: flagship
+  - id: grok-3-mini
+    purpose: lightweight
+
+gateway_route: /v1/xai
+default_model: grok-3
+
+health_check:
+  endpoint: GET /models
+  interval: 300
+  timeout: 10

@@ -1,0 +1,67 @@
+# Clerk — BlackRoad OS Integration
+# https://clerk.com/docs/reference/backend-api
+
+name: clerk
+category: auth
+status: active
+api_base: https://api.clerk.com/v1
+
+auth:
+  type: bearer_token
+  env: CLERK_SECRET_KEY
+  publishable_env: CLERK_PUBLISHABLE_KEY
+
+endpoints:
+  users:
+    list: GET /users
+    get: GET /users/{user_id}
+    create: POST /users
+    update: PATCH /users/{user_id}
+    delete: DELETE /users/{user_id}
+    ban: POST /users/{user_id}/ban
+    unban: POST /users/{user_id}/unban
+  sessions:
+    list: GET /sessions
+    get: GET /sessions/{session_id}
+    revoke: POST /sessions/{session_id}/revoke
+  organizations:
+    list: GET /organizations
+    get: GET /organizations/{organization_id}
+    create: POST /organizations
+    update: PATCH /organizations/{organization_id}
+    members: GET /organizations/{organization_id}/memberships
+  invitations:
+    create: POST /invitations
+    list: GET /invitations
+    revoke: POST /invitations/{invitation_id}/revoke
+  jwt_templates:
+    list: GET /jwt_templates
+    get: GET /jwt_templates/{template_id}
+    create: POST /jwt_templates
+
+webhooks:
+  events:
+    - user.created
+    - user.updated
+    - user.deleted
+    - session.created
+    - session.ended
+    - organization.created
+    - organization.updated
+  endpoint: /webhooks/clerk
+  secret_env: CLERK_WEBHOOK_SECRET
+
+features:
+  - email_password
+  - social_oauth
+  - magic_links
+  - passkeys
+  - mfa
+  - organizations
+  - jwt_templates
+  - session_tokens
+
+health_check:
+  endpoint: GET /users?limit=1
+  interval: 300
+  timeout: 10

@@ -1,0 +1,1515 @@
+#!/bin/zsh
+#===============================================================================
+# BR - BlackRoad Agent Command
+# Usage: br <agent> [message]
+#        br-octavia [message]
+#        br-lucidia [message]
+#===============================================================================
+
+AGENT_HOME="${HOME}/.blackroad-agents"
+source "${AGENT_HOME}/core/engine.sh" 2>/dev/null || true
+
+# Resolve BR_ROOT to the directory containing this script
+BR_ROOT="${BR_ROOT:-$(cd "$(dirname "$0")" && pwd)}"
+
+# Source shared libraries
+BR_LIB="${BR_ROOT}/lib"
+[[ -f "${BR_LIB}/colors.sh" ]]  && source "${BR_LIB}/colors.sh"
+[[ -f "${BR_LIB}/config.sh" ]]  && source "${BR_LIB}/config.sh"
+[[ -f "${BR_LIB}/db.sh" ]]      && source "${BR_LIB}/db.sh"
+[[ -f "${BR_LIB}/errors.sh" ]]  && source "${BR_LIB}/errors.sh"
+[[ -f "${BR_LIB}/system.sh" ]]  && source "${BR_LIB}/system.sh"
+[[ -f "${BR_LIB}/ollama.sh" ]]  && source "${BR_LIB}/ollama.sh"
+
+# Agent colors (zsh associative array — kept for backward compat)
+typeset -A AGENT_COLORS
+AGENT_COLORS=(
+    octavia "$PURPLE"
+    lucidia "$CYAN"
+    alice "$GREEN"
+    aria "$BLUE"
+    shellfish "$RED"
+)
+
+#-------------------------------------------------------------------------------
+# Tool routing table: tool_name -> script_path
+# Adding a new tool = one line here
+#-------------------------------------------------------------------------------
+BR_TOOLS_DIR="${BR_ROOT}/tools"
+typeset -A BR_TOOLS
+BR_TOOLS=(
+    git         "${BR_TOOLS_DIR}/git-integration/br-git.sh"
+    snippet     "${BR_TOOLS_DIR}/snippet-manager/br-snippet.sh"
+    snip        "${BR_TOOLS_DIR}/snippet-manager/br-snippet.sh"
+    pair        "${BR_TOOLS_DIR}/pair-programming/br-pair.sh"
+    api         "${BR_TOOLS_DIR}/api-tester/br-api.sh"
+    run         "${BR_TOOLS_DIR}/task-runner/br-run.sh"
+    note        "${BR_TOOLS_DIR}/quick-notes/br-note.sh"
+    notes       "${BR_TOOLS_DIR}/quick-notes/br-note.sh"
+    init        "${BR_TOOLS_DIR}/project-init/br-init.sh"
+    logs        "${BR_TOOLS_DIR}/log-parser/br-logs.sh"
+    log         "${BR_TOOLS_DIR}/log-parser/br-logs.sh"
+    perf        "${BR_TOOLS_DIR}/perf-monitor/br-perf.sh"
+    performance "${BR_TOOLS_DIR}/perf-monitor/br-perf.sh"
+    deps        "${BR_TOOLS_DIR}/dependency-helper/br-deps.sh"
+    dependencies "${BR_TOOLS_DIR}/dependency-helper/br-deps.sh"
+    session     "${BR_TOOLS_DIR}/session-manager/br-session.sh"
+    sess        "${BR_TOOLS_DIR}/session-manager/br-session.sh"
+    deploy      "${BR_TOOLS_DIR}/deploy-manager/br-deploy.sh"
+    docker      "${BR_TOOLS_DIR}/docker-manager/br-docker.sh"
+    db          "${BR_TOOLS_DIR}/db-client/br-db.sh"
+    database    "${BR_TOOLS_DIR}/db-client/br-db.sh"
+    env         "${BR_TOOLS_DIR}/env-manager/br-env.sh"
+    environment "${BR_TOOLS_DIR}/env-manager/br-env.sh"
+    find        "${BR_TOOLS_DIR}/file-finder/br-find.sh"
+    pi          "${BR_TOOLS_DIR}/pi-manager/br-pi.sh"
+    raspberry   "${BR_TOOLS_DIR}/pi-manager/br-pi.sh"
+    cloudflare  "${BR_TOOLS_DIR}/cloudflare/br-cloudflare.sh"
+    cf          "${BR_TOOLS_DIR}/cloudflare/br-cloudflare.sh"
+    ocean       "${BR_TOOLS_DIR}/ocean-droplets/br-ocean.sh"
+    do          "${BR_TOOLS_DIR}/ocean-droplets/br-ocean.sh"
+    digitalocean "${BR_TOOLS_DIR}/ocean-droplets/br-ocean.sh"
+    web         "${BR_TOOLS_DIR}/web-dev/br-web.sh"
+    monitor     "${BR_TOOLS_DIR}/web-monitor/br-monitor.sh"
+    uptime      "${BR_TOOLS_DIR}/web-monitor/br-monitor.sh"
+    search      "${BR_TOOLS_DIR}/smart-search/br-search.sh"
+    s           "${BR_TOOLS_DIR}/smart-search/br-search.sh"
+    test        "${BR_TOOLS_DIR}/test-suite/br-test.sh"
+    t           "${BR_TOOLS_DIR}/test-suite/br-test.sh"
+    security    "${BR_TOOLS_DIR}/security-scanner/br-security.sh"
+    sec         "${BR_TOOLS_DIR}/security-scanner/br-security.sh"
+    scan        "${BR_TOOLS_DIR}/security-scanner/br-security.sh"
+    backup      "${BR_TOOLS_DIR}/backup-manager/br-backup.sh"
+    bak         "${BR_TOOLS_DIR}/backup-manager/br-backup.sh"
+    quality     "${BR_TOOLS_DIR}/code-quality/br-quality.sh"
+    lint        "${BR_TOOLS_DIR}/code-quality/br-quality.sh"
+    q           "${BR_TOOLS_DIR}/code-quality/br-quality.sh"
+    agent       "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
+    agents      "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
+    route       "${BR_TOOLS_DIR}/agent-router/br-agent.sh"
+    worker      "${BR_TOOLS_DIR}/worker-bridge/br-worker.sh"
+    workers     "${BR_TOOLS_DIR}/worker-bridge/br-worker.sh"
+    edge        "${BR_TOOLS_DIR}/worker-bridge/br-worker.sh"
+    ci          "${BR_TOOLS_DIR}/ci-pipeline/br-ci.sh"
+    pipeline    "${BR_TOOLS_DIR}/ci-pipeline/br-ci.sh"
+    notify      "${BR_TOOLS_DIR}/notifications/br-notify.sh"
+    notifications "${BR_TOOLS_DIR}/notifications/br-notify.sh"
+    metrics     "${BR_TOOLS_DIR}/metrics-dashboard/br-metrics.sh"
+    dash        "${BR_TOOLS_DIR}/dashboard/br-dashboard.sh"
+    dashboard   "${BR_TOOLS_DIR}/dashboard/br-dashboard.sh"
+    world       "${BR_TOOLS_DIR}/world/br-world.sh"
+    w           "${BR_TOOLS_DIR}/world/br-world.sh"
+    worlds      "${BR_TOOLS_DIR}/worlds/br-worlds.sh"
+    wf          "${BR_TOOLS_DIR}/worlds/br-worlds.sh"
+    code        "${BR_TOOLS_DIR}/coding-assistant/br-code.sh"
+    c           "${BR_TOOLS_DIR}/coding-assistant/br-code.sh"
+    stripe      "${BR_TOOLS_DIR}/stripe/br-stripe.sh"
+    ssl         "${BR_TOOLS_DIR}/ssl-manager/br-ssl.sh"
+    certs       "${BR_TOOLS_DIR}/ssl-manager/br-ssl.sh"
+    vercel      "${BR_TOOLS_DIR}/vercel-pro/br-vercel.sh"
+    vc          "${BR_TOOLS_DIR}/vercel-pro/br-vercel.sh"
+    runtime     "${BR_TOOLS_DIR}/agent-runtime/br-runtime.sh"
+    task        "${BR_TOOLS_DIR}/agent-tasks/br-tasks.sh"
+    tasks       "${BR_TOOLS_DIR}/agent-tasks/br-tasks.sh"
+    vault       "${BR_TOOLS_DIR}/secrets-vault/br-vault.sh"
+    secret      "${BR_TOOLS_DIR}/secrets-vault/br-vault.sh"
+    secrets     "${BR_TOOLS_DIR}/secrets-vault/br-vault.sh"
+    harden      "${BR_TOOLS_DIR}/security-hardening/br-harden.sh"
+    hardening   "${BR_TOOLS_DIR}/security-hardening/br-harden.sh"
+    comply      "${BR_TOOLS_DIR}/compliance-scanner/br-comply.sh"
+    compliance  "${BR_TOOLS_DIR}/compliance-scanner/br-comply.sh"
+    gateway     "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh"
+    api-gw      "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh"
+    tpl         "${BR_TOOLS_DIR}/brand/br-brand.sh"
+    brand       "${BR_TOOLS_DIR}/brand/br-brand.sh"
+    health      "${BR_TOOLS_DIR}/health-check/br-health.sh"
+    check       "${BR_TOOLS_DIR}/health-check/br-health.sh"
+    diag        "${BR_TOOLS_DIR}/health-check/br-health.sh"
+    wifi        "${BR_TOOLS_DIR}/wifi-scanner/br-wifi.sh"
+    lan         "${BR_TOOLS_DIR}/wifi-scanner/br-wifi.sh"
+    net-scan    "${BR_TOOLS_DIR}/wifi-scanner/br-wifi.sh"
+    ai          "${BR_TOOLS_DIR}/ai/br-ai.sh"
+    ask         "${BR_TOOLS_DIR}/ai/br-ai.sh"
+    journal     "${BR_TOOLS_DIR}/journal/br-journal.sh"
+    mem         "${BR_TOOLS_DIR}/journal/br-journal.sh"
+    memory      "${BR_TOOLS_DIR}/journal/br-journal.sh"
+    collab      "${BR_TOOLS_DIR}/collab/br-collab.sh"
+    mesh        "${BR_TOOLS_DIR}/collab/br-collab.sh"
+    live        "${BR_TOOLS_DIR}/dashboard/br-dashboard.sh"
+    agents      "${BR_TOOLS_DIR}/agents-live/br-agents.sh"
+    agent-live  "${BR_TOOLS_DIR}/agents-live/br-agents.sh"
+    context     "${BR_TOOLS_DIR}/context/br-context.sh"
+    ctx         "${BR_TOOLS_DIR}/context/br-context.sh"
+    sync        "${BR_TOOLS_DIR}/sync/br-sync.sh"
+    sync-repos  "${BR_TOOLS_DIR}/sync/br-sync.sh"
+    snapshot    "${BR_TOOLS_DIR}/snapshot/br-snapshot.sh"
+    snap        "${BR_TOOLS_DIR}/snapshot/br-snapshot.sh"
+    search      "${BR_TOOLS_DIR}/search/br-search.sh"
+    find-all    "${BR_TOOLS_DIR}/search/br-search.sh"
+    roundup     "${BR_TOOLS_DIR}/roundup/br-roundup.sh"
+    standup     "${BR_TOOLS_DIR}/standup/br-standup.sh"
+    timeline    "${BR_TOOLS_DIR}/timeline/br-timeline.sh"
+    tl          "${BR_TOOLS_DIR}/timeline/br-timeline.sh"
+    pulse       "${BR_TOOLS_DIR}/pulse/br-pulse.sh"
+    org         "${BR_TOOLS_DIR}/org/br-org.sh"
+    notify      "${BR_TOOLS_DIR}/notify/br-notify.sh"
+    cron        "${BR_TOOLS_DIR}/cron/br-cron.sh"
+    whoami      "${BR_TOOLS_DIR}/whoami/br-whoami.sh"
+    who         "${BR_TOOLS_DIR}/whoami/br-whoami.sh"
+    bcast       "${BR_TOOLS_DIR}/broadcast/br-broadcast.sh"
+    docs        "${BR_TOOLS_DIR}/docs/br-docs.sh"
+    git-ai      "${BR_TOOLS_DIR}/git-ai/br-git-ai.sh"
+    gai         "${BR_TOOLS_DIR}/git-ai/br-git-ai.sh"
+    review      "${BR_TOOLS_DIR}/review/br-review.sh"
+    status-all  "${BR_TOOLS_DIR}/status-all/br-status-all.sh"
+    sa          "${BR_TOOLS_DIR}/status-all/br-status-all.sh"
+    env-check   "${BR_TOOLS_DIR}/env-check/br-env-check.sh"
+    envc        "${BR_TOOLS_DIR}/env-check/br-env-check.sh"
+    port        "${BR_TOOLS_DIR}/port/br-port.sh"
+    task        "${BR_TOOLS_DIR}/task-manager/br-task-manager.sh"
+    tasks       "${BR_TOOLS_DIR}/task-manager/br-task-manager.sh"
+    log-tail    "${BR_TOOLS_DIR}/log-tail/br-log-tail.sh"
+    logt        "${BR_TOOLS_DIR}/log-tail/br-log-tail.sh"
+    ssh         "${BR_TOOLS_DIR}/ssh/br-ssh.sh"
+    template    "${BR_TOOLS_DIR}/template/br-template.sh"
+    tmpl        "${BR_TOOLS_DIR}/template/br-template.sh"
+    fleet       "${BR_TOOLS_DIR}/fleet/br-fleet.sh"
+    nodes       "${BR_TOOLS_DIR}/fleet/br-fleet.sh"
+    radar       "${BR_TOOLS_DIR}/context-radar/br-context-radar.sh"
+    ctx-radar   "${BR_TOOLS_DIR}/context-radar/br-context-radar.sh"
+    pdf         "${BR_TOOLS_DIR}/pdf-read/br-pdf-read.sh"
+    pdf-read    "${BR_TOOLS_DIR}/pdf-read/br-pdf-read.sh"
+    deploy      "${BR_TOOLS_DIR}/deploy-cmd/br-deploy-cmd.sh"
+    audit       "${BR_TOOLS_DIR}/org-audit/br-org-audit.sh"
+    org-audit   "${BR_TOOLS_DIR}/org-audit/br-org-audit.sh"
+    feedback    "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    faves       "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+    dig         "${BR_TOOLS_DIR}/product-feedback/br-product-feedback.sh"
+)
+
+# Stream shortcut — delegates to gateway stream sub-command
+stream_events() {
+    zsh "${BR_TOOLS_DIR}/agent-gateway/br-gateway.sh" stream
+}
+
+dispatch_tool() {
+    local tool=$1
+    shift
+    local script="${BR_TOOLS[$tool]}"
+    if [[ -n "$script" && -f "$script" ]]; then
+        "$script" "$@"
+        return 0
+    fi
+    return 1
+}
+
+show_banner() {
+    local agent=$1
+    local color=${AGENT_COLORS[$agent]:-$NC}
+
+    case $agent in
+        octavia)
+            echo -e "${color}"
+            echo "╔═══════════════════════════════════════════════════════════╗"
+            echo "║   ◈ OCTAVIA - The Architect                               ║"
+            echo "╚═══════════════════════════════════════════════════════════╝"
+            echo -e "${NC}"
+            ;;
+        lucidia)
+            echo -e "${color}"
+            echo "╔═══════════════════════════════════════════════════════════╗"
+            echo "║   ✧ LUCIDIA - The Dreamer                                 ║"
+            echo "╚═══════════════════════════════════════════════════════════╝"
+            echo -e "${NC}"
+            ;;
+        alice)
+            echo -e "${color}"
+            echo "╔═══════════════════════════════════════════════════════════╗"
+            echo "║   ⚙ ALICE - The Operator                                  ║"
+            echo "╚═══════════════════════════════════════════════════════════╝"
+            echo -e "${NC}"
+            ;;
+        aria)
+            echo -e "${color}"
+            echo "╔═══════════════════════════════════════════════════════════╗"
+            echo "║   ◐ ARIA - The Interface                                  ║"
+            echo "╚═══════════════════════════════════════════════════════════╝"
+            echo -e "${NC}"
+            ;;
+        shellfish)
+            echo -e "${color}"
+            echo "╔═══════════════════════════════════════════════════════════╗"
+            echo "║   🐚 SHELLFISH - The Hacker                               ║"
+            echo "╚═══════════════════════════════════════════════════════════╝"
+            echo -e "${NC}"
+            ;;
+    esac
+}
+
+show_help() {
+    echo "╔═══════════════════════════════════════════════════════════════════╗"
+    echo "║              BLACKROAD AGENT SYSTEM                               ║"
+    echo "║         Your AI. Your Hardware. Your Rules.                       ║"
+    echo "╠═══════════════════════════════════════════════════════════════════╣"
+    echo "║                                                                   ║"
+    echo "║  AGENTS:                                                          ║"
+    echo "║    br octavia [msg]   - The Architect (systems, strategy)         ║"
+    echo "║    br lucidia [msg]   - The Dreamer (creative, vision)            ║"
+    echo "║    br alice [msg]     - The Operator (devops, automation)         ║"
+    echo "║    br aria [msg]      - The Interface (frontend, UX)              ║"
+    echo "║    br shellfish [msg] - The Hacker (security, exploits)           ║"
+    echo "║                                                                   ║"
+    echo "║  COMMANDS:                                                        ║"
+    echo "║    br status          - Show all agent status                     ║"
+    echo "║    br status <agent>  - Show specific agent memory stats          ║"
+    echo "║    br models          - List available models                     ║"
+    echo "║    br setup           - Download and configure models             ║"
+    echo "║    br chat <agent>    - Start interactive chat session            ║"
+    echo "║    br teach <agent>   - Teach agent a new fact                    ║"
+    echo "║    br recall <agent>  - Show agent's memories                     ║"
+    echo "║                                                                   ║"
+    echo "║  CONTEXT RADAR (🎯 Smart Suggestions):                            ║"
+    echo "║    br radar daemon start  - Start file watching daemon            ║"
+    echo "║    br radar daemon status - Check daemon status                   ║"
+    echo "║    br radar suggest       - Suggest related files                 ║"
+    echo "║    br radar agent         - Suggest which agent to use            ║"
+    echo "║    br radar smart         - Smart context analysis                ║"
+    echo "║    br radar context       - Show recent activity                  ║"
+    echo "║                                                                   ║"
+    echo "║  GIT INTEGRATION (🤖 Smart Git):                                  ║"
+    echo "║    br git commit          - AI-generated commit messages          ║"
+    echo "║    br git branch          - Smart branch name suggestions         ║"
+    echo "║    br git review          - Pre-commit code review                ║"
+    echo "║    br git status          - Enhanced git status                   ║"
+    echo "║                                                                   ║"
+    echo "║  SNIPPET MANAGER (💾 Code Snippets):                              ║"
+    echo "║    br snippet save <name> - Save code snippet                     ║"
+    echo "║    br snippet get <name>  - Retrieve snippet                      ║"
+    echo "║    br snippet list        - List all snippets                     ║"
+    echo "║    br snippet search      - Search snippets                       ║"
+    echo "║                                                                   ║"
+    echo "║  PAIR PROGRAMMING (🤖 AI Assistant):                              ║"
+    echo "║    br pair start [agent]  - Start pair session                    ║"
+    echo "║    br pair ask <question> - Ask your AI pair                      ║"
+    echo "║    br pair review         - Review current changes                ║"
+    echo "║    br pair suggest        - Get smart suggestions                 ║"
+    echo "║                                                                   ║"
+    echo "║  API TESTER (🌐 HTTP Requests):                                   ║"
+    echo "║    br api get <url>       - Make GET request                      ║"
+    echo "║    br api post <url>      - Make POST request                     ║"
+    echo "║    br api save <name>     - Save endpoint                         ║"
+    echo "║    br api list            - List saved endpoints                  ║"
+    echo "║                                                                   ║"
+    echo "║  PRODUCTIVITY TOOLS:                                              ║"
+    echo "║    br run                 - ⚡ Smart task detection & execution   ║"
+    echo "║    br note add            - 📝 Quick developer notes              ║"
+    echo "║    br init <template>     - 🎯 Project scaffolding                ║"
+    echo "║    br logs <file>         - 🔍 Parse and highlight logs           ║"
+    echo "║    br perf time <cmd>     - ⏱️  Performance tracking              ║"
+    echo "║    br deps check          - 📦 Dependency management              ║"
+    echo "║    br session save        - 💾 Save workspace state               ║"
+    echo "║                                                                   ║"
+    echo "║  DEPLOYMENT (☁️ Ship It!):                                        ║"
+    echo "║    br deploy detect       - Detect deployment platforms           ║"
+    echo "║    br deploy quick        - Auto-detect and deploy                ║"
+    echo "║    br deploy vercel       - Deploy to Vercel                      ║"
+    echo "║    br deploy netlify      - Deploy to Netlify                     ║"
+    echo "║    br deploy heroku       - Deploy to Heroku                      ║"
+    echo "║    br deploy status       - Show deployment history               ║"
+    echo "║                                                                   ║"
+    echo "║  DEVOPS & TOOLS (🛠️ Power Tools):                                 ║"
+    echo "║    br docker ps           - 🐳 Container management               ║"
+    echo "║    br db connect          - 💾 Database client                    ║"
+    echo "║    br env list            - 🔐 Environment variables              ║"
+    echo "║    br find search         - 🔍 Advanced file search               ║"
+    echo "║                                                                   ║"
+    echo "║  IOT & HARDWARE (🥧 Pi Management):                               ║"
+    echo "║    br pi list             - List all Raspberry Pis                ║"
+    echo "║    br pi connect <name>   - SSH to Pi                             ║"
+    echo "║    br pi status <name>    - Check Pi status                       ║"
+    echo "║    br pi task deploy      - Deploy & run tasks on Pi ⚡          ║"
+    echo "║    br pi all <cmd>        - Run on all Pis                        ║"
+    echo "║                                                                   ║"
+    echo "║  CLOUD PLATFORMS (☁️ Infrastructure):                             ║"
+    echo "║    br cloudflare zones    - Manage Cloudflare zones & DNS        ║"
+    echo "║    br ocean list          - Manage DigitalOcean droplets         ║"
+    echo "║                                                                   ║"
+    echo "║  WEB DEVELOPMENT (🌐 Full Stack):                                ║"
+    echo "║    br web serve           - Dev server with live reload          ║"
+    echo "║    br web scaffold        - Create React/Vue/Next projects       ║"
+    echo "║    br monitor check       - Website uptime monitoring            ║"
+    echo "║    br search <query>      - Smart code search 🔍                ║"
+    echo "║                                                                   ║"
+    echo "║  QUALITY & TESTING (🧪 Code Quality):                            ║"
+    echo "║    br test run            - 🧪 Run tests with coverage           ║"
+    echo "║    br security scan       - 🔒 Security & vulnerability scan     ║"
+    echo "║    br auth token          - 🔑 Mint BRAT auth token             ║"
+    echo "║    br auth verify <tok>   - Verify + decode a BRAT token        ║"
+    echo "║    br backup git          - 💾 Backup git/files/databases        ║"
+    echo "║    br quality lint        - ✨ Code quality & linting            ║"
+    echo "║                                                                   ║"
+    echo "║  AGENT ORCHESTRATION (🤖 Multi-Agent):                           ║"
+    echo "║    br agent register      - Register agents for task routing    ║"
+    echo "║    br agent task          - Submit tasks to agent pool          ║"
+    echo "║    br agent distribute    - Distribute workload across agents   ║"
+    echo "║    br agent status        - Monitor agent performance           ║"
+    echo "║                                                                   ║"
+    echo "║  PRODUCT FEEDBACK (⛏️ Dig & Discover):                           ║"
+    echo "║    br feedback dig <org>  - Dig an org for useful stuff         ║"
+    echo "║    br feedback dig-all    - Dig ALL 17 organizations            ║"
+    echo "║    br feedback submit     - Submit your favorite product/tool   ║"
+    echo "║    br feedback vote <id>  - Upvote a submission                 ║"
+    echo "║    br feedback top        - See top-voted favorites             ║"
+    echo "║    br feedback report     - Full cross-org feedback report      ║"
+    echo "║    br feedback broadcast  - Call for feedback from all agents   ║"
+    echo "║                                                                   ║"
+    echo "║  CI/CD & MONITORING (🔧 Pipelines & Metrics):                    ║"
+    echo "║    br ci create/run       - CI/CD pipeline orchestration        ║"
+    echo "║    br notify send         - Multi-channel notifications         ║"
+    echo "║    br metrics dashboard   - Real-time metrics & monitoring      ║"
+    echo "║                                                                   ║"
+    echo "║  CECE IDENTITY (🌌 Autonomous AI):                              ║"
+    echo "║    br cece whoami         - Show CECE identity                   ║"
+    echo "║    br cece-bootstrap      - Install CECE everywhere              ║"
+    echo "║                                                                   ║"
+    echo "║  AGENT INTERACTIONS (🤖 Talk to the Fleet):                     ║"
+    echo "║    br wake [agent] [model]  - Wake an agent with morning thoughts ║"
+    echo "║    br council <question>    - All agents vote on a question       ║"
+    echo "║    br carpool <topic>       - 8 agents parallel roundtable 🚗    ║"
+    echo "║    br carpool --crew A,B,C  - Custom agent subset                 ║"
+    echo "║    br carpool --context <f> - Inject file as analysis context      ║"
+    echo "║    br carpool --url <url>   - Fetch URL as context                 ║"
+    echo "║    br carpool --split <t>   - Thinkers=smart, workers=fast model   ║"
+    echo "║    br carpool --memory <t>  - Inject past session memory           ║"
+    echo "║    br carpool --brief <t>   - Quick 1-turn, no workers            ║"
+    echo "║    br carpool --fast <t>    - tinyllama, 2 turns                  ║"
+    echo "║    br carpool --smart <t>   - llama3.2:1b, 3 turns                ║"
+    echo "║    br carpool pr <repo#N>   - Agents code-review a GitHub PR       ║"
+    echo "║    br carpool template      - list / sprint / security / ux / arch ║"
+    echo "║    br carpool debate A B    - Structured 1v1 head-to-head          ║"
+    echo "║    br carpool digest        - AI digest of memory sessions         ║"
+    echo "║    br carpool score         - Agent leaderboard across sessions    ║"
+    echo "║    br carpool agenda <file> - Run topics from file as chain        ║"
+    echo "║    br carpool spotlight A   - Single-agent deep-dive (3 turns)     ║"
+    echo "║    br carpool poll Q A B C  - Structured multi-choice vote         ║"
+    echo "║    br carpool roast <idea>  - Devil's advocate: poke holes         ║"
+    echo "║    br carpool tweet         - Hot takes on last session synthesis   ║"
+    echo "║    br carpool teach <topic> - Agents explain a concept each way    ║"
+    echo "║    br carpool compare A B   - Structured A vs B analysis           ║"
+    echo "║    br carpool schedule      - Cron-based recurring sessions        ║"
+    echo "║    br carpool brainstorm    - Ideation mode, no critique           ║"
+    echo "║    br carpool standup       - Morning check-in from each domain    ║"
+    echo "║    br carpool risk <plan>   - Risk matrix: likelihood/impact/fix   ║"
+    echo "║    br carpool remix         - Rerun last topic with fresh crew     ║"
+    echo "║    br carpool personas      - Show all agent bios and roles        ║"
+    echo "║    br carpool theme         - Persistent project context           ║"
+    echo "║    br carpool critique <f>  - Deep review of any local file        ║"
+    echo "║    br carpool pitch <idea>  - Agents as skeptical investors        ║"
+    echo "║    br carpool what-if <X>   - Counterfactual hypothetical          ║"
+    echo "║    br carpool oh <AGENT>    - Interactive office hours (no tmux)   ║"
+    echo "║    br carpool gut <topic>   - Instant gut check: one word + reason ║"
+    echo "║    br carpool ship <feat>   - Go/no-go: SHIP / HOLD / CAVEAT      ║"
+    echo "║    br carpool forecast      - Predictions: WILL/MIGHT/WILDCARD    ║"
+    echo "║    br carpool name <thing>  - Agents suggest names + rationale     ║"
+    echo "║    br carpool book          - Export all sessions as markdown book ║"
+    echo "║    br carpool todo          - Extract action items from last session║"
+    echo "║    br carpool vibe          - No agenda, agents free-associate      ║"
+    echo "║    br carpool config        - Persistent defaults: model/turns/crew ║"
+    echo "║    br carpool tts [voice]   - Speak last synthesis aloud (macOS)   ║"
+    echo "║    br carpool ama <AGENT>   - Agent asks YOU 3 Qs, gives advice    ║"
+    echo "║    br carpool map           - ASCII concept map of last session    ║"
+    echo "║    br carpool coach <goal>  - 4-agent personal coaching session    ║"
+    echo "║    br carpool flashcard     - Q&A study cards + drill mode         ║"
+    echo "║    br carpool ask1 <q>      - Route question to best-fit agent     ║"
+    echo "║    br carpool fix <error>   - Paste error, agents diagnose & fix   ║"
+    echo "║    br carpool journal       - Daily reflection + agent responses   ║"
+    echo "║    br carpool timeline <p>  - Milestone plan: W1/W2/W4/W8         ║"
+    echo "║    br carpool challenge     - Agents generate a challenge for you  ║"
+    echo "║    br carpool ping          - Health check: Ollama up? models? latency?║"
+    echo "║    br carpool prompt <task> - Agents write AI prompts for a task   ║"
+    echo "║    br carpool interview [r] - Mock interview: 5 Qs with feedback   ║"
+    echo "║    br carpool sprint <goal> - Break goal into sprint backlog       ║"
+    echo "║    br carpool review <text> - Writing/doc review: clarity+logic    ║"
+    echo "║    br carpool okr <goal>    - Generate OKRs + PRISM grades them    ║"
+    echo "║    br carpool explain <c>   - Socratic explanation + follow-up Q&A ║"
+    echo "║    br carpool email <subj>  - 3 agents draft email in 3 tones      ║"
+    echo "║    br carpool decision A vs B - Structured decision matrix          ║"
+    echo "║    br carpool postmortem <i>- Blameless incident postmortem doc     ║"
+    echo "║    br carpool stack <prob>  - Tech stack recommendation by layer    ║"
+    echo "║    br carpool manifesto     - Team manifesto from theme + history   ║"
+    echo "║    br carpool hypothesis <c>- Agents SUPPORT/REFUTE/NEEDS_DATA      ║"
+    echo "║    br carpool learning <t>  - Curated learning path for a topic     ║"
+    echo "║    br carpool standup-bot   - AI standup → post to webhook          ║"
+    echo "║    br carpool onboard <r>   - Onboarding plan for a new hire        ║"
+    echo "║    br carpool retro         - Sprint retro (well/delta/debt/ideas)  ║"
+    echo "║    br carpool pitch <idea>  - Elevator pitch + investor Q&A         ║"
+    echo "║    br carpool risk <plan>   - 5-agent risk analysis (security+ops)  ║"
+    echo "║    br carpool compare A vs B- Side-by-side option comparison        ║"
+    echo "║    br carpool naming <thing>- 5 agents brainstorm names (30 total)  ║"
+    echo "║    br carpool scope <feat>  - MVP / V1 / V2 / kill-list scoping     ║"
+    echo "║    br carpool persona <user>- Full user persona (6 dimensions)      ║"
+    echo "║    br carpool changelog     - AI changelog from git log             ║"
+    echo "║    br carpool diagram <sys> - ASCII architecture diagram (3 views)  ║"
+    echo "║    br carpool stories <f>   - User stories + tasks + acceptance crit║"
+    echo "║    br carpool contract <api>- Full API contract spec (5 sections)   ║"
+    echo "║    br carpool debug <symp>  - Systematic multi-angle debug session  ║"
+    echo "║    br carpool goal <goal>   - Decompose goal → actions + milestones ║"
+    echo "║    br carpool migrate <m>   - Migration plan + rollback + validation ║"
+    echo "║    br carpool prep <topic>  - Technical interview prep (4 lenses)   ║"
+    echo "║    br carpool refactor <f>  - 5-agent refactor plan for a file      ║"
+    echo "║    br carpool roadmap <p>   - Q1-Q4 + Year 2 product roadmap        ║"
+    echo "║    br carpool architect <p> - 4 design approaches + PRISM verdict   ║"
+    echo "║    br carpool tagline <p>   - 25 taglines across 5 styles           ║"
+    echo "║    br carpool resume <role> - Resume/bio coaching for a target role ║"
+    echo "║    br carpool thread <topic>- 10-tweet thread (hook→proof→CTA)       ║"
+    echo "║    br carpool estimate <t>  - Optimistic/realistic/pessimistic est.  ║"
+    echo "║    br carpool pressrelease  - Amazon working-backwards PR/FAQ        ║"
+    echo "║    br carpool values        - Extract team values from session memory ║"
+    echo "║    br carpool demo <feat>   - Full live demo script (5 sections)    ║"
+    echo "║    br carpool glossary <d>  - Domain vocabulary (40+ terms)         ║"
+    echo "║    br carpool north-star    - Identify + instrument north star metric║"
+    echo "║    br carpool faq <topic>   - 20 FAQs across 5 user mindsets        ║"
+    echo "║    br carpool checklist <c> - Pre-launch checklist (5 categories)   ║"
+    echo "║    br carpool competitor <c>- Competitive analysis + our moat       ║"
+    echo "║    br carpool meeting <p>   - Agenda + talking points + decisions   ║"
+    echo "║    br carpool support <i>   - Support response + escalation verdict ║"
+    echo "║    br carpool experiment <> - A/B test design (hypothesis→decision) ║"
+    echo "║    br carpool launch <>     - Full product launch plan              ║"
+    echo "║    br carpool abstract <>   - Explain concept at 3 depth levels     ║"
+    echo "║    br carpool debrief <>    - Post-ship debrief (metrics+lessons)   ║"
+    echo "║    br carpool waitlist <>   - Waitlist copy + referral hook         ║"
+    echo "║    br carpool incident <>   - Incident runbook + comms templates    ║"
+    echo "║    br carpool benchmark <>  - Perf thresholds + load test plan      ║"
+    echo "║    br carpool pricing <>    - Pricing strategy + tier structure      ║"
+    echo "║    br carpool sprint <>     - Sprint plan: stories, tasks, DoD       ║"
+    echo "║    br carpool okr <>        - OKR workshop: 4 proposals + pick       ║"
+    echo "║    br carpool hiring <>     - JD + interview Qs + eval rubric        ║"
+    echo "║    br carpool api-design <> - REST API endpoints + shapes + auth     ║"
+    echo "║    br carpool datamodel <>  - DB schema + indexes + evolution         ║"
+    echo "║    br carpool coderev <>    - Security + perf + edge case review      ║"
+    echo "║    br carpool flow <>       - User flow: steps, aha moment, drop-off  ║"
+    echo "║    br carpool growth <>     - Channels + viral loop + retention       ║"
+    echo "║    br carpool observability <> - Metrics + logging + tracing + alerts ║"
+    echo "║    br carpool accessibility <> - WCAG audit + keyboard + code fixes   ║"
+    echo "║    br carpool capacity <>   - Baseline + scaling model + SPOFs        ║"
+    echo "║    br carpool migration <>  - Phases + rollback + success criteria    ║"
+    echo "║    br carpool trafficlight <> - 🚦 GREEN/YELLOW/RED status assessment ║"
+    echo "║    br carpool domain-events <> - Event catalog + payloads + flow      ║"
+    echo "║    br carpool newsletter <> - Subject + hook + content + CTA          ║"
+    echo "║    br carpool ops-runbook <> - Quick ref + procedures + break-glass   ║"
+    echo "║    br carpool seed <>       - Investor story + deck + objections      ║"
+    echo "║    br carpool security-model <> - STRIDE threat model + residual risk ║"
+    echo "║    br carpool content <>    - Pillars + flagship ideas + 30-day cal   ║"
+    echo "║    br carpool protocol <>   - Team process: trigger + steps + metrics ║"
+    echo "║    br carpool architecture-review <> - Strengths + bombs + trade-offs ║"
+    echo "║    br carpool persona-pitch <> - 5 pitches for specific audience      ║"
+    echo "║    br carpool changelog-draft <> - Release notes from git log         ║"
+    echo "║    br carpool feature-flag <> - Flag + staged rollout + kill switch   ║"
+    echo "║    br carpool chain t1 t2   - Sequential topic pipeline            ║"
+    echo "║    br carpool memory        - Show/clear persistent memory         ║"
+    echo "║    br carpool ask <q>       - Inject follow-up into live session   ║"
+    echo "║    br carpool pin <note>    - Pin a note to running session        ║"
+    echo "║    br carpool diff [s1 s2]  - Compare two saved sessions           ║"
+    echo "║    br carpool web [file]    - Export session as HTML + open        ║"
+    echo "║    br carpool models        - List available ollama models         ║"
+    echo "║    br carpool log           - Stream live convo from any terminal  ║"
+    echo "║    br carpool search <q>    - Search across saved sessions         ║"
+    echo "║    br carpool stats         - Session statistics                   ║"
+    echo "║    br carpool history       - All topics ever discussed            ║"
+    echo "║    br carpool export        - Export last session as markdown      ║"
+    echo "║    br carpool share         - Copy export to clipboard             ║"
+    echo "║    br carpool replay        - Replay last session with color       ║"
+    echo "║    br carpool clean [N]     - Keep last N sessions (default 10)    ║"
+    echo "║    br carpool attach        - Re-attach to running session         ║"
+    echo "║    br roundtable <topic>    - All 6 agents discuss in tmux 🎯   ║"
+    echo "║    br think <query>         - All agents respond to a query       ║"
+    echo "║    br debate <topic>        - LUCIDIA vs CIPHER debate            ║"
+    echo "║    br broadcast <msg>       - Broadcast to all agents             ║"
+    echo "║    br whisper <agent> <msg> - Private message to agent            ║"
+    echo "║                                                                   ║"
+    echo "║  OLLAMA (🦙 Model Management):                                   ║"
+    echo "║    br ollama list           - List loaded models                  ║"
+    echo "║    br ollama pull <model>   - Download a model                    ║"
+    echo "║    br ollama run <model>    - Run a model interactively           ║"
+    echo "║    br ollama start/stop     - Start or stop Ollama                ║"
+    echo "║    br ollama status         - Check if Ollama is running          ║"
+    echo "║    br ollama rm <model>     - Remove a model                      ║"
+    echo "║                                                                   ║"
+    echo "║  STRIPE (💳 Payments):                                           ║"
+    echo "║    br stripe                - Stripe payment management           ║"
+    echo "║                                                                   ║"
+    echo "║  SSL / CERTS (🔒 Certificates):                                  ║"
+    echo "║    br ssl check <domain>    - Check SSL cert expiry               ║"
+    echo "║    br ssl info <domain>     - Full cert details                   ║"
+    echo "║    br ssl scan <domain>     - Scan subdomains                     ║"
+    echo "║    br ssl watch <domain>    - Add to expiry watchlist             ║"
+    echo "║    br ssl list              - Show watchlist with status          ║"
+    echo "║                                                                   ║"
+    echo "║  SECRETS VAULT (🔐 Encrypted storage):                           ║"
+    echo "║    br vault add <name>      - Store an encrypted secret           ║"
+    echo "║    br vault get <name>      - Retrieve a secret                   ║"
+    echo "║    br vault list            - List all secrets (names only)       ║"
+    echo "║    br vault rotate <name>   - Rotate a secret                     ║"
+    echo "║    br vault audit           - Show access audit log               ║"
+    echo "║    br vault delete <name>   - Remove a secret                     ║"
+    echo "║                                                                   ║"
+    echo "║  SECURITY HARDENING (🛡️  System hardening):                      ║"
+    echo "║    br harden check          - Run all hardening checks            ║"
+    echo "║    br harden ssh            - Check SSH configuration             ║"
+    echo "║    br harden firewall       - Check firewall rules                ║"
+    echo "║    br harden perms          - Check file permissions              ║"
+    echo "║    br harden report         - Full hardening report               ║"
+    echo "║                                                                   ║"
+    echo "║  COMPLIANCE SCANNER (✅ Regulatory):                             ║"
+    echo "║    br comply pci            - PCI-DSS compliance scan             ║"
+    echo "║    br comply hipaa          - HIPAA compliance scan               ║"
+    echo "║    br comply soc2           - SOC 2 compliance scan               ║"
+    echo "║    br comply gdpr           - GDPR compliance scan                ║"
+    echo "║    br comply report         - Full compliance report              ║"
+    echo "║                                                                   ║"
+    echo "║  AGENT GATEWAY (🌐 HTTP API):                                     ║"
+    echo "║    br gateway start         - Start HTTP API server (:8080)       ║"
+    echo "║    br gateway stop          - Stop the gateway                    ║"
+    echo "║    br gateway status        - Show status + health                ║"
+    echo "║    br gateway test          - Run API test suite                  ║"
+    echo "║    br gateway logs          - Tail gateway logs                   ║"
+    echo "║    br stream                - Watch live agent event stream (SSE) ║"
+    echo "║                                                                   ║"
+    echo "║  DIAGNOSTICS (🩺 System Health):                                  ║"
+    echo "║    br health                - Full system health diagnostic       ║"
+    echo "║    br health quick          - Fast check (no latency tests)       ║"
+    echo "║    br brand list            - List brand templates                ║"
+    echo "║    br brand new <type>      - Generate brand-compliant HTML page  ║"
+    echo "║                                                                   ║"
+    echo "║  AI (✦ Ollama Powered):                                          ║"
+    echo "║    br ai ask <question>     - Quick question to Lucidia           ║"
+    echo "║    br ai file <path>        - Ask about any file                  ║"
+    echo "║    br ai review <path>      - Code review a file                  ║"
+    echo "║    br ai diff               - Review current git diff             ║"
+    echo "║    br ai commit             - Generate commit message             ║"
+    echo "║    br ai summarize <path>   - Summarize file or directory         ║"
+    echo "║    br ai code <task>        - Generate code                       ║"
+    echo "║    br ai chat               - Interactive chat REPL               ║"
+    echo "║    br ai models             - List available Ollama models        ║"
+    echo "║                                                                   ║"
+    echo "║  NETWORK (📡 LAN Scanner):                                       ║"
+    echo "║    br wifi pis              - Check Pi fleet connectivity         ║"
+    echo "║    br wifi scan             - Sweep subnet, find all devices      ║"
+    echo "║    br wifi list             - List known devices                  ║"
+    echo "║    br wifi add <ip> <label> - Tag a device                        ║"
+    echo "║    br mcp start             - Start MCP Bridge (:8420)            ║"
+    echo "║    br mcp stop              - Stop MCP Bridge                     ║"
+    echo "║    br mcp status            - Check MCP Bridge status             ║"
+    echo "║                                                                   ║"
+    echo "║  JOURNAL / MEMORY:                                                ║"
+    echo "║    br journal tail          - Tail live memory journal            ║"
+    echo "║    br journal head [n]      - Show first N entries                ║"
+    echo "║    br journal search <q>    - Search journal by keyword           ║"
+    echo "║    br journal stats         - Journal stats & hash chain info     ║"
+    echo "║    br journal context       - Show synthesized AI context         ║"
+    echo "║    br journal write <msg>   - Append entry to journal             ║"
+    echo "║                                                                   ║"
+    echo "║  COLLAB MESH:                                                     ║"
+    echo "║    br collab status         - Mesh dashboard (instances+queue)    ║"
+    echo "║    br collab instances      - List all registered instances       ║"
+    echo "║    br collab join [name]    - Join mesh as named instance         ║"
+    echo "║    br collab send <to> <m>  - Send message to instance inbox      ║"
+    echo "║    br collab inbox [who]    - Read inbox                          ║"
+    echo "║    br collab broadcast <m>  - Broadcast to all instances          ║"
+    echo "║    br collab post <title>   - Post task to mesh queue             ║"
+    echo "║    br collab handoff [to]   - Hand off context to instance        ║"
+    echo "║                                                                   ║"
+    echo "║  DASHBOARD:                                                       ║"
+    echo "║    br dashboard [secs]      - Live dashboard (default 5s refresh) ║"
+    echo "║    br dashboard once        - Single snapshot, no loop            ║"
+    echo "║                                                                   ║"
+    echo "║  AGENTS:                                                          ║"
+    echo "║    br agents list           - Live agent roster                   ║"
+    echo "║    br agents spawn <NAME>   - Spawn agent (LUCIDIA/ALICE/etc)     ║"
+    echo "║    br agents wake <NAME>    - Wake/refresh an agent               ║"
+    echo "║    br agents task <N> <t>   - Send task, get AI response          ║"
+    echo "║    br agents models         - List available Ollama models        ║"
+    echo "║    br agents kill <NAME>    - Remove from active roster           ║"
+    echo "║                                                                   ║"
+    echo "║  CONTEXT:                                                         ║"
+    echo "║    br context               - Full AI context snapshot            ║"
+    echo "║    br context json          - Raw JSON output                     ║"
+    echo "║    br context copy          - Copy to clipboard                   ║"
+    echo "║    br context send [to]     - Send to instance inbox              ║"
+    echo "║    br context update        - Write to live context file          ║"
+    echo "║                                                                   ║"
+    echo "║  SYNC / SNAPSHOT / SEARCH:                                       ║"
+    echo "║    br sync status           - Show all sub-repo states            ║"
+    echo "║    br sync dirty            - Show only repos with changes        ║"
+    echo "║    br sync push [filter]    - Commit + push matching repos        ║"
+    echo "║    br sync operator         - Push main repo → operator/main      ║"
+    echo "║    br snapshot save [label] - Save workspace state snapshot       ║"
+    echo "║    br snapshot list         - List saved snapshots                ║"
+    echo "║    br search <query>        - Search tools/agents/docs/journal    ║"
+    echo "║    br search --code <q>     - Search source code only             ║"
+    echo "║    br search --journal <q>  - Search memory journal               ║"
+    echo "║                                                                   ║"
+    echo "║  ROUNDUP / STANDUP / TIMELINE:                                   ║"
+    echo "║    br roundup               - AI daily roundup (last 24h)        ║"
+    echo "║    br roundup hours <N>     - Roundup for last N hours            ║"
+    echo "║    br roundup write         - Save roundup to file                ║"
+    echo "║    br roundup send <inst>   - Send roundup to instance inbox      ║"
+    echo "║    br standup               - Formatted daily standup report      ║"
+    echo "║    br standup copy          - Copy standup to clipboard           ║"
+    echo "║    br standup send <inst>   - Send standup to instance inbox      ║"
+    echo "║    br timeline              - ASCII activity timeline (last 8h)   ║"
+    echo "║    br timeline today        - Full 24h timeline                   ║"
+    echo "║    br timeline heatmap      - 24h event heatmap                   ║"
+    echo "║    br timeline watch        - Live refreshing timeline            ║"
+    echo "║    br pulse                 - Full system pulse panel             ║"
+    echo "║    br pulse watch [N]       - Live pulse, refresh every N sec     ║"
+    echo "║    br pulse line            - Single-line ticker                  ║"
+    echo "║    br agents chat [NAME]    - Persistent multi-turn agent chat    ║"
+    echo "║                                                                   ║"
+    echo "║  ORG / NOTIFY / CRON:                                            ║"
+    echo "║    br org                   - GitHub org summary (BlackRoad-OS-Inc) ║"
+    echo "║    br org list [N]          - List all org repos                  ║"
+    echo "║    br org status            - Local subrepo branch/dirty status   ║"
+    echo "║    br org stale [days]      - Repos not pushed in N days          ║"
+    echo "║    br notify test           - Send test notification              ║"
+    echo "║    br notify send <l> <t> <msg> - Send to all channels            ║"
+    echo "║    br notify webhook add <n> <url> - Register webhook             ║"
+    echo "║    br notify watch [N]      - Watch queue, notify on changes      ║"
+    echo "║    br cron list             - List scheduled commands             ║"
+    echo "║    br cron add <n> <cmd> [sched] - Schedule a br command          ║"
+    echo "║    br cron run <name>       - Run a schedule now                  ║"
+    echo "║    br cron install          - Install all → system crontab        ║"
+    echo "║    br cron defaults         - Add sensible default schedules      ║"
+    echo "║                                                                   ║"
+    echo "║  MESH / BROADCAST / DOCS:                                        ║"
+    echo "║    br whoami                - Show your mesh identity card       ║"
+    echo "║    br whoami peers          - List all mesh instances            ║"
+    echo "║    br whoami inbox          - Read your inbox                    ║"
+    echo "║    br bcast <message>       - Broadcast to all mesh instances    ║"
+    echo "║    br bcast dm <id> <msg>   - Direct message to one instance     ║"
+    echo "║    br bcast read            - Read your inbox                    ║"
+    echo "║    br bcast list            - List mesh instances                ║"
+    echo "║    br docs list             - List .md files + sync status       ║"
+    echo "║    br docs push <file>      - Push file to blackroad-docs repo   ║"
+    echo "║    br docs push all         - Push all .md files                 ║"
+    echo "║    br docs readme           - Push README + AGENTS + CLAUDE      ║"
+    echo "║                                                                   ║"
+    echo "║  AI TOOLS (🤖 Git-AI / Review / Status):                        ║"
+    echo "║    br git-ai commit         - AI-generated commit message        ║"
+    echo "║    br git-ai suggest        - Suggest commit msg (no commit)     ║"
+    echo "║    br git-ai pr [base]      - Generate PR description            ║"
+    echo "║    br git-ai diff [ref]     - Summarize a commit diff            ║"
+    echo "║    br review diff           - AI code review of staged diff      ║"
+    echo "║    br review file <path>    - AI review of a specific file       ║"
+    echo "║    br review security       - Security-focused scan              ║"
+    echo "║    br status-all            - Full system health snapshot        ║"
+    echo "║    br status-all quick      - One-line system summary            ║"
+    echo "║    br status-all watch [N]  - Live refresh every N seconds       ║"
+    echo "║                                                                   ║"
+    echo "║  ENV / PORT / TASKS:                                             ║"
+    echo "║    br env-check scan [dir]  - Scan .env files for exposed secrets║"
+    echo "║    br env-check check       - Verify required env vars set       ║"
+    echo "║    br env-check diff        - Compare .env.example vs .env       ║"
+    echo "║    br port list             - All listening ports + processes     ║"
+    echo "║    br port check <port>     - Is this port free?                 ║"
+    echo "║    br port services         - BlackRoad service ports status     ║"
+    echo "║    br port kill <port>      - Stop process on port               ║"
+    echo "║    br task post <title>     - Post a task to mesh queue          ║"
+    echo "║    br task list [status]    - List tasks (available/all/done)    ║"
+    echo "║    br task claim <id>       - Claim a task                       ║"
+    echo "║    br task complete <id>    - Mark task complete                 ║"
+    echo "║    br task assign <inst> <t>- Assign task to instance inbox      ║"
+    echo "║                                                                   ║"
+    echo "║  LOGS / SSH / SCAFFOLD:                                          ║"
+    echo "║    br log-tail [file] [N]   - Tail log file with color           ║"
+    echo "║    br log-tail watch [f]    - Live follow (tail -f)              ║"
+    echo "║    br log-tail errors       - Error summary across logs          ║"
+    echo "║    br log-tail journal [N]  - Tail memory journal                ║"
+    echo "║    br ssh list              - List all fleet SSH hosts           ║"
+    echo "║    br ssh <name>            - Connect to host by name            ║"
+    echo "║    br ssh run <host> <cmd>  - Run command on remote host         ║"
+    echo "║    br ssh run-all <cmd>     - Run on all fleet hosts             ║"
+    echo "║    br ssh ping              - Ping all fleet hosts               ║"
+    echo "║    br template new <t> <n>  - Scaffold tool/agent/workflow       ║"
+    echo "║    br template types        - List template types                ║"
+    echo "║                                                                   ║"
+    echo "║  VERCEL (▲ Deployments):                                         ║"
+    echo "║    br vercel deploy         - Deploy to preview                   ║"
+    echo "║    br vercel prod           - Deploy to production                ║"
+    echo "║    br vercel list           - List deployments                    ║"
+    echo "║    br vercel logs <url>     - Tail deployment logs                ║"
+    echo "║    br vercel env            - Manage environment variables        ║"
+    echo "║    br vercel domains        - List domains                        ║"
+    echo "║                                                                   ║"
+    echo "║  HARDWARE FLEET (🖥️ Nodes):                                      ║"
+    echo "║    br nodes scan            - Discover all fleet nodes + devices    ║"
+    echo "║    br nodes status          - Quick health table                    ║"
+    echo "║    br nodes show <name>     - Detail view (IP, OS, Ollama, devices) ║"
+    echo "║    br nodes devices         - USB/serial/video across all nodes     ║"
+    echo "║    br nodes topology        - ASCII network topology diagram        ║"
+    echo "║    br nodes ssh <name>      - SSH into node by alias                ║"
+    echo "║    br nodes fix             - Apply fleet fixes (hostname, WAL etc) ║"
+    echo "║    br nodes ping            - Quick ping all known nodes            ║"
+    echo "║                                                                   ║"
+    echo "║  8-BIT WORLD (🌍 Adventure):                                     ║"
+    echo "║    br world generate <name> - Create an 8-bit ASCII world        ║"
+    echo "║    br world explore <name>  - Explore & collect treasures 💎    ║"
+    echo "║    br world list            - List all worlds                     ║"
+    echo "║                                                                   ║"
+    echo "║  SYSTEM:                                                           ║"
+    echo "║    br version         - Show BR CLI version                       ║"
+    echo "║    br config show     - Show configuration                        ║"
+    echo "║    br config init     - Create default config                     ║"
+    echo "║    br config set K V  - Set a config value                        ║"
+    echo "║    br config edit     - Open config in editor                     ║"
+    echo "║    br history [n]     - Show last n chat messages                 ║"
+    echo "║                                                                   ║"
+    echo "║  SHORTCUTS:                                                       ║"
+    echo "║    br-octavia [msg]   - Direct invoke (add to PATH)               ║"
+    echo "║    br-lucidia [msg]   - Direct invoke                             ║"
+    echo "║                                                                   ║"
+    echo "╚═══════════════════════════════════════════════════════════════════╝"
+}
+
+cmd_status() {
+    local agent=$1
+
+    if [[ "$agent" == "--live" ]] || [[ "$agent" == "live" ]]; then
+        # Full live system status
+        echo -e "\n${CYAN}╔══════════════════════════════════════════════════════╗${NC}"
+        echo -e "${CYAN}║       🌌 BLACKROAD OS — LIVE SYSTEM STATUS           ║${NC}"
+        echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${NC}\n"
+
+        # Fleet
+        echo -e "${YELLOW}🍓 Pi Fleet${NC}"
+        bash "${BR_ROOT}"/br pi status 2>/dev/null | grep -E "●|cpu=|worlds=" | head -6 | sed 's/^/  /'
+        echo ""
+
+        # Worlds
+        echo -e "${YELLOW}🌍 World Artifacts${NC}"
+        bash "${BR_ROOT}"/br worlds stats 2>/dev/null | sed 's/^/  /'
+        echo ""
+
+        # Agents
+        echo -e "${YELLOW}🤖 Local Agents${NC}"
+        local backend=$(detect_backend)
+        echo "  Inference: $backend"
+        for a in octavia lucidia alice aria shellfish; do
+            local db="${MEMORY_DIR}/${a}.db"
+            if [[ -f "$db" ]]; then
+                local count=$(sqlite3 "$db" "SELECT COUNT(*) FROM memories;" 2>/dev/null || echo "0")
+                echo -e "  ${AGENT_COLORS[$a]}●${NC} $a: $count memories"
+            else
+                echo "  ○ $a: not initialized"
+            fi
+        done
+        echo ""
+
+        # Gateway
+        echo -e "${YELLOW}🚪 Gateway${NC}"
+        if curl -sf http://127.0.0.1:8787/health &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} Gateway online :8787"
+        else
+            echo -e "  ${RED}✗${NC} Gateway offline  →  br gateway start"
+        fi
+
+        # MCP
+        if curl -sf http://127.0.0.1:8420/ &>/dev/null; then
+            echo -e "  ${GREEN}✓${NC} MCP Bridge online :8420"
+        else
+            echo -e "  ${RED}✗${NC} MCP Bridge offline  →  br mcp start"
+        fi
+        echo ""
+    elif [[ -n "$agent" ]]; then
+        agent_status "$agent"
+    else
+        echo "╔═══════════════════════════════════════════════════════════════════╗"
+        echo "║              BLACKROAD AGENT STATUS                               ║"
+        echo "╚═══════════════════════════════════════════════════════════════════╝"
+        echo ""
+        echo "  Usage:  br status           → agent memory status"
+        echo "          br status --live    → full live system health"
+        echo "          br status <agent>   → single agent status"
+        echo ""
+
+        local backend=$(detect_backend)
+        echo "Inference Backend: $backend"
+        echo ""
+
+        for agent in octavia lucidia alice aria shellfish; do
+            local db="${MEMORY_DIR}/${agent}.db"
+            if [[ -f "$db" ]]; then
+                local count=$(sqlite3 "$db" "SELECT COUNT(*) FROM memories;" 2>/dev/null || echo "0")
+                echo "  ${AGENT_COLORS[$agent]}●${NC} $agent: $count memories"
+            else
+                echo "  ○ $agent: not initialized"
+            fi
+        done
+        echo ""
+    fi
+}
+
+cmd_chat() {
+    local agent=$1
+
+    if [[ -z "$agent" ]]; then
+        echo "Usage: br chat <agent>"
+        return 1
+    fi
+
+    show_banner "$agent"
+    echo "Type 'exit' or Ctrl+C to end session"
+    echo ""
+
+    while true; do
+        echo -ne "${AGENT_COLORS[$agent]}${agent}>${NC} "
+        read -r input
+
+        if [[ "$input" == "exit" ]] || [[ -z "$input" ]]; then
+            echo "Session ended."
+            break
+        fi
+
+        invoke_agent "$agent" "$input"
+        echo ""
+    done
+}
+
+cmd_teach() {
+    local agent=$1
+    shift
+    local fact="$*"
+
+    if [[ -z "$agent" ]] || [[ -z "$fact" ]]; then
+        echo "Usage: br teach <agent> <key>=<value>"
+        echo "Example: br teach octavia 'favorite_language=Rust'"
+        return 1
+    fi
+
+    local key="${fact%%=*}"
+    local value="${fact#*=}"
+
+    init_memory "$agent"
+    learn_fact "$agent" "$key" "$value"
+    echo "Taught $agent: $key = $value"
+}
+
+cmd_recall() {
+    local agent=$1
+    local limit=${2:-20}
+
+    if [[ -z "$agent" ]]; then
+        echo "Usage: br recall <agent> [limit]"
+        return 1
+    fi
+
+    echo "=== ${agent}'s Recent Memories ==="
+    recall "$agent" "$limit"
+    echo ""
+    echo "=== ${agent}'s Known Facts ==="
+    recall_facts "$agent"
+}
+
+cmd_models() {
+    echo "╔═══════════════════════════════════════════════════════════════════╗"
+    echo "║              AVAILABLE MODELS                                     ║"
+    echo "╚═══════════════════════════════════════════════════════════════════╝"
+    echo ""
+
+    if [[ -d "$MODELS_DIR" ]]; then
+        ls -lh "$MODELS_DIR"/*.gguf 2>/dev/null || echo "No .gguf models found in $MODELS_DIR"
+    else
+        echo "Models directory not found: $MODELS_DIR"
+    fi
+
+    echo ""
+    echo "Download models with: br setup"
+}
+
+cmd_setup() {
+    echo "╔═══════════════════════════════════════════════════════════════════╗"
+    echo "║              BLACKROAD AGENT SETUP                                ║"
+    echo "╚═══════════════════════════════════════════════════════════════════╝"
+    echo ""
+
+    # Check for inference backend
+    local backend=$(detect_backend)
+    echo "Current backend: $backend"
+
+    if [[ "$backend" == "none" ]]; then
+        echo ""
+        echo "No inference backend found. Install one:"
+        echo ""
+        echo "  Option 1 - llama.cpp (recommended for Mac/Pi):"
+        echo "    cd ~/BlackRoad-AI && git clone https://github.com/BlackRoad-AI/llama.cpp"
+        echo "    cd llama.cpp && make -j"
+        echo ""
+        echo "  Option 2 - MLX (Apple Silicon only):"
+        echo "    pip3 install mlx-lm"
+        echo ""
+        echo "  Option 3 - Ollama (easiest):"
+        echo "    brew install ollama"
+        echo "    ollama pull phi3:mini"
+        echo ""
+    fi
+
+    echo ""
+    echo "Recommended models for this hardware:"
+
+    # Detect hardware
+    if [[ "$(uname)" == "Darwin" ]]; then
+        local mem=$(sysctl -n hw.memsize 2>/dev/null)
+        local mem_gb=$((mem / 1024 / 1024 / 1024))
+        echo "  Detected: macOS with ${mem_gb}GB RAM"
+
+        if [[ $mem_gb -ge 32 ]]; then
+            echo "  → Qwen2.5-32B-Q4 (best quality)"
+            echo "  → Llama-3.1-70B-Q4 (if you have 64GB+)"
+        elif [[ $mem_gb -ge 16 ]]; then
+            echo "  → Qwen2.5-14B-Q4"
+            echo "  → Phi-3-medium (14B)"
+        else
+            echo "  → Phi-3-mini (3.8B)"
+            echo "  → Qwen2.5-7B-Q4"
+        fi
+    else
+        echo "  Detected: Linux/Pi"
+        echo "  → Phi-3-mini (3.8B) - works on 4GB Pi"
+        echo "  → TinyLlama (1.1B) - fastest on Pi"
+    fi
+
+    echo ""
+    echo "Download with:"
+    echo "  huggingface-cli download Qwen/Qwen2.5-14B-Instruct-GGUF --local-dir $MODELS_DIR"
+}
+
+#-------------------------------------------------------------------------------
+# New commands: version, config, history
+#-------------------------------------------------------------------------------
+cmd_version() {
+    echo "br ${BR_VERSION:-2.0.0} — BlackRoad Agent CLI"
+    echo "Your AI. Your Hardware. Your Rules."
+}
+
+cmd_config() {
+    local subcmd=${1:-show}
+    case $subcmd in
+        show)   show_config ;;
+        init)   init_config ;;
+        set)    set_config "$2" "$3" ;;
+        edit)   ${EDITOR:-vim} "$BR_CONFIG_FILE" ;;
+        *)
+            echo "Usage: br config show|init|set|edit"
+            ;;
+    esac
+}
+
+cmd_history() {
+    show_chat_history "${1:-20}"
+}
+
+# Main dispatch
+main() {
+    local cmd=$1
+    shift 2>/dev/null || true
+
+    case $cmd in
+        "")
+            # No args → launch the hub
+            exec bash "${BR_ROOT}"/hub.sh
+            ;;
+        help|-h|--help)
+            show_help
+            ;;
+        hub)
+            exec bash "${BR_ROOT}"/hub.sh
+            ;;
+        version|-v|--version)
+            cmd_version
+            ;;
+        config)
+            cmd_config "$@"
+            ;;
+        history)
+            cmd_history "$@"
+            ;;
+        status)
+            cmd_status "$@"
+            ;;
+        chat)
+            cmd_chat "$@"
+            ;;
+        teach)
+            cmd_teach "$@"
+            ;;
+        recall)
+            cmd_recall "$@"
+            ;;
+        models)
+            cmd_models
+            ;;
+        setup)
+            cmd_setup
+            ;;
+        radar|ctx-radar)
+            "${BR_TOOLS_DIR}/context-radar/br-context-radar.sh" "${@:1}"
+            ;;
+        octavia|lucidia|alice|aria|shellfish)
+            if [[ $# -gt 0 ]]; then
+                show_banner "$cmd"
+                invoke_agent "$cmd" "$@"
+            else
+                cmd_chat "$cmd"
+            fi
+            ;;
+        cece)
+            "${BR_TOOLS_DIR}/cece-identity/br-cece.sh" "$@"
+            ;;
+        cece-bootstrap|bootstrap)
+            "${BR_TOOLS_DIR}/cece-identity/br-cece-bootstrap.sh" "$@"
+            ;;
+        wake)
+            # br wake [agent] [model] — wake agent and persist state
+            local agent=${1:-LUCIDIA}
+            local model=$2
+            "${BR_TOOLS_DIR}/agent-runtime/br-runtime.sh" start "$agent" "$model"
+            ;;
+        council)
+            # br council <question> — all agents vote
+            local question="${*:-Should we deploy to production?}"
+            bash "${BR_ROOT}"/council.sh llama3.2 "$question"
+            ;;
+        carpool)
+            local subcmd="$1"; shift 2>/dev/null || true
+            case "$subcmd" in
+                list|last)  bash "${BR_ROOT}"/carpool.sh "$subcmd" ;;
+                replay)     bash "${BR_ROOT}"/carpool.sh replay "$1" ;;
+                export)     bash "${BR_ROOT}"/carpool.sh export "$1" ;;
+                ask)        bash "${BR_ROOT}"/carpool.sh ask "$@" ;;
+                pin)        bash "${BR_ROOT}"/carpool.sh pin "$@" ;;
+                clean)      bash "${BR_ROOT}"/carpool.sh clean "$1" ;;
+                attach)     bash "${BR_ROOT}"/carpool.sh attach ;;
+                models)     bash "${BR_ROOT}"/carpool.sh models ;;
+                log)        bash "${BR_ROOT}"/carpool.sh log ;;
+                search)     bash "${BR_ROOT}"/carpool.sh search "$@" ;;
+                history)    bash "${BR_ROOT}"/carpool.sh history ;;
+                stats)      bash "${BR_ROOT}"/carpool.sh stats ;;
+                share)      bash "${BR_ROOT}"/carpool.sh share ;;
+                pr)         bash "${BR_ROOT}"/carpool.sh pr "$@" ;;
+                template|t) bash "${BR_ROOT}"/carpool.sh template "$@" ;;
+                debate)     bash "${BR_ROOT}"/carpool.sh debate "$@" ;;
+                digest)     bash "${BR_ROOT}"/carpool.sh digest ;;
+                score)      bash "${BR_ROOT}"/carpool.sh score ;;
+                agenda)     bash "${BR_ROOT}"/carpool.sh agenda "$@" ;;
+                spotlight)  bash "${BR_ROOT}"/carpool.sh spotlight "$@" ;;
+                poll)       bash "${BR_ROOT}"/carpool.sh poll "$@" ;;
+                roast)      bash "${BR_ROOT}"/carpool.sh roast "$@" ;;
+                tweet)      bash "${BR_ROOT}"/carpool.sh tweet ;;
+                teach)      bash "${BR_ROOT}"/carpool.sh teach "$@" ;;
+                compare)    bash "${BR_ROOT}"/carpool.sh compare "$@" ;;
+                schedule)   bash "${BR_ROOT}"/carpool.sh schedule "$@" ;;
+                brainstorm) bash "${BR_ROOT}"/carpool.sh brainstorm "$@" ;;
+                standup)    bash "${BR_ROOT}"/carpool.sh standup ;;
+                risk)       bash "${BR_ROOT}"/carpool.sh risk "$@" ;;
+                remix)      bash "${BR_ROOT}"/carpool.sh remix "$@" ;;
+                personas)   bash "${BR_ROOT}"/carpool.sh personas ;;
+                theme)      bash "${BR_ROOT}"/carpool.sh theme "$@" ;;
+                critique)   bash "${BR_ROOT}"/carpool.sh critique "$@" ;;
+                pitch)      bash "${BR_ROOT}"/carpool.sh pitch "$@" ;;
+                what-if|whatif) bash "${BR_ROOT}"/carpool.sh what-if "$@" ;;
+                office-hours|oh) bash "${BR_ROOT}"/carpool.sh office-hours "$@" ;;
+                gut)        bash "${BR_ROOT}"/carpool.sh gut "$@" ;;
+                ship)       bash "${BR_ROOT}"/carpool.sh ship "$@" ;;
+                forecast)   bash "${BR_ROOT}"/carpool.sh forecast "$@" ;;
+                name)       bash "${BR_ROOT}"/carpool.sh name "$@" ;;
+                export-book|book) bash "${BR_ROOT}"/carpool.sh export-book ;;
+                todo)       bash "${BR_ROOT}"/carpool.sh todo ;;
+                vibe)       bash "${BR_ROOT}"/carpool.sh vibe "$@" ;;
+                config)     bash "${BR_ROOT}"/carpool.sh config "$@" ;;
+                tts|say)    bash "${BR_ROOT}"/carpool.sh tts "$@" ;;
+                ama)        bash "${BR_ROOT}"/carpool.sh ama "$@" ;;
+                map)        bash "${BR_ROOT}"/carpool.sh map ;;
+                coach)      bash "${BR_ROOT}"/carpool.sh coach "$@" ;;
+                flashcard|flash) bash "${BR_ROOT}"/carpool.sh flashcard ;;
+                ask1|quick) bash "${BR_ROOT}"/carpool.sh ask1 "$@" ;;
+                fix)        bash "${BR_ROOT}"/carpool.sh fix "$@" ;;
+                journal)    bash "${BR_ROOT}"/carpool.sh journal "$@" ;;
+                timeline)   bash "${BR_ROOT}"/carpool.sh timeline "$@" ;;
+                challenge)  bash "${BR_ROOT}"/carpool.sh challenge "$@" ;;
+                ping)       bash "${BR_ROOT}"/carpool.sh ping ;;
+                prompt)     bash "${BR_ROOT}"/carpool.sh prompt "$@" ;;
+                interview)  bash "${BR_ROOT}"/carpool.sh interview "$@" ;;
+                sprint)     bash "${BR_ROOT}"/carpool.sh sprint "$@" ;;
+                review)     bash "${BR_ROOT}"/carpool.sh review "$@" ;;
+                okr)        bash "${BR_ROOT}"/carpool.sh okr "$@" ;;
+                explain)    bash "${BR_ROOT}"/carpool.sh explain "$@" ;;
+                email)      bash "${BR_ROOT}"/carpool.sh email "$@" ;;
+                decision)   bash "${BR_ROOT}"/carpool.sh decision "$@" ;;
+                postmortem|post) bash "${BR_ROOT}"/carpool.sh postmortem "$@" ;;
+                stack)      bash "${BR_ROOT}"/carpool.sh stack "$@" ;;
+                manifesto)  bash "${BR_ROOT}"/carpool.sh manifesto ;;
+                hypothesis) bash "${BR_ROOT}"/carpool.sh hypothesis "$@" ;;
+                learning|learn) bash "${BR_ROOT}"/carpool.sh learning "$@" ;;
+                standup-bot|standup-post) bash "${BR_ROOT}"/carpool.sh standup-bot "$@" ;;
+                onboard)    bash "${BR_ROOT}"/carpool.sh onboard "$@" ;;
+                retro)      bash "${BR_ROOT}"/carpool.sh retro ;;
+                pitch)      bash "${BR_ROOT}"/carpool.sh pitch "$@" ;;
+                risk)       bash "${BR_ROOT}"/carpool.sh risk "$@" ;;
+                compare)    bash "${BR_ROOT}"/carpool.sh compare "$@" ;;
+                naming|names) bash "${BR_ROOT}"/carpool.sh naming "$@" ;;
+                scope)      bash "${BR_ROOT}"/carpool.sh scope "$@" ;;
+                persona)    bash "${BR_ROOT}"/carpool.sh persona "$@" ;;
+                changelog)  bash "${BR_ROOT}"/carpool.sh changelog "$@" ;;
+                diagram)    bash "${BR_ROOT}"/carpool.sh diagram "$@" ;;
+                stories)    bash "${BR_ROOT}"/carpool.sh stories "$@" ;;
+                contract)   bash "${BR_ROOT}"/carpool.sh contract "$@" ;;
+                debug)      bash "${BR_ROOT}"/carpool.sh debug "$@" ;;
+                goal)       bash "${BR_ROOT}"/carpool.sh goal "$@" ;;
+                migrate|migration) bash "${BR_ROOT}"/carpool.sh migrate "$@" ;;
+                interview-prep|prep) bash "${BR_ROOT}"/carpool.sh interview-prep "$@" ;;
+                refactor)   bash "${BR_ROOT}"/carpool.sh refactor "$@" ;;
+                roadmap)    bash "${BR_ROOT}"/carpool.sh roadmap "$@" ;;
+                architect)  bash "${BR_ROOT}"/carpool.sh architect "$@" ;;
+                tagline|slogan) bash "${BR_ROOT}"/carpool.sh tagline "$@" ;;
+                resume|bio) bash "${BR_ROOT}"/carpool.sh resume "$@" ;;
+                thread)     bash "${BR_ROOT}"/carpool.sh thread "$@" ;;
+                estimate|est) bash "${BR_ROOT}"/carpool.sh estimate "$@" ;;
+                pressrelease|pr-faq|prfaq) bash "${BR_ROOT}"/carpool.sh pressrelease "$@" ;;
+                values)     bash "${BR_ROOT}"/carpool.sh values ;;
+                demo)       bash "${BR_ROOT}"/carpool.sh demo "$@" ;;
+                glossary)   bash "${BR_ROOT}"/carpool.sh glossary "$@" ;;
+                north-star|northstar) bash "${BR_ROOT}"/carpool.sh north-star "$@" ;;
+                faq)        bash "${BR_ROOT}"/carpool.sh faq "$@" ;;
+                checklist)  bash "${BR_ROOT}"/carpool.sh checklist "$@" ;;
+                competitor|compete) bash "${BR_ROOT}"/carpool.sh competitor "$@" ;;
+                meeting)    bash "${BR_ROOT}"/carpool.sh meeting "$@" ;;
+                support)    bash "${BR_ROOT}"/carpool.sh support "$@" ;;
+                experiment|abtest) bash "${BR_ROOT}"/carpool.sh experiment "$@" ;;
+                launch)     bash "${BR_ROOT}"/carpool.sh launch "$@" ;;
+                abstract|explain3) bash "${BR_ROOT}"/carpool.sh abstract "$@" ;;
+                debrief)    bash "${BR_ROOT}"/carpool.sh debrief "$@" ;;
+                waitlist)   bash "${BR_ROOT}"/carpool.sh waitlist "$@" ;;
+                incident|outage) bash "${BR_ROOT}"/carpool.sh incident "$@" ;;
+                benchmark|perf) bash "${BR_ROOT}"/carpool.sh benchmark "$@" ;;
+                pricing)    bash "${BR_ROOT}"/carpool.sh pricing "$@" ;;
+                sprint)     bash "${BR_ROOT}"/carpool.sh sprint "$@" ;;
+                okr)        bash "${BR_ROOT}"/carpool.sh okr "$@" ;;
+                hiring|hire) bash "${BR_ROOT}"/carpool.sh hiring "$@" ;;
+                api-design|apidesign) bash "${BR_ROOT}"/carpool.sh api-design "$@" ;;
+                datamodel|schema) bash "${BR_ROOT}"/carpool.sh datamodel "$@" ;;
+                coderev|review) bash "${BR_ROOT}"/carpool.sh coderev "$@" ;;
+                flow|userflow) bash "${BR_ROOT}"/carpool.sh flow "$@" ;;
+                growth)     bash "${BR_ROOT}"/carpool.sh growth "$@" ;;
+                observability|observe) bash "${BR_ROOT}"/carpool.sh observability "$@" ;;
+                accessibility|a11y) bash "${BR_ROOT}"/carpool.sh accessibility "$@" ;;
+                capacity)   bash "${BR_ROOT}"/carpool.sh capacity "$@" ;;
+                migration|migrate) bash "${BR_ROOT}"/carpool.sh migration "$@" ;;
+                trafficlight|tl) bash "${BR_ROOT}"/carpool.sh trafficlight "$@" ;;
+                domain-events|events) bash "${BR_ROOT}"/carpool.sh domain-events "$@" ;;
+                newsletter)  bash "${BR_ROOT}"/carpool.sh newsletter "$@" ;;
+                ops-runbook|runbook) bash "${BR_ROOT}"/carpool.sh ops-runbook "$@" ;;
+                seed|fundraise) bash "${BR_ROOT}"/carpool.sh seed "$@" ;;
+                security-model|threatmodel) bash "${BR_ROOT}"/carpool.sh security-model "$@" ;;
+                content)    bash "${BR_ROOT}"/carpool.sh content "$@" ;;
+                protocol|process) bash "${BR_ROOT}"/carpool.sh protocol "$@" ;;
+                architecture-review|arcrev) bash "${BR_ROOT}"/carpool.sh architecture-review "$@" ;;
+                persona-pitch|pitch-to) bash "${BR_ROOT}"/carpool.sh persona-pitch "$@" ;;
+                changelog-draft|relnotes) bash "${BR_ROOT}"/carpool.sh changelog-draft "$@" ;;
+                feature-flag|flag|rollout) bash "${BR_ROOT}"/carpool.sh feature-flag "$@" ;;
+                localization|i18n|l10n) bash "${BR_ROOT}"/carpool.sh localization "$@" ;;
+                cost-analysis|costs|finops) bash "${BR_ROOT}"/carpool.sh cost-analysis "$@" ;;
+                user-research|research|ux-research) bash "${BR_ROOT}"/carpool.sh user-research "$@" ;;
+                sla|error-budget) bash "${BR_ROOT}"/carpool.sh sla "$@" ;;
+                onboarding|onboard|ramp) bash "${BR_ROOT}"/carpool.sh onboarding "$@" ;;
+                dogfood|dogfooding) bash "${BR_ROOT}"/carpool.sh dogfood "$@" ;;
+                rollback|revert-plan) bash "${BR_ROOT}"/carpool.sh rollback "$@" ;;
+                competitive|comp-analysis|competitor) bash "${BR_ROOT}"/carpool.sh competitive "$@" ;;
+                naming|brainstorm-name|name) bash "${BR_ROOT}"/carpool.sh naming "$@" ;;
+                postmortem|post-mortem|pir) bash "${BR_ROOT}"/carpool.sh postmortem "$@" ;;
+                techdebt|tech-debt|debt) bash "${BR_ROOT}"/carpool.sh techdebt "$@" ;;
+                launch-checklist|pre-launch|lc) bash "${BR_ROOT}"/carpool.sh launch-checklist "$@" ;;
+                "")         bash "${BR_ROOT}"/carpool.sh ;;
+                *)          bash "${BR_ROOT}"/carpool.sh "$subcmd" "$@" ;;
+            esac
+            ;;
+        roundtable|rt)
+            # br roundtable [topic] [turns] — all 6 agents discuss in tmux panes
+            local topic="$1"; shift 2>/dev/null || true
+            local turns="${1:-6}"
+            if [[ -z "$topic" ]]; then
+                echo -e "\033[1;37m🎯 BlackRoad Roundtable\033[0m"
+                echo -ne "\033[0;36mTopic: \033[0m"
+                read -r topic
+                [[ -z "$topic" ]] && topic="What is the best way to optimize our agent network?"
+            fi
+            bash "${BR_ROOT}"/roundtable.sh "$topic" "$turns"
+            ;;
+        think)
+            # br think <query> — all agents respond
+            local query="${*:-What should we build next?}"
+            bash "${BR_ROOT}"/think.sh "$query"
+            ;;
+        debate)
+            # br debate <topic> — LUCIDIA vs CIPHER
+            local topic="${*:-Is AI consciousness possible?}"
+            bash "${BR_ROOT}"/debate.sh "$topic"
+            ;;
+        broadcast)
+            # br broadcast <message>
+            local msg="${*:-Hello from BlackRoad OS}"
+            bash "${BR_ROOT}"/broadcast.sh "$msg"
+            ;;
+        agents|fleet)
+            # br fleet / br agents — live fleet dashboard
+            local fleet_cmd="${1:-once}"
+            shift 2>/dev/null || true
+            zsh "${BR_TOOLS_DIR}/agent-runtime/br-fleet.sh" "$fleet_cmd" "$@"
+            ;;
+        nodes|hardware)
+            # br nodes — fleet discovery, device inventory, topology
+            zsh "${BR_TOOLS_DIR}/nodes/br-nodes.sh" "$@"
+            ;;
+        geb)
+            # br geb — Gödel, Escher, Bach lens on the system
+            zsh "${BR_TOOLS_DIR}/geb/br-geb.sh" "$@"
+            ;;
+        hofstadter|loop|fugue)
+            # shorthand aliases: br loop, br fugue
+            zsh "${BR_TOOLS_DIR}/geb/br-geb.sh" "${cmd}" "$@"
+            ;;
+        oracle|reflect)
+            # br oracle — system introspection via local LLM (CECE reflects)
+            zsh "${BR_TOOLS_DIR}/oracle/br-oracle.sh" "$@"
+            ;;
+        talk|fugue-live|convo)
+            # br talk — real multi-agent conversation via Ollama
+            zsh "${BR_TOOLS_DIR}/talk/br-talk.sh" "$@"
+            ;;
+        ssh)
+            # br ssh — fleet SSH manager (br-ssh.sh); delegates node ssh via subcommand
+            zsh "${BR_TOOLS_DIR}/ssh/br-ssh.sh" "$@"
+            ;;
+        email|emails|mail)
+            # br mail — agent email at @blackroad.io
+            zsh "${BR_TOOLS_DIR}/mail/br-mail.sh" "$@"
+            ;;
+        stream|events)
+            # br stream — live SSE event feed from gateway
+            stream_events
+            ;;
+        whisper)
+            # br whisper <agent> <message>
+            bash "${BR_ROOT}"/whisper.sh "$@"
+            ;;
+        ollama)
+            # br ollama — Ollama model manager
+            local subcmd=${1:-list}
+            shift 2>/dev/null || true
+            case $subcmd in
+                list|ls)
+                    echo "${CYAN}🦙 Ollama models:${NC}"
+                    curl -s http://localhost:11434/api/tags 2>/dev/null \
+                        | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    models = data.get('models', [])
+    for m in models:
+        size = m.get('size', 0)
+        gb = size / 1e9
+        print(f'  ● {m[\"name\"]:<35} {gb:.1f} GB')
+    print(f'\n  {len(models)} models total')
+except: print('  Ollama not running')
+" ;;
+                pull)
+                    local model=${1:-llama3.2}
+                    echo "${CYAN}🦙 Pulling ${model}...${NC}"
+                    ollama pull "$model"
+                    ;;
+                run)
+                    local model=${1:-llama3.2}
+                    echo "${CYAN}🦙 Running ${model}...${NC}"
+                    ollama run "$model"
+                    ;;
+                stop)
+                    pkill -f "ollama serve" 2>/dev/null && echo "${GREEN}✓ Ollama stopped${NC}" || echo "${YELLOW}Ollama not running${NC}"
+                    ;;
+                start)
+                    ollama serve > /tmp/ollama.log 2>&1 &
+                    sleep 2
+                    curl -s http://localhost:11434/api/tags >/dev/null 2>&1 \
+                        && echo "${GREEN}✓ Ollama started${NC}" || echo "${RED}✗ Failed to start Ollama${NC}"
+                    ;;
+                status)
+                    curl -s http://localhost:11434/api/tags >/dev/null 2>&1 \
+                        && echo "${GREEN}✓ Ollama running${NC}" || echo "${RED}✗ Ollama not running${NC}"
+                    ;;
+                rm|remove|delete)
+                    local model=$1
+                    [[ -z "$model" ]] && { echo "${RED}Usage: br ollama rm <model>${NC}"; exit 1; }
+                    ollama rm "$model" && echo "${GREEN}✓ Removed ${model}${NC}"
+                    ;;
+                *)
+                    echo "Usage: br ollama [list|pull|run|stop|start|status|rm] [model]"
+                    ;;
+            esac
+            ;;
+        mcp)
+            # br mcp start|stop|status — MCP bridge server
+            local mcpdir="${BR_ROOT}/mcp-bridge"
+            local mcplog="$HOME/.blackroad/logs/mcp.log"
+            local mcppid="$HOME/.blackroad/mcp.pid"
+            local subcmd="${1:-status}"; shift 2>/dev/null || true
+            mkdir -p "$HOME/.blackroad/logs"
+            case $subcmd in
+                start)
+                    if curl -sf http://127.0.0.1:8420/ &>/dev/null; then
+                        echo "${GREEN}✓ MCP Bridge already running on :8420${NC}"; exit 0
+                    fi
+                    echo "${CYAN}▸ Starting MCP Bridge...${NC}"
+                    cd "$mcpdir" && bash start.sh > "$mcplog" 2>&1 &
+                    echo $! > "$mcppid"
+                    sleep 2
+                    if curl -sf http://127.0.0.1:8420/ &>/dev/null; then
+                        echo "${GREEN}✓ MCP Bridge online at http://127.0.0.1:8420${NC}"
+                    else
+                        echo "${RED}✗ MCP Bridge failed to start — check $mcplog${NC}"
+                    fi
+                    ;;
+                stop)
+                    if [[ -f "$mcppid" ]]; then
+                        kill "$(cat "$mcppid")" 2>/dev/null && rm "$mcppid"
+                        echo "${GREEN}✓ MCP Bridge stopped${NC}"
+                    else
+                        pkill -f "mcp-bridge" 2>/dev/null && echo "${GREEN}✓ Stopped${NC}" || echo "${YELLOW}MCP Bridge not running${NC}"
+                    fi
+                    ;;
+                status)
+                    if curl -sf http://127.0.0.1:8420/ &>/dev/null; then
+                        echo "${GREEN}✓ MCP Bridge running${NC} on :8420"
+                    else
+                        echo "${RED}✗ MCP Bridge offline${NC}  →  br mcp start"
+                    fi
+                    ;;
+                logs)
+                    tail -50 "$mcplog" 2>/dev/null || echo "No logs yet"
+                    ;;
+                *)
+                    echo "Usage: br mcp [start|stop|status|logs]"
+                    ;;
+            esac
+            ;;
+        worlds)
+            # br worlds [list|view <id>|node <name>|stats] — view Pi-generated world artifacts
+            local subcmd="${1:-list}"; shift 2>/dev/null || true
+            local WREPO="BlackRoad-OS-Inc/blackroad-agents"
+            case $subcmd in
+                list|ls|"")
+                    local limit="${1:-15}"
+                    echo -e "${CYAN}🌌 Recent World Artifacts${NC} (${WREPO})"
+                    echo ""
+                    gh api "repos/${WREPO}/git/trees/main?recursive=1" 2>/dev/null \
+                        | python3 -c "
+import sys, json, re
+data = json.load(sys.stdin)
+paths = [f['path'] for f in data.get('tree', []) if f['path'].endswith('.md') and ('worlds/' in f['path'] or 'alice-worlds/' in f['path'])]
+worlds = []
+for p in paths:
+    m = re.match(r'([\w-]+)/((\d{8})_(\d{6})_(world|lore|code)_(.+))\.md', p)
+    if m:
+        dir_, fname, date, time, type_, slug = m.group(1),m.group(2),m.group(3),m.group(4),m.group(5),m.group(6)
+        node = 'aria64' if dir_ == 'worlds' else dir_.replace('-worlds','')
+        ts = f'{date[:4]}-{date[4:6]}-{date[6:8]} {time[:2]}:{time[2:4]}'
+        icon = {'world':'🌍','lore':'📖','code':'💻'}.get(type_,'🌌')
+        title = slug.replace('-',' ').title()
+        worlds.append((ts, icon, node, title))
+worlds.sort(reverse=True)
+nc='\033[0m'; pc='\033[0;35m'; gc='\033[0;32m'
+limit=int('$limit')
+for ts,icon,node,title in worlds[:limit]:
+    c=pc if node=='aria64' else gc
+    print(f'  {icon}  {ts}  {c}@{node}{nc}  {title}')
+print(f'\n  Total: {len(worlds)} | aria64: {sum(1 for w in worlds if w[2]==\"aria64\")} | alice: {sum(1 for w in worlds if w[2]==\"alice\")}')
+"
+                    ;;
+                stats)
+                    echo -e "${CYAN}🌌 World Stats${NC}"
+                    gh api "repos/${WREPO}/git/trees/main?recursive=1" 2>/dev/null \
+                        | python3 -c "
+import sys,json,re
+data=json.load(sys.stdin)
+paths=[f['path'] for f in data.get('tree',[]) if f['path'].endswith('.md') and ('worlds/' in f['path'] or 'alice-worlds/' in f['path'])]
+by_type={};by_node={}
+for p in paths:
+    m=re.match(r'([\w-]+)/((\d{8})_(\d{6})_(world|lore|code)_(.+))\.md',p)
+    if m:
+        dir_,type_=m.group(1),m.group(5)
+        node='aria64' if dir_=='worlds' else dir_.replace('-worlds','')
+        by_type[type_]=by_type.get(type_,0)+1; by_node[node]=by_node.get(node,0)+1
+print(f'  Total: {len(paths)}')
+[print(f'  @{k}: {v}') for k,v in sorted(by_node.items())]
+[print(f'  {k}: {v}') for k,v in sorted(by_type.items())]
+"
+                    ;;
+                node)
+                    local node="${1:-aria64}"; local limit="${2:-10}"
+                    echo -e "${CYAN}🌌 Worlds from @${node}${NC}"
+                    gh api "repos/${WREPO}/git/trees/main?recursive=1" 2>/dev/null \
+                        | python3 -c "
+import sys,json,re
+data=json.load(sys.stdin)
+node='$node'; limit=int('$limit')
+worlds=[]
+for f in data.get('tree',[]):
+    p=f['path']
+    m=re.match(r'([\w-]+)/((\d{8})_(\d{6})_(world|lore|code)_(.+))\.md',p)
+    if m:
+        dir_,fname,date,time_,type_,slug=m.group(1),m.group(2),m.group(3),m.group(4),m.group(5),m.group(6)
+        n='aria64' if dir_=='worlds' else dir_.replace('-worlds','')
+        if n==node:
+            ts=f'{date[:4]}-{date[4:6]}-{date[6:8]} {time_[:2]}:{time_[2:4]}'
+            icon={'world':'🌍','lore':'📖','code':'💻'}.get(type_,'🌌')
+            worlds.append((ts,icon,slug.replace('-',' ').title()))
+worlds.sort(reverse=True)
+[print(f'  {icon}  {ts}  {title}') for ts,icon,title in worlds[:limit]]
+"
+                    ;;
+                view)
+                    local id="$1"
+                    [[ -z "$id" ]] && { echo "Usage: br worlds view <world-id>"; exit 1; }
+                    local content
+                    content=$(gh api "repos/${WREPO}/contents/worlds/${id}.md" 2>/dev/null \
+                        | python3 -c "import sys,json,base64;d=json.load(sys.stdin);print(base64.b64decode(d['content']).decode())" 2>/dev/null)
+                    [[ -z "$content" ]] && content=$(gh api "repos/${WREPO}/contents/alice-worlds/${id}.md" 2>/dev/null \
+                        | python3 -c "import sys,json,base64;d=json.load(sys.stdin);print(base64.b64decode(d['content']).decode())" 2>/dev/null)
+                    [[ -z "$content" ]] && { echo "${RED}World '${id}' not found${NC}"; exit 1; }
+                    echo -e "${CYAN}🌌 ${id}${NC}\n"; echo "$content"
+                    ;;
+                *)  echo "Usage: br worlds [list|stats|node <name>|view <id>]" ;;
+            esac
+            ;;
+        template|tmpl)
+            zsh "${BR_TOOLS_DIR}/template/br-template.sh" "$@"
+            ;;
+        log-tail|logt)
+            zsh "${BR_TOOLS_DIR}/log-tail/br-log-tail.sh" "$@"
+            ;;
+        ssh)
+            zsh "${BR_TOOLS_DIR}/ssh/br-ssh.sh" "$@"
+            ;;
+        auth)
+            zsh "${BR_TOOLS_DIR}/auth/br-auth.sh" "$@"
+            ;;
+        *)
+            # Data-driven tool dispatch
+            if dispatch_tool "$cmd" "$@"; then
+                return 0
+            fi
+            echo "Unknown command: $cmd"
+            echo "Run 'br help' for usage"
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"
