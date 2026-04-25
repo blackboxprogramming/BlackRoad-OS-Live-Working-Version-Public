@@ -1,0 +1,1837 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — Pave Tomorrow.</title>
+<meta name="description" content="BlackRoad OS is the sovereign operating system for AI-native organizations. Self-hosted infrastructure, spatial interfaces, and sentient agents. All under one roof.">
+<meta name="theme-color" content="#000000">
+<meta property="og:title" content="BlackRoad OS — Pave Tomorrow.">
+<meta property="og:description" content="Sovereign infrastructure, spatial interfaces, and sentient agents. The operating system for AI-native organizations.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://blackroad.io">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://images.blackroad.io/pixel-art/road-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   BLACKROAD OS — blackroad.io master site
+   Design system: Space Grotesk + Inter + JetBrains Mono
+   Palette: #FF6B2B → #FF2255 → #CC00AA → #8844FF → #4488FF → #00D4FF
+   ═══════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --g: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g135: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g-bg: linear-gradient(135deg, #FF6B2B 0%, #FF2255 20%, #CC00AA 40%, #8844FF 60%, #4488FF 80%, #00D4FF 100%);
+  --bg: #000;
+  --white: #f5f5f5;
+  --border: #1a1a1a;
+  --border-light: #222;
+  --sg: 'Space Grotesk', sans-serif;
+  --inter: 'Inter', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --orange: #FF6B2B;
+  --magenta: #FF2255;
+  --violet: #CC00AA;
+  --purple: #8844FF;
+  --blue: #4488FF;
+  --cyan: #00D4FF;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--sg);
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #1c1c1c; border-radius: 4px; }
+
+a { color: inherit; text-decoration: none; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes barPulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.7; }
+  50% { transform: scaleY(1.6); opacity: 1; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.5); }
+  100% { box-shadow: 0 0 0 12px rgba(0, 212, 255, 0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(40px, -30px); }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-30px, 20px); }
+}
+@keyframes rotateGrad {
+  from { filter: hue-rotate(0deg); }
+  to { filter: hue-rotate(360deg); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes heroGradient {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 100%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ═══ FADE-IN ON SCROLL ═══ */
+.fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.fade-delay-1 { transition-delay: 0.1s; }
+.fade-delay-2 { transition-delay: 0.2s; }
+.fade-delay-3 { transition-delay: 0.3s; }
+.fade-delay-4 { transition-delay: 0.4s; }
+
+/* ═══ GRADIENT BAR (top/bottom) ═══ */
+.grad-bar {
+  height: 4px;
+  background: var(--g);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+  image-rendering: crisp-edges;
+}
+
+/* ═══ NAV ═══ */
+.nav-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+}
+.nav-grad {
+  height: 2px;
+  background: var(--g);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 58px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+nav.scrolled {
+  background: rgba(0,0,0,0.97);
+  border-bottom-color: #141414;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+.nav-bars {
+  display: flex;
+  gap: 2px;
+}
+.nav-bar {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-links a {
+  font-family: var(--inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: #686868;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #f0f0f0; }
+.nav-cta-wrap { display: flex; gap: 10px; }
+
+/* Buttons */
+.btn-grad {
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 20px;
+  background: var(--g);
+  background-size: 200% 100%;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-grad:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136,68,255,0.35);
+}
+.btn-outline {
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #a0a0a0;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-outline:hover {
+  border-color: #444;
+  background: rgba(255,255,255,0.03);
+  color: #e0e0e0;
+}
+.btn-lg {
+  font-size: 15px;
+  padding: 14px 36px;
+  border-radius: 8px;
+}
+
+/* ═══ HERO ═══ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 40%, rgba(136,68,255,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 20% 60%, rgba(255,34,85,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 30%, rgba(0,212,255,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(120px);
+  opacity: 0.07;
+}
+.hero-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: #8844FF;
+  top: 10%;
+  left: 20%;
+  animation: orb1 12s ease-in-out infinite;
+}
+.hero-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: #00D4FF;
+  top: 15%;
+  right: 15%;
+  animation: orb2 14s ease-in-out infinite;
+}
+.hero-orb-3 {
+  width: 350px;
+  height: 350px;
+  background: #FF2255;
+  bottom: 10%;
+  left: 40%;
+  animation: orb1 10s ease-in-out infinite reverse;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border: 1px solid #1e1e1e;
+  background: rgba(255,255,255,0.02);
+  border-radius: 24px;
+  margin-bottom: 36px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  animation: ping 1.8s ease-out infinite;
+}
+.hero-badge span {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.hero h1 {
+  font-family: var(--sg);
+  font-weight: 700;
+  font-size: clamp(48px, 10vw, 96px);
+  color: var(--white);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s ease 0.2s both;
+  max-width: 900px;
+}
+.hero-title-gradient {
+  background: var(--g);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: heroGradient 6s ease infinite;
+}
+.hero-sub {
+  font-family: var(--inter);
+  font-size: clamp(15px, 3vw, 19px);
+  color: #505050;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto 48px;
+  animation: fadeUp 0.6s ease 0.35s both;
+}
+.hero-ctas {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.45s both;
+}
+.hero-bars {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 64px;
+  animation: fadeUp 0.6s ease 0.55s both;
+}
+.hero-color-bar {
+  width: 48px;
+  height: 4px;
+  border-radius: 2px;
+}
+.hero-bottom-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--g);
+  opacity: 0.25;
+}
+
+/* ═══ SECTION BASE ═══ */
+.section {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+.section-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--sg);
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+.section-desc {
+  font-family: var(--inter);
+  font-size: 15px;
+  color: var(--white);
+  opacity: 0.35;
+  max-width: 520px;
+  margin-bottom: 56px;
+  line-height: 1.7;
+}
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0 48px;
+}
+
+/* ═══ PROBLEM SECTION ═══ */
+.problem-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.problem-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px 32px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.problem-card:hover {
+  border-color: #333;
+}
+.problem-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  opacity: 0.6;
+}
+.problem-card:nth-child(1)::before { background: linear-gradient(90deg, var(--orange), var(--magenta)); }
+.problem-card:nth-child(2)::before { background: linear-gradient(90deg, var(--violet), var(--purple)); }
+.problem-card:nth-child(3)::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+.problem-stat {
+  font-family: var(--sg);
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+.problem-stat-1 { color: var(--orange); }
+.problem-stat-2 { color: var(--purple); }
+.problem-stat-3 { color: var(--cyan); }
+.problem-label {
+  font-family: var(--inter);
+  font-size: 14px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.6;
+}
+.problem-source {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.15;
+  margin-top: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══ PORTALS SECTION ═══ */
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.portal-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+  cursor: pointer;
+  display: block;
+}
+.portal-card:hover {
+  border-color: #333;
+  transform: translateY(-2px);
+}
+.portal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  transition: opacity 0.3s;
+}
+.portal-card:hover::before { opacity: 1; }
+.portal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.portal-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0.12;
+}
+.portal-name {
+  font-family: var(--sg);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.portal-desc {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.35;
+  line-height: 1.6;
+}
+.portal-link {
+  font-family: var(--jb);
+  font-size: 10px;
+  opacity: 0.2;
+  margin-top: 16px;
+  display: block;
+  letter-spacing: 0.04em;
+}
+.portal-card:hover .portal-link { opacity: 0.5; }
+
+/* ═══ DOMAINS SECTION ═══ */
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.domain-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+.domain-card:hover { border-color: #333; }
+.domain-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.domain-dot.live { background: #4CAF50; animation: blink 2.5s infinite; }
+.domain-dot.pending { background: #FF9800; }
+.domain-name {
+  font-family: var(--jb);
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.6;
+}
+.domain-card:hover .domain-name { opacity: 1; }
+
+/* ═══ STACK SECTION ═══ */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.stack-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: border-color 0.2s;
+}
+.stack-card:hover { border-color: #333; }
+.stack-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.stack-info { flex: 1; }
+.stack-name {
+  font-family: var(--sg);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.stack-desc {
+  font-family: var(--inter);
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.3;
+  line-height: 1.5;
+}
+.stack-badge {
+  font-family: var(--jb);
+  font-size: 9px;
+  padding: 3px 8px;
+  border: 1px solid #1e3a1e;
+  color: #4CAF50;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* ═══ MATH SECTION ═══ */
+.math-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+.math-formula {
+  font-family: var(--jb);
+  font-size: clamp(18px, 4vw, 32px);
+  font-weight: 500;
+  margin: 32px 0 16px;
+  padding: 40px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.math-formula::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--g);
+  opacity: 0.5;
+}
+.math-formula .fn {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.math-result {
+  font-family: var(--jb);
+  font-size: 14px;
+  color: var(--white);
+  opacity: 0.3;
+  margin-top: 8px;
+}
+.math-desc {
+  font-family: var(--inter);
+  font-size: 14px;
+  color: var(--white);
+  opacity: 0.3;
+  line-height: 1.7;
+  margin-top: 24px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.math-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  margin-top: 20px;
+  letter-spacing: 0.06em;
+}
+
+/* ═══ FLEET SECTION ═══ */
+.fleet-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.fleet-stat {
+  text-align: center;
+  padding: 32px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.fleet-stat-val {
+  font-family: var(--sg);
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+.fleet-stat-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+.node-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+.node-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+.node-card:hover { border-color: #333; }
+.node-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  position: relative;
+}
+.node-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  padding: 2px;
+  background: var(--g);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.node-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.node-role {
+  font-family: var(--inter);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.3;
+  margin-bottom: 12px;
+}
+.node-stat {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  line-height: 1.8;
+}
+.node-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-family: var(--inter);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.4;
+}
+.node-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.node-status-dot.on { background: #4CAF50; }
+.node-status-dot.off { background: none; border: 1px solid rgba(255,255,255,0.3); width: 5px; height: 5px; }
+
+/* ═══ PRICING ═══ */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.price-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px 28px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.price-card:hover {
+  border-color: #333;
+  transform: translateY(-2px);
+}
+.price-card.featured {
+  border-color: #333;
+}
+.price-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--g);
+}
+.price-tier {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.price-amount {
+  font-family: var(--sg);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+.price-period {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.25;
+  margin-left: 4px;
+}
+.price-desc {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.3;
+  margin: 16px 0 24px;
+  line-height: 1.6;
+}
+.price-features {
+  list-style: none;
+  margin-bottom: 32px;
+}
+.price-features li {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.45;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.price-features li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.price-card:nth-child(1) .price-features li::before { background: #555; }
+.price-card:nth-child(2) .price-features li::before { background: var(--orange); }
+.price-card:nth-child(3) .price-features li::before { background: var(--purple); }
+.price-card:nth-child(4) .price-features li::before { background: var(--cyan); }
+.price-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  display: block;
+}
+.price-btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  opacity: 0.6;
+}
+.price-btn-outline:hover { border-color: #444; opacity: 1; }
+.price-btn-solid {
+  background: var(--g);
+  background-size: 200% 100%;
+  border: none;
+  color: #fff;
+}
+.price-btn-solid:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(136,68,255,0.3);
+}
+
+/* ═══ FOOTER ═══ */
+.footer-cta {
+  text-align: center;
+  padding: 100px 48px 60px;
+  position: relative;
+}
+.footer-cta h2 {
+  font-family: var(--sg);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+.footer-cta-sub {
+  font-family: var(--inter);
+  font-size: 16px;
+  color: var(--white);
+  opacity: 0.3;
+  margin-bottom: 40px;
+}
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.footer-brand {
+  font-family: var(--sg);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.footer-tagline {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.3;
+  line-height: 1.7;
+  max-width: 280px;
+}
+.footer-col-title {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.footer-col a {
+  display: block;
+  font-family: var(--inter);
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  padding: 4px 0;
+  transition: opacity 0.15s;
+}
+.footer-col a:hover { opacity: 1; }
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.footer-copy {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.15;
+}
+.footer-legal {
+  display: flex;
+  gap: 20px;
+}
+.footer-legal a {
+  font-family: var(--inter);
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.2;
+  transition: opacity 0.15s;
+}
+.footer-legal a:hover { opacity: 0.6; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1024px) {
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .fleet-stats { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; }
+  .section { padding: 64px 20px; }
+  .section-divider { margin: 0 20px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .portal-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .stack-grid { grid-template-columns: 1fr; }
+  .domain-grid { grid-template-columns: 1fr 1fr; }
+  .node-grid { grid-template-columns: 1fr 1fr; }
+  .fleet-stats { grid-template-columns: 1fr 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 24px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .footer-cta { padding: 64px 20px 40px; }
+  .hero-ctas { flex-direction: column; align-items: center; }
+  .hero-bars { gap: 4px; }
+  .hero-color-bar { width: 32px; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 40px; }
+  .domain-grid { grid-template-columns: 1fr; }
+  .fleet-stats { grid-template-columns: 1fr; }
+}
+</style>
+<link rel="canonical" href="https://blackroad.io/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad OS — Pave Tomorrow.","url":"https://blackroad.io","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════ -->
+<div class="nav-wrap" id="nav">
+  <div class="nav-grad"></div>
+  <nav id="navbar">
+    <div class="nav-logo">
+      <div class="nav-bars">
+        <div class="nav-bar" style="background:#FF6B2B;animation:barPulse 2.5s ease-in-out 0s infinite"></div>
+        <div class="nav-bar" style="background:#FF2255;animation:barPulse 2.5s ease-in-out 0.14s infinite"></div>
+        <div class="nav-bar" style="background:#CC00AA;animation:barPulse 2.5s ease-in-out 0.28s infinite"></div>
+        <div class="nav-bar" style="background:#8844FF;animation:barPulse 2.5s ease-in-out 0.42s infinite"></div>
+        <div class="nav-bar" style="background:#4488FF;animation:barPulse 2.5s ease-in-out 0.56s infinite"></div>
+        <div class="nav-bar" style="background:#00D4FF;animation:barPulse 2.5s ease-in-out 0.70s infinite"></div>
+      </div>
+      BlackRoad OS
+    </div>
+    <div class="nav-links">
+      <a href="#product">Product</a>
+      <a href="#portals">Portals</a>
+      <a href="#stack">Stack</a>
+      <a href="#fleet">Fleet</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://github.com/BlackRoad-OS-Inc" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-cta-wrap">
+      <a href="https://blackroadai.com" class="btn-outline" style="font-size:12px;padding:7px 16px">Try Lucidia</a>
+      <a href="https://blackroadai.com" class="btn-grad" style="font-size:12px;padding:7px 16px">Get Started</a>
+    </div>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════ -->
+<section class="hero" id="top">
+  <div class="hero-bg"></div>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    <span>Sovereign infrastructure for AI-native organizations</span>
+  </div>
+
+  <h1>BlackRoad OS</h1>
+  <h1 style="margin-bottom:32px">
+    <span class="hero-title-gradient" id="hero-word">Pave Tomorrow.</span>
+  </h1>
+
+  <p class="hero-sub">
+    The operating system that owns its intelligence. Self-hosted AI, encrypted mesh networking,
+    consent-first data, and spatial interfaces — running on hardware you control.
+    No cloud lock-in. No surveillance. No permission needed.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="https://blackroadai.com" class="btn-grad btn-lg">Get Started</a>
+    <a href="https://github.com/BlackRoad-OS-Inc" target="_blank" class="btn-outline btn-lg">View Source</a>
+  </div>
+
+  <div class="hero-bars">
+    <div class="hero-color-bar" style="background:#FF6B2B;border-radius:2px"></div>
+    <div class="hero-color-bar" style="background:#FF2255;border-radius:2px"></div>
+    <div class="hero-color-bar" style="background:#CC00AA;border-radius:2px"></div>
+    <div class="hero-color-bar" style="background:#8844FF;border-radius:2px"></div>
+    <div class="hero-color-bar" style="background:#4488FF;border-radius:2px"></div>
+    <div class="hero-color-bar" style="background:#00D4FF;border-radius:2px"></div>
+  </div>
+
+  <div class="hero-bottom-line"></div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     THE PROBLEM
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="product">
+  <div class="section-label">The Problem</div>
+  <div class="section-title">The internet broke its promise</div>
+  <div class="section-desc">Centralized platforms harvest your data, gate your access, and charge rent on tools you built. We're building the alternative.</div>
+
+  <div class="problem-grid">
+    <div class="problem-card fade-section fade-delay-1">
+      <div class="problem-stat problem-stat-1" data-count="42" data-suffix="%">0%</div>
+      <div class="problem-label">of users find search less useful than five years ago. AI summaries replaced by ads. Context replaced by clickbait.</div>
+      <div class="problem-source">Pew Research 2025</div>
+    </div>
+    <div class="problem-card fade-section fade-delay-2">
+      <div class="problem-stat problem-stat-2" data-count="60" data-suffix="%">0%</div>
+      <div class="problem-label">of parents cannot help their children with homework using current tools. Education infrastructure is failing families.</div>
+      <div class="problem-source">National Assessment 2024</div>
+    </div>
+    <div class="problem-card fade-section fade-delay-3">
+      <div class="problem-stat problem-stat-3" data-count="270" data-prefix="$" data-suffix="B">$0B</div>
+      <div class="problem-label">annual surveillance economy built on data you never consented to share. Your attention is the product.</div>
+      <div class="problem-source">EFF Estimate 2025</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     7 PORTALS
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="portals">
+  <div class="section-label">Portals</div>
+  <div class="section-title">Seven portals, one road</div>
+  <div class="section-desc">Each portal is a sovereign product vertical — built on BlackRoad OS infrastructure, connected by the same encrypted mesh.</div>
+
+  <div class="portal-grid">
+    <a href="https://lucidia.blackroad.io" class="portal-card" style="--accent:#CC00AA">
+      <div class="portal-icon" style="background:rgba(204,0,170,0.1);color:#CC00AA">
+        <div style="font-size:24px">&#x2726;</div>
+      </div>
+      <div class="portal-name">Lucidia</div>
+      <div class="portal-desc">Sovereign AI platform. Local-first inference on 26 TOPS of edge hardware. 11 models, consent-gated memory, moral reasoning built in. Your AI, your hardware, your rules.</div>
+      <span class="portal-link">lucidia.blackroad.io</span>
+    </a>
+
+    <a href="https://backroad.social" class="portal-card" style="--accent:#8844FF">
+      <div class="portal-icon" style="background:rgba(136,68,255,0.1);color:#8844FF">
+        <div style="font-size:24px">&#x2637;</div>
+      </div>
+      <div class="portal-name">BackRoad</div>
+      <div class="portal-desc">Social network that doesn't sell you. Federated architecture, end-to-end encrypted DMs, zero ads. Your social graph stays yours. Consent-first communities.</div>
+      <span class="portal-link">backroad.social</span>
+    </a>
+
+    <a href="https://roadglitch.io" class="portal-card" style="--accent:#FF6B2B">
+      <div class="portal-icon" style="background:rgba(255,107,43,0.1);color:#FF6B2B">
+        <div style="font-size:24px">&#x26A1;</div>
+      </div>
+      <div class="portal-name">RoadGlitch</div>
+      <div class="portal-desc">Automation engine for the real world. Connect devices, trigger workflows, manage fleet ops. If-this-then-that, but sovereign — runs on your Pis, not someone else's cloud.</div>
+      <span class="portal-link">roadglitch.io</span>
+    </a>
+
+    <a href="https://carpool.blackroad.io" class="portal-card" style="--accent:#FF2255">
+      <div class="portal-icon" style="background:rgba(255,34,85,0.1);color:#FF2255">
+        <div style="font-size:24px">&#x25B6;</div>
+      </div>
+      <div class="portal-name">CarPool</div>
+      <div class="portal-desc">Peer-to-peer streaming and content delivery. NATS-powered real-time messaging across all nodes. Share media, files, and streams without a centralized CDN.</div>
+      <span class="portal-link">carpool.blackroad.io</span>
+    </a>
+
+    <a href="https://roadview.blackroad.io" class="portal-card" style="--accent:#4488FF">
+      <div class="portal-icon" style="background:rgba(68,136,255,0.1);color:#4488FF">
+        <div style="font-size:24px">&#x2316;</div>
+      </div>
+      <div class="portal-name">RoadView</div>
+      <div class="portal-desc">Search and truth engine. RAG-powered knowledge retrieval across your own corpus. Academic citations, moral context, and source verification. Search that respects you.</div>
+      <span class="portal-link">roadview.blackroad.io</span>
+    </a>
+
+    <a href="https://roadwork.blackroad.io" class="portal-card" style="--accent:#00D4FF">
+      <div class="portal-icon" style="background:rgba(0,212,255,0.1);color:#00D4FF">
+        <div style="font-size:24px">&#x2710;</div>
+      </div>
+      <div class="portal-name">RoadWork</div>
+      <div class="portal-desc">Education platform that actually helps. AI tutoring powered by local models, personalized curriculum, and parent dashboards. 60% of parents can't help — we fix that.</div>
+      <span class="portal-link">roadwork.blackroad.io</span>
+    </a>
+
+    <a href="https://roadworld.blackroad.io" class="portal-card" style="--accent:#8844FF">
+      <div class="portal-icon" style="background:rgba(136,68,255,0.08);color:#8844FF">
+        <div style="font-size:24px">&#x2B22;</div>
+      </div>
+      <div class="portal-name">RoadWorld</div>
+      <div class="portal-desc">Spatial metaverse. Pixel-art virtual HQ with 14 floors, 50 agents, and real-time collaboration. Your office lives on your hardware. Walk the halls, meet the fleet.</div>
+      <span class="portal-link">roadworld.blackroad.io</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     19 DOMAINS
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="domains">
+  <div class="section-label">Network</div>
+  <div class="section-title">20 domains, one mesh</div>
+  <div class="section-desc">Every domain is a node in the BlackRoad network. Self-hosted on our Pi fleet and edge servers, encrypted end-to-end.</div>
+
+  <div class="domain-grid">
+    <a href="https://blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">blackroad.io</span>
+    </a>
+    <a href="https://blackroadai.com" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">blackroadai.com</span>
+    </a>
+    <a href="https://blackroadinc.us" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">blackroadinc.us</span>
+    </a>
+    <a href="https://blackroad.dev" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">blackroad.dev</span>
+    </a>
+    <a href="https://blackroad.app" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">blackroad.app</span>
+    </a>
+    <a href="https://roadcode.dev" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">roadcode.dev</span>
+    </a>
+    <a href="https://roadglitch.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">roadglitch.io</span>
+    </a>
+    <a href="https://backroad.social" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">backroad.social</span>
+    </a>
+    <a href="https://roadworld.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">roadworld.io</span>
+    </a>
+    <a href="https://roundtrip.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">roundtrip.blackroad.io</span>
+    </a>
+    <a href="https://chat.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">chat.blackroad.io</span>
+    </a>
+    <a href="https://hq.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">hq.blackroad.io</span>
+    </a>
+    <a href="https://images.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">images.blackroad.io</span>
+    </a>
+    <a href="https://search.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">search.blackroad.io</span>
+    </a>
+    <a href="https://lucidia.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">lucidia.blackroad.io</span>
+    </a>
+    <a href="https://pay.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">pay.blackroad.io</span>
+    </a>
+    <a href="https://finance.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">finance.blackroad.io</span>
+    </a>
+    <a href="https://status.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">status.blackroad.io</span>
+    </a>
+    <a href="https://docs.blackroad.io" class="domain-card">
+      <div class="domain-dot live"></div>
+      <span class="domain-name">docs.blackroad.io</span>
+    </a>
+    <a href="https://api.blackroad.io" class="domain-card">
+      <div class="domain-dot pending"></div>
+      <span class="domain-name">api.blackroad.io</span>
+    </a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     THE STACK
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="stack">
+  <div class="section-label">Sovereignty</div>
+  <div class="section-title">We own every layer</div>
+  <div class="section-desc">No vendor lock-in. No API dependencies. Every critical service runs on hardware we control, encrypted with keys we hold.</div>
+
+  <div class="stack-grid">
+    <div class="stack-card">
+      <div class="stack-icon">&#x2699;</div>
+      <div class="stack-info">
+        <div class="stack-name">Gitea (RoadCode)</div>
+        <div class="stack-desc">629 repos across 8 orgs. Full CI/CD with act_runner. Mirrors to GitHub. Sovereign version control.</div>
+        <div class="stack-badge">Self-Hosted on Octavia</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2726;</div>
+      <div class="stack-info">
+        <div class="stack-name">Ollama (Passenger)</div>
+        <div class="stack-desc">11 local AI models across 4 nodes. 26 TOPS of Hailo-8 edge inference. Zero cloud API calls required.</div>
+        <div class="stack-badge">Self-Hosted on 4 Nodes</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x26C1;</div>
+      <div class="stack-info">
+        <div class="stack-name">MinIO (Curb)</div>
+        <div class="stack-desc">S3-compatible object storage. 4 buckets, all assets served from our own CDN. No R2, no S3, no rent.</div>
+        <div class="stack-badge">Self-Hosted on Cecilia</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2302;</div>
+      <div class="stack-info">
+        <div class="stack-name">PowerDNS</div>
+        <div class="stack-desc">Authoritative DNS for all 20 domains. ns1/ns2.blackroad.io running on Lucidia and Gematria.</div>
+        <div class="stack-badge">Self-Hosted on 2 Nodes</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x26BF;</div>
+      <div class="stack-info">
+        <div class="stack-name">WireGuard (TollBooth)</div>
+        <div class="stack-desc">Full mesh VPN. 12/12 SSH connections. Encrypted tunnel from every device to every device. Zero trust.</div>
+        <div class="stack-badge">Self-Hosted on All Nodes</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2696;</div>
+      <div class="stack-info">
+        <div class="stack-name">Caddy (OneWay)</div>
+        <div class="stack-desc">TLS edge with automatic Let's Encrypt. 18 domains served from Gematria. No Cloudflare proxy needed.</div>
+        <div class="stack-badge">Self-Hosted on Gematria</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2637;</div>
+      <div class="stack-info">
+        <div class="stack-name">NATS (CarPool)</div>
+        <div class="stack-desc">Real-time pub/sub messaging. Agent coordination, fleet telemetry, event streaming. v2.12.3 live on 4 nodes.</div>
+        <div class="stack-badge">Self-Hosted on Octavia</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2317;</div>
+      <div class="stack-info">
+        <div class="stack-name">PostgreSQL</div>
+        <div class="stack-desc">Primary relational database on 3 nodes. Agent memory, knowledge graphs, fleet state. No D1, no managed DB.</div>
+        <div class="stack-badge">Self-Hosted on 3 Nodes</div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="stack-icon">&#x2B22;</div>
+      <div class="stack-info">
+        <div class="stack-name">Qdrant (RearView)</div>
+        <div class="stack-desc">Vector database for RAG. Academic papers, agent memories, and semantic search. nomic-embed-text embeddings.</div>
+        <div class="stack-badge">Self-Hosted on Alice</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     MATH — THE AMUNDSON FRAMEWORK
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="math">
+  <div class="math-wrap">
+    <div class="section-label">Mathematics</div>
+    <div class="section-title">The Amundson Framework</div>
+    <div class="section-desc" style="margin-left:auto;margin-right:auto;text-align:center">Connection has a floor. Even when n grows without bound, the ratio never decays to zero. There is always a remainder.</div>
+
+    <div class="math-formula">
+      <span class="fn">G(n) = n<sup>n+1</sup> / (n+1)<sup>n</sup></span>
+    </div>
+
+    <div class="math-result">A<sub>G</sub> = lim G(n)/n = 1/e &asymp; 0.36788 &nbsp;&mdash;&nbsp; Permanent excess: 1/(2e) &asymp; 0.18394</div>
+
+    <div style="display:flex;gap:24px;justify-content:center;margin-top:32px;flex-wrap:wrap">
+      <div style="text-align:center;padding:20px 28px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-family:var(--sg);font-size:28px;font-weight:700;color:var(--orange)">1.24433</div>
+        <div style="font-family:var(--jb);font-size:10px;color:var(--white);opacity:0.2;margin-top:4px;letter-spacing:0.08em;text-transform:uppercase">A<sub>G</sub> Constant</div>
+      </div>
+      <div style="text-align:center;padding:20px 28px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-family:var(--sg);font-size:28px;font-weight:700;color:var(--purple)">536</div>
+        <div style="font-family:var(--jb);font-size:10px;color:var(--white);opacity:0.2;margin-top:4px;letter-spacing:0.08em;text-transform:uppercase">Tests Passed</div>
+      </div>
+      <div style="text-align:center;padding:20px 28px;border:1px solid var(--border);border-radius:8px">
+        <div style="font-family:var(--sg);font-size:28px;font-weight:700;color:var(--cyan)">4</div>
+        <div style="font-family:var(--jb);font-size:10px;color:var(--white);opacity:0.2;margin-top:4px;letter-spacing:0.08em;text-transform:uppercase">Pi Nodes Verified</div>
+      </div>
+    </div>
+
+    <div class="math-desc">
+      The function G(n) captures the fundamental ratio of connectivity in any growing system.
+      As n approaches infinity, the excess over n/e converges to exactly 1/(2e) &mdash;
+      an irreducible gap that proves connection is never zero.
+      K(t) = C(t) &middot; e<sup>&lambda;|&delta;|</sup> &mdash; coherence amplifies under contradiction.
+    </div>
+
+    <div class="math-badge">
+      <div style="width:4px;height:4px;border-radius:50%;background:var(--purple)"></div>
+      Paper A: 13 pages &middot; LaTeX &middot; Peer review ready
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FLEET
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="fleet">
+  <div class="section-label">Fleet</div>
+  <div class="section-title">Edge nodes</div>
+  <div class="section-desc">Five Raspberry Pis, two cloud droplets, and an encrypted WireGuard mesh. The sovereign backbone.</div>
+
+  <div class="fleet-stats">
+    <div class="fleet-stat">
+      <div class="fleet-stat-val" id="stat-agents">--</div>
+      <div class="fleet-stat-label">Active Agents</div>
+    </div>
+    <div class="fleet-stat">
+      <div class="fleet-stat-val">7</div>
+      <div class="fleet-stat-label">Nodes</div>
+    </div>
+    <div class="fleet-stat">
+      <div class="fleet-stat-val">52</div>
+      <div class="fleet-stat-label">TOPS (AI)</div>
+    </div>
+    <div class="fleet-stat">
+      <div class="fleet-stat-val">$136</div>
+      <div class="fleet-stat-label">Monthly Cost</div>
+    </div>
+  </div>
+
+  <div class="node-grid">
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>A</div>
+      <div class="node-name">Alice</div>
+      <div class="node-role">Gateway &middot; DNS &middot; PostgreSQL &middot; Qdrant</div>
+      <div class="node-stat">Pi 400 &middot; 192.168.4.49<br>Pi-hole, Redis, 65+ tunnel routes</div>
+      <div class="node-status"><div class="node-status-dot on"></div>Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>C</div>
+      <div class="node-name">Cecilia</div>
+      <div class="node-role">AI Inference &middot; MinIO &middot; TTS</div>
+      <div class="node-stat">Pi 5 &middot; 192.168.4.96<br>Hailo-8 (26 TOPS), Ollama x16</div>
+      <div class="node-status"><div class="node-status-dot off"></div>Offline</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>O</div>
+      <div class="node-name">Octavia</div>
+      <div class="node-role">Gitea &middot; NVMe &middot; NATS &middot; Workers</div>
+      <div class="node-stat">Pi 5 &middot; 192.168.4.101<br>Hailo-8 (26 TOPS), 15 Workers</div>
+      <div class="node-status"><div class="node-status-dot on"></div>Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>R</div>
+      <div class="node-name">Aria</div>
+      <div class="node-role">Portainer &middot; Headscale &middot; Ollama</div>
+      <div class="node-stat">Pi 5 &middot; 192.168.4.98<br>Ollama x6, Docker orchestration</div>
+      <div class="node-status"><div class="node-status-dot off"></div>Needs Cycle</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>L</div>
+      <div class="node-name">Lucidia</div>
+      <div class="node-role">334 Web Apps &middot; PowerDNS &middot; CI/CD</div>
+      <div class="node-stat">Pi 5 &middot; 192.168.4.38<br>GitHub runners, nginx, Ollama</div>
+      <div class="node-status"><div class="node-status-dot on"></div>Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>G</div>
+      <div class="node-name">Gematria</div>
+      <div class="node-role">TLS Edge &middot; DNS &middot; 151 Domains</div>
+      <div class="node-stat">DO Droplet &middot; NYC3<br>Caddy, PowerDNS (ns1), Ollama x6</div>
+      <div class="node-status"><div class="node-status-dot on"></div>Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar"><div class="node-ring"></div>N</div>
+      <div class="node-name">Anastasia</div>
+      <div class="node-role">WireGuard Hub &middot; Relay</div>
+      <div class="node-stat">DO Droplet &middot; NYC1<br>VPN hub, SSH relay</div>
+      <div class="node-status"><div class="node-status-dot on"></div>Online</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     PRICING
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="pricing">
+  <div class="section-label">Pricing</div>
+  <div class="section-title">Simple, honest pricing</div>
+  <div class="section-desc">No hidden fees. No data harvesting. No "free" tier that sells you. Just infrastructure that respects you.</div>
+
+  <div class="pricing-grid">
+    <!-- Free -->
+    <div class="price-card">
+      <div class="price-tier">Free</div>
+      <div class="price-amount">$0<span class="price-period">/mo</span></div>
+      <div class="price-desc">For individuals exploring sovereign computing. No credit card required.</div>
+      <ul class="price-features">
+        <li>RoundTrip agent chat (read-only)</li>
+        <li>Public knowledge base access</li>
+        <li>Community support</li>
+        <li>1 device on mesh</li>
+        <li>Open-source CLI tools</li>
+      </ul>
+      <a href="https://blackroadai.com" class="price-btn price-btn-outline">Get Started Free</a>
+    </div>
+
+    <!-- Rider -->
+    <div class="price-card">
+      <div class="price-tier">Rider</div>
+      <div class="price-amount">$29<span class="price-period">/mo</span></div>
+      <div class="price-desc">For developers and creators who want sovereign AI and mesh access.</div>
+      <ul class="price-features">
+        <li>Full RoundTrip agent access</li>
+        <li>Lucidia AI (100K tokens/day)</li>
+        <li>5 devices on mesh</li>
+        <li>Personal agent memory</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="https://pay.blackroad.io/rider" class="price-btn price-btn-outline">Start Riding</a>
+    </div>
+
+    <!-- Paver -->
+    <div class="price-card featured">
+      <div class="price-tier">Paver</div>
+      <div class="price-amount">$99<span class="price-period">/mo</span></div>
+      <div class="price-desc">For teams building on BlackRoad OS. Full stack access, unlimited agents.</div>
+      <ul class="price-features">
+        <li>Everything in Rider</li>
+        <li>Unlimited AI tokens</li>
+        <li>25 devices on mesh</li>
+        <li>Team agent coordination</li>
+        <li>Custom agent training</li>
+        <li>RoadView search access</li>
+      </ul>
+      <a href="https://pay.blackroad.io/paver" class="price-btn price-btn-solid">Pave Tomorrow</a>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="price-card">
+      <div class="price-tier">Enterprise</div>
+      <div class="price-amount">$299<span class="price-period">/mo</span></div>
+      <div class="price-desc">For organizations that need full sovereignty. Dedicated infrastructure.</div>
+      <ul class="price-features">
+        <li>Everything in Paver</li>
+        <li>Dedicated Pi fleet node</li>
+        <li>Unlimited devices</li>
+        <li>On-prem deployment</li>
+        <li>SLA + direct engineering</li>
+        <li>Custom integrations</li>
+      </ul>
+      <a href="https://pay.blackroad.io/enterprise" class="price-btn price-btn-outline">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FOOTER CTA
+     ═══════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="footer-cta fade-section">
+  <h2>Remember the Road.<br><span class="hero-title-gradient">Pave Tomorrow.</span></h2>
+  <p class="footer-cta-sub">Pick up your agent. Ride the BlackRoad together.</p>
+  <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+    <a href="https://blackroadai.com" class="btn-grad btn-lg">Get Started</a>
+    <a href="https://github.com/BlackRoad-OS-Inc" target="_blank" class="btn-outline btn-lg">View on GitHub</a>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">BlackRoad OS</div>
+      <div class="footer-tagline">The sovereign operating system for AI-native organizations. Founded 2025 in Delaware by Alexa Amundson. Built on Raspberry Pis, powered by conviction.</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Product</div>
+      <a href="https://lucidia.blackroad.io">Lucidia AI</a>
+      <a href="https://roundtrip.blackroad.io">RoundTrip</a>
+      <a href="https://chat.blackroad.io">Agent Chat</a>
+      <a href="https://hq.blackroad.io">Pixel HQ</a>
+      <a href="https://search.blackroad.io">RoadSearch</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Company</div>
+      <a href="https://blackroadinc.us">About</a>
+      <a href="https://blackroadinc.us">Investors</a>
+      <a href="https://docs.blackroad.io">Docs</a>
+      <a href="https://status.blackroad.io">Status</a>
+      <a href="https://finance.blackroad.io">Finance</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Open Source</div>
+      <a href="https://github.com/BlackRoad-OS-Inc" target="_blank">BlackRoad-OS-Inc</a>
+      <a href="https://github.com/BlackRoad-AI" target="_blank">BlackRoad-AI</a>
+      <a href="https://github.com/blackboxprogramming" target="_blank">blackboxprogramming</a>
+      <a href="https://roadcode.dev" target="_blank">RoadCode (Gitea)</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">&copy; 2025-2026 BlackRoad OS, Inc. Delaware C-Corp. All rights reserved.</div>
+    <div class="footer-legal">
+      <a href="https://blackroadinc.us/privacy">Privacy</a>
+      <a href="https://blackroadinc.us/terms">Terms</a>
+      <a href="https://blackroadinc.us/security">Security</a>
+    </div>
+  </div>
+</footer>
+<div class="grad-bar"></div>
+
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Nav scroll effect ───
+  var navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 40) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
+
+  // ─── Intersection Observer for fade-in ───
+  var fadeSections = document.querySelectorAll('.fade-section');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  fadeSections.forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // ─── Animated counters (problem section) ───
+  var counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var el = entry.target;
+        var target = parseInt(el.getAttribute('data-count'), 10);
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        var duration = 1800;
+        var start = performance.now();
+
+        function animate(now) {
+          var elapsed = now - start;
+          var progress = Math.min(elapsed / duration, 1);
+          // Ease out cubic
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = Math.round(eased * target);
+          el.textContent = prefix + current + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          }
+        }
+        requestAnimationFrame(animate);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.problem-stat').forEach(function(el) {
+    if (el.getAttribute('data-count')) {
+      counterObserver.observe(el);
+    }
+  });
+
+  // ─── Hero word rotation ───
+  var heroWords = ['Pave Tomorrow.', 'Sovereign.', 'Spatial.', 'Sentient.', 'Pave Tomorrow.'];
+  var heroWordIdx = 0;
+  var heroWordEl = document.getElementById('hero-word');
+  setInterval(function() {
+    heroWordEl.style.opacity = '0';
+    heroWordEl.style.transition = 'opacity 0.3s ease';
+    setTimeout(function() {
+      heroWordIdx = (heroWordIdx + 1) % heroWords.length;
+      heroWordEl.textContent = heroWords[heroWordIdx];
+      heroWordEl.style.opacity = '1';
+    }, 300);
+  }, 3000);
+
+  // ─── Fetch fleet stats from RoundTrip ───
+  async function loadFleetStats() {
+    try {
+      var r = await fetch('https://roundtrip.blackroad.io/api/health', { signal: AbortSignal.timeout(5000) });
+      var d = await r.json();
+      var agentCount = d.agents || d.agent_count || 35;
+      document.getElementById('stat-agents').textContent = agentCount;
+    } catch (e) {
+      document.getElementById('stat-agents').textContent = '35';
+    }
+  }
+  loadFleetStats();
+  setInterval(loadFleetStats, 60000);
+
+  // ─── Smooth scroll for anchor links ───
+  document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        var offset = 70; // nav height
+        var y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ─── Domain dot animation — random pulse ───
+  var domainDots = document.querySelectorAll('.domain-dot.live');
+  setInterval(function() {
+    domainDots.forEach(function(d) {
+      d.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    });
+  }, 5000);
+
+  // ─── Portal card hover accent bars ───
+  document.querySelectorAll('.portal-card').forEach(function(card) {
+    var accent = card.style.getPropertyValue('--accent') || '#8844FF';
+    card.querySelector('.portal-icon').style.borderColor = 'transparent';
+    card.addEventListener('mouseenter', function() {
+      this.style.borderColor = accent + '33';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.borderColor = '';
+    });
+    // Set the top accent bar
+    var style = document.createElement('style');
+    var idx = Array.from(document.querySelectorAll('.portal-card')).indexOf(card);
+    style.textContent = '.portal-card:nth-child(' + (idx+1) + ')::before { background: linear-gradient(90deg, ' + accent + ', ' + accent + '44); opacity: 0.5; }';
+    document.head.appendChild(style);
+  });
+
+  // ─── Keyboard nav: Escape scrolls to top ───
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+})();
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

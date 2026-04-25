@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Intelligence — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.systems.js" defer></script>
+  <script src="https://blackroad.io.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="Local Intelligence — AI that runs on your hardware, never phones home. Runs on your hardware, no API keys leaving your network.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #CC00AA; --accent-dim: rgba(204,0,170,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius:50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(204,0,170,0.18) 0%, rgba(204,0,170,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .genesis-block {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .genesis-hash {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--accent); letter-spacing: 0.05em; word-break: break-all;
+    }
+    .genesis-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: var(--muted); margin-top: var(--sp-xs);
+    }
+
+    .event-list {
+      display: flex; flex-direction: column; gap: var(--sp-xs);
+      margin-top: var(--sp-md); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .event-item { color: var(--subtle); }
+    .event-type { color: var(--accent); }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .philosophy {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-xl); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .philosophy p {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1rem; color: var(--subtle); line-height: 1.8;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius:0;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius:50%; }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Local-First AI</div>
+    <div class="concept-title">Local Intelligence</div>
+    <div class="concept-summary">
+      AI that runs on your hardware, never phones home. Runs on your hardware, no API keys leaving your network. Tokenless gateway pattern. Your compute, your rules.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Principle</div>
+    <p>
+      Every inference runs on hardware you own. 16 Ollama models on Cecilia alone. 52 TOPS of Hailo-8 edge AI acceleration across the fleet. The tokenless gateway pattern means no API key ever leaves your network &mdash; agents call the local gateway, the gateway talks to providers. Ownership by architecture, not by policy.
+    </p>
+    <div class="genesis-block">
+      <div class="genesis-hash">tokenless://gateway:8787 &rarr; ollama://localhost:11434</div>
+      <div class="genesis-label">agent &rarr; gateway &rarr; local model &middot; no external API keys</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">How it works</div>
+    <p>
+      Agents never embed API keys. All LLM provider communication flows through the tokenless gateway. The gateway holds the keys, the agents hold nothing. Provider switches are invisible to agents &mdash; swap from Ollama to Claude without changing a single line of agent code.
+    </p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-type">gateway.route</span> &mdash; agent request routed to local provider</div>
+      <div class="event-item"><span class="event-type">model.infer</span> &mdash; inference executed on local hardware</div>
+      <div class="event-item"><span class="event-type">token.zero</span> &mdash; no API key transmitted externally</div>
+      <div class="event-item"><span class="event-type">provider.swap</span> &mdash; backend changed, agents unaware</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Why it matters</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Privacy</div>
+        <div class="card-body">Your prompts never leave your network. No telemetry, no training on your data, no third-party access. What happens on your hardware stays on your hardware.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Resilience</div>
+        <div class="card-body">Cloud goes down? You don't. Your AI keeps running. No rate limits, no outages, no deprecation notices. Infrastructure you own is always-on infrastructure.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Economics</div>
+        <div class="card-body">52 TOPS of edge AI for the cost of hardware. No per-token billing, no monthly subscriptions. Pay once for silicon, run forever. Inference at the marginal cost of electricity.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Philosophy</div>
+    <div class="philosophy">
+      <p>
+        Your compute, your rules. Intelligence that depends on someone else's server is not yours &mdash; it's rented. BlackRoad OS runs on hardware you can touch, on a network you control, with models you can inspect.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Related Concepts</div>
+    <div class="conn-grid">
+      <a href="../soul-chain/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> Soul Chain</a>
+      <a href="../edge-compute/" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> Edge Compute</a>
+      <a href="../self-healing/" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> Self-Healing</a>
+      <a href="../roadid/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> RoadID</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Tokenless Gateway &middot; Fleet &middot; CECE
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Connected Agents</div>
+    <div class="conn-grid">
+      <a href="../../agents/cecilia/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> CECILIA</a>
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> ALICE</a>
+      <a href="../../agents/gematria/" class="conn-card"><span class="conn-dot" style="background:#0af;"></span> GEMATRIA</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Cecilia hosts 16 local Ollama models. Alice serves as the gateway. Gematria provides edge compute from the cloud boundary.
+    </p>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <div class="section-label">Go Deeper</div>
+    <div class="conn-grid">
+      <a href="https://blackroad.io" class="conn-card"><span class="conn-dot" style="background:#CC00AA;"></span> blackroad.io</a>
+      <a href="https://docs.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#CC00AA;"></span> docs.blackroad.io</a>
+      <a href="https://status.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#CC00AA;"></span> status.blackroad.io</a>
+    </div>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>Local Intelligence &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

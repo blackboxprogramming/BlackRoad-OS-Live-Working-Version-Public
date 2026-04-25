@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Get Started — BlackRoad OS</title>
+<meta name="description" content="Sign up for BlackRoad OS. Your device, your data, your agents.">
+<link rel="canonical" href="https://app.blackroad.io/signup">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--card:#131313;--border:#1a1a1a;--text:#f5f5f5;--muted:#737373;--dim:#525252;--faint:#404040;--ghost:#333;--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.grad{height:2px;background:var(--g);position:fixed;top:0;left:0;right:0}
+.mark{display:flex;gap:2px;margin-bottom:24px;justify-content:center}
+.mark div{width:3px;height:14px;border-radius:1.5px}
+.box{max-width:400px;width:100%;padding:40px 32px;background:var(--card);border:1px solid var(--border);border-radius:14px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;text-align:center;margin-bottom:6px;letter-spacing:-0.02em}
+.sub{text-align:center;font-size:14px;color:var(--muted);margin-bottom:32px}
+label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:0.1em;display:block;margin-bottom:6px}
+input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;margin-bottom:16px}
+input:focus{border-color:#262626}
+.btn{width:100%;padding:14px;background:var(--text);color:var(--bg);border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+.btn:hover{opacity:0.88}
+.btn:disabled{opacity:0.3;cursor:default}
+.step{display:none}.step.active{display:block}
+.plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px}
+.plan{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;cursor:pointer;transition:border-color 0.2s}
+.plan.selected{border-color:#262626}
+.plan .price{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin:8px 0 4px}
+.plan .name{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);text-transform:uppercase;letter-spacing:0.06em}
+.plan .per{font-size:11px;color:var(--dim)}
+.key-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);word-break:break-all;margin:16px 0}
+.copy-btn{font-size:11px;color:var(--faint);cursor:pointer;text-align:right;margin-top:8px}
+.success{text-align:center}
+.success h2{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:8px}
+.error{color:#ef4444;font-size:12px;margin-bottom:12px;display:none}
+.footer{margin-top:24px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ghost)}
+@media(max-width:440px){.plans{grid-template-columns:1fr}.box{padding:32px 20px}}
+</style>
+</head>
+<body>
+<div class="grad"></div>
+
+<div class="box">
+  <!-- Step 1: Signup -->
+  <div class="step active" id="step1">
+    <div class="mark"><div style="background:#FF6B2B"></div><div style="background:#FF2255"></div><div style="background:#CC00AA"></div><div style="background:#8844FF"></div><div style="background:#4488FF"></div><div style="background:#00D4FF"></div></div>
+    <h1>Get Started</h1>
+    <p class="sub">Your device. Your data. Your agents.</p>
+    <div class="error" id="err1"></div>
+    <label>Name</label>
+    <input type="text" id="name" placeholder="Your name" autocomplete="name">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    <label>Password</label>
+    <input type="password" id="password" placeholder="Min 8 characters" autocomplete="new-password">
+    <button class="btn" onclick="signup()">Create Account</button>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--dim)">Already have an account? <a href="#" onclick="showStep(4)" style="color:var(--muted);text-decoration:none">Sign in</a></p>
+  </div>
+
+  <!-- Step 2: Choose Plan -->
+  <div class="step" id="step2">
+    <h1>Choose a Plan</h1>
+    <p class="sub">Free tier included. Upgrade anytime.</p>
+    <div class="plans">
+      <div class="plan selected" onclick="selectPlan(this,'free')">
+        <div class="name">Free</div>
+        <div class="price">$0</div>
+        <div class="per">forever</div>
+      </div>
+      <div class="plan" onclick="selectPlan(this,'rider')">
+        <div class="name">Rider</div>
+        <div class="price">$29</div>
+        <div class="per">/month</div>
+      </div>
+      <div class="plan" onclick="selectPlan(this,'paver')">
+        <div class="name">Paver</div>
+        <div class="price">$99</div>
+        <div class="per">/month</div>
+      </div>
+    </div>
+    <button class="btn" onclick="checkout()">Continue</button>
+  </div>
+
+  <!-- Step 3: API Key -->
+  <div class="step" id="step3">
+    <div class="success">
+      <h2>You're in.</h2>
+      <p class="sub">Here's your API key. Save it — you won't see it again.</p>
+    </div>
+    <label>Your API Key</label>
+    <div class="key-box" id="apikey">br_live_...</div>
+    <div class="copy-btn" onclick="copyKey()">tap to copy</div>
+    <button class="btn" onclick="window.location='https://app.blackroad.io'">Open Dashboard</button>
+  </div>
+
+  <!-- Step 4: Sign In -->
+  <div class="step" id="step4">
+    <div class="mark"><div style="background:#FF6B2B"></div><div style="background:#FF2255"></div><div style="background:#CC00AA"></div><div style="background:#8844FF"></div><div style="background:#4488FF"></div><div style="background:#00D4FF"></div></div>
+    <h1>Sign In</h1>
+    <p class="sub">Welcome back.</p>
+    <div class="error" id="err4"></div>
+    <label>Email</label>
+    <input type="email" id="si-email" placeholder="you@example.com">
+    <label>Password</label>
+    <input type="password" id="si-password" placeholder="Your password">
+    <button class="btn" onclick="signin()">Sign In</button>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--dim)">New here? <a href="#" onclick="showStep(1)" style="color:var(--muted);text-decoration:none">Create account</a></p>
+  </div>
+</div>
+
+<div class="footer">BlackRoad OS, Inc. — Pave Tomorrow.</div>
+
+<script>
+const AUTH = 'https://auth.blackroad.io';
+const STRIPE = {
+  free: null,
+  rider: 'https://buy.stripe.com/6oUfZae7CbK56Kv6Ec4Vy0v',
+  paver: 'https://buy.stripe.com/fZuaEQ3sY01n2ufd2A4Vy0w',
+};
+let selectedPlan = 'free';
+let userToken = null;
+
+function showStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('.plan').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+}
+
+async function signup() {
+  const name = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  const err = document.getElementById('err1');
+  err.style.display = 'none';
+  if (!name || !email || !password) { err.textContent = 'All fields required.'; err.style.display = 'block'; return; }
+  if (password.length < 8) { err.textContent = 'Password must be 8+ characters.'; err.style.display = 'block'; return; }
+  try {
+    const r = await fetch(AUTH + '/api/signup', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password})
+    });
+    const d = await r.json();
+    if (d.token) { userToken = d.token; showStep(2); }
+    else { err.textContent = d.error || 'Signup failed.'; err.style.display = 'block'; }
+  } catch(e) { err.textContent = 'Connection error.'; err.style.display = 'block'; }
+}
+
+function checkout() {
+  if (selectedPlan !== 'free' && STRIPE[selectedPlan]) {
+    window.open(STRIPE[selectedPlan], '_blank');
+  }
+  // Generate API key
+  const key = 'br_live_' + Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  document.getElementById('apikey').textContent = key;
+  showStep(3);
+}
+
+function copyKey() {
+  const key = document.getElementById('apikey').textContent;
+  navigator.clipboard?.writeText(key);
+  document.querySelector('.copy-btn').textContent = 'copied!';
+  setTimeout(() => document.querySelector('.copy-btn').textContent = 'tap to copy', 2000);
+}
+
+async function signin() {
+  const email = document.getElementById('si-email').value;
+  const password = document.getElementById('si-password').value;
+  const err = document.getElementById('err4');
+  err.style.display = 'none';
+  try {
+    const r = await fetch(AUTH + '/api/signin', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const d = await r.json();
+    if (d.token) { window.location = 'https://app.blackroad.io'; }
+    else { err.textContent = d.error || 'Sign in failed.'; err.style.display = 'block'; }
+  } catch(e) { err.textContent = 'Connection error.'; err.style.display = 'block'; }
+}
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

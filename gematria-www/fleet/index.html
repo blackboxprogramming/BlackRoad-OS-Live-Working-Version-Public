@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fleet Dashboard — BlackRoad OS</title>
+<meta name="description" content="Real-time fleet status for all 7 BlackRoad nodes.">
+<meta property="og:title" content="Fleet Dashboard — BlackRoad OS">
+<meta property="og:description" content="7 nodes. 26 TOPS. Your hardware, your data, your agents.">
+<meta property="og:image" content="https://images.blackroad.io/brand/og-card.png">
+<link rel="icon" href="https://images.blackroad.io/brand/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+.gradient-bar{height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);width:100%}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a;background:#0a0a0a}
+nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#f5f5f5;text-decoration:none}
+nav .logo span{display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FF2255,#8844FF);margin-right:8px}
+nav .nav-links{margin-left:auto;display:flex;gap:20px}
+nav .nav-links a{color:#a3a3a3;text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+nav .nav-links a:hover{color:#f5f5f5}
+.container{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;margin-bottom:6px}
+.subtitle{color:#a3a3a3;font-size:14px;margin-bottom:32px}
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px}
+.stat-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:16px;text-align:center}
+.stat-card .value{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#f5f5f5}
+.stat-card .label{font-size:11px;color:#737373;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.section-label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#d4d4d4;margin-bottom:14px}
+.node-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.node-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start}
+.node-header{display:flex;align-items:center;gap:10px}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-dot.online{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.4)}
+.status-dot.offline{background:#525252}
+.status-dot.degraded{background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.4)}
+.node-name{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px}
+.node-ip{font-family:'JetBrains Mono',monospace;font-size:12px;color:#737373}
+.node-role{font-size:12px;color:#a3a3a3;margin-top:2px}
+.node-services{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.svc-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#737373;background:#1a1a1a;padding:2px 7px;border-radius:4px}
+.node-status-label{font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;padding-top:2px}
+.node-status-label.online{color:#a3a3a3}
+.node-status-label.offline{color:#525252}
+.node-status-label.degraded{color:#a3a3a3}
+.refresh-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.refresh-text{font-size:12px;color:#525252;font-family:'JetBrains Mono',monospace}
+.pulse{display:inline-block;width:6px;height:6px;border-radius:50%;background:#22c55e;margin-right:6px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.footer-msg{text-align:center;color:#404040;font-size:13px;margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a}
+.footer-msg strong{color:#525252}
+@media(max-width:540px){.stats-strip{grid-template-columns:repeat(2,1fr)}.node-card{grid-template-columns:1fr}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+<a href="https://blackroad.io" class="logo"><span></span>BlackRoad OS</a>
+<div class="nav-links">
+<a href="https://blackroad.io">Home</a>
+<a href="https://docs.blackroad.io">Docs</a>
+<a href="https://api.blackroad.io">API</a>
+<a href="https://hq.blackroad.io">HQ</a>
+</div>
+</nav>
+<div class="container">
+<h1>Fleet Dashboard</h1>
+<p class="subtitle">Real-time status across all BlackRoad infrastructure</p>
+
+<div class="stats-strip">
+<div class="stat-card"><div class="value">7</div><div class="label">Nodes</div></div>
+<div class="stat-card"><div class="value">52</div><div class="label">TOPS</div></div>
+<div class="stat-card"><div class="value">254</div><div class="label">Repos</div></div>
+<div class="stat-card"><div class="value">67</div><div class="label">Agents</div></div>
+</div>
+
+<div class="refresh-bar">
+<div class="section-label">Node Status</div>
+<div class="refresh-text"><span class="pulse"></span>Auto-refresh <span id="countdown">30</span>s</div>
+</div>
+
+<div class="node-grid" id="node-grid">
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot online"></div><div class="node-name">Alice</div></div>
+<div class="node-ip">192.168.4.49</div>
+<div class="node-role">Gateway &middot; Primary Router</div>
+<div class="node-services"><span class="svc-tag">nginx</span><span class="svc-tag">Pi-hole</span><span class="svc-tag">PostgreSQL</span><span class="svc-tag">Qdrant</span><span class="svc-tag">Redis</span><span class="svc-tag">RoundTrip</span></div>
+</div>
+<div class="node-status-label online">online</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot offline"></div><div class="node-name">Cecilia</div></div>
+<div class="node-ip">192.168.4.96</div>
+<div class="node-role">AI Compute &middot; Hailo-8</div>
+<div class="node-services"><span class="svc-tag">Ollama</span><span class="svc-tag">MinIO</span><span class="svc-tag">PostgreSQL</span><span class="svc-tag">InfluxDB</span><span class="svc-tag">Hailo 26T</span></div>
+</div>
+<div class="node-status-label offline">offline</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot online"></div><div class="node-name">Octavia</div></div>
+<div class="node-ip">192.168.4.101</div>
+<div class="node-role">Code &middot; DevOps Platform</div>
+<div class="node-services"><span class="svc-tag">Gitea</span><span class="svc-tag">Workers</span><span class="svc-tag">NATS</span><span class="svc-tag">Docker</span><span class="svc-tag">Hailo 26T</span><span class="svc-tag">PaaS</span></div>
+</div>
+<div class="node-status-label online">online</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot offline"></div><div class="node-name">Aria</div></div>
+<div class="node-ip">192.168.4.98</div>
+<div class="node-role">Auxiliary Compute</div>
+<div class="node-services"><span class="svc-tag">Ollama</span><span class="svc-tag">Workers</span></div>
+</div>
+<div class="node-status-label offline">needs cycle</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot degraded"></div><div class="node-name">Lucidia</div></div>
+<div class="node-ip">192.168.4.38</div>
+<div class="node-role">Web &middot; 334 Apps</div>
+<div class="node-services"><span class="svc-tag">nginx</span><span class="svc-tag">PowerDNS</span><span class="svc-tag">Ollama</span><span class="svc-tag">Actions Runner</span></div>
+</div>
+<div class="node-status-label degraded">degraded</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot online"></div><div class="node-name">Gematria</div></div>
+<div class="node-ip">DO nyc3</div>
+<div class="node-role">TLS Edge &middot; 151 Domains</div>
+<div class="node-services"><span class="svc-tag">Caddy</span><span class="svc-tag">Ollama</span><span class="svc-tag">PowerDNS</span><span class="svc-tag">WireGuard</span></div>
+</div>
+<div class="node-status-label online">online</div>
+</div>
+
+<div class="node-card">
+<div>
+<div class="node-header"><div class="status-dot online"></div><div class="node-name">Anastasia</div></div>
+<div class="node-ip">DO nyc1</div>
+<div class="node-role">Backup Edge</div>
+<div class="node-services"><span class="svc-tag">Caddy</span><span class="svc-tag">WireGuard</span></div>
+</div>
+<div class="node-status-label online">online</div>
+</div>
+</div>
+
+<div class="footer-msg">Fleet runs on <strong>your hardware</strong>. 5 Raspberry Pis + 2 cloud droplets. $38/mo total.</div>
+</div>
+
+<script>
+(function(){
+  let t=30;
+  const el=document.getElementById('countdown');
+  setInterval(()=>{t--;if(t<=0){t=30;checkHealth();}el.textContent=t;},1000);
+  async function checkHealth(){
+    try{
+      const r=await fetch('https://roundtrip.blackroad.io/api/health',{mode:'cors',cache:'no-store'});
+      if(r.ok){document.querySelector('.refresh-text .pulse').style.background='#22c55e';}
+    }catch(e){document.querySelector('.refresh-text .pulse').style.background='#525252';}
+  }
+  checkHealth();
+})();
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

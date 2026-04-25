@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sovereign Cloud - BlackRoad OS</title>
+    <meta name="description" content="Your cloud. Your hardware. PostgreSQL, Redis, MinIO -- all self-hosted."/>
+    <meta name="keywords" content="sovereign cloud, self-hosted, PostgreSQL, Redis, MinIO, BlackRoad"/>
+    <meta name="author" content="BlackRoad OS, Inc."/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://cloud.blackroad.io"/>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://cloud.blackroad.io"/>
+    <meta property="og:title" content="Sovereign Cloud - BlackRoad OS"/>
+    <meta property="og:description" content="Your cloud. Your hardware. PostgreSQL, Redis, MinIO -- all self-hosted."/>
+    <meta property="og:image" content="https://images.blackroad.io/brand/og-card.png"/>
+    <meta property="og:site_name" content="BlackRoad OS"/>
+    <meta property="og:locale" content="en_US"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Sovereign Cloud - BlackRoad OS"/>
+    <meta name="twitter:description" content="Your cloud. Your hardware. PostgreSQL, Redis, MinIO -- all self-hosted."/>
+    <meta name="twitter:image" content="https://images.blackroad.io/brand/og-card.png"/>
+
+    <!-- PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="theme-color" content="#000"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/favicon-32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="https://images.blackroad.io/brand/favicon-16.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://images.blackroad.io/brand/apple-touch-icon.png"/>
+
+    <!-- Shared CSS -->
+    <link rel="stylesheet" href="../_shared/design.css"/>
+
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Organization", "name": "BlackRoad OS, Inc.", "url": "https://blackroad.io", "logo": "https://images.blackroad.io/brand/logo-512.png", "sameAs": ["https://github.com/BlackRoad-OS-Inc", "https://github.com/blackboxprogramming"], "description": "Sovereign AI infrastructure. Self-hosted everything.", "foundingDate": "2025-11-17", "founder": {"@type": "Person", "name": "Alexa Amundson"}}</script>
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebPage", "name": "Sovereign Cloud", "description": "Your cloud. Your hardware. PostgreSQL, Redis, MinIO -- all self-hosted.", "url": "https://cloud.blackroad.io", "isPartOf": {"@type": "WebSite", "name": "BlackRoad OS", "url": "https://blackroad.io"}, "publisher": {"@type": "Organization", "name": "BlackRoad OS, Inc."}}</script>
+
+    <style>
+      :root {
+        --bg: #000;
+        --fg: #fff;
+        --fg-muted: #999;
+        --accent-pink: #FF1D6C;
+        --accent-amber: #F5A623;
+        --accent-blue: #2979FF;
+        --accent-violet: #9C27B0;
+        --card-bg: #0a0a0a;
+        --border: #1a1a1a;
+        --radius: 12px;
+      }
+      *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* ---- NAV ---- */
+      .nav {
+        position: sticky; top: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 24px;
+        background: rgba(0,0,0,.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .nav-brand {
+        display: flex; align-items: center; gap: 10px;
+        text-decoration: none; color: var(--fg);
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700; font-size: 18px;
+      }
+      .nav-mark {
+        width: 28px; height: 28px; border-radius: 6px;
+        background: linear-gradient(135deg, var(--accent-pink), var(--accent-amber), var(--accent-blue));
+      }
+      .nav-links { display: flex; gap: 24px; list-style: none; }
+      .nav-links a {
+        color: var(--fg-muted); text-decoration: none; font-size: 14px;
+        transition: color .2s;
+      }
+      .nav-links a:hover { color: var(--fg); }
+      @media(max-width:640px) { .nav-links { display: none; } }
+
+      /* ---- HERO ---- */
+      .hero {
+        text-align: center;
+        padding: 100px 24px 80px;
+        max-width: 800px; margin: 0 auto;
+      }
+      .hero-badge {
+        display: inline-block;
+        padding: 6px 16px; border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 12px; color: var(--fg-muted);
+        text-transform: uppercase; letter-spacing: 1px;
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        font-weight: 800;
+        line-height: 1.1;
+        background: linear-gradient(135deg, var(--accent-pink), var(--accent-amber), var(--accent-blue));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 24px;
+      }
+      .hero p {
+        font-size: 18px; color: var(--fg-muted);
+        max-width: 600px; margin: 0 auto 32px;
+      }
+      .hero-cta {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 14px 32px; border-radius: var(--radius);
+        background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+        color: #fff; text-decoration: none;
+        font-weight: 600; font-size: 16px;
+        transition: transform .2s, box-shadow .2s;
+      }
+      .hero-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(255,29,108,.3);
+      }
+
+      /* ---- FEATURES ---- */
+      .features {
+        max-width: 1000px; margin: 0 auto;
+        padding: 60px 24px;
+      }
+      .features h2 {
+        text-align: center; font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem; margin-bottom: 48px;
+      }
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 24px;
+      }
+      .feature-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 32px 24px;
+        transition: transform .3s, border-color .3s;
+        opacity: 0; transform: translateY(20px);
+      }
+      .feature-card.visible {
+        opacity: 1; transform: translateY(0);
+        transition: opacity .5s, transform .5s;
+      }
+      .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent-pink);
+      }
+      .feature-icon {
+        width: 48px; height: 48px; border-radius: 10px;
+        background: linear-gradient(135deg, rgba(255,29,108,.15), rgba(41,121,255,.15));
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 16px; color: var(--accent-pink);
+      }
+      .feature-card h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.1rem; font-weight: 600;
+      }
+
+      /* ---- ORG SECTION ---- */
+      .org-section {
+        max-width: 800px; margin: 0 auto;
+        padding: 60px 24px; text-align: center;
+      }
+      .org-section h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem; margin-bottom: 16px;
+      }
+      .org-badge {
+        display: inline-block;
+        padding: 8px 20px; border-radius: 999px;
+        border: 1px solid var(--accent-violet);
+        color: var(--accent-violet);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 14px;
+      }
+      .org-section p {
+        color: var(--fg-muted); margin-top: 12px; font-size: 14px;
+      }
+
+      /* ---- RELATED ---- */
+      .related {
+        max-width: 1000px; margin: 0 auto;
+        padding: 60px 24px 80px;
+      }
+      .related h2 {
+        text-align: center; font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.5rem; margin-bottom: 32px;
+      }
+      .related-grid {
+        display: flex; flex-wrap: wrap; gap: 12px;
+        justify-content: center;
+      }
+      .related-link {
+        display: inline-block;
+        padding: 10px 20px; border-radius: var(--radius);
+        border: 1px solid var(--border);
+        color: var(--fg-muted); text-decoration: none;
+        font-size: 14px; transition: border-color .2s, color .2s;
+      }
+      .related-link:hover {
+        border-color: var(--accent-blue); color: var(--fg);
+      }
+
+      /* ---- FOOTER ---- */
+      .footer {
+        text-align: center;
+        padding: 40px 24px;
+        border-top: 1px solid var(--border);
+        color: var(--fg-muted); font-size: 13px;
+      }
+      .footer .tagline {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14px; color: var(--fg);
+        margin-bottom: 8px;
+      }
+
+      /* ---- MOBILE NAV ---- */
+      .mobile-nav {
+        display: none;
+        position: fixed; bottom: 0; left: 0; right: 0;
+        background: rgba(0,0,0,.92);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--border);
+        padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+        z-index: 100;
+      }
+      .mobile-nav-inner {
+        display: flex; justify-content: space-around; align-items: center;
+      }
+      .mobile-nav a {
+        display: flex; flex-direction: column; align-items: center; gap: 2px;
+        color: var(--fg-muted); text-decoration: none; font-size: 10px;
+        padding: 4px 12px;
+      }
+      .mobile-nav a:hover { color: var(--fg); }
+      .mobile-nav svg { width: 22px; height: 22px; }
+      @media(max-width:640px) {
+        .mobile-nav { display: block; }
+        body { padding-bottom: 72px; }
+      }
+
+      /* ---- SCROLL ANIM ---- */
+      .fade-in {
+        opacity: 0; transform: translateY(20px);
+        transition: opacity .6s ease, transform .6s ease;
+      }
+      .fade-in.visible {
+        opacity: 1; transform: translateY(0);
+      }
+    </style>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  </head>
+  <body>
+
+    <!-- NAV -->
+    <nav class="nav">
+      <a href="https://blackroad.io" class="nav-brand">
+        <div class="nav-mark"></div>
+        BlackRoad
+      </a>
+      <ul class="nav-links">
+        <li><a href="https://blackroad.io">Home</a></li>
+        <li><a href="https://about.blackroad.io">About</a></li>
+        <li><a href="https://apps.blackroad.io">Products</a></li>
+        <li><a href="https://code.blackroad.io">Code</a></li>
+        <li><a href="https://chat.blackroad.io">Chat</a></li>
+      </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-badge">Cloud</div>
+      <h1>Sovereign Cloud</h1>
+      <p>Your cloud. Your hardware. PostgreSQL, Redis, MinIO -- all self-hosted.</p>
+      <a href="https://cloud.blackroad.io" class="hero-cta">
+        Explore Cloud
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features fade-in">
+      <h2>Capabilities</h2>
+      <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <h3>Object storage</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+        </div>
+        <h3>Database</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3V3zm2 2v14h14V5H5z"/></svg>
+        </div>
+        <h3>Cache</h3>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+        </div>
+        <h3>Compute</h3>
+      </div>
+      </div>
+    </section>
+
+    <!-- ORG -->
+    <section class="org-section fade-in">
+      <h2>Part of BlackRoad OS</h2>
+      <div class="org-badge">BlackRoad-Cloud</div>
+      <p>This product is maintained by the BlackRoad-Cloud organization within BlackRoad OS, Inc.</p>
+      <p>Sovereign infrastructure. Self-hosted everything. No external dependencies.</p>
+    </section>
+
+    <!-- RELATED -->
+    <section class="related fade-in">
+      <h2>Related Products</h2>
+      <div class="related-grid">
+      <a href="https://deploy.blackroad.io" class="related-link">Deployment Engine</a>
+      <a href="https://data.blackroad.io" class="related-link">Data Platform</a>
+      <a href="https://edge.blackroad.io" class="related-link">Edge Computing</a>
+      <a href="https://network.blackroad.io" class="related-link">Network</a>
+      <a href="https://connect.blackroad.io" class="related-link">Fleet Connect</a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="tagline">BlackRoad OS -- Pave Tomorrow.</div>
+      <p>Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved.</p>
+      <p style="margin-top:8px">
+        <a href="https://legal.blackroad.io" style="color:var(--fg-muted)">Legal</a>
+        &middot;
+        <a href="https://support.blackroad.io" style="color:var(--fg-muted)">Support</a>
+        &middot;
+        <a href="https://github.com/BlackRoad-OS-Inc" style="color:var(--fg-muted)">GitHub</a>
+      </p>
+    </footer>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav">
+      <div class="mobile-nav-inner">
+        <a href="https://blackroad.io">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z"/></svg>
+          Home
+        </a>
+        <a href="https://search.blackroad.io">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          Search
+        </a>
+        <a href="https://chat.blackroad.io">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+          Chat
+        </a>
+        <a href="https://code.blackroad.io">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 20l4-16M18 8l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          Code
+        </a>
+      </div>
+    </div>
+
+    <!-- SCROLL ANIMATIONS -->
+    <script>
+      (function() {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              var cards = entry.target.querySelectorAll('.feature-card');
+              cards.forEach(function(card, i) {
+                setTimeout(function() { card.classList.add('visible'); }, i * 100);
+              });
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(function(el) {
+          observer.observe(el);
+        });
+      })();
+    </script>
+
+  <script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+<script src="https://cdn.blackroad.io/br.js" defer></script></body>
+</html>

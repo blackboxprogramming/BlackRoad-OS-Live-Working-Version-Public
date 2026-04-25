@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitstop Dashboard — BlackRoad</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-medium: #121212;
+            --bg-light: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-orange: #FF9D00;
+            --accent-red: #FF006B;
+            --accent-purple: #7700FF;
+            --accent-blue: #0066FF;
+            --accent-green: #27AE60;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-medium);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--accent-orange), var(--accent-red), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .breadcrumb {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-bg);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout-button {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #E74C3C;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        /* File Grid */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .file-card {
+            background: var(--bg-medium);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(119, 0, 255, 0.2);
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-red), var(--accent-purple));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .file-card:hover::before {
+            opacity: 1;
+        }
+
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .file-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .file-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .file-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .file-badge {
+            display: inline-block;
+            background: rgba(255, 157, 0, 0.1);
+            color: var(--accent-orange);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .file-badge.live {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--accent-green);
+        }
+
+        .file-badge.protected {
+            background: rgba(231, 76, 60, 0.1);
+            color: #E74C3C;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--bg-medium);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">PITSTOP</div>
+            <div class="breadcrumb">/ dashboard</div>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar" id="user-avatar">A</div>
+                <div class="user-name" id="user-name">Loading...</div>
+            </div>
+            <button class="logout-button" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <h1 class="page-title">Welcome to Pitstop</h1>
+        <p class="page-subtitle">Secure access to all BlackRoad OS systems and files</p>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📁</div>
+                <div class="stat-label">Total Files</div>
+                <div class="stat-value">32</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🌌</div>
+                <div class="stat-label">Systems</div>
+                <div class="stat-value">18</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💻</div>
+                <div class="stat-label">Code Lines</div>
+                <div class="stat-value">14K+</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🚀</div>
+                <div class="stat-label">Deployments</div>
+                <div class="stat-value">3</div>
+            </div>
+        </div>
+
+        <!-- File Grid -->
+        <div class="file-grid">
+            <!-- Metaverse Files -->
+            <div class="file-card" onclick="openFile('universe.html')">
+                <div class="file-icon">🌌</div>
+                <div class="file-title">Complete Universe</div>
+                <div class="file-description">Full integration of all 18 systems with beautiful UI</div>
+                <div class="file-meta">
+                    <span class="file-badge live">LIVE</span>
+                    <span>981 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('index.html')">
+                <div class="file-icon">🎮</div>
+                <div class="file-title">Original Metaverse</div>
+                <div class="file-description">First version with core features</div>
+                <div class="file-meta">
+                    <span class="file-badge live">LIVE</span>
+                    <span>1,698 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('module-loader.js')">
+                <div class="file-icon">🔗</div>
+                <div class="file-title">Module Loader</div>
+                <div class="file-description">Dynamic import system with dependency management</div>
+                <div class="file-meta">
+                    <span class="file-badge">MODULE</span>
+                    <span>287 lines</span>
+                </div>
+            </div>
+
+            <!-- System Files -->
+            <div class="file-card" onclick="openFile('truth-contracts.js')">
+                <div class="file-icon">🔐</div>
+                <div class="file-title">Truth Contracts</div>
+                <div class="file-description">Time scales, reference frames, and verification</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>382 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('celestial-mechanics.js')">
+                <div class="file-icon">🪐</div>
+                <div class="file-title">Celestial Mechanics</div>
+                <div class="file-description">NASA-grade IAU 2000/2006 transformations</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>500 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('physics-engine.js')">
+                <div class="file-icon">⚡</div>
+                <div class="file-title">Physics Engine</div>
+                <div class="file-description">Rigid body dynamics and collision detection</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>632 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('living-nature.js')">
+                <div class="file-icon">🦋</div>
+                <div class="file-title">Living Nature</div>
+                <div class="file-description">6 animals + 6 plants with AI emotions</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>1,177 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('intelligent-agents.js')">
+                <div class="file-icon">🤖</div>
+                <div class="file-title">Intelligent Agents</div>
+                <div class="file-description">Alice, Aria, Lucidia with behavior trees</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>862 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('infinite-biomes.js')">
+                <div class="file-icon">🌲</div>
+                <div class="file-title">Infinite Biomes</div>
+                <div class="file-description">6 procedurally generated biomes</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>492 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('photorealistic-graphics.js')">
+                <div class="file-icon">🎨</div>
+                <div class="file-title">Photorealistic Graphics</div>
+                <div class="file-description">PBR materials and custom GLSL shaders</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>743 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('game-integration.js')">
+                <div class="file-icon">🎯</div>
+                <div class="file-title">Game Integration</div>
+                <div class="file-description">System orchestrator for all 17 modules</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>890 lines</span>
+                </div>
+            </div>
+
+            <!-- Other Systems -->
+            <div class="file-card" onclick="openFile('crafting-building.js')">
+                <div class="file-icon">🛠️</div>
+                <div class="file-title">Crafting & Building</div>
+                <div class="file-description">Material system with 30+ recipes</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>741 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('quest-system.js')">
+                <div class="file-icon">🏆</div>
+                <div class="file-title">Quest System</div>
+                <div class="file-description">12 unique quests with achievements</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>676 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('dialogue-story.js')">
+                <div class="file-icon">💬</div>
+                <div class="file-title">Dialogue & Story</div>
+                <div class="file-description">Branching conversations and story arcs</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>674 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('world-evolution.js')">
+                <div class="file-icon">🌍</div>
+                <div class="file-title">World Evolution</div>
+                <div class="file-description">Seasons, weather, and ecosystem simulation</div>
+                <div class="file-meta">
+                    <span class="file-badge">SYSTEM</span>
+                    <span>673 lines</span>
+                </div>
+            </div>
+
+            <!-- Documentation -->
+            <div class="file-card" onclick="openFile('STATUS.md')">
+                <div class="file-icon">📊</div>
+                <div class="file-title">Complete Status</div>
+                <div class="file-description">Full project documentation and metrics</div>
+                <div class="file-meta">
+                    <span class="file-badge">DOCS</span>
+                    <span>561 lines</span>
+                </div>
+            </div>
+
+            <div class="file-card" onclick="openFile('DOMAIN_SETUP.md')">
+                <div class="file-icon">🌐</div>
+                <div class="file-title">Domain Setup Guide</div>
+                <div class="file-description">Instructions for universe.blackroad.io</div>
+                <div class="file-meta">
+                    <span class="file-badge">DOCS</span>
+                    <span>244 lines</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SESSION_KEY = 'blackroad_pitstop_session';
+
+        // Check authentication
+        function checkAuth() {
+            const session = localStorage.getItem(SESSION_KEY);
+            if (!session) {
+                window.location.href = 'index.html';
+                return null;
+            }
+
+            try {
+                const sessionData = JSON.parse(session);
+                const now = Date.now();
+
+                if (sessionData.expires < now) {
+                    localStorage.removeItem(SESSION_KEY);
+                    window.location.href = 'index.html';
+                    return null;
+                }
+
+                return sessionData;
+            } catch (e) {
+                localStorage.removeItem(SESSION_KEY);
+                window.location.href = 'index.html';
+                return null;
+            }
+        }
+
+        // Initialize
+        const session = checkAuth();
+        if (session) {
+            document.getElementById('user-name').textContent = session.username;
+            document.getElementById('user-avatar').textContent = session.username.charAt(0).toUpperCase();
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem(SESSION_KEY);
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Open file function
+        function openFile(filename) {
+            // Map files to their actual URLs
+            const fileMap = {
+                'universe.html': '../blackroad-metaverse/universe.html',
+                'index.html': '../blackroad-metaverse/index.html',
+                'module-loader.js': '../blackroad-metaverse/module-loader.js',
+                'truth-contracts.js': '../blackroad-metaverse/truth-contracts.js',
+                'celestial-mechanics.js': '../blackroad-metaverse/celestial-mechanics.js',
+                'physics-engine.js': '../blackroad-metaverse/physics-engine.js',
+                'living-nature.js': '../blackroad-metaverse/living-nature.js',
+                'intelligent-agents.js': '../blackroad-metaverse/intelligent-agents.js',
+                'infinite-biomes.js': '../blackroad-metaverse/infinite-biomes.js',
+                'photorealistic-graphics.js': '../blackroad-metaverse/photorealistic-graphics.js',
+                'game-integration.js': '../blackroad-metaverse/game-integration.js',
+                'crafting-building.js': '../blackroad-metaverse/crafting-building.js',
+                'quest-system.js': '../blackroad-metaverse/quest-system.js',
+                'dialogue-story.js': '../blackroad-metaverse/dialogue-story.js',
+                'world-evolution.js': '../blackroad-metaverse/world-evolution.js',
+                'STATUS.md': '../blackroad-metaverse/STATUS.md',
+                'DOMAIN_SETUP.md': '../blackroad-metaverse/DOMAIN_SETUP.md'
+            };
+
+            const url = fileMap[filename];
+            if (url) {
+                if (filename.endsWith('.html')) {
+                    // Open HTML files directly
+                    window.open(url, '_blank');
+                } else {
+                    // For other files, we'll need a file viewer
+                    alert(`File: ${filename}\nPath: ${url}\n\nViewer coming soon!`);
+                }
+            }
+        }
+    </script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

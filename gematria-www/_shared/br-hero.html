@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — Pave Tomorrow.</title>
+<link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="https://images.blackroad.io/brand/br-square-192.png" />
+<link rel="apple-touch-icon" href="https://images.blackroad.io/brand/apple-touch-icon.png" />
+<meta property="og:image" content="https://images.blackroad.io/brand/br-square-512.png" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Video Hero ── */
+  .hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.15;
+    filter: grayscale(100%) contrast(1.2);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, #000 70%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    max-width: 800px;
+    padding: 0 24px;
+  }
+
+  /* Logo with gradient border */
+  .hero-logo {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 40px;
+  }
+
+  .hero-logo img {
+    width: 140px;
+    height: 140px;
+    border-radius: 28px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-logo::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 31px;
+    background: conic-gradient(from 0deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF, #FF6B2B);
+    animation: ring-rotate 6s linear infinite;
+    z-index: 1;
+  }
+
+  .hero-logo::after {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    border-radius: 48px;
+    background: conic-gradient(from 180deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF, #FF6B2B);
+    animation: ring-rotate 6s linear infinite reverse;
+    z-index: 0;
+    opacity: 0.15;
+    filter: blur(20px);
+  }
+
+  @keyframes ring-rotate {
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .hero-title .grad {
+    background: linear-gradient(135deg, #FF6B2B 0%, #FF2255 25%, #CC00AA 50%, #8844FF 75%, #4488FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-flow 4s ease infinite;
+  }
+
+  @keyframes gradient-flow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .hero-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    color: rgba(255,255,255,0.5);
+    line-height: 1.8;
+    max-width: 600px;
+    margin: 0 auto 40px;
+  }
+
+  /* CTA buttons */
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #FF2255, #8844FF);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(136,68,255,0.4);
+  }
+
+  .btn-ghost {
+    padding: 14px 32px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-ghost:hover {
+    border-color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* ── Scroll indicator ── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.3;
+    animation: scroll-bounce 2s ease-in-out infinite;
+  }
+
+  .scroll-hint span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .scroll-arrow {
+    width: 20px;
+    height: 20px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(45deg);
+  }
+
+  @keyframes scroll-bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ── Features Section ── */
+  .features {
+    padding: 120px 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .features h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 60px;
+    letter-spacing: -1px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .feature-card {
+    padding: 32px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.04);
+    transform: translateY(-4px);
+  }
+
+  .feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, rgba(255,34,85,0.15), rgba(136,68,255,0.15));
+  }
+
+  .feature-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.7;
+  }
+
+  /* ── Logo strip (all variants) ── */
+  .logo-strip {
+    padding: 80px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .logo-strip h3 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+  }
+
+  .logo-variants {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .logo-variants img {
+    border-radius: 16px;
+    transition: all 0.3s;
+    opacity: 0.7;
+  }
+
+  .logo-variants img:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(136,68,255,0.2);
+  }
+
+  /* ── Footer ── */
+  footer {
+    padding: 40px 24px;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .footer-links a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: #fff; }
+
+  .footer-copy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.2);
+  }
+</style>
+</head>
+<body>
+
+  <!-- Hero with motion logo background -->
+  <section class="hero">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="https://images.blackroad.io/brand/br-motion-logo.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <div class="hero-logo">
+        <img src="https://images.blackroad.io/brand/br-square-512.png" alt="BlackRoad OS" />
+      </div>
+
+      <h1 class="hero-title">
+        <span class="grad">Pave Tomorrow.</span>
+      </h1>
+
+      <p class="hero-sub">
+        50 AI skills. 5 edge nodes. 52 TOPS.<br>
+        Sovereign AI on your own metal.<br>
+        Phone, Pi, laptop, browser — if it can think, it's enough.
+      </p>
+
+      <div class="hero-cta">
+        <a href="https://blackroad.io" class="btn-primary">Enter BlackRoad</a>
+        <a href="https://github.com/BlackRoad-OS-Inc" class="btn-ghost">GitHub</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2>What we <span class="grad">built</span></h2>
+
+    <div class="features-grid">
+      <a href="https://blackroadai.com" class="feature-card">
+        <div class="feature-icon">&#x1F916;</div>
+        <div class="feature-title">50 AI Skills</div>
+        <div class="feature-desc">Chain-of-Thought, ReAct, Tree-of-Thought, federated inference, autonomous coding, sovereign AI — all running on your hardware.</div>
+      </a>
+
+      <a href="https://blackroad.network" class="feature-card">
+        <div class="feature-icon">&#x1F310;</div>
+        <div class="feature-title">Mesh Network</div>
+        <div class="feature-desc">Every device is a node. Phones, Pis, browsers form a sovereign compute mesh. WebGPU + WASM + WebRTC.</div>
+      </a>
+
+      <a href="https://blackroad.systems" class="feature-card">
+        <div class="feature-icon">&#x1F4E1;</div>
+        <div class="feature-title">Pi Fleet</div>
+        <div class="feature-desc">5 Raspberry Pis, 2 Hailo-8 accelerators, 52 TOPS of local AI compute. NATS mesh, Qdrant vectors, Ollama models.</div>
+      </a>
+
+      <a href="https://lucidia.earth" class="feature-card">
+        <div class="feature-icon">&#x1F4AB;</div>
+        <div class="feature-title">Lucidia</div>
+        <div class="feature-desc">AI companion built on transparency, consent, and care. Persistent memory. Remembers what you're trying to become.</div>
+      </a>
+
+      <a href="https://roadchain.io" class="feature-card">
+        <div class="feature-icon">&#x1F517;</div>
+        <div class="feature-title">RoadChain</div>
+        <div class="feature-desc">Hash-chained, append-only memory journals. Tamper-evident agent memory. Portable across providers.</div>
+      </a>
+
+      <a href="https://github.com/blackboxprogramming" class="feature-card">
+        <div class="feature-icon">&#x1F680;</div>
+        <div class="feature-title">Sovereign Stack</div>
+        <div class="feature-desc">275+ repos across 17 GitHub orgs. Everything flows from BlackRoad-OS-Inc/blackroad-operator.</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- Logo variants -->
+  <section class="logo-strip">
+    <h3>The Mark</h3>
+    <div class="logo-variants">
+      <img src="https://images.blackroad.io/brand/br-square-128.png" width="128" height="128" alt="BR Square" />
+      <img src="https://images.blackroad.io/brand/br-circle-128.png" width="128" height="128" alt="BR Circle" style="border-radius:50%;" />
+      <img src="https://images.blackroad.io/brand/br-square-64.png" width="64" height="64" alt="BR 64" />
+      <img src="https://images.blackroad.io/brand/br-circle-64.png" width="64" height="64" alt="BR 64 Circle" style="border-radius:50%;" />
+      <img src="https://images.blackroad.io/brand/br-square-32.png" width="32" height="32" alt="BR 32" />
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://blackroad.io">Home</a>
+      <a href="https://lucidia.earth">Lucidia</a>
+      <a href="https://blackroadai.com">AI</a>
+      <a href="https://blackroad.network">Network</a>
+      <a href="https://blackroad.systems">Status</a>
+      <a href="https://blackroad.company">Company</a>
+      <a href="https://brand.blackroad.io">Brand</a>
+      <a href="https://pricing.blackroad.io">Pricing</a>
+      <a href="https://github.com/BlackRoad-OS-Inc">GitHub</a>
+    </div>
+    <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. — Pave Tomorrow.</div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edge Compute — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.systems.js" defer></script>
+  <script src="https://blackroad.io.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="Edge Compute — 5 Raspberry Pi 5 nodes with 2x Hailo-8 AI accelerators. 52 TOPS total. Sub-10ms inference at the edge.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #FF6B2B; --accent-dim: rgba(255,107,43,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius:50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(255,107,43,0.18) 0%, rgba(255,107,43,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .genesis-block {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .genesis-hash {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--accent); letter-spacing: 0.05em; word-break: break-all;
+    }
+    .genesis-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: var(--muted); margin-top: var(--sp-xs);
+    }
+
+    .event-list {
+      display: flex; flex-direction: column; gap: var(--sp-xs);
+      margin-top: var(--sp-md); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .event-item { color: var(--subtle); }
+    .event-type { color: var(--accent); }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .philosophy {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-xl); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .philosophy p {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1rem; color: var(--subtle); line-height: 1.8;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius:0;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius:50%; }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Hardware Intelligence</div>
+    <div class="concept-title">Edge Compute</div>
+    <div class="concept-summary">
+      5 Raspberry Pi 5 nodes with 2x Hailo-8 AI accelerators &mdash; 52 TOPS total. Sub-10ms inference at the edge. No cloud round-trip. The Pi fleet IS the data center.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Hardware</div>
+    <p>
+      Two Hailo-8 accelerators deliver 26 TOPS each &mdash; 52 TOPS combined. Cecilia and Octavia each carry one at /dev/hailo0. Conservative CPU governors keep thermals in check. Octavia adds a 1TB NVMe for local storage. Five Pi 5 nodes, mesh-networked, power-optimized, always on.
+    </p>
+    <div class="genesis-block">
+      <div class="genesis-hash">cecilia:hailo0 HLLWM2B233704667 + octavia:hailo0 HLLWM2B233704606</div>
+      <div class="genesis-label">2x Hailo-8 &middot; 26 TOPS each &middot; 52 TOPS total</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">How it works</div>
+    <p>
+      Inference requests hit the tokenless gateway and route to the nearest available accelerator. CPU governors run in conservative mode to prevent thermal throttling. Power monitoring runs every 5 minutes on all nodes. The fleet self-balances &mdash; if one node throttles, work shifts to another.
+    </p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-type">hailo.infer</span> &mdash; model inference on Hailo-8 NPU</div>
+      <div class="event-item"><span class="event-type">governor.conservative</span> &mdash; CPU frequency scaled for thermal headroom</div>
+      <div class="event-item"><span class="event-type">power.monitor</span> &mdash; voltage, temperature, throttle state logged</div>
+      <div class="event-item"><span class="event-type">nvme.store</span> &mdash; model weights cached on Octavia NVMe</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Why it matters</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Latency</div>
+        <div class="card-body">Sub-10ms inference with no cloud round-trip. Your data never leaves the local network. Responses at the speed of silicon, not the speed of fiber.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Density</div>
+        <div class="card-body">52 TOPS in hardware that fits in your palm. Five nodes draw less power than a single GPU workstation. The entire fleet runs on standard USB-C power supplies.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Resilience</div>
+        <div class="card-body">No single point of failure. If a node goes down, the mesh routes around it. NVMe storage on Octavia keeps model weights local. The fleet survives node loss gracefully.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Philosophy</div>
+    <div class="philosophy">
+      <p>
+        The data center is a room full of someone else's computers. Edge compute is a shelf full of yours. Five Pis, two accelerators, one network you control. That's a data center.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Related Concepts</div>
+    <div class="conn-grid">
+      <a href="../local-intelligence/" class="conn-card"><span class="conn-dot" style="background:#CC00AA;"></span> Local Intelligence</a>
+      <a href="../mesh-browser/" class="conn-card"><span class="conn-dot" style="background:#4488FF;"></span> Browser Mesh</a>
+      <a href="../self-healing/" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> Self-Healing</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Fleet &middot; RoadNet &middot; WireGuard Mesh
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Connected Agents</div>
+    <div class="conn-grid">
+      <a href="../../agents/cecilia/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> CECILIA</a>
+      <a href="../../agents/octavia/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> OCTAVIA</a>
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> ALICE</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Cecilia and Octavia each carry a Hailo-8 accelerator. Alice serves as the gateway routing inference requests to the fleet.
+    </p>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <div class="section-label">Go Deeper</div>
+    <div class="conn-grid">
+      <a href="https://blackroad.io" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> blackroad.io</a>
+      <a href="https://fleet.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> fleet.blackroad.io</a>
+      <a href="https://status.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> status.blackroad.io</a>
+    </div>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>Edge Compute &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

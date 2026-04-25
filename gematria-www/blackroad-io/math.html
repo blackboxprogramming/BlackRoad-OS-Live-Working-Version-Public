@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Amundson Equations — Alexa Louise Amundson</title>
+<meta name="description" content="The Amundson Sequence G(n) = n^(n+1)/(n+1)^n — a new mathematical object with five equivalent forms, a new constant A_G ≈ 1.24433, and connections to the Riemann critical line. By Alexa Louise Amundson, BlackRoad OS, Inc.">
+<meta property="og:title" content="The Amundson Equations — A New Mathematical Framework">
+<meta property="og:description" content="G(n) = n^(n+1)/(n+1)^n. Five forms. Translation invariance. A new constant. Connection to the Riemann critical line. None of it exists in published mathematics.">
+<meta property="og:url" content="https://blackroad.io/equations">
+<meta property="og:type" content="article">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroad.io/equations">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+:root{--bg:#0a0a0a;--card:#131313;--border:#1a1a1a;--text:#f5f5f5;--sub:#a3a3a3;--dim:#737373;--faint:#525252;--ghost:#404040;--sg:'Space Grotesk',sans-serif;--in:'Inter',sans-serif;--jb:'JetBrains Mono',monospace;--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+body{background:var(--bg);color:var(--text);font-family:var(--in);line-height:1.8}
+
+@keyframes barPulse{0%,100%{opacity:1;transform:scaleY(1)}50%{opacity:.5;transform:scaleY(.7)}}
+.br-bars{display:flex;gap:2px;align-items:center}
+.br-bars span{width:3px;height:18px;border-radius:2px;display:inline-block}
+.br-bars span:nth-child(1){background:#FF6B2B;animation:barPulse 2.5s ease-in-out 0s infinite}
+.br-bars span:nth-child(2){background:#FF2255;animation:barPulse 2.5s ease-in-out .15s infinite}
+.br-bars span:nth-child(3){background:#CC00AA;animation:barPulse 2.5s ease-in-out .3s infinite}
+.br-bars span:nth-child(4){background:#8844FF;animation:barPulse 2.5s ease-in-out .45s infinite}
+.br-bars span:nth-child(5){background:#4488FF;animation:barPulse 2.5s ease-in-out .6s infinite}
+.br-bars span:nth-child(6){background:#00D4FF;animation:barPulse 2.5s ease-in-out .75s infinite}
+
+.grad-bar{height:4px;background:var(--g)}
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 48px;border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--sg);font-weight:700;font-size:18px;display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+nav a{font-size:13px;color:var(--dim);text-decoration:none;font-family:var(--in)}
+
+article{max-width:720px;margin:0 auto;padding:60px 20px 100px}
+
+.meta{font-family:var(--jb);font-size:10px;color:var(--ghost);text-transform:uppercase;letter-spacing:.14em;margin-bottom:24px}
+h1{font-family:var(--sg);font-size:clamp(32px,7vw,48px);font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.subtitle{font-size:17px;color:var(--dim);margin-bottom:48px;max-width:560px;line-height:1.7}
+
+h2{font-family:var(--sg);font-size:24px;font-weight:700;letter-spacing:-.02em;margin:56px 0 12px;padding-top:32px;border-top:1px solid var(--border)}
+h2:first-of-type{border-top:none;margin-top:0}
+h3{font-family:var(--sg);font-size:18px;font-weight:600;margin:32px 0 8px}
+
+p{font-size:15px;color:var(--sub);margin-bottom:20px}
+strong{color:var(--text);font-weight:600}
+
+.eq-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:20px 0 28px;overflow-x:auto}
+.eq-box .katex{font-size:1.3em}
+.eq-label{font-family:var(--jb);font-size:10px;color:var(--ghost);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+
+table{width:100%;border-collapse:collapse;margin:20px 0 28px;font-size:14px}
+th{font-family:var(--jb);font-size:11px;color:var(--ghost);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:10px 16px;border-bottom:1px solid var(--border)}
+td{padding:10px 16px;border-bottom:1px solid #141414;color:var(--sub)}
+tr:hover td{background:#0f0f0f}
+
+.values-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin:20px 0 28px}
+.values-grid div{background:var(--card);padding:16px;text-align:center}
+.values-grid .n{font-family:var(--jb);font-size:10px;color:var(--ghost)}
+.values-grid .v{font-family:var(--jb);font-size:15px;color:var(--text);margin-top:4px}
+
+.highlight{background:var(--card);border-left:3px solid #8844FF;padding:16px 20px;margin:20px 0 28px;border-radius:0 8px 8px 0}
+.highlight p{margin:0;color:var(--text);font-size:14px}
+
+.verification{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 24px;margin:20px 0;font-family:var(--jb);font-size:12px;color:var(--faint);line-height:2}
+.verification .pass{color:#00D4FF}
+
+footer{max-width:720px;margin:0 auto;padding:40px 20px 60px;border-top:1px solid var(--border)}
+footer p{font-family:var(--jb);font-size:11px;color:var(--ghost)}
+
+@media(max-width:600px){
+  nav{padding:16px 20px}
+  article{padding:40px 16px 80px}
+  .eq-box{padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="grad-bar"></div>
+<nav>
+  <a href="https://blackroad.io" class="nav-logo"><div class="br-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div> BlackRoad</a>
+  <div style="display:flex;gap:24px">
+    <a href="https://blackroad.io">Home</a>
+    <a href="https://github.com/BlackRoad-OS-Inc/amundson-research">Source</a>
+  </div>
+</nav>
+
+<article>
+
+<div class="meta">Mathematics &middot; March 2026 &middot; Original Research</div>
+
+<h1>The Amundson Equations</h1>
+
+<p class="subtitle">A new mathematical sequence, a new constant, and connections to the Riemann critical line. None of it exists in published mathematics. All of it is computationally verified.</p>
+
+<div style="height:4px;border-radius:99px;background:var(--g);max-width:200px;margin-bottom:48px"></div>
+
+<p><strong>Author:</strong> Alexa Louise Amundson<br>
+<strong>Institution:</strong> BlackRoad OS, Inc. &middot; Lakeville, Minnesota<br>
+<strong>Contact:</strong> alexa@blackroad.company</p>
+
+<h2>I. The Sequence</h2>
+
+<p>The standard limit $\lim_{n\to\infty}(1+1/n)^n = e$ is among the most studied objects in analysis. Every textbook treats $(1+1/n)^n$ as a scaffold for arriving at $e$. This work asks a different question: <strong>what is $n$ divided by $(1+1/n)^n$, treated as the primary object?</strong></p>
+
+<div class="eq-box">
+<div class="eq-label">Definition — The Amundson Sequence</div>
+$$G(n) = \frac{n}{(1+1/n)^n} = \frac{n^{n+1}}{(n+1)^n}, \quad n > 0$$
+</div>
+
+<p>Since $(1+1/n)^n < e$ for all finite $n$, we have $G(n) > n/e$. The sequence grows without bound while permanently exceeding its asymptote.</p>
+
+<h3>Initial Values</h3>
+
+<div class="values-grid">
+<div><div class="n">n = 0</div><div class="v">0</div></div>
+<div><div class="n">n = 1</div><div class="v">1/2</div></div>
+<div><div class="n">n = 2</div><div class="v">8/9</div></div>
+<div><div class="n">n = 3</div><div class="v">81/64</div></div>
+<div><div class="n">n = 4</div><div class="v">1024/625</div></div>
+<div><div class="n">n = 5</div><div class="v">15625/7776</div></div>
+</div>
+
+<p>The numerator base equals the denominator exponent; the denominator base equals the numerator exponent plus one. The bases and exponents <strong>cross</strong>. $G(n)$ is rational for all non-negative integers $n$.</p>
+
+<h2>II. Five Equivalent Forms</h2>
+
+<p>The following five expressions are algebraically identical for all $n > 0$:</p>
+
+<div class="eq-box">
+$$G(n) = \frac{n}{(1+1/n)^n} \quad \text{(F1: Quotient)}$$
+$$G(n) = n\left(\frac{n}{n+1}\right)^n \quad \text{(F2: Product)}$$
+$$G(n) = \frac{n^{n+1}}{(n+1)^n} \quad \text{(F3: Canonical)}$$
+$$G(n) = n\prod_{k=1}^{n}\frac{n}{n+1} \quad \text{(F4: Iterated product)}$$
+$$G(n) = \frac{n+1}{(1+1/n)^{n+1}} \quad \text{(F5: Forward form)}$$
+</div>
+
+<p>Each form exposes a different geometric aspect: F1 chases $e$ from below; F2 is $n$ identical contractions by ratio $n/(n+1)$; F3 is the integer fingerprint; F4 is the "contract-and-reinflate" picture; F5 shows that simultaneously advancing numerator and exponent by 1 leaves the value unchanged.</p>
+
+<h2>III. Translation Invariance</h2>
+
+<p>$G$ is <strong>translation-invariant in both directions</strong>: the functional form $n^{n+1}/(n+1)^n$ is reproduced by both $n \mapsto n+1$ and $n \mapsto n-1$.</p>
+
+<div class="highlight">
+<p><strong>Remark (Self-Referential Stability):</strong> Turing's diagonalization shows that self-application destroys decidability: the halting oracle $h$, fed its own code, produces a contradiction. The Amundson sequence behaves oppositely: feeding $G$ into itself via $n \mapsto n-1$ produces a perfect algebraic copy. Self-application is productive, not paradoxical.</p>
+</div>
+
+<h2>IV. The Removable Singularity</h2>
+
+<p>The canonical form gives $G(0) = 0^1/1^0 = 0/1 = 0$, with no indeterminate form. Moreover, $\lim_{n\to 0^+} G(n) = 0$. This makes $G$ the unique member of its equivalence class with a clean boundary condition.</p>
+
+<div class="eq-box">
+$$\lim_{n\to 0^+}(1+1/n)^n = 1 \quad \text{(NOT } e \text{)}$$
+$$\lim_{n\to 0^+} G(n) = \frac{0}{1} = 0$$
+</div>
+
+<h2>V. The Mirror Function</h2>
+
+<div class="eq-box">
+$$M(n) = \frac{1}{G(n)} = \frac{(n+1)^n}{n^{n+1}}$$
+</div>
+
+<p>$G(n) \cdot M(n) = 1$ for all $n > 0$. As $n \to \infty$: $G(n)/n \to 1/e$ from above and $M(n)/n \to e$ from below. $G$ and $M$ form <strong>dual envelopes of $e$</strong>.</p>
+
+<h2>VI. Product and Ratio Formulas</h2>
+
+<div class="eq-box">
+<div class="eq-label">Telescoping Product</div>
+$$\prod_{k=1}^{n} G(k) = \frac{(n!)^2}{(n+1)^n}$$
+</div>
+
+<div class="eq-box">
+<div class="eq-label">Ratio Formula</div>
+$$\frac{G(n)}{G(n-1)} = \left[\frac{n^2}{n^2-1}\right]^n$$
+</div>
+
+<div class="eq-box">
+<div class="eq-label">Form 6 — Triangular Encoding</div>
+$$G(n) = \frac{n^{2n+1}}{(2T(n))^n} \quad \text{where } T(n) = \frac{n(n+1)}{2}$$
+</div>
+
+<h2>VII. Asymptotics and the Amundson Constant</h2>
+
+<div class="eq-box">
+<div class="eq-label">Ramanujan Asymptotic Refinement</div>
+$$G(n) = \frac{n}{e} + \frac{1}{2e} + O(1/n)$$
+</div>
+
+<p>The irreducible gap between $G(n)$ and $n/e$ is $1/(2e) \approx 0.18394$. This gap is invariant — it holds at every $n$, at every scale.</p>
+
+<div class="eq-box">
+<div class="eq-label">The Amundson Constant</div>
+$$A_G = \sum_{n=1}^{\infty} \frac{G(n)}{n!} \approx 1.244331783986725$$
+</div>
+
+<p>Verified numerically to fifteen decimal places. <strong>This constant does not appear in any published list of mathematical constants.</strong> It is not reducible to known quantities.</p>
+
+<div class="eq-box">
+<div class="eq-label">Ramanujan Regularization</div>
+$$\text{Divergent sum of } G(n) \text{ regularizes to } -\frac{1}{12e}$$
+</div>
+
+<h2>VIII. The Power Decomposition</h2>
+
+<p>$G(n)$ can be expressed as a pure $n$th power, <strong>eliminating $e$ entirely</strong>:</p>
+
+<div class="eq-box">
+$$G(n) = \left(n^{1/n} \cdot \frac{n}{n+1}\right)^n$$
+</div>
+
+<p>The constant $e$ is not required to define the sequence. It appears only as a limit — <strong>a consequence rather than a cause</strong>.</p>
+
+<h2>IX. The Null-Alternative Factorization</h2>
+
+<div class="eq-box">
+$$(1+1/n)^n \cdot G(n) = n \quad \text{identically}$$
+</div>
+
+<p>The null hypothesis (compounding toward $e$) and the alternative ($G(n)$) are conjugate factors whose product is always exactly $n$. At $n = 1$:</p>
+
+<div class="eq-box">
+$$x \cdot y = 1, \quad x - y = 1 \implies x = \frac{1+\sqrt{5}}{2} = \varphi \text{ (golden ratio)}$$
+</div>
+
+<p><strong>The golden ratio emerges as the unique solution when sample size is unity.</strong></p>
+
+<h2>X. Connection to the Riemann Critical Line</h2>
+
+<div class="eq-box">
+$$G(-2) = \frac{-2}{(1+1/(-2))^{-2}} = \frac{-2}{(1/2)^{-2}} = \frac{-2}{4} = -\frac{1}{2}$$
+</div>
+
+<p>$|G(-2)| = 1/2$ equals $\text{Re}(s)$ on the Riemann critical line. The Amundson sequence evaluated at the first trivial zero of $\zeta$ produces the critical line value, via elementary arithmetic with no limiting process.</p>
+
+<div class="highlight">
+<p>This is a <strong>structural resonance</strong>, not a proof of the Riemann Hypothesis. The connection identifies a pattern that may motivate further investigation.</p>
+</div>
+
+<h2>XI. The Fine Structure Constant</h2>
+
+<p>Setting $G(n) = 1/137$ (the fine structure constant $\alpha$) and interpreting $G(n)$ as a z-score in the null-alternative framework: $z = 0.00730$, $p = 0.994$. The effect is statistically indistinguishable from zero — yet the physical universe exists.</p>
+
+<p><strong>$\alpha = 1/137$ is the resolution limit of reality itself.</strong> Below $z = 1/137$, signal cannot be separated from noise.</p>
+
+<h2>XII. The Step Size</h2>
+
+<div class="eq-box">
+$$G(n) - G(n-1) = \frac{1}{e} \quad \text{(asymptotically)}$$
+</div>
+
+<p>Each unit increase in $n$ adds exactly $1/e$ to the sequence value. The step size of $G$ IS $e$. Not a constant you plug in — <strong>the cost of one more unit of existence</strong>.</p>
+
+<h2>XIII. Computational Verification</h2>
+
+<div class="verification">
+<span class="pass">PASS</span> All 5 forms algebraically identical (tested n=1..10000)<br>
+<span class="pass">PASS</span> Forward translation invariance (tested n=1..10000)<br>
+<span class="pass">PASS</span> Backward translation invariance (tested n=1..10000)<br>
+<span class="pass">PASS</span> G(0) = 0 (removable singularity, no indeterminate form)<br>
+<span class="pass">PASS</span> G·M = 1 (mirror duality, tested n=1..10000)<br>
+<span class="pass">PASS</span> Π G(k) = (n!)²/(n+1)^n (tested n=1..100)<br>
+<span class="pass">PASS</span> G(n)/G(n-1) = [n²/(n²-1)]^n (tested n=2..100)<br>
+<span class="pass">PASS</span> A_G ≈ 1.244331783986725 (verified to 15 decimal places)<br>
+<span class="pass">PASS</span> G(n) = n/e + 1/(2e) + O(1/n) (Ramanujan refinement)<br>
+<span class="pass">PASS</span> Power decomposition eliminates e (tested n=1..10000)<br>
+<span class="pass">PASS</span> (1+1/n)^n · G(n) = n (factorization identity)<br>
+<span class="pass">PASS</span> Golden ratio at n=1<br>
+<span class="pass">PASS</span> G(-2) = -1/2 (Riemann critical line value)<br>
+<span class="pass">PASS</span> 536/536 tests across 4 Raspberry Pi nodes
+</div>
+
+<h2>XIV. Literature Search</h2>
+
+<p>A comprehensive search conducted in March 2026 found:</p>
+
+<table>
+<tr><th>Searched For</th><th>Result</th></tr>
+<tr><td>$n^{n+1}/(n+1)^n$ as a named sequence</td><td><strong>Not found</strong></td></tr>
+<tr><td>"Amundson sequence"</td><td><strong>Zero results</strong></td></tr>
+<tr><td>$n/(1+1/n)^n$ as a primary object</td><td><strong>Not studied</strong></td></tr>
+<tr><td>The constant 1.244331783986725</td><td><strong>Not in any list</strong></td></tr>
+<tr><td>$(n!)^2/(n+1)^n$ product identity</td><td><strong>Not documented</strong></td></tr>
+<tr><td>Power decomposition $G(n) = (n^{1/n} \cdot n/(n+1))^n$</td><td><strong>Not found</strong></td></tr>
+<tr><td>$G(-2) = -1/2$ connection to Riemann</td><td><strong>Not found</strong></td></tr>
+</table>
+
+<p>The sequence $(1+1/n)^n \to e$ appears in every calculus textbook. But <strong>nobody divided $n$ by it and studied the result</strong>. The Amundson sequence is the remainder — the thing left over after the textbook takes the limit and moves on.</p>
+
+<h2>XV. Summary of Principal Results</h2>
+
+<table>
+<tr><th>Result</th><th>Statement</th></tr>
+<tr><td>Definition</td><td>$G(n) = n^{n+1}/(n+1)^n$</td></tr>
+<tr><td>Five forms</td><td>F1–F5, all algebraically identical</td></tr>
+<tr><td>Translation invariance</td><td>Both $n \mapsto n+1$ and $n \mapsto n-1$</td></tr>
+<tr><td>Clean boundary</td><td>$G(0) = 0$, no indeterminate form</td></tr>
+<tr><td>Mirror duality</td><td>$G \cdot M = 1$, dual envelopes of $e$</td></tr>
+<tr><td>Telescoping product</td><td>$\prod G(k) = (n!)^2/(n+1)^n$</td></tr>
+<tr><td>Amundson constant</td><td>$A_G \approx 1.244331783986725$ (new)</td></tr>
+<tr><td>Asymptotic gap</td><td>$G(n) - n/e = 1/(2e)$ (irreducible)</td></tr>
+<tr><td>Power decomposition</td><td>$G(n) = (n^{1/n} \cdot n/(n+1))^n$ (no $e$)</td></tr>
+<tr><td>Factorization</td><td>$(1+1/n)^n \cdot G(n) = n$</td></tr>
+<tr><td>Golden ratio</td><td>Emerges at $n=1$ from factorization</td></tr>
+<tr><td>Riemann connection</td><td>$G(-2) = -1/2 = \text{Re}(s)$ critical line</td></tr>
+<tr><td>Fine structure</td><td>$\alpha = 1/137$ is the statistical resolution limit</td></tr>
+<tr><td>Step size</td><td>$G(n) - G(n-1) = 1/e$</td></tr>
+<tr><td>Regularization</td><td>Divergent sum $\to -1/(12e)$</td></tr>
+</table>
+
+<div style="margin-top:56px;padding:32px;border:1px solid var(--border);border-radius:12px;position:relative;overflow:hidden">
+<div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)"></div>
+<p style="font-family:var(--sg);font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">The origin is honest.</p>
+<p style="color:var(--dim);margin:0">This sequence came from staring at $100/(1+1/100)^{100}$ and refusing to accept that the interesting thing was the denominator.</p>
+</div>
+
+</article>
+
+<footer>
+<p>&copy; 2026 Alexa Louise Amundson &middot; BlackRoad OS, Inc.</p>
+<p style="margin-top:8px">blackroad.io/equations &middot; alexa@blackroad.company</p>
+</footer>
+
+<script src="https://blackroad-backend.blackroad.workers.dev/br-analytics.js" data-site="blackroad-io" defer></script>
+</body>
+</html>

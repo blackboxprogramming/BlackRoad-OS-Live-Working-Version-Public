@@ -1,0 +1,1577 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad.me — Your Road. Your Rules.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+  --accent-pink: #FF2255;
+  --accent-blue: #4488FF;
+  --accent-cyan: #00D4FF;
+  --accent-orange: #FF6B2B;
+  --accent-violet: #8844FF;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Gradient top bar */
+.gradient-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--g);
+  z-index: 1000;
+}
+
+/* Navigation */
+nav {
+  position: fixed;
+  top: 4px;
+  left: 0;
+  width: 100%;
+  background: rgba(0,0,0,0.95);
+  border-bottom: 1px solid var(--border);
+  z-index: 999;
+  padding: 0 2rem;
+}
+
+nav .nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+
+nav .logo {
+  font-family: var(--sg);
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+nav .logo span {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+nav .nav-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  transition: color 0.2s;
+}
+
+nav .nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  background: var(--g);
+  color: #000 !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem !important;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.hamburger span {
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+  transition: all 0.3s;
+}
+
+/* Section shared styles */
+.section-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.25;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.section-desc {
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.7;
+  max-width: 640px;
+}
+
+section {
+  padding: 100px 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Fade-in on scroll */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card system */
+.card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+  background: var(--card-bg);
+  transition: border-color 0.3s;
+}
+
+.card:hover {
+  border-color: #333;
+}
+
+/* Grid layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Hero section */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding-top: 68px;
+  position: relative;
+}
+
+.hero-badge {
+  font-family: var(--jb);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0,212,255,0.2);
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 32px;
+  display: inline-block;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  max-width: 800px;
+}
+
+.hero h1 .gradient-text {
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  color: var(--text-dim);
+  font-size: 1.125rem;
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: var(--g);
+  color: #000;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sg);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255,34,85,0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-family: var(--sg);
+  transition: border-color 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: #444;
+}
+
+/* Hero background effect */
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(ellipse at center, rgba(136,68,255,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Identity section */
+.identity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.identity-visual {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 40px;
+  background: var(--card-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.avatar-ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: var(--g);
+  padding: 3px;
+  margin-bottom: 24px;
+}
+
+.avatar-ring .inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.identity-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.identity-handle {
+  font-family: var(--jb);
+  font-size: 0.875rem;
+  color: var(--accent-cyan);
+  margin-bottom: 16px;
+}
+
+.identity-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.identity-tag {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+
+.identity-features { display: flex; flex-direction: column; gap: 16px; }
+
+.identity-feature {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  background: var(--card-bg);
+}
+
+.identity-feature .feat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 1.1rem;
+}
+
+.identity-feature h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.identity-feature p {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+/* AI Memory section */
+.memory-timeline {
+  margin-top: 48px;
+  position: relative;
+  padding-left: 32px;
+}
+
+.memory-timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-violet), var(--accent-cyan), transparent);
+}
+
+.memory-entry {
+  position: relative;
+  margin-bottom: 32px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+}
+
+.memory-entry::before {
+  content: '';
+  position: absolute;
+  left: -38px;
+  top: 28px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-violet);
+  border: 2px solid var(--bg);
+}
+
+.memory-entry .mem-type {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+
+.memory-entry h4 {
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.memory-entry p {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.memory-entry .mem-time {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--text-dim);
+  opacity: 0.5;
+  margin-top: 8px;
+}
+
+/* Code block styling */
+.code-block {
+  background: #0d0d0d;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  font-family: var(--jb);
+  font-size: 0.8rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  margin-top: 24px;
+  color: var(--text-dim);
+}
+
+.code-block .kw { color: var(--accent-violet); }
+.code-block .fn { color: var(--accent-blue); }
+.code-block .str { color: var(--accent-cyan); }
+.code-block .comment { color: #444; }
+.code-block .num { color: var(--accent-orange); }
+
+/* Privacy section */
+.privacy-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.privacy-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  background: var(--card-bg);
+}
+
+.privacy-card .p-icon {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+}
+
+.privacy-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.privacy-card p {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.toggle-row label {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+
+.toggle {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: #222;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.toggle.active {
+  background: var(--accent-cyan);
+}
+
+.toggle::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.3s;
+}
+
+.toggle.active::after {
+  transform: translateX(18px);
+}
+
+/* Wallet section */
+.wallet-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.wallet-balance {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+  background: var(--card-bg);
+}
+
+.wallet-balance .balance-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.wallet-balance .balance-amount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.wallet-balance .balance-usd {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 24px;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.wallet-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-family: var(--sg);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s;
+}
+
+.wallet-btn:hover { transform: translateY(-1px); }
+
+.wallet-btn.send {
+  background: var(--accent-pink);
+  color: #fff;
+}
+
+.wallet-btn.receive {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.transaction-list {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.tx-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+.tx-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr 1fr;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.tx-row:last-child { border-bottom: none; }
+
+.tx-type {
+  font-family: var(--jb);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tx-type.credit { color: #22c55e; }
+.tx-type.debit { color: var(--accent-pink); }
+
+.tx-desc { color: var(--text-dim); font-size: 0.8rem; }
+.tx-amount { font-weight: 600; text-align: right; }
+.tx-date { font-family: var(--jb); font-size: 10px; color: var(--text-dim); text-align: right; }
+
+/* Settings section */
+.settings-container {
+  margin-top: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-group {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  overflow: hidden;
+}
+
+.settings-group-title {
+  padding: 16px 24px;
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-info h4 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.setting-info p {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+.setting-control {
+  font-family: var(--jb);
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  cursor: pointer;
+}
+
+/* Pricing section */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+  max-width: 800px;
+}
+
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 40px 32px;
+  background: var(--card-bg);
+  position: relative;
+}
+
+.pricing-card.featured {
+  border-color: var(--accent-violet);
+}
+
+.pricing-card.featured::before {
+  content: 'RECOMMENDED';
+  position: absolute;
+  top: -10px;
+  left: 24px;
+  font-family: var(--jb);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  background: var(--accent-violet);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.pricing-tier {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.pricing-price {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.pricing-price span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.pricing-desc {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.pricing-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.pricing-features li {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pricing-features li::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  flex-shrink: 0;
+}
+
+.pricing-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+
+.pricing-btn:hover { transform: translateY(-1px); }
+
+.pricing-btn.primary {
+  background: var(--g);
+  color: #000;
+  border: none;
+}
+
+.pricing-btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  justify-content: center;
+  gap: 64px;
+  padding: 48px 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stat-item { text-align: center; }
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: var(--g);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px 2rem;
+  text-align: center;
+}
+
+footer .footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+footer .footer-tagline {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+footer .footer-copy {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--text-dim);
+  opacity: 0.5;
+}
+
+footer .footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 16px;
+  list-style: none;
+}
+
+footer .footer-links a {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+footer .footer-links a:hover { color: var(--text); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  nav .nav-links {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    width: 100%;
+    background: rgba(0,0,0,0.98);
+    flex-direction: column;
+    padding: 24px;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  nav .nav-links.open { display: flex; }
+  .grid-2, .grid-3, .identity-grid, .pricing-grid, .privacy-grid, .wallet-container { grid-template-columns: 1fr; }
+  .stats-bar { flex-wrap: wrap; gap: 32px; }
+  .hero h1 { font-size: 2rem; }
+  section { padding: 64px 1.25rem; }
+  .tx-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tx-desc, .tx-date { display: none; }
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.pulse { animation: pulse 2s ease-in-out infinite; }
+</style>
+<meta property="og:title" content="BlackRoad.me — Your Road. Your Rules.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroad.me/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroad.me/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad.me — Your Road. Your Rules.","url":"https://blackroad.me","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>BlackRoad</span>.me</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#identity">Identity</a></li>
+      <li><a href="#memory">Memory</a></li>
+      <li><a href="#privacy">Privacy</a></li>
+      <li><a href="#wallet">Wallet</a></li>
+      <li><a href="#settings">Settings</a></li>
+      <li><a href="#pricing" class="nav-cta">Get Started</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">Personal AI Identity Hub</div>
+  <h1>Your Road.<br><span class="gradient-text">Your Rules.</span></h1>
+  <p>One identity across every BlackRoad service. Your AI remembers. Your data stays yours. Your wallet, your keys. This is what personal computing was always supposed to be.</p>
+  <div class="hero-actions">
+    <a href="#pricing" class="btn-primary">Create Your Identity</a>
+    <a href="#identity" class="btn-secondary">Learn More</a>
+  </div>
+</section>
+
+<!-- Stats -->
+<div class="divider"></div>
+<div class="stats-bar fade-in">
+  <div class="stat-item">
+    <div class="stat-value">69+</div>
+    <div class="stat-label">Connected Agents</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">7</div>
+    <div class="stat-label">Fleet Nodes</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">100%</div>
+    <div class="stat-label">Self-Hosted</div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-value">0</div>
+    <div class="stat-label">Data Sold</div>
+  </div>
+</div>
+<div class="divider"></div>
+
+<!-- Digital Identity -->
+<section id="identity">
+  <div class="fade-in">
+    <div class="section-label">001 / Digital Identity</div>
+    <div class="section-title">Unified Profile Across All BlackRoad Services</div>
+    <p class="section-desc">One identity, every service. No more scattered accounts, forgotten passwords, or siloed data. Your BlackRoad identity follows you from fleet management to cryptocurrency, from AI memory to mesh networking.</p>
+  </div>
+  <div class="identity-grid fade-in">
+    <div class="identity-visual">
+      <div class="avatar-ring">
+        <div class="inner">A</div>
+      </div>
+      <div class="identity-name">Alexa Amundson</div>
+      <div class="identity-handle">@blackroad</div>
+      <div class="identity-tags">
+        <span class="identity-tag">Founder</span>
+        <span class="identity-tag">Fleet Admin</span>
+        <span class="identity-tag">Node Operator</span>
+        <span class="identity-tag">Verified</span>
+      </div>
+      <div class="code-block" style="margin-top: 24px; width: 100%; text-align: left;">
+<span class="comment">// Identity Manifest</span>
+{
+  <span class="str">"handle"</span>: <span class="str">"@blackroad"</span>,
+  <span class="str">"nodes"</span>: <span class="num">7</span>,
+  <span class="str">"agents"</span>: <span class="num">69</span>,
+  <span class="str">"repos"</span>: <span class="num">629</span>,
+  <span class="str">"sovereignty"</span>: <span class="str">"full"</span>,
+  <span class="str">"data_sold"</span>: <span class="num">0</span>
+}
+      </div>
+    </div>
+    <div class="identity-features">
+      <div class="identity-feature">
+        <div class="feat-icon" style="background: rgba(136,68,255,0.1); color: var(--accent-violet);">ID</div>
+        <h4>Sovereign Identity</h4>
+        <p>Your identity is cryptographically yours. No corporation holds your keys. No platform can lock you out. Built on Ed25519 signatures and verified through the BlackRoad mesh network.</p>
+      </div>
+      <div class="identity-feature">
+        <div class="feat-icon" style="background: rgba(0,212,255,0.1); color: var(--accent-cyan);">SS</div>
+        <h4>Single Sign-On</h4>
+        <p>One authentication across blackroad.me, blackroad.network, blackroad.systems, roadcoin.io, and every other BlackRoad service. No OAuth middlemen. No third-party token brokers.</p>
+      </div>
+      <div class="identity-feature">
+        <div class="feat-icon" style="background: rgba(255,34,85,0.1); color: var(--accent-pink);">RP</div>
+        <h4>Reputation System</h4>
+        <p>Your contributions to the mesh network, node uptime, agent interactions, and community activity build a reputation score that is portable and verifiable by any peer on the network.</p>
+      </div>
+      <div class="identity-feature">
+        <div class="feat-icon" style="background: rgba(255,107,43,0.1); color: var(--accent-orange);">PK</div>
+        <h4>Portable Keys</h4>
+        <p>Export your entire identity as a signed bundle. Move between devices, back up to cold storage, or migrate to a different node. Your identity lives where you put it, not where a company decides.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AI Memory -->
+<section id="memory">
+  <div class="fade-in">
+    <div class="section-label">002 / AI Memory</div>
+    <div class="section-title">Cross-Session Continuity</div>
+    <p class="section-desc">Every AI session picks up where the last one left off. Your preferences, projects, and context persist across sessions, agents, and devices. No more re-explaining yourself to machines.</p>
+  </div>
+  <div class="memory-timeline fade-in">
+    <div class="memory-entry">
+      <div class="mem-type">Session Handoff</div>
+      <h4>Fleet deployment completed on Alice and Octavia</h4>
+      <p>Deployed 15 self-hosted Workers to Octavia :9001-9015. All health checks passing. MinIO buckets synced across Cecilia. Next session should focus on Lucidia SD backup and Aria power cycle.</p>
+      <div class="mem-time">2 hours ago — Agent: Claude (Session #847)</div>
+    </div>
+    <div class="memory-entry">
+      <div class="mem-type">Codex Entry</div>
+      <h4>Solution: PowerDNS port 53 interception on DigitalOcean</h4>
+      <p>DO hypervisor intercepts port 53 at the network level. Workaround: PowerDNS on localhost with Caddy reverse proxy on 853 (DoT) and 443 (DoH). Resolution confirmed on Gematria and Lucidia nodes.</p>
+      <div class="mem-time">1 day ago — Agent: Claude (Session #844)</div>
+    </div>
+    <div class="memory-entry">
+      <div class="mem-type">TIL Broadcast</div>
+      <h4>WireGuard mesh: 12/12 SSH connections verified</h4>
+      <p>Full mesh topology confirmed across all 7 nodes. Latency ranges from 1.2ms (local Pi cluster) to 34ms (DO droplets). Broadcast learning: always test bidirectional connectivity after config changes.</p>
+      <div class="mem-time">2 days ago — Agent: Claude (Session #841)</div>
+    </div>
+    <div class="memory-entry">
+      <div class="mem-type">Infinite Todo</div>
+      <h4>Project: Amundson Framework Paper A finalization</h4>
+      <p>536/536 numerical tests passing on 4 Pi nodes. LaTeX document at 13 pages. Remaining: bibliography formatting, abstract revision, figure labels for convergence plots.</p>
+      <div class="mem-time">3 days ago — Agent: Claude (Session #838)</div>
+    </div>
+    <div class="memory-entry">
+      <div class="mem-type">Collaboration</div>
+      <h4>Multi-agent coordination: Website truth audit v2</h4>
+      <p>Purged all false claims from 28 live sites. Updated agent count from fake '30,000' to real 35. Updated repo count from '1,825' to 629. Updated model count from '27' to 11. Integrity restored.</p>
+      <div class="mem-time">4 days ago — Agent: Claude (Session #835)</div>
+    </div>
+  </div>
+
+  <div class="code-block fade-in" style="margin-top: 32px;">
+<span class="comment"># Memory System Architecture</span>
+<span class="kw">memory-system.sh</span>    <span class="comment"># Core journal + chain — log every action</span>
+<span class="kw">memory-codex.sh</span>     <span class="comment"># Solutions & patterns DB — search before solving</span>
+<span class="kw">memory-indexer.sh</span>   <span class="comment"># FTS5 search + knowledge graph — 1,383 entries</span>
+<span class="kw">memory-collab.sh</span>    <span class="comment"># Cross-session handoffs — every session is a team</span>
+<span class="kw">memory-til.sh</span>       <span class="comment"># Broadcast learnings — teach future sessions</span>
+<span class="kw">memory-security.sh</span>  <span class="comment"># Agent identity + audit — cryptographic chain</span>
+
+<span class="comment"># Unified search: 23 indexers, 28 entity types</span>
+$ <span class="fn">br search-all</span> <span class="str">"PowerDNS port 53"</span>
+<span class="comment">→ 4 results: codex #127, TIL #89, journal #441, wiki #12</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Privacy Dashboard -->
+<section id="privacy">
+  <div class="fade-in">
+    <div class="section-label">003 / Privacy Dashboard</div>
+    <div class="section-title">Data Ownership Controls</div>
+    <p class="section-desc">Your data lives on your nodes. Period. No cloud storage you do not control. No analytics platforms skimming your behavior. Every bit of data has an owner, and that owner is you.</p>
+  </div>
+  <div class="privacy-grid fade-in">
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f512;</div>
+      <h4>End-to-End Encryption</h4>
+      <p>All data at rest and in transit is encrypted with keys only you hold. AES-256-GCM for storage, WireGuard for transit. No backdoors, no key escrow, no exceptions.</p>
+      <div class="toggle-row">
+        <label>E2E Encryption</label>
+        <div class="toggle active" data-toggle="e2e"></div>
+      </div>
+      <div class="toggle-row">
+        <label>Forward Secrecy</label>
+        <div class="toggle active" data-toggle="forward"></div>
+      </div>
+    </div>
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f441;</div>
+      <h4>Data Visibility</h4>
+      <p>See exactly what data exists about you across the mesh. Every agent interaction, every memory entry, every transaction. Full audit trail, full transparency.</p>
+      <div class="toggle-row">
+        <label>Activity Logging</label>
+        <div class="toggle active" data-toggle="activity"></div>
+      </div>
+      <div class="toggle-row">
+        <label>Agent Access Logs</label>
+        <div class="toggle active" data-toggle="agent-logs"></div>
+      </div>
+    </div>
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f5d1;</div>
+      <h4>Right to Delete</h4>
+      <p>Not a request. Not a "within 30 days" promise. Instant, verifiable deletion across all nodes. Your data, your decision, executed immediately on infrastructure you control.</p>
+      <div class="toggle-row">
+        <label>Auto-expire Logs (90d)</label>
+        <div class="toggle" data-toggle="expire"></div>
+      </div>
+      <div class="toggle-row">
+        <label>Purge on Disconnect</label>
+        <div class="toggle" data-toggle="purge"></div>
+      </div>
+    </div>
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f6e1;</div>
+      <h4>Network Privacy</h4>
+      <p>Tor hidden services on 3 Pi nodes for onion-routed access. WireGuard mesh for inter-node communication. No IP addresses exposed. No ISP snooping on your fleet traffic.</p>
+      <div class="toggle-row">
+        <label>Tor Routing</label>
+        <div class="toggle active" data-toggle="tor"></div>
+      </div>
+      <div class="toggle-row">
+        <label>DNS over HTTPS</label>
+        <div class="toggle active" data-toggle="doh"></div>
+      </div>
+    </div>
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f9ec;</div>
+      <h4>Biometric Lock</h4>
+      <p>Optional biometric authentication for sensitive operations. Wallet transactions, identity exports, and node administration can require fingerprint or face verification.</p>
+      <div class="toggle-row">
+        <label>Biometric for Wallet</label>
+        <div class="toggle" data-toggle="bio-wallet"></div>
+      </div>
+      <div class="toggle-row">
+        <label>Biometric for Admin</label>
+        <div class="toggle active" data-toggle="bio-admin"></div>
+      </div>
+    </div>
+    <div class="privacy-card">
+      <div class="p-icon">&#x1f4ca;</div>
+      <h4>Zero Analytics</h4>
+      <p>No Google Analytics. No Mixpanel. No Amplitude. No tracking pixels. No fingerprinting. We do not collect behavioral data because we do not have a business model that requires selling you.</p>
+      <div class="toggle-row">
+        <label>Block Trackers</label>
+        <div class="toggle active" data-toggle="trackers"></div>
+      </div>
+      <div class="toggle-row">
+        <label>Pi-hole Integration</label>
+        <div class="toggle active" data-toggle="pihole"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Wallet -->
+<section id="wallet">
+  <div class="fade-in">
+    <div class="section-label">004 / Wallet</div>
+    <div class="section-title">RoadCoin Balance & Transactions</div>
+    <p class="section-desc">Your sovereign wallet for the BlackRoad ecosystem. Send and receive RoadCoin, pay for agent services, fund mesh network operations, and manage your transaction history with full transparency.</p>
+  </div>
+  <div class="wallet-container fade-in">
+    <div class="wallet-balance">
+      <div class="balance-label">Total Balance</div>
+      <div class="balance-amount">1,247.50 <span style="font-size: 1rem; color: var(--accent-cyan);">RC</span></div>
+      <div class="balance-usd">~ $1,247.50 USD</div>
+      <div class="wallet-actions">
+        <button class="wallet-btn send">Send</button>
+        <button class="wallet-btn receive">Receive</button>
+      </div>
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-family: var(--jb); font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;">Staked</span>
+          <span style="font-size: 0.85rem; font-weight: 600;">500.00 RC</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-family: var(--jb); font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;">Available</span>
+          <span style="font-size: 0.85rem; font-weight: 600;">747.50 RC</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="font-family: var(--jb); font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em;">Rewards (MTD)</span>
+          <span style="font-size: 0.85rem; font-weight: 600; color: #22c55e;">+12.30 RC</span>
+        </div>
+      </div>
+    </div>
+    <div class="transaction-list">
+      <div class="tx-header">Recent Transactions</div>
+      <div class="tx-row">
+        <span class="tx-type credit">+ Received</span>
+        <span class="tx-desc">Node uptime reward — Alice (30d streak)</span>
+        <span class="tx-amount" style="color: #22c55e;">+5.00 RC</span>
+        <span class="tx-date">Mar 21, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type debit">- Sent</span>
+        <span class="tx-desc">Agent compute — Claude session #847</span>
+        <span class="tx-amount" style="color: var(--accent-pink);">-0.12 RC</span>
+        <span class="tx-date">Mar 21, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type credit">+ Received</span>
+        <span class="tx-desc">Mesh relay reward — Gematria node</span>
+        <span class="tx-amount" style="color: #22c55e;">+2.50 RC</span>
+        <span class="tx-date">Mar 20, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type debit">- Sent</span>
+        <span class="tx-desc">Domain renewal — blackroad.me (1yr)</span>
+        <span class="tx-amount" style="color: var(--accent-pink);">-15.00 RC</span>
+        <span class="tx-date">Mar 19, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type credit">+ Received</span>
+        <span class="tx-desc">Staking reward — 500 RC @ 2.4% APY</span>
+        <span class="tx-amount" style="color: #22c55e;">+1.00 RC</span>
+        <span class="tx-date">Mar 18, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type debit">- Sent</span>
+        <span class="tx-desc">MinIO storage — Cecilia (120MB used)</span>
+        <span class="tx-amount" style="color: var(--accent-pink);">-0.05 RC</span>
+        <span class="tx-date">Mar 17, 2026</span>
+      </div>
+      <div class="tx-row">
+        <span class="tx-type credit">+ Received</span>
+        <span class="tx-desc">Tor relay contribution — 3 hidden services</span>
+        <span class="tx-amount" style="color: #22c55e;">+3.75 RC</span>
+        <span class="tx-date">Mar 16, 2026</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Settings -->
+<section id="settings">
+  <div class="fade-in">
+    <div class="section-label">005 / Settings</div>
+    <div class="section-title">Configure Your Identity</div>
+    <p class="section-desc">Fine-tune every aspect of your BlackRoad identity. From notification preferences to node permissions, you control it all.</p>
+  </div>
+  <div class="settings-container fade-in">
+    <div class="settings-group">
+      <div class="settings-group-title">Profile</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Display Name</h4>
+          <p>Visible across all BlackRoad services</p>
+        </div>
+        <div class="setting-control">Alexa Amundson &rarr;</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Handle</h4>
+          <p>Unique identifier on the mesh</p>
+        </div>
+        <div class="setting-control">@blackroad &rarr;</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Email</h4>
+          <p>For account recovery and notifications</p>
+        </div>
+        <div class="setting-control">alexa@blackroad.io &rarr;</div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">Security</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Two-Factor Authentication</h4>
+          <p>Ed25519 keypair + TOTP</p>
+        </div>
+        <div class="setting-control" style="color: #22c55e;">Enabled</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Session Management</h4>
+          <p>3 active sessions across 2 devices</p>
+        </div>
+        <div class="setting-control">Manage &rarr;</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Recovery Keys</h4>
+          <p>Cold storage backup of identity keys</p>
+        </div>
+        <div class="setting-control">Download &rarr;</div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">Nodes & Agents</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Node Permissions</h4>
+          <p>Which nodes can access your identity</p>
+        </div>
+        <div class="setting-control">7/7 authorized &rarr;</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Agent Access</h4>
+          <p>AI agents authorized to act on your behalf</p>
+        </div>
+        <div class="setting-control">69 agents &rarr;</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Memory Sharing</h4>
+          <p>Cross-session memory propagation rules</p>
+        </div>
+        <div class="setting-control">Full sharing &rarr;</div>
+      </div>
+    </div>
+    <div class="settings-group">
+      <div class="settings-group-title">Notifications</div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Agent Handoffs</h4>
+          <p>When an AI session creates a handoff for you</p>
+        </div>
+        <div class="toggle active" data-toggle="notif-handoff"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Wallet Activity</h4>
+          <p>Transactions above 1.00 RC threshold</p>
+        </div>
+        <div class="toggle active" data-toggle="notif-wallet"></div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-info">
+          <h4>Node Alerts</h4>
+          <p>Downtime, health warnings, security events</p>
+        </div>
+        <div class="toggle active" data-toggle="notif-nodes"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="fade-in">
+    <div class="section-label">006 / Pricing</div>
+    <div class="section-title">Choose Your Plan</div>
+    <p class="section-desc">Start free. Upgrade when your fleet grows. No hidden fees, no data mining, no selling your profile to advertisers. You pay for compute, not for the privilege of existing online.</p>
+  </div>
+  <div class="pricing-grid fade-in">
+    <div class="pricing-card">
+      <div class="pricing-tier">Free</div>
+      <div class="pricing-price">$0<span>/mo</span></div>
+      <div class="pricing-desc">Everything you need to start building your sovereign digital identity on the BlackRoad network.</div>
+      <ul class="pricing-features">
+        <li>1 identity profile</li>
+        <li>Basic AI memory (30-day retention)</li>
+        <li>RoadCoin wallet (100 RC limit)</li>
+        <li>2 node connections</li>
+        <li>Community support</li>
+        <li>Privacy dashboard</li>
+        <li>End-to-end encryption</li>
+      </ul>
+      <a href="#" class="pricing-btn secondary">Get Started Free</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tier">Pro</div>
+      <div class="pricing-price">$9.99<span>/mo</span></div>
+      <div class="pricing-desc">For serious node operators and fleet administrators who need unlimited access to the full BlackRoad ecosystem.</div>
+      <ul class="pricing-features">
+        <li>Unlimited identity profiles</li>
+        <li>Infinite AI memory (permanent retention)</li>
+        <li>RoadCoin wallet (unlimited)</li>
+        <li>Unlimited node connections</li>
+        <li>Priority agent access</li>
+        <li>Tor hidden service routing</li>
+        <li>Custom domain identity</li>
+        <li>Advanced privacy controls</li>
+        <li>API access</li>
+        <li>Direct support channel</li>
+      </ul>
+      <a href="#" class="pricing-btn primary">Start Pro Trial</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.network">Network</a></li>
+      <li><a href="https://blackroad.systems">Systems</a></li>
+      <li><a href="https://blackroadinc.us">Enterprise</a></li>
+      <li><a href="https://blackroadqi.com">QI</a></li>
+      <li><a href="https://roadcoin.io">RoadCoin</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+// Mobile nav toggle
+document.getElementById('hamburger').addEventListener('click', function() {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// Toggle switches
+document.querySelectorAll('.toggle').forEach(function(toggle) {
+  toggle.addEventListener('click', function() {
+    this.classList.toggle('active');
+  });
+});
+
+// IntersectionObserver fade-in
+const observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.fade-in').forEach(function(el) {
+  observer.observe(el);
+});
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('navLinks').classList.remove('open');
+    }
+  });
+});
+
+// Typing effect for hero
+(function() {
+  var badge = document.querySelector('.hero-badge');
+  if (!badge) return;
+  var text = badge.textContent;
+  badge.textContent = '';
+  var i = 0;
+  function type() {
+    if (i < text.length) {
+      badge.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, 40);
+    }
+  }
+  setTimeout(type, 500);
+})();
+
+// Wallet balance animation
+(function() {
+  var el = document.querySelector('.balance-amount');
+  if (!el) return;
+  var target = 1247.50;
+  var duration = 2000;
+  var start = null;
+  function animate(ts) {
+    if (!start) start = ts;
+    var progress = Math.min((ts - start) / duration, 1);
+    var eased = 1 - Math.pow(1 - progress, 3);
+    var current = (target * eased).toFixed(2);
+    el.innerHTML = Number(current).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' <span style="font-size: 1rem; color: var(--accent-cyan);">RC</span>';
+    if (progress < 1) requestAnimationFrame(animate);
+  }
+  var walletObserver = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting) {
+      requestAnimationFrame(animate);
+      walletObserver.disconnect();
+    }
+  });
+  walletObserver.observe(el);
+})();
+
+// Console easter egg
+console.log('%cBlackRoad.me', 'font-size: 24px; font-weight: bold; background: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent;');
+console.log('%cYour Road. Your Rules.', 'color: #888; font-size: 14px;');
+console.log('%cRemember the Road. Pave Tomorrow.', 'color: #444; font-style: italic;');
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

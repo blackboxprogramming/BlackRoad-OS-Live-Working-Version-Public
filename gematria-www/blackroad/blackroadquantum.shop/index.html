@@ -1,0 +1,626 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum Shop — Learn. Build. Ship.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sg); line-height: 1.6; overflow-x: hidden; }
+.gradient-bar { height: 4px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+nav {
+  position: fixed; top: 4px; left: 0; right: 0; z-index: 999;
+  background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
+}
+.logo { font-family: var(--sg); font-weight: 700; font-size: 1.25rem; }
+.logo span { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.875rem; font-family: var(--jb); transition: color 0.3s; }
+.nav-links a:hover { color: var(--text); }
+.section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.25; margin-bottom: 1rem; }
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-family: var(--sg); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
+h2 { font-family: var(--sg); font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+h3 { font-family: var(--sg); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 68px; position: relative; }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero .subtitle { font-size: clamp(1.1rem, 2.5vw, 1.35rem); color: var(--text-dim); max-width: 640px; margin-bottom: 2.5rem; }
+.hero-gradient {
+  position: absolute; top: 40%; left: 30%; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,34,85,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.btn-primary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: var(--g); color: #fff; text-decoration: none; font-weight: 600;
+  font-family: var(--sg); font-size: 1rem; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,34,85,0.3); }
+.btn-secondary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: transparent; color: var(--text); text-decoration: none;
+  font-weight: 500; font-family: var(--sg); font-size: 1rem;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color 0.3s;
+}
+.btn-secondary:hover { border-color: #444; }
+.btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); transition: border-color 0.3s; }
+.card:hover { border-color: #333; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2rem; margin: 3rem 0; }
+.stat { text-align: center; }
+.stat .number { font-family: var(--sg); font-size: 2.5rem; font-weight: 700; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat .label { font-family: var(--jb); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+.tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 1rem; }
+.divider { height: 1px; background: var(--border); margin: 0 auto; max-width: 1200px; }
+.icon-circle { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; font-size: 1.25rem; }
+.feature-list { list-style: none; margin: 1rem 0; }
+.feature-list li { padding: 0.5rem 0; color: var(--text-dim); font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #FF2255; flex-shrink: 0; }
+.course-card {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg);
+  overflow: hidden; transition: border-color 0.3s;
+}
+.course-card:hover { border-color: #333; }
+.course-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); }
+.course-body { padding: 2rem; }
+.course-meta { display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap; }
+.course-meta-item { font-family: var(--jb); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; padding: 0.25rem 0.75rem; border: 1px solid var(--border); border-radius: 4px; }
+.course-modules { margin: 1.5rem 0; }
+.course-module { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+.course-module-num { font-family: var(--jb); font-size: 0.7rem; color: #FF2255; min-width: 30px; }
+.course-module-title { font-size: 0.9rem; color: var(--text-dim); }
+.cert-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem;
+  background: var(--card-bg); position: relative; overflow: hidden;
+}
+.cert-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--g); }
+.cert-badge {
+  width: 64px; height: 64px; border-radius: 50%; border: 2px solid #FF2255;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;
+  font-size: 1.5rem; background: rgba(255,34,85,0.05);
+}
+.cert-modules { margin: 1.5rem 0; }
+.cert-module { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+.cert-module-status { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; flex-shrink: 0; }
+.cert-module-status.pass { border-color: #00D4FF; color: #00D4FF; }
+.cert-module-name { font-size: 0.9rem; }
+.cert-module-desc { font-size: 0.8rem; color: var(--text-dim); }
+.download-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.download-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  background: var(--card-bg); transition: border-color 0.3s;
+}
+.download-card:hover { border-color: #FF2255; }
+.download-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.download-name { font-weight: 600; margin-bottom: 0.25rem; }
+.download-desc { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.75rem; }
+.download-format { font-family: var(--jb); font-size: 0.65rem; color: #FF2255; text-transform: uppercase; letter-spacing: 0.1em; }
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.pricing-card { border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem; background: var(--card-bg); position: relative; }
+.pricing-card.featured { border-color: #FF2255; }
+.pricing-card.featured::before {
+  content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--g); color: #fff; font-family: var(--jb); font-size: 0.65rem;
+  letter-spacing: 0.1em; padding: 0.25rem 1rem; border-radius: 20px;
+}
+.price { font-size: 3rem; font-weight: 700; margin: 1rem 0; }
+.price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+.faq-section { margin-top: 2rem; }
+.faq-item { border-bottom: 1px solid var(--border); padding: 1.5rem 0; cursor: pointer; }
+.faq-question { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.05rem; }
+.faq-toggle { font-family: var(--jb); font-size: 1.25rem; color: var(--text-dim); transition: transform 0.3s; }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+.faq-answer.open { max-height: 300px; padding-top: 1rem; }
+.faq-answer p { font-size: 0.95rem; }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; max-width: 1200px; margin: 0 auto; }
+.footer-tagline { font-family: var(--sg); font-size: 1.1rem; font-weight: 500; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+.footer-copy { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  section { padding: 4rem 1rem; }
+  .grid-2, .grid-3, .pricing-grid { grid-template-columns: 1fr; }
+  .download-grid { grid-template-columns: 1fr; }
+  .price { font-size: 2.5rem; }
+}
+</style>
+<meta property="og:title" content="BlackRoad Quantum Shop — Learn. Build. Ship.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadquantum.shop/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadquantum.shop/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Quantum Shop — Learn. Build. Ship.","url":"https://blackroadquantum.shop","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+  <div class="logo"><span>BlackRoad</span> Quantum Shop</div>
+  <ul class="nav-links">
+    <li><a href="#courses">Courses</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#downloads">Downloads</a></li>
+    <li><a href="#bundles">Bundles</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="fade-in">
+    <div class="section-label">BlackRoad Quantum Digital Products</div>
+    <h1>Learn. Build. Ship.</h1>
+    <p class="subtitle">Courses, certifications, and digital downloads for building sovereign computing infrastructure. Everything we teach, we run in production on our own fleet. No theory without practice. No practice without a shipping product at the end.</p>
+    <div class="btn-group">
+      <a href="#courses" class="btn-primary">Browse Courses</a>
+      <a href="#bundles" class="btn-secondary">View Bundles</a>
+    </div>
+  </div>
+  <div class="stat-grid fade-in">
+    <div class="stat">
+      <div class="number">5</div>
+      <div class="label">Full Courses</div>
+    </div>
+    <div class="stat">
+      <div class="number">5</div>
+      <div class="label">Certification Modules</div>
+    </div>
+    <div class="stat">
+      <div class="number">40+</div>
+      <div class="label">Digital Downloads</div>
+    </div>
+    <div class="stat">
+      <div class="number">3</div>
+      <div class="label">Bundle Tiers</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="courses">
+  <div class="fade-in">
+    <div class="section-label">01 — Courses</div>
+    <h2>Built by Practitioners. Tested in Production.</h2>
+    <p style="max-width: 700px;">Every course is based on real infrastructure running in the BlackRoad fleet. You will build the same systems we run — Pi clusters, WireGuard meshes, self-hosted AI, decentralized networks. By the end of each course, you will have a working system, not just knowledge.</p>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="course-card">
+      <div class="course-header">
+        <span class="tag">Foundational</span>
+        <h3>Sovereign Computing: Own Your Infrastructure</h3>
+        <div class="course-meta">
+          <div class="course-meta-item">12 modules</div>
+          <div class="course-meta-item">40 hours</div>
+          <div class="course-meta-item">Beginner</div>
+        </div>
+      </div>
+      <div class="course-body">
+        <p>The philosophy and practice of running your own computing infrastructure. From buying your first Raspberry Pi to deploying a full self-hosted stack that replaces every cloud service you currently depend on.</p>
+        <div class="course-modules">
+          <div class="course-module"><div class="course-module-num">01</div><div class="course-module-title">Why Sovereignty Matters — the case for self-hosting</div></div>
+          <div class="course-module"><div class="course-module-num">02</div><div class="course-module-title">Hardware Selection — Pi 5, SSDs, cases, power supplies</div></div>
+          <div class="course-module"><div class="course-module-num">03</div><div class="course-module-title">Linux Fundamentals — headless Raspberry Pi OS setup</div></div>
+          <div class="course-module"><div class="course-module-num">04</div><div class="course-module-title">Networking Basics — SSH, VPN, DNS, firewalls</div></div>
+          <div class="course-module"><div class="course-module-num">05</div><div class="course-module-title">Service Deployment — nginx, PostgreSQL, Redis</div></div>
+          <div class="course-module"><div class="course-module-num">06</div><div class="course-module-title">Domain Management — DNS, TLS, Caddy</div></div>
+          <div class="course-module"><div class="course-module-num">07</div><div class="course-module-title">Monitoring — Grafana, InfluxDB, alerting</div></div>
+          <div class="course-module"><div class="course-module-num">08</div><div class="course-module-title">Backup and Recovery — rsync, disaster recovery</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-header">
+        <span class="tag">Infrastructure</span>
+        <h3>Pi Fleet Setup: Multi-Node Cluster Engineering</h3>
+        <div class="course-meta">
+          <div class="course-meta-item">10 modules</div>
+          <div class="course-meta-item">30 hours</div>
+          <div class="course-meta-item">Intermediate</div>
+        </div>
+      </div>
+      <div class="course-body">
+        <p>Scale from one Pi to a fleet of five. Learn cluster coordination, distributed storage, load balancing, and automated deployment. By the end, you will have a production-grade Pi cluster running multiple services with automatic failover.</p>
+        <div class="course-modules">
+          <div class="course-module"><div class="course-module-num">01</div><div class="course-module-title">Fleet Architecture — roles, naming, IP planning</div></div>
+          <div class="course-module"><div class="course-module-num">02</div><div class="course-module-title">WireGuard Mesh — encrypted tunnels between all nodes</div></div>
+          <div class="course-module"><div class="course-module-num">03</div><div class="course-module-title">Service Distribution — which services go where</div></div>
+          <div class="course-module"><div class="course-module-num">04</div><div class="course-module-title">Storage Replication — MinIO, PostgreSQL replication</div></div>
+          <div class="course-module"><div class="course-module-num">05</div><div class="course-module-title">NATS Messaging — pub/sub between fleet nodes</div></div>
+          <div class="course-module"><div class="course-module-num">06</div><div class="course-module-title">Docker Orchestration — containers on ARM64</div></div>
+          <div class="course-module"><div class="course-module-num">07</div><div class="course-module-title">Gitea Self-Hosting — your own Git with CI/CD</div></div>
+          <div class="course-module"><div class="course-module-num">08</div><div class="course-module-title">Fleet Automation — scripts, cron, health monitoring</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-header">
+        <span class="tag">AI</span>
+        <h3>Ollama Deployment: Local AI on Any Hardware</h3>
+        <div class="course-meta">
+          <div class="course-meta-item">8 modules</div>
+          <div class="course-meta-item">20 hours</div>
+          <div class="course-meta-item">Intermediate</div>
+        </div>
+      </div>
+      <div class="course-body">
+        <p>Run large language models on your own hardware. From a single Pi with a 7B model to a multi-node inference cluster with Hailo-8 acceleration. Includes custom Modelfile creation, API integration, and RAG pipeline setup.</p>
+        <div class="course-modules">
+          <div class="course-module"><div class="course-module-num">01</div><div class="course-module-title">Ollama Installation — ARM64, x86, and macOS</div></div>
+          <div class="course-module"><div class="course-module-num">02</div><div class="course-module-title">Model Selection — size vs quality vs speed tradeoffs</div></div>
+          <div class="course-module"><div class="course-module-num">03</div><div class="course-module-title">Custom Modelfiles — persona, system prompts, parameters</div></div>
+          <div class="course-module"><div class="course-module-num">04</div><div class="course-module-title">Hailo-8 Acceleration — 26 TOPS on a Pi</div></div>
+          <div class="course-module"><div class="course-module-num">05</div><div class="course-module-title">Multi-Node Inference — load balancing across fleet</div></div>
+          <div class="course-module"><div class="course-module-num">06</div><div class="course-module-title">RAG Pipeline — Qdrant + embedding models</div></div>
+          <div class="course-module"><div class="course-module-num">07</div><div class="course-module-title">Agent Frameworks — building AI agents with local models</div></div>
+          <div class="course-module"><div class="course-module-num">08</div><div class="course-module-title">Production Deployment — monitoring, caching, scaling</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-header">
+        <span class="tag">Networking</span>
+        <h3>Mesh Networking: Tor, WireGuard, and Beyond</h3>
+        <div class="course-meta">
+          <div class="course-meta-item">10 modules</div>
+          <div class="course-meta-item">35 hours</div>
+          <div class="course-meta-item">Advanced</div>
+        </div>
+      </div>
+      <div class="course-body">
+        <p>Build a multi-protocol mesh network that routes traffic across Tor, WireGuard, WebRTC, and IPFS simultaneously. Learn ternary routing, the BlackBox Protocol, and how to make your services reachable globally with zero public IP exposure.</p>
+        <div class="course-modules">
+          <div class="course-module"><div class="course-module-num">01</div><div class="course-module-title">Mesh Theory — why multi-path, why multi-protocol</div></div>
+          <div class="course-module"><div class="course-module-num">02</div><div class="course-module-title">WireGuard Deep Dive — key exchange, routing, NAT traversal</div></div>
+          <div class="course-module"><div class="course-module-num">03</div><div class="course-module-title">Tor Hidden Services — .onion setup on Raspberry Pi</div></div>
+          <div class="course-module"><div class="course-module-num">04</div><div class="course-module-title">IPFS Fundamentals — content-addressed distributed storage</div></div>
+          <div class="course-module"><div class="course-module-num">05</div><div class="course-module-title">Ternary Routing — the -1 state that changes everything</div></div>
+          <div class="course-module"><div class="course-module-num">06</div><div class="course-module-title">BlackBox Protocol — combining all protocols into one mesh</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="course-card">
+      <div class="course-header">
+        <span class="tag">Blockchain</span>
+        <h3>Blockchain Fundamentals: From Hashes to RoadChain</h3>
+        <div class="course-meta">
+          <div class="course-meta-item">8 modules</div>
+          <div class="course-meta-item">25 hours</div>
+          <div class="course-meta-item">Intermediate</div>
+        </div>
+      </div>
+      <div class="course-body">
+        <p>Understand blockchain from first principles — no hype, no speculation. Hash functions, Merkle trees, consensus mechanisms, and smart contracts. Build a simple chain, then integrate it with the BlackRoad identity and timestamping system.</p>
+        <div class="course-modules">
+          <div class="course-module"><div class="course-module-num">01</div><div class="course-module-title">Cryptographic Primitives — hashes, signatures, keys</div></div>
+          <div class="course-module"><div class="course-module-num">02</div><div class="course-module-title">Data Structures — Merkle trees, DAGs, chains</div></div>
+          <div class="course-module"><div class="course-module-num">03</div><div class="course-module-title">Consensus — proof of work, proof of stake, Byzantine fault tolerance</div></div>
+          <div class="course-module"><div class="course-module-num">04</div><div class="course-module-title">Build a Chain — minimal blockchain in Python</div></div>
+          <div class="course-module"><div class="course-module-num">05</div><div class="course-module-title">Bitcoin Protocol — UTXO model, scripting, Lightning</div></div>
+          <div class="course-module"><div class="course-module-num">06</div><div class="course-module-title">RoadChain Integration — agent identity and timestamping</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="certifications">
+  <div class="fade-in">
+    <div class="section-label">02 — Certifications</div>
+    <h2>BlackRoad Start Certification</h2>
+    <p style="max-width: 700px;">The BlackRoad Start Certification validates your ability to build and operate sovereign computing infrastructure. Five check modules, each testing a real skill. 80% score required to pass. Validated on the blackroad-operator codebase — the actual production system.</p>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="cert-card">
+      <div class="cert-badge">&#x1F3C6;</div>
+      <h3>BlackRoad Start — Certified Operator</h3>
+      <p>Demonstrates proficiency in deploying and maintaining BlackRoad OS infrastructure. Covers security, brand compliance, memory system usage, and operational best practices.</p>
+      <div class="cert-modules">
+        <div class="cert-module">
+          <div class="cert-module-status pass">&#10003;</div>
+          <div>
+            <div class="cert-module-name">Security Audit</div>
+            <div class="cert-module-desc">Scan for exposed credentials, open ports, weak permissions. All findings must be false positives or resolved.</div>
+          </div>
+        </div>
+        <div class="cert-module">
+          <div class="cert-module-status pass">&#10003;</div>
+          <div>
+            <div class="cert-module-name">Memory System Integration</div>
+            <div class="cert-module-desc">Verify codex, TIL, and journal are operational. Search must return results. Logging must persist across sessions.</div>
+          </div>
+        </div>
+        <div class="cert-module">
+          <div class="cert-module-status pass">&#10003;</div>
+          <div>
+            <div class="cert-module-name">Brand Compliance</div>
+            <div class="cert-module-desc">Proprietary LICENSE file present. README follows template. No MIT/Apache/open-source licensing language anywhere.</div>
+          </div>
+        </div>
+        <div class="cert-module">
+          <div class="cert-module-status pass">&#10003;</div>
+          <div>
+            <div class="cert-module-name">Infrastructure Health</div>
+            <div class="cert-module-desc">All configured services responsive. DNS resolving. TLS certificates valid. WireGuard tunnels connected.</div>
+          </div>
+        </div>
+        <div class="cert-module">
+          <div class="cert-module-status pass">&#10003;</div>
+          <div>
+            <div class="cert-module-name">Operational Readiness</div>
+            <div class="cert-module-desc">Deployment scripts functional. Backup recovery tested. Monitoring alerts configured. Disaster recovery plan documented.</div>
+          </div>
+        </div>
+      </div>
+      <p style="margin-top: 1.5rem; font-size: 0.9rem;">blackroad-operator scored 80% (4/5) on initial validation. Security module findings were all false positives. The certification is real — it runs real checks against real infrastructure.</p>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>Why Certification Matters</h3>
+        <p>A certification is only valuable if it tests real skills. The BlackRoad Start certification does not ask you to answer multiple-choice questions. It runs automated checks against your deployed infrastructure and either passes or fails based on real state.</p>
+        <ul class="feature-list">
+          <li>No multiple choice — automated infrastructure checks</li>
+          <li>Pass/fail based on real system state</li>
+          <li>Reproducible — same checks every time</li>
+          <li>Open methodology — you can read the check scripts</li>
+          <li>Continuous — re-run to maintain certification</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Certification Path</h3>
+        <ul class="feature-list">
+          <li>Start (current) — basic operational competence</li>
+          <li>Builder (coming) — multi-node fleet management</li>
+          <li>Architect (coming) — mesh networking + AI deployment</li>
+          <li>Master (coming) — full sovereignty stack + BlackBox Protocol</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="downloads">
+  <div class="fade-in">
+    <div class="section-label">03 — Digital Downloads</div>
+    <h2>Templates, Scripts, Configs, and Modelfiles</h2>
+    <p style="max-width: 700px;">Production-tested configuration files, deployment scripts, website templates, and AI model configurations. Everything is extracted from the live BlackRoad fleet — these are not examples, they are the actual files running in production.</p>
+  </div>
+  <div class="download-grid fade-in">
+    <div class="download-card">
+      <div class="download-icon">&#x1F4C4;</div>
+      <div class="download-name">JSX Website Templates</div>
+      <div class="download-desc">20 production website templates following the BlackRoad design system. Black background, gradient accents, Space Grotesk + JetBrains Mono, responsive, accessible.</div>
+      <div class="download-format">HTML / CSS / JS — 20 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F4BB;</div>
+      <div class="download-name">Shell Script Collection</div>
+      <div class="download-desc">400+ shell scripts for system administration, deployment, monitoring, AI inference, network management, and fleet coordination. Battle-tested on the Pi fleet.</div>
+      <div class="download-format">Bash / Zsh — 400+ files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x2699;</div>
+      <div class="download-name">WireGuard Config Pack</div>
+      <div class="download-desc">Complete WireGuard mesh configuration for 2-node, 5-node, and 7-node topologies. Includes key generation scripts, routing tables, and health check monitors.</div>
+      <div class="download-format">CONF / SH — 15 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F916;</div>
+      <div class="download-name">Ollama Modelfiles</div>
+      <div class="download-desc">Custom Modelfiles for 16 AI model configurations. Includes system prompts, temperature settings, context windows, and persona definitions for the BlackRoad agent fleet.</div>
+      <div class="download-format">Modelfile — 16 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F50D;</div>
+      <div class="download-name">Nginx Config Collection</div>
+      <div class="download-desc">nginx server blocks for 37 sites, including reverse proxy, static hosting, WebSocket upgrade, SSL termination, and rate limiting configurations.</div>
+      <div class="download-format">CONF — 37 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F4E6;</div>
+      <div class="download-name">Docker Compose Stack</div>
+      <div class="download-desc">Complete docker-compose files for deploying PostgreSQL, Redis, MinIO, Qdrant, Grafana, InfluxDB, NATS, and Gitea on ARM64 Raspberry Pi hardware.</div>
+      <div class="download-format">YAML — 12 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F4CA;</div>
+      <div class="download-name">Monitoring Dashboards</div>
+      <div class="download-desc">Grafana dashboard JSON exports for system metrics, AI inference performance, network health, storage utilization, and fleet-wide overview panels.</div>
+      <div class="download-format">JSON — 8 files</div>
+    </div>
+    <div class="download-card">
+      <div class="download-icon">&#x1F512;</div>
+      <div class="download-name">Tor Hidden Service Kit</div>
+      <div class="download-desc">Complete setup scripts for Tor hidden services on Raspberry Pi. Includes torrc templates, nginx integration, and automated service deployment.</div>
+      <div class="download-format">SH / CONF — 6 files</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="bundles">
+  <div class="fade-in">
+    <div class="section-label">04 — Bundles</div>
+    <h2>Everything You Need. One Price.</h2>
+    <p style="max-width: 700px;">Bundles combine courses, certifications, and digital downloads at a significant discount. Each bundle is designed for a specific level of commitment to sovereign computing.</p>
+  </div>
+  <div class="pricing-grid fade-in">
+    <div class="pricing-card">
+      <span class="tag">Starter</span>
+      <h3>Sovereign Starter</h3>
+      <div class="price">$29</div>
+      <p>For curious builders who want to dip their toes into self-hosted infrastructure. Get the foundational course and essential configs.</p>
+      <ul class="feature-list">
+        <li>Sovereign Computing course (full)</li>
+        <li>WireGuard Config Pack</li>
+        <li>Shell Script Collection (50 essential scripts)</li>
+        <li>Community Discord access</li>
+        <li>30-day email support</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Get Started</a>
+    </div>
+    <div class="pricing-card featured">
+      <span class="tag">Builder</span>
+      <h3>Fleet Builder</h3>
+      <div class="price">$99</div>
+      <p>For serious builders ready to deploy a multi-node fleet with AI capabilities. All courses, all configs, certification included.</p>
+      <ul class="feature-list">
+        <li>All 5 courses (full access)</li>
+        <li>BlackRoad Start Certification</li>
+        <li>All digital downloads (400+ files)</li>
+        <li>Ollama Modelfile collection</li>
+        <li>Docker Compose full stack</li>
+        <li>Monitoring dashboards</li>
+        <li>Priority email support (90 days)</li>
+        <li>Monthly office hours (3 months)</li>
+      </ul>
+      <a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 1.5rem;">Build Your Fleet</a>
+    </div>
+    <div class="pricing-card">
+      <span class="tag">Enterprise</span>
+      <h3>Full Sovereignty</h3>
+      <div class="price">$299</div>
+      <p>For organizations deploying sovereign infrastructure at scale. Everything in Builder plus dedicated consulting and custom configurations.</p>
+      <ul class="feature-list">
+        <li>Everything in Fleet Builder</li>
+        <li>All future certification levels</li>
+        <li>Custom Modelfile configuration</li>
+        <li>Custom WireGuard topology design</li>
+        <li>1-on-1 deployment consulting (4 hours)</li>
+        <li>Infrastructure audit and recommendations</li>
+        <li>Priority support (1 year)</li>
+        <li>Early access to new courses</li>
+        <li>BlackBox Protocol beta access</li>
+        <li>Lifetime updates</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Go Sovereign</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="faq">
+  <div class="fade-in">
+    <div class="section-label">05 — Frequently Asked Questions</div>
+    <h2>Questions and Answers</h2>
+  </div>
+  <div class="faq-section fade-in">
+    <div class="faq-item">
+      <div class="faq-question">Do I need a Raspberry Pi to take the courses?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Not for all of them. The Sovereign Computing and Blockchain Fundamentals courses work on any Linux machine, including a $5/month VPS. However, the Pi Fleet Setup and Mesh Networking courses are designed specifically for Raspberry Pi hardware. The Ollama course works on any machine with sufficient RAM (8GB minimum for 7B models).</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Are these self-paced or scheduled?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Completely self-paced. Each course is a collection of written modules with code examples, configuration files, and verification scripts. You work through them at your own speed. The monthly office hours (Builder and Enterprise bundles) provide live Q&A opportunities.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">What format are the courses in?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Written tutorials with embedded code blocks, configuration file examples, architecture diagrams, and verification scripts. No video content — we believe written documentation is more searchable, more maintainable, and more respectful of your time. Every module includes a "verify" script you can run to confirm your setup matches the expected state.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Can I get a refund?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Yes. 30-day unconditional refund on all purchases. If the content does not meet your expectations, email us and we will process the refund. No questions asked. We would rather have satisfied customers than retained revenue from unsatisfied ones.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Is the certification recognized by employers?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>The BlackRoad Start certification is new and not yet widely recognized. However, it tests real skills — automated infrastructure checks against deployed systems. Any employer who understands DevOps will recognize the value of a candidate who can deploy and maintain a self-hosted computing fleet. The check scripts are open — you can show exactly what was tested.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Do the digital downloads get updated?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Yes. Digital downloads are extracted from the live BlackRoad fleet and updated when our production configurations change. Builder and Enterprise bundle customers receive lifetime updates. Starter bundle customers receive 1 year of updates.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Can I use these configurations commercially?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>Yes, with one restriction: you may not resell the configurations themselves as a competing educational product. You are free to use all configurations, scripts, and templates in your own commercial infrastructure, products, and services without any royalty or attribution requirement.</p></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">How do I access the content after purchase?<span class="faq-toggle">+</span></div>
+      <div class="faq-answer"><p>You receive a Gitea repository invitation with all course materials, configuration files, and verification scripts. Everything is in Git — you can clone, fork, and track your progress with commits. No proprietary learning platform. No DRM. Just a Git repo.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="fade-in">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const answer = item.querySelector('.faq-answer');
+      const toggle = item.querySelector('.faq-toggle');
+      const isOpen = answer.classList.contains('open');
+
+      // Close all
+      document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+      document.querySelectorAll('.faq-toggle').forEach(t => t.textContent = '+');
+
+      if (!isOpen) {
+        answer.classList.add('open');
+        toggle.textContent = '-';
+      }
+    });
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Nav scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.98)' : 'rgba(0,0,0,0.92)';
+  });
+});
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

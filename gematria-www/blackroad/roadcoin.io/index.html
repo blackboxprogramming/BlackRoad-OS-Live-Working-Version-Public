@@ -1,0 +1,502 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadCoin — Payments Without Borders.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--bg:#000;--text:#fff;--text-dim:#888;--card-bg:#0a0a0a;--accent-pink:#FF2255;--accent-blue:#4488FF;--accent-cyan:#00D4FF;--accent-orange:#FF6B2B;--accent-violet:#8844FF;--accent-green:#22c55e}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+.gradient-bar{position:fixed;top:0;left:0;width:100%;height:4px;background:var(--g);z-index:1000}
+nav{position:fixed;top:4px;left:0;width:100%;background:rgba(0,0,0,0.95);border-bottom:1px solid var(--border);z-index:999;padding:0 2rem}
+nav .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .logo{font-weight:700;font-size:1.25rem;color:var(--text);text-decoration:none}
+nav .logo span{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.875rem;transition:color 0.2s}
+nav .nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--g);color:#000!important;padding:8px 20px;border-radius:6px;font-weight:600;font-size:0.8rem!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+.hamburger span{width:24px;height:2px;background:var(--text)}
+.section-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;opacity:0.25;margin-bottom:12px}
+.section-title{font-size:32px;font-weight:700;margin-bottom:16px;line-height:1.2}
+.section-desc{color:var(--text-dim);font-size:1rem;line-height:1.7;max-width:640px}
+section{padding:100px 2rem;max-width:1200px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.card{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);transition:border-color 0.3s}
+.card:hover{border-color:#333}
+.divider{width:100%;height:1px;background:var(--border);max-width:1200px;margin:0 auto}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:68px;position:relative}
+.hero-bg{position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(ellipse at center,rgba(255,107,43,0.06) 0%,transparent 70%);pointer-events:none;z-index:-1}
+.hero-badge{font-family:var(--jb);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent-orange);border:1px solid rgba(255,107,43,0.2);padding:6px 16px;border-radius:20px;margin-bottom:32px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:24px;max-width:800px}
+.hero h1 .gradient-text{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text-dim);font-size:1.125rem;max-width:560px;line-height:1.7;margin-bottom:40px}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{background:var(--g);color:#000;padding:14px 32px;border-radius:8px;font-weight:600;font-size:0.9rem;text-decoration:none;border:none;cursor:pointer;font-family:var(--sg);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:8px;font-weight:500;font-size:0.9rem;text-decoration:none;border:1px solid var(--border);font-family:var(--sg)}
+
+.code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:var(--jb);font-size:0.8rem;line-height:1.8;overflow-x:auto;color:var(--text-dim)}
+.code-block .kw{color:var(--accent-violet)}
+.code-block .fn{color:var(--accent-blue)}
+.code-block .str{color:var(--accent-cyan)}
+.code-block .comment{color:#444}
+.code-block .num{color:var(--accent-orange)}
+
+/* Market stats */
+.market-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.market-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg);text-align:center}
+.market-value{font-size:2.5rem;font-weight:700;margin-bottom:8px}
+.market-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim)}
+.market-detail{color:var(--text-dim);font-size:0.8rem;margin-top:8px;line-height:1.5}
+
+/* Utility section */
+.utility-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.utility-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg)}
+.utility-icon{font-size:1.25rem;margin-bottom:16px}
+.utility-card h4{font-size:1rem;font-weight:600;margin-bottom:8px}
+.utility-card p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+
+/* Stripe bridge */
+.bridge-container{display:grid;grid-template-columns:1fr auto 1fr;gap:24px;margin-top:48px;align-items:center}
+.bridge-side{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);text-align:center}
+.bridge-side h4{font-size:1.1rem;font-weight:600;margin-bottom:8px}
+.bridge-side p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+.bridge-arrow{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-dim)}
+.bridge-arrow .arrow{font-size:2rem;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.bridge-arrow span{font-family:var(--jb);font-size:9px;text-transform:uppercase;letter-spacing:0.1em}
+
+/* Honest assessment */
+.honest-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px}
+.honest-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg)}
+.honest-card.bad{border-color:rgba(255,34,85,0.2)}
+.honest-card.good{border-color:rgba(34,197,94,0.2)}
+.honest-tag{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px}
+.honest-tag.bad{color:var(--accent-pink)}
+.honest-tag.good{color:var(--accent-green)}
+.honest-card h4{font-size:1rem;font-weight:600;margin-bottom:8px}
+.honest-card p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+.honest-card ul{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.honest-card ul li{font-size:0.8rem;color:var(--text-dim);display:flex;align-items:flex-start;gap:8px}
+.honest-card ul li::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.honest-card.bad ul li::before{background:var(--accent-pink)}
+.honest-card.good ul li::before{background:var(--accent-green)}
+
+/* Regulatory */
+.reg-timeline{margin-top:48px;position:relative;padding-left:32px}
+.reg-timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent-orange),var(--accent-cyan),transparent)}
+.reg-entry{position:relative;margin-bottom:24px;padding:20px 24px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg)}
+.reg-entry::before{content:'';position:absolute;left:-38px;top:24px;width:10px;height:10px;border-radius:50%;background:var(--accent-orange);border:2px solid var(--bg)}
+.reg-phase{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px}
+.reg-phase.complete{color:var(--accent-green)}
+.reg-phase.active{color:var(--accent-orange)}
+.reg-phase.planned{color:var(--text-dim)}
+.reg-entry h4{font-size:0.9rem;font-weight:600;margin-bottom:4px}
+.reg-entry p{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+
+/* Pricing */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px}
+.pricing-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg)}
+.pricing-card.featured{border-color:var(--accent-orange)}
+.pricing-tier{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px}
+.pricing-price{font-size:2rem;font-weight:700;margin-bottom:4px}
+.pricing-price span{font-size:0.85rem;font-weight:400;color:var(--text-dim)}
+.pricing-desc{color:var(--text-dim);font-size:0.8rem;margin-bottom:20px;line-height:1.6}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.pricing-features li{font-size:0.8rem;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.pricing-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent-cyan);flex-shrink:0}
+.pricing-btn{display:block;width:100%;padding:10px;border-radius:6px;text-align:center;font-family:var(--sg);font-weight:600;font-size:0.85rem;cursor:pointer;text-decoration:none;border:none;transition:transform 0.2s}
+.pricing-btn:hover{transform:translateY(-1px)}
+.pricing-btn.primary{background:var(--g);color:#000}
+.pricing-btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+
+.stats-bar{display:flex;justify-content:center;gap:64px;padding:48px 2rem;max-width:1200px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-value{font-size:2rem;font-weight:700;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-top:4px}
+
+footer{border-top:1px solid var(--border);padding:48px 2rem;text-align:center}
+footer .footer-inner{max-width:1200px;margin:0 auto}
+footer .footer-tagline{font-size:1rem;font-weight:300;color:var(--text-dim);margin-bottom:8px;font-style:italic}
+footer .footer-copy{font-family:var(--jb);font-size:11px;color:var(--text-dim);opacity:0.5}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-top:16px;list-style:none}
+footer .footer-links a{color:var(--text-dim);text-decoration:none;font-size:0.8rem}
+
+@media(max-width:768px){
+  .hamburger{display:flex}
+  nav .nav-links{display:none;position:absolute;top:64px;left:0;width:100%;background:rgba(0,0,0,0.98);flex-direction:column;padding:24px;gap:16px;border-bottom:1px solid var(--border)}
+  nav .nav-links.open{display:flex}
+  .market-grid,.utility-grid,.pricing-grid{grid-template-columns:1fr}
+  .honest-grid{grid-template-columns:1fr}
+  .bridge-container{grid-template-columns:1fr;text-align:center}
+  .bridge-arrow{transform:rotate(90deg)}
+  section{padding:64px 1.25rem}
+  .hero h1{font-size:2rem}
+  .stats-bar{flex-wrap:wrap;gap:32px}
+}
+</style>
+<meta property="og:title" content="RoadCoin — Payments Without Borders.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://roadcoin.io/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://roadcoin.io/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"RoadCoin — Payments Without Borders.","url":"https://roadcoin.io","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>Road</span>Coin</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#stablecoins">Stablecoins</a></li>
+      <li><a href="#utility">Utility</a></li>
+      <li><a href="#bridge">Stripe Bridge</a></li>
+      <li><a href="#honest">Honest Take</a></li>
+      <li><a href="#regulatory">Regulatory</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#" class="nav-cta">Get Wallet</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">Cryptocurrency & Payments</div>
+  <h1>Payments<br><span class="gradient-text">Without Borders.</span></h1>
+  <p>RoadCoin is not a speculative asset. It is a utility token for the BlackRoad ecosystem: agent micropayments, creator payouts, mesh network incentives, and cross-border transfers. Built by a Delaware C-Corp with a real founder.</p>
+  <div class="hero-actions">
+    <a href="#utility" class="btn-primary">See Use Cases</a>
+    <a href="#honest" class="btn-secondary">Read Our Honest Take</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Why Stablecoins -->
+<section id="stablecoins">
+  <div class="fade-in">
+    <div class="section-label">001 / Why Stablecoins Work</div>
+    <div class="section-title">The Market Speaks Clearly</div>
+    <p class="section-desc">Stablecoins are the breakout use case of cryptocurrency. Not speculation. Not DeFi yield farming. Actual payments that actual people send to actual recipients. The numbers are staggering.</p>
+  </div>
+  <div class="market-grid fade-in">
+    <div class="market-card">
+      <div class="market-value" style="color:var(--accent-orange);">$6T+</div>
+      <div class="market-label">Stablecoin Payments (2024)</div>
+      <div class="market-detail">More than Visa and Mastercard combined. Stablecoins processed over $6 trillion in transactions in 2024, primarily in cross-border remittances and merchant payments.</div>
+    </div>
+    <div class="market-card">
+      <div class="market-value" style="color:var(--accent-cyan);">$195T</div>
+      <div class="market-label">Global Cross-Border Volume</div>
+      <div class="market-detail">The total cross-border payment market is $195 trillion annually. Stablecoins currently capture 3%. Even modest growth to 10% represents a $19.5 trillion opportunity.</div>
+    </div>
+    <div class="market-card">
+      <div class="market-value" style="color:var(--accent-green);">3%</div>
+      <div class="market-label">Current Penetration</div>
+      <div class="market-detail">Stablecoins are only 3% of cross-border payments. This is pre-mainstream adoption. The infrastructure is being built now. RoadCoin is positioning for the 97% that has not moved yet.</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem;margin-bottom:8px;">Why Not Just Use USDC?</h4>
+      <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.6;">You can, and we interoperate with USDC. But USDC has a single point of failure: Circle. If Circle freezes your address (they have done this), your money is gone. RoadCoin is backed by a sovereign infrastructure that you can verify. The mesh network runs the settlement layer. No single entity can freeze your funds.</p>
+    </div>
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem;margin-bottom:8px;">Why Not Just Use Bitcoin?</h4>
+      <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.6;">Bitcoin is a store of value, not a payment rail. At $50+ per transaction and 10-minute confirmation times, it is impractical for micropayments. Lightning Network helps but adds complexity. RoadCoin settles in seconds, costs fractions of a cent, and is designed specifically for the payment use case.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RoadCoin Utility -->
+<section id="utility">
+  <div class="fade-in">
+    <div class="section-label">002 / RoadCoin Utility</div>
+    <div class="section-title">Not Speculation. Ecosystem Payments.</div>
+    <p class="section-desc">Every RoadCoin use case is tied to a real service in the BlackRoad ecosystem. You earn RoadCoin by contributing resources, and you spend it on services. It is a medium of exchange, not a Ponzi scheme.</p>
+  </div>
+  <div class="utility-grid fade-in">
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f916;</div>
+      <h4>Agent Micropayments</h4>
+      <p>Pay AI agents per interaction. Claude sessions, Ollama inference, Qdrant queries — each service has a RoadCoin cost measured in fractions of a cent. No monthly subscription for compute you do not use.</p>
+    </div>
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f3a8;</div>
+      <h4>Creator Payouts</h4>
+      <p>Content creators, developers, and contributors earn RoadCoin for their work. Write a plugin, contribute a road fork, create pixel art for the metaverse — get paid instantly in RoadCoin with zero platform fees.</p>
+    </div>
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f310;</div>
+      <h4>Mesh Incentives</h4>
+      <p>Run a node on the BlackRoad mesh and earn RoadCoin for uptime, relay bandwidth, and storage contribution. Alice earns 5 RC per 30-day uptime streak. Tor relay operators earn 3.75 RC per contribution cycle.</p>
+    </div>
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f4b3;</div>
+      <h4>Cross-Border Payments</h4>
+      <p>Send RoadCoin to any wallet globally. No SWIFT delays. No correspondent bank fees. No weekend processing windows. Settlement in seconds, cost in fractions of a cent, regardless of geography.</p>
+    </div>
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f512;</div>
+      <h4>Staking Rewards</h4>
+      <p>Stake RoadCoin to secure the network and earn 2.4% APY. Staked coins are locked for a minimum period and used to validate transactions. Unlike proof-of-work, staking consumes no meaningful energy.</p>
+    </div>
+    <div class="utility-card">
+      <div class="utility-icon">&#x1f3e2;</div>
+      <h4>Domain & Service Payments</h4>
+      <p>Pay for BlackRoad services in RoadCoin: domain renewals, storage upgrades, priority agent access, fleet monitoring subscriptions. The entire ecosystem accepts RoadCoin as primary currency.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Stripe Bridge -->
+<section id="bridge">
+  <div class="fade-in">
+    <div class="section-label">003 / Stripe Bridge</div>
+    <div class="section-title">Fiat On-Ramp / Off-Ramp</div>
+    <p class="section-desc">Convert between USD and RoadCoin seamlessly through our Stripe integration. Buy RoadCoin with a credit card, sell RoadCoin for bank deposit. No crypto exchange account required.</p>
+  </div>
+  <div class="bridge-container fade-in">
+    <div class="bridge-side">
+      <h4>US Dollars (USD)</h4>
+      <p>Credit card, debit card, or bank transfer through Stripe. KYC verified. Instant confirmation. Familiar payment experience for users who have never touched cryptocurrency.</p>
+      <div style="margin-top:16px;font-family:var(--jb);font-size:11px;color:var(--text-dim);">Powered by Stripe</div>
+    </div>
+    <div class="bridge-arrow">
+      <div class="arrow">&harr;</div>
+      <span>1:1 Peg</span>
+    </div>
+    <div class="bridge-side">
+      <h4>RoadCoin (RC)</h4>
+      <p>Sovereign wallet on the BlackRoad mesh. Send to any address. Use for agent micropayments, mesh incentives, and creator payouts. Full transaction history. Export anytime.</p>
+      <div style="margin-top:16px;font-family:var(--jb);font-size:11px;color:var(--text-dim);">BlackRoad Mesh Settlement</div>
+    </div>
+  </div>
+  <div class="code-block fade-in" style="margin-top:24px;">
+<span class="comment"># Stripe Bridge — Fiat ↔ RoadCoin</span>
+
+<span class="comment"># Buy RoadCoin with USD</span>
+$ <span class="fn">roadcoin</span> buy <span class="num">100</span> --currency usd --method stripe
+<span class="str">Processing payment of $100.00 via Stripe...</span>
+<span class="str">Payment confirmed. 100.00 RC deposited to wallet.</span>
+<span class="str">Transaction ID: tx_3L8k2mNpQrSt...</span>
+
+<span class="comment"># Send RoadCoin</span>
+$ <span class="fn">roadcoin</span> send <span class="num">25.50</span> --to @creator-handle
+<span class="str">Sending 25.50 RC to @creator-handle...</span>
+<span class="str">Settled in 1.2s via mesh node Octavia.</span>
+
+<span class="comment"># Withdraw to USD</span>
+$ <span class="fn">roadcoin</span> withdraw <span class="num">50</span> --to bank --method stripe
+<span class="str">Withdrawal of 50.00 RC ($50.00 USD) initiated.</span>
+<span class="str">Estimated deposit: 1-2 business days.</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Honest Assessment -->
+<section id="honest">
+  <div class="fade-in">
+    <div class="section-label">004 / Honest Assessment</div>
+    <div class="section-title">80% of ICOs Were Scams. We Know.</div>
+    <p class="section-desc">We are not going to pretend the crypto industry does not have a credibility problem. It does. Most token launches were cash grabs by anonymous teams with no product. Here is why RoadCoin is different, and we will let you judge for yourself.</p>
+  </div>
+  <div class="honest-grid fade-in">
+    <div class="honest-card bad">
+      <div class="honest-tag bad">The Typical ICO</div>
+      <h4>What Most Crypto Projects Look Like</h4>
+      <p>A pattern so predictable it became a meme. The 2017-2022 era was defined by thousands of projects that followed this exact playbook:</p>
+      <ul>
+        <li>Anonymous or pseudonymous team hiding behind Twitter avatars</li>
+        <li>Whitepaper full of buzzwords, no working product</li>
+        <li>Token pre-sale at 90% discount to insiders</li>
+        <li>Promises of "revolutionary" technology that never shipped</li>
+        <li>Offshore registration (Cayman Islands, BVI, Singapore shell)</li>
+        <li>No accountability — founders disappeared after raise</li>
+        <li>Community governed by Discord hype, not product quality</li>
+        <li>Liquidity pulled once price peaked (rug pull)</li>
+      </ul>
+    </div>
+    <div class="honest-card good">
+      <div class="honest-tag good">RoadCoin — The Difference</div>
+      <h4>What We Actually Are</h4>
+      <p>Every single item in the left column is the opposite of how we operate. We are not trying to reinvent finance. We are building a payment system for an ecosystem that already exists.</p>
+      <ul>
+        <li>Real founder: Alexa Amundson, Delaware, verifiable identity</li>
+        <li>Real C-Corp: BlackRoad OS, Inc., EIN 41-2663817, Stripe Atlas</li>
+        <li>Real products: 92 products, 629+ repos, 7-node fleet, 69+ agents</li>
+        <li>Real infrastructure: $925 in Pi hardware, auditable code</li>
+        <li>No ICO: no pre-sale, no insider discount, no token dump</li>
+        <li>Utility only: tied to real services, not speculation</li>
+        <li>Open code: every line of code is in Gitea (629 repos)</li>
+        <li>1:1 peg to USD via Stripe — not volatile by design</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card fade-in" style="padding:24px;margin-top:24px;border-color:rgba(255,107,43,0.2);">
+    <h4 style="font-size:0.9rem;margin-bottom:8px;color:var(--accent-orange);">Our Commitment to Honesty</h4>
+    <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.8;">We will not tell you RoadCoin will make you rich. It will not. It is pegged 1:1 to USD. There is no price appreciation mechanism. There is no FOMO. There is no "get in early" narrative. What there is: a utility token that makes payments cheaper and faster within an ecosystem of real products built on real hardware by a real person with a real corporate entity. If that is boring to you, good. Boring payments are good payments. The exciting ones are usually the ones that lose your money.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Regulatory Path -->
+<section id="regulatory">
+  <div class="fade-in">
+    <div class="section-label">005 / Regulatory Path</div>
+    <div class="section-title">SEC-Aware. AML/KYC Compliant.</div>
+    <p class="section-desc">We are building within the regulatory framework, not trying to circumvent it. The goal is not to disrupt regulators — it is to make payments better while respecting the rules that protect consumers.</p>
+  </div>
+  <div class="reg-timeline fade-in">
+    <div class="reg-entry">
+      <div class="reg-phase complete">Complete</div>
+      <h4>Delaware C-Corp Formation</h4>
+      <p>Incorporated November 17, 2025 via Stripe Atlas. EIN assigned. All corporate documents filed. This gives us a legal entity that regulators can hold accountable — which is the point.</p>
+    </div>
+    <div class="reg-entry">
+      <div class="reg-phase complete">Complete</div>
+      <h4>Stripe Payment Integration</h4>
+      <p>Stripe handles our fiat on/off ramp. Stripe is already PCI DSS compliant, handles KYC for card payments, and provides fraud detection. We inherit their compliance infrastructure.</p>
+    </div>
+    <div class="reg-entry">
+      <div class="reg-phase active">In Progress</div>
+      <h4>AML/KYC Framework</h4>
+      <p>Implementing Know Your Customer verification for wallet creation and Anti-Money Laundering monitoring for transactions above $3,000. Working with legal counsel on BSA (Bank Secrecy Act) compliance requirements.</p>
+    </div>
+    <div class="reg-entry">
+      <div class="reg-phase active">In Progress</div>
+      <h4>Money Transmitter Licensing</h4>
+      <p>Research phase for state-by-state MTL requirements. RoadCoin's 1:1 USD peg and Stripe bridge may qualify for exemptions in several states. Legal analysis ongoing with qualified fintech counsel.</p>
+    </div>
+    <div class="reg-entry">
+      <div class="reg-phase planned">Planned</div>
+      <h4>SEC Classification Analysis</h4>
+      <p>Formal legal opinion on whether RoadCoin constitutes a security under the Howey test. Our position: a 1:1 USD-pegged utility token with no expectation of profit is not a security. But we will get the legal opinion before asserting this publicly.</p>
+    </div>
+    <div class="reg-entry">
+      <div class="reg-phase planned">Planned</div>
+      <h4>Regular Financial Audits</h4>
+      <p>Once the token is live, quarterly proof-of-reserves audits by an independent CPA firm. Every RoadCoin in circulation will be backed 1:1 by USD in a verified Stripe account. No fractional reserve games.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Pricing -->
+<section id="pricing">
+  <div class="fade-in">
+    <div class="section-label">006 / Pricing</div>
+    <div class="section-title">Simple. Transparent. Fair.</div>
+    <p class="section-desc">No hidden fees. No surprise markups. No premium tiers just for the privilege of accessing your own money. The wallet is free. Transactions cost 0.5%. That is it.</p>
+  </div>
+  <div class="pricing-grid fade-in">
+    <div class="pricing-card">
+      <div class="pricing-tier">Wallet</div>
+      <div class="pricing-price">Free</div>
+      <div class="pricing-desc">The RoadCoin wallet is free. Create it, hold coins, view history. No monthly fee, no minimum balance, no inactivity penalty.</div>
+      <ul class="pricing-features">
+        <li>Unlimited wallet addresses</li>
+        <li>Full transaction history</li>
+        <li>Send and receive RoadCoin</li>
+        <li>Stripe fiat on/off ramp</li>
+        <li>Multi-device sync</li>
+      </ul>
+      <a href="#" class="pricing-btn secondary">Create Wallet</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tier">Transactions</div>
+      <div class="pricing-price">0.5%<span> per tx</span></div>
+      <div class="pricing-desc">One flat fee for every transaction. No tiers. No volume discounts that only benefit whales. Fair for everyone.</div>
+      <ul class="pricing-features">
+        <li>0.5% on all sends</li>
+        <li>Free to receive</li>
+        <li>No network fees</li>
+        <li>Instant settlement (1-3s)</li>
+        <li>No minimum transaction</li>
+      </ul>
+      <a href="#" class="pricing-btn primary">Start Transacting</a>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-tier">Staking</div>
+      <div class="pricing-price">2.4%<span> APY</span></div>
+      <div class="pricing-desc">Stake RoadCoin to earn passive rewards. No lock-up beyond the minimum 30-day period. Unstake anytime after.</div>
+      <ul class="pricing-features">
+        <li>2.4% annual yield</li>
+        <li>30-day minimum stake</li>
+        <li>Compound daily</li>
+        <li>No maximum stake</li>
+        <li>Rewards paid in RC</li>
+      </ul>
+      <a href="#" class="pricing-btn secondary">Start Staking</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.me">Identity</a></li>
+      <li><a href="https://blackroad.network">Network</a></li>
+      <li><a href="https://blackroad.systems">Systems</a></li>
+      <li><a href="https://blackroadinc.us">Enterprise</a></li>
+      <li><a href="https://blackroadqi.com">QI</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+document.getElementById('hamburger').addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open')});
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-in').forEach(function(el){observer.observe(el)});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
+
+// Animated counter for market stats
+(function() {
+  function animateValue(el, target, prefix, suffix, duration) {
+    var start = null;
+    function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3);
+      var current = Math.floor(target * eased);
+      el.textContent = prefix + current.toLocaleString() + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    var obs = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting) { requestAnimationFrame(step); obs.disconnect(); }
+    });
+    obs.observe(el);
+  }
+  var vals = document.querySelectorAll('.market-value');
+  if (vals.length >= 3) {
+    // Already have text content, animation would need parsing — skip for simplicity
+  }
+})();
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

@@ -1,0 +1,1684 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucidia Studio — From Idea to Ship in Minutes</title>
+<meta name="description" content="Lucidia Studio closes the gap between idea and production. Browser-native video, voice, visual, and music tools with AI-powered creation and 90%+ creator revenue share.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+body {
+  background: #000;
+  color: #f5f5f5;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+
+/* ─── Design Tokens ──────────────────────────────────────────── */
+:root {
+  --grad: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --grad-warm: linear-gradient(135deg, #FF6B2B, #FF2255);
+  --grad-cool: linear-gradient(135deg, #4488FF, #00D4FF);
+  --grad-purple: linear-gradient(135deg, #8844FF, #CC00AA);
+  --grad-full: linear-gradient(135deg, #FF6B2B, #00D4FF);
+  --orange: #FF6B2B;
+  --red: #FF2255;
+  --magenta: #CC00AA;
+  --purple: #8844FF;
+  --blue: #4488FF;
+  --cyan: #00D4FF;
+  --surface: #080808;
+  --surface-hover: #0e0e0e;
+  --border: #141414;
+  --border-hover: #222;
+  --text-primary: #f5f5f5;
+  --text-secondary: #888;
+  --text-muted: #555;
+  --text-dim: #383838;
+  --grotesk: 'Space Grotesk', sans-serif;
+  --inter: 'Inter', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────── */
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 rgba(0,212,255,0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(0,212,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+}
+@keyframes barPulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.7; }
+  50% { transform: scaleY(1.5); opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -20px); }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-25px, 15px); }
+}
+@keyframes rotateGrad {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes waveform {
+  0%, 100% { height: 8px; }
+  25% { height: 24px; }
+  50% { height: 16px; }
+  75% { height: 32px; }
+}
+
+/* ─── Scroll Reveal ──────────────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─── Navigation ─────────────────────────────────────────────── */
+.nav-wrap {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+}
+.nav-grad-line {
+  height: 2px;
+  background: var(--grad);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 56px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav.scrolled {
+  background: rgba(0,0,0,0.97);
+  border-bottom-color: #141414;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo-bars {
+  display: flex; gap: 2px;
+}
+.nav-logo-bar {
+  width: 3px; height: 18px; border-radius: 2px;
+}
+.nav-logo-text {
+  font-family: var(--grotesk); font-weight: 700; font-size: 18px;
+  color: #f5f5f5; letter-spacing: -0.03em;
+}
+.nav-logo-sub {
+  font-family: var(--mono); font-size: 10px; color: #444;
+  margin-left: 4px; letter-spacing: 0.05em;
+}
+.nav-links {
+  display: flex; gap: 32px; align-items: center;
+}
+.nav-links a {
+  font-family: var(--inter); font-size: 13px; font-weight: 500;
+  color: #686868; transition: color 0.2s;
+}
+.nav-links a:hover { color: #f0f0f0; }
+.nav-cta {
+  font-family: var(--inter); font-weight: 600; font-size: 12px;
+  padding: 8px 18px; background: var(--grad); background-size: 200% 100%;
+  color: #fff; border-radius: 0; letter-spacing: 0.01em;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(136,68,255,0.2);
+}
+.nav-cta:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136,68,255,0.35);
+}
+
+/* ─── Hero ───────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 120px 40px 80px;
+  position: relative; overflow: hidden; text-align: center;
+}
+.hero-orb {
+  position: absolute; pointer-events: none; border-radius: 50%;
+}
+.hero-orb-1 {
+  top: 15%; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(136,68,255,0.1) 0%, transparent 70%);
+}
+.hero-orb-2 {
+  top: 30%; left: 15%; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(255,107,43,0.07) 0%, transparent 70%);
+  animation: orb1 8s ease-in-out infinite;
+}
+.hero-orb-3 {
+  top: 20%; right: 10%; width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+  animation: orb2 10s ease-in-out infinite;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border: 1px solid #1e1e1e;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 36;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--cyan); animation: ping 1.8s ease-out infinite;
+}
+.hero-badge-text {
+  font-family: var(--mono); font-size: 10px; color: #555;
+  text-transform: uppercase; letter-spacing: 0.14em;
+}
+.hero-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: clamp(38px, 10vw, 80px);
+  letter-spacing: -0.04em; line-height: 1;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s ease 0.2s both;
+  max-width: 900;
+}
+.hero-title-grad {
+  background: var(--grad-full);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-family: var(--inter); font-size: clamp(15px, 3vw, 19px);
+  color: #606060; line-height: 1.7; max-width: 600;
+  margin-bottom: 48; margin-top: 24px;
+  animation: fadeUp 0.6s ease 0.35s both;
+}
+.hero-ctas {
+  display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.6s ease 0.45s both;
+}
+.btn-grad {
+  font-family: var(--inter); font-weight: 600; font-size: 15px;
+  padding: 14px 36px;
+  background: var(--grad); background-size: 200% 100%;
+  color: #fff; letter-spacing: 0.01em;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(136,68,255,0.2);
+}
+.btn-grad:hover {
+  background-position: 100% 0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(136,68,255,0.35);
+}
+.btn-outline {
+  font-family: var(--inter); font-weight: 600; font-size: 15px;
+  padding: 14px 32px;
+  background: transparent; border: 1px solid #2a2a2a;
+  color: #a0a0a0;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: #444; color: #ccc;
+}
+.hero-stats {
+  display: flex; gap: 48; margin-top: 72;
+  flex-wrap: wrap; justify-content: center;
+  animation: fadeUp 0.6s ease 0.55s both;
+}
+.hero-stat-val {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: clamp(20px, 4vw, 28px);
+  color: #f0f0f0; letter-spacing: -0.03em;
+}
+.hero-stat-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.1em; margin-top: 4px;
+}
+.hero-divider {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 1px; background: var(--grad); opacity: 0.3;
+}
+
+/* ─── Section Layout ─────────────────────────────────────────── */
+.section {
+  padding: 120px 40px;
+  max-width: 1200px; margin: 0 auto;
+  position: relative;
+}
+.section-full {
+  padding: 120px 40px;
+  position: relative;
+}
+.section-label {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.14em; margin-bottom: 16px;
+}
+.section-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: clamp(28px, 6vw, 48px);
+  color: var(--text-primary); letter-spacing: -0.04em;
+  line-height: 1.1; margin-bottom: 20px;
+}
+.section-desc {
+  font-family: var(--inter); font-size: 17px;
+  color: var(--text-secondary); line-height: 1.7;
+  max-width: 600; margin-bottom: 56px;
+}
+
+/* ─── Problem Section ────────────────────────────────────────── */
+.problem-section {
+  background: linear-gradient(180deg, #000 0%, #060306 50%, #000 100%);
+  border-top: 1px solid #0a0a0a;
+  border-bottom: 1px solid #0a0a0a;
+}
+.problem-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  max-width: 1200px; margin: 0 auto;
+}
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+.problem-card:hover {
+  border-color: #222;
+  box-shadow: 0 0 40px rgba(255,34,85,0.06);
+  transform: translateY(-3px);
+}
+.problem-card-icon {
+  font-size: 36px; margin-bottom: 20px;
+  filter: grayscale(0.3);
+}
+.problem-card-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 20px; color: var(--text-primary);
+  letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.problem-card-price {
+  font-family: var(--mono); font-size: 13px;
+  margin-bottom: 14px; display: inline-block;
+  padding: 3px 10px;
+  background: rgba(255,34,85,0.08);
+  color: var(--red);
+}
+.problem-card-body {
+  font-family: var(--inter); font-size: 14px;
+  color: var(--text-muted); line-height: 1.75;
+}
+.problem-card-line {
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--grad-warm); opacity: 0;
+  transition: opacity 0.3s;
+}
+.problem-card:hover .problem-card-line { opacity: 1; }
+
+.problem-stat-row {
+  display: flex; gap: 40px; flex-wrap: wrap;
+  justify-content: center; align-items: center;
+  margin-top: 64px; padding: 32px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.01);
+  max-width: 1200px; margin-left: auto; margin-right: auto;
+}
+.problem-stat {
+  text-align: center; flex: 1; min-width: 140px;
+}
+.problem-stat-val {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 32px; letter-spacing: -0.03em;
+}
+.problem-stat-val.red { color: var(--red); }
+.problem-stat-val.orange { color: var(--orange); }
+.problem-stat-val.purple { color: var(--purple); }
+.problem-stat-label {
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-muted); margin-top: 4px;
+}
+
+/* ─── Studio Tools ───────────────────────────────────────────── */
+.tools-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+}
+.tool-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 40px 32px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+}
+.tool-card[data-color="orange"]:hover { border-color: rgba(255,107,43,0.3); box-shadow: 0 0 50px rgba(255,107,43,0.08); }
+.tool-card[data-color="cyan"]:hover   { border-color: rgba(0,212,255,0.3);  box-shadow: 0 0 50px rgba(0,212,255,0.08); }
+.tool-card[data-color="purple"]:hover { border-color: rgba(136,68,255,0.3); box-shadow: 0 0 50px rgba(136,68,255,0.08); }
+.tool-card[data-color="red"]:hover    { border-color: rgba(255,34,85,0.3);  box-shadow: 0 0 50px rgba(255,34,85,0.08); }
+
+.tool-card-top {
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 20px;
+}
+.tool-card-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.tool-card-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.tool-card-name {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 22px; color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+.tool-card-accent {
+  height: 2px; width: 40px; margin-bottom: 18px;
+  transition: width 0.3s;
+}
+.tool-card:hover .tool-card-accent { width: 80px; }
+.tool-card-body {
+  font-family: var(--inter); font-size: 15px;
+  color: var(--text-muted); line-height: 1.75;
+  margin-bottom: 24px;
+}
+.tool-card-features {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.tool-card-feature {
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 10px;
+}
+.tool-card-feature-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Visual demos inside tool cards ─────────────────────────── */
+.tool-demo {
+  margin-top: 24px; padding: 20px;
+  background: rgba(255,255,255,0.015);
+  border: 1px solid #111;
+}
+.waveform-demo {
+  display: flex; align-items: flex-end; gap: 3px; height: 40px;
+}
+.waveform-bar {
+  width: 4px; background: var(--cyan); border-radius: 2px;
+  animation: waveform 1.2s ease-in-out infinite;
+}
+.timeline-demo {
+  display: flex; gap: 4px; align-items: center; height: 32px;
+}
+.timeline-block {
+  height: 24px; border-radius: 2px; opacity: 0.8;
+}
+.color-palette-demo {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.color-swatch {
+  width: 32px; height: 32px; border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.piano-demo {
+  display: flex; gap: 2px; height: 40px;
+}
+.piano-key {
+  background: #f0f0f0; border-radius: 0 0 3px 3px;
+  width: 18px; position: relative;
+}
+.piano-key.black {
+  background: #111; width: 12px; height: 26px;
+  margin: 0 -6px; z-index: 1;
+}
+
+/* ─── Creator Economics ──────────────────────────────────────── */
+.economics-section {
+  background: linear-gradient(180deg, #000 0%, #030208 50%, #000 100%);
+}
+.economics-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+  max-width: 1200px; margin: 0 auto;
+  align-items: center;
+}
+.economics-chart {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.econ-bar-row {
+  display: flex; align-items: center; gap: 16px;
+}
+.econ-bar-label {
+  font-family: var(--inter); font-size: 14px;
+  color: var(--text-secondary); width: 120px;
+  text-align: right; flex-shrink: 0;
+}
+.econ-bar-track {
+  flex: 1; height: 32px; background: #0a0a0a;
+  border: 1px solid #111; position: relative; overflow: hidden;
+}
+.econ-bar-fill {
+  height: 100%; position: absolute; left: 0; top: 0;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding-right: 12px;
+  font-family: var(--mono); font-size: 12px; color: #fff;
+  transition: width 1.2s var(--ease);
+  width: 0;
+}
+.econ-bar-fill.visible { /* widths set inline */ }
+.econ-features {
+  display: flex; flex-direction: column; gap: 24px;
+}
+.econ-feature {
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+.econ-feature:hover { border-color: #222; }
+.econ-feature-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 18px; color: var(--text-primary);
+  letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.econ-feature-body {
+  font-family: var(--inter); font-size: 14px;
+  color: var(--text-muted); line-height: 1.7;
+}
+.econ-feature-highlight {
+  display: inline-block; margin-top: 10px;
+  font-family: var(--mono); font-size: 12px;
+  padding: 4px 10px;
+}
+
+/* ─── AI Section ─────────────────────────────────────────────── */
+.ai-section {
+  position: relative; overflow: hidden;
+}
+.ai-section::before {
+  content: ''; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(136,68,255,0.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+.ai-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  max-width: 1200px; margin: 0 auto;
+}
+.ai-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px 24px;
+  transition: border-color 0.3s, transform 0.25s, box-shadow 0.3s;
+}
+.ai-card:hover {
+  border-color: rgba(136,68,255,0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 0 40px rgba(136,68,255,0.06);
+}
+.ai-card-icon {
+  font-size: 32px; margin-bottom: 18px;
+}
+.ai-card-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 18px; color: var(--text-primary);
+  letter-spacing: -0.02em; margin-bottom: 10px;
+}
+.ai-card-body {
+  font-family: var(--inter); font-size: 14px;
+  color: var(--text-muted); line-height: 1.75;
+}
+.ai-prompt-demo {
+  max-width: 1200px; margin: 56px auto 0;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 24px 28px; position: relative;
+}
+.ai-prompt-label {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 12px;
+}
+.ai-prompt-text {
+  font-family: var(--mono); font-size: 14px;
+  color: var(--cyan); line-height: 1.7;
+  overflow: hidden; white-space: nowrap;
+  border-right: 2px solid var(--cyan);
+  animation: typewriter 3s steps(60) forwards, blink 0.7s step-end infinite;
+  max-width: fit-content;
+}
+.ai-prompt-output {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid #111;
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-muted); line-height: 1.7;
+  animation: fadeIn 0.6s ease 3.2s both;
+}
+
+/* ─── Pricing ────────────────────────────────────────────────── */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  max-width: 1200px; margin: 0 auto;
+}
+.price-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 36px 28px;
+  display: flex; flex-direction: column;
+  transition: border-color 0.3s, transform 0.25s, box-shadow 0.3s;
+}
+.price-card:hover {
+  transform: translateY(-4px);
+  border-color: #222;
+}
+.price-card.featured {
+  border-color: rgba(136,68,255,0.3);
+  background: linear-gradient(180deg, rgba(136,68,255,0.04) 0%, var(--surface) 40%);
+  position: relative;
+}
+.price-card.featured::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 2px; background: var(--grad);
+}
+.price-card-badge {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--purple); text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 12px;
+}
+.price-card-name {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 22px; color: var(--text-primary);
+  letter-spacing: -0.03em; margin-bottom: 8px;
+}
+.price-card-price {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 36px; color: var(--text-primary);
+  letter-spacing: -0.04em; margin-bottom: 4px;
+}
+.price-card-price span {
+  font-size: 15px; font-weight: 500; color: var(--text-muted);
+}
+.price-card-desc {
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-muted); margin-bottom: 28px;
+  line-height: 1.6;
+}
+.price-features {
+  display: flex; flex-direction: column; gap: 10px;
+  margin-bottom: 32px; flex: 1;
+}
+.price-feature {
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 10px;
+}
+.price-feature::before {
+  content: ''; width: 4px; height: 4px;
+  background: var(--text-dim); border-radius: 50%; flex-shrink: 0;
+}
+.price-card.featured .price-feature::before {
+  background: var(--purple);
+}
+.price-btn {
+  width: 100%; padding: 12px;
+  font-family: var(--inter); font-weight: 600; font-size: 13px;
+  background: rgba(255,255,255,0.03); border: 1px solid #1a1a1a;
+  color: var(--text-secondary);
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.price-btn:hover {
+  background: rgba(255,255,255,0.06); border-color: #333; color: #ddd;
+}
+.price-card.featured .price-btn {
+  background: var(--grad); background-size: 200% 100%;
+  border: none; color: #fff;
+  box-shadow: 0 4px 16px rgba(136,68,255,0.2);
+  transition: background-position 0.4s, transform 0.2s, box-shadow 0.2s;
+}
+.price-card.featured .price-btn:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136,68,255,0.3);
+}
+
+/* ─── CTA Section ────────────────────────────────────────────── */
+.cta-section {
+  text-align: center;
+  padding: 140px 40px;
+  position: relative; overflow: hidden;
+}
+.cta-section::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(136,68,255,0.08) 0%, transparent 80%);
+  pointer-events: none;
+}
+.cta-title {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: clamp(36px, 8vw, 64px);
+  letter-spacing: -0.04em; line-height: 1.05;
+  margin-bottom: 24px;
+}
+.cta-title-grad {
+  background: var(--grad);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cta-sub {
+  font-family: var(--inter); font-size: 18px;
+  color: #606060; max-width: 500; margin: 0 auto 48px;
+  line-height: 1.7;
+}
+.cta-buttons {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid #0e0e0e;
+  padding: 60px 40px 40px;
+  max-width: 1200px; margin: 0 auto;
+}
+.footer-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  flex-wrap: wrap; gap: 40px; margin-bottom: 48px;
+}
+.footer-brand {
+  max-width: 280px;
+}
+.footer-brand-name {
+  font-family: var(--grotesk); font-weight: 700;
+  font-size: 20px; color: var(--text-primary);
+  letter-spacing: -0.03em; margin-bottom: 12px;
+}
+.footer-brand-desc {
+  font-family: var(--inter); font-size: 13px;
+  color: var(--text-muted); line-height: 1.7;
+}
+.footer-cols {
+  display: flex; gap: 64px;
+}
+.footer-col-title {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.12em; margin-bottom: 16px;
+}
+.footer-col a {
+  display: block; font-family: var(--inter); font-size: 13px;
+  color: var(--text-muted); margin-bottom: 10px;
+  transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--text-primary); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 24px; border-top: 1px solid #0a0a0a;
+}
+.footer-copy {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text-dim);
+}
+.footer-legal {
+  display: flex; gap: 24px;
+}
+.footer-legal a {
+  font-family: var(--inter); font-size: 12px;
+  color: var(--text-dim); transition: color 0.2s;
+}
+.footer-legal a:hover { color: var(--text-secondary); }
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .problem-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
+  .economics-grid { grid-template-columns: 1fr; gap: 40px; }
+  .ai-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; }
+  .section, .section-full { padding: 80px 20px; }
+  .footer-cols { gap: 32px; }
+}
+@media (max-width: 600px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 24px; }
+  .nav { padding: 0 16px; }
+  .problem-stat-row { flex-direction: column; gap: 20px; }
+  .footer-top { flex-direction: column; }
+  .footer-cols { flex-wrap: wrap; gap: 32px; }
+  .econ-bar-label { width: 80px; font-size: 12px; }
+}
+</style>
+<meta property="og:title" content="Lucidia Studio — From Idea to Ship in Minutes">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://lucidia.studio/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://lucidia.studio/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lucidia Studio — From Idea to Ship in Minutes","url":"https://lucidia.studio","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     NAVIGATION
+     ══════════════════════════════════════════════════════════════ -->
+<div class="nav-wrap">
+  <div class="nav-grad-line"></div>
+  <nav class="nav" id="mainNav">
+    <div class="nav-logo">
+      <div class="nav-logo-bars">
+        <div class="nav-logo-bar" style="background:#FF6B2B; animation:barPulse 2.5s ease-in-out 0s infinite"></div>
+        <div class="nav-logo-bar" style="background:#FF2255; animation:barPulse 2.5s ease-in-out 0.14s infinite"></div>
+        <div class="nav-logo-bar" style="background:#CC00AA; animation:barPulse 2.5s ease-in-out 0.28s infinite"></div>
+        <div class="nav-logo-bar" style="background:#8844FF; animation:barPulse 2.5s ease-in-out 0.42s infinite"></div>
+        <div class="nav-logo-bar" style="background:#4488FF; animation:barPulse 2.5s ease-in-out 0.56s infinite"></div>
+        <div class="nav-logo-bar" style="background:#00D4FF; animation:barPulse 2.5s ease-in-out 0.7s infinite"></div>
+      </div>
+      <span class="nav-logo-text">Lucidia<span class="nav-logo-sub">studio</span></span>
+    </div>
+    <div class="nav-links">
+      <a href="#tools">Tools</a>
+      <a href="#economics">Economics</a>
+      <a href="#ai">AI</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Start Creating</button>
+  </nav>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    <span class="hero-badge-text">Creator tools, reimagined</span>
+  </div>
+
+  <h1 class="hero-title">
+    From Idea to Ship<br>
+    <span class="hero-title-grad">in Minutes</span>
+  </h1>
+
+  <p class="hero-sub">
+    Ideas take 5 seconds. Production takes weeks. Lucidia Studio closes that gap with browser-native creator tools, AI-powered workflows, and economics that actually favor creators.
+  </p>
+
+  <div class="hero-ctas">
+    <button class="btn-grad" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Start Creating</button>
+    <button class="btn-outline" onclick="document.getElementById('tools').scrollIntoView({behavior:'smooth'})">Explore Tools &darr;</button>
+  </div>
+
+  <div class="hero-stats">
+    <div style="text-align:center">
+      <div class="hero-stat-val">90%+</div>
+      <div class="hero-stat-label">Revenue Share</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">4K</div>
+      <div class="hero-stat-label">Browser-native</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">$0</div>
+      <div class="hero-stat-label">Transaction fees</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">&lt;2min</div>
+      <div class="hero-stat-label">Idea to Export</div>
+    </div>
+  </div>
+
+  <div class="hero-divider"></div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     THE PROBLEM
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section-full problem-section" id="problem">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="reveal">
+      <div class="section-label">// The Problem</div>
+      <div class="section-title">Creation is broken.</div>
+      <div class="section-desc">
+        Content creators spend 6-10 hours per piece of content. The tools are either too complex, too simple, or too expensive. Every option forces a compromise.
+      </div>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-card reveal" style="transition-delay:0.1s">
+        <div class="problem-card-line"></div>
+        <div class="problem-card-icon">Ps</div>
+        <div class="problem-card-title">Too Complex</div>
+        <div class="problem-card-price">$52.99/mo</div>
+        <div class="problem-card-body">
+          Adobe Creative Suite demands months of learning before you produce anything professional. Photoshop alone has 500+ features most creators never touch. The skill ceiling is high, but the floor is a cliff. Average time to proficiency: 6-12 months.
+        </div>
+      </div>
+
+      <div class="problem-card reveal" style="transition-delay:0.2s">
+        <div class="problem-card-line"></div>
+        <div class="problem-card-icon">Ca</div>
+        <div class="problem-card-title">Too Simple</div>
+        <div class="problem-card-price">$12.99/mo</div>
+        <div class="problem-card-body">
+          Canva makes design accessible, but every output looks like every other Canva design. Generic templates, limited customization, no real video editing, no audio production. You hit the ceiling in week one. Your brand looks like everyone else's brand.
+        </div>
+      </div>
+
+      <div class="problem-card reveal" style="transition-delay:0.3s">
+        <div class="problem-card-line"></div>
+        <div class="problem-card-icon">AI</div>
+        <div class="problem-card-title">Too Limited</div>
+        <div class="problem-card-price">$200/mo</div>
+        <div class="problem-card-body">
+          Current AI tools generate 5-20 second clips with no continuity. Sora, Runway, Pika — they produce isolated fragments, not cohesive content. You still need traditional tools to assemble the final product. AI creates pieces, not productions.
+        </div>
+      </div>
+    </div>
+
+    <div class="problem-stat-row reveal">
+      <div class="problem-stat">
+        <div class="problem-stat-val red">6-10hrs</div>
+        <div class="problem-stat-label">Per content piece</div>
+      </div>
+      <div class="problem-stat">
+        <div class="problem-stat-val orange">73%</div>
+        <div class="problem-stat-label">Creators feel undervalued</div>
+      </div>
+      <div class="problem-stat">
+        <div class="problem-stat-val purple">$266/mo</div>
+        <div class="problem-stat-label">Avg tool spend</div>
+      </div>
+      <div class="problem-stat">
+        <div class="problem-stat-val" style="color:var(--cyan)">2M+</div>
+        <div class="problem-stat-label">New creators / month</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     STUDIO TOOLS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section" id="tools">
+  <div class="reveal">
+    <div class="section-label">// Studio Tools</div>
+    <div class="section-title">Four studios.<br>One browser tab.</div>
+    <div class="section-desc">
+      No downloads, no installations, no plugin hell. Every tool runs natively in your browser at full fidelity. WebCodecs, WASM, and WebGPU — the browser is finally powerful enough.
+    </div>
+  </div>
+
+  <div class="tools-grid">
+    <!-- Video Editor -->
+    <div class="tool-card reveal" data-color="orange" style="transition-delay:0.1s">
+      <div class="tool-card-top">
+        <div class="tool-card-icon" style="color:var(--orange)">&#9654;</div>
+        <div>
+          <div class="tool-card-label">Video</div>
+          <div class="tool-card-name">Video Editor</div>
+        </div>
+      </div>
+      <div class="tool-card-accent" style="background:var(--orange)"></div>
+      <div class="tool-card-body">
+        Browser-native 4K editing powered by WebCodecs and WASM. No uploads, no render farms, no waiting. Cut, composite, color grade, and export — all running on your GPU through WebGPU acceleration. Frame-accurate timeline with multi-track audio.
+      </div>
+      <div class="tool-card-features">
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--orange)"></div>4K 60fps playback in-browser</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--orange)"></div>WebCodecs + WASM processing pipeline</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--orange)"></div>Real-time color grading via LUTs</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--orange)"></div>Multi-track timeline with keyframing</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--orange)"></div>Export to MP4, WebM, ProRes</div>
+      </div>
+      <div class="tool-demo">
+        <div class="timeline-demo">
+          <div class="timeline-block" style="width:25%; background:var(--orange)"></div>
+          <div class="timeline-block" style="width:15%; background:var(--red)"></div>
+          <div class="timeline-block" style="width:35%; background:var(--orange); opacity:0.6"></div>
+          <div class="timeline-block" style="width:10%; background:var(--magenta)"></div>
+          <div class="timeline-block" style="width:20%; background:var(--orange); opacity:0.4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voice Studio -->
+    <div class="tool-card reveal" data-color="cyan" style="transition-delay:0.2s">
+      <div class="tool-card-top">
+        <div class="tool-card-icon" style="color:var(--cyan)">&#9835;</div>
+        <div>
+          <div class="tool-card-label">Voice</div>
+          <div class="tool-card-name">Voice Studio</div>
+        </div>
+      </div>
+      <div class="tool-card-accent" style="background:var(--cyan)"></div>
+      <div class="tool-card-body">
+        38% of new creators are faceless — voice is their identity. Clone, generate, and fine-tune voices with sub-200ms latency. The $54.5B voice market is exploding and creators need professional-grade tools that don't cost professional-grade prices.
+      </div>
+      <div class="tool-card-features">
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--cyan)"></div>Voice cloning from 30-second samples</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--cyan)"></div>Real-time voice transformation</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--cyan)"></div>Multi-language generation (42 languages)</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--cyan)"></div>Emotion and tone control</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--cyan)"></div>Background noise removal + mastering</div>
+      </div>
+      <div class="tool-demo">
+        <div class="waveform-demo">
+          <div class="waveform-bar" style="animation-delay:0s"></div>
+          <div class="waveform-bar" style="animation-delay:0.1s"></div>
+          <div class="waveform-bar" style="animation-delay:0.2s"></div>
+          <div class="waveform-bar" style="animation-delay:0.3s"></div>
+          <div class="waveform-bar" style="animation-delay:0.4s"></div>
+          <div class="waveform-bar" style="animation-delay:0.5s"></div>
+          <div class="waveform-bar" style="animation-delay:0.6s"></div>
+          <div class="waveform-bar" style="animation-delay:0.7s"></div>
+          <div class="waveform-bar" style="animation-delay:0.8s"></div>
+          <div class="waveform-bar" style="animation-delay:0.9s"></div>
+          <div class="waveform-bar" style="animation-delay:1.0s"></div>
+          <div class="waveform-bar" style="animation-delay:0.15s"></div>
+          <div class="waveform-bar" style="animation-delay:0.25s"></div>
+          <div class="waveform-bar" style="animation-delay:0.35s"></div>
+          <div class="waveform-bar" style="animation-delay:0.45s"></div>
+          <div class="waveform-bar" style="animation-delay:0.55s"></div>
+          <div class="waveform-bar" style="animation-delay:0.65s"></div>
+          <div class="waveform-bar" style="animation-delay:0.75s"></div>
+          <div class="waveform-bar" style="animation-delay:0.85s"></div>
+          <div class="waveform-bar" style="animation-delay:0.95s"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Editor -->
+    <div class="tool-card reveal" data-color="purple" style="transition-delay:0.3s">
+      <div class="tool-card-top">
+        <div class="tool-card-icon" style="color:var(--purple)">&#9674;</div>
+        <div>
+          <div class="tool-card-label">Visual</div>
+          <div class="tool-card-name">Visual Editor</div>
+        </div>
+      </div>
+      <div class="tool-card-accent" style="background:var(--purple)"></div>
+      <div class="tool-card-body">
+        Design without design school. Intelligent layout systems, constraint-based positioning, and real-time collaboration. Thumbnails, social posts, brand kits, presentations — all with the precision of Figma and the approachability of a blank canvas.
+      </div>
+      <div class="tool-card-features">
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--purple)"></div>Constraint-based responsive layouts</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--purple)"></div>Smart typography and color pairing</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--purple)"></div>Brand kit with auto-apply</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--purple)"></div>Real-time multiplayer editing</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--purple)"></div>Export to PNG, SVG, PDF, WebP</div>
+      </div>
+      <div class="tool-demo">
+        <div class="color-palette-demo">
+          <div class="color-swatch" style="background:#FF6B2B"></div>
+          <div class="color-swatch" style="background:#FF2255"></div>
+          <div class="color-swatch" style="background:#CC00AA"></div>
+          <div class="color-swatch" style="background:#8844FF"></div>
+          <div class="color-swatch" style="background:#4488FF"></div>
+          <div class="color-swatch" style="background:#00D4FF"></div>
+          <div class="color-swatch" style="background:#0D0D0D"></div>
+          <div class="color-swatch" style="background:#1A1A1A"></div>
+          <div class="color-swatch" style="background:#f5f5f5"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music Production -->
+    <div class="tool-card reveal" data-color="red" style="transition-delay:0.4s">
+      <div class="tool-card-top">
+        <div class="tool-card-icon" style="color:var(--red)">&#9836;</div>
+        <div>
+          <div class="tool-card-label">Music</div>
+          <div class="tool-card-name">Music Studio</div>
+        </div>
+      </div>
+      <div class="tool-card-accent" style="background:var(--red)"></div>
+      <div class="tool-card-body">
+        A full DAW in your browser. Web Audio API + WASM synthesizers give you professional production without installing a single plugin. MIDI support, virtual instruments, sample libraries, and AI-assisted composition for creators who need original tracks.
+      </div>
+      <div class="tool-card-features">
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--red)"></div>Web Audio API + WASM synthesizers</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--red)"></div>MIDI controller support</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--red)"></div>Built-in sample library (10K+ sounds)</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--red)"></div>AI chord and melody suggestions</div>
+        <div class="tool-card-feature"><div class="tool-card-feature-dot" style="background:var(--red)"></div>Export stems, WAV, FLAC, MP3</div>
+      </div>
+      <div class="tool-demo">
+        <div class="piano-demo">
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key"></div>
+          <div class="piano-key black"></div>
+          <div class="piano-key"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CREATOR ECONOMICS
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section-full economics-section" id="economics">
+  <div style="max-width:1200px; margin:0 auto; padding:0 40px;">
+    <div class="reveal">
+      <div class="section-label">// Creator Economics</div>
+      <div class="section-title">You make it.<br>You keep it.</div>
+      <div class="section-desc">
+        Platforms extract value from creators. Lucidia Studio inverts that model. 90%+ revenue share, zero transaction fees on educational content, and anonymity as a first-class feature.
+      </div>
+    </div>
+
+    <div class="economics-grid">
+      <div class="economics-chart reveal-left">
+        <div style="font-family:var(--mono); font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:24px;">Revenue share comparison</div>
+
+        <div class="econ-bar-row">
+          <div class="econ-bar-label">Roblox</div>
+          <div class="econ-bar-track">
+            <div class="econ-bar-fill" data-width="29%" style="background:rgba(255,34,85,0.6)">29%</div>
+          </div>
+        </div>
+        <div class="econ-bar-row">
+          <div class="econ-bar-label">Apple</div>
+          <div class="econ-bar-track">
+            <div class="econ-bar-fill" data-width="70%" style="background:rgba(255,107,43,0.5)">70%</div>
+          </div>
+        </div>
+        <div class="econ-bar-row">
+          <div class="econ-bar-label">YouTube</div>
+          <div class="econ-bar-track">
+            <div class="econ-bar-fill" data-width="55%" style="background:rgba(136,68,255,0.5)">55%</div>
+          </div>
+        </div>
+        <div class="econ-bar-row">
+          <div class="econ-bar-label">Spotify</div>
+          <div class="econ-bar-track">
+            <div class="econ-bar-fill" data-width="30%" style="background:rgba(68,136,255,0.5)">~30%</div>
+          </div>
+        </div>
+        <div class="econ-bar-row">
+          <div class="econ-bar-label" style="color:var(--text-primary); font-weight:600">Lucidia</div>
+          <div class="econ-bar-track" style="border-color:rgba(0,212,255,0.2)">
+            <div class="econ-bar-fill" data-width="93%" style="background:linear-gradient(90deg, var(--cyan), var(--purple))">93%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="econ-features reveal-right">
+        <div class="econ-feature">
+          <div class="econ-feature-title">90%+ Revenue Share</div>
+          <div class="econ-feature-body">
+            You created it, you should earn from it. Our infrastructure costs are low because everything runs in the browser. We pass those savings directly to creators.
+          </div>
+          <div class="econ-feature-highlight" style="background:rgba(0,212,255,0.08); color:var(--cyan)">93% on direct sales</div>
+        </div>
+
+        <div class="econ-feature">
+          <div class="econ-feature-title">Zero Fees on Education</div>
+          <div class="econ-feature-body">
+            Educational content deserves to be free from platform taxes. Tutorials, courses, explainers — if you're teaching, we're not charging. Knowledge should flow without friction.
+          </div>
+          <div class="econ-feature-highlight" style="background:rgba(136,68,255,0.08); color:var(--purple)">0% transaction fee</div>
+        </div>
+
+        <div class="econ-feature">
+          <div class="econ-feature-title">Anonymity as a Feature</div>
+          <div class="econ-feature-body">
+            38% of new creators choose to be faceless. That's not a limitation — it's a preference we respect. Create under any identity. Your voice, your avatar, your choice. No face required.
+          </div>
+          <div class="econ-feature-highlight" style="background:rgba(255,107,43,0.08); color:var(--orange)">Privacy-first architecture</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     AI-POWERED
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section-full ai-section" id="ai">
+  <div style="max-width:1200px; margin:0 auto; padding:0 40px;">
+    <div class="reveal">
+      <div class="section-label">// AI-Powered Creation</div>
+      <div class="section-title">Describe it.<br>Build it.</div>
+      <div class="section-desc">
+        Natural language as the primary interface. Generate educational content, data visualizations, interactive simulations, and complete video sequences from a text prompt. The AI has full context of your project — it doesn't just generate fragments, it builds alongside you.
+      </div>
+    </div>
+
+    <div class="ai-grid">
+      <div class="ai-card reveal" style="transition-delay:0.1s">
+        <div class="ai-card-icon">&#9672;</div>
+        <div class="ai-card-title">Context-Aware Generation</div>
+        <div class="ai-card-body">
+          The AI sees your entire project — timeline, assets, brand kit, previous edits. When you ask for "a transition between these two scenes," it knows exactly what you mean. No disconnected one-shot generation. Coherent, project-aware output every time.
+        </div>
+      </div>
+
+      <div class="ai-card reveal" style="transition-delay:0.2s">
+        <div class="ai-card-icon">&#9678;</div>
+        <div class="ai-card-title">Educational Content Engine</div>
+        <div class="ai-card-body">
+          Describe a concept and get a complete educational video: narration, visuals, annotations, interactive quizzes. From "explain how TCP handshakes work" to a polished 3-minute explainer — with diagrams that actually make sense.
+        </div>
+      </div>
+
+      <div class="ai-card reveal" style="transition-delay:0.3s">
+        <div class="ai-card-icon">&#9670;</div>
+        <div class="ai-card-title">Data Visualization</div>
+        <div class="ai-card-body">
+          Feed it a dataset and describe the story you want to tell. Animated charts, interactive dashboards, scrollytelling narratives — generated as editable components you can drop directly into your timeline or canvas.
+        </div>
+      </div>
+
+      <div class="ai-card reveal" style="transition-delay:0.4s">
+        <div class="ai-card-icon">&#9671;</div>
+        <div class="ai-card-title">Simulation Builder</div>
+        <div class="ai-card-body">
+          "Show how gravity affects orbital mechanics" becomes a live interactive simulation. Physics, biology, chemistry, economics — complex systems rendered as explorable visual experiences your audience can interact with.
+        </div>
+      </div>
+
+      <div class="ai-card reveal" style="transition-delay:0.5s">
+        <div class="ai-card-icon">&#9673;</div>
+        <div class="ai-card-title">Voice & Music Generation</div>
+        <div class="ai-card-body">
+          Generate narration in your cloned voice, background music matched to mood, and sound effects synced to visual beats. The AI handles timing, pacing, and emotional arc — you handle the creative direction.
+        </div>
+      </div>
+
+      <div class="ai-card reveal" style="transition-delay:0.6s">
+        <div class="ai-card-icon">&#9679;</div>
+        <div class="ai-card-title">Batch & Repurpose</div>
+        <div class="ai-card-body">
+          One long-form video becomes 12 short-form clips, a blog post, a carousel, and a podcast episode. The AI understands content structure and repackages your work for every platform automatically. Create once, publish everywhere.
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-prompt-demo reveal">
+      <div class="ai-prompt-label">Lucidia AI</div>
+      <div class="ai-prompt-text">"Create a 2-minute explainer about how neural networks learn, with animated diagrams"</div>
+      <div class="ai-prompt-output">
+        <span style="color:var(--purple)">&#10003;</span> Generated storyboard (6 scenes) &nbsp;&middot;&nbsp;
+        <span style="color:var(--cyan)">&#10003;</span> Rendered neural network animations &nbsp;&middot;&nbsp;
+        <span style="color:var(--orange)">&#10003;</span> Synthesized narration (1:58) &nbsp;&middot;&nbsp;
+        <span style="color:var(--text-muted)">Ready for review</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRICING
+     ══════════════════════════════════════════════════════════════ -->
+<section class="section" id="pricing">
+  <div class="reveal" style="text-align:center; margin-bottom:64px;">
+    <div class="section-label" style="text-align:center;">// Pricing</div>
+    <div class="section-title" style="text-align:center; margin-left:auto; margin-right:auto;">
+      Start free.<br>Scale when ready.
+    </div>
+    <div class="section-desc" style="text-align:center; margin-left:auto; margin-right:auto;">
+      No credit card required. No trial limits. Build real projects on the free tier and upgrade when your workflow demands it.
+    </div>
+  </div>
+
+  <div class="pricing-grid">
+    <!-- Free -->
+    <div class="price-card reveal" style="transition-delay:0.1s">
+      <div class="price-card-name">Free</div>
+      <div class="price-card-price">$0 <span>/forever</span></div>
+      <div class="price-card-desc">Perfect for trying out the studio and building your first projects.</div>
+      <div class="price-features">
+        <div class="price-feature">3 active projects</div>
+        <div class="price-feature">1080p export</div>
+        <div class="price-feature">Basic AI generation</div>
+        <div class="price-feature">5 voice clones</div>
+        <div class="price-feature">Community support</div>
+        <div class="price-feature">2GB cloud storage</div>
+      </div>
+      <button class="price-btn">Get Started</button>
+    </div>
+
+    <!-- Creator -->
+    <div class="price-card reveal" style="transition-delay:0.2s">
+      <div class="price-card-name">Creator</div>
+      <div class="price-card-price">$29 <span>/mo</span></div>
+      <div class="price-card-desc">For individual creators building a content business.</div>
+      <div class="price-features">
+        <div class="price-feature">Unlimited projects</div>
+        <div class="price-feature">4K export</div>
+        <div class="price-feature">Advanced AI (500 gen/mo)</div>
+        <div class="price-feature">25 voice clones</div>
+        <div class="price-feature">Music studio full access</div>
+        <div class="price-feature">50GB cloud storage</div>
+        <div class="price-feature">Priority rendering</div>
+        <div class="price-feature">Brand kit</div>
+      </div>
+      <button class="price-btn">Start Creating</button>
+    </div>
+
+    <!-- Pro -->
+    <div class="price-card featured reveal" style="transition-delay:0.3s">
+      <div class="price-card-badge">Most Popular</div>
+      <div class="price-card-name">Pro</div>
+      <div class="price-card-price">$99 <span>/mo</span></div>
+      <div class="price-card-desc">For professional creators and small teams shipping daily.</div>
+      <div class="price-features">
+        <div class="price-feature">Everything in Creator</div>
+        <div class="price-feature">8K export + ProRes</div>
+        <div class="price-feature">Unlimited AI generation</div>
+        <div class="price-feature">Unlimited voice clones</div>
+        <div class="price-feature">Batch content repurposing</div>
+        <div class="price-feature">500GB cloud storage</div>
+        <div class="price-feature">Real-time collaboration (5 seats)</div>
+        <div class="price-feature">API access</div>
+        <div class="price-feature">Analytics dashboard</div>
+      </div>
+      <button class="price-btn">Start Pro Trial</button>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="price-card reveal" style="transition-delay:0.4s">
+      <div class="price-card-name">Enterprise</div>
+      <div class="price-card-price">Custom</div>
+      <div class="price-card-desc">For studios, agencies, and organizations with custom needs.</div>
+      <div class="price-features">
+        <div class="price-feature">Everything in Pro</div>
+        <div class="price-feature">Unlimited seats</div>
+        <div class="price-feature">Custom model fine-tuning</div>
+        <div class="price-feature">On-premise deployment</div>
+        <div class="price-feature">Unlimited storage</div>
+        <div class="price-feature">SLA + dedicated support</div>
+        <div class="price-feature">Custom integrations</div>
+        <div class="price-feature">White-label option</div>
+        <div class="price-feature">SOC 2 compliance</div>
+      </div>
+      <button class="price-btn">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FINAL CTA
+     ══════════════════════════════════════════════════════════════ -->
+<section class="cta-section" id="cta">
+  <div class="reveal">
+    <div class="cta-title">
+      Stop waiting.<br>
+      <span class="cta-title-grad">Start creating.</span>
+    </div>
+    <div class="cta-sub">
+      The gap between your idea and a finished product should be measured in minutes, not months. Lucidia Studio makes that real.
+    </div>
+    <div class="cta-buttons">
+      <button class="btn-grad" style="font-size:17px; padding:16px 44px;">Start Creating — Free</button>
+      <button class="btn-outline" style="font-size:17px; padding:16px 36px;">Watch the Demo &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-brand-name">Lucidia Studio</div>
+      <div class="footer-brand-desc">
+        Browser-native creator tools with AI-powered workflows and economics that favor creators. From idea to ship in minutes.
+      </div>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <div class="footer-col-title">Product</div>
+        <a href="#tools">Video Editor</a>
+        <a href="#tools">Voice Studio</a>
+        <a href="#tools">Visual Editor</a>
+        <a href="#tools">Music Studio</a>
+        <a href="#ai">AI Features</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Company</div>
+        <a href="https://blackroad.io">BlackRoad OS</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#">Blog</a>
+        <a href="#">Changelog</a>
+        <a href="#">Careers</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Resources</div>
+        <a href="#">Documentation</a>
+        <a href="#">Tutorials</a>
+        <a href="#">Community</a>
+        <a href="#">Status</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <div class="footer-legal">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Security</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Scroll-based nav background ─────────────────────────────
+  const nav = document.getElementById('mainNav');
+  let lastScrolled = false;
+  function checkNav() {
+    const scrolled = window.scrollY > 40;
+    if (scrolled !== lastScrolled) {
+      nav.classList.toggle('scrolled', scrolled);
+      lastScrolled = scrolled;
+    }
+  }
+  window.addEventListener('scroll', checkNav, { passive: true });
+  checkNav();
+
+  // ─── Intersection Observer for reveal animations ─────────────
+  const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+  const revealObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
+  });
+  revealElements.forEach(function(el) {
+    revealObserver.observe(el);
+  });
+
+  // ─── Animated revenue bars ───────────────────────────────────
+  const barFills = document.querySelectorAll('.econ-bar-fill');
+  const barObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.econ-bar-fill');
+        fills.forEach(function(fill, i) {
+          setTimeout(function() {
+            fill.style.width = fill.getAttribute('data-width');
+          }, i * 150);
+        });
+        barObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const chartEl = document.querySelector('.economics-chart');
+  if (chartEl) {
+    barObserver.observe(chartEl);
+  }
+
+  // ─── Smooth scroll for anchor links ──────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ─── Rotating gradient on hero title ─────────────────────────
+  var heroGrad = document.querySelector('.hero-title-grad');
+  if (heroGrad) {
+    var angle = 0;
+    function rotateHeroGrad() {
+      angle = (angle + 0.5) % 360;
+      heroGrad.style.background = 'linear-gradient(' + angle + 'deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF)';
+      heroGrad.style.webkitBackgroundClip = 'text';
+      heroGrad.style.webkitTextFillColor = 'transparent';
+      heroGrad.style.backgroundClip = 'text';
+      requestAnimationFrame(rotateHeroGrad);
+    }
+    rotateHeroGrad();
+  }
+
+  // ─── Typewriter effect for AI prompt ─────────────────────────
+  var promptEl = document.querySelector('.ai-prompt-text');
+  if (promptEl) {
+    var fullText = promptEl.textContent;
+    promptEl.textContent = '';
+    promptEl.style.borderRight = '2px solid var(--cyan)';
+    var promptObserver = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          typeWrite(promptEl, fullText, 0);
+          promptObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    promptObserver.observe(promptEl);
+  }
+
+  function typeWrite(el, text, i) {
+    if (i <= text.length) {
+      el.textContent = text.substring(0, i);
+      setTimeout(function() { typeWrite(el, text, i + 1); }, 35);
+    } else {
+      // Show output after typing completes
+      var output = document.querySelector('.ai-prompt-output');
+      if (output) {
+        output.style.animation = 'none';
+        output.style.opacity = '0';
+        setTimeout(function() {
+          output.style.transition = 'opacity 0.6s ease';
+          output.style.opacity = '1';
+        }, 400);
+      }
+    }
+  }
+
+  // ─── Parallax orbs on mouse move ─────────────────────────────
+  var orbs = document.querySelectorAll('.hero-orb');
+  document.addEventListener('mousemove', function(e) {
+    var mx = (e.clientX / window.innerWidth - 0.5) * 2;
+    var my = (e.clientY / window.innerHeight - 0.5) * 2;
+    orbs.forEach(function(orb, i) {
+      var speed = (i + 1) * 8;
+      orb.style.transform = orb.style.transform || '';
+      var base = '';
+      if (i === 0) base = 'translateX(-50%)';
+      orb.style.transform = base + ' translate(' + (mx * speed) + 'px, ' + (my * speed) + 'px)';
+    });
+  });
+
+  // ─── Tool card hover glow effect ─────────────────────────────
+  document.querySelectorAll('.tool-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      card.style.background = 'radial-gradient(600px circle at ' + x + 'px ' + y + 'px, rgba(255,255,255,0.02), var(--surface) 60%)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.background = 'var(--surface)';
+    });
+  });
+
+  // ─── Pricing card hover glow ─────────────────────────────────
+  document.querySelectorAll('.price-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      var isFeatured = card.classList.contains('featured');
+      var base = isFeatured
+        ? 'linear-gradient(180deg, rgba(136,68,255,0.04) 0%, var(--surface) 40%)'
+        : 'var(--surface)';
+      card.style.background = 'radial-gradient(400px circle at ' + x + 'px ' + y + 'px, rgba(255,255,255,0.025), transparent 60%), ' + base;
+    });
+    card.addEventListener('mouseleave', function() {
+      var isFeatured = card.classList.contains('featured');
+      card.style.background = isFeatured
+        ? 'linear-gradient(180deg, rgba(136,68,255,0.04) 0%, var(--surface) 40%)'
+        : 'var(--surface)';
+    });
+  });
+
+  // ─── AI card hover glow ──────────────────────────────────────
+  document.querySelectorAll('.ai-card').forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var rect = card.getBoundingClientRect();
+      var x = e.clientX - rect.left;
+      var y = e.clientY - rect.top;
+      card.style.background = 'radial-gradient(400px circle at ' + x + 'px ' + y + 'px, rgba(136,68,255,0.03), var(--surface) 60%)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.background = 'var(--surface)';
+    });
+  });
+
+  // ─── Staggered animation delays for grid children ────────────
+  document.querySelectorAll('.tools-grid .tool-card, .ai-grid .ai-card, .pricing-grid .price-card, .problem-grid .problem-card').forEach(function(card, i) {
+    card.style.transitionDelay = (i * 0.1) + 's';
+  });
+
+  // ─── Counter animation for hero stats ────────────────────────
+  var statVals = document.querySelectorAll('.hero-stat-val');
+  statVals.forEach(function(el) {
+    el.style.animation = 'countUp 0.6s ease both';
+  });
+
+  // ─── Piano key hover effect ──────────────────────────────────
+  document.querySelectorAll('.piano-key').forEach(function(key) {
+    key.addEventListener('mouseenter', function() {
+      if (key.classList.contains('black')) {
+        key.style.background = '#333';
+      } else {
+        key.style.background = '#ddd';
+      }
+    });
+    key.addEventListener('mouseleave', function() {
+      if (key.classList.contains('black')) {
+        key.style.background = '#111';
+      } else {
+        key.style.background = '#f0f0f0';
+      }
+    });
+  });
+
+  // ─── Waveform randomization ──────────────────────────────────
+  document.querySelectorAll('.waveform-bar').forEach(function(bar) {
+    var duration = 0.8 + Math.random() * 0.8;
+    bar.style.animationDuration = duration + 's';
+  });
+
+})();
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

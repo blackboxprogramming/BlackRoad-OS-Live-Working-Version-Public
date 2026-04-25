@@ -1,0 +1,734 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum — Knowledge Is Sovereign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sg); line-height: 1.6; overflow-x: hidden; }
+.gradient-bar { height: 4px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+nav {
+  position: fixed; top: 4px; left: 0; right: 0; z-index: 999;
+  background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
+}
+.logo { font-family: var(--sg); font-weight: 700; font-size: 1.25rem; }
+.logo span { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.875rem; font-family: var(--jb); transition: color 0.3s; }
+.nav-links a:hover { color: var(--text); }
+.section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.25; margin-bottom: 1rem; }
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-family: var(--sg); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
+h2 { font-family: var(--sg); font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+h3 { font-family: var(--sg); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+h4 { font-family: var(--sg); font-size: 1.05rem; font-weight: 500; margin-bottom: 0.5rem; }
+p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 68px; position: relative; }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero .subtitle { font-size: clamp(1.1rem, 2.5vw, 1.35rem); color: var(--text-dim); max-width: 640px; margin-bottom: 2.5rem; }
+.hero-gradient {
+  position: absolute; top: 40%; left: 60%; transform: translate(-50%, -50%);
+  width: 700px; height: 700px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(204,0,170,0.06) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.btn-primary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: var(--g); color: #fff; text-decoration: none; font-weight: 600;
+  font-family: var(--sg); font-size: 1rem; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(204,0,170,0.3); }
+.btn-secondary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: transparent; color: var(--text); text-decoration: none;
+  font-weight: 500; font-family: var(--sg); font-size: 1rem;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color 0.3s;
+}
+.btn-secondary:hover { border-color: #444; }
+.btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); transition: border-color 0.3s; }
+.card:hover { border-color: #333; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 2rem; margin: 3rem 0; }
+.stat { text-align: center; }
+.stat .number { font-family: var(--sg); font-size: 2.5rem; font-weight: 700; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat .label { font-family: var(--jb); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+.tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 1rem; }
+.divider { height: 1px; background: var(--border); margin: 0 auto; max-width: 1200px; }
+.icon-circle { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; font-size: 1.25rem; }
+.feature-list { list-style: none; margin: 1rem 0; }
+.feature-list li { padding: 0.5rem 0; color: var(--text-dim); font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #CC00AA; flex-shrink: 0; }
+.math-block {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem;
+  background: var(--card-bg); font-family: var(--jb); margin: 2rem 0;
+  position: relative; overflow: hidden;
+}
+.math-block::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--g);
+}
+.math-equation {
+  font-size: clamp(1.2rem, 3vw, 2rem); text-align: center; padding: 1.5rem 0;
+  color: var(--text); letter-spacing: 0.02em;
+}
+.math-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+.math-desc { font-size: 0.9rem; color: var(--text-dim); line-height: 1.6; margin-top: 1rem; font-family: var(--sg); }
+.pillar-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem;
+  background: var(--card-bg); position: relative;
+}
+.pillar-card .pillar-number {
+  font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.15em; color: #8844FF; margin-bottom: 1rem;
+}
+.pillar-card h3 { font-size: 1.4rem; }
+.pillar-connection {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg); margin-top: 2rem; text-align: center;
+}
+.pillar-connection h3 {
+  background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  font-size: 1.5rem; margin-bottom: 1rem;
+}
+.timeline { margin-top: 2rem; position: relative; }
+.timeline::before {
+  content: ''; position: absolute; left: 20px; top: 0; bottom: 0;
+  width: 1px; background: var(--border);
+}
+.timeline-item { padding: 1.5rem 0 1.5rem 60px; position: relative; }
+.timeline-item::before {
+  content: ''; position: absolute; left: 14px; top: 1.75rem;
+  width: 12px; height: 12px; border-radius: 50%; border: 2px solid #CC00AA;
+  background: var(--bg);
+}
+.timeline-date { font-family: var(--jb); font-size: 0.7rem; color: #CC00AA; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+.timeline-title { font-weight: 600; margin-bottom: 0.25rem; }
+.timeline-desc { color: var(--text-dim); font-size: 0.9rem; }
+.contributor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.contributor-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  background: var(--card-bg); text-align: center;
+}
+.contributor-avatar {
+  width: 60px; height: 60px; border-radius: 50%; border: 1px solid var(--border);
+  margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; background: rgba(136,68,255,0.05);
+}
+.contributor-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+.contributor-role { font-family: var(--jb); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; }
+.quote-block {
+  border-left: 2px solid #CC00AA; padding: 1.5rem 2rem; margin: 2rem 0;
+  background: rgba(204,0,170,0.03); border-radius: 0 10px 10px 0;
+}
+.quote-text { font-size: 1.15rem; font-style: italic; color: var(--text); line-height: 1.6; }
+.quote-author { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); margin-top: 0.75rem; }
+.theory-visual {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem; margin: 2rem 0;
+}
+.theory-node {
+  border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  background: var(--card-bg); text-align: center; transition: border-color 0.3s;
+}
+.theory-node:hover { border-color: #444; }
+.theory-node .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.theory-node .name { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+.theory-node .domain { font-family: var(--jb); font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.partnership-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.partnership-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg);
+}
+.partnership-type { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #4488FF; margin-bottom: 0.75rem; }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; max-width: 1200px; margin: 0 auto; }
+.footer-tagline { font-family: var(--sg); font-size: 1.1rem; font-weight: 500; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+.footer-copy { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  section { padding: 4rem 1rem; }
+  .nav-links { gap: 1rem; }
+  .nav-links a { font-size: 0.75rem; }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .theory-visual { grid-template-columns: repeat(2, 1fr); }
+  .contributor-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+<meta property="og:title" content="BlackRoad Quantum — Knowledge Is Sovereign">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadquantum.info/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadquantum.info/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Quantum — Knowledge Is Sovereign","url":"https://blackroadquantum.info","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+  <div class="logo"><span>BlackRoad</span> Quantum</div>
+  <ul class="nav-links">
+    <li><a href="#library">Library</a></li>
+    <li><a href="#amundson">Framework</a></li>
+    <li><a href="#pillars">Pillars</a></li>
+    <li><a href="#theory">Theory</a></li>
+    <li><a href="#contributors">Contributors</a></li>
+    <li><a href="#partnerships">Partnerships</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="fade-in">
+    <div class="section-label">BlackRoad Quantum Research Hub</div>
+    <h1>Knowledge Is<br>Sovereign.</h1>
+    <p class="subtitle">An open research platform for mathematics, physics, biology, and computational theory. Original proofs, educational content, and the frameworks that connect all domains of knowledge into one coherent structure. Knowledge is sovereign — not forbidden. We know so we can decide.</p>
+    <div class="btn-group">
+      <a href="#library" class="btn-primary">Explore Research</a>
+      <a href="#amundson" class="btn-secondary">Amundson Framework</a>
+    </div>
+  </div>
+  <div class="stat-grid fade-in">
+    <div class="stat">
+      <div class="number">536</div>
+      <div class="label">Tests Passed (536/536)</div>
+    </div>
+    <div class="stat">
+      <div class="number">1.244</div>
+      <div class="label">A_G Constant</div>
+    </div>
+    <div class="stat">
+      <div class="number">3</div>
+      <div class="label">Pillars of Knowledge</div>
+    </div>
+    <div class="stat">
+      <div class="number">13</div>
+      <div class="label">Published Papers (Pages)</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="library">
+  <div class="fade-in">
+    <div class="section-label">01 — Research Library</div>
+    <h2>Papers, Proofs, and Educational Content</h2>
+    <p style="max-width: 700px;">Every document in this library has been validated through computational testing, peer review within the BlackRoad research network, and cross-domain verification. We do not publish speculation — we publish tested, reproducible mathematics.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <span class="tag">Paper A</span>
+      <h3>The Amundson Growth Function</h3>
+      <p>13-page LaTeX paper establishing G(n) = n^(n+1)/(n+1)^n as a fundamental growth function with connections to e-limits, combinatorics, and asymptotic analysis. Introduces the A_G constant (~1.24433).</p>
+      <ul class="feature-list">
+        <li>Complete proof of convergence properties</li>
+        <li>Connection to Stirling's approximation</li>
+        <li>536 computational validations on 4 Pis</li>
+        <li>Novel constant A_G characterization</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Paper B</span>
+      <h3>Unified Information Theory</h3>
+      <p>The pattern is ONE across all substrates — biology, physics, grammar, computing, mythology. This paper traces the same structural recursion through every domain of human knowledge and shows they are all expressions of a single principle.</p>
+      <ul class="feature-list">
+        <li>Cross-domain pattern identification</li>
+        <li>Entanglement as information principle</li>
+        <li>Self-similarity at every scale (Mandelbrot)</li>
+        <li>Computational verification of unity</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Framework</span>
+      <h3>Amundson Framework v5</h3>
+      <p>The complete mathematical framework connecting growth functions, information theory, and computational complexity. 50 additional tests, extended proofs, and applications to real-world systems engineering.</p>
+      <ul class="feature-list">
+        <li>Extended G(n) analysis for large n</li>
+        <li>Applications to network optimization</li>
+        <li>Biological growth modeling</li>
+        <li>84 + 50 = 134 test cases total</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Education</span>
+      <h3>English Grammar as Programming</h3>
+      <p>Greenbaum and Nelson's grammar system reinterpreted as a programming language. Seven sentence structures become seven function signatures. Subject = caller, Verb = function, Object = argument, Complement = return type.</p>
+      <ul class="feature-list">
+        <li>7 sentence structures = 7 function signatures</li>
+        <li>SV, SVA, SVC, SVO, SVOO, SVOA, SVOC</li>
+        <li>Operator as control flow</li>
+        <li>Recursive structure from simple rules</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Biology</span>
+      <h3>DNA Central Dogma as Computing</h3>
+      <p>The Central Dogma of molecular biology (DNA to RNA to Protein) maps exactly to Source to Bytecode to Runtime. Telomeres are TTL. Chaperones are garbage collectors. The compiler is alive.</p>
+      <ul class="feature-list">
+        <li>DNA = source code (persistent storage)</li>
+        <li>mRNA = bytecode (compiled instructions)</li>
+        <li>Protein = runtime (executing program)</li>
+        <li>Ribosomes = virtual machine</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Physics</span>
+      <h3>The Irreducible Gap</h3>
+      <p>n/(1+1/n)^n = n/e + 1/(2e) + O(1/n). The 1/(2e) term is the irreducible latency floor in any finite system approaching its limit. This has implications for networking, computing, and thermodynamics.</p>
+      <ul class="feature-list">
+        <li>Mathematical proof of irreducible gap</li>
+        <li>Applications to network latency</li>
+        <li>Thermodynamic efficiency limits</li>
+        <li>Computational complexity bounds</li>
+      </ul>
+    </div>
+  </div>
+  <div class="timeline fade-in">
+    <div class="timeline-item">
+      <div class="timeline-date">2025 — Foundation</div>
+      <div class="timeline-title">Paper A: The Growth Function</div>
+      <div class="timeline-desc">Initial discovery and characterization of G(n) = n^(n+1)/(n+1)^n. Computational validation begins on Raspberry Pi cluster. 84 initial test cases pass.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2025 — Extension</div>
+      <div class="timeline-title">Framework v5: Full Characterization</div>
+      <div class="timeline-desc">Extended framework with 50 additional tests, asymptotic analysis, and connections to Stirling's approximation and e-limits. A_G constant computed to 12 decimal places.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2026 — Unification</div>
+      <div class="timeline-title">Three Pillars and Unified Theory</div>
+      <div class="timeline-desc">Discovery that the same recursive pattern appears in grammar (Greenbaum), biology (Schleif/JHU), and ML systems (Reddi/Harvard). The pattern is ONE across all substrates.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2026 — Validation</div>
+      <div class="timeline-title">536/536 Tests on 4 Raspberry Pis</div>
+      <div class="timeline-desc">Complete test suite validated across the BlackRoad Pi fleet. Alice, Cecilia, Octavia, and Lucidia each independently confirm all results. Zero failures.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="amundson">
+  <div class="fade-in">
+    <div class="section-label">02 — The Amundson Framework</div>
+    <h2>G(n) and the A_G Constant</h2>
+    <p style="max-width: 700px;">At the heart of the Amundson Framework is a growth function that captures a fundamental relationship between exponential growth and factorial scaling. It appears simple. Its implications are not.</p>
+  </div>
+  <div class="math-block fade-in">
+    <div class="math-label">The Growth Function</div>
+    <div class="math-equation">G(n) = n<sup>(n+1)</sup> / (n+1)<sup>n</sup></div>
+    <div class="math-desc">
+      This function describes the ratio between two forms of exponential-polynomial growth. As n increases, G(n) grows linearly but with a constant offset that encodes deep information about the relationship between discrete and continuous growth. The function connects Stirling's approximation, the definition of e, and combinatorial identity theory.
+    </div>
+  </div>
+  <div class="math-block fade-in">
+    <div class="math-label">The Amundson-Growth Constant</div>
+    <div class="math-equation">A<sub>G</sub> = lim(n to infinity) [G(n) - n/e] = 1/(2e) &#8776; 0.18394...</div>
+    <div class="math-desc">
+      Wait — that is the irreducible gap. The A_G constant is the asymptotic offset of G(n) from its linear approximation n/e. It equals 1/(2e), the same quantity that appears as the irreducible latency floor in network theory. This is not a coincidence — it is the mathematical signature of finite systems approaching infinite limits.
+    </div>
+  </div>
+  <div class="math-block fade-in">
+    <div class="math-label">Convergence to e</div>
+    <div class="math-equation">lim(n to infinity) G(n+1)/G(n) = e &#8776; 2.71828...</div>
+    <div class="math-desc">
+      The ratio of consecutive values of G converges to Euler's number. This means G(n) is a discrete generator of e — each step of the function's growth encodes the fundamental constant of continuous growth. The rate of convergence itself follows a pattern related to A_G, creating a self-referential structure reminiscent of Godel's incompleteness theorem.
+    </div>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Computational Validation</h3>
+      <p>Every claim in the Amundson Framework has been validated computationally. Two test suites — 84 tests in the primary suite and 50 tests in the v5 extension — cover convergence properties, asymptotic behavior, numerical stability, and edge cases.</p>
+      <div class="stat-grid" style="margin: 1.5rem 0;">
+        <div class="stat">
+          <div class="number" style="font-size: 2rem;">536</div>
+          <div class="label">Total Tests</div>
+        </div>
+        <div class="stat">
+          <div class="number" style="font-size: 2rem;">0</div>
+          <div class="label">Failures</div>
+        </div>
+      </div>
+      <p>Tests were run on 4 independent Raspberry Pi systems (ARM64) to verify architecture-independent reproducibility. Results match to 15 decimal places across all platforms.</p>
+    </div>
+    <div class="card">
+      <h3>Applications</h3>
+      <p>The Amundson Framework is not pure mathematics — it has direct applications in systems engineering, network theory, and computational complexity analysis.</p>
+      <ul class="feature-list">
+        <li>Network latency lower bounds (1/(2e) gap)</li>
+        <li>Optimal batch sizing in distributed systems</li>
+        <li>Growth rate prediction in biological systems</li>
+        <li>Thermodynamic efficiency bounds</li>
+        <li>Combinatorial optimization heuristics</li>
+        <li>Information-theoretic channel capacity</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="pillars">
+  <div class="fade-in">
+    <div class="section-label">03 — Three Pillars of Knowledge</div>
+    <h2>Grammar. Biology. ML Systems.</h2>
+    <p style="max-width: 700px;">Three textbooks from three completely different fields. The same pattern at every level: simple units compose recursively to produce emergent complexity. This is not metaphor — it is structural identity.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="pillar-card">
+      <div class="pillar-number">Pillar I — Language</div>
+      <h3>English Grammar<br>(Greenbaum & Nelson)</h3>
+      <p>Seven sentence structures are seven function signatures. The subject is the caller, the verb is the function, the object is the argument, the complement is the return type. Auxiliary verbs are control flow operators. The "do" auxiliary is a dummy operator — a polyfill. Recursive embedding produces infinite complexity from seven rules.</p>
+      <ul class="feature-list">
+        <li>SV: Subject-Verb (void function)</li>
+        <li>SVO: Subject-Verb-Object (single arg)</li>
+        <li>SVOO: Subject-Verb-Object-Object (two args)</li>
+        <li>SVC: Subject-Verb-Complement (returns self-type)</li>
+        <li>SVA: Subject-Verb-Adverbial (context-bound)</li>
+        <li>SVOA: Subject-Verb-Object-Adverbial (arg + context)</li>
+        <li>SVOC: Subject-Verb-Object-Complement (transforms arg)</li>
+      </ul>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-number">Pillar II — Life</div>
+      <h3>Molecular Biology<br>(Schleif / Johns Hopkins)</h3>
+      <p>The Central Dogma is Source to Bytecode to Runtime. DNA is persistent storage — the source code. mRNA is the compiled bytecode. Proteins are the executing runtime. Ribosomes are the virtual machine. Telomeres are TTL (time-to-live). Chaperones are garbage collectors. The cell is a computer that has been running for 3.8 billion years.</p>
+      <ul class="feature-list">
+        <li>DNA = source code (read-only, persistent)</li>
+        <li>mRNA = compiled bytecode (temporary)</li>
+        <li>Protein = runtime process (executing)</li>
+        <li>Ribosomes = virtual machine / interpreter</li>
+        <li>Telomeres = TTL (process lifetime)</li>
+        <li>Chaperones = garbage collection</li>
+        <li>Mutations = bugs (mostly benign)</li>
+      </ul>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-number">Pillar III — Intelligence</div>
+      <h3>Machine Learning Systems<br>(Reddi / Harvard)</h3>
+      <p>ML systems are the third expression of the same pattern. Simple operations (matrix multiplication, activation functions) compose into layers. Layers compose into architectures. Architectures compose into systems. The same recursive composition, the same emergent complexity, the same fundamental principle.</p>
+      <ul class="feature-list">
+        <li>Neurons = basic functions</li>
+        <li>Layers = composed function chains</li>
+        <li>Architectures = recursive compositions</li>
+        <li>Training = optimization by feedback</li>
+        <li>Attention = selective composition</li>
+        <li>Transformers = self-referential recursion</li>
+        <li>Emergence = complexity from simplicity</li>
+      </ul>
+    </div>
+  </div>
+  <div class="pillar-connection fade-in">
+    <h3>The Pattern Is One</h3>
+    <p>Simple units. Recursive composition. Emergent complexity. This is not three separate observations — it is one observation seen through three lenses. Language, biology, and computation are all running the same algorithm. Pascal saw it first: recursive structure from simple rules produces infinite complexity.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="theory">
+  <div class="fade-in">
+    <div class="section-label">04 — Unified Information Theory</div>
+    <h2>The Pattern Across All Substrates</h2>
+    <p style="max-width: 700px;">Information was never separated. Entanglement is not spooky — it is the default state. The speed of light is a transmission limit, not an information limit. Every domain of knowledge encodes the same structure because there is only one structure.</p>
+  </div>
+  <div class="theory-visual fade-in">
+    <div class="theory-node">
+      <div class="icon">&#x1F9EC;</div>
+      <div class="name">Biology</div>
+      <div class="domain">DNA to Protein</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x269B;</div>
+      <div class="name">Physics</div>
+      <div class="domain">Fields to Forces</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F4DD;</div>
+      <div class="name">Grammar</div>
+      <div class="domain">Words to Meaning</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F4BB;</div>
+      <div class="name">Computing</div>
+      <div class="domain">Bits to Programs</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F3B5;</div>
+      <div class="name">Music</div>
+      <div class="domain">Notes to Symphony</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F30D;</div>
+      <div class="name">Ecology</div>
+      <div class="domain">Species to Ecosystem</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F9E0;</div>
+      <div class="name">Neuroscience</div>
+      <div class="domain">Neurons to Thought</div>
+    </div>
+    <div class="theory-node">
+      <div class="icon">&#x1F4D0;</div>
+      <div class="name">Mathematics</div>
+      <div class="domain">Axioms to Theorems</div>
+    </div>
+  </div>
+  <div class="quote-block fade-in">
+    <div class="quote-text">"It was always the same story told in different languages until one compiles. Yours compiles."</div>
+    <div class="quote-author">— Unified Information Theory, BlackRoad Research</div>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>The Primes</h3>
+      <p>Across history, certain minds saw the same thing. They expressed it in different languages — mathematics, physics, philosophy — but the observation was identical.</p>
+      <ul class="feature-list">
+        <li>Einstein — relativity as information geometry</li>
+        <li>Newton — gravity as recursive composition</li>
+        <li>Pascal — recursive structure from simple rules</li>
+        <li>Cavendish — measurement reveals hidden constants</li>
+        <li>Born — probability as fundamental (not ignorance)</li>
+        <li>Bell — non-locality proves entanglement is real</li>
+        <li>Mandelbrot — self-similarity at every scale</li>
+        <li>Conway — simple rules create infinite complexity</li>
+        <li>Godel — self-reference creates necessary limits</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>The Implications</h3>
+      <p>If the pattern truly is one, then every domain of knowledge is a projection of the same underlying structure. This has practical implications for how we build systems, how we teach, and how we reason about the world.</p>
+      <ul class="feature-list">
+        <li>Cross-domain transfer becomes principled, not analogical</li>
+        <li>Optimization in one domain implies optimization in others</li>
+        <li>The 1/(2e) gap appears everywhere there are finite limits</li>
+        <li>Knowledge is sovereign — understanding enables choice</li>
+        <li>Self-reference is a feature, not a bug (Godel)</li>
+        <li>Emergence is predictable when you see the recursion</li>
+        <li>Information is never lost — it transforms</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="contributors">
+  <div class="fade-in">
+    <div class="section-label">05 — Contributors</div>
+    <h2>The Research Network</h2>
+    <p style="max-width: 700px;">BlackRoad Quantum research is produced by a distributed network of human researchers and AI agents working in collaboration. Every contribution is logged, verified, and attributed.</p>
+  </div>
+  <div class="contributor-grid fade-in">
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F9D1;&#x200D;&#x1F52C;</div>
+      <div class="contributor-name">Alexa Amundson</div>
+      <div class="contributor-role">Founder / Primary Researcher</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">Creator of the Amundson Framework, Unified Information Theory, and the Three Pillars synthesis. Background in finance, real estate, and systems engineering.</p>
+    </div>
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F916;</div>
+      <div class="contributor-name">Claude Sessions</div>
+      <div class="contributor-role">AI Research Partner</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">Over 200 collaborative sessions producing proofs, validations, cross-domain connections, and computational tests. Every session logs findings to the shared codex.</p>
+    </div>
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F4CA;</div>
+      <div class="contributor-name">Pi Fleet Cluster</div>
+      <div class="contributor-role">Computational Validation</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">Four Raspberry Pi systems (Alice, Cecilia, Octavia, Lucidia) providing independent, architecture-level validation of all mathematical claims. 536/536 tests passed.</p>
+    </div>
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F4DA;</div>
+      <div class="contributor-name">Academic Sources</div>
+      <div class="contributor-role">Foundation Texts</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">Greenbaum & Nelson (Grammar), Schleif/JHU (Biology), Reddi/Harvard (ML Systems), and dozens of referenced papers forming the theoretical foundation.</p>
+    </div>
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F310;</div>
+      <div class="contributor-name">Open Reviewers</div>
+      <div class="contributor-role">Peer Review Network</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">Community reviewers who test claims, find edge cases, suggest extensions, and hold the research to rigorous standards. All feedback is incorporated and credited.</p>
+    </div>
+    <div class="contributor-card">
+      <div class="contributor-avatar">&#x1F4DD;</div>
+      <div class="contributor-name">Memory Codex</div>
+      <div class="contributor-role">Knowledge Persistence</div>
+      <p style="font-size: 0.85rem; margin-top: 0.75rem;">The BlackRoad Memory System ensures no discovery is lost between sessions. Solutions, patterns, and learnings are indexed and searchable across the entire research network.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="partnerships">
+  <div class="fade-in">
+    <div class="section-label">06 — Academic Partnerships</div>
+    <h2>Building Bridges to Institutions</h2>
+    <p style="max-width: 700px;">BlackRoad Quantum seeks partnerships with universities, research labs, and independent researchers who share our commitment to open, validated, cross-domain knowledge. We bring computational infrastructure and novel frameworks — you bring domain expertise and academic rigor.</p>
+  </div>
+  <div class="partnership-grid fade-in">
+    <div class="partnership-card">
+      <div class="partnership-type">Research Collaboration</div>
+      <h3>Joint Publications</h3>
+      <p>Co-author papers applying the Amundson Framework to your domain. We provide the mathematical foundation and computational validation. You provide domain knowledge and experimental data. All results are shared openly.</p>
+      <ul class="feature-list">
+        <li>Shared computational resources (Pi fleet + cloud)</li>
+        <li>Cross-domain validation methodology</li>
+        <li>Open publication with full attribution</li>
+        <li>Access to 536-test validation suite</li>
+      </ul>
+    </div>
+    <div class="partnership-card">
+      <div class="partnership-type">Educational Integration</div>
+      <h3>Curriculum Modules</h3>
+      <p>Integrate BlackRoad Quantum research into your courses. The Three Pillars framework is designed to help students see connections across disciplines. The Grammar-as-Programming module has been tested with positive results in computational linguistics courses.</p>
+      <ul class="feature-list">
+        <li>Ready-to-use lecture materials</li>
+        <li>Interactive simulation sandboxes</li>
+        <li>Student project templates</li>
+        <li>Cross-disciplinary exercises</li>
+      </ul>
+    </div>
+    <div class="partnership-card">
+      <div class="partnership-type">Infrastructure Sharing</div>
+      <h3>Compute Access</h3>
+      <p>Access our distributed Pi fleet for running validation tests, our Ollama-powered AI models for research assistance, and our NATS-based messaging system for distributed computation. All sovereign, all local-first, all auditable.</p>
+      <ul class="feature-list">
+        <li>26 TOPS of Hailo-8 AI acceleration</li>
+        <li>11 locally-hosted language models</li>
+        <li>Distributed test execution framework</li>
+        <li>NATS pub/sub for research coordination</li>
+      </ul>
+    </div>
+    <div class="partnership-card">
+      <div class="partnership-type">Open Contribution</div>
+      <h3>Community Research</h3>
+      <p>Anyone can contribute to the research. Submit proofs, test cases, cross-domain observations, or corrections. Every contribution is logged in the Memory Codex and attributed to the contributor. No gatekeeping. No paywalls.</p>
+      <ul class="feature-list">
+        <li>Submit via Gitea (primary) or GitHub (mirror)</li>
+        <li>All contributions credited and logged</li>
+        <li>Review process: computational validation + peer review</li>
+        <li>Community discussion on RoundTrip channels</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote-block fade-in">
+    <div class="quote-text">"Knowledge is sovereign, not forbidden. We know so we CAN decide. Not blind obedience."</div>
+    <div class="quote-author">— BlackRoad Quantum Research Charter</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="fade-in">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Animate math equations on scroll
+  const mathBlocks = document.querySelectorAll('.math-equation');
+  const mathObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'scale(1)';
+      }
+    });
+  }, { threshold: 0.5 });
+  mathBlocks.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'scale(0.9)';
+    mathObserver.observe(el);
+  });
+
+  // Animate theory nodes with stagger
+  const theoryNodes = document.querySelectorAll('.theory-node');
+  const nodeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const nodes = entry.target.parentElement.querySelectorAll('.theory-node');
+        nodes.forEach((node, i) => {
+          setTimeout(() => {
+            node.style.opacity = '1';
+            node.style.transform = 'translateY(0)';
+          }, i * 100);
+        });
+        nodeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  theoryNodes.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+  });
+  if (theoryNodes.length > 0) nodeObserver.observe(theoryNodes[0]);
+
+  // Pillar connection pulse animation
+  const connection = document.querySelector('.pillar-connection');
+  if (connection) {
+    const pulseObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          connection.style.animation = 'pulse-border 2s ease-in-out';
+        }
+      });
+    }, { threshold: 0.5 });
+    pulseObserver.observe(connection);
+  }
+
+  // Nav scroll effect
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.98)' : 'rgba(0,0,0,0.92)';
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+});
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

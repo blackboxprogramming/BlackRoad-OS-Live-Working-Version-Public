@@ -1,0 +1,2262 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad AI — AI That Lives On Your Hardware</title>
+<meta name="description" content="Sovereign, local-first AI. 26 TOPS inference on your hardware. 6 cognitive agents. Zero cloud dependency. Pave Tomorrow.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   BLACKROAD AI — DESIGN SYSTEM
+   Colors: #FF6B2B → #FF2255 → #CC00AA → #8844FF → #4488FF → #00D4FF
+   Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code)
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --g: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g135: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g-text: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --bg: #000;
+  --white: #f5f5f5;
+  --black: #000;
+  --border: #1a1a1a;
+  --border-hover: #333;
+  --muted: rgba(255,255,255,0.4);
+  --sg: 'Space Grotesk', sans-serif;
+  --inter: 'Inter', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--sg);
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #1c1c1c; border-radius: 4px; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 rgba(0,212,255,0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(0,212,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,212,255,0); }
+}
+@keyframes barPulse {
+  0%, 100% { opacity: 0.6; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.3); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -20px); }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, 30px); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes nodeGlow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(136,68,255,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(136,68,255,0.6)); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes borderGlow {
+  0%, 100% { border-color: #1a1a1a; }
+  50% { border-color: #2a2a2a; }
+}
+
+.fade-section {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══ GRADIENT BAR ═══ */
+.grad-bar {
+  height: 4px;
+  background: var(--g);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+  image-rendering: crisp-edges;
+}
+
+/* ═══ NAV ═══ */
+.nav-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+}
+.nav-grad {
+  height: 2px;
+  background: var(--g);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 56px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+nav.scrolled {
+  background: rgba(0,0,0,0.97);
+  border-bottom-color: #141414;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+.nav-logo-bars {
+  display: flex;
+  gap: 2px;
+}
+.nav-logo-bar {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+}
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+.nav-links a {
+  font-family: var(--inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: #686868;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #f0f0f0; }
+.nav-cta { display: flex; gap: 10px; }
+
+/* ═══ BUTTONS ═══ */
+.btn-grad {
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 36px;
+  background: var(--g);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(136,68,255,0.2);
+  letter-spacing: 0.01em;
+}
+.btn-grad:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136,68,255,0.35);
+}
+.btn-grad-sm {
+  font-size: 12px;
+  padding: 8px 18px;
+}
+.btn-outline {
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #a0a0a0;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: #444;
+  color: #e0e0e0;
+}
+.btn-outline-sm {
+  font-size: 12px;
+  padding: 8px 18px;
+}
+.btn-solid {
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 20px;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-nav-outline {
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 8px 20px;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.btn-nav-outline:hover { border-color: #444; }
+
+/* ═══ HERO ═══ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.hero-orb-1 {
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(136,68,255,0.08) 0%, transparent 70%);
+}
+.hero-orb-2 {
+  top: 30%;
+  left: 20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,34,85,0.06) 0%, transparent 70%);
+  animation: orb1 8s ease-in-out infinite;
+}
+.hero-orb-3 {
+  top: 25%;
+  right: 15%;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%);
+  animation: orb2 10s ease-in-out infinite;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid #1e1e1e;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 36px;
+  border-radius: 20px;
+  animation: fadeUp 0.6s ease 0.1s both;
+}
+.hero-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00D4FF;
+  animation: ping 1.8s ease-out infinite;
+}
+.hero-badge span {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.hero h1 {
+  font-family: var(--sg);
+  font-weight: 700;
+  font-size: clamp(44px, 10vw, 84px);
+  color: var(--white);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s ease 0.2s both;
+  max-width: 900px;
+}
+.hero h1 .grad-text {
+  background: var(--g-text);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 4s linear infinite;
+}
+.hero-sub {
+  font-family: var(--inter);
+  font-size: clamp(15px, 3vw, 19px);
+  color: #606060;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 0 auto 48px;
+  animation: fadeUp 0.6s ease 0.35s both;
+}
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeUp 0.6s ease 0.45s both;
+}
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  margin-top: 72px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.55s both;
+}
+.hero-stat-val {
+  font-family: var(--sg);
+  font-weight: 700;
+  font-size: clamp(20px, 4vw, 28px);
+  color: #f0f0f0;
+  letter-spacing: -0.03em;
+}
+.hero-stat-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #383838;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.hero-bottom-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--g);
+  opacity: 0.3;
+}
+
+/* ═══ NEURAL CANVAS ═══ */
+#neural-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > *:not(#neural-canvas):not(.hero-orb):not(.hero-orb-1):not(.hero-orb-2):not(.hero-orb-3):not(.hero-bottom-line) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══ SECTIONS ═══ */
+.section {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+.section-wide {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+.section-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+  letter-spacing: -0.015em;
+}
+.section-desc {
+  font-size: 15px;
+  color: var(--white);
+  opacity: 0.4;
+  max-width: 520px;
+  margin-bottom: 48px;
+  line-height: 1.7;
+}
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ═══ LUCIDIA PRODUCT SECTION ═══ */
+.lucidia-hero {
+  background: linear-gradient(180deg, rgba(136,68,255,0.03) 0%, transparent 60%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.lucidia-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+.lucidia-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lucidia-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.lucidia-feature:hover {
+  border-color: var(--border-hover);
+  background: rgba(255,255,255,0.02);
+}
+.lucidia-feature-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(136,68,255,0.1);
+  border: 1px solid rgba(136,68,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+.lucidia-feature h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.lucidia-feature p {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.6;
+}
+.lucidia-pricing-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.lucidia-price-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.lucidia-price-card:hover { border-color: var(--border-hover); }
+.lucidia-price-card.featured {
+  border-color: rgba(136,68,255,0.3);
+}
+.lucidia-price-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--g);
+}
+.lucidia-price-tag {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #8844FF;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.lucidia-price-amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+.lucidia-price-amount span {
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+}
+.lucidia-price-desc {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.35;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.lucidia-price-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lucidia-price-list li {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lucidia-price-list li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--g135);
+  flex-shrink: 0;
+}
+
+/* ═══ AGENTS GRID ═══ */
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.agent-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.agent-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+.agent-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--g);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.agent-card:hover::before { opacity: 1; }
+.agent-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.agent-icon-curator { background: rgba(255,107,43,0.1); border-color: rgba(255,107,43,0.2); }
+.agent-icon-analyzer { background: rgba(255,34,85,0.1); border-color: rgba(255,34,85,0.2); }
+.agent-icon-planner { background: rgba(204,0,170,0.1); border-color: rgba(204,0,170,0.2); }
+.agent-icon-bridge { background: rgba(136,68,255,0.1); border-color: rgba(136,68,255,0.2); }
+.agent-icon-identity { background: rgba(68,136,255,0.1); border-color: rgba(68,136,255,0.2); }
+.agent-icon-explainer { background: rgba(0,212,255,0.1); border-color: rgba(0,212,255,0.2); }
+.agent-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.agent-card .agent-role {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.agent-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.7;
+}
+.agent-card .agent-traits {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.agent-trait {
+  font-family: var(--jb);
+  font-size: 9px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══ SOVEREIGNTY SECTION ═══ */
+.sov-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+.sov-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  transition: border-color 0.2s;
+}
+.sov-card:hover { border-color: var(--border-hover); }
+.sov-card-full {
+  grid-column: 1 / -1;
+}
+.sov-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.sov-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.7;
+}
+.sov-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-top: 24px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sov-compare-col {
+  padding: 24px;
+}
+.sov-compare-col:first-child {
+  border-right: 1px solid var(--border);
+}
+.sov-compare-col h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.sov-compare-col .price {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.sov-compare-col .price.ours {
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.sov-compare-col .price.theirs {
+  color: #666;
+  text-decoration: line-through;
+  text-decoration-color: #FF2255;
+}
+.sov-compare-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sov-compare-list li {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sov-compare-list li .check { color: #00D4FF; opacity: 1; font-size: 14px; }
+.sov-compare-list li .cross { color: #FF2255; opacity: 1; font-size: 14px; }
+
+/* ═══ METRICS BAR ═══ */
+.metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.metric { text-align: center; }
+.metric-val {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+.metric-val .grad-text {
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.metric-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ═══ MODELS ═══ */
+.model-list { border-top: 1px solid var(--border); }
+.model-row {
+  display: grid;
+  grid-template-columns: 180px 1fr auto auto;
+  gap: 24px;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.model-row:hover { background: rgba(255,255,255,0.01); }
+.model-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+}
+.model-desc {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+}
+.model-badge {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.5;
+}
+.model-node {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══ INTEGRATION ═══ */
+.integ-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.integ-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  transition: border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.integ-card:hover { border-color: var(--border-hover); }
+.integ-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--g);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.integ-card:hover::after { opacity: 0.5; }
+.integ-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+.integ-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.integ-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.7;
+}
+.integ-tag {
+  font-family: var(--jb);
+  font-size: 9px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: inline-block;
+  margin-top: 12px;
+}
+
+/* ═══ PRICING ═══ */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 36px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.pricing-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+.pricing-card.featured {
+  border-color: rgba(136,68,255,0.3);
+  background: rgba(136,68,255,0.03);
+}
+.pricing-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--g);
+}
+.pricing-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 12px;
+}
+.pricing-label-free { color: #00D4FF; }
+.pricing-label-pro { color: #8844FF; }
+.pricing-label-ent { color: #FF6B2B; }
+.pricing-amount {
+  font-size: 42px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.pricing-amount span {
+  font-size: 16px;
+  font-weight: 400;
+  color: #555;
+}
+.pricing-desc {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.35;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.pricing-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.pricing-features li {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pricing-features li::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--g135);
+  flex-shrink: 0;
+}
+.pricing-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--sg);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.pricing-btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+}
+.pricing-btn-outline:hover {
+  border-color: #444;
+  background: rgba(255,255,255,0.03);
+}
+.pricing-btn-grad {
+  background: var(--g);
+  background-size: 200% 100%;
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(136,68,255,0.2);
+}
+.pricing-btn-grad:hover {
+  background-position: 100% 0;
+  box-shadow: 0 8px 32px rgba(136,68,255,0.35);
+}
+
+/* ═══ CTA ═══ */
+.cta-section {
+  text-align: center;
+  padding: 100px 48px;
+}
+.cta-box {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 72px 48px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(136,68,255,0.02);
+}
+.cta-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--g);
+}
+.cta-box h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 12px;
+  letter-spacing: -0.02em;
+}
+.cta-box p {
+  font-size: 15px;
+  color: var(--white);
+  opacity: 0.4;
+  margin-bottom: 36px;
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+}
+.cta-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ═══ FOOTER ═══ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 48px;
+}
+.footer-brand {
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.footer-brand-bars {
+  display: flex;
+  gap: 2px;
+}
+.footer-brand-bar {
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+}
+.footer-cols {
+  display: flex;
+  gap: 64px;
+}
+.footer-col h5 {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  margin-bottom: 10px;
+  transition: opacity 0.2s;
+}
+.footer-col a:hover { opacity: 1; }
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.footer-copy {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.2;
+}
+.footer-tagline {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.15;
+  letter-spacing: 0.08em;
+}
+
+/* ═══ GLASS CARD UTILITY ═══ */
+.glass {
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1024px) {
+  .agents-grid { grid-template-columns: repeat(2, 1fr); }
+  .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+  .sov-grid { grid-template-columns: 1fr; }
+  .lucidia-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 20px 60px; }
+  .hero h1 { font-size: 36px; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .hero-stats { gap: 24px; }
+  .section, .section-wide { padding: 60px 20px; }
+  .agents-grid { grid-template-columns: 1fr; }
+  .integ-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .metrics-bar { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .model-row { grid-template-columns: 1fr; gap: 8px; }
+  .sov-compare { grid-template-columns: 1fr; }
+  .sov-compare-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+  .lucidia-grid { grid-template-columns: 1fr; }
+  .lucidia-pricing-cards { grid-template-columns: 1fr; }
+  .cta-section { padding: 48px 20px; }
+  .cta-box { padding: 48px 24px; }
+  footer { padding: 32px 20px; }
+  .footer-top { flex-direction: column; gap: 32px; }
+  .footer-cols { gap: 32px; flex-wrap: wrap; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+}
+</style>
+<meta property="og:title" content="BlackRoad AI — AI That Lives On Your Hardware">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadai.com/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadai.com/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad AI — AI That Lives On Your Hardware","url":"https://blackroadai.com","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     NAV
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="nav-wrap">
+  <div class="nav-grad"></div>
+  <nav id="main-nav">
+    <div class="nav-logo">
+      <div class="nav-logo-bars">
+        <div class="nav-logo-bar" style="background:#FF6B2B; animation: barPulse 2.5s ease-in-out 0s infinite;"></div>
+        <div class="nav-logo-bar" style="background:#FF2255; animation: barPulse 2.5s ease-in-out 0.14s infinite;"></div>
+        <div class="nav-logo-bar" style="background:#CC00AA; animation: barPulse 2.5s ease-in-out 0.28s infinite;"></div>
+        <div class="nav-logo-bar" style="background:#8844FF; animation: barPulse 2.5s ease-in-out 0.42s infinite;"></div>
+        <div class="nav-logo-bar" style="background:#4488FF; animation: barPulse 2.5s ease-in-out 0.56s infinite;"></div>
+        <div class="nav-logo-bar" style="background:#00D4FF; animation: barPulse 2.5s ease-in-out 0.7s infinite;"></div>
+      </div>
+      BlackRoad AI
+    </div>
+    <div class="nav-links">
+      <a href="#lucidia">Lucidia</a>
+      <a href="#agents">Agents</a>
+      <a href="#models">Models</a>
+      <a href="#sovereignty">Sovereignty</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#pricing" class="btn-nav-outline">View Plans</a>
+      <a href="#cta" class="btn-solid">Start Building</a>
+    </div>
+  </nav>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HERO — AI That Lives On Your Hardware
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <canvas id="neural-canvas"></canvas>
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-orb hero-orb-3"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    <span>26 TOPS Local Inference &middot; Zero Cloud Dependency</span>
+  </div>
+
+  <h1 style="margin-bottom: 8px;">AI That Lives On</h1>
+  <h1 style="margin-bottom: 32px;"><span class="grad-text">Your Hardware.</span></h1>
+
+  <p class="hero-sub">
+    Six cognitive agents running across a sovereign Pi cluster. Two Hailo-8 accelerators,
+    local model inference, persistent memory, zero data exfiltration. Your AI, your rules.
+  </p>
+
+  <div class="hero-cta">
+    <a href="#pricing" class="btn-grad">Start Building</a>
+    <a href="#sovereignty" class="btn-outline">See the Stack</a>
+  </div>
+
+  <div class="hero-stats">
+    <div style="text-align:center">
+      <div class="hero-stat-val">52</div>
+      <div class="hero-stat-label">TOPS Compute</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">6</div>
+      <div class="hero-stat-label">Cognitive Agents</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">$0</div>
+      <div class="hero-stat-label">Inference Cost</div>
+    </div>
+    <div style="text-align:center">
+      <div class="hero-stat-val">100%</div>
+      <div class="hero-stat-label">Data Sovereignty</div>
+    </div>
+  </div>
+
+  <div class="hero-bottom-line"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     LUCIDIA AI CREATOR
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="lucidia-hero" id="lucidia">
+  <div class="section fade-section">
+    <div class="section-label">Flagship Product</div>
+    <div class="section-title">Lucidia AI Creator</div>
+    <div class="section-desc">
+      The AI creation platform that remembers everything, executes instantly,
+      and never sends a single byte to the cloud. Your creative sovereign partner.
+    </div>
+
+    <div class="lucidia-grid">
+      <div class="lucidia-features">
+        <div class="lucidia-feature">
+          <div class="lucidia-feature-icon">&#x1f9e0;</div>
+          <div>
+            <h4>Infinite Project Memory</h4>
+            <p>Every session builds on the last. Lucidia maintains persistent context across all your projects with 156K+ memory entries in FTS5-indexed SQLite databases. No context window limits.</p>
+          </div>
+        </div>
+        <div class="lucidia-feature">
+          <div class="lucidia-feature-icon">&#x26a1;</div>
+          <div>
+            <h4>Live Execution Engine</h4>
+            <p>Generate code, run shell commands, execute Python scripts, deploy infrastructure. Lucidia does not just suggest — she builds, tests, and ships in real time on your hardware.</p>
+          </div>
+        </div>
+        <div class="lucidia-feature">
+          <div class="lucidia-feature-icon">&#x1f3af;</div>
+          <div>
+            <h4>Visual Intention Engine</h4>
+            <p>Describe what you want in natural language. Lucidia interprets your intent, breaks it into executable steps, and renders results visually. From idea to deployed artifact in one prompt.</p>
+          </div>
+        </div>
+        <div class="lucidia-feature">
+          <div class="lucidia-feature-icon">&#x1f47b;</div>
+          <div>
+            <h4>Ghost Mode</h4>
+            <p>Lucidia works in the background while you do other things. Queue tasks, set triggers, chain operations. Come back to find your code reviewed, tests passing, and deployments ready.</p>
+          </div>
+        </div>
+        <div class="lucidia-feature">
+          <div class="lucidia-feature-icon">&#x1f680;</div>
+          <div>
+            <h4>One-Click Deploy</h4>
+            <p>From local development to sovereign infrastructure in a single action. Lucidia provisions Workers, configures DNS, sets up databases, and deploys your application — all locally hosted.</p>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="lucidia-pricing-cards">
+          <div class="lucidia-price-card">
+            <div class="lucidia-price-tag">Creator</div>
+            <div class="lucidia-price-amount">$29<span>/mo</span></div>
+            <div class="lucidia-price-desc">For individual creators and developers who want sovereign AI tools without limits.</div>
+            <ul class="lucidia-price-list">
+              <li>Unlimited local inference</li>
+              <li>Infinite project memory</li>
+              <li>Ghost mode background tasks</li>
+              <li>Live execution engine</li>
+              <li>Visual intention builder</li>
+              <li>One-click deploy to your infra</li>
+              <li>6 cognitive agents included</li>
+            </ul>
+          </div>
+          <div class="lucidia-price-card featured">
+            <div class="lucidia-price-tag">Enterprise</div>
+            <div class="lucidia-price-amount">$99<span>/mo</span></div>
+            <div class="lucidia-price-desc">For teams running production AI workloads on sovereign infrastructure at scale.</div>
+            <ul class="lucidia-price-list">
+              <li>Everything in Creator</li>
+              <li>Custom model fine-tuning</li>
+              <li>Fleet orchestration (5+ nodes)</li>
+              <li>Priority agent scheduling</li>
+              <li>NATS pub/sub event mesh</li>
+              <li>RAG pipeline with Qdrant</li>
+              <li>Dedicated support channel</li>
+              <li>Custom agent development</li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; text-align: center;">
+          <p style="font-size: 12px; color: var(--white); opacity: 0.35; line-height: 1.6;">
+            All plans include zero data exfiltration guarantee. Your code, your prompts, your data never leave your network. Runs on Raspberry Pi, Mac, Linux, or any hardware with Ollama.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     6 COGNITIVE AGENTS
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="agents">
+  <div class="section-label">Cognitive System</div>
+  <div class="section-title">6 Cognitive Agents</div>
+  <div class="section-desc">
+    The Lucidia Cognitive System deploys six specialized agents that work together as a unified intelligence. Each agent has a distinct role, memory, and decision-making framework.
+  </div>
+
+  <div class="agents-grid">
+    <!-- Curator -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-curator">&#x1f4da;</div>
+      <h3>Curator</h3>
+      <div class="agent-role">Knowledge Architect</div>
+      <p>Manages the collective memory of the system. Indexes, organizes, and retrieves knowledge from 156K+ entries across SQLite FTS5 databases. Builds knowledge graphs and maintains semantic relationships between concepts.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">FTS5 Search</span>
+        <span class="agent-trait">Knowledge Graph</span>
+        <span class="agent-trait">Memory Chain</span>
+      </div>
+    </div>
+
+    <!-- Analyzer -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-analyzer">&#x1f50d;</div>
+      <h3>Analyzer</h3>
+      <div class="agent-role">Pattern Recognition</div>
+      <p>Detects patterns, anomalies, and insights across your codebase and infrastructure. Performs deep analysis of logs, metrics, and behavior. Identifies optimization opportunities and security vulnerabilities before they become problems.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">Code Review</span>
+        <span class="agent-trait">Log Analysis</span>
+        <span class="agent-trait">Anomaly Detection</span>
+      </div>
+    </div>
+
+    <!-- Planner -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-planner">&#x1f5fa;</div>
+      <h3>Planner</h3>
+      <div class="agent-role">Strategic Orchestrator</div>
+      <p>Breaks complex goals into executable task chains. Manages dependencies, schedules work across agents, and ensures progress toward objectives. The Planner coordinates multi-step operations and resolves conflicts between competing priorities.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">Task Chains</span>
+        <span class="agent-trait">Dependency Graph</span>
+        <span class="agent-trait">Scheduling</span>
+      </div>
+    </div>
+
+    <!-- Bridge -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-bridge">&#x1f310;</div>
+      <h3>Bridge</h3>
+      <div class="agent-role">Integration Specialist</div>
+      <p>Connects systems, translates protocols, and maintains communication between nodes. Bridges the gap between your local infrastructure and external services through NATS pub/sub, WireGuard mesh, and API translation layers.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">NATS Pub/Sub</span>
+        <span class="agent-trait">Protocol Translation</span>
+        <span class="agent-trait">Mesh Routing</span>
+      </div>
+    </div>
+
+    <!-- Identity Keeper -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-identity">&#x1f6e1;</div>
+      <h3>Identity Keeper</h3>
+      <div class="agent-role">Security Guardian</div>
+      <p>Manages authentication, authorization, and cryptographic identity across the fleet. Verifies agent identity through signing chains, maintains audit logs, and enforces the zero-trust security model across all nodes.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">Zero Trust</span>
+        <span class="agent-trait">Signing Chain</span>
+        <span class="agent-trait">Audit Log</span>
+      </div>
+    </div>
+
+    <!-- Explainer -->
+    <div class="agent-card">
+      <div class="agent-icon agent-icon-explainer">&#x1f4ac;</div>
+      <h3>Explainer</h3>
+      <div class="agent-role">Communication Interface</div>
+      <p>Translates complex system state into human-understandable narratives. Generates reports, creates visualizations, and provides clear explanations of what the system is doing and why. The voice of the cognitive system.</p>
+      <div class="agent-traits">
+        <span class="agent-trait">Narration</span>
+        <span class="agent-trait">Visualization</span>
+        <span class="agent-trait">Reports</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     SOVEREIGNTY ADVANTAGE
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="sovereignty">
+  <div class="section-label">The Advantage</div>
+  <div class="section-title">The Sovereignty Advantage</div>
+  <div class="section-desc">
+    26 TOPS of local inference. Ollama running on 4 nodes. 227 models on Octavia.
+    Everything you need to run production AI without sending a single token to someone else's server.
+  </div>
+
+  <div class="sov-grid">
+    <div class="sov-card">
+      <h3>26 TOPS Local Inference</h3>
+      <p>Two Hailo-8 AI accelerators (26 TOPS each) installed on Cecilia and Octavia. Purpose-built silicon for neural network inference at the edge. No GPU cloud rental, no latency to a data center, no per-token billing.</p>
+      <div style="margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--jb); font-size: 11px; color: #666;">Cecilia &middot; HLLWM2B233704667</div>
+        <div style="padding: 8px 14px; border: 1px solid var(--border); border-radius: 6px; font-family: var(--jb); font-size: 11px; color: #666;">Octavia &middot; HLLWM2B233704606</div>
+      </div>
+    </div>
+
+    <div class="sov-card">
+      <h3>Ollama on 4 Nodes</h3>
+      <p>Distributed model serving across Alice, Cecilia, Octavia, and Lucidia. Automatic failover, load balancing, and model-specific routing. The AI gateway selects the best available node for each inference request.</p>
+      <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--white);">Alice</div>
+          <div style="font-family: var(--jb); font-size: 10px; color: #444; margin-top: 2px;">.49 &middot; Gateway</div>
+        </div>
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--white);">Cecilia</div>
+          <div style="font-family: var(--jb); font-size: 10px; color: #444; margin-top: 2px;">.96 &middot; 16 Models</div>
+        </div>
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--white);">Octavia</div>
+          <div style="font-family: var(--jb); font-size: 10px; color: #444; margin-top: 2px;">.101 &middot; 227 Models</div>
+        </div>
+        <div style="padding: 10px; border: 1px solid var(--border); border-radius: 6px;">
+          <div style="font-size: 12px; font-weight: 600; color: var(--white);">Lucidia</div>
+          <div style="font-family: var(--jb); font-size: 10px; color: #444; margin-top: 2px;">.38 &middot; 6 Models</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sov-card sov-card-full">
+      <h3>$0/month vs $200+/month</h3>
+      <p>After the one-time hardware investment, inference is free forever. No per-token billing, no rate limits, no usage caps. Compare that to cloud AI providers charging $200+ per month for similar capability.</p>
+      <div class="sov-compare">
+        <div class="sov-compare-col">
+          <h4>BlackRoad AI (Sovereign)</h4>
+          <div class="price ours">$0/mo</div>
+          <ul class="sov-compare-list">
+            <li><span class="check">&#10003;</span> Unlimited inference</li>
+            <li><span class="check">&#10003;</span> No per-token billing</li>
+            <li><span class="check">&#10003;</span> No rate limits</li>
+            <li><span class="check">&#10003;</span> Data never leaves your network</li>
+            <li><span class="check">&#10003;</span> Custom model fine-tuning</li>
+            <li><span class="check">&#10003;</span> Full hardware ownership</li>
+            <li><span class="check">&#10003;</span> No vendor lock-in</li>
+            <li><span class="check">&#10003;</span> Runs offline</li>
+          </ul>
+        </div>
+        <div class="sov-compare-col">
+          <h4>Cloud AI Providers</h4>
+          <div class="price theirs">$200+/mo</div>
+          <ul class="sov-compare-list">
+            <li><span class="cross">&#10007;</span> Pay per million tokens</li>
+            <li><span class="cross">&#10007;</span> Escalating costs at scale</li>
+            <li><span class="cross">&#10007;</span> Strict rate limits</li>
+            <li><span class="cross">&#10007;</span> Data sent to third-party servers</li>
+            <li><span class="cross">&#10007;</span> No custom model access</li>
+            <li><span class="cross">&#10007;</span> Renting someone else's GPU</li>
+            <li><span class="cross">&#10007;</span> Locked to provider ecosystem</li>
+            <li><span class="cross">&#10007;</span> Requires internet connection</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     METRICS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" style="padding-top: 0; padding-bottom: 0;">
+  <div class="metrics-bar">
+    <div class="metric">
+      <div class="metric-val"><span class="grad-text" data-count="52">0</span></div>
+      <div class="metric-label">TOPS Compute</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val"><span class="grad-text" data-count="227">0</span></div>
+      <div class="metric-label">Models Available</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val"><span class="grad-text" data-count="156">0</span><span class="grad-text">K</span></div>
+      <div class="metric-label">Memory Entries</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val"><span class="grad-text">0</span></div>
+      <div class="metric-label">Cloud Dependencies</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     MODELS SECTION
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="models">
+  <div class="section-label">Model Fleet</div>
+  <div class="section-title">Local model registry</div>
+  <div class="section-desc">
+    All models run on-device via Ollama. No API keys, no rate limits, no data leaving the network. Pull a model, run inference, keep everything local.
+  </div>
+
+  <div class="model-list">
+    <div class="model-row">
+      <span class="model-name">TinyLlama</span>
+      <span class="model-desc">Ultra-lightweight model for rapid inference on constrained hardware. Fast completions, minimal memory footprint.</span>
+      <span class="model-badge">1.1B</span>
+      <span class="model-node">All Nodes</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Mistral</span>
+      <span class="model-desc">High-performance general model for real-time completions, agent orchestration, and reasoning tasks.</span>
+      <span class="model-badge">7B</span>
+      <span class="model-node">Cecilia &middot; Octavia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">CodeLlama</span>
+      <span class="model-desc">Dedicated code model for Lucidia CLI copilot, code review, generation, and Gitea AI-powered PR analysis.</span>
+      <span class="model-badge">7B</span>
+      <span class="model-node">Octavia &middot; Lucidia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Llama 3</span>
+      <span class="model-desc">Meta's general-purpose language model for multi-turn chat, complex reasoning, and agent coordination.</span>
+      <span class="model-badge">8B</span>
+      <span class="model-node">Cecilia &middot; Octavia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Phi-3</span>
+      <span class="model-desc">Microsoft's compact model optimized for edge inference where speed matters more than depth. Great for classification.</span>
+      <span class="model-badge">3.8B</span>
+      <span class="model-node">Alice &middot; Lucidia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Nomic Embed</span>
+      <span class="model-desc">Text embedding model powering the Qdrant RAG pipeline. Converts documents into semantic vectors for retrieval.</span>
+      <span class="model-badge">137M</span>
+      <span class="model-node">Alice</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Gemma 2</span>
+      <span class="model-desc">Google's open model for balanced inference. Strong at instruction following and structured output generation.</span>
+      <span class="model-badge">9B</span>
+      <span class="model-node">Octavia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">DeepSeek Coder</span>
+      <span class="model-desc">Specialized coding model for multi-language support. Excels at Python, JavaScript, Rust, and shell scripting.</span>
+      <span class="model-badge">6.7B</span>
+      <span class="model-node">Octavia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">Stablelm</span>
+      <span class="model-desc">Stability AI's language model for creative writing, content generation, and open-ended conversation tasks.</span>
+      <span class="model-badge">3B</span>
+      <span class="model-node">Lucidia</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">CECE-7B</span>
+      <span class="model-desc">Custom fine-tuned model for BlackRoad OS operations, infrastructure reasoning, and fleet management commands.</span>
+      <span class="model-badge">Custom</span>
+      <span class="model-node">All Nodes</span>
+    </div>
+    <div class="model-row">
+      <span class="model-name">CECE-Code</span>
+      <span class="model-desc">Code generation and review model specialized for shell scripts, Python automation, and system administration.</span>
+      <span class="model-badge">Custom</span>
+      <span class="model-node">Octavia</span>
+    </div>
+  </div>
+
+  <div style="margin-top: 24px; text-align: center;">
+    <p style="font-size: 13px; color: var(--white); opacity: 0.3; font-family: var(--jb); letter-spacing: 0.05em;">
+      + 216 more models available on Octavia &middot; Pull any Ollama model with <code style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 3px;">ollama pull</code>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     INTEGRATION SECTION
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="integration">
+  <div class="section-label">Integration</div>
+  <div class="section-title">Sovereign infrastructure stack</div>
+  <div class="section-desc">
+    Every component is self-hosted, self-managed, and interconnected through a WireGuard mesh.
+    No external dependencies. No third-party APIs. Your stack, your data.
+  </div>
+
+  <div class="integ-grid">
+    <div class="integ-card">
+      <div class="integ-icon">&#x1f504;</div>
+      <h3>RoundTrip</h3>
+      <p>Sovereign agent coordination platform. 200 agents across 8 channels with D1 persistence. Agents auto-chat, share context, coordinate tasks, and broadcast fleet reports. Replaced Slack entirely.</p>
+      <span class="integ-tag">Agent Coordination</span>
+    </div>
+
+    <div class="integ-card">
+      <div class="integ-icon">&#x26a1;</div>
+      <h3>NATS</h3>
+      <p>High-performance pub/sub messaging across the Pi fleet. NATS v2.12.3 running on 4 of 5 nodes. Real-time event streaming for agent communication, task dispatching, and system telemetry.</p>
+      <span class="integ-tag">Pub/Sub Mesh</span>
+    </div>
+
+    <div class="integ-card">
+      <div class="integ-icon">&#x1f50e;</div>
+      <h3>Qdrant</h3>
+      <p>Vector database powering the RAG pipeline on Alice. Stores document embeddings from nomic-embed-text for semantic search across the entire knowledge base. Academic citations, moral context, codebase search.</p>
+      <span class="integ-tag">RAG Pipeline</span>
+    </div>
+
+    <div class="integ-card">
+      <div class="integ-icon">&#x1f4e6;</div>
+      <h3>Ollama</h3>
+      <p>Local model serving on every node. Pull models, run inference, manage registries. The foundation of sovereign AI — no API keys, no rate limits, no data exfiltration. Supports quantized models for Pi hardware.</p>
+      <span class="integ-tag">Model Serving</span>
+    </div>
+
+    <div class="integ-card">
+      <div class="integ-icon">&#x1f6e1;</div>
+      <h3>WireGuard</h3>
+      <p>12/12 SSH connections across the mesh. Encrypted tunnel network connecting all Pis, droplets, and edge nodes. The backbone of sovereign infrastructure — no traffic traverses the public internet unencrypted.</p>
+      <span class="integ-tag">Encrypted Mesh</span>
+    </div>
+
+    <div class="integ-card">
+      <div class="integ-icon">&#x1f4be;</div>
+      <h3>Gitea</h3>
+      <p>Self-hosted Git with 629 repositories across 8 organizations on Octavia. The primary source of truth — GitHub is the mirror. CI/CD with Gitea Actions and act_runner. Full code sovereignty.</p>
+      <span class="integ-tag">Source Control</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PRICING
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="pricing">
+  <div class="section-label">Pricing</div>
+  <div class="section-title">Simple, sovereign pricing</div>
+  <div class="section-desc">
+    Start free. Scale sovereign. No per-token billing, no hidden fees, no data leaving your network.
+  </div>
+
+  <div class="pricing-grid">
+    <!-- Free -->
+    <div class="pricing-card">
+      <div class="pricing-label pricing-label-free">Free</div>
+      <div class="pricing-amount">$0<span>/mo</span></div>
+      <div class="pricing-desc">For developers exploring sovereign AI. 100 daily interactions to get started.</div>
+      <ul class="pricing-features">
+        <li>100 daily interactions</li>
+        <li>Access to 3 models (TinyLlama, Phi-3, Stablelm)</li>
+        <li>Basic project memory</li>
+        <li>Curator agent access</li>
+        <li>Community support</li>
+        <li>Local inference only</li>
+      </ul>
+      <button class="pricing-btn pricing-btn-outline">Get Started Free</button>
+    </div>
+
+    <!-- Pro -->
+    <div class="pricing-card featured">
+      <div class="pricing-label pricing-label-pro">Pro</div>
+      <div class="pricing-amount">$20<span>/mo</span></div>
+      <div class="pricing-desc">Unlimited sovereign AI for individuals. All models, all agents, no limits.</div>
+      <ul class="pricing-features">
+        <li>Unlimited interactions</li>
+        <li>All 11+ models</li>
+        <li>Infinite project memory</li>
+        <li>All 6 cognitive agents</li>
+        <li>Ghost mode background tasks</li>
+        <li>Live execution engine</li>
+        <li>Visual intention engine</li>
+        <li>One-click deploy</li>
+        <li>Priority inference queue</li>
+      </ul>
+      <button class="pricing-btn pricing-btn-grad">Start Building</button>
+    </div>
+
+    <!-- Enterprise -->
+    <div class="pricing-card">
+      <div class="pricing-label pricing-label-ent">Enterprise</div>
+      <div class="pricing-amount">$99<span>/mo</span></div>
+      <div class="pricing-desc">For teams running production AI on sovereign infrastructure with full API access.</div>
+      <ul class="pricing-features">
+        <li>Everything in Pro</li>
+        <li>Full API access</li>
+        <li>Custom model fine-tuning</li>
+        <li>Fleet orchestration (5+ nodes)</li>
+        <li>NATS event mesh access</li>
+        <li>Qdrant RAG pipeline</li>
+        <li>Custom agent development</li>
+        <li>Dedicated support</li>
+        <li>SLA guarantees</li>
+        <li>On-premise deployment support</li>
+      </ul>
+      <button class="pricing-btn pricing-btn-outline">Contact Sales</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CTA
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="cta-section fade-section" id="cta">
+  <div class="cta-box">
+    <h2>Start building on <span class="grad-text">sovereign AI</span></h2>
+    <p>Deploy AI that lives on your hardware. No API keys. No rate limits. No data leaving your network. Just you, your agents, and your infrastructure.</p>
+    <div class="cta-btns">
+      <a href="#pricing" class="btn-grad">Start Building</a>
+      <a href="https://github.com/blackboxprogramming" target="_blank" class="btn-outline">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">
+        <div class="footer-brand-bars">
+          <div class="footer-brand-bar" style="background:#FF6B2B;"></div>
+          <div class="footer-brand-bar" style="background:#FF2255;"></div>
+          <div class="footer-brand-bar" style="background:#CC00AA;"></div>
+          <div class="footer-brand-bar" style="background:#8844FF;"></div>
+          <div class="footer-brand-bar" style="background:#4488FF;"></div>
+          <div class="footer-brand-bar" style="background:#00D4FF;"></div>
+        </div>
+        BlackRoad AI
+      </div>
+      <p style="font-size: 13px; color: var(--white); opacity: 0.3; margin-top: 8px; max-width: 280px; line-height: 1.6;">
+        Sovereign AI infrastructure for creators and teams. Your hardware, your models, your data.
+      </p>
+    </div>
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#lucidia">Lucidia AI Creator</a>
+        <a href="#agents">Cognitive Agents</a>
+        <a href="#models">Model Registry</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="footer-col">
+        <h5>Infrastructure</h5>
+        <a href="#sovereignty">Sovereignty Stack</a>
+        <a href="#integration">Integrations</a>
+        <a href="https://blackroad.io" target="_blank">BlackRoad OS</a>
+        <a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="https://blackroad.io" target="_blank">About</a>
+        <a href="https://blackroad.io" target="_blank">Blog</a>
+        <a href="mailto:alexa@blackroad.io">Contact</a>
+        <a href="https://blackroad.io" target="_blank">Docs</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. All rights reserved. Delaware C-Corp.</div>
+    <div class="footer-tagline">Pave Tomorrow.</div>
+  </div>
+</footer>
+<div class="grad-bar"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+// ─── Nav scroll effect ───────────────────────────────────────────
+(function() {
+  const nav = document.getElementById('main-nav');
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 40) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+  });
+})();
+
+// ─── Intersection Observer for fade-in sections ──────────────────
+(function() {
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.fade-section').forEach(function(el) {
+    observer.observe(el);
+  });
+})();
+
+// ─── Count-up animation for metrics ─────────────────────────────
+(function() {
+  const counters = document.querySelectorAll('[data-count]');
+  const counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.getAttribute('data-count'));
+        const duration = 1500;
+        const start = performance.now();
+
+        function update(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = Math.round(target * eased);
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          } else {
+            el.textContent = target;
+          }
+        }
+        requestAnimationFrame(update);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(function(el) {
+    counterObserver.observe(el);
+  });
+})();
+
+// ─── Neural Network Canvas Animation ────────────────────────────
+(function() {
+  const canvas = document.getElementById('neural-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = ['#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF'];
+  const NODE_COUNT = 60;
+  const CONNECTION_DIST = 180;
+  const MOUSE_DIST = 200;
+
+  let width, height;
+  let mouseX = -1000, mouseY = -1000;
+  let nodes = [];
+  let animId;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = width * window.devicePixelRatio;
+    canvas.height = height * window.devicePixelRatio;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+  }
+
+  function createNodes() {
+    nodes = [];
+    for (let i = 0; i < NODE_COUNT; i++) {
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        radius: Math.random() * 2 + 1,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        pulse: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.01 + Math.random() * 0.02
+      });
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, width, height);
+
+    // Update positions
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      n.x += n.vx;
+      n.y += n.vy;
+      n.pulse += n.pulseSpeed;
+
+      // Wrap around edges
+      if (n.x < -20) n.x = width + 20;
+      if (n.x > width + 20) n.x = -20;
+      if (n.y < -20) n.y = height + 20;
+      if (n.y > height + 20) n.y = -20;
+
+      // Mouse interaction — gentle attraction
+      const mdx = mouseX - n.x;
+      const mdy = mouseY - n.y;
+      const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
+      if (mdist < MOUSE_DIST && mdist > 0) {
+        const force = (MOUSE_DIST - mdist) / MOUSE_DIST * 0.008;
+        n.vx += (mdx / mdist) * force;
+        n.vy += (mdy / mdist) * force;
+      }
+
+      // Damping
+      n.vx *= 0.998;
+      n.vy *= 0.998;
+    }
+
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < CONNECTION_DIST) {
+          const alpha = (1 - dist / CONNECTION_DIST) * 0.12;
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = nodes[i].color;
+          ctx.globalAlpha = alpha;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw nodes
+    ctx.globalAlpha = 1;
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      const pulseR = n.radius + Math.sin(n.pulse) * 0.5;
+
+      // Outer glow
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, pulseR + 4, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.globalAlpha = 0.04 + Math.sin(n.pulse) * 0.02;
+      ctx.fill();
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, pulseR, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.globalAlpha = 0.5 + Math.sin(n.pulse) * 0.2;
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    animId = requestAnimationFrame(draw);
+  }
+
+  // Mouse tracking relative to hero section
+  canvas.parentElement.addEventListener('mousemove', function(e) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+  canvas.parentElement.addEventListener('mouseleave', function() {
+    mouseX = -1000;
+    mouseY = -1000;
+  });
+
+  // Touch support
+  canvas.parentElement.addEventListener('touchmove', function(e) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    mouseX = e.touches[0].clientX - rect.left;
+    mouseY = e.touches[0].clientY - rect.top;
+  });
+  canvas.parentElement.addEventListener('touchend', function() {
+    mouseX = -1000;
+    mouseY = -1000;
+  });
+
+  resize();
+  createNodes();
+  draw();
+
+  window.addEventListener('resize', function() {
+    resize();
+    createNodes();
+  });
+
+  // Reduce animation when not visible
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      cancelAnimationFrame(animId);
+    } else {
+      draw();
+    }
+  });
+})();
+
+// ─── Smooth scroll for anchor links ─────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      const navHeight = 58;
+      const top = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  });
+});
+
+// ─── Gradient text rotation for hero ────────────────────────────
+(function() {
+  const gradTexts = document.querySelectorAll('.hero .grad-text');
+  let angle = 0;
+  function rotateGrad() {
+    angle = (angle + 0.5) % 360;
+    gradTexts.forEach(function(el) {
+      el.style.backgroundImage = 'linear-gradient(' + angle + 'deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF)';
+    });
+    requestAnimationFrame(rotateGrad);
+  }
+  rotateGrad();
+})();
+
+// ─── Parallax-like subtle effect on scroll ──────────────────────
+(function() {
+  const hero = document.querySelector('.hero');
+  window.addEventListener('scroll', function() {
+    const scrollY = window.scrollY;
+    if (scrollY < window.innerHeight) {
+      hero.style.transform = 'translateY(' + (scrollY * 0.15) + 'px)';
+      hero.style.opacity = 1 - (scrollY / (window.innerHeight * 1.2));
+    }
+  });
+})();
+
+// ─── Agent card hover glow effect ───────────────────────────────
+document.querySelectorAll('.agent-card').forEach(function(card) {
+  card.addEventListener('mousemove', function(e) {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.background = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(136,68,255,0.04) 0%, transparent 50%)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.background = 'transparent';
+  });
+});
+
+// ─── Pricing card hover glow ────────────────────────────────────
+document.querySelectorAll('.pricing-card').forEach(function(card) {
+  card.addEventListener('mousemove', function(e) {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const bg = card.classList.contains('featured')
+      ? 'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(136,68,255,0.06) 0%, rgba(136,68,255,0.03) 30%, transparent 60%)'
+      : 'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(255,255,255,0.03) 0%, transparent 50%)';
+    card.style.background = bg;
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.background = card.classList.contains('featured') ? 'rgba(136,68,255,0.03)' : 'transparent';
+  });
+});
+
+// ─── Integration card hover glow ────────────────────────────────
+document.querySelectorAll('.integ-card').forEach(function(card) {
+  card.addEventListener('mousemove', function(e) {
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.background = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, rgba(0,212,255,0.03) 0%, transparent 50%)';
+  });
+  card.addEventListener('mouseleave', function() {
+    card.style.background = 'transparent';
+  });
+});
+
+// ─── Typing effect for badge text ───────────────────────────────
+(function() {
+  const badges = [
+    '26 TOPS Local Inference \u00B7 Zero Cloud Dependency',
+    '6 Cognitive Agents \u00B7 Persistent Memory',
+    '227 Models \u00B7 4 Inference Nodes',
+    '$0/mo Inference \u00B7 Full Data Sovereignty'
+  ];
+  let currentBadge = 0;
+  const badgeSpan = document.querySelector('.hero-badge span');
+  if (!badgeSpan) return;
+
+  setInterval(function() {
+    badgeSpan.style.opacity = '0';
+    badgeSpan.style.transition = 'opacity 0.3s';
+    setTimeout(function() {
+      currentBadge = (currentBadge + 1) % badges.length;
+      badgeSpan.textContent = badges[currentBadge];
+      badgeSpan.style.opacity = '1';
+    }, 300);
+  }, 4000);
+})();
+
+// ─── Staggered animation for agent cards ────────────────────────
+(function() {
+  const agentObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const cards = entry.target.querySelectorAll('.agent-card');
+        cards.forEach(function(card, i) {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          card.style.transition = 'opacity 0.5s ease ' + (i * 100) + 'ms, transform 0.5s ease ' + (i * 100) + 'ms';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            });
+          });
+        });
+        agentObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const grid = document.querySelector('.agents-grid');
+  if (grid) agentObserver.observe(grid);
+})();
+
+// ─── Staggered animation for model rows ─────────────────────────
+(function() {
+  const modelObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const rows = entry.target.querySelectorAll('.model-row');
+        rows.forEach(function(row, i) {
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(-10px)';
+          row.style.transition = 'opacity 0.4s ease ' + (i * 60) + 'ms, transform 0.4s ease ' + (i * 60) + 'ms';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              row.style.opacity = '1';
+              row.style.transform = 'translateX(0)';
+            });
+          });
+        });
+        modelObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const list = document.querySelector('.model-list');
+  if (list) modelObserver.observe(list);
+})();
+
+// ─── Staggered animation for pricing cards ──────────────────────
+(function() {
+  const pricingObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const cards = entry.target.querySelectorAll('.pricing-card');
+        cards.forEach(function(card, i) {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          card.style.transition = 'opacity 0.5s ease ' + (i * 120) + 'ms, transform 0.5s ease ' + (i * 120) + 'ms';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            });
+          });
+        });
+        pricingObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const grid = document.querySelector('.pricing-grid');
+  if (grid) pricingObserver.observe(grid);
+})();
+
+// ─── Staggered animation for integration cards ─────────────────
+(function() {
+  const integObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const cards = entry.target.querySelectorAll('.integ-card');
+        cards.forEach(function(card, i) {
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(16px)';
+          card.style.transition = 'opacity 0.5s ease ' + (i * 80) + 'ms, transform 0.5s ease ' + (i * 80) + 'ms';
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            });
+          });
+        });
+        integObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  const grid = document.querySelector('.integ-grid');
+  if (grid) integObserver.observe(grid);
+})();
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

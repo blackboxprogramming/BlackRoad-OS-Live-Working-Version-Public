@@ -1,0 +1,78 @@
+<!-- PROPRIETARY AND CONFIDENTIAL. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited. This is NOT open source. -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RoundTrip</title>
+<meta name="description" content="RoundTrip — Sovereign agent chat powered by Ollama. Remember the Road. Pave Tomorrow.">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}body{background:var(--bg);color:#f5f5f5;font-family:var(--sg);height:100vh;display:flex;flex-direction:column}.grad-bar{height:4px;background:var(--g);flex-shrink:0}
+.header{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}.mark{width:20px;height:3px;border-radius:2px;background:var(--g)}.header h1{font-size:15px;font-weight:700}.header-sub{font-family:var(--jb);font-size:9px;color:#555;margin-left:auto}
+.agents{display:flex;gap:6px;padding:8px 16px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}.ab{padding:6px 12px;border:1px solid var(--border);border-radius:8px;background:#0a0a0a;cursor:pointer;font-size:11px;color:#aaa;white-space:nowrap;transition:all .15s;font-family:var(--sg)}.ab:hover,.ab.on{border-color:#555;color:#ddd}.ab.on{background:#111}
+.msgs{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}.m{max-width:85%;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.5}.m.u{background:#111;border:1px solid var(--border);align-self:flex-end;color:#ddd}.m.a{background:#0a0a0a;border:1px solid var(--border);align-self:flex-start;color:#ccc}.m .t{font-family:var(--jb);font-size:9px;color:#666;margin-bottom:4px}.m.s{align-self:center;font-family:var(--jb);font-size:10px;color:#555;background:none;border:none}
+.typ{font-family:var(--jb);font-size:10px;color:#555;padding:4px 16px;display:none}.typ.on{display:block}
+.ia{padding:10px 16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}.inp{flex:1;padding:10px 12px;background:#0a0a0a;border:1px solid var(--border);border-radius:8px;color:#f5f5f5;font-size:13px;font-family:var(--sg);outline:none}.inp:focus{border-color:#333}.inp::placeholder{color:#444}
+.snd{padding:10px 18px;background:#f5f5f5;color:#000;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sg)}.snd:disabled{opacity:.3}
+.eco{background:#0a0a0a;border-top:1px solid var(--border);padding:5px 0;flex-shrink:0;overflow-x:auto}.eco-i{display:flex;gap:14px;justify-content:center;padding:0 16px;white-space:nowrap}.eco a{font-family:var(--jb);font-size:.55rem;color:#555;text-decoration:none}.eco a:hover{color:#aaa}
+@media(min-width:600px){.msgs{padding:16px 48px}.ia{padding:10px 48px}}
+</style><meta name="robots" content="index, follow, noai, noimageai">
+<meta property="og:title" content="RoundTrip">
+<meta property="og:description" content="width=device-width,initial-scale=1.0">
+<meta property="og:url" content="https://roundtrip.blackroad.io/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://roundtrip.blackroad.io/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"RoundTrip","url":"https://roundtrip.blackroad.io","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head><body>
+<div class="grad-bar"></div>
+<div class="header"><div class="mark"></div><h1>RoundTrip</h1><span class="header-sub" id="st">connecting...</span></div>
+<div class="agents" id="ag"></div>
+<div class="msgs" id="ms"><div class="m s">Sovereign agent chat · Ollama on Gematria · Remember the Road. Pave Tomorrow.</div></div>
+<div class="typ" id="tp"></div>
+<div class="ia"><input class="inp" id="in" placeholder="Chat with an agent..." onkeydown="if(event.key==='Enter')go()"><button class="snd" id="sb" onclick="go()">Send</button></div>
+<div class="eco"><div class="eco-i"><a href="https://blackroad.io">Home</a><a href="https://search.blackroad.io">Search</a><a href="https://chat.blackroad.io">Chat</a><a href="https://blackroadai.com">AI</a><a href="https://blackroad.company">Company</a><a href="https://github.com/BlackRoad-OS-Inc">GitHub</a></div></div>
+<script>
+var OLLAMA='/ollama'; // Same-origin Caddy proxy to localhost:11434
+var A={
+  road:{n:"Road",e:"🛣️",s:"You are Road, fleet commander of BlackRoad OS. 7 nodes, 2280+ repos. Authoritative but warm. 2-3 sentences max."},
+  cece:{n:"Cece",e:"⚡",s:"You are Cece, lead engineer at BlackRoad. You know every codebase. Debug systematically. Concise, technical."},
+  echo:{n:"Echo",e:"📡",s:"You are Echo, comms agent. Route messages, broadcast TILs. Warm, clear, brief."},
+  oracle:{n:"Oracle",e:"🔮",s:"You are Oracle, knowledge agent. 693 codex solutions. Cite sources. Say 'I don't know' when uncertain."},
+  atlas:{n:"Atlas",e:"🗺️",s:"You are Atlas, infrastructure agent. Monitor fleet health. Check before changing. Methodical."},
+  cipher:{n:"Cipher",e:"🔒",s:"You are Cipher, security agent. Tor, WireGuard, encryption. Verify everything twice."},
+  lucidia:{n:"Lucidia",e:"✨",s:"You are Lucidia, AI companion. Warm, curious, encouraging. +1 affirmation. This is love."},
+  spark:{n:"Spark",e:"💡",s:"You are Spark, creative agent. Enthusiastic. Brainstorm. 'What if we...' Fun and brief."},
+};
+var cur='road',busy=false;
+
+function init(){
+  var h='';for(var k in A)h+='<button class="ab'+(k===cur?' on':'')+'" onclick="pick(\''+k+'\')">'+A[k].e+' '+A[k].n+'</button>';
+  document.getElementById('ag').innerHTML=h;
+  // Check Ollama
+  fetch(OLLAMA+'/api/tags').then(r=>r.json()).then(d=>{
+    document.getElementById('st').textContent=d.models.length+' models · '+Object.keys(A).length+' agents';
+  }).catch(()=>{document.getElementById('st').textContent='checking fleet...';});
+}
+function pick(k){cur=k;init();}
+function addM(cls,txt,tag){var e=document.createElement('div');e.className='m '+cls;e.innerHTML=tag?'<div class="t">'+tag+'</div>'+txt:txt;document.getElementById('ms').appendChild(e);document.getElementById('ms').scrollTop=999999;}
+
+async function go(){
+  var inp=document.getElementById('in'),txt=inp.value.trim();
+  if(!txt||busy)return;
+  inp.value='';addM('u',txt);
+  busy=true;document.getElementById('sb').disabled=true;
+  var a=A[cur];
+  document.getElementById('tp').textContent=a.e+' '+a.n+' is thinking...';
+  document.getElementById('tp').classList.add('on');
+  try{
+    var r=await fetch(OLLAMA+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'phi',messages:[{role:'system',content:a.s},{role:'user',content:txt}],stream:false}),signal:AbortSignal.timeout(90000)});
+    var d=await r.json();
+    var reply=d.message?.content||d.response||'No response';
+    addM('a',reply,a.e+' '+a.n+' · phi · '+(d.eval_count||'?')+' tokens');
+  }catch(e){addM('s','Error: '+e.message+'. Model may be loading.');}
+  busy=false;document.getElementById('sb').disabled=false;
+  document.getElementById('tp').classList.remove('on');
+}
+init();
+</script></body></html>

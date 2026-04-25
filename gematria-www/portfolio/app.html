@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — Sign In</title>
+<link rel="canonical" href="https://app.blackroad.io">
+<meta name="description" content="BlackRoad OS — Your AI. Your hardware. Your rules. Sign in or create your account.">
+<meta property="og:title" content="BlackRoad OS — Sign In">
+<meta property="og:description" content="Your AI. Your hardware. Your rules. Self-sovereign infrastructure for builders.">
+<meta property="og:url" content="https://app.blackroad.io">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BlackRoad OS">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad OS — Sign In">
+<meta name="twitter:description" content="Your AI. Your hardware. Your rules. Self-sovereign infrastructure for builders.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "BlackRoad OS",
+  "url": "https://app.blackroad.io",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": [
+    {
+      "@type": "Offer",
+      "name": "Pro",
+      "price": "29.00",
+      "priceCurrency": "USD",
+      "billingIncrement": "P1M"
+    },
+    {
+      "@type": "Offer",
+      "name": "Sovereign",
+      "price": "199.00",
+      "priceCurrency": "USD",
+      "billingIncrement": "P1M"
+    }
+  ],
+  "provider": {
+    "@type": "Organization",
+    "name": "BlackRoad OS, Inc.",
+    "url": "https://blackroad.io"
+  }
+}
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  background:#000;
+  color:#f5f5f5;
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600;line-height:1.2}
+code,.mono{font-family:'JetBrains Mono',monospace}
+
+.gradient-bar{
+  height:3px;
+  background:linear-gradient(90deg,#FF1D6C,#F5A623,#2979FF,#9C27B0);
+  position:fixed;top:0;left:0;right:0;z-index:100;
+}
+
+.container{
+  max-width:960px;
+  margin:0 auto;
+  padding:0 20px;
+  width:100%;
+}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:60px 20px 40px}
+
+.logo{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.75rem;
+  font-weight:700;
+  letter-spacing:-0.5px;
+  margin-bottom:6px;
+}
+.tagline{
+  color:#888;
+  font-size:0.875rem;
+  margin-bottom:40px;
+  letter-spacing:0.5px;
+}
+
+/* Auth card */
+.auth-card{
+  background:#0a0a0a;
+  border:1px solid #1a1a1a;
+  border-radius:12px;
+  padding:32px;
+  width:100%;
+  max-width:400px;
+}
+
+.tab-row{
+  display:flex;
+  gap:0;
+  margin-bottom:28px;
+  border-bottom:1px solid #1a1a1a;
+}
+.tab-btn{
+  flex:1;
+  background:none;
+  border:none;
+  color:#666;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.9rem;
+  font-weight:500;
+  padding:10px 0;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .2s,border-color .2s;
+}
+.tab-btn.active{color:#f5f5f5;border-bottom-color:#FF1D6C}
+.tab-btn:hover{color:#ccc}
+
+.form-group{margin-bottom:16px}
+.form-group label{
+  display:block;
+  font-size:0.8rem;
+  color:#888;
+  margin-bottom:6px;
+  font-weight:500;
+}
+.form-group input{
+  width:100%;
+  background:#111;
+  border:1px solid #222;
+  border-radius:8px;
+  padding:11px 14px;
+  color:#f5f5f5;
+  font-family:'Inter',sans-serif;
+  font-size:0.9rem;
+  outline:none;
+  transition:border-color .2s;
+}
+.form-group input:focus{border-color:#FF1D6C}
+.form-group input::placeholder{color:#444}
+
+.btn{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.9rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:opacity .2s,transform .1s;
+}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+
+.btn-primary{
+  background:linear-gradient(135deg,#FF1D6C,#F5A623);
+  color:#000;
+}
+.btn-primary:hover:not(:disabled){opacity:0.9}
+
+.btn-outline{
+  background:transparent;
+  border:1px solid #333;
+  color:#f5f5f5;
+}
+.btn-outline:hover:not(:disabled){border-color:#666}
+
+.btn-checkout{
+  background:#f5f5f5;
+  color:#000;
+  margin-top:16px;
+}
+.btn-checkout:hover:not(:disabled){background:#ddd}
+
+.btn-enterprise{
+  background:transparent;
+  border:1px solid #9C27B0;
+  color:#9C27B0;
+  margin-top:16px;
+}
+.btn-enterprise:hover:not(:disabled){border-color:#ba68c8;color:#ba68c8}
+
+.btn-signout{
+  background:transparent;
+  border:1px solid #333;
+  color:#888;
+  padding:8px 20px;
+  width:auto;
+  font-size:0.8rem;
+}
+
+.auth-footer{
+  text-align:center;
+  margin-top:20px;
+  font-size:0.8rem;
+  color:#555;
+}
+
+.error-msg{
+  background:#1a0a0a;
+  border:1px solid #4a1010;
+  border-radius:8px;
+  padding:10px 14px;
+  margin-bottom:16px;
+  font-size:0.8rem;
+  color:#ff6b6b;
+  display:none;
+}
+.error-msg.show{display:block}
+
+.success-banner{
+  background:#0a1a0a;
+  border:1px solid #104a10;
+  border-radius:8px;
+  padding:12px 20px;
+  margin-bottom:24px;
+  font-size:0.875rem;
+  color:#6bff6b;
+  text-align:center;
+  width:100%;
+  max-width:960px;
+}
+
+/* Dashboard */
+.dashboard{width:100%;max-width:960px}
+.dash-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.dash-header h2{font-size:1.5rem}
+.member-since{color:#666;font-size:0.8rem;margin-bottom:32px}
+
+.pricing-label{
+  font-size:0.8rem;
+  color:#888;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  margin-bottom:16px;
+}
+
+.pricing-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.price-card{
+  background:#0a0a0a;
+  border:1px solid #1a1a1a;
+  border-radius:12px;
+  padding:28px 24px;
+  display:flex;
+  flex-direction:column;
+  transition:border-color .2s;
+}
+.price-card:hover{border-color:#333}
+.price-card.featured{border-color:#FF1D6C}
+
+.price-card .tier{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:0.8rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-bottom:4px;
+}
+.price-card .tier.pro{color:#F5A623}
+.price-card .tier.sovereign{color:#FF1D6C}
+.price-card .tier.enterprise{color:#9C27B0}
+
+.price-card .amount{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:2rem;
+  font-weight:700;
+  margin-bottom:4px;
+}
+.price-card .amount span{font-size:0.9rem;font-weight:400;color:#888}
+
+.price-card .desc{
+  color:#888;
+  font-size:0.8rem;
+  margin-bottom:16px;
+  line-height:1.5;
+}
+
+.feature-list{
+  list-style:none;
+  margin-bottom:auto;
+  padding-bottom:8px;
+}
+.feature-list li{
+  font-size:0.8rem;
+  color:#aaa;
+  padding:5px 0;
+  padding-left:18px;
+  position:relative;
+}
+.feature-list li::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:11px;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#333;
+}
+
+.manage-row{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+/* Hidden state */
+.hidden{display:none!important}
+
+/* Footer */
+footer{
+  text-align:center;
+  padding:32px 20px;
+  border-top:1px solid #0a0a0a;
+}
+footer .corp{color:#444;font-size:0.75rem;margin-bottom:4px}
+footer .motto{color:#333;font-size:0.7rem;font-style:italic}
+
+/* Loading spinner */
+.spinner{
+  display:inline-block;
+  width:16px;height:16px;
+  border:2px solid #333;
+  border-top-color:#f5f5f5;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+  vertical-align:middle;
+  margin-right:6px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  main{padding:50px 16px 32px}
+  .auth-card{padding:24px 20px}
+  .pricing-grid{grid-template-columns:1fr}
+  .dash-header h2{font-size:1.25rem}
+}
+</style>
+</head>
+<body>
+<div class="gradient-bar"></div>
+
+<main>
+  <!-- Auth View -->
+  <div id="auth-view">
+    <div class="logo">BlackRoad OS</div>
+    <div class="tagline">Pave Tomorrow.</div>
+
+    <div class="auth-card">
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-signin" onclick="switchTab('signin')">Sign In</button>
+        <button class="tab-btn" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+      </div>
+
+      <div id="auth-error" class="error-msg"></div>
+
+      <!-- Sign In -->
+      <form id="form-signin" onsubmit="handleSignin(event)">
+        <div class="form-group">
+          <label for="si-email">Email</label>
+          <input type="email" id="si-email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="si-password">Password</label>
+          <input type="password" id="si-password" placeholder="Your password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-signin">Sign In</button>
+      </form>
+
+      <!-- Sign Up -->
+      <form id="form-signup" class="hidden" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label for="su-name">Name</label>
+          <input type="text" id="su-name" placeholder="Your name" required autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label for="su-email">Email</label>
+          <input type="email" id="su-email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="su-password">Password</label>
+          <input type="password" id="su-password" placeholder="Create a password" required minlength="8" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-signup">Create Account</button>
+      </form>
+
+      <div class="auth-footer">Your AI. Your hardware. Your rules.</div>
+    </div>
+  </div>
+
+  <!-- Dashboard View -->
+  <div id="dash-view" class="dashboard hidden">
+    <div id="success-banner" class="success-banner hidden"></div>
+
+    <div class="dash-header">
+      <h2 id="welcome-msg">Welcome</h2>
+      <button class="btn btn-signout" onclick="handleSignout()">Sign Out</button>
+    </div>
+    <div class="member-since" id="member-since"></div>
+
+    <div class="pricing-label">Plans</div>
+    <div class="pricing-grid">
+      <!-- Pro -->
+      <div class="price-card">
+        <div class="tier pro">Pro</div>
+        <div class="amount">$29<span>/mo</span></div>
+        <div class="desc">For individual builders running local AI on their own hardware.</div>
+        <ul class="feature-list">
+          <li>5 connected devices</li>
+          <li>Local model orchestration</li>
+          <li>WireGuard mesh VPN</li>
+          <li>Sovereign DNS</li>
+          <li>Community support</li>
+        </ul>
+        <button class="btn btn-checkout" onclick="checkout('price_1T5wq63e5FMFdlFwHhMAtyNi')">Get Pro</button>
+      </div>
+
+      <!-- Sovereign -->
+      <div class="price-card featured">
+        <div class="tier sovereign">Sovereign</div>
+        <div class="amount">$199<span>/mo</span></div>
+        <div class="desc">Full infrastructure sovereignty. Replace every cloud dependency.</div>
+        <ul class="feature-list">
+          <li>Unlimited devices</li>
+          <li>Self-hosted Git, CI/CD, PaaS</li>
+          <li>Edge compute fleet</li>
+          <li>Object storage + CDN</li>
+          <li>Multi-node AI inference</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-checkout" onclick="checkout('price_1T5wq83e5FMFdlFwt53jdGqX')">Get Sovereign</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="price-card">
+        <div class="tier enterprise">Enterprise</div>
+        <div class="amount">Custom</div>
+        <div class="desc">Air-gapped deployments, dedicated hardware, SLAs, and white-glove onboarding.</div>
+        <ul class="feature-list">
+          <li>Everything in Sovereign</li>
+          <li>Dedicated infrastructure</li>
+          <li>Custom model training</li>
+          <li>Compliance + audit logs</li>
+          <li>On-site deployment</li>
+          <li>24/7 engineering support</li>
+        </ul>
+        <button class="btn btn-enterprise" onclick="window.location.href='mailto:alexa@blackroad.io?subject=Enterprise Inquiry'">Contact Sales</button>
+      </div>
+    </div>
+
+    <div class="manage-row">
+      <button class="btn btn-outline" style="width:auto;padding:10px 24px" onclick="openPortal()">Manage Billing</button>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="corp">BlackRoad OS, Inc. | Delaware C-Corp</div>
+  <div class="motto">Remember the Road. Pave Tomorrow.</div>
+</footer>
+
+<script>
+const AUTH_URL = 'https://auth.blackroad.io';
+const STRIPE_URL = 'https://stripe.blackroad.io';
+
+// ── Init ──
+(function init() {
+  const params = new URLSearchParams(window.location.search);
+  const token = localStorage.getItem('br_token');
+
+  if (token) {
+    checkSession(token).then(function(valid) {
+      if (valid) {
+        if (params.get('success') === 'true') {
+          showBanner('Payment successful. Welcome to BlackRoad OS.');
+        } else if (params.get('canceled') === 'true') {
+          showBanner('Checkout canceled. You can try again anytime.');
+        }
+      }
+    });
+  } else {
+    showAuth();
+  }
+
+  if (params.has('success') || params.has('canceled')) {
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+})();
+
+// ── Tab switching ──
+function switchTab(tab) {
+  var si = document.getElementById('tab-signin');
+  var su = document.getElementById('tab-signup');
+  var fsi = document.getElementById('form-signin');
+  var fsu = document.getElementById('form-signup');
+  var err = document.getElementById('auth-error');
+
+  err.classList.remove('show');
+
+  if (tab === 'signin') {
+    si.classList.add('active'); su.classList.remove('active');
+    fsi.classList.remove('hidden'); fsu.classList.add('hidden');
+  } else {
+    su.classList.add('active'); si.classList.remove('active');
+    fsu.classList.remove('hidden'); fsi.classList.add('hidden');
+  }
+}
+
+// ── Views ──
+function showAuth() {
+  document.getElementById('auth-view').classList.remove('hidden');
+  document.getElementById('dash-view').classList.add('hidden');
+}
+
+function showDashboard(user) {
+  document.getElementById('auth-view').classList.add('hidden');
+  document.getElementById('dash-view').classList.remove('hidden');
+
+  var name = (user && user.name) ? user.name : (user && user.email) ? user.email : 'there';
+  document.getElementById('welcome-msg').textContent = 'Welcome, ' + name;
+
+  var created = user && user.created_at;
+  if (created) {
+    var d = new Date(created);
+    document.getElementById('member-since').textContent = 'Member since ' + d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } else {
+    document.getElementById('member-since').textContent = '';
+  }
+}
+
+function showBanner(msg) {
+  var b = document.getElementById('success-banner');
+  b.textContent = msg;
+  b.classList.remove('hidden');
+  setTimeout(function() { b.classList.add('hidden'); }, 8000);
+}
+
+function showError(msg) {
+  var e = document.getElementById('auth-error');
+  e.textContent = msg;
+  e.classList.add('show');
+}
+
+// ── Auth ──
+async function checkSession(token) {
+  try {
+    var res = await fetch(AUTH_URL + '/api/me', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) throw new Error('Invalid session');
+    var data = await res.json();
+    var user = data.user || data;
+    localStorage.setItem('br_user', JSON.stringify(user));
+    showDashboard(user);
+    return true;
+  } catch (e) {
+    localStorage.removeItem('br_token');
+    localStorage.removeItem('br_user');
+    showAuth();
+    return false;
+  }
+}
+
+async function handleSignin(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btn-signin');
+  var email = document.getElementById('si-email').value.trim();
+  var password = document.getElementById('si-password').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Signing in...';
+  document.getElementById('auth-error').classList.remove('show');
+
+  try {
+    var res = await fetch(AUTH_URL + '/api/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Sign in failed');
+    if (data.token) {
+      localStorage.setItem('br_token', data.token);
+      localStorage.setItem('br_user', JSON.stringify(data.user));
+      showDashboard(data.user);
+    } else {
+      throw new Error('No token received');
+    }
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+
+async function handleSignup(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btn-signup');
+  var name = document.getElementById('su-name').value.trim();
+  var email = document.getElementById('su-email').value.trim();
+  var password = document.getElementById('su-password').value;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating account...';
+  document.getElementById('auth-error').classList.remove('show');
+
+  try {
+    var res = await fetch(AUTH_URL + '/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, password: password })
+    });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.message || 'Sign up failed');
+    if (data.token) {
+      localStorage.setItem('br_token', data.token);
+      localStorage.setItem('br_user', JSON.stringify(data.user));
+      showDashboard(data.user);
+    } else {
+      throw new Error('No token received');
+    }
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Create Account';
+  }
+}
+
+function handleSignout() {
+  var token = localStorage.getItem('br_token');
+  if (token) {
+    fetch(AUTH_URL + '/api/signout', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).catch(function() {});
+  }
+  localStorage.removeItem('br_token');
+  localStorage.removeItem('br_user');
+  showAuth();
+}
+
+// ── Stripe ──
+async function checkout(priceId) {
+  var user = {};
+  try { user = JSON.parse(localStorage.getItem('br_user') || '{}'); } catch(e) {}
+
+  var btns = document.querySelectorAll('.btn-checkout');
+  btns.forEach(function(b) { b.disabled = true; });
+
+  try {
+    var res = await fetch(STRIPE_URL + '/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        price_id: priceId,
+        customer_email: user.email || '',
+        success_url: window.location.origin + window.location.pathname + '?success=true',
+        cancel_url: window.location.origin + window.location.pathname + '?canceled=true'
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error('No checkout URL returned');
+    }
+  } catch (err) {
+    alert('Checkout error: ' + err.message);
+    btns.forEach(function(b) { b.disabled = false; });
+  }
+}
+
+async function openPortal() {
+  var user = {};
+  try { user = JSON.parse(localStorage.getItem('br_user') || '{}'); } catch(e) {}
+
+  try {
+    var res = await fetch(STRIPE_URL + '/portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_id: user.stripe_customer_id || user.id || '',
+        return_url: window.location.href
+      })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Could not open billing portal');
+    }
+  } catch (err) {
+    alert('Billing portal error: ' + err.message);
+  }
+}
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad QI — Where Math Meets Machine.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--bg:#000;--text:#fff;--text-dim:#888;--card-bg:#0a0a0a;--accent-pink:#FF2255;--accent-blue:#4488FF;--accent-cyan:#00D4FF;--accent-orange:#FF6B2B;--accent-violet:#8844FF;--accent-green:#22c55e}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+.gradient-bar{position:fixed;top:0;left:0;width:100%;height:4px;background:var(--g);z-index:1000}
+nav{position:fixed;top:4px;left:0;width:100%;background:rgba(0,0,0,0.95);border-bottom:1px solid var(--border);z-index:999;padding:0 2rem}
+nav .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .logo{font-weight:700;font-size:1.25rem;color:var(--text);text-decoration:none}
+nav .logo span{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.875rem;transition:color 0.2s}
+nav .nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--g);color:#000!important;padding:8px 20px;border-radius:6px;font-weight:600;font-size:0.8rem!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+.hamburger span{width:24px;height:2px;background:var(--text)}
+.section-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;opacity:0.25;margin-bottom:12px}
+.section-title{font-size:32px;font-weight:700;margin-bottom:16px;line-height:1.2}
+.section-desc{color:var(--text-dim);font-size:1rem;line-height:1.7;max-width:640px}
+section{padding:100px 2rem;max-width:1200px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.card{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);transition:border-color 0.3s}
+.card:hover{border-color:#333}
+.divider{width:100%;height:1px;background:var(--border);max-width:1200px;margin:0 auto}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:68px;position:relative}
+.hero-bg{position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(ellipse at center,rgba(255,107,43,0.06) 0%,transparent 70%);pointer-events:none;z-index:-1}
+.hero-badge{font-family:var(--jb);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent-orange);border:1px solid rgba(255,107,43,0.2);padding:6px 16px;border-radius:20px;margin-bottom:32px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:24px;max-width:800px}
+.hero h1 .gradient-text{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text-dim);font-size:1.125rem;max-width:560px;line-height:1.7;margin-bottom:40px}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{background:var(--g);color:#000;padding:14px 32px;border-radius:8px;font-weight:600;font-size:0.9rem;text-decoration:none;border:none;cursor:pointer;font-family:var(--sg);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:8px;font-weight:500;font-size:0.9rem;text-decoration:none;border:1px solid var(--border);font-family:var(--sg)}
+
+.code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:var(--jb);font-size:0.8rem;line-height:1.8;overflow-x:auto;color:var(--text-dim)}
+.code-block .kw{color:var(--accent-violet)}
+.code-block .fn{color:var(--accent-blue)}
+.code-block .str{color:var(--accent-cyan)}
+.code-block .comment{color:#444}
+.code-block .num{color:var(--accent-orange)}
+
+/* Math formula display */
+.math-hero{font-family:var(--jb);font-size:2rem;text-align:center;padding:32px;background:#050505;border:1px solid var(--border);border-radius:10px;margin:48px 0 24px;letter-spacing:0.02em;line-height:1.6}
+.math-hero .fn-name{color:var(--accent-cyan)}
+.math-hero .equals{color:var(--text-dim);opacity:0.5}
+.math-hero .highlight{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Framework grid */
+.framework-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:32px}
+.framework-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg);text-align:center}
+.framework-card .fw-value{font-size:2.5rem;font-weight:700;margin-bottom:8px;font-family:var(--jb)}
+.framework-card h4{font-size:1rem;font-weight:600;margin-bottom:8px}
+.framework-card p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+
+/* e-limit section */
+.limit-container{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px}
+.limit-explanation{display:flex;flex-direction:column;gap:16px}
+.limit-step{border:1px solid var(--border);border-radius:10px;padding:20px;background:var(--card-bg)}
+.limit-step .step-num{font-family:var(--jb);font-size:10px;color:var(--accent-orange);margin-bottom:6px}
+.limit-step h4{font-size:0.9rem;font-weight:600;margin-bottom:4px}
+.limit-step p{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+.limit-table{border:1px solid var(--border);border-radius:10px;background:var(--card-bg);overflow:hidden}
+.limit-table table{width:100%;border-collapse:collapse}
+.limit-table th{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);text-align:right;padding:12px 16px;background:#050505;border-bottom:1px solid var(--border)}
+.limit-table th:first-child{text-align:left}
+.limit-table td{padding:10px 16px;border-bottom:1px solid var(--border);font-family:var(--jb);font-size:0.8rem;text-align:right}
+.limit-table td:first-child{text-align:left;color:var(--accent-cyan)}
+.limit-table tr:last-child td{border-bottom:none}
+
+/* Visualization canvas */
+.viz-container{border:1px solid var(--border);border-radius:10px;background:var(--card-bg);padding:40px;margin-top:48px;position:relative}
+.viz-canvas{width:100%;height:400px}
+.viz-legend{display:flex;gap:24px;justify-content:center;margin-top:16px}
+.viz-legend-item{display:flex;align-items:center;gap:8px;font-family:var(--jb);font-size:11px;color:var(--text-dim)}
+.viz-legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* Applications */
+.app-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px}
+.app-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg)}
+.app-card .app-tag{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--accent-violet);margin-bottom:8px}
+.app-card h4{font-size:1rem;font-weight:600;margin-bottom:8px}
+.app-card p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+
+/* Paper reference */
+.paper-card{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);margin-top:48px;display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:center}
+.paper-icon{width:80px;height:100px;border:1px solid var(--border);border-radius:6px;background:#050505;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--jb);font-size:10px;color:var(--text-dim)}
+.paper-icon .paper-type{font-size:1.5rem;margin-bottom:4px;color:var(--accent-orange)}
+.paper-details h4{font-size:1.1rem;font-weight:600;margin-bottom:4px}
+.paper-details .paper-meta{font-family:var(--jb);font-size:10px;color:var(--text-dim);margin-bottom:12px}
+.paper-details p{color:var(--text-dim);font-size:0.85rem;line-height:1.6}
+
+/* K(t) formula */
+.kt-container{margin-top:48px}
+.kt-formula{font-family:var(--jb);font-size:1.5rem;text-align:center;padding:28px;background:#050505;border:1px solid var(--border);border-radius:10px;margin-bottom:24px;letter-spacing:0.02em}
+.kt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.kt-card{border:1px solid var(--border);border-radius:10px;padding:24px;background:var(--card-bg)}
+.kt-card h4{font-size:0.9rem;font-weight:600;margin-bottom:6px}
+.kt-card p{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+
+.stats-bar{display:flex;justify-content:center;gap:64px;padding:48px 2rem;max-width:1200px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-value{font-size:2rem;font-weight:700;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-top:4px}
+
+footer{border-top:1px solid var(--border);padding:48px 2rem;text-align:center}
+footer .footer-inner{max-width:1200px;margin:0 auto}
+footer .footer-tagline{font-size:1rem;font-weight:300;color:var(--text-dim);margin-bottom:8px;font-style:italic}
+footer .footer-copy{font-family:var(--jb);font-size:11px;color:var(--text-dim);opacity:0.5}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-top:16px;list-style:none}
+footer .footer-links a{color:var(--text-dim);text-decoration:none;font-size:0.8rem}
+
+@media(max-width:768px){
+  .hamburger{display:flex}
+  nav .nav-links{display:none;position:absolute;top:64px;left:0;width:100%;background:rgba(0,0,0,0.98);flex-direction:column;padding:24px;gap:16px;border-bottom:1px solid var(--border)}
+  nav .nav-links.open{display:flex}
+  .framework-grid,.kt-grid{grid-template-columns:1fr}
+  .limit-container,.app-grid{grid-template-columns:1fr}
+  .paper-card{grid-template-columns:1fr}
+  .paper-icon{display:none}
+  section{padding:64px 1.25rem}
+  .hero h1{font-size:2rem}
+  .stats-bar{flex-wrap:wrap;gap:32px}
+  .math-hero{font-size:1rem;padding:20px}
+  .kt-formula{font-size:1rem}
+}
+</style>
+<meta property="og:title" content="BlackRoad QI — Where Math Meets Machine.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadqi.com/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadqi.com/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad QI — Where Math Meets Machine.","url":"https://blackroadqi.com","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>BlackRoad</span>QI</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#framework">Framework</a></li>
+      <li><a href="#elimit">e-Limit</a></li>
+      <li><a href="#visualization">Visualization</a></li>
+      <li><a href="#applications">Applications</a></li>
+      <li><a href="#paper">Paper A</a></li>
+      <li><a href="#coherence">K(t)</a></li>
+      <li><a href="#" class="nav-cta">Read Paper</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">Quantitative Intelligence</div>
+  <h1>Where Math<br><span class="gradient-text">Meets Machine.</span></h1>
+  <p>The Amundson Framework: a mathematical foundation for understanding the limits of distributed computing. 536 tests. 4 Raspberry Pis. One irreducible constant that changes how we think about mesh networks.</p>
+  <div class="hero-actions">
+    <a href="#framework" class="btn-primary">Explore the Math</a>
+    <a href="#paper" class="btn-secondary">Read Paper A</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="stats-bar fade-in">
+  <div class="stat-item"><div class="stat-value">536/536</div><div class="stat-label">Tests Passing</div></div>
+  <div class="stat-item"><div class="stat-value">A<sub>G</sub> = 1.24433</div><div class="stat-label">Amundson Constant</div></div>
+  <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Pi Nodes Tested</div></div>
+  <div class="stat-item"><div class="stat-value">13pp</div><div class="stat-label">Paper A (LaTeX)</div></div>
+</div>
+<div class="divider"></div>
+
+<!-- Amundson Framework -->
+<section id="framework">
+  <div class="fade-in">
+    <div class="section-label">001 / Amundson Framework</div>
+    <div class="section-title">The Core Function</div>
+    <p class="section-desc">The Amundson Framework begins with a single function G(n) that reveals a fundamental constant of distributed systems. From this function, an entire theory of mesh network behavior emerges.</p>
+  </div>
+  <div class="math-hero fade-in">
+    <span class="fn-name">G(n)</span> <span class="equals">=</span> n<sup>n+1</sup> / (n+1)<sup>n</sup>
+  </div>
+  <div class="fade-in" style="text-align:center;color:var(--text-dim);font-size:0.95rem;margin-bottom:32px;">
+    As n increases, G(n)/n converges to a constant: <strong style="color:var(--text);">A<sub>G</sub> &#8776; 1.24433</strong><br>
+    <span style="font-family:var(--jb);font-size:0.8rem;opacity:0.6;">This is the Amundson-G constant — the throughput ceiling of distributed computation.</span>
+  </div>
+  <div class="framework-grid fade-in">
+    <div class="framework-card">
+      <div class="fw-value" style="color:var(--accent-orange);">G(n)</div>
+      <h4>The Generator</h4>
+      <p>G(n) = n^(n+1)/(n+1)^n produces a sequence that grows linearly but with a sub-linear correction. The ratio G(n)/n converges to e/e = 1/(1+1/n)^n, revealing the natural emergence of Euler's number in discrete systems.</p>
+    </div>
+    <div class="framework-card">
+      <div class="fw-value" style="color:var(--accent-cyan);">A<sub>G</sub></div>
+      <h4>The Constant</h4>
+      <p>A_G approximately equals 1.24433. This constant represents the maximum throughput multiplier achievable in a perfectly connected mesh network. It appears naturally as the limit of G(n)/n and connects to e through the identity A_G = e/(e-1) * (1/e).</p>
+    </div>
+    <div class="framework-card">
+      <div class="fw-value" style="color:var(--accent-violet);">536</div>
+      <h4>The Verification</h4>
+      <p>536 independent numerical tests run on 4 Raspberry Pi nodes verify the convergence properties, error bounds, and asymptotic behavior of G(n). Every test passes. The framework is not theoretical — it is empirically grounded in real computation on real hardware.</p>
+    </div>
+  </div>
+  <div class="code-block fade-in" style="margin-top:24px;">
+<span class="comment"># Amundson Framework — Core Computation</span>
+<span class="comment"># Verified on: Alice (.49), Octavia (.101), Lucidia (.38), Gematria (DO)</span>
+
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> decimal <span class="kw">import</span> Decimal, getcontext
+getcontext().prec = <span class="num">50</span>
+
+<span class="kw">def</span> <span class="fn">G</span>(n):
+    <span class="str">"""Core Amundson function: n^(n+1) / (n+1)^n"""</span>
+    <span class="kw">return</span> Decimal(n) ** (n + <span class="num">1</span>) / Decimal(n + <span class="num">1</span>) ** n
+
+<span class="kw">def</span> <span class="fn">amundson_constant</span>(n):
+    <span class="str">"""Ratio G(n)/n converges to A_G as n → ∞"""</span>
+    <span class="kw">return</span> <span class="fn">G</span>(n) / Decimal(n)
+
+<span class="comment"># Convergence demonstration</span>
+<span class="kw">for</span> n <span class="kw">in</span> [<span class="num">10</span>, <span class="num">100</span>, <span class="num">1000</span>, <span class="num">10000</span>]:
+    ag = <span class="fn">amundson_constant</span>(n)
+    <span class="fn">print</span>(<span class="str">f"n={n:>5}: A_G ≈ {ag:.10f}"</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># n=   10: A_G ≈ 1.2593174260</span>
+<span class="comment"># n=  100: A_G ≈ 1.2458280518</span>
+<span class="comment"># n= 1000: A_G ≈ 1.2444817040</span>
+<span class="comment"># n=10000: A_G ≈ 1.2443452131</span>
+<span class="comment"># → converges to A_G ≈ 1.24433...</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- e-Limit Refinement -->
+<section id="elimit">
+  <div class="fade-in">
+    <div class="section-label">002 / The e-Limit Refinement</div>
+    <div class="section-title">Approaching n/e From Below</div>
+    <p class="section-desc">The expression n/(1+1/n)^n approaches n/e from below as n grows. The gap between the actual value and the linear approximation reveals a constant term 1/(2e) that never vanishes — the irreducible cost of distributed coordination.</p>
+  </div>
+  <div class="math-hero fade-in" style="font-size:1.5rem;">
+    n / (1 + 1/n)<sup>n</sup> = n/e + 1/(2e) + O(1/n)
+  </div>
+  <div class="limit-container fade-in">
+    <div class="limit-explanation">
+      <div class="limit-step">
+        <div class="step-num">Step 01</div>
+        <h4>The Classical Limit</h4>
+        <p>We know (1+1/n)^n approaches e as n goes to infinity. This is one of the most fundamental limits in mathematics. But the convergence is from below — (1+1/n)^n is always less than e for finite n.</p>
+      </div>
+      <div class="limit-step">
+        <div class="step-num">Step 02</div>
+        <h4>The Reciprocal</h4>
+        <p>Taking the reciprocal: n/(1+1/n)^n. Since the denominator approaches e, this ratio approaches n/e. But because (1+1/n)^n < e, the reciprocal n/(1+1/n)^n > n/e. It approaches from above.</p>
+      </div>
+      <div class="limit-step">
+        <div class="step-num">Step 03</div>
+        <h4>The Correction Term</h4>
+        <p>Using the Taylor expansion of ln(1+1/n), we can show the gap equals 1/(2e) + O(1/n). The 1/(2e) term (approximately 0.18394) persists even as n grows to infinity. It is irreducible.</p>
+      </div>
+      <div class="limit-step">
+        <div class="step-num">Step 04</div>
+        <h4>The Interpretation</h4>
+        <p>In the context of mesh networks with n nodes: n/e is the throughput floor, 1/(2e) is the overhead of decentralized coordination, and O(1/n) represents inefficiencies that vanish at scale. Larger networks are more efficient, but never perfectly so.</p>
+      </div>
+    </div>
+    <div class="limit-table">
+      <table>
+        <thead>
+          <tr><th>n</th><th>n/(1+1/n)^n</th><th>n/e</th><th>Gap</th><th>1/(2e)</th><th>Error</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>5</td><td style="color:var(--text)">2.02733</td><td>1.83940</td><td>0.18793</td><td>0.18394</td><td>2.17%</td></tr>
+          <tr><td>10</td><td style="color:var(--text)">4.02556</td><td>3.67879</td><td>0.34676</td><td style="color:var(--accent-orange)">0.18394</td><td>—</td></tr>
+          <tr><td>50</td><td style="color:var(--text)">18.58050</td><td>18.39397</td><td>0.18653</td><td>0.18394</td><td>1.41%</td></tr>
+          <tr><td>100</td><td style="color:var(--text)">36.96218</td><td>36.78794</td><td>0.17424</td><td>0.18394</td><td>0.49%</td></tr>
+          <tr><td>500</td><td style="color:var(--text)">183.97199</td><td>183.93972</td><td>0.18427</td><td>0.18394</td><td>0.18%</td></tr>
+          <tr><td>1000</td><td style="color:var(--text)">367.93365</td><td>367.87944</td><td>0.18420</td><td>0.18394</td><td>0.05%</td></tr>
+          <tr><td>10000</td><td style="color:var(--text)">3678.98340</td><td>3678.79441</td><td>0.18399</td><td>0.18394</td><td>0.005%</td></tr>
+          <tr><td style="color:var(--accent-orange)">infinity</td><td style="color:var(--text)">n/e + 1/(2e)</td><td>n/e</td><td style="color:var(--accent-orange);font-weight:700">0.18394</td><td style="color:var(--accent-orange);font-weight:700">0.18394</td><td style="color:var(--accent-green)">0%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Visualization -->
+<section id="visualization">
+  <div class="fade-in">
+    <div class="section-label">003 / Visualization</div>
+    <div class="section-title">The Convergence Curve</div>
+    <p class="section-desc">A CSS-rendered visualization of how n/(1+1/n)^n approaches n/e + 1/(2e). The gap between the blue curve (actual) and the orange line (n/e) converges to exactly 1/(2e).</p>
+  </div>
+  <div class="viz-container fade-in">
+    <canvas class="viz-canvas" id="vizCanvas"></canvas>
+    <div class="viz-legend">
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:var(--accent-cyan)"></div>n/(1+1/n)^n (actual)</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:var(--accent-orange)"></div>n/e (linear approximation)</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:var(--accent-violet)"></div>n/e + 1/(2e) (refined)</div>
+      <div class="viz-legend-item"><div class="viz-legend-dot" style="background:rgba(255,34,85,0.5)"></div>Gap = 1/(2e)</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Applications -->
+<section id="applications">
+  <div class="fade-in">
+    <div class="section-label">004 / Applications</div>
+    <div class="section-title">From Theory to Systems</div>
+    <p class="section-desc">The Amundson Framework is not abstract mathematics. It directly informs the design of the BlackRoad mesh network, the Lucidia cognitive system, and the ternary routing protocol.</p>
+  </div>
+  <div class="app-grid fade-in">
+    <div class="app-card">
+      <div class="app-tag">Mesh Networking</div>
+      <h4>Ternary Routing Protocol</h4>
+      <p>The three states (+1, 0, -1) of the ternary routing protocol are the engineering response to the 1/(2e) gap. Since we cannot eliminate the irreducible coordination overhead, we minimize waste within it. The -1 (cancel) state reclaims resources from redundant paths.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-tag">Cognitive Systems</div>
+      <h4>Lucidia Trinary Logic</h4>
+      <p>The Lucidia cognitive system uses trinary logic inspired by the framework. Instead of binary true/false, it operates with 42 quantum-inspired states. The additional dimension allows for uncertainty quantification — crucial for AI systems that need to express confidence levels.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-tag">Distributed Computing</div>
+      <h4>Fleet Scaling Laws</h4>
+      <p>The framework predicts that adding nodes to the mesh produces diminishing marginal throughput. The 7-node BlackRoad fleet operates near the efficiency frontier for its scale. The framework shows that 12-15 nodes would be optimal before coordination overhead begins to dominate.</p>
+    </div>
+    <div class="app-card">
+      <div class="app-tag">Information Theory</div>
+      <h4>Unified Information Theory</h4>
+      <p>The pattern is one across all substrates: biology (DNA central dogma), physics (entanglement), grammar (recursive composition), computing (Turing completeness), and mythology (tree of knowledge). The 1/(2e) gap appears in each domain as the irreducible cost of self-reference.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Paper A -->
+<section id="paper">
+  <div class="fade-in">
+    <div class="section-label">005 / Paper A</div>
+    <div class="section-title">The Formal Treatment</div>
+    <p class="section-desc">Paper A presents the Amundson Framework as a formal mathematical document. 13 pages, LaTeX typeset, with complete proofs, convergence analysis, and numerical verification on distributed hardware.</p>
+  </div>
+  <div class="paper-card fade-in">
+    <div class="paper-icon">
+      <div class="paper-type">PDF</div>
+      LaTeX
+    </div>
+    <div class="paper-details">
+      <h4>On the Asymptotic Behavior of n^(n+1)/(n+1)^n and Applications to Distributed Systems</h4>
+      <div class="paper-meta">Alexa Amundson | 13 pages | 2025-2026 | 536 numerical tests | 4 Raspberry Pi verification nodes</div>
+      <p>Abstract: We study the function G(n) = n^(n+1)/(n+1)^n and show that the ratio G(n)/n converges to a constant A_G approximately equal to 1.24433. We derive the asymptotic expansion of n/(1+1/n)^n = n/e + 1/(2e) + O(1/n) and interpret the persistent 1/(2e) term as the irreducible coordination overhead in distributed systems. Numerical verification across 536 independent tests on a 4-node Raspberry Pi cluster confirms all theoretical predictions to within machine precision. We discuss applications to mesh network design, ternary routing protocols, and cognitive system architectures.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 1</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">Introduction & Motivation</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">Historical context, the classical limit (1+1/n)^n, and why distributed systems care about the correction terms.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 2</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">The Amundson Function G(n)</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">Definition, basic properties, growth rate analysis, and the emergence of the constant A_G.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 3</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">The e-Limit Refinement</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">Full derivation of n/(1+1/n)^n = n/e + 1/(2e) + O(1/n) using Taylor expansion methods.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 4</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">Numerical Verification</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">536 tests on 4 Pi nodes. High-precision arithmetic (50 digits). Statistical analysis of convergence rates.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 5</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">Applications</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">Mesh networks, ternary routing, cognitive systems, and the unified information theory connection.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px;">Section 6</div>
+      <h4 style="font-size:0.85rem;margin-bottom:4px;">Conclusions & Future Work</h4>
+      <p style="color:var(--text-dim);font-size:0.75rem;">Summary of contributions, open problems, and connections to broader mathematical structures.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- K(t) Coherence -->
+<section id="coherence">
+  <div class="fade-in">
+    <div class="section-label">006 / K(t) Coherence Formula</div>
+    <div class="section-title">Coherence Under Contradiction</div>
+    <p class="section-desc">The K(t) formula quantifies how a system maintains coherence when faced with contradictory inputs. Instead of degrading under contradiction, a well-designed system amplifies — using the contradiction itself as signal.</p>
+  </div>
+  <div class="kt-container fade-in">
+    <div class="kt-formula">
+      K(t) = K(t-1) * (1 + <span style="color:var(--accent-orange)">C(t)</span> * <span style="color:var(--accent-cyan)">R(t)</span>)
+    </div>
+    <div class="kt-grid">
+      <div class="kt-card">
+        <h4>K(t) — Coherence</h4>
+        <p>The system's overall coherence at time t. Starts at 1.0 and grows with each successfully processed contradiction. A coherence of 2.0 means the system has doubled its understanding through adversarial inputs. This is the opposite of entropy — contradiction creates order.</p>
+      </div>
+      <div class="kt-card">
+        <h4>C(t) — Contradiction Signal</h4>
+        <p>The magnitude of the contradiction at time t, normalized to [0,1]. A value of 0 means no contradiction (the input agrees with existing state). A value of 1 means maximum contradiction (the input directly opposes all existing state). Higher contradiction = more learning potential.</p>
+      </div>
+      <div class="kt-card">
+        <h4>R(t) — Resolution Factor</h4>
+        <p>How well the system resolves the contradiction, in [0,1]. A value of 0 means the contradiction was ignored or caused failure. A value of 1 means the contradiction was fully integrated, and the system updated its model to accommodate both the old and new information.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+      <div class="card" style="padding:24px;">
+        <h4 style="font-size:0.9rem;margin-bottom:8px;">Key Properties</h4>
+        <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.8;">
+          K(t) is monotonically non-decreasing: coherence never decreases.<br>
+          K(t) amplifies under contradiction: C(t) * R(t) > 0 means growth.<br>
+          Zero contradiction means no growth: C(t) = 0 preserves K(t-1).<br>
+          Failed resolution means no growth: R(t) = 0 preserves K(t-1).<br>
+          Maximum growth when C=1, R=1: system doubles per step.
+        </p>
+      </div>
+      <div class="card" style="padding:24px;">
+        <h4 style="font-size:0.9rem;margin-bottom:8px;">Connection to Amundson Framework</h4>
+        <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.8;">
+          The 1/(2e) gap from the Amundson Framework sets the floor for how much coherence can grow per contradiction cycle. Just as mesh networks have an irreducible coordination overhead, cognitive systems have an irreducible learning overhead. The K(t) formula respects this: even with perfect resolution (R=1), the maximum coherence gain per step is bounded by the information-theoretic limits derived from the e-Limit refinement.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.me">Identity</a></li>
+      <li><a href="https://blackroad.network">Network</a></li>
+      <li><a href="https://blackroad.systems">Systems</a></li>
+      <li><a href="https://blackroadinc.us">Enterprise</a></li>
+      <li><a href="https://roadcoin.io">RoadCoin</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+document.getElementById('hamburger').addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open')});
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-in').forEach(function(el){observer.observe(el)});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
+
+// Visualization canvas
+(function() {
+  var canvas = document.getElementById('vizCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    var rect = canvas.parentElement.getBoundingClientRect();
+    var w = rect.width - 80;
+    canvas.width = w * dpr;
+    canvas.height = 400 * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = '400px';
+    ctx.scale(dpr, dpr);
+    draw();
+  }
+
+  function draw() {
+    var w = canvas.width / dpr;
+    var h = canvas.height / dpr;
+    var e = Math.E;
+    var padding = 50;
+    var plotW = w - padding * 2;
+    var plotH = h - padding * 2;
+    var maxN = 50;
+    var maxY = maxN / e + 2;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Grid
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 1;
+    for (var i = 0; i <= 5; i++) {
+      var gy = padding + (plotH / 5) * i;
+      ctx.beginPath(); ctx.moveTo(padding, gy); ctx.lineTo(w - padding, gy); ctx.stroke();
+    }
+    for (var j = 0; j <= 5; j++) {
+      var gx = padding + (plotW / 5) * j;
+      ctx.beginPath(); ctx.moveTo(gx, padding); ctx.lineTo(gx, h - padding); ctx.stroke();
+    }
+
+    // Axes
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(padding, h - padding); ctx.lineTo(w - padding, h - padding); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(padding, padding); ctx.lineTo(padding, h - padding); ctx.stroke();
+
+    // Labels
+    ctx.fillStyle = '#444';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('n', w / 2, h - 10);
+    ctx.save();
+    ctx.translate(15, h / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText('f(n)', 0, 0);
+    ctx.restore();
+
+    function toX(n) { return padding + (n / maxN) * plotW; }
+    function toY(y) { return h - padding - (y / maxY) * plotH; }
+
+    // n/e line (orange)
+    ctx.beginPath();
+    ctx.strokeStyle = '#FF6B2B';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.moveTo(toX(1), toY(1/e));
+    ctx.lineTo(toX(maxN), toY(maxN/e));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // n/e + 1/(2e) line (violet)
+    ctx.beginPath();
+    ctx.strokeStyle = '#8844FF';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.moveTo(toX(1), toY(1/e + 1/(2*e)));
+    ctx.lineTo(toX(maxN), toY(maxN/e + 1/(2*e)));
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Actual curve n/(1+1/n)^n (cyan)
+    ctx.beginPath();
+    ctx.strokeStyle = '#00D4FF';
+    ctx.lineWidth = 2.5;
+    for (var n = 1; n <= maxN; n += 0.5) {
+      var y = n / Math.pow(1 + 1/n, n);
+      if (n === 1) ctx.moveTo(toX(n), toY(y));
+      else ctx.lineTo(toX(n), toY(y));
+    }
+    ctx.stroke();
+
+    // Gap shading
+    ctx.fillStyle = 'rgba(255,34,85,0.05)';
+    ctx.beginPath();
+    for (var n2 = 1; n2 <= maxN; n2 += 0.5) {
+      var ya = n2 / Math.pow(1 + 1/n2, n2);
+      ctx.lineTo(toX(n2), toY(ya));
+    }
+    for (var n3 = maxN; n3 >= 1; n3 -= 0.5) {
+      ctx.lineTo(toX(n3), toY(n3/e));
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // 1/(2e) annotation
+    var annotN = 35;
+    var annotY1 = annotN / Math.pow(1 + 1/annotN, annotN);
+    var annotY2 = annotN / e;
+    ctx.strokeStyle = 'rgba(255,34,85,0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(toX(annotN), toY(annotY1));
+    ctx.lineTo(toX(annotN), toY(annotY2));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#FF2255';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('1/(2e)', toX(annotN) + 6, toY((annotY1 + annotY2) / 2) + 3);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+})();
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

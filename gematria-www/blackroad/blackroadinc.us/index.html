@@ -1,0 +1,582 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Inc — Enterprise-Grade. Founder-Built.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--bg:#000;--text:#fff;--text-dim:#888;--card-bg:#0a0a0a;--accent-pink:#FF2255;--accent-blue:#4488FF;--accent-cyan:#00D4FF;--accent-orange:#FF6B2B;--accent-violet:#8844FF;--accent-green:#22c55e}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+.gradient-bar{position:fixed;top:0;left:0;width:100%;height:4px;background:var(--g);z-index:1000}
+nav{position:fixed;top:4px;left:0;width:100%;background:rgba(0,0,0,0.95);border-bottom:1px solid var(--border);z-index:999;padding:0 2rem}
+nav .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .logo{font-weight:700;font-size:1.25rem;color:var(--text);text-decoration:none}
+nav .logo span{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.875rem;transition:color 0.2s}
+nav .nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--g);color:#000!important;padding:8px 20px;border-radius:6px;font-weight:600;font-size:0.8rem!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+.hamburger span{width:24px;height:2px;background:var(--text)}
+.section-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;opacity:0.25;margin-bottom:12px}
+.section-title{font-size:32px;font-weight:700;margin-bottom:16px;line-height:1.2}
+.section-desc{color:var(--text-dim);font-size:1rem;line-height:1.7;max-width:640px}
+section{padding:100px 2rem;max-width:1200px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.card{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);transition:border-color 0.3s}
+.card:hover{border-color:#333}
+.divider{width:100%;height:1px;background:var(--border);max-width:1200px;margin:0 auto}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:68px;position:relative}
+.hero-bg{position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(ellipse at center,rgba(136,68,255,0.06) 0%,transparent 70%);pointer-events:none;z-index:-1}
+.hero-badge{font-family:var(--jb);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent-violet);border:1px solid rgba(136,68,255,0.2);padding:6px 16px;border-radius:20px;margin-bottom:32px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:24px;max-width:800px}
+.hero h1 .gradient-text{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text-dim);font-size:1.125rem;max-width:560px;line-height:1.7;margin-bottom:40px}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{background:var(--g);color:#000;padding:14px 32px;border-radius:8px;font-weight:600;font-size:0.9rem;text-decoration:none;border:none;cursor:pointer;font-family:var(--sg);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:8px;font-weight:500;font-size:0.9rem;text-decoration:none;border:1px solid var(--border);font-family:var(--sg)}
+
+/* Dashboard wireframe */
+.dashboard-preview{border:1px solid var(--border);border-radius:10px;background:var(--card-bg);overflow:hidden;margin-top:48px}
+.dash-topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:#050505}
+.dash-topbar-left{display:flex;align-items:center;gap:12px}
+.dash-dot{width:8px;height:8px;border-radius:50%}
+.dash-breadcrumb{font-family:var(--jb);font-size:10px;color:var(--text-dim)}
+.dash-body{display:grid;grid-template-columns:200px 1fr;min-height:400px}
+.dash-sidebar{border-right:1px solid var(--border);padding:16px 0}
+.dash-sidebar-item{padding:8px 20px;font-size:0.8rem;color:var(--text-dim);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px}
+.dash-sidebar-item:hover{color:var(--text);background:rgba(255,255,255,0.02)}
+.dash-sidebar-item.active{color:var(--text);border-left:2px solid var(--accent-violet);background:rgba(136,68,255,0.05)}
+.dash-sidebar-item .item-dot{width:4px;height:4px;border-radius:50%;background:var(--text-dim)}
+.dash-sidebar-item.active .item-dot{background:var(--accent-violet)}
+.dash-content{padding:24px}
+.dash-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.dash-stat{padding:16px;border:1px solid var(--border);border-radius:8px;background:#050505}
+.dash-stat-label{font-family:var(--jb);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:4px}
+.dash-stat-value{font-size:1.5rem;font-weight:700}
+.dash-table{width:100%;border-collapse:collapse}
+.dash-table th{font-family:var(--jb);font-size:9px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border)}
+.dash-table td{padding:8px 12px;border-bottom:1px solid var(--border);font-size:0.8rem;color:var(--text-dim)}
+
+/* Investor section */
+.investor-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px}
+.investor-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg)}
+.investor-card .inv-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px}
+.investor-card .inv-value{font-size:1.25rem;font-weight:600;margin-bottom:4px}
+.investor-card .inv-detail{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+
+/* Pricing tiers */
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px}
+.pricing-card{border:1px solid var(--border);border-radius:10px;padding:28px;background:var(--card-bg);position:relative}
+.pricing-card.featured{border-color:var(--accent-violet)}
+.pricing-card.featured::before{content:'POPULAR';position:absolute;top:-10px;left:20px;font-family:var(--jb);font-size:9px;letter-spacing:0.1em;background:var(--accent-violet);color:#fff;padding:3px 10px;border-radius:4px}
+.pricing-tier{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-bottom:8px}
+.pricing-price{font-size:2rem;font-weight:700;margin-bottom:4px}
+.pricing-price span{font-size:0.85rem;font-weight:400;color:var(--text-dim)}
+.pricing-desc{color:var(--text-dim);font-size:0.8rem;margin-bottom:20px;line-height:1.6}
+.pricing-features{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.pricing-features li{font-size:0.8rem;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.pricing-features li::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent-cyan);flex-shrink:0}
+.pricing-btn{display:block;width:100%;padding:10px;border-radius:6px;text-align:center;font-family:var(--sg);font-weight:600;font-size:0.85rem;cursor:pointer;text-decoration:none;transition:transform 0.2s;border:none}
+.pricing-btn:hover{transform:translateY(-1px)}
+.pricing-btn.primary{background:var(--g);color:#000}
+.pricing-btn.secondary{background:transparent;color:var(--text);border:1px solid var(--border)}
+
+/* RoadChain */
+.chain-timeline{margin-top:48px;position:relative;padding-left:32px}
+.chain-timeline::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent-violet),var(--accent-cyan),transparent)}
+.chain-block{position:relative;margin-bottom:24px;padding:20px 24px;border:1px solid var(--border);border-radius:10px;background:var(--card-bg)}
+.chain-block::before{content:'';position:absolute;left:-38px;top:24px;width:10px;height:10px;border-radius:50%;background:var(--accent-violet);border:2px solid var(--bg)}
+.chain-hash{font-family:var(--jb);font-size:10px;color:var(--accent-cyan);opacity:0.6;margin-bottom:4px}
+.chain-action{font-weight:600;margin-bottom:2px}
+.chain-detail{color:var(--text-dim);font-size:0.8rem}
+.chain-time{font-family:var(--jb);font-size:10px;color:var(--text-dim);opacity:0.4;margin-top:6px}
+
+/* API docs */
+.api-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}
+.api-endpoint{border:1px solid var(--border);border-radius:10px;padding:24px;background:var(--card-bg)}
+.api-method{font-family:var(--jb);font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.api-method.get{background:rgba(34,197,94,0.1);color:var(--accent-green)}
+.api-method.post{background:rgba(68,136,255,0.1);color:var(--accent-blue)}
+.api-method.put{background:rgba(255,107,43,0.1);color:var(--accent-orange)}
+.api-method.delete{background:rgba(255,34,85,0.1);color:var(--accent-pink)}
+.api-path{font-family:var(--jb);font-size:0.85rem;margin-bottom:8px}
+.api-desc{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+
+/* Contact */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:48px}
+.contact-form{display:flex;flex-direction:column;gap:16px}
+.form-group label{display:block;font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 16px;background:#0d0d0d;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--sg);font-size:0.9rem;transition:border-color 0.2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#333}
+.form-group textarea{height:120px;resize:vertical}
+.contact-info{display:flex;flex-direction:column;gap:20px}
+.contact-item{border:1px solid var(--border);border-radius:10px;padding:20px;background:var(--card-bg)}
+.contact-item h4{font-size:0.9rem;margin-bottom:4px}
+.contact-item p{color:var(--text-dim);font-size:0.85rem}
+.contact-item a{color:var(--accent-cyan);text-decoration:none}
+
+.stats-bar{display:flex;justify-content:center;gap:64px;padding:48px 2rem;max-width:1200px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-value{font-size:2rem;font-weight:700;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-top:4px}
+
+.code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:var(--jb);font-size:0.8rem;line-height:1.8;overflow-x:auto;color:var(--text-dim)}
+.code-block .kw{color:var(--accent-violet)}
+.code-block .fn{color:var(--accent-blue)}
+.code-block .str{color:var(--accent-cyan)}
+.code-block .comment{color:#444}
+.code-block .num{color:var(--accent-orange)}
+
+footer{border-top:1px solid var(--border);padding:48px 2rem;text-align:center}
+footer .footer-inner{max-width:1200px;margin:0 auto}
+footer .footer-tagline{font-size:1rem;font-weight:300;color:var(--text-dim);margin-bottom:8px;font-style:italic}
+footer .footer-copy{font-family:var(--jb);font-size:11px;color:var(--text-dim);opacity:0.5}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-top:16px;list-style:none}
+footer .footer-links a{color:var(--text-dim);text-decoration:none;font-size:0.8rem}
+
+@media(max-width:768px){
+  .hamburger{display:flex}
+  nav .nav-links{display:none;position:absolute;top:64px;left:0;width:100%;background:rgba(0,0,0,0.98);flex-direction:column;padding:24px;gap:16px;border-bottom:1px solid var(--border)}
+  nav .nav-links.open{display:flex}
+  .pricing-grid{grid-template-columns:1fr}
+  .investor-grid,.api-grid,.contact-grid{grid-template-columns:1fr}
+  .dash-body{grid-template-columns:1fr}
+  .dash-sidebar{display:none}
+  .dash-cards{grid-template-columns:1fr}
+  section{padding:64px 1.25rem}
+  .hero h1{font-size:2rem}
+  .stats-bar{flex-wrap:wrap;gap:32px}
+}
+</style>
+<meta property="og:title" content="BlackRoad Inc — Enterprise-Grade. Founder-Built.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadinc.us/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadinc.us/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Inc — Enterprise-Grade. Founder-Built.","url":"https://blackroadinc.us","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><circle cx='10' cy='16' r='5' fill='%23FF2255'/><rect x='18' y='11' width='10' height='10' rx='2' fill='%238844FF'/></svg>" type="image/svg+xml">
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>BlackRoad</span>Inc</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#investors">Investors</a></li>
+      <li><a href="#billing">Billing</a></li>
+      <li><a href="#roadchain">RoadChain</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#" class="nav-cta">Admin Login</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">Enterprise Administration</div>
+  <h1>Enterprise-Grade.<br><span class="gradient-text">Founder-Built.</span></h1>
+  <p>The administrative backbone of BlackRoad OS, Inc. A Delaware C-Corp with real infrastructure, real products, and real accountability. Built by one founder who writes every line of code.</p>
+  <div class="hero-actions">
+    <a href="#dashboard" class="btn-primary">View Dashboard</a>
+    <a href="#investors" class="btn-secondary">Investor Relations</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="stats-bar fade-in">
+  <div class="stat-item"><div class="stat-value">Delaware</div><div class="stat-label">C-Corp</div></div>
+  <div class="stat-item"><div class="stat-value">Nov 2025</div><div class="stat-label">Incorporated</div></div>
+  <div class="stat-item"><div class="stat-value">10M</div><div class="stat-label">Shares Authorized</div></div>
+  <div class="stat-item"><div class="stat-value">92</div><div class="stat-label">Products</div></div>
+</div>
+<div class="divider"></div>
+
+<!-- Admin Dashboard -->
+<section id="dashboard">
+  <div class="fade-in">
+    <div class="section-label">001 / Admin Dashboard</div>
+    <div class="section-title">Unified Administration</div>
+    <p class="section-desc">One dashboard for all corporate operations: fleet management, billing, user administration, agent coordination, and audit trails. Everything in one place, all self-hosted.</p>
+  </div>
+  <div class="dashboard-preview fade-in">
+    <div class="dash-topbar">
+      <div class="dash-topbar-left">
+        <div class="dash-dot" style="background:#FF2255"></div>
+        <div class="dash-dot" style="background:#FF6B2B"></div>
+        <div class="dash-dot" style="background:#22c55e"></div>
+        <span class="dash-breadcrumb">admin.blackroadinc.us / dashboard</span>
+      </div>
+      <span class="dash-breadcrumb">Alexa Amundson — CEO</span>
+    </div>
+    <div class="dash-body">
+      <div class="dash-sidebar">
+        <div class="dash-sidebar-item active"><span class="item-dot"></span>Overview</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Fleet Nodes</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Agents (69)</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Services</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Billing</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Users</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>RoadChain</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>DNS Records</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Deployments</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Audit Log</div>
+        <div class="dash-sidebar-item"><span class="item-dot"></span>Settings</div>
+      </div>
+      <div class="dash-content">
+        <div class="dash-cards">
+          <div class="dash-stat">
+            <div class="dash-stat-label">Active Nodes</div>
+            <div class="dash-stat-value" style="color:var(--accent-green)">5/7</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-label">MRR</div>
+            <div class="dash-stat-value">$0</div>
+          </div>
+          <div class="dash-stat">
+            <div class="dash-stat-label">Uptime (Fleet Avg)</div>
+            <div class="dash-stat-value" style="color:var(--accent-green)">91.4%</div>
+          </div>
+        </div>
+        <table class="dash-table">
+          <thead><tr><th>Event</th><th>Source</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody>
+            <tr><td>Deploy: 15 Workers to Octavia</td><td>CI/CD</td><td style="color:var(--accent-green)">Complete</td><td>2m ago</td></tr>
+            <tr><td>Cecilia health check failed</td><td>Watchdog</td><td style="color:var(--accent-pink)">Alert</td><td>4h ago</td></tr>
+            <tr><td>DNS migration: 138/151 records</td><td>PowerDNS</td><td style="color:var(--accent-orange)">91%</td><td>1d ago</td></tr>
+            <tr><td>TLS renewal: 12 certificates</td><td>Caddy</td><td style="color:var(--accent-green)">Auto</td><td>2d ago</td></tr>
+            <tr><td>Agent sync: 69 agents registered</td><td>RoundTrip</td><td style="color:var(--accent-green)">Healthy</td><td>5m ago</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Investor Relations -->
+<section id="investors">
+  <div class="fade-in">
+    <div class="section-label">002 / Investor Relations</div>
+    <div class="section-title">Corporate Formation Details</div>
+    <p class="section-desc">BlackRoad OS, Inc. is a Delaware C-Corp formed through Stripe Atlas on November 17, 2025. Sole founder, CEO, and director: Alexa Amundson. All corporate documents on file.</p>
+  </div>
+  <div class="investor-grid fade-in">
+    <div class="investor-card">
+      <div class="inv-label">Entity Type</div>
+      <div class="inv-value">Delaware C-Corporation</div>
+      <div class="inv-detail">Formed November 17, 2025 via Stripe Atlas. File #10405914. Registered agent: Legalinc Corporate Services Inc., Wilmington, DE.</div>
+    </div>
+    <div class="investor-card">
+      <div class="inv-label">EIN</div>
+      <div class="inv-value">41-2663817</div>
+      <div class="inv-detail">IRS Employer Identification Number. CP 575 notice on file. SS-4 application completed. Form 8821 (Tax Information Authorization) filed.</div>
+    </div>
+    <div class="investor-card">
+      <div class="inv-label">Stock Structure</div>
+      <div class="inv-value">10,000,000 Shares Common</div>
+      <div class="inv-detail">Par value $0.00001 per share. 83(b) election filed. Stock certificates issued. Restricted Stock Purchase Agreement (RSPA) executed.</div>
+    </div>
+    <div class="investor-card">
+      <div class="inv-label">Leadership</div>
+      <div class="inv-value">Alexa Amundson</div>
+      <div class="inv-detail">Sole founder, CEO, and director. CIIAA (Confidential Information and Invention Assignment Agreement) on file. Indemnification agreement executed. Board actions documented.</div>
+    </div>
+    <div class="investor-card">
+      <div class="inv-label">Corporate Documents</div>
+      <div class="inv-value">19 PDFs on File</div>
+      <div class="inv-detail">Certificate of Incorporation, Bylaws, 83(b) election, EIN (CP 575), Stock Certificates, RSPA, CIIAA, Indemnification Agreement, Board Actions, SS-4, Form 8821.</div>
+    </div>
+    <div class="investor-card">
+      <div class="inv-label">Tax Obligations</div>
+      <div class="inv-value">Form 1120 Due 04/15/2026</div>
+      <div class="inv-detail">Federal corporate income tax return. Delaware franchise tax due annually. All formation-related filings current and compliant.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Billing -->
+<section id="billing">
+  <div class="fade-in">
+    <div class="section-label">003 / Billing</div>
+    <div class="section-title">Stripe-Powered Pricing</div>
+    <p class="section-desc">Four tiers designed for different scales of operation. From individual developers to enterprise fleets. Stripe handles payment processing — the only external dependency we accept.</p>
+  </div>
+  <div class="pricing-grid fade-in">
+    <div class="pricing-card">
+      <div class="pricing-tier">Free</div>
+      <div class="pricing-price">$0<span>/mo</span></div>
+      <div class="pricing-desc">For individuals getting started with sovereign computing.</div>
+      <ul class="pricing-features">
+        <li>1 identity</li>
+        <li>Basic AI memory</li>
+        <li>100 RC wallet</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="pricing-btn secondary">Get Started</a>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-tier">Pro</div>
+      <div class="pricing-price">$9.99<span>/mo</span></div>
+      <div class="pricing-desc">For power users and node operators.</div>
+      <ul class="pricing-features">
+        <li>Unlimited identities</li>
+        <li>Infinite AI memory</li>
+        <li>Unlimited RC wallet</li>
+        <li>Tor routing</li>
+        <li>API access</li>
+      </ul>
+      <a href="#" class="pricing-btn secondary">Upgrade</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-tier">Team</div>
+      <div class="pricing-price">$49<span>/mo</span></div>
+      <div class="pricing-desc">For teams managing fleet infrastructure.</div>
+      <ul class="pricing-features">
+        <li>10 team members</li>
+        <li>Fleet dashboard</li>
+        <li>Priority support</li>
+        <li>Custom agents</li>
+        <li>Audit logging</li>
+        <li>SLA guarantee</li>
+      </ul>
+      <a href="#" class="pricing-btn primary">Start Trial</a>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-tier">Enterprise</div>
+      <div class="pricing-price">Custom</div>
+      <div class="pricing-desc">For organizations requiring dedicated infrastructure.</div>
+      <ul class="pricing-features">
+        <li>Unlimited members</li>
+        <li>Dedicated nodes</li>
+        <li>On-prem deployment</li>
+        <li>Custom SLA</li>
+        <li>Dedicated support</li>
+        <li>White-label option</li>
+      </ul>
+      <a href="#contact" class="pricing-btn secondary">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RoadChain -->
+<section id="roadchain">
+  <div class="fade-in">
+    <div class="section-label">004 / RoadChain Ops</div>
+    <div class="section-title">Blockchain Audit Trails</div>
+    <p class="section-desc">Every significant operation in the BlackRoad infrastructure is recorded on RoadChain — an immutable, cryptographically signed audit trail. Not a cryptocurrency. A corporate accountability layer.</p>
+  </div>
+  <div class="chain-timeline fade-in">
+    <div class="chain-block">
+      <div class="chain-hash">0x7a3f...e291 — Block #4,847</div>
+      <div class="chain-action">Deploy: 15 Workers to Octavia</div>
+      <div class="chain-detail">Signed by: Claude (Session #847) | Approved by: Alexa Amundson | Ports: 9001-9015 | Health: 15/15 passing</div>
+      <div class="chain-time">2026-03-21 14:23:07 UTC</div>
+    </div>
+    <div class="chain-block">
+      <div class="chain-hash">0x3b1c...a847 — Block #4,846</div>
+      <div class="chain-action">DNS Migration: 6 records moved to PowerDNS</div>
+      <div class="chain-detail">Signed by: DNS Agent | Total migrated: 138/151 (91.4%) | Remaining: 13 records pending GoDaddy NS change</div>
+      <div class="chain-time">2026-03-20 09:15:33 UTC</div>
+    </div>
+    <div class="chain-block">
+      <div class="chain-hash">0x9e4d...f123 — Block #4,845</div>
+      <div class="chain-action">Truth Audit v2: Purged false claims from 28 sites</div>
+      <div class="chain-detail">Signed by: Watchdog Agent | Changes: agent count 30000→35, repos 1825→629, models 27→11 | All sites verified</div>
+      <div class="chain-time">2026-03-17 22:41:19 UTC</div>
+    </div>
+    <div class="chain-block">
+      <div class="chain-hash">0x5f2a...b456 — Block #4,844</div>
+      <div class="chain-action">Corporate: Form 1120 preparation started</div>
+      <div class="chain-detail">Signed by: Alexa Amundson | Due: 2026-04-15 | Tax year: 2025 | Status: In progress</div>
+      <div class="chain-time">2026-03-15 11:07:52 UTC</div>
+    </div>
+    <div class="chain-block">
+      <div class="chain-hash">0x1d8e...c789 — Block #4,843</div>
+      <div class="chain-action">Infrastructure: WireGuard mesh 12/12 verified</div>
+      <div class="chain-detail">Signed by: Mesh Agent | All bidirectional tunnels confirmed | Latency: 1.2ms local, 34ms DO</div>
+      <div class="chain-time">2026-03-14 16:55:41 UTC</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- API Documentation -->
+<section id="api">
+  <div class="fade-in">
+    <div class="section-label">005 / API Documentation</div>
+    <div class="section-title">REST API Reference</div>
+    <p class="section-desc">Programmatic access to the BlackRoad platform. Authentication via Ed25519 signed tokens. Rate limited per tier. All endpoints return JSON.</p>
+  </div>
+  <div class="api-grid fade-in">
+    <div class="api-endpoint">
+      <span class="api-method get">GET</span>
+      <div class="api-path">/api/v1/fleet/status</div>
+      <div class="api-desc">Returns current status of all fleet nodes including uptime, load, services, and health indicators. Requires authentication.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method get">GET</span>
+      <div class="api-path">/api/v1/agents</div>
+      <div class="api-desc">List all registered agents in the RoundTrip system. Includes agent name, role, last active timestamp, and current channel.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method post">POST</span>
+      <div class="api-path">/api/v1/deploy</div>
+      <div class="api-desc">Trigger a deployment to the specified node. Requires admin privileges. Body includes target node, service, and configuration.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method get">GET</span>
+      <div class="api-path">/api/v1/roadchain/blocks</div>
+      <div class="api-desc">Query the RoadChain audit trail. Supports pagination, date range filtering, and search by action type or signer.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method post">POST</span>
+      <div class="api-path">/api/v1/identity/verify</div>
+      <div class="api-desc">Verify an Ed25519 signed identity token. Returns identity details, reputation score, and associated node permissions.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method get">GET</span>
+      <div class="api-path">/api/v1/billing/usage</div>
+      <div class="api-desc">Current billing period usage metrics. Compute hours, storage bytes, API calls, and agent interactions. Per-tier limits shown.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method put">PUT</span>
+      <div class="api-path">/api/v1/dns/records/:id</div>
+      <div class="api-desc">Update a DNS record on the PowerDNS infrastructure. Supports A, AAAA, CNAME, MX, TXT, and SRV record types.</div>
+    </div>
+    <div class="api-endpoint">
+      <span class="api-method delete">DELETE</span>
+      <div class="api-path">/api/v1/agents/:id</div>
+      <div class="api-desc">Deregister an agent from the RoundTrip system. Removes from all channels and clears message history. Irreversible.</div>
+    </div>
+  </div>
+  <div class="code-block fade-in" style="margin-top:24px;">
+<span class="comment"># Authentication example</span>
+$ curl -H <span class="str">"Authorization: Bearer $(blackroad-identity sign)"</span> \
+    <span class="str">https://api.blackroadinc.us/v1/fleet/status</span>
+
+{
+  <span class="str">"nodes"</span>: <span class="num">7</span>,
+  <span class="str">"online"</span>: <span class="num">5</span>,
+  <span class="str">"offline"</span>: [<span class="str">"cecilia"</span>],
+  <span class="str">"degraded"</span>: [<span class="str">"aria"</span>],
+  <span class="str">"services"</span>: <span class="num">12</span>,
+  <span class="str">"agents"</span>: <span class="num">69</span>,
+  <span class="str">"fleet_uptime_avg"</span>: <span class="num">0.914</span>
+}
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="fade-in">
+    <div class="section-label">006 / Contact</div>
+    <div class="section-title">Get in Touch</div>
+    <p class="section-desc">For enterprise inquiries, investor relations, partnership proposals, or technical questions. Direct line to the founder.</p>
+  </div>
+  <div class="contact-grid fade-in">
+    <div class="contact-form">
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Subject</label>
+        <select>
+          <option>Enterprise Inquiry</option>
+          <option>Investor Relations</option>
+          <option>Partnership</option>
+          <option>Technical Support</option>
+          <option>Press / Media</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Message</label>
+        <textarea placeholder="Tell us about your needs..."></textarea>
+      </div>
+      <button class="btn-primary" style="align-self:flex-start;">Send Message</button>
+    </div>
+    <div class="contact-info">
+      <div class="contact-item">
+        <h4>Email</h4>
+        <p><a href="mailto:alexa@blackroad.io">alexa@blackroad.io</a></p>
+      </div>
+      <div class="contact-item">
+        <h4>Corporate Address</h4>
+        <p>BlackRoad OS, Inc.<br>Delaware C-Corporation<br>Registered Agent: Legalinc Corporate Services Inc.</p>
+      </div>
+      <div class="contact-item">
+        <h4>Response Time</h4>
+        <p>Business inquiries: 24-48 hours<br>Technical support: Same business day<br>Enterprise: Priority response</p>
+      </div>
+      <div class="contact-item">
+        <h4>Connect</h4>
+        <p>GitHub: <a href="https://github.com/blackboxprogramming">@blackboxprogramming</a><br>
+        Web: <a href="https://blackroad.io">blackroad.io</a><br>
+        Network: <a href="https://blackroad.network">blackroad.network</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.me">Identity</a></li>
+      <li><a href="https://blackroad.network">Network</a></li>
+      <li><a href="https://blackroad.systems">Systems</a></li>
+      <li><a href="https://blackroadqi.com">QI</a></li>
+      <li><a href="https://roadcoin.io">RoadCoin</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+document.getElementById('hamburger').addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open')});
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-in').forEach(function(el){observer.observe(el)});
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
+
+// Dashboard sidebar interaction
+document.querySelectorAll('.dash-sidebar-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.dash-sidebar-item').forEach(function(i) { i.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

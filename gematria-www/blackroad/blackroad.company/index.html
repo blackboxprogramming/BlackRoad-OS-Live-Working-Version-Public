@@ -1,0 +1,2306 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS, Inc. — The Company Behind the Road</title>
+<meta name="description" content="BlackRoad OS, Inc. Delaware C-Corp founded November 17, 2025 by Alexa Louise Amundson. Sovereign infrastructure, unified platform, pave tomorrow.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   BlackRoad OS, Inc. — Corporate Portal
+   blackroad.company
+   Design System: BlackRoad JSX (adapted pure CSS)
+   ═══════════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --g: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g135: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --g-text: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --bg: #000;
+  --white: #f5f5f5;
+  --black: #000;
+  --border: #1a1a1a;
+  --border-hover: #333;
+  --sg: 'Space Grotesk', sans-serif;
+  --inter: 'Inter', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  background: var(--bg);
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--sg);
+  overflow-x: hidden;
+  max-width: 100vw;
+  line-height: 1.6;
+}
+
+a { color: inherit; text-decoration: none; }
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #1c1c1c; border-radius: 4px; }
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+@keyframes barPulse {
+  0%, 100% { opacity: 0.6; transform: scaleY(1); }
+  50% { opacity: 1; transform: scaleY(1.3); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.08; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ GRADIENT BAR ═══ */
+.grad-bar {
+  height: 3px;
+  background: var(--g);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+  image-rendering: crisp-edges;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+}
+
+/* ═══ NAV ═══ */
+.nav {
+  position: fixed;
+  top: 3px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 48px;
+  height: 56px;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.nav.scrolled {
+  background: rgba(0, 0, 0, 0.97);
+  border-bottom-color: #141414;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+
+.nav-bars {
+  display: flex;
+  gap: 2px;
+}
+
+.nav-bar {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+}
+
+.nav-bar:nth-child(1) { background: #FF6B2B; animation: barPulse 2.5s ease-in-out 0s infinite; }
+.nav-bar:nth-child(2) { background: #FF2255; animation: barPulse 2.5s ease-in-out 0.14s infinite; }
+.nav-bar:nth-child(3) { background: #CC00AA; animation: barPulse 2.5s ease-in-out 0.28s infinite; }
+.nav-bar:nth-child(4) { background: #8844FF; animation: barPulse 2.5s ease-in-out 0.42s infinite; }
+.nav-bar:nth-child(5) { background: #4488FF; animation: barPulse 2.5s ease-in-out 0.56s infinite; }
+.nav-bar:nth-child(6) { background: #00D4FF; animation: barPulse 2.5s ease-in-out 0.7s infinite; }
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+}
+
+.nav-links a {
+  font-family: var(--inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: #686868;
+  transition: color 0.15s;
+}
+
+.nav-links a:hover { color: var(--white); }
+
+.nav-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sg);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.btn-outline:hover { border-color: #444; background: rgba(255,255,255,0.03); }
+
+.btn-solid {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--white);
+  color: var(--black);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sg);
+  transition: opacity 0.2s;
+}
+
+.btn-solid:hover { opacity: 0.9; }
+
+/* ═══ HERO ═══ */
+.hero {
+  text-align: center;
+  padding: 160px 48px 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.05;
+  pointer-events: none;
+  animation: pulseGlow 6s ease-in-out infinite;
+}
+
+.orb-1 { width: 600px; height: 600px; background: #FF2255; top: -250px; left: -10%; }
+.orb-2 { width: 500px; height: 500px; background: #4488FF; top: -200px; right: -8%; }
+.orb-3 { width: 400px; height: 400px; background: #CC00AA; bottom: -150px; left: 35%; }
+.orb-4 { width: 350px; height: 350px; background: #8844FF; bottom: -100px; right: 10%; animation-delay: 3s; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 36px;
+  opacity: 0.7;
+}
+
+.hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--g135);
+}
+
+.hero h1 {
+  font-size: 68px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.05;
+  margin-bottom: 20px;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: -0.035em;
+}
+
+.hero-inc {
+  font-size: 28px;
+  font-weight: 300;
+  opacity: 0.4;
+  display: block;
+  margin-top: 8px;
+  letter-spacing: 0.06em;
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--white);
+  opacity: 0.4;
+  max-width: 620px;
+  margin: 0 auto 20px;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.hero-founder {
+  font-family: var(--jb);
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.25;
+  margin-bottom: 48px;
+  letter-spacing: 0.04em;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.btn-lg {
+  display: inline-flex;
+  align-items: center;
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--sg);
+  transition: all 0.2s;
+}
+
+.btn-lg-solid {
+  background: var(--white);
+  color: var(--black);
+  border: none;
+}
+
+.btn-lg-solid:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btn-lg-outline {
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--border);
+}
+
+.btn-lg-outline:hover { border-color: #444; background: rgba(255,255,255,0.03); }
+
+.btn-lg-grad {
+  background: var(--g);
+  background-size: 200% 100%;
+  color: #fff;
+  border: none;
+  animation: gradShift 4s linear infinite;
+}
+
+.btn-lg-grad:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(255, 34, 85, 0.2); }
+
+/* ═══ METRICS STRIP ═══ */
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.metric-cell {
+  padding: 32px 20px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+
+.metric-cell:last-child { border-right: none; }
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+}
+
+.metric-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ═══ SECTIONS ═══ */
+.section {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 48px;
+}
+
+.section-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.section-desc {
+  font-size: 15px;
+  color: var(--white);
+  opacity: 0.4;
+  max-width: 520px;
+  margin-bottom: 56px;
+  line-height: 1.7;
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: var(--g);
+  border-radius: 2px;
+  margin-bottom: 32px;
+  image-rendering: crisp-edges;
+}
+
+/* ═══ ABOUT ═══ */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.about-content h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 16px;
+}
+
+.about-content p {
+  font-size: 14px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.about-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px;
+  position: relative;
+  background: rgba(255,255,255,0.01);
+}
+
+.about-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--g);
+  border-radius: 12px 12px 0 0;
+  image-rendering: crisp-edges;
+}
+
+.about-timeline {
+  margin-top: 24px;
+}
+
+.about-timeline-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.about-timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--g135);
+}
+
+.about-timeline-item .year {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.2;
+  min-width: 60px;
+  padding-top: 2px;
+}
+
+.about-timeline-item .desc {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.45;
+  line-height: 1.6;
+}
+
+/* ═══ VISION ═══ */
+.vision-statement {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.45;
+  margin-bottom: 32px;
+  max-width: 700px;
+}
+
+.vision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.vision-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.vision-card:hover { border-color: var(--border-hover); }
+
+.vision-card-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.vision-card h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.vision-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.35;
+  line-height: 1.7;
+}
+
+.vision-tam {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  padding: 12px 24px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: var(--jb);
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.5;
+}
+
+.vision-tam-value {
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══ PRODUCTS ═══ */
+.product-featured {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.product-card {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+  position: relative;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--g);
+  border-radius: 10px 10px 0 0;
+  image-rendering: crisp-edges;
+}
+
+.product-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+}
+
+.product-badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.35;
+  margin-bottom: 16px;
+}
+
+.product-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.product-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.product-stat {
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.2;
+  letter-spacing: 0.04em;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.product-sm h3 { font-size: 16px; }
+.product-sm p { font-size: 12px; }
+
+.product-url {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  margin-top: 8px;
+  transition: opacity 0.2s;
+}
+
+.product-card:hover .product-url { opacity: 0.5; }
+
+/* ═══ INFRA — NODE GRID ═══ */
+.node-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.node-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.node-card:hover { border-color: var(--border-hover); }
+
+.node-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--white);
+  position: relative;
+}
+
+.node-ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--g);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 2px;
+}
+
+.node-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.node-role {
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.3;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.node-stat {
+  font-family: var(--jb);
+  font-size: 9px;
+  color: var(--white);
+  opacity: 0.2;
+  line-height: 1.8;
+}
+
+.node-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.4;
+}
+
+.node-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--g135);
+}
+
+.node-dot.off {
+  background: none;
+  border: 1px solid var(--white);
+  opacity: 0.3;
+}
+
+/* Additional infra cards */
+.infra-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.infra-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+  transition: border-color 0.2s;
+}
+
+.infra-card:hover { border-color: var(--border-hover); }
+
+.infra-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 6px;
+}
+
+.infra-card p {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.35;
+  line-height: 1.6;
+}
+
+.infra-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.infra-stat {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+}
+
+.infra-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.infra-stat-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ═══ SOVEREIGN STACK TABLE ═══ */
+.stack-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 40px;
+}
+
+.stack-table th {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.25;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stack-table td {
+  font-size: 13px;
+  color: var(--white);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stack-table td:first-child {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.stack-table td:nth-child(2) {
+  opacity: 0.4;
+  font-family: var(--jb);
+  font-size: 11px;
+}
+
+.stack-table td:nth-child(3) {
+  opacity: 0.25;
+  font-size: 12px;
+  text-decoration: line-through;
+}
+
+.stack-table tr:hover td {
+  background: rgba(255,255,255,0.01);
+}
+
+/* ═══ CORPORATE ═══ */
+.corp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.corp-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  transition: border-color 0.2s;
+}
+
+.corp-card:hover { border-color: var(--border-hover); }
+
+.corp-card-label {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.corp-card-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+
+.corp-card-detail {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.3;
+  line-height: 1.6;
+}
+
+.corp-detail-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.corp-detail-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.corp-detail-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.corp-detail-card p {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.35;
+  line-height: 1.7;
+}
+
+/* ═══ TIMELINE ═══ */
+.timeline {
+  position: relative;
+  padding-left: 36px;
+  margin-top: 48px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border);
+}
+
+.tl-node {
+  position: relative;
+  padding: 20px 0;
+}
+
+.tl-dot {
+  position: absolute;
+  left: -36px;
+  top: 24px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.tl-dot.major {
+  width: 12px;
+  height: 12px;
+  left: -37px;
+  top: 23px;
+  background: var(--g135);
+}
+
+.tl-dot.minor {
+  border: 1px solid var(--white);
+  opacity: 0.2;
+}
+
+.tl-node h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.tl-node p {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.35;
+  max-width: 550px;
+  line-height: 1.6;
+}
+
+.tl-date {
+  font-family: var(--jb);
+  font-size: 10px;
+  color: var(--white);
+  opacity: 0.15;
+  margin-top: 6px;
+}
+
+/* ═══ CONTACT / PRESS ═══ */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+}
+
+.contact-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+  transition: border-color 0.2s;
+}
+
+.contact-card:hover { border-color: var(--border-hover); }
+
+.contact-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.contact-card p {
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.4;
+  line-height: 1.7;
+}
+
+.contact-card a {
+  color: var(--white);
+  opacity: 0.6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s;
+}
+
+.contact-card a:hover { opacity: 1; }
+
+.org-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.org-pill {
+  padding: 6px 16px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: var(--jb);
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.35;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.org-pill:hover { opacity: 0.7; border-color: #333; }
+
+/* ═══ FOOTER ═══ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 64px 48px 48px;
+  margin-top: 40px;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 32px;
+}
+
+.footer-brand {
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+
+.footer-brand-desc {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.3;
+  line-height: 1.7;
+  max-width: 280px;
+}
+
+.footer-tagline {
+  font-family: var(--jb);
+  font-size: 11px;
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 12px;
+  letter-spacing: 0.02em;
+}
+
+.footer-col h5 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 14px;
+}
+
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--white);
+  opacity: 0.35;
+  margin-bottom: 10px;
+  transition: opacity 0.2s;
+}
+
+.footer-col a:hover { opacity: 1; }
+
+.footer-bottom {
+  max-width: 1200px;
+  margin: 36px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--white);
+  opacity: 0.2;
+}
+
+.footer-legal {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-legal a {
+  font-size: 11px;
+  color: var(--white);
+  opacity: 0.2;
+  transition: opacity 0.2s;
+}
+
+.footer-legal a:hover { opacity: 0.6; }
+
+.footer-road {
+  text-align: center;
+  padding: 48px 20px 24px;
+  font-family: var(--jb);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.8;
+}
+
+/* ═══ FADE IN ON SCROLL ═══ */
+.fade-section {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.fade-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══ GRADIENT TEXT ═══ */
+.grad-text {
+  background: var(--g-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1024px) {
+  .metrics-strip { grid-template-columns: repeat(3, 1fr); }
+  .node-grid { grid-template-columns: repeat(3, 1fr); }
+  .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .corp-grid { grid-template-columns: repeat(2, 1fr); }
+  .infra-stat-row { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .contact-grid { grid-template-columns: 1fr 1fr; }
+  .about-grid { grid-template-columns: 1fr; }
+  .vision-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { padding: 120px 20px 60px; }
+  .hero h1 { font-size: 38px; }
+  .hero-inc { font-size: 20px; }
+  .hero-sub { font-size: 15px; }
+  .hero-cta { flex-direction: column; align-items: center; }
+  .section { padding: 60px 20px; }
+  .section-title { font-size: 28px; }
+  .metrics-strip { grid-template-columns: repeat(2, 1fr); }
+  .product-featured { grid-template-columns: 1fr; }
+  .product-grid { grid-template-columns: 1fr; }
+  .node-grid { grid-template-columns: 1fr 1fr; }
+  .corp-grid { grid-template-columns: 1fr; }
+  .corp-detail-row { grid-template-columns: 1fr; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .infra-secondary { grid-template-columns: 1fr; }
+  .infra-stat-row { grid-template-columns: 1fr 1fr; }
+  footer { padding: 40px 20px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .stack-table { font-size: 11px; }
+  .stack-table td, .stack-table th { padding: 10px 8px; }
+  .vision-statement { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { font-size: 30px; }
+  .metrics-strip { grid-template-columns: 1fr 1fr; }
+  .node-grid { grid-template-columns: 1fr; }
+  .infra-stat-row { grid-template-columns: 1fr; }
+}
+</style>
+<meta property="og:title" content="BlackRoad OS, Inc. — The Company Behind the Road">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroad.company/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroad.company/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad OS, Inc. — The Company Behind the Road","url":"https://blackroad.company","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     GRADIENT BAR
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="grad-bar"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     NAVIGATION
+     ═══════════════════════════════════════════════════════════════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-logo">
+    <div class="nav-bars">
+      <div class="nav-bar"></div>
+      <div class="nav-bar"></div>
+      <div class="nav-bar"></div>
+      <div class="nav-bar"></div>
+      <div class="nav-bar"></div>
+      <div class="nav-bar"></div>
+    </div>
+    BlackRoad OS, Inc.
+  </div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#vision">Vision</a>
+    <a href="#products">Products</a>
+    <a href="#infrastructure">Infrastructure</a>
+    <a href="#corporate">Corporate</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-outline" href="mailto:alexa@blackroad.io">Get in Touch</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    Delaware C-Corp &mdash; Founded November 17, 2025
+  </div>
+
+  <h1>
+    BlackRoad OS
+    <span class="hero-inc">The company behind the road.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Sovereign infrastructure. Unified platform. One founder, one vision, one stack built from scratch.
+    We own every layer from silicon to software.
+  </p>
+
+  <p class="hero-founder">
+    Founded by Alexa Louise Amundson &mdash; CEO, sole engineer, sole shareholder
+  </p>
+
+  <div class="hero-cta">
+    <a class="btn-lg btn-lg-grad" href="#vision">The Vision</a>
+    <a class="btn-lg btn-lg-outline" href="#products">Our Products</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     METRICS STRIP
+     ═══════════════════════════════════════════════════════════════════ -->
+<div class="fade-section">
+  <div class="metrics-strip">
+    <div class="metric-cell">
+      <div class="metric-value" data-count="629">0</div>
+      <div class="metric-label">Repositories</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-value" data-count="20">0</div>
+      <div class="metric-label">Domains</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-value" data-count="35">0</div>
+      <div class="metric-label">AI Agents</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-value" data-count="52">0</div>
+      <div class="metric-label">TOPS (AI Compute)</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-value" data-count="15">0</div>
+      <div class="metric-label">Self-Hosted Workers</div>
+    </div>
+    <div class="metric-cell">
+      <div class="metric-value" data-count="7">0</div>
+      <div class="metric-label">Product Verticals</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     ABOUT
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="about">
+  <div class="section-label">// ABOUT</div>
+  <div class="section-title">Solo Founder. Full Stack Sovereign.</div>
+  <div class="section-desc">
+    One person built the company, the infrastructure, the products, the brand, and the math.
+    No co-founders. No outside engineers. Every line of code, every server, every domain.
+  </div>
+
+  <div class="about-grid">
+    <div class="about-content">
+      <h3>Alexa Louise Amundson</h3>
+      <p>
+        CEO, sole director, and sole engineer of BlackRoad OS, Inc. Career path: sales, finance,
+        real estate, and technology. Licensed across multiple professional domains. Built the entire
+        BlackRoad sovereign stack from the ground up &mdash; 5 Raspberry Pis, 2 cloud droplets,
+        20 domains, 629+ repositories, a custom AI fleet, and a self-hosted replacement for every
+        major cloud service.
+      </p>
+      <p>
+        Author of the Amundson Mathematical Framework: G(n) = n^(n+1)/(n+1)^n, with convergence
+        constant A_G approximately 1.24433. Validated across 536 test cases on 4 distributed compute nodes.
+        Published as a 13-page LaTeX paper with formal proofs.
+      </p>
+      <p>
+        The thesis is simple: the digital experience is fundamentally broken across search, education,
+        creative tools, privacy, and ownership. Rather than build on someone else's platform,
+        build the platform. Own every layer. Sovereignty is not a feature &mdash; it is the architecture.
+      </p>
+    </div>
+    <div>
+      <div class="about-card">
+        <div style="font-family: var(--jb); font-size: 10px; color: var(--white); opacity: 0.2; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 20px;">Career Timeline</div>
+        <div class="about-timeline">
+          <div class="about-timeline-item">
+            <span class="year">Sales</span>
+            <span class="desc">Direct revenue generation, client acquisition, territory management. Built from zero.</span>
+          </div>
+          <div class="about-timeline-item">
+            <span class="year">Finance</span>
+            <span class="desc">Licensed. Financial analysis, market structure, risk frameworks.</span>
+          </div>
+          <div class="about-timeline-item">
+            <span class="year">Real Estate</span>
+            <span class="desc">Licensed agent. Property, transactions, regulatory compliance.</span>
+          </div>
+          <div class="about-timeline-item">
+            <span class="year">Technology</span>
+            <span class="desc">Self-taught. Full-stack engineering, AI/ML, distributed systems, infrastructure. Built BlackRoad OS.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     THE VISION
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="vision">
+  <div class="section-label">// THE VISION</div>
+  <div class="section-title">What Doesn't Exist Yet</div>
+  <div class="section-divider"></div>
+
+  <div class="vision-statement">
+    The digital experience is broken. Search is ad-polluted. Education is inaccessible.
+    Creative tools are siloed. Privacy is a checkbox, not architecture.
+    BlackRoad builds the unified platform that doesn't exist &mdash; one where you own the stack,
+    the data, and the decision.
+  </div>
+
+  <p style="font-size: 14px; color: var(--white); opacity: 0.35; line-height: 1.8; max-width: 640px; margin-bottom: 20px;">
+    We are not building another SaaS product. We are building a platform thesis: interconnected
+    verticals &mdash; AI, education, creative tools, identity, gaming, infrastructure &mdash; that share a
+    common sovereign backbone. Each product strengthens the network. Each user owns their experience.
+  </p>
+
+  <div class="vision-tam">
+    <span>Total Addressable Market:</span>
+    <span class="vision-tam-value">$600B+</span>
+    <span style="opacity: 0.4;">across interconnected domains</span>
+  </div>
+
+  <div class="vision-grid">
+    <div class="vision-card">
+      <div class="vision-card-label">Problem</div>
+      <h4>Search is Broken</h4>
+      <p>Results optimized for advertisers, not users. Knowledge is buried under SEO and sponsored content. The index is not yours.</p>
+    </div>
+    <div class="vision-card">
+      <div class="vision-card-label">Problem</div>
+      <h4>Education is Gatekept</h4>
+      <p>Tuition walls, geographic barriers, outdated curricula. Learning should be sovereign &mdash; available anywhere, anytime, on any device.</p>
+    </div>
+    <div class="vision-card">
+      <div class="vision-card-label">Problem</div>
+      <h4>Creative Tools are Siloed</h4>
+      <p>Subscriptions for everything. Your work lives on someone else's server. Export is an afterthought. Ownership is a premium feature.</p>
+    </div>
+    <div class="vision-card">
+      <div class="vision-card-label">Problem</div>
+      <h4>Privacy is Theater</h4>
+      <p>Cookie banners and checkbox consent. Real privacy means owning your compute, your data, your inference. Local-first, not cloud-dependent.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PRODUCTS
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="products">
+  <div class="section-label">// PRODUCTS</div>
+  <div class="section-title">Seven Portals</div>
+  <div class="section-desc">
+    Each product is a vertical. Each vertical feeds the platform. Together they form a unified
+    sovereign experience that no single cloud provider can replicate.
+  </div>
+
+  <div class="product-featured">
+    <div class="product-card">
+      <div class="product-badge">AI PLATFORM</div>
+      <h3>Lucidia</h3>
+      <p>
+        Sovereign AI inference and agent orchestration. Local-first models running on Raspberry Pi
+        hardware with Hailo-8 accelerators. 26 TOPS of on-premise compute. No API keys, no cloud
+        dependency, no data leaving the network. Your models, your hardware, your intelligence.
+      </p>
+      <div class="product-stat">lucidia.blackroad.io &middot; 200 agents &middot; 16 models</div>
+      <div class="product-url">&#8594; lucidia.blackroad.io</div>
+    </div>
+    <div class="product-card">
+      <div class="product-badge">INFRASTRUCTURE</div>
+      <h3>BackRoad</h3>
+      <p>
+        The sovereign infrastructure layer. Self-hosted replacements for every major cloud service:
+        Gitea for Git, MinIO for object storage, PowerDNS for DNS, WireGuard for VPN, workerd for
+        edge compute. 138 of 18 domains served from own hardware. Zero vendor lock-in.
+      </p>
+      <div class="product-stat">backroad.dev &middot; 5 Pis + 2 droplets &middot; 15 Workers</div>
+      <div class="product-url">&#8594; backroad.dev</div>
+    </div>
+  </div>
+
+  <div class="product-grid">
+    <div class="product-card product-sm">
+      <div class="product-badge">CREATIVE</div>
+      <h3>RoadGlitch</h3>
+      <p>
+        Creative tools and digital art platform. Glitch aesthetics, generative art, pixel
+        environments. Art that owns itself. No subscription, no cloud render farm, no watermarks.
+      </p>
+      <div class="product-stat">roadglitch.com</div>
+      <div class="product-url">&#8594; roadglitch.com</div>
+    </div>
+    <div class="product-card product-sm">
+      <div class="product-badge">NETWORK</div>
+      <h3>CarPool</h3>
+      <p>
+        Mesh communication and agent coordination. NATS-based pub/sub messaging across all nodes.
+        Every device is a Roadie. Real-time event streams, agent dispatch, fleet telemetry.
+      </p>
+      <div class="product-stat">carpool.blackroad.io &middot; NATS v2.12.3</div>
+      <div class="product-url">&#8594; carpool.blackroad.io</div>
+    </div>
+    <div class="product-card product-sm">
+      <div class="product-badge">SEARCH</div>
+      <h3>RoadView</h3>
+      <p>
+        Sovereign search and knowledge graph. FTS5 indexing across 1,383+ entries from 23 indexers.
+        Search your repos, agents, docs, domains, wikis, and memory &mdash; all local, all yours.
+      </p>
+      <div class="product-stat">search.blackroad.io &middot; 28 entity types</div>
+      <div class="product-url">&#8594; search.blackroad.io</div>
+    </div>
+    <div class="product-card product-sm">
+      <div class="product-badge">PLATFORM</div>
+      <h3>RoadWork</h3>
+      <p>
+        Deployment and operations platform. Push code to Gitea, deploy to self-hosted Workers,
+        monitor with sovereign observability. CI/CD pipelines that never leave your network.
+      </p>
+      <div class="product-stat">roadwork.dev &middot; PaaS on :3500</div>
+      <div class="product-url">&#8594; roadwork.dev</div>
+    </div>
+    <div class="product-card product-sm">
+      <div class="product-badge">GAMING</div>
+      <h3>RoadWorld</h3>
+      <p>
+        Pixel metaverse and digital spaces. 14-floor headquarters with agent-populated offices,
+        isometric cities, interactive environments. Virtual spaces that run on real hardware.
+      </p>
+      <div class="product-stat">roadworld.games &middot; 50 pixel assets</div>
+      <div class="product-url">&#8594; roadworld.games</div>
+    </div>
+    <div class="product-card product-sm">
+      <div class="product-badge">EDUCATION</div>
+      <h3>RoadCode</h3>
+      <p>
+        Learning platform and documentation hub. The Amundson Framework, English grammar as
+        programming, biology-to-compute mappings. Education without tuition walls.
+      </p>
+      <div class="product-stat">roadcode.dev &middot; 16 repos deployed</div>
+      <div class="product-url">&#8594; roadcode.dev</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     INFRASTRUCTURE
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="infrastructure">
+  <div class="section-label">// INFRASTRUCTURE</div>
+  <div class="section-title">The Sovereign Stack</div>
+  <div class="section-desc">
+    Five Raspberry Pis, two cloud droplets, a WireGuard mesh, and zero vendor lock-in.
+    Every service self-hosted. Every byte under our control.
+  </div>
+
+  <div class="node-grid">
+    <div class="node-card">
+      <div class="node-avatar">
+        A
+        <div class="node-ring"></div>
+      </div>
+      <div class="node-name">Alice</div>
+      <div class="node-role">Gateway &middot; Pi-hole &middot; PostgreSQL</div>
+      <div class="node-stat">
+        192.168.4.49<br>
+        Qdrant &middot; Redis &middot; nginx<br>
+        37 sites routed
+      </div>
+      <div class="node-status"><div class="node-dot"></div> Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar">
+        C
+        <div class="node-ring"></div>
+      </div>
+      <div class="node-name">Cecilia</div>
+      <div class="node-role">AI Compute &middot; MinIO &middot; Hailo-8</div>
+      <div class="node-stat">
+        192.168.4.96<br>
+        Ollama (16 models)<br>
+        MinIO (4 buckets)
+      </div>
+      <div class="node-status"><div class="node-dot off"></div> Offline</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar">
+        O
+        <div class="node-ring"></div>
+      </div>
+      <div class="node-name">Octavia</div>
+      <div class="node-role">Gitea &middot; Workers &middot; NATS</div>
+      <div class="node-stat">
+        192.168.4.101<br>
+        629 repos &middot; 8 orgs<br>
+        15 Workers &middot; PaaS
+      </div>
+      <div class="node-status"><div class="node-dot"></div> Online</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar">
+        R
+        <div class="node-ring"></div>
+      </div>
+      <div class="node-name">Aria</div>
+      <div class="node-role">Compute Node</div>
+      <div class="node-stat">
+        192.168.4.98<br>
+        Distributed tasks<br>
+        Hailo-8 accelerator
+      </div>
+      <div class="node-status"><div class="node-dot off"></div> Standby</div>
+    </div>
+    <div class="node-card">
+      <div class="node-avatar">
+        L
+        <div class="node-ring"></div>
+      </div>
+      <div class="node-name">Lucidia</div>
+      <div class="node-role">Web Apps &middot; DNS &middot; Ollama</div>
+      <div class="node-stat">
+        192.168.4.38<br>
+        334 web apps<br>
+        PowerDNS &middot; Actions
+      </div>
+      <div class="node-status"><div class="node-dot"></div> Online</div>
+    </div>
+  </div>
+
+  <div class="infra-secondary">
+    <div class="infra-card">
+      <h4>Gematria &mdash; Edge Node (NYC3)</h4>
+      <p>
+        DigitalOcean droplet running Caddy with automatic TLS for 18 domains. Ollama with 6 models.
+        PowerDNS as ns1. Internet traffic enters here and routes through WireGuard to the Pi fleet.
+        The front door to the sovereign network.
+      </p>
+    </div>
+    <div class="infra-card">
+      <h4>Anastasia &mdash; Backup Node (NYC1)</h4>
+      <p>
+        Secondary DigitalOcean droplet for redundancy and geographic distribution. Disaster recovery
+        target. Ensures the network survives any single point of failure. Because sovereignty means
+        resilience, not just ownership.
+      </p>
+    </div>
+  </div>
+
+  <div class="infra-stat-row">
+    <div class="infra-stat">
+      <div class="infra-stat-value">52</div>
+      <div class="infra-stat-label">TOPS AI Compute</div>
+    </div>
+    <div class="infra-stat">
+      <div class="infra-stat-value">151</div>
+      <div class="infra-stat-label">DNS Records</div>
+    </div>
+    <div class="infra-stat">
+      <div class="infra-stat-value">12/12</div>
+      <div class="infra-stat-label">WireGuard Links</div>
+    </div>
+    <div class="infra-stat">
+      <div class="infra-stat-value">91%</div>
+      <div class="infra-stat-label">Self-Hosted Traffic</div>
+    </div>
+  </div>
+
+  <!-- Sovereign Stack Table -->
+  <table class="stack-table">
+    <thead>
+      <tr>
+        <th>Service</th>
+        <th>Self-Hosted Solution</th>
+        <th>Replaces</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Git Hosting</td>
+        <td>Gitea (RoadCode) &mdash; Octavia</td>
+        <td>GitHub</td>
+      </tr>
+      <tr>
+        <td>AI Inference</td>
+        <td>Ollama + Hailo-8 &mdash; 4 nodes</td>
+        <td>OpenAI / Anthropic</td>
+      </tr>
+      <tr>
+        <td>Edge Compute</td>
+        <td>workerd &mdash; Octavia :9001-9015</td>
+        <td>Cloudflare Workers</td>
+      </tr>
+      <tr>
+        <td>Object Storage</td>
+        <td>MinIO (Curb) &mdash; Cecilia</td>
+        <td>AWS S3 / CF R2</td>
+      </tr>
+      <tr>
+        <td>DNS</td>
+        <td>PowerDNS &mdash; Lucidia + Gematria</td>
+        <td>Cloudflare DNS</td>
+      </tr>
+      <tr>
+        <td>PaaS</td>
+        <td>Deploy API &mdash; Octavia :3500</td>
+        <td>Railway / Heroku / Vercel</td>
+      </tr>
+      <tr>
+        <td>Database</td>
+        <td>PostgreSQL &mdash; 3 nodes</td>
+        <td>Cloudflare D1</td>
+      </tr>
+      <tr>
+        <td>Cache</td>
+        <td>Redis &mdash; Alice</td>
+        <td>Cloudflare KV</td>
+      </tr>
+      <tr>
+        <td>TLS Edge</td>
+        <td>Caddy + Let's Encrypt &mdash; Gematria</td>
+        <td>Cloudflare Proxy</td>
+      </tr>
+      <tr>
+        <td>VPN Mesh</td>
+        <td>WireGuard (TollBooth) &mdash; 12/12</td>
+        <td>Tailscale</td>
+      </tr>
+      <tr>
+        <td>Chat / Comms</td>
+        <td>RoundTrip &mdash; Alice + D1</td>
+        <td>Slack</td>
+      </tr>
+      <tr>
+        <td>CI/CD</td>
+        <td>Gitea Actions + act_runner</td>
+        <td>GitHub Actions</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CORPORATE
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="corporate">
+  <div class="section-label">// CORPORATE</div>
+  <div class="section-title">Corporate Information</div>
+  <div class="section-desc">
+    BlackRoad OS, Inc. is a Delaware C-Corporation incorporated via Stripe Atlas
+    on November 17, 2025.
+  </div>
+
+  <div class="corp-grid">
+    <div class="corp-card">
+      <div class="corp-card-label">Entity</div>
+      <div class="corp-card-value">Delaware C-Corp</div>
+      <div class="corp-card-detail">
+        Incorporated November 17, 2025<br>
+        via Stripe Atlas<br>
+        State of Delaware
+      </div>
+    </div>
+    <div class="corp-card">
+      <div class="corp-card-label">EIN</div>
+      <div class="corp-card-value" style="font-family: var(--jb);">41-2663817</div>
+      <div class="corp-card-detail">
+        Federal Employer Identification Number<br>
+        IRS Form CP 575 confirmed<br>
+        File #10405914
+      </div>
+    </div>
+    <div class="corp-card">
+      <div class="corp-card-label">Shares</div>
+      <div class="corp-card-value">10,000,000</div>
+      <div class="corp-card-detail">
+        Common shares authorized<br>
+        $0.00001 par value<br>
+        83(b) election filed
+      </div>
+    </div>
+  </div>
+
+  <div class="corp-detail-row">
+    <div class="corp-detail-card">
+      <h4>Leadership</h4>
+      <p>
+        <strong>Alexa Louise Amundson</strong> &mdash; Founder, CEO, Sole Director, Sole Shareholder.<br><br>
+        Single-founder structure. All board actions executed by sole incorporator. Certificate of
+        Incorporation, Bylaws, RSPA, CIIAA, Indemnification Agreement, and all formation documents
+        completed and filed.
+      </p>
+    </div>
+    <div class="corp-detail-card">
+      <h4>Registered Agent</h4>
+      <p>
+        <strong>Legalinc Corporate Services Inc.</strong><br><br>
+        Delaware File Number: 10405914<br>
+        Formation documents include: Certificate of Incorporation, Bylaws, Stock Certificates,
+        Board Consent Actions, SS-4 filing, Form 8821 authorization, and 83(b) election.
+      </p>
+    </div>
+  </div>
+
+  <!-- Company Timeline -->
+  <div class="timeline">
+    <div class="tl-node">
+      <div class="tl-dot major"></div>
+      <h4>Incorporation</h4>
+      <p>BlackRoad OS, Inc. incorporated as Delaware C-Corp via Stripe Atlas. All formation documents executed. EIN assigned.</p>
+      <div class="tl-date">November 17, 2025</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot minor"></div>
+      <h4>83(b) Election Filed</h4>
+      <p>Section 83(b) election filed with IRS within 30-day window. Stock purchase agreement executed for 10M common shares.</p>
+      <div class="tl-date">December 2025</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot minor"></div>
+      <h4>Infrastructure Buildout</h4>
+      <p>Full sovereign stack deployed: 5 Raspberry Pis, WireGuard mesh, Gitea with 239+ repos, self-hosted Workers, MinIO, PowerDNS, Ollama fleet.</p>
+      <div class="tl-date">Q4 2025 &mdash; Q1 2026</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot minor"></div>
+      <h4>Amundson Framework Published</h4>
+      <p>Mathematical framework G(n) = n^(n+1)/(n+1)^n formally proven with convergence constant A_G. 536 test cases validated across distributed compute.</p>
+      <div class="tl-date">Q1 2026</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot major"></div>
+      <h4>Product Platform Launch</h4>
+      <p>Seven product verticals operational. 28 live websites. 629+ repositories. 200 AI agents. 26 TOPS of on-premise inference. Full sovereignty achieved.</p>
+      <div class="tl-date">March 2026</div>
+    </div>
+    <div class="tl-node">
+      <div class="tl-dot minor"></div>
+      <h4>BlackBox Protocol</h4>
+      <p>Multi-network mesh protocol: Tor hidden services on 3 Pis, IPFS, BitTorrent DHT discovery. Ternary routing with Amundson 1/(2e) latency floor.</p>
+      <div class="tl-date">March 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     PRESS / CONTACT
+     ═══════════════════════════════════════════════════════════════════ -->
+<section class="section fade-section" id="contact">
+  <div class="section-label">// PRESS &amp; CONTACT</div>
+  <div class="section-title">Get in Touch</div>
+  <div class="section-desc">
+    BlackRoad OS, Inc. is a solo-founded company building sovereign infrastructure.
+    For press inquiries, partnership discussions, or general questions.
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h4>Email</h4>
+      <p>
+        <a href="mailto:alexa@blackroad.io">alexa@blackroad.io</a><br><br>
+        For press, partnerships, and corporate inquiries. Response within 24 hours.
+      </p>
+    </div>
+    <div class="contact-card">
+      <h4>GitHub</h4>
+      <p>
+        <a href="https://github.com/BlackRoad-OS-Inc" target="_blank" rel="noopener">BlackRoad-OS-Inc</a><br><br>
+        Primary corporate organization. Public repositories, product codebases, and documentation.
+      </p>
+    </div>
+    <div class="contact-card">
+      <h4>Domains</h4>
+      <p>
+        <a href="https://blackroad.io" target="_blank" rel="noopener">blackroad.io</a><br><br>
+        Primary domain. 20 root custom domains across the BlackRoad network.
+      </p>
+    </div>
+  </div>
+
+  <div style="margin-top: 48px;">
+    <div class="section-label">// ORGANIZATIONS</div>
+    <p style="font-size: 14px; color: var(--white); opacity: 0.35; margin-bottom: 20px;">
+      17 GitHub organizations spanning the full product and infrastructure surface.
+    </p>
+    <div class="org-pills">
+      <a class="org-pill" href="https://github.com/BlackRoad-OS-Inc" target="_blank" rel="noopener">BlackRoad-OS-Inc</a>
+      <a class="org-pill" href="https://github.com/BlackRoad-AI" target="_blank" rel="noopener">BlackRoad-AI</a>
+      <a class="org-pill" href="https://github.com/blackboxprogramming" target="_blank" rel="noopener">blackboxprogramming</a>
+      <a class="org-pill" href="https://github.com/lucidia-app" target="_blank" rel="noopener">lucidia-app</a>
+      <a class="org-pill" href="https://github.com/roadcode-dev" target="_blank" rel="noopener">roadcode-dev</a>
+      <a class="org-pill" href="https://github.com/roadglitch" target="_blank" rel="noopener">roadglitch</a>
+      <a class="org-pill" href="https://github.com/roadworld-games" target="_blank" rel="noopener">roadworld-games</a>
+      <a class="org-pill" href="https://github.com/backroad-dev" target="_blank" rel="noopener">backroad-dev</a>
+      <a class="org-pill" href="https://github.com/carpool-mesh" target="_blank" rel="noopener">carpool-mesh</a>
+      <a class="org-pill" href="https://github.com/roadwork-dev" target="_blank" rel="noopener">roadwork-dev</a>
+      <a class="org-pill" href="https://github.com/roadview-search" target="_blank" rel="noopener">roadview-search</a>
+    </div>
+  </div>
+
+  <div style="margin-top: 48px;">
+    <div class="section-label">// DOMAINS</div>
+    <p style="font-size: 14px; color: var(--white); opacity: 0.35; margin-bottom: 20px;">
+      20 root custom domains. 151 DNS records. 138 serving from sovereign infrastructure.
+    </p>
+    <div class="org-pills">
+      <span class="org-pill" style="opacity: 0.5;">blackroad.io</span>
+      <span class="org-pill" style="opacity: 0.5;">blackroad.company</span>
+      <span class="org-pill">blackroadai.com</span>
+      <span class="org-pill">lucidia.app</span>
+      <span class="org-pill">roadcode.dev</span>
+      <span class="org-pill">roadglitch.com</span>
+      <span class="org-pill">roadworld.games</span>
+      <span class="org-pill">backroad.dev</span>
+      <span class="org-pill">roadwork.dev</span>
+      <span class="org-pill">roadview.io</span>
+      <span class="org-pill">carpool.dev</span>
+      <span class="org-pill">pavetomorrow.com</span>
+      <span class="org-pill">roadhella.com</span>
+      <span class="org-pill">pixelhq.io</span>
+      <span class="org-pill">tollbooth.dev</span>
+      <span class="org-pill">roundtrip.dev</span>
+      <span class="org-pill">roadchain.io</span>
+      <span class="org-pill">backroad.io</span>
+      <span class="org-pill">roadnet.dev</span>
+      <span class="org-pill">blackroad.dev</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">BlackRoad OS, Inc.</div>
+        <div class="footer-brand-desc">
+          Sovereign infrastructure company. Delaware C-Corp.
+          Built from scratch by a solo founder who owns every layer of the stack.
+        </div>
+        <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+      </div>
+      <div class="footer-col">
+        <h5>Products</h5>
+        <a href="#products">Lucidia</a>
+        <a href="#products">BackRoad</a>
+        <a href="#products">RoadGlitch</a>
+        <a href="#products">CarPool</a>
+        <a href="#products">RoadView</a>
+        <a href="#products">RoadWork</a>
+        <a href="#products">RoadWorld</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#about">About</a>
+        <a href="#vision">Vision</a>
+        <a href="#corporate">Corporate</a>
+        <a href="#infrastructure">Infrastructure</a>
+        <a href="#contact">Press</a>
+      </div>
+      <div class="footer-col">
+        <h5>Infrastructure</h5>
+        <a href="#infrastructure">Pi Fleet</a>
+        <a href="#infrastructure">Sovereign Stack</a>
+        <a href="#infrastructure">WireGuard Mesh</a>
+        <a href="#infrastructure">Edge Nodes</a>
+      </div>
+      <div class="footer-col">
+        <h5>Connect</h5>
+        <a href="mailto:alexa@blackroad.io">Email</a>
+        <a href="https://github.com/BlackRoad-OS-Inc" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://blackroad.io" target="_blank" rel="noopener">blackroad.io</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved. Delaware C-Corp. EIN 41-2663817.</div>
+      <div class="footer-legal">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">License</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="footer-road">
+  REMEMBER THE ROAD. PAVE TOMORROW.
+</div>
+
+<!-- Final gradient bar -->
+<div style="height: 3px; background: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF); background-size: 200% 100%; animation: gradShift 4s linear infinite;"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+  'use strict';
+
+  // ─── Nav scroll effect ──────────────────────────────────────────
+  const nav = document.getElementById('nav');
+  let lastScroll = 0;
+
+  window.addEventListener('scroll', function() {
+    const scrollY = window.scrollY;
+    if (scrollY > 40) {
+      nav.classList.add('scrolled');
+    } else {
+      nav.classList.remove('scrolled');
+    }
+    lastScroll = scrollY;
+  }, { passive: true });
+
+  // ─── Intersection Observer for fade-in sections ─────────────────
+  const fadeSections = document.querySelectorAll('.fade-section');
+
+  const fadeObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        fadeObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.08,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  fadeSections.forEach(function(section) {
+    fadeObserver.observe(section);
+  });
+
+  // ─── Counter animation ──────────────────────────────────────────
+  const counters = document.querySelectorAll('[data-count]');
+  let countersAnimated = false;
+
+  const counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && !countersAnimated) {
+        countersAnimated = true;
+        animateCounters();
+        counterObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  counters.forEach(function(counter) {
+    counterObserver.observe(counter);
+  });
+
+  function animateCounters() {
+    counters.forEach(function(counter, index) {
+      const target = parseInt(counter.getAttribute('data-count'));
+      const duration = 1200;
+      const startTime = performance.now() + (index * 80);
+
+      function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        if (elapsed < 0) {
+          requestAnimationFrame(update);
+          return;
+        }
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(target * eased);
+
+        if (target >= 100) {
+          counter.textContent = current.toLocaleString();
+        } else {
+          counter.textContent = current;
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          // Ensure final value is exact
+          if (counter.getAttribute('data-count') === '52') {
+            counter.textContent = '52';
+          } else {
+            counter.textContent = target.toLocaleString();
+          }
+        }
+      }
+
+      requestAnimationFrame(update);
+    });
+  }
+
+  // ─── Smooth scroll for nav links ───────────────────────────────
+  document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        const navHeight = 60;
+        const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+        window.scrollTo({
+          top: targetPosition,
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+
+  // ─── Product card hover gradient shift ─────────────────────────
+  const productCards = document.querySelectorAll('.product-card');
+  productCards.forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(255,255,255,0.015)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.background = 'transparent';
+    });
+  });
+
+  // ─── Node card subtle animation on hover ───────────────────────
+  const nodeCards = document.querySelectorAll('.node-card');
+  nodeCards.forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(255,255,255,0.015)';
+      this.style.transform = 'translateY(-2px)';
+      this.style.transition = 'all 0.2s ease';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.background = 'transparent';
+      this.style.transform = 'translateY(0)';
+    });
+  });
+
+  // ─── Org pill hover effects ────────────────────────────────────
+  const orgPills = document.querySelectorAll('.org-pill');
+  orgPills.forEach(function(pill) {
+    pill.addEventListener('mouseenter', function() {
+      this.style.borderColor = '#333';
+      this.style.background = 'rgba(255,255,255,0.03)';
+    });
+    pill.addEventListener('mouseleave', function() {
+      this.style.borderColor = '';
+      this.style.background = 'transparent';
+    });
+  });
+
+  // ─── Stack table row hover ─────────────────────────────────────
+  const stackRows = document.querySelectorAll('.stack-table tbody tr');
+  stackRows.forEach(function(row) {
+    row.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(255,255,255,0.02)';
+    });
+    row.addEventListener('mouseleave', function() {
+      this.style.background = 'transparent';
+    });
+  });
+
+  // ─── Parallax orbs ─────────────────────────────────────────────
+  const orbs = document.querySelectorAll('.orb');
+
+  window.addEventListener('scroll', function() {
+    const scrollY = window.scrollY;
+    orbs.forEach(function(orb, i) {
+      const speed = 0.03 + (i * 0.01);
+      orb.style.transform = 'translateY(' + (scrollY * speed) + 'px)';
+    });
+  }, { passive: true });
+
+  // ─── Vision card stagger animation ─────────────────────────────
+  const visionCards = document.querySelectorAll('.vision-card');
+  const visionObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const cards = entry.target.parentElement.querySelectorAll('.vision-card');
+        cards.forEach(function(card, i) {
+          setTimeout(function() {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, i * 100);
+        });
+        visionObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  visionCards.forEach(function(card) {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(16px)';
+    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    visionObserver.observe(card);
+  });
+
+  // ─── Timeline node stagger ─────────────────────────────────────
+  const tlNodes = document.querySelectorAll('.tl-node');
+  const tlObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateX(0)';
+        tlObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  tlNodes.forEach(function(node, i) {
+    node.style.opacity = '0';
+    node.style.transform = 'translateX(-16px)';
+    node.style.transition = 'opacity 0.5s ease ' + (i * 0.08) + 's, transform 0.5s ease ' + (i * 0.08) + 's';
+    tlObserver.observe(node);
+  });
+
+  // ─── Corp card stagger ─────────────────────────────────────────
+  const corpCards = document.querySelectorAll('.corp-card');
+  const corpObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const siblings = entry.target.parentElement.querySelectorAll('.corp-card');
+        siblings.forEach(function(card, i) {
+          setTimeout(function() {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, i * 120);
+        });
+        corpObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  corpCards.forEach(function(card) {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(12px)';
+    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    corpObserver.observe(card);
+  });
+
+  // ─── Metric cell stagger ───────────────────────────────────────
+  const metricCells = document.querySelectorAll('.metric-cell');
+  const metricObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const cells = document.querySelectorAll('.metric-cell');
+        cells.forEach(function(cell, i) {
+          setTimeout(function() {
+            cell.style.opacity = '1';
+            cell.style.transform = 'translateY(0)';
+          }, i * 80);
+        });
+        metricObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+
+  metricCells.forEach(function(cell) {
+    cell.style.opacity = '0';
+    cell.style.transform = 'translateY(10px)';
+    cell.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    metricObserver.observe(cell);
+  });
+
+  // ─── Contact card animations ───────────────────────────────────
+  const contactCards = document.querySelectorAll('.contact-card');
+  contactCards.forEach(function(card) {
+    card.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(255,255,255,0.015)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.background = 'transparent';
+    });
+  });
+
+  // ─── Keyboard navigation ───────────────────────────────────────
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+
+  // ─── Console signature ─────────────────────────────────────────
+  console.log('%c BlackRoad OS, Inc. ', 'background: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA); color: white; font-size: 16px; padding: 8px 16px; border-radius: 4px; font-family: "Space Grotesk", sans-serif;');
+  console.log('%c Remember the Road. Pave Tomorrow. ', 'color: #666; font-size: 11px; font-family: "JetBrains Mono", monospace;');
+  console.log('%c Delaware C-Corp | EIN 41-2663817 | Founded Nov 17, 2025 ', 'color: #444; font-size: 10px;');
+
+})();
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

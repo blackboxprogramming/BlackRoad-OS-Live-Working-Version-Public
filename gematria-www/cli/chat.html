@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>BlackRoad OS -- Voice Chat</title>
+<meta name="description" content="Voice-first chat interface for BlackRoad OS. Talk to your sovereign AI agents.">
+<meta property="og:title" content="BlackRoad OS -- Voice Chat">
+<meta property="og:description" content="Voice-first sovereign AI chat. Talk to 60 agents across the BlackRoad fleet.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chat.blackroad.io">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BlackRoad OS -- Voice Chat">
+<meta name="twitter:description" content="Voice-first sovereign AI chat interface.">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BlackRoad OS Voice Chat","applicationCategory":"CommunicationApplication","operatingSystem":"Web","description":"Voice-first chat interface for BlackRoad OS sovereign AI agents.","creator":{"@type":"Organization","name":"BlackRoad OS, Inc."}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #000000;
+  --chat-bg: #050505;
+  --user-bubble: #0a0a0a;
+  --agent-bubble: #0d0d0d;
+  --text: #f5f5f5;
+  --muted: #737373;
+  --pink: #FF1D6C;
+  --amber: #F5A623;
+  --blue: #2979FF;
+  --violet: #9C27B0;
+  --orange: #FF6B2B;
+  --cyan: #00D4FF;
+  --red: #FF2255;
+  --green: #00E676;
+  --gradient: linear-gradient(135deg, #FF6B2B, #FF1D6C, #9C27B0, #2979FF, #00D4FF);
+  --gradient-h: linear-gradient(90deg, #FF6B2B, #FF1D6C, #9C27B0, #2979FF, #00D4FF);
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, sans-serif;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --- GRADIENT TOP BAR --- */
+.top-bar {
+  height: 4px;
+  background: var(--gradient-h);
+  background-size: 200% 100%;
+  animation: gradientShift 4s ease infinite;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* --- HEADER --- */
+.header {
+  position: fixed;
+  top: 4px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 90;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  background: var(--gradient-h);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.agent-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255,255,255,0.08);
+}
+
+.agent-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+  animation: dotPulse 2s ease infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.agent-name-header {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+
+.settings-btn.active {
+  color: var(--cyan);
+}
+
+.settings-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* --- AGENT SELECTOR --- */
+.agent-selector-wrapper {
+  position: relative;
+}
+
+.agent-selector {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 6px 28px 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+  max-width: 160px;
+}
+
+.agent-selector:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+}
+
+.agent-selector:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.15);
+}
+
+.agent-selector option {
+  background: #111;
+  color: var(--text);
+}
+
+.agent-selector optgroup {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.selector-arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted);
+}
+
+/* --- CHAT AREA --- */
+.chat-area {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 80px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  background: var(--chat-bg);
+  scroll-behavior: smooth;
+}
+
+.chat-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-area::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 2px;
+}
+
+.messages {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* --- EMPTY STATE --- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 40px 20px;
+  animation: fadeInUp 0.6s ease;
+}
+
+.empty-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 42px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  letter-spacing: -1px;
+}
+
+.empty-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.empty-hint {
+  font-size: 13px;
+  color: rgba(115, 115, 115, 0.6);
+  margin-bottom: 32px;
+}
+
+.suggestion-chips {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.chip {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.chip:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
+}
+
+/* --- MESSAGE BUBBLES --- */
+.message {
+  display: flex;
+  animation: fadeInUp 0.3s ease;
+  max-width: 85%;
+}
+
+.message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message.agent {
+  align-self: flex-start;
+}
+
+.bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  line-height: 1.55;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message.user .bubble {
+  background: var(--user-bubble);
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.message.user .bubble::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,107,43,0.3), rgba(0,212,255,0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.message.agent .bubble {
+  background: var(--agent-bubble);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.agent-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.agent-label-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.agent-label-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.bubble-text {
+  color: var(--text);
+}
+
+.bubble-time {
+  font-size: 10px;
+  color: rgba(115, 115, 115, 0.5);
+  margin-top: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* --- TYPING INDICATOR --- */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 16px 20px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: typingBounce 1.4s ease infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+
+/* --- INTERIM TRANSCRIPTION --- */
+.interim-text {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: rgba(245, 245, 245, 0.35);
+  font-style: italic;
+  max-width: 600px;
+  text-align: center;
+  padding: 8px 16px;
+  background: rgba(0,0,0,0.6);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  z-index: 80;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+/* --- BOTTOM BAR --- */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  z-index: 90;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 720px;
+}
+
+.text-input {
+  flex: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.text-input::placeholder {
+  color: rgba(115, 115, 115, 0.6);
+}
+
+.text-input:focus {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+}
+
+.send-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.send-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+}
+
+.send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- MIC BUTTON --- */
+.mic-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+.mic-btn::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #FF6B2B, #00D4FF);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: all 0.3s;
+}
+
+.mic-btn:hover::before {
+  background: linear-gradient(135deg, #FF6B2B, #FF1D6C, #00D4FF);
+}
+
+.mic-btn svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text);
+  z-index: 1;
+  transition: color 0.3s;
+}
+
+.mic-btn.listening {
+  animation: micPulse 1.5s ease infinite;
+}
+
+.mic-btn.listening::before {
+  background: var(--red);
+  box-shadow: 0 0 20px rgba(255, 34, 85, 0.5);
+}
+
+.mic-btn.listening svg {
+  color: var(--red);
+}
+
+@keyframes micPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+.mic-btn.listening::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 34, 85, 0.3);
+  animation: micRing 1.5s ease infinite;
+}
+
+@keyframes micRing {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* --- WAVEFORM VISUALIZER --- */
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  position: absolute;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.waveform.active {
+  opacity: 1;
+}
+
+.wave-bar {
+  width: 4px;
+  border-radius: 2px;
+  height: 8px;
+  transition: height 0.1s;
+}
+
+.wave-bar:nth-child(1) {
+  background: #FF6B2B;
+  animation: wave1 0.8s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) {
+  background: #FF1D6C;
+  animation: wave2 0.6s ease-in-out infinite;
+}
+.wave-bar:nth-child(3) {
+  background: #9C27B0;
+  animation: wave3 0.7s ease-in-out infinite;
+}
+.wave-bar:nth-child(4) {
+  background: #2979FF;
+  animation: wave4 0.5s ease-in-out infinite;
+}
+.wave-bar:nth-child(5) {
+  background: #00D4FF;
+  animation: wave5 0.9s ease-in-out infinite;
+}
+
+@keyframes wave1 { 0%, 100% { height: 6px; } 50% { height: 24px; } }
+@keyframes wave2 { 0%, 100% { height: 10px; } 50% { height: 28px; } }
+@keyframes wave3 { 0%, 100% { height: 14px; } 50% { height: 20px; } }
+@keyframes wave4 { 0%, 100% { height: 8px; } 50% { height: 26px; } }
+@keyframes wave5 { 0%, 100% { height: 12px; } 50% { height: 22px; } }
+
+/* --- SPEAKING INDICATOR --- */
+.speaking-indicator {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0,0,0,0.7);
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--cyan);
+  z-index: 85;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.speaking-indicator.active {
+  opacity: 1;
+}
+
+.speaker-icon {
+  animation: speakerPulse 1s ease infinite;
+}
+
+@keyframes speakerPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* --- SPACEBAR HINT --- */
+.spacebar-hint {
+  position: fixed;
+  bottom: 84px;
+  right: 20px;
+  font-size: 11px;
+  color: rgba(115, 115, 115, 0.4);
+  font-family: 'JetBrains Mono', monospace;
+  z-index: 80;
+  pointer-events: none;
+}
+
+.spacebar-hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 10px;
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- MOBILE --- */
+@media (max-width: 640px) {
+  .header { padding: 0 12px; }
+  .logo { font-size: 17px; }
+  .agent-info { display: none; }
+  .chat-area { padding: 12px; }
+  .empty-logo { font-size: 32px; }
+  .empty-subtitle { font-size: 15px; }
+  .suggestion-chips { gap: 8px; }
+  .chip { font-size: 12px; padding: 8px 14px; }
+  .mic-btn { width: 56px; height: 56px; }
+  .text-input { font-size: 16px; padding: 10px 14px; }
+  .spacebar-hint { display: none; }
+  .bottom-bar { height: 72px; }
+  .chat-area { bottom: 72px; }
+}
+
+/* --- SCROLLBAR FOR DARK --- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.08) transparent;
+}
+</style>
+</head>
+<body>
+
+<!-- Gradient top bar -->
+<div class="top-bar"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">BlackRoad</div>
+    <div class="agent-info">
+      <div class="agent-dot" id="agentDot"></div>
+      <div class="agent-name-header" id="agentNameHeader">Road</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="agent-selector-wrapper">
+      <select class="agent-selector" id="agentSelector">
+        <optgroup label="Fleet">
+          <option value="alice">Alice</option>
+          <option value="cecilia">Cecilia</option>
+          <option value="octavia">Octavia</option>
+          <option value="lucidia">Lucidia</option>
+          <option value="aria">Aria</option>
+        </optgroup>
+        <optgroup label="AI">
+          <option value="road" selected>Road</option>
+          <option value="alexandria">Alexandria</option>
+          <option value="cipher">Cipher</option>
+        </optgroup>
+        <optgroup label="IoT">
+          <option value="eero">Eero</option>
+          <option value="phantom">Phantom</option>
+          <option value="portia">Portia</option>
+        </optgroup>
+      </select>
+      <svg class="selector-arrow" width="10" height="6" viewBox="0 0 10 6" fill="none">
+        <path d="M1 1L5 5L9 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <button class="settings-btn active" id="voiceToggle" title="Toggle voice output">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- Chat area -->
+<div class="chat-area" id="chatArea">
+  <div class="messages" id="messages">
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-logo">BlackRoad OS</div>
+      <div class="empty-subtitle">Talk to your agents</div>
+      <div class="empty-hint">Press the mic or type below</div>
+      <div class="suggestion-chips">
+        <button class="chip" onclick="sendSuggestion('What is BlackRoad?')">What is BlackRoad?</button>
+        <button class="chip" onclick="sendSuggestion('Show fleet status')">Show fleet status</button>
+        <button class="chip" onclick="sendSuggestion('Who is Alexa Amundson?')">Who is Alexa Amundson?</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Waveform -->
+<div class="waveform" id="waveform">
+  <div class="wave-bar"></div>
+  <div class="wave-bar"></div>
+  <div class="wave-bar"></div>
+  <div class="wave-bar"></div>
+  <div class="wave-bar"></div>
+</div>
+
+<!-- Interim text -->
+<div class="interim-text" id="interimText" style="opacity:0"></div>
+
+<!-- Speaking indicator -->
+<div class="speaking-indicator" id="speakingIndicator">
+  <svg class="speaker-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  </svg>
+  Speaking...
+</div>
+
+<!-- Spacebar hint -->
+<div class="spacebar-hint">
+  <kbd>space</kbd> to talk
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+  <div class="input-row">
+    <input type="text" class="text-input" id="textInput" placeholder="Type a message..." autocomplete="off">
+    <button class="mic-btn" id="micBtn" title="Hold spacebar or click to talk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="1" width="6" height="11" rx="3"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+    <button class="send-btn" id="sendBtn" title="Send message">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // --- State ---
+  let isListening = false;
+  let isSpeaking = false;
+  let voiceEnabled = true;
+  let currentAgent = 'road';
+  let recognition = null;
+  let chatHistory = [];
+
+  // --- DOM refs ---
+  const chatArea = document.getElementById('chatArea');
+  const messagesEl = document.getElementById('messages');
+  const emptyState = document.getElementById('emptyState');
+  const textInput = document.getElementById('textInput');
+  const micBtn = document.getElementById('micBtn');
+  const sendBtn = document.getElementById('sendBtn');
+  const agentSelector = document.getElementById('agentSelector');
+  const agentNameHeader = document.getElementById('agentNameHeader');
+  const agentDot = document.getElementById('agentDot');
+  const waveform = document.getElementById('waveform');
+  const interimText = document.getElementById('interimText');
+  const speakingIndicator = document.getElementById('speakingIndicator');
+  const voiceToggle = document.getElementById('voiceToggle');
+
+  // --- Agent colors ---
+  const agentColors = {
+    alice: '#00E676', cecilia: '#FF6B2B', octavia: '#9C27B0',
+    lucidia: '#2979FF', aria: '#FF1D6C', road: '#00D4FF',
+    alexandria: '#F5A623', cipher: '#FF2255', eero: '#4CAF50',
+    phantom: '#7C4DFF', portia: '#FF9100'
+  };
+
+  // --- Load history from localStorage ---
+  function loadHistory() {
+    try {
+      const saved = localStorage.getItem('br-voice-chat-history');
+      if (saved) {
+        chatHistory = JSON.parse(saved);
+        if (chatHistory.length > 0) {
+          emptyState.style.display = 'none';
+          chatHistory.forEach(function(msg) {
+            renderMessage(msg, false);
+          });
+          scrollToBottom();
+        }
+      }
+    } catch (e) {}
+  }
+
+  function saveHistory() {
+    try {
+      const trimmed = chatHistory.slice(-50);
+      localStorage.setItem('br-voice-chat-history', JSON.stringify(trimmed));
+    } catch (e) {}
+  }
+
+  // --- Render message ---
+  function renderMessage(msg, animate) {
+    var div = document.createElement('div');
+    div.className = 'message ' + msg.role;
+    if (animate !== false) div.style.animation = 'fadeInUp 0.3s ease';
+
+    var bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    if (msg.role === 'agent') {
+      var label = document.createElement('div');
+      label.className = 'agent-label';
+      var dot = document.createElement('div');
+      dot.className = 'agent-label-dot';
+      dot.style.background = agentColors[msg.agent] || '#00D4FF';
+      var name = document.createElement('span');
+      name.className = 'agent-label-name';
+      name.textContent = msg.agent || 'Road';
+      label.appendChild(dot);
+      label.appendChild(name);
+      bubble.appendChild(label);
+    }
+
+    var text = document.createElement('div');
+    text.className = 'bubble-text';
+    if (animate !== false && msg.role === 'agent') {
+      typeText(text, msg.text);
+    } else {
+      text.textContent = msg.text;
+    }
+    bubble.appendChild(text);
+
+    var time = document.createElement('div');
+    time.className = 'bubble-time';
+    time.textContent = msg.time || formatTime(new Date());
+    bubble.appendChild(time);
+
+    div.appendChild(bubble);
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+
+  function typeText(el, str) {
+    var i = 0;
+    var interval = setInterval(function() {
+      if (i < str.length) {
+        el.textContent += str[i];
+        i++;
+        scrollToBottom();
+      } else {
+        clearInterval(interval);
+      }
+    }, 12);
+  }
+
+  function formatTime(d) {
+    var h = d.getHours();
+    var m = d.getMinutes();
+    var ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+  }
+
+  function scrollToBottom() {
+    requestAnimationFrame(function() {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+  }
+
+  // --- Typing indicator ---
+  function showTyping() {
+    var div = document.createElement('div');
+    div.className = 'message agent';
+    div.id = 'typingMsg';
+
+    var indicator = document.createElement('div');
+    indicator.className = 'typing-indicator';
+    for (var i = 0; i < 3; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'typing-dot';
+      indicator.appendChild(dot);
+    }
+    var bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    var label = document.createElement('div');
+    label.className = 'agent-label';
+    var ldot = document.createElement('div');
+    ldot.className = 'agent-label-dot';
+    ldot.style.background = agentColors[currentAgent] || '#00D4FF';
+    var lname = document.createElement('span');
+    lname.className = 'agent-label-name';
+    lname.textContent = currentAgent;
+    label.appendChild(ldot);
+    label.appendChild(lname);
+    bubble.appendChild(label);
+    bubble.appendChild(indicator);
+    div.appendChild(bubble);
+    messagesEl.appendChild(div);
+    scrollToBottom();
+  }
+
+  function hideTyping() {
+    var el = document.getElementById('typingMsg');
+    if (el) el.remove();
+  }
+
+  // --- Send message ---
+  function sendMessage(text) {
+    if (!text || !text.trim()) return;
+    text = text.trim();
+
+    emptyState.style.display = 'none';
+
+    var userMsg = { role: 'user', text: text, time: formatTime(new Date()) };
+    chatHistory.push(userMsg);
+    renderMessage(userMsg);
+    saveHistory();
+
+    textInput.value = '';
+    showTyping();
+
+    var controller = new AbortController();
+    var timeout = setTimeout(function() { controller.abort(); }, 15000);
+
+    fetch('https://roundtrip.blackroad.io/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: currentAgent, message: text }),
+      signal: controller.signal
+    })
+    .then(function(res) {
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(data) {
+      hideTyping();
+      var responseText = data.response || data.message || 'No response.';
+      var agentName = data.agent || currentAgent;
+      var agentMsg = {
+        role: 'agent',
+        text: responseText,
+        agent: agentName.toLowerCase(),
+        time: formatTime(new Date())
+      };
+      chatHistory.push(agentMsg);
+      renderMessage(agentMsg);
+      saveHistory();
+
+      if (voiceEnabled) speak(responseText);
+    })
+    .catch(function(err) {
+      clearTimeout(timeout);
+      hideTyping();
+      var errText = err.name === 'AbortError' ? 'Request timed out. Try again.' : 'Connection error: ' + err.message;
+      var errMsg = { role: 'agent', text: errText, agent: currentAgent, time: formatTime(new Date()) };
+      chatHistory.push(errMsg);
+      renderMessage(errMsg);
+      saveHistory();
+    });
+  }
+
+  function sendSuggestion(text) {
+    sendMessage(text);
+  }
+  window.sendSuggestion = sendSuggestion;
+
+  // --- Speech Recognition ---
+  var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+
+    recognition.onresult = function(event) {
+      var interim = '';
+      var final = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += transcript;
+        } else {
+          interim += transcript;
+        }
+      }
+
+      if (interim) {
+        interimText.textContent = interim;
+        interimText.style.opacity = '1';
+      }
+
+      if (final) {
+        interimText.style.opacity = '0';
+        stopListening();
+        sendMessage(final);
+      }
+    };
+
+    recognition.onerror = function(event) {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        console.error('Speech error:', event.error);
+      }
+      stopListening();
+    };
+
+    recognition.onend = function() {
+      if (isListening) {
+        // Restart if still in listening mode (continuous)
+        try { recognition.start(); } catch(e) {}
+      }
+    };
+  }
+
+  function startListening() {
+    if (!recognition) return;
+    if (isListening) return;
+    isListening = true;
+    micBtn.classList.add('listening');
+    waveform.classList.add('active');
+    try { recognition.start(); } catch(e) {}
+  }
+
+  function stopListening() {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    waveform.classList.remove('active');
+    interimText.style.opacity = '0';
+    if (recognition) {
+      try { recognition.stop(); } catch(e) {}
+    }
+  }
+
+  function toggleListening() {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }
+
+  // --- Speech Synthesis ---
+  function speak(text) {
+    if (!voiceEnabled) return;
+    if (!window.speechSynthesis) return;
+
+    window.speechSynthesis.cancel();
+
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 0.9;
+
+    // Pick a good voice if available
+    var voices = window.speechSynthesis.getVoices();
+    var preferred = voices.find(function(v) {
+      return v.name.indexOf('Samantha') !== -1 ||
+             v.name.indexOf('Google') !== -1 ||
+             v.name.indexOf('Daniel') !== -1;
+    });
+    if (preferred) utterance.voice = preferred;
+
+    utterance.onstart = function() {
+      isSpeaking = true;
+      speakingIndicator.classList.add('active');
+    };
+
+    utterance.onend = function() {
+      isSpeaking = false;
+      speakingIndicator.classList.remove('active');
+    };
+
+    utterance.onerror = function() {
+      isSpeaking = false;
+      speakingIndicator.classList.remove('active');
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // Preload voices
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function() {
+      window.speechSynthesis.getVoices();
+    };
+  }
+
+  // --- Event listeners ---
+  micBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    toggleListening();
+  });
+
+  sendBtn.addEventListener('click', function() {
+    sendMessage(textInput.value);
+  });
+
+  textInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(textInput.value);
+    }
+  });
+
+  // Spacebar to toggle mic (only when not focused on input)
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && document.activeElement !== textInput) {
+      e.preventDefault();
+      toggleListening();
+    }
+  });
+
+  agentSelector.addEventListener('change', function() {
+    currentAgent = agentSelector.value;
+    var display = currentAgent.charAt(0).toUpperCase() + currentAgent.slice(1);
+    agentNameHeader.textContent = display;
+    agentDot.style.background = agentColors[currentAgent] || '#00D4FF';
+    agentDot.style.boxShadow = '0 0 8px ' + (agentColors[currentAgent] || '#00D4FF') + '80';
+  });
+
+  voiceToggle.addEventListener('click', function() {
+    voiceEnabled = !voiceEnabled;
+    voiceToggle.classList.toggle('active', voiceEnabled);
+    if (!voiceEnabled && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      isSpeaking = false;
+      speakingIndicator.classList.remove('active');
+    }
+  });
+
+  // --- Fetch agents from API and populate selector ---
+  fetch('https://roundtrip.blackroad.io/api/agents')
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      var agents = data.agents || data;
+      if (!Array.isArray(agents) || agents.length === 0) return;
+
+      // Clear existing options
+      agentSelector.innerHTML = '';
+
+      // Group agents or list flat
+      var group = document.createElement('optgroup');
+      group.label = 'All Agents';
+      agents.forEach(function(a) {
+        var name = typeof a === 'string' ? a : (a.name || a.id || '');
+        if (!name) return;
+        var opt = document.createElement('option');
+        opt.value = name.toLowerCase();
+        opt.textContent = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+        if (name.toLowerCase() === 'road') opt.selected = true;
+        group.appendChild(opt);
+      });
+      agentSelector.appendChild(group);
+    })
+    .catch(function() {
+      // Keep default options on error
+    });
+
+  // --- Init ---
+  loadHistory();
+
+  // Set initial agent color
+  agentDot.style.background = agentColors[currentAgent];
+  agentDot.style.boxShadow = '0 0 8px ' + agentColors[currentAgent] + '80';
+})();
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum Store — Hardware for the Sovereign Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sg); line-height: 1.6; overflow-x: hidden; }
+.gradient-bar { height: 4px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+nav {
+  position: fixed; top: 4px; left: 0; right: 0; z-index: 999;
+  background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
+}
+.logo { font-family: var(--sg); font-weight: 700; font-size: 1.25rem; }
+.logo span { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.875rem; font-family: var(--jb); transition: color 0.3s; }
+.nav-links a:hover { color: var(--text); }
+.section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.25; margin-bottom: 1rem; }
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-family: var(--sg); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
+h2 { font-family: var(--sg); font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+h3 { font-family: var(--sg); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 68px; position: relative; }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero .subtitle { font-size: clamp(1.1rem, 2.5vw, 1.35rem); color: var(--text-dim); max-width: 640px; margin-bottom: 2.5rem; }
+.hero-gradient {
+  position: absolute; top: 30%; right: 5%; width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,107,43,0.08) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.btn-primary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: var(--g); color: #fff; text-decoration: none; font-weight: 600;
+  font-family: var(--sg); font-size: 1rem; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,43,0.3); }
+.btn-secondary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: transparent; color: var(--text); text-decoration: none;
+  font-weight: 500; font-family: var(--sg); font-size: 1rem;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color 0.3s;
+}
+.btn-secondary:hover { border-color: #444; }
+.btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); transition: border-color 0.3s; }
+.card:hover { border-color: #333; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2rem; margin: 3rem 0; }
+.stat { text-align: center; }
+.stat .number { font-family: var(--sg); font-size: 2.5rem; font-weight: 700; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat .label { font-family: var(--jb); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+.tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 1rem; }
+.divider { height: 1px; background: var(--border); margin: 0 auto; max-width: 1200px; }
+.feature-list { list-style: none; margin: 1rem 0; }
+.feature-list li { padding: 0.5rem 0; color: var(--text-dim); font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #FF6B2B; flex-shrink: 0; }
+.product-card {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg);
+  overflow: hidden; transition: border-color 0.3s; position: relative;
+}
+.product-card:hover { border-color: #FF6B2B; }
+.product-image {
+  height: 200px; background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+  display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--border); font-size: 4rem; position: relative; overflow: hidden;
+}
+.product-image::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.8) 100%);
+}
+.product-body { padding: 1.5rem; }
+.product-price { font-size: 1.75rem; font-weight: 700; margin: 0.5rem 0; }
+.product-price span { font-size: 0.85rem; color: var(--text-dim); font-weight: 400; }
+.product-specs { margin: 1rem 0; }
+.product-spec { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.product-spec-label { font-family: var(--jb); font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
+.product-spec-value { color: var(--text); }
+.product-badge {
+  position: absolute; top: 1rem; right: 1rem; z-index: 1;
+  background: var(--g); color: #fff; font-family: var(--jb); font-size: 0.65rem;
+  letter-spacing: 0.1em; padding: 0.25rem 0.75rem; border-radius: 4px;
+  text-transform: uppercase;
+}
+.bundle-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem;
+  background: var(--card-bg); position: relative; overflow: hidden;
+}
+.bundle-card.featured { border-color: #FF6B2B; }
+.bundle-card.featured::before {
+  content: 'COMPLETE FLEET'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--g); color: #fff; font-family: var(--jb); font-size: 0.65rem;
+  letter-spacing: 0.1em; padding: 0.25rem 1rem; border-radius: 20px;
+}
+.bundle-savings {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 4px;
+  background: rgba(255,107,43,0.1); color: #FF6B2B; font-family: var(--jb);
+  font-size: 0.7rem; letter-spacing: 0.05em; margin-top: 0.5rem;
+}
+.price { font-size: 3rem; font-weight: 700; margin: 1rem 0; }
+.price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+.accessory-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.accessory-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  background: var(--card-bg); text-align: center; transition: border-color 0.3s;
+}
+.accessory-card:hover { border-color: #333; }
+.accessory-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.accessory-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.25rem; }
+.accessory-price { font-family: var(--jb); font-size: 1.1rem; font-weight: 600; color: #FF6B2B; margin-bottom: 0.25rem; }
+.accessory-desc { font-size: 0.8rem; color: var(--text-dim); }
+.merch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.merch-card {
+  border: 1px solid var(--border); border-radius: 10px; background: var(--card-bg);
+  overflow: hidden; transition: border-color 0.3s;
+}
+.merch-card:hover { border-color: #333; }
+.merch-image {
+  height: 180px; display: flex; align-items: center; justify-content: center;
+  border-bottom: 1px solid var(--border); font-size: 3rem;
+  background: linear-gradient(135deg, #0a0a0a 0%, #111 50%, #0a0a0a 100%);
+}
+.merch-body { padding: 1.5rem; }
+.merch-name { font-weight: 600; margin-bottom: 0.25rem; }
+.merch-price { font-family: var(--jb); font-size: 1.1rem; font-weight: 600; color: #FF6B2B; margin-bottom: 0.5rem; }
+.merch-desc { font-size: 0.85rem; color: var(--text-dim); }
+.merch-sizes { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.merch-size {
+  width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--jb); font-size: 0.65rem; color: var(--text-dim);
+  cursor: pointer; transition: border-color 0.3s;
+}
+.merch-size:hover { border-color: #FF6B2B; color: #FF6B2B; }
+.shipping-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.shipping-card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); }
+.shipping-icon { font-size: 2rem; margin-bottom: 1rem; }
+.comparison-table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+.comparison-table th {
+  text-align: left; padding: 1rem; border-bottom: 1px solid var(--border);
+  font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-dim);
+}
+.comparison-table td {
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+  font-size: 0.9rem; color: var(--text-dim);
+}
+.comparison-table tr:hover td { color: var(--text); }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; max-width: 1200px; margin: 0 auto; }
+.footer-tagline { font-family: var(--sg); font-size: 1.1rem; font-weight: 500; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+.footer-copy { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  section { padding: 4rem 1rem; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .accessory-grid { grid-template-columns: repeat(2, 1fr); }
+  .merch-grid { grid-template-columns: 1fr; }
+  .comparison-table { font-size: 0.8rem; }
+  .price { font-size: 2.5rem; }
+}
+</style>
+<meta property="og:title" content="BlackRoad Quantum Store — Hardware for the Sovereign Stack">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadquantum.store/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadquantum.store/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Quantum Store — Hardware for the Sovereign Stack","url":"https://blackroadquantum.store","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+  <div class="logo"><span>BlackRoad</span> Quantum Store</div>
+  <ul class="nav-links">
+    <li><a href="#kits">Pi Kits</a></li>
+    <li><a href="#hailo">Hailo-8</a></li>
+    <li><a href="#fleet">Fleet Bundle</a></li>
+    <li><a href="#accessories">Accessories</a></li>
+    <li><a href="#merch">Merch</a></li>
+    <li><a href="#shipping">Shipping</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="fade-in">
+    <div class="section-label">BlackRoad Quantum Hardware Store</div>
+    <h1>Hardware for the<br>Sovereign Stack.</h1>
+    <p class="subtitle">Pre-configured Raspberry Pi fleet kits, Hailo-8 AI accelerator bundles, and everything you need to build your own sovereign computing infrastructure. Every kit ships with BlackRoad OS pre-installed, WireGuard configured, and a getting-started guide that gets you from unboxing to running services in under an hour.</p>
+    <div class="btn-group">
+      <a href="#kits" class="btn-primary">Shop Pi Kits</a>
+      <a href="#fleet" class="btn-secondary">Full Fleet Bundle</a>
+    </div>
+  </div>
+  <div class="stat-grid fade-in">
+    <div class="stat">
+      <div class="number">Pi 5</div>
+      <div class="label">Latest Hardware</div>
+    </div>
+    <div class="stat">
+      <div class="number">8GB</div>
+      <div class="label">RAM per Node</div>
+    </div>
+    <div class="stat">
+      <div class="number">52</div>
+      <div class="label">TOPS AI (2x Hailo)</div>
+    </div>
+    <div class="stat">
+      <div class="number">&lt;1hr</div>
+      <div class="label">Unbox to Running</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="kits">
+  <div class="fade-in">
+    <div class="section-label">01 — Pi Fleet Kits</div>
+    <h2>Pre-Configured. Ready to Deploy.</h2>
+    <p style="max-width: 700px;">Each Pi Fleet Kit ships with a Raspberry Pi 5 (8GB), NVMe SSD, aluminum case with passive cooling, power supply, and a pre-flashed SD card with BlackRoad OS. WireGuard keys are pre-generated. SSH is configured. Ollama is installed. You plug in power and Ethernet — the rest is done.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="product-card">
+      <div class="product-badge">Popular</div>
+      <div class="product-image">&#x1F4BB;</div>
+      <div class="product-body">
+        <span class="tag">Single Node</span>
+        <h3>Pi Fleet Node — Standard</h3>
+        <div class="product-price">$149</div>
+        <p style="font-size: 0.9rem;">One fully configured Raspberry Pi 5 node ready for sovereign computing. Perfect for your first self-hosted server or adding a node to an existing fleet.</p>
+        <div class="product-specs">
+          <div class="product-spec"><span class="product-spec-label">Board</span><span class="product-spec-value">Raspberry Pi 5 (8GB)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Storage</span><span class="product-spec-value">256GB NVMe SSD</span></div>
+          <div class="product-spec"><span class="product-spec-label">Case</span><span class="product-spec-value">Aluminum passive cooling</span></div>
+          <div class="product-spec"><span class="product-spec-label">Power</span><span class="product-spec-value">27W USB-C PD supply</span></div>
+          <div class="product-spec"><span class="product-spec-label">OS</span><span class="product-spec-value">BlackRoad OS (pre-flashed)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Network</span><span class="product-spec-value">WireGuard pre-configured</span></div>
+        </div>
+        <a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 1rem;">Add to Cart</a>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-image">&#x1F4BB;</div>
+      <div class="product-body">
+        <span class="tag">High Storage</span>
+        <h3>Pi Fleet Node — Storage</h3>
+        <div class="product-price">$199</div>
+        <p style="font-size: 0.9rem;">Same as Standard but with 1TB NVMe SSD for Gitea repositories, MinIO object storage, PostgreSQL databases, or AI model storage.</p>
+        <div class="product-specs">
+          <div class="product-spec"><span class="product-spec-label">Board</span><span class="product-spec-value">Raspberry Pi 5 (8GB)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Storage</span><span class="product-spec-value">1TB NVMe SSD</span></div>
+          <div class="product-spec"><span class="product-spec-label">Case</span><span class="product-spec-value">Aluminum passive cooling</span></div>
+          <div class="product-spec"><span class="product-spec-label">Power</span><span class="product-spec-value">27W USB-C PD supply</span></div>
+          <div class="product-spec"><span class="product-spec-label">OS</span><span class="product-spec-value">BlackRoad OS (pre-flashed)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Extras</span><span class="product-spec-value">MinIO + PostgreSQL pre-installed</span></div>
+        </div>
+        <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1rem;">Add to Cart</a>
+      </div>
+    </div>
+    <div class="product-card">
+      <div class="product-image">&#x1F4BB;</div>
+      <div class="product-body">
+        <span class="tag">Gateway</span>
+        <h3>Pi Fleet Node — Gateway</h3>
+        <div class="product-price">$179</div>
+        <p style="font-size: 0.9rem;">Configured as a network gateway with Pi-hole DNS, nginx reverse proxy, and WireGuard endpoint. The entry point for your fleet's network traffic.</p>
+        <div class="product-specs">
+          <div class="product-spec"><span class="product-spec-label">Board</span><span class="product-spec-value">Raspberry Pi 5 (8GB)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Storage</span><span class="product-spec-value">256GB NVMe SSD</span></div>
+          <div class="product-spec"><span class="product-spec-label">Case</span><span class="product-spec-value">Aluminum passive cooling</span></div>
+          <div class="product-spec"><span class="product-spec-label">Power</span><span class="product-spec-value">27W USB-C PD supply</span></div>
+          <div class="product-spec"><span class="product-spec-label">Software</span><span class="product-spec-value">Pi-hole + nginx + WireGuard</span></div>
+          <div class="product-spec"><span class="product-spec-label">Role</span><span class="product-spec-value">Network gateway node</span></div>
+        </div>
+        <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1rem;">Add to Cart</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="hailo">
+  <div class="fade-in">
+    <div class="section-label">02 — Hailo-8 AI Accelerator Kit</div>
+    <h2>26 TOPS of AI on a Raspberry Pi</h2>
+    <p style="max-width: 700px;">The Hailo-8 M.2 module adds 26 Tera Operations Per Second of dedicated AI inference to any Raspberry Pi 5. Run computer vision, natural language processing, and neural network inference at speeds that rival desktop GPUs — all on 5 watts of power.</p>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="product-card">
+      <div class="product-badge">AI Accelerator</div>
+      <div class="product-image" style="font-size: 3rem;">&#x1F9E0;</div>
+      <div class="product-body">
+        <span class="tag">AI Module</span>
+        <h3>Hailo-8 AI Accelerator Kit</h3>
+        <div class="product-price">$199</div>
+        <p style="font-size: 0.9rem;">Hailo-8 M.2 module with Pi 5 M.2 HAT adapter, pre-configured drivers, and optimized Ollama integration. Plug into any Pi Fleet Node for instant AI acceleration.</p>
+        <div class="product-specs">
+          <div class="product-spec"><span class="product-spec-label">Chip</span><span class="product-spec-value">Hailo-8 (26 TOPS)</span></div>
+          <div class="product-spec"><span class="product-spec-label">Interface</span><span class="product-spec-value">M.2 Key B+M</span></div>
+          <div class="product-spec"><span class="product-spec-label">Power</span><span class="product-spec-value">2.5W typical / 5W peak</span></div>
+          <div class="product-spec"><span class="product-spec-label">Precision</span><span class="product-spec-value">INT8 / INT16</span></div>
+          <div class="product-spec"><span class="product-spec-label">Includes</span><span class="product-spec-value">M.2 HAT + thermal pad</span></div>
+          <div class="product-spec"><span class="product-spec-label">Software</span><span class="product-spec-value">HailoRT + Ollama optimized</span></div>
+        </div>
+        <a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 1rem;">Add to Cart</a>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <h3>Performance Benchmarks</h3>
+        <p>Real-world inference benchmarks measured on the BlackRoad fleet with Hailo-8 acceleration enabled.</p>
+        <table class="comparison-table">
+          <thead>
+            <tr><th>Model</th><th>Without Hailo</th><th>With Hailo</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>YOLOv8 (object detection)</td><td>2.3 FPS</td><td>28 FPS</td></tr>
+            <tr><td>ResNet-50 (classification)</td><td>8 FPS</td><td>95 FPS</td></tr>
+            <tr><td>MobileNet v2 (edge AI)</td><td>15 FPS</td><td>180 FPS</td></tr>
+            <tr><td>Whisper (speech to text)</td><td>0.3x realtime</td><td>2.1x realtime</td></tr>
+            <tr><td>LLaMA 7B (inference)</td><td>1.2 tok/s</td><td>4.8 tok/s</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Dual Hailo Setup</h3>
+        <p>Two Hailo-8 modules on the same Pi 5 give you 26 TOPS — more AI compute power than most laptops. The BlackRoad fleet runs dual Hailo on Cecilia and Octavia for production AI workloads.</p>
+        <ul class="feature-list">
+          <li>26 TOPS combined (26 TOPS per module)</li>
+          <li>Requires Pi 5 M.2 HAT with dual M.2 slots</li>
+          <li>Load balancing across both modules automatic</li>
+          <li>Under 10W total power consumption</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="fleet">
+  <div class="fade-in">
+    <div class="section-label">03 — Full Fleet Bundle</div>
+    <h2>The Complete Sovereign Stack</h2>
+    <p style="max-width: 700px;">Five Raspberry Pi 5 nodes, pre-configured as a complete fleet with assigned roles, WireGuard mesh, and all services deployed. This is the exact configuration running the BlackRoad production infrastructure. Unbox, connect to your network, and you have a sovereign cloud.</p>
+  </div>
+  <div class="bundle-card featured fade-in" style="margin-top: 2rem;">
+    <h3>Full Fleet Bundle — 5 Nodes</h3>
+    <div class="price">$925 <span>Save $120 vs individual</span></div>
+    <div class="bundle-savings">$120 SAVINGS</div>
+    <p style="margin-top: 1rem;">Five pre-configured Pi 5 nodes with roles matching the BlackRoad production fleet. Gateway, AI compute, code host, web server, and backup node. All WireGuard tunnels pre-configured. All services pre-deployed. One hour from unboxing to a running sovereign cloud.</p>
+    <div class="grid-3" style="margin-top: 2rem;">
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FF6B2B; margin-bottom: 0.75rem;">Node 1 — Gateway</h4>
+        <ul class="feature-list">
+          <li>Pi-hole DNS filtering</li>
+          <li>nginx reverse proxy</li>
+          <li>WireGuard endpoint</li>
+          <li>PostgreSQL primary</li>
+          <li>Redis cache</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FF2255; margin-bottom: 0.75rem;">Node 2 — AI Compute</h4>
+        <ul class="feature-list">
+          <li>Ollama (16 models)</li>
+          <li>MinIO object storage</li>
+          <li>InfluxDB time series</li>
+          <li>Hailo-8 ready</li>
+          <li>1TB NVMe SSD</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #CC00AA; margin-bottom: 0.75rem;">Node 3 — Code Host</h4>
+        <ul class="feature-list">
+          <li>Gitea (Git + CI/CD)</li>
+          <li>NATS messaging</li>
+          <li>Docker containers</li>
+          <li>PaaS deploy API</li>
+          <li>1TB NVMe SSD</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8844FF; margin-bottom: 0.75rem;">Node 4 — Web Host</h4>
+        <ul class="feature-list">
+          <li>nginx (unlimited sites)</li>
+          <li>PowerDNS authoritative</li>
+          <li>Ollama inference</li>
+          <li>Tor hidden service</li>
+          <li>Static site deployment</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #4488FF; margin-bottom: 0.75rem;">Node 5 — Backup / Standby</h4>
+        <ul class="feature-list">
+          <li>PostgreSQL replica</li>
+          <li>MinIO replica</li>
+          <li>Secondary DNS</li>
+          <li>Backup AI inference</li>
+          <li>Disaster recovery ready</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #00D4FF; margin-bottom: 0.75rem;">Also Included</h4>
+        <ul class="feature-list">
+          <li>5-port gigabit switch</li>
+          <li>5x Ethernet cables (1m)</li>
+          <li>5x USB-C power cables</li>
+          <li>Getting started guide</li>
+          <li>BlackRoad Fleet Builder course</li>
+        </ul>
+      </div>
+    </div>
+    <a href="#" class="btn-primary" style="display: inline-block; margin-top: 2rem;">Order Full Fleet Bundle</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="accessories">
+  <div class="fade-in">
+    <div class="section-label">04 — Accessories</div>
+    <h2>Parts. Cables. Storage. Upgrades.</h2>
+    <p style="max-width: 700px;">Individual components for building, expanding, or repairing your fleet. All accessories are tested and verified compatible with BlackRoad OS and the Pi Fleet Kit hardware.</p>
+  </div>
+  <div class="accessory-grid fade-in">
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F4BE;</div>
+      <div class="accessory-name">256GB NVMe SSD</div>
+      <div class="accessory-price">$35</div>
+      <div class="accessory-desc">Samsung 980 PRO or equivalent. PCIe 4.0 x4. Pre-formatted ext4.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F4BE;</div>
+      <div class="accessory-name">1TB NVMe SSD</div>
+      <div class="accessory-price">$79</div>
+      <div class="accessory-desc">Samsung 980 PRO or equivalent. PCIe 4.0 x4. Pre-formatted ext4.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F5C3;</div>
+      <div class="accessory-name">Aluminum Case</div>
+      <div class="accessory-price">$25</div>
+      <div class="accessory-desc">Passive cooling aluminum case for Pi 5. Keeps temps under 60C under load.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F50C;</div>
+      <div class="accessory-name">27W USB-C Power Supply</div>
+      <div class="accessory-price">$15</div>
+      <div class="accessory-desc">Official Raspberry Pi 27W USB-C PD power supply. Required for Pi 5 + NVMe.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F310;</div>
+      <div class="accessory-name">5-Port Gigabit Switch</div>
+      <div class="accessory-price">$19</div>
+      <div class="accessory-desc">Unmanaged gigabit switch. Metal case. Fanless. Perfect for Pi fleet networking.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F517;</div>
+      <div class="accessory-name">Cat6 Cable (1m)</div>
+      <div class="accessory-price">$5</div>
+      <div class="accessory-desc">Shielded Cat6 Ethernet cable. 1 meter. Black. Slim profile for tight rack spaces.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F4F1;</div>
+      <div class="accessory-name">M.2 HAT (Single)</div>
+      <div class="accessory-price">$15</div>
+      <div class="accessory-desc">M.2 Key B+M HAT for Pi 5. One M.2 slot for NVMe SSD or Hailo-8 module.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F4F1;</div>
+      <div class="accessory-name">M.2 HAT (Dual)</div>
+      <div class="accessory-price">$29</div>
+      <div class="accessory-desc">Dual M.2 slot HAT for Pi 5. Run NVMe SSD + Hailo-8, or dual Hailo-8 (26 TOPS).</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x1F4BE;</div>
+      <div class="accessory-name">32GB microSD (Pre-flashed)</div>
+      <div class="accessory-price">$12</div>
+      <div class="accessory-desc">BlackRoad OS pre-flashed on high-endurance microSD. Boot media for NVMe-primary setups.</div>
+    </div>
+    <div class="accessory-card">
+      <div class="accessory-icon">&#x2699;</div>
+      <div class="accessory-name">Cluster Rack (5-Node)</div>
+      <div class="accessory-price">$45</div>
+      <div class="accessory-desc">Stackable acrylic rack holding 5 Pi nodes + switch. Cable management included. Desk-mountable.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="merch">
+  <div class="fade-in">
+    <div class="section-label">05 — Merch</div>
+    <h2>Wear the Road.</h2>
+    <p style="max-width: 700px;">BlackRoad branded apparel and accessories. High-quality materials, minimal design, maximum comfort. All merch features the BlackRoad gradient logo and tagline.</p>
+  </div>
+  <div class="merch-grid fade-in">
+    <div class="merch-card">
+      <div class="merch-image">&#x1F455;</div>
+      <div class="merch-body">
+        <div class="merch-name">BlackRoad OS Tee — Gradient Logo</div>
+        <div class="merch-price">$29</div>
+        <div class="merch-desc">100% combed ringspun cotton. BlackRoad gradient logo on front. "Pave Tomorrow" on back collar. Black.</div>
+        <div class="merch-sizes">
+          <div class="merch-size">S</div>
+          <div class="merch-size">M</div>
+          <div class="merch-size">L</div>
+          <div class="merch-size">XL</div>
+          <div class="merch-size">2X</div>
+        </div>
+      </div>
+    </div>
+    <div class="merch-card">
+      <div class="merch-image">&#x1F9E5;</div>
+      <div class="merch-body">
+        <div class="merch-name">BlackRoad Hoodie — Sovereign Stack</div>
+        <div class="merch-price">$59</div>
+        <div class="merch-desc">Heavyweight 400gsm cotton-poly blend. Gradient embroidered logo. Kangaroo pocket. Black.</div>
+        <div class="merch-sizes">
+          <div class="merch-size">S</div>
+          <div class="merch-size">M</div>
+          <div class="merch-size">L</div>
+          <div class="merch-size">XL</div>
+          <div class="merch-size">2X</div>
+        </div>
+      </div>
+    </div>
+    <div class="merch-card">
+      <div class="merch-image">&#x1F3A8;</div>
+      <div class="merch-body">
+        <div class="merch-name">BlackRoad Sticker Pack (10)</div>
+        <div class="merch-price">$9</div>
+        <div class="merch-desc">10 vinyl die-cut stickers. Gradient logo, "Pave Tomorrow", Pi fleet icons, agent badges. Waterproof, UV-resistant.</div>
+      </div>
+    </div>
+    <div class="merch-card">
+      <div class="merch-image">&#x1F9E2;</div>
+      <div class="merch-body">
+        <div class="merch-name">BlackRoad Cap — Embroidered</div>
+        <div class="merch-price">$25</div>
+        <div class="merch-desc">Unstructured 6-panel cap. Gradient embroidered logo on front. Adjustable strap. Black.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="shipping">
+  <div class="fade-in">
+    <div class="section-label">06 — Shipping Information</div>
+    <h2>Ships From Minnesota. Worldwide.</h2>
+    <p style="max-width: 700px;">All orders ship from Minneapolis, Minnesota. Hardware kits are assembled, tested, and pre-configured before shipping. Every kit undergoes a boot test and network connectivity verification before leaving our facility.</p>
+  </div>
+  <div class="shipping-grid fade-in">
+    <div class="shipping-card">
+      <div class="shipping-icon">&#x1F4E6;</div>
+      <h3>Standard Shipping (US)</h3>
+      <p>USPS Priority Mail. 2-4 business days. Free on orders over $200. $9.99 flat rate under $200. Tracking included. Insurance on hardware orders over $100.</p>
+    </div>
+    <div class="shipping-card">
+      <div class="shipping-icon">&#x2708;</div>
+      <h3>Express Shipping (US)</h3>
+      <p>USPS Express Mail. 1-2 business days. $19.99 flat rate. Tracking and insurance included. Saturday delivery available in most areas.</p>
+    </div>
+    <div class="shipping-card">
+      <div class="shipping-icon">&#x1F30D;</div>
+      <h3>International Shipping</h3>
+      <p>USPS International Priority. 6-10 business days. Calculated at checkout based on weight and destination. Customs duties and taxes are the responsibility of the buyer. Available to 180+ countries.</p>
+    </div>
+    <div class="shipping-card">
+      <div class="shipping-icon">&#x1F4CB;</div>
+      <h3>Quality Assurance</h3>
+      <p>Every hardware kit is boot-tested before shipping. We verify: Pi boots successfully, NVMe is detected, WireGuard keys are generated, Ollama responds to inference request, and all services start cleanly. A test report is included in the box.</p>
+    </div>
+  </div>
+  <div class="card fade-in" style="margin-top: 2rem;">
+    <h3>Returns and Warranty</h3>
+    <p>30-day return policy on all hardware. 1-year warranty on Pi Fleet Kits and Hailo-8 modules. Merch returns accepted within 14 days if unworn with tags. Defective items replaced at our cost including shipping. Contact support for RMA authorization.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="fade-in">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Smooth scroll
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Nav scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.98)' : 'rgba(0,0,0,0.92)';
+  });
+
+  // Merch size selector
+  document.querySelectorAll('.merch-size').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.target.parentElement.querySelectorAll('.merch-size').forEach(s => {
+        s.style.borderColor = 'var(--border)';
+        s.style.color = 'var(--text-dim)';
+      });
+      e.target.style.borderColor = '#FF6B2B';
+      e.target.style.color = '#FF6B2B';
+    });
+  });
+
+  // Product card hover animation
+  document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      const img = card.querySelector('.product-image');
+      if (img) img.style.transform = 'scale(1.02)';
+    });
+    card.addEventListener('mouseleave', () => {
+      const img = card.querySelector('.product-image');
+      if (img) img.style.transform = 'scale(1)';
+    });
+  });
+});
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

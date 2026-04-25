@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why We Left the Cloud — BlackRoad Blog</title>
+<meta name="description" content="We ran the numbers. $4,200/month on cloud AI inference for a 5-person company. Then we bought five Raspberry Pis for $400 total and never looked back.">
+<meta property="og:title" content="Why We Left the Cloud">
+<meta property="og:description" content="We ran the numbers. $4,200/month on cloud AI inference for a 5-person company. Then we bought five Raspberry Pis for $400 total and never looked back.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://blackroad.io/blog/why-we-left-the-cloud/">
+<meta name="author" content="Alexa Amundson">
+<link rel="icon" type="image/png" sizes="32x32" href="https://images.blackroad.io/brand/br-square-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--card:#0a0a0a;--border:#1a1a1a;--muted:#444;--sub:#737373;--white:#f5f5f5;
+--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+--sg:'Space Grotesk',sans-serif;--in:'Inter',sans-serif;--jb:'JetBrains Mono',monospace}
+body{background:var(--bg);color:var(--white);font-family:var(--in);line-height:1.8;-webkit-font-smoothing:antialiased}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(0,0,0,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+nav::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite}
+@keyframes gs{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.nav-inner{max-width:760px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--sg);font-weight:700;font-size:17px;color:var(--white);text-decoration:none}
+.nav-links a{font-family:var(--in);font-size:13px;color:var(--sub);text-decoration:none;margin-left:24px}
+.nav-links a:hover{color:var(--white)}
+article{max-width:760px;margin:0 auto;padding:120px 24px 80px}
+.post-meta{font-family:var(--jb);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:16px}
+.post-title{font-family:var(--sg);font-weight:700;font-size:clamp(32px,6vw,48px);color:var(--white);letter-spacing:-0.03em;line-height:1.1;margin-bottom:24px}
+.post-excerpt{font-size:18px;color:var(--sub);line-height:1.7;margin-bottom:40px;border-left:3px solid;border-image:var(--g) 1;padding-left:20px}
+.post-body h2{font-family:var(--sg);font-weight:700;font-size:24px;color:var(--white);margin:48px 0 16px;letter-spacing:-0.02em}
+.post-body h3{font-family:var(--sg);font-weight:600;font-size:18px;color:var(--white);margin:32px 0 12px}
+.post-body p{color:var(--sub);margin-bottom:20px;font-size:16px}
+.post-body strong{color:var(--white)}
+.post-body code{font-family:var(--jb);font-size:14px;background:var(--card);padding:2px 6px;border:1px solid var(--border)}
+.post-body pre{background:var(--card);border:1px solid var(--border);padding:20px;margin:24px 0;overflow-x:auto;font-family:var(--jb);font-size:13px;line-height:1.8;color:var(--sub)}
+.post-body blockquote{border-left:3px solid;border-image:var(--g) 1;padding-left:20px;margin:24px 0;font-style:italic;color:var(--sub)}
+.post-body ul,.post-body ol{margin:16px 0 20px 24px;color:var(--sub)}
+.post-body li{margin-bottom:8px}
+.post-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:48px;padding-top:24px;border-top:1px solid var(--border)}
+.post-tag{font-family:var(--jb);font-size:10px;color:var(--muted);border:1px solid var(--border);padding:4px 10px;text-transform:uppercase;letter-spacing:0.1em}
+.post-footer{margin-top:48px;padding-top:32px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.post-author{display:flex;align-items:center;gap:12px}
+.post-author-name{font-family:var(--sg);font-weight:600;font-size:14px;color:var(--white)}
+.post-author-role{font-family:var(--jb);font-size:11px;color:var(--muted)}
+.post-cta{font-family:var(--in);font-weight:600;font-size:14px;padding:10px 24px;background:var(--g);background-size:200% 100%;color:#fff;text-decoration:none;transition:background-position 0.4s}
+.post-cta:hover{background-position:100% 0}
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center}
+footer p{font-family:var(--jb);font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+<nav><div class="nav-inner">
+<a href="https://blackroad.io" class="nav-brand">BlackRoad</a>
+<div class="nav-links"><a href="https://blackroad.io/blog/">Blog</a><a href="https://docs.blackroad.io">Docs</a><a href="https://blackroadai.com">AI</a><a href="https://pricing.blackroad.io">Pricing</a></div>
+</div></nav>
+<article>
+<div class="post-meta">March 16, 2026 · 8 min read · Infrastructure</div>
+<h1 class="post-title">Why We Left the Cloud</h1>
+<div class="post-excerpt">We ran the numbers. $4,200/month on cloud AI inference for a 5-person company. Then we bought five Raspberry Pis for $400 total and never looked back.</div>
+<div class="post-body">
+
+<h2>The $4,200 Wake-Up Call</h2>
+<p>In January 2026, our monthly cloud AI bill hit $4,200. For a team of one. We were running inference through OpenAI, Anthropic, and Groq — paying per token, per request, per everything. The models were getting better, but so were the bills.</p>
+<p>I did what any rational person would do: I bought five Raspberry Pi 5 boards for $80 each.</p>
+
+<h2>The Math That Changed Everything</h2>
+<p><strong>Cloud cost:</strong> $4,200/month = $50,400/year</p>
+<p><strong>Pi fleet cost:</strong> $400 one-time + $15/month electricity = $580/year</p>
+<p><strong>Savings:</strong> $49,820/year. That's not a typo.</p>
+<p>But it's not just about money. It's about <strong>sovereignty</strong>. When you run AI on hardware you physically own, no one can:</p>
+<ul>
+<li>Change the pricing on you overnight</li>
+<li>Read your prompts and responses</li>
+<li>Throttle your access during peak hours</li>
+<li>Shut down the model you depend on</li>
+<li>Train on your data without consent</li>
+</ul>
+
+<h2>52 TOPS of Sovereign Compute</h2>
+<p>Two Hailo-8 AI accelerators — one on Cecilia, one on Octavia — deliver 52 trillion operations per second of dedicated neural inference. That's enough to run <strong>27 models simultaneously</strong> across the fleet.</p>
+<p>The models aren't as big as GPT-4 or Claude Opus. But they're <strong>ours</strong>. They run 24/7, respond in under 40 milliseconds on local inference, and never send a single byte to anyone else's server.</p>
+
+<h2>The Fleet</h2>
+<p>Five Raspberry Pi 5 nodes, each with a name, a role, and a personality:</p>
+<ul>
+<li><strong>Alice</strong> — The Gateway. DNS, Pi-hole, PostgreSQL, Qdrant vectors. Routes 48+ domains.</li>
+<li><strong>Cecilia</strong> — The AI Engine. 15 Ollama models, Hailo-8, CECE custom models. The brain.</li>
+<li><strong>Octavia</strong> — The Architect. Gitea (207 repos), Docker Swarm, NATS messaging. The builder.</li>
+<li><strong>Aria</strong> — The Interface. Portainer, container orchestration. The face.</li>
+<li><strong>Lucidia</strong> — The Dreamer. FastAPI, 334 web apps, GitHub Actions. The soul.</li>
+</ul>
+
+<h2>What We Learned</h2>
+<p>Running your own AI infrastructure isn't easy. We dealt with undervoltage on Octavia (the Hailo-8 draws more power than a standard Pi PSU can deliver). We watched Lucidia's SD card slowly degrade. We debugged WireGuard mesh routing at 3 AM.</p>
+<p>But every problem we solved made the system <strong>more resilient</strong>. Every fix went into the codex. Every lesson got broadcast to future sessions. The fleet gets smarter every day.</p>
+<p>And we haven't paid a cloud AI bill since January.</p>
+
+<h2>Try It Yourself</h2>
+<p>BlackRoad OS is proprietary software, but the idea is simple: <strong>buy a Pi, install Ollama, run your own models</strong>. You don't need 52 TOPS to start. A single Pi 5 with an 8B parameter model will change how you think about AI.</p>
+<pre>curl -sSL install.blackroad.io | sh
+br init
+br chat</pre>
+<p>Three commands. Your AI. Your hardware. Your rules.</p>
+
+<blockquote>The cloud was someone else's computer. The Pi is yours. — Alexa Amundson</blockquote>
+
+</div>
+<div class="post-tags"><span class="post-tag">sovereign-ai</span><span class="post-tag">infrastructure</span><span class="post-tag">raspberry-pi</span><span class="post-tag">cost-savings</span></div>
+<div class="post-footer">
+<div class="post-author">
+<div><div class="post-author-name">Alexa Amundson</div><div class="post-author-role">Founder & CEO, BlackRoad OS</div></div>
+</div>
+<a href="https://blackroad.io" class="post-cta">Try BlackRoad OS →</a>
+</div>
+</article>
+<footer><p>© 2026 BlackRoad OS, Inc. · Pave Tomorrow.</p></footer>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+<script src="https://blackroad-backend.blackroad.workers.dev/br-analytics.js" data-site="blackroad-io" defer></script>
+</body>
+</html>

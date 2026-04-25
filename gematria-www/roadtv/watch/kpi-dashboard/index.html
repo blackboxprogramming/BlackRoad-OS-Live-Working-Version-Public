@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KPI Dashboard — Road TV</title>
+  <meta name="description" content="Animated KPI dashboard for BlackRoad OS. Live-counting numbers for commits, LOC, fleet status, models, repos, and domains.">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; min-height: 100vh; overflow-x: hidden; }
+
+    .back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .back-nav a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
+    }
+    .back-nav a:hover { color: #fff; }
+    .back-nav .title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      font-weight: 700; color: #fff;
+    }
+
+    .dashboard {
+      max-width: 1000px; margin: 0 auto;
+      padding: 100px 24px 40px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .kpi-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius:0;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: linear-gradient(180deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+    }
+
+    .kpi-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; font-weight: 400;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .kpi-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.8rem; font-weight: 700;
+      color: #fff; line-height: 1;
+      margin-bottom: 8px;
+    }
+    .kpi-value .suffix {
+      font-size: 1.2rem; color: rgba(255,255,255,0.4);
+      font-weight: 600;
+    }
+
+    .kpi-detail {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; color: rgba(255,255,255,0.25);
+    }
+
+    /* Fleet status dots */
+    .fleet-dots {
+      display: flex; gap: 8px; margin-top: 12px;
+    }
+    .fleet-dot {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem; color: rgba(255,255,255,0.35);
+    }
+    .fleet-dot .dot {
+      width: 8px; height: 8px; border-radius:50%;
+    }
+    .dot-online { background: #00D4FF; box-shadow: 0 0 6px #00D4FF44; }
+    .dot-offline { background: rgba(255,80,80,0.4); }
+
+    .info-panel {
+      max-width: 1000px; margin: 0 auto;
+      padding: 20px 24px 40px;
+    }
+    .info-panel h2 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .info-panel p {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.45); line-height: 1.5;
+    }
+    .info-panel .links {
+      margin-top: 8px; display: flex; gap: 16px;
+    }
+    .info-panel .links a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s;
+    }
+    .info-panel .links a:hover { color: #fff; }
+  </style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<script src="https://blackroad.systems.js" defer></script>
+<script src="https://blackroad.io.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+
+  <div class="back-nav">
+    <a href="../../">&larr; Road TV</a>
+    <span class="title">KPI Dashboard</span>
+    <span></span>
+  </div>
+
+  <div class="dashboard">
+
+    <div class="kpi-card">
+      <div class="kpi-label">Commits</div>
+      <div class="kpi-value"><span data-count="343">0</span></div>
+      <div class="kpi-detail">across all repos since inception</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Lines of Code</div>
+      <div class="kpi-value"><span data-count="7200000" data-format="abbr">0</span></div>
+      <div class="kpi-detail">7.2M lines across the fleet</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Fleet Nodes</div>
+      <div class="kpi-value"><span data-count="3">0</span> <span class="suffix">/ 5</span></div>
+      <div class="kpi-detail">online Pi nodes</div>
+      <div class="fleet-dots">
+        <span class="fleet-dot"><span class="dot dot-online"></span>Alice</span>
+        <span class="fleet-dot"><span class="dot dot-online"></span>Cecilia</span>
+        <span class="fleet-dot"><span class="dot dot-offline"></span>Octavia</span>
+        <span class="fleet-dot"><span class="dot dot-offline"></span>Aria</span>
+        <span class="fleet-dot"><span class="dot dot-online"></span>Lucidia</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Ollama Models</div>
+      <div class="kpi-value"><span data-count="27">0</span></div>
+      <div class="kpi-detail">deployed across fleet nodes</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Repositories</div>
+      <div class="kpi-value"><span data-count="207">0</span><span class="suffix">+</span></div>
+      <div class="kpi-detail">Gitea + GitHub combined</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-label">Custom Domains</div>
+      <div class="kpi-value"><span data-count="48">0</span><span class="suffix">+</span></div>
+      <div class="kpi-detail">routed through Cloudflare</div>
+    </div>
+
+  </div>
+
+  <div class="info-panel">
+    <h2>KPI Dashboard</h2>
+    <p>First collection: 2026-03-12. Data from GitHub, Gitea, SSH fleet probe, Ollama, and Cloudflare. Numbers animate from zero on load.</p>
+    <div class="links">
+      <a href="../tokenless-flow/">Tokenless Flow</a>
+      <a href="../mesh-topology/">Mesh Topology</a>
+      <a href="../fleet-pulse/">Fleet Pulse</a>
+      <a href="/wiki/kpi-system">Wiki: KPI System</a>
+    </div>
+  </div>
+
+<script>
+(function() {
+  function easeOutExpo(t) {
+    return t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+  }
+
+  function formatAbbr(n) {
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return Math.round(n).toLocaleString();
+  }
+
+  const counters = document.querySelectorAll('[data-count]');
+  const duration = 2000;
+  let startTime = null;
+  let done = false;
+
+  function animate(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOutExpo(progress);
+
+    counters.forEach(el => {
+      const target = parseInt(el.dataset.count, 10);
+      const current = Math.round(target * eased);
+      if (el.dataset.format === 'abbr') {
+        el.textContent = formatAbbr(current);
+      } else {
+        el.textContent = current.toLocaleString();
+      }
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  // Start animation when page is visible
+  const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !done) {
+      done = true;
+      requestAnimationFrame(animate);
+    }
+  }, { threshold: 0.1 });
+
+  observer.observe(document.querySelector('.dashboard'));
+
+  // Fallback: start after short delay if observer doesn't fire
+  setTimeout(() => {
+    if (!done) { done = true; requestAnimationFrame(animate); }
+  }, 300);
+})();
+</script>
+
+</body>
+</html>

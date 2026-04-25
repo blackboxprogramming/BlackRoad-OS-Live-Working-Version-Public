@@ -1,0 +1,1759 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoadChain — Immutable by Design | BlackRoad OS</title>
+<meta name="description" content="RoadChain is BlackRoad's blockchain layer for verification, consent management, and audit trails. Not speculation — infrastructure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Base ─────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: #000;
+  color: #e0e0e0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ─── Variables ────────────────────────────────────────────────── */
+:root {
+  --orange: #FF6B2B;
+  --pink: #FF2255;
+  --magenta: #CC00AA;
+  --purple: #8844FF;
+  --blue: #4488FF;
+  --cyan: #00D4FF;
+  --grad: linear-gradient(90deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  --grad-r: linear-gradient(90deg, #00D4FF, #4488FF, #8844FF, #CC00AA, #FF2255, #FF6B2B);
+  --mono: 'JetBrains Mono', monospace;
+  --grotesk: 'Space Grotesk', sans-serif;
+  --inter: 'Inter', sans-serif;
+  --card-bg: #080808;
+  --card-border: #141414;
+  --card-hover: #1a1a1a;
+  --text-primary: #f5f5f5;
+  --text-secondary: #888;
+  --text-muted: #444;
+  --max-w: 1120px;
+}
+
+/* ─── Animations ───────────────────────────────────────────────── */
+@keyframes gradShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes ping {
+  0% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(0, 212, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0); }
+}
+@keyframes barPulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(0.7); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(40px, -30px); }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-35px, 25px); }
+}
+@keyframes slideHash {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@keyframes chainLink {
+  0% { stroke-dashoffset: 100; }
+  100% { stroke-dashoffset: 0; }
+}
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Nav ──────────────────────────────────────────────────────── */
+.nav-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+}
+.nav-grad-bar {
+  height: 2px;
+  background: var(--grad);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 56px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: background 0.3s, border-color 0.3s;
+}
+.nav.scrolled {
+  background: rgba(0, 0, 0, 0.97);
+  border-bottom-color: #141414;
+}
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-bars {
+  display: flex;
+  gap: 2px;
+}
+.nav-bar {
+  width: 3px;
+  height: 18px;
+  border-radius: 2px;
+}
+.nav-brand {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+.nav-brand span {
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+.nav-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.nav-links a {
+  font-family: var(--inter);
+  font-size: 13px;
+  font-weight: 500;
+  color: #686868;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: #f0f0f0; }
+.nav-cta {
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px 18px;
+  background: var(--grad);
+  background-size: 200% 100%;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(136, 68, 255, 0.2);
+  letter-spacing: 0.01em;
+}
+.nav-cta:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136, 68, 255, 0.35);
+}
+
+/* ─── Shared ───────────────────────────────────────────────────── */
+.section {
+  padding: 120px 40px;
+  max-width: var(--max-w);
+  margin: 0 auto;
+  position: relative;
+}
+.section-divider {
+  height: 1px;
+  background: var(--grad);
+  opacity: 0.15;
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid #1e1e1e;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 24px;
+}
+.section-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: ping 1.8s ease-out infinite;
+}
+.section-badge span {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.section-title {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: clamp(32px, 6vw, 52px);
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 20px;
+}
+.section-title .gradient-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.section-sub {
+  font-family: var(--inter);
+  font-size: clamp(15px, 2.5vw, 18px);
+  color: #606060;
+  line-height: 1.7;
+  max-width: 600px;
+  margin-bottom: 48px;
+}
+.grad-btn {
+  display: inline-block;
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 36px;
+  background: var(--grad);
+  background-size: 200% 100%;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  transition: background-position 0.4s ease, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(136, 68, 255, 0.2);
+  letter-spacing: 0.01em;
+}
+.grad-btn:hover {
+  background-position: 100% 0;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(136, 68, 255, 0.35);
+}
+.outline-btn {
+  display: inline-block;
+  font-family: var(--inter);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid #2a2a2a;
+  color: #a0a0a0;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.outline-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #444;
+  color: #d0d0d0;
+}
+
+/* ─── Glass Card ───────────────────────────────────────────────── */
+.glass-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 28px 24px;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+.glass-card:hover {
+  border-color: rgba(136, 68, 255, 0.25);
+  box-shadow: 0 0 40px rgba(136, 68, 255, 0.08);
+  transform: translateY(-3px);
+}
+.glass-card .card-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #1a1a1a;
+  background: rgba(255, 255, 255, 0.02);
+}
+.glass-card .card-title {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.glass-card .card-body {
+  font-family: var(--inter);
+  font-size: 14px;
+  color: #585858;
+  line-height: 1.65;
+}
+
+/* ─── Grid ─────────────────────────────────────────────────────── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+/* ─── Hero ─────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 40px 80px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.hero-orb-1 {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(136, 68, 255, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-orb-2 {
+  position: absolute;
+  top: 30%;
+  left: 20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 34, 85, 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  animation: orb1 8s ease-in-out infinite;
+}
+.hero-orb-3 {
+  position: absolute;
+  top: 25%;
+  right: 15%;
+  width: 280px;
+  height: 280px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  animation: orb2 10s ease-in-out infinite;
+}
+.hero h1 {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: clamp(44px, 11vw, 88px);
+  color: var(--text-primary);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  margin-bottom: 8px;
+  animation: fadeUp 0.6s ease 0.2s both;
+  max-width: 900px;
+}
+.hero h1 .gradient-text {
+  background: var(--grad);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradShift 4s linear infinite;
+}
+.hero-sub {
+  font-family: var(--inter);
+  font-size: clamp(15px, 3vw, 19px);
+  color: #606060;
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: 48px;
+  animation: fadeUp 0.6s ease 0.35s both;
+}
+.hero-ctas {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.45s both;
+}
+.hero-stats {
+  display: flex;
+  gap: 48px;
+  margin-top: 72px;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.6s ease 0.55s both;
+}
+.hero-stat-val {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: clamp(20px, 4vw, 28px);
+  color: #f0f0f0;
+  letter-spacing: -0.03em;
+}
+.hero-stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #383838;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+.hero-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--grad);
+  opacity: 0.3;
+}
+
+/* ─── Hash Ticker ──────────────────────────────────────────────── */
+.hash-ticker {
+  overflow: hidden;
+  background: #030303;
+  border-top: 1px solid #0e0e0e;
+  border-bottom: 1px solid #0e0e0e;
+  padding: 10px 0;
+}
+.hash-ticker-inner {
+  display: flex;
+  gap: 40px;
+  white-space: nowrap;
+  animation: slideHash 30s linear infinite;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #1e1e1e;
+}
+.hash-ticker-inner .active {
+  color: var(--purple);
+}
+
+/* ─── Why Section ──────────────────────────────────────────────── */
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 48px;
+}
+.why-col { display: flex; flex-direction: column; gap: 20px; }
+.why-item {
+  padding: 20px 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  transition: border-color 0.25s;
+}
+.why-item:hover { border-color: rgba(255, 34, 85, 0.2); }
+.why-item .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.why-item .label.green { color: #22c55e; }
+.why-item .label.red { color: #FF2255; }
+.why-item h4 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.why-item p {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+.why-stat-bar {
+  height: 3px;
+  margin-top: 12px;
+  border-radius: 2px;
+  background: #111;
+  overflow: hidden;
+}
+.why-stat-bar .fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1.5s ease;
+}
+
+/* ─── Use Cases ────────────────────────────────────────────────── */
+.usecase-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.usecase-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 32px 24px;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.usecase-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--card-accent, var(--purple));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.usecase-card:hover::before { opacity: 1; }
+.usecase-card:hover {
+  border-color: rgba(136, 68, 255, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+}
+.usecase-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 1px solid #1a1a1a;
+  background: rgba(255, 255, 255, 0.02);
+  margin-bottom: 20px;
+}
+.usecase-card h4 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.usecase-card p {
+  font-family: var(--inter);
+  font-size: 13.5px;
+  color: #555;
+  line-height: 1.65;
+}
+.usecase-tag {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border: 1px solid #1a1a1a;
+}
+
+/* ─── RoadCoin ─────────────────────────────────────────────────── */
+.roadcoin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+.roadcoin-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.roadcoin-item {
+  padding: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  transition: border-color 0.25s;
+}
+.roadcoin-item:hover { border-color: rgba(68, 136, 255, 0.2); }
+.roadcoin-item h5 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+.roadcoin-item p {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+.coin-visual {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  position: relative;
+  overflow: hidden;
+}
+.coin-circle {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  border: 2px solid #1e1e1e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--text-primary);
+  position: relative;
+  margin-bottom: 24px;
+}
+.coin-circle::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background: conic-gradient(from 0deg, var(--orange), var(--pink), var(--magenta), var(--purple), var(--blue), var(--cyan), var(--orange)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: gradShift 3s linear infinite;
+}
+.coin-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.coin-detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 260px;
+}
+.coin-detail-row .cd-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.coin-detail-row .cd-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #666;
+}
+
+/* ─── Architecture ─────────────────────────────────────────────── */
+.arch-diagram {
+  background: #030303;
+  border: 1px solid #111;
+  padding: 48px 32px;
+  margin-top: 48px;
+  position: relative;
+  overflow: hidden;
+}
+.arch-diagram::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--grad);
+  opacity: 0.2;
+}
+.arch-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.arch-layer {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid #0e0e0e;
+  transition: border-color 0.3s, background 0.3s;
+}
+.arch-layer:hover {
+  border-color: #1e1e1e;
+  background: rgba(255, 255, 255, 0.02);
+}
+.arch-layer-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.arch-layer-items {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.arch-chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 5px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #1a1a1a;
+  color: #666;
+  transition: color 0.2s, border-color 0.2s;
+}
+.arch-chip:hover {
+  color: #aaa;
+  border-color: #2a2a2a;
+}
+.arch-specs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 32px;
+}
+.arch-spec {
+  text-align: center;
+  padding: 20px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+}
+.arch-spec .val {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.arch-spec .label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #333;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ─── Honest Difference ────────────────────────────────────────── */
+.honest-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 48px;
+}
+.honest-card {
+  padding: 28px 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  transition: border-color 0.25s, transform 0.2s;
+  position: relative;
+}
+.honest-card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
+}
+.honest-card .check {
+  font-size: 18px;
+  margin-bottom: 14px;
+  display: block;
+}
+.honest-card h4 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.honest-card p {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* ─── Compliance ───────────────────────────────────────────────── */
+.compliance-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 48px;
+}
+.compliance-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.compliance-block h4 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+.compliance-block p {
+  font-family: var(--inter);
+  font-size: 13.5px;
+  color: #555;
+  line-height: 1.65;
+}
+.compliance-code {
+  background: #030303;
+  border: 1px solid #111;
+  padding: 32px 28px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: #444;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+.compliance-code .key { color: var(--cyan); }
+.compliance-code .val { color: #666; }
+.compliance-code .comment { color: #2a2a2a; }
+.compliance-code .bool-true { color: #22c55e; }
+.compliance-code .bool-false { color: #FF2255; }
+
+/* ─── Footer ───────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid #0e0e0e;
+  padding: 60px 40px 40px;
+  max-width: var(--max-w);
+  margin: 0 auto;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 48px;
+}
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.footer-brand-name {
+  font-family: var(--grotesk);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.footer-desc {
+  font-family: var(--inter);
+  font-size: 13px;
+  color: #444;
+  line-height: 1.6;
+  max-width: 280px;
+}
+.footer-col h5 {
+  font-family: var(--grotesk);
+  font-weight: 600;
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+.footer-col a {
+  display: block;
+  font-family: var(--inter);
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 10px;
+  transition: color 0.15s;
+}
+.footer-col a:hover { color: #a0a0a0; }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid #0e0e0e;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #2a2a2a;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ─── Block Explorer Preview ───────────────────────────────────── */
+.explorer-preview {
+  background: #030303;
+  border: 1px solid #111;
+  margin-top: 48px;
+  overflow: hidden;
+}
+.explorer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #111;
+  background: rgba(255, 255, 255, 0.01);
+}
+.explorer-header .title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.explorer-header .live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #22c55e;
+}
+.explorer-header .live .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: ping 2s ease-out infinite;
+}
+.explorer-rows { padding: 0; }
+.explorer-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px 100px 80px;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid #0a0a0a;
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: background 0.15s;
+}
+.explorer-row:hover { background: rgba(255, 255, 255, 0.015); }
+.explorer-row .block-num { color: #555; }
+.explorer-row .hash { color: #333; }
+.explorer-row .hash .highlight { color: var(--purple); }
+.explorer-row .type { color: #444; }
+.explorer-row .agent { color: #555; }
+.explorer-row .time { color: #2a2a2a; }
+
+/* ─── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .grid-3, .usecase-grid, .honest-grid { grid-template-columns: 1fr 1fr; }
+  .arch-specs { grid-template-columns: repeat(2, 1fr); }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .roadcoin-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr; }
+  .compliance-content { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .nav { padding: 0 16px; }
+  .nav-links { display: none; }
+  .section { padding: 80px 20px; }
+  .hero { padding: 100px 20px 60px; }
+  .hero-stats { gap: 24px; }
+  .grid-3, .usecase-grid, .honest-grid, .grid-2 { grid-template-columns: 1fr; }
+  .arch-specs { grid-template-columns: 1fr 1fr; }
+  .arch-layer { grid-template-columns: 1fr; gap: 8px; }
+  .footer-top { grid-template-columns: 1fr; gap: 24px; }
+  .explorer-row { grid-template-columns: 40px 1fr 80px; }
+  .explorer-row .type, .explorer-row .time { display: none; }
+}
+</style>
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://roadchain.io/">
+<meta name="robots" content="index, follow, noai, noimageai">
+</head>
+<body>
+
+<!-- ─── Nav ──────────────────────────────────────────────────────── -->
+<div class="nav-wrapper">
+  <div class="nav-grad-bar"></div>
+  <nav class="nav" id="mainNav">
+    <a href="/" class="nav-logo">
+      <div class="nav-bars">
+        <div class="nav-bar" style="background:#FF6B2B; animation: barPulse 2.5s ease-in-out 0s infinite;"></div>
+        <div class="nav-bar" style="background:#FF2255; animation: barPulse 2.5s ease-in-out 0.14s infinite;"></div>
+        <div class="nav-bar" style="background:#CC00AA; animation: barPulse 2.5s ease-in-out 0.28s infinite;"></div>
+        <div class="nav-bar" style="background:#8844FF; animation: barPulse 2.5s ease-in-out 0.42s infinite;"></div>
+        <div class="nav-bar" style="background:#4488FF; animation: barPulse 2.5s ease-in-out 0.56s infinite;"></div>
+        <div class="nav-bar" style="background:#00D4FF; animation: barPulse 2.5s ease-in-out 0.7s infinite;"></div>
+      </div>
+      <span class="nav-brand">RoadChain<span>.io</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#why">Why Blockchain</a>
+      <a href="#usecases">Use Cases</a>
+      <a href="#roadcoin">RoadCoin</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#compliance">Compliance</a>
+    </div>
+    <a href="https://blackroad.company" target="_blank"><button class="nav-cta">View Company</button></a>
+  </nav>
+</div>
+
+<!-- ─── Hero ─────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-orb-1"></div>
+  <div class="hero-orb-2"></div>
+  <div class="hero-orb-3"></div>
+
+  <div class="section-badge" style="animation: fadeUp 0.6s ease 0.1s both;">
+    <div class="dot" style="background: var(--cyan);"></div>
+    <span>Blockchain verification layer</span>
+  </div>
+
+  <h1 style="animation: fadeUp 0.6s ease 0.2s both;">Immutable</h1>
+  <h1 style="margin-bottom: 32px; animation: fadeUp 0.6s ease 0.25s both;">
+    <span class="gradient-text">by Design.</span>
+  </h1>
+
+  <p class="hero-sub">
+    RoadChain is BlackRoad's blockchain layer for verification, consent management, and audit trails. Built on what actually works in crypto &mdash; not what gets hyped.
+  </p>
+
+  <div class="hero-ctas">
+    <a href="#usecases"><button class="grad-btn">Explore Use Cases</button></a>
+    <a href="#architecture"><button class="outline-btn">View Architecture &rarr;</button></a>
+  </div>
+
+  <div class="hero-stats">
+    <div style="text-align:center;">
+      <div class="hero-stat-val">$6T+</div>
+      <div class="hero-stat-label">Stablecoin volume (2024)</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="hero-stat-val">SHA-256</div>
+      <div class="hero-stat-label">Hash algorithm</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="hero-stat-val">ZK</div>
+      <div class="hero-stat-label">Zero-knowledge proofs</div>
+    </div>
+    <div style="text-align:center;">
+      <div class="hero-stat-val">8545</div>
+      <div class="hero-stat-label">JSON-RPC port</div>
+    </div>
+  </div>
+
+  <div class="hero-bottom-bar"></div>
+</section>
+
+<!-- ─── Hash Ticker ──────────────────────────────────────────────── -->
+<div class="hash-ticker">
+  <div class="hash-ticker-inner" id="hashTicker"></div>
+</div>
+
+<!-- ─── Why Blockchain (Honestly) ────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="why">
+  <div class="section-badge">
+    <div class="dot" style="background: var(--pink);"></div>
+    <span>An honest assessment</span>
+  </div>
+  <h2 class="section-title">Why Blockchain<br><span class="gradient-text">(Honestly)</span></h2>
+  <p class="section-sub">
+    Most of crypto was smoke and mirrors. But the underlying technology &mdash; when applied to real problems &mdash; is genuinely useful. Here's what actually works and what doesn't.
+  </p>
+
+  <div class="why-grid">
+    <div class="why-col">
+      <div class="why-item">
+        <div class="label green">What works</div>
+        <h4>Stablecoins &amp; Cross-Border Payments</h4>
+        <p>$6.27 trillion in stablecoin payments in 2024 &mdash; surpassing Visa's transaction volume. Real utility, real adoption, real settlement. USDC and USDT process more value than most traditional payment networks.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #22c55e, #00D4FF);" data-width="92%"></div></div>
+      </div>
+      <div class="why-item">
+        <div class="label green">What works</div>
+        <h4>Immutable Audit Trails</h4>
+        <p>When you need to prove that data existed at a specific time and hasn't been tampered with, blockchain is the right tool. Timestamps, hashes, and consensus create trustless verification. RoadChain uses this for every agent action.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #22c55e, #4488FF);" data-width="88%"></div></div>
+      </div>
+      <div class="why-item">
+        <div class="label green">What works</div>
+        <h4>Consent Management</h4>
+        <p>GDPR requires proof of consent. On-chain hashes of consent records provide immutable evidence without storing personal data on-chain. The hash proves the record exists &mdash; the data stays off-chain and deletable.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #22c55e, #8844FF);" data-width="85%"></div></div>
+      </div>
+    </div>
+    <div class="why-col">
+      <div class="why-item">
+        <div class="label red">What failed</div>
+        <h4>ICOs &amp; Speculative Tokens</h4>
+        <p>80% of ICOs in 2017-2018 were identified as scams. $7.7 billion lost to rug pulls since 2020. The "tokenize everything" thesis was largely a vehicle for fraud. RoadChain has no ICO and never will.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #FF2255, #FF6B2B);" data-width="80%"></div></div>
+      </div>
+      <div class="why-item">
+        <div class="label red">What failed</div>
+        <h4>NFTs as Speculation</h4>
+        <p>Bored Apes went from $400K to $40K. The speculative NFT market collapsed 95%+ from peak. The technology (proving ownership of digital assets) is sound &mdash; the casino built on top of it was not.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #FF2255, #CC00AA);" data-width="95%"></div></div>
+      </div>
+      <div class="why-item">
+        <div class="label red">What failed</div>
+        <h4>"Decentralize Everything"</h4>
+        <p>Most "decentralized" projects are controlled by 3-5 entities. Decentralization theater. RoadChain is honest: we run a permissioned chain where it makes sense, and use public chains for verification anchoring.</p>
+        <div class="why-stat-bar"><div class="fill" style="width:0%; background: linear-gradient(90deg, #FF2255, #8844FF);" data-width="72%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Use Cases ─────────────────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="usecases">
+  <div class="section-badge">
+    <div class="dot" style="background: var(--purple);"></div>
+    <span>Real applications</span>
+  </div>
+  <h2 class="section-title">Use Cases</h2>
+  <p class="section-sub">
+    Every use case below solves a real problem that existing tools handle poorly. No blockchain-for-the-sake-of-blockchain.
+  </p>
+
+  <div class="usecase-grid">
+    <div class="usecase-card" style="--card-accent: var(--magenta);">
+      <div class="usecase-icon" style="color: var(--magenta);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/></svg>
+      </div>
+      <h4>Consent Management</h4>
+      <p>GDPR-compliant consent records with on-chain hashes. Personal data stays off-chain and can be deleted per right-to-erasure. The blockchain stores only the cryptographic proof that consent was given, when, and for what purpose. Auditable by regulators, deletable by users.</p>
+      <div class="usecase-tag">GDPR Article 7 &middot; On-chain hash</div>
+    </div>
+
+    <div class="usecase-card" style="--card-accent: var(--cyan);">
+      <div class="usecase-icon" style="color: var(--cyan);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+      </div>
+      <h4>Data Fingerprinting</h4>
+      <p>Hash any document, dataset, or model weight and anchor it to the chain. Proves the data existed at a specific timestamp without revealing its contents. Used internally for agent memory verification &mdash; every memory commit gets a fingerprint that prevents silent data mutation.</p>
+      <div class="usecase-tag">SHA-256 &middot; Merkle tree</div>
+    </div>
+
+    <div class="usecase-card" style="--card-accent: var(--purple);">
+      <div class="usecase-icon" style="color: var(--purple);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6m3-3h-6"/></svg>
+      </div>
+      <h4>Identity Verification</h4>
+      <p>Zero-knowledge proofs allow users to prove attributes (age, citizenship, credential) without revealing the underlying data. Built on zk-SNARKs. Agents verify each other's identity through soul chains &mdash; cryptographic lineage from genesis to current state.</p>
+      <div class="usecase-tag">zk-SNARKs &middot; Soul chain</div>
+    </div>
+
+    <div class="usecase-card" style="--card-accent: var(--orange);">
+      <div class="usecase-icon" style="color: var(--orange);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h4>Creator Content Ownership</h4>
+      <p>Register creative works on-chain with timestamp and ownership proof. Not an NFT marketplace &mdash; a copyright registry. Content hash + creator identity + timestamp = verifiable proof of creation. Integrates with DMCA processes and content platforms.</p>
+      <div class="usecase-tag">Content hash &middot; Timestamp proof</div>
+    </div>
+
+    <div class="usecase-card" style="--card-accent: var(--blue);">
+      <div class="usecase-icon" style="color: var(--blue);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h4>Supply Chain Tracking</h4>
+      <p>Every handoff in a supply chain creates a signed transaction. From raw material to finished product, each checkpoint is verifiable. IoT sensors write readings to the chain. Counterfeits become immediately detectable by verifying the chain of custody against expected signatures.</p>
+      <div class="usecase-tag">IoT &middot; Chain of custody</div>
+    </div>
+
+    <div class="usecase-card" style="--card-accent: var(--pink);">
+      <div class="usecase-icon" style="color: var(--pink);">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+      <h4>Agent Audit Trails</h4>
+      <p>Every AI agent action in BlackRoad OS is logged to RoadChain. When an agent makes a decision, the inputs, reasoning hash, and output are recorded. Full accountability for autonomous systems. Required for enterprise AI compliance and SOC 2 audit readiness.</p>
+      <div class="usecase-tag">SOC 2 &middot; Agent accountability</div>
+    </div>
+  </div>
+
+  <!-- Explorer Preview -->
+  <div class="explorer-preview">
+    <div class="explorer-header">
+      <span class="title">RoadChain Explorer &mdash; Latest Blocks</span>
+      <span class="live"><span class="dot"></span> Live</span>
+    </div>
+    <div class="explorer-rows" id="explorerRows"></div>
+  </div>
+</section>
+
+<!-- ─── RoadCoin ──────────────────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="roadcoin">
+  <div class="section-badge">
+    <div class="dot" style="background: var(--blue);"></div>
+    <span>Utility token</span>
+  </div>
+  <h2 class="section-title">RoadCoin</h2>
+  <p class="section-sub">
+    Not a speculative token. A utility coin for the BlackRoad ecosystem &mdash; cross-border payments, agent micropayments, and Stripe bridge for fiat on/off ramp.
+  </p>
+
+  <div class="roadcoin-grid">
+    <div class="roadcoin-detail">
+      <div class="roadcoin-item">
+        <h5>Stablecoin Integration</h5>
+        <p>RoadCoin is pegged to USD via smart contract reserves. Cross-border payments settle in seconds, not days. Built for the $6T+ stablecoin economy that already exists &mdash; not trying to create a new speculative market.</p>
+      </div>
+      <div class="roadcoin-item">
+        <h5>Stripe Bridge</h5>
+        <p>Fiat on-ramp and off-ramp through Stripe Connect. Users pay in USD, receive in RoadCoin. Merchants receive in USD. The crypto layer is invisible to end users &mdash; they just see faster, cheaper payments.</p>
+      </div>
+      <div class="roadcoin-item">
+        <h5>Agent Micropayments</h5>
+        <p>AI agents in BlackRoad OS use RoadCoin for inter-agent transactions. Memory reads, compute cycles, and task bounties are priced in fractional RoadCoin. The task marketplace runs on real economic incentives.</p>
+      </div>
+      <div class="roadcoin-item">
+        <h5>Ecosystem Utility</h5>
+        <p>Transaction fees on RoadChain are paid in RoadCoin. Staking RoadCoin provides priority compute access. Revenue from BlackRoad products flows through the RoadCoin economy. Every product touchpoint is a transaction.</p>
+      </div>
+    </div>
+
+    <div class="coin-visual">
+      <div class="coin-circle">
+        <span>RC</span>
+      </div>
+      <div class="coin-label">RoadCoin &middot; Utility Token</div>
+      <div class="coin-detail-row">
+        <div>
+          <div class="cd-label">Type</div>
+          <div class="cd-val">ERC-20 Stablecoin</div>
+        </div>
+        <div>
+          <div class="cd-label">Peg</div>
+          <div class="cd-val">1 RC = $1.00 USD</div>
+        </div>
+      </div>
+      <div class="coin-detail-row" style="margin-top: 12px;">
+        <div>
+          <div class="cd-label">Bridge</div>
+          <div class="cd-val">Stripe Connect</div>
+        </div>
+        <div>
+          <div class="cd-label">Network</div>
+          <div class="cd-val">Ethereum L2</div>
+        </div>
+      </div>
+      <div style="margin-top: 28px; font-family: var(--mono); font-size: 10px; color: #222; text-align: center; max-width: 220px; line-height: 1.5;">
+        Not an investment vehicle. Not listed on exchanges. A utility for BlackRoad OS infrastructure.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Technical Architecture ────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="architecture">
+  <div class="section-badge">
+    <div class="dot" style="background: var(--orange);"></div>
+    <span>Infrastructure</span>
+  </div>
+  <h2 class="section-title">Technical<br><span class="gradient-text">Architecture</span></h2>
+  <p class="section-sub">
+    Sovereign infrastructure. Self-hosted nodes. No dependency on third-party blockchain providers. Every component runs on BlackRoad's own hardware.
+  </p>
+
+  <div class="arch-diagram">
+    <div class="arch-layers">
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--cyan);">Application</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">RoadChain Explorer</div>
+          <div class="arch-chip">Consent Manager</div>
+          <div class="arch-chip">Agent Audit UI</div>
+          <div class="arch-chip">RoadCoin Wallet</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--blue);">API Layer</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">JSON-RPC :8545</div>
+          <div class="arch-chip">REST API</div>
+          <div class="arch-chip">WebSocket Events</div>
+          <div class="arch-chip">GraphQL</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--purple);">Smart Contracts</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">Solidity 0.8.x</div>
+          <div class="arch-chip">ConsentRegistry.sol</div>
+          <div class="arch-chip">RoadCoin.sol</div>
+          <div class="arch-chip">AuditTrail.sol</div>
+          <div class="arch-chip">SoulChain.sol</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--magenta);">Consensus</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">Ethereum PoS</div>
+          <div class="arch-chip">Hyperledger Fabric (permissioned)</div>
+          <div class="arch-chip">BFT Ordering</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--pink);">Storage</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">LevelDB (state)</div>
+          <div class="arch-chip">IPFS (off-chain)</div>
+          <div class="arch-chip">MinIO (objects)</div>
+          <div class="arch-chip">PostgreSQL (index)</div>
+        </div>
+      </div>
+      <div class="arch-layer">
+        <div class="arch-layer-name" style="color: var(--orange);">Network</div>
+        <div class="arch-layer-items">
+          <div class="arch-chip">WireGuard mesh</div>
+          <div class="arch-chip">Pi fleet nodes</div>
+          <div class="arch-chip">Gematria edge</div>
+          <div class="arch-chip">Tor hidden services</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-specs">
+    <div class="arch-spec">
+      <div class="val">5</div>
+      <div class="label">Network Nodes</div>
+    </div>
+    <div class="arch-spec">
+      <div class="val">~2s</div>
+      <div class="label">Block Time</div>
+    </div>
+    <div class="arch-spec">
+      <div class="val">52</div>
+      <div class="label">TOPS (Hailo-8)</div>
+    </div>
+    <div class="arch-spec">
+      <div class="val">256-bit</div>
+      <div class="label">Hash Depth</div>
+    </div>
+  </div>
+
+  <!-- Code block -->
+  <div style="margin-top: 32px;">
+    <div class="compliance-code" style="max-height: 340px; overflow-y: auto;">
+      <pre><span class="comment">// RoadChain JSON-RPC — connect to the network</span>
+
+<span class="key">const</span> provider = <span class="key">new</span> ethers.JsonRpcProvider(
+  <span class="val">"https://rpc.roadchain.io:8545"</span>
+);
+
+<span class="comment">// Query latest block</span>
+<span class="key">const</span> block = <span class="key">await</span> provider.getBlock(<span class="val">"latest"</span>);
+console.log(block.hash);
+<span class="comment">// 0x7a3f...c91e</span>
+
+<span class="comment">// Verify consent record</span>
+<span class="key">const</span> consent = <span class="key">await</span> consentRegistry.verify(
+  userId,
+  purposeHash,
+  timestamp
+);
+<span class="comment">// { valid: true, blockNumber: 847291, txHash: "0x..." }</span>
+
+<span class="comment">// Register data fingerprint</span>
+<span class="key">const</span> tx = <span class="key">await</span> auditTrail.registerFingerprint(
+  dataHash,     <span class="comment">// SHA-256 of the dataset</span>
+  metadataUri,  <span class="comment">// IPFS CID for metadata</span>
+  agentId       <span class="comment">// The agent that produced it</span>
+);
+<span class="key">await</span> tx.wait();
+<span class="comment">// Confirmed in ~2 seconds</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─── The Honest Difference ────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="honest">
+  <div class="section-badge">
+    <div class="dot" style="background: #22c55e;"></div>
+    <span>No bullshit</span>
+  </div>
+  <h2 class="section-title">The Honest<br><span class="gradient-text">Difference</span></h2>
+  <p class="section-sub">
+    RoadChain is built by a real company with real infrastructure. Here's what separates it from the 10,000 blockchain projects that came before.
+  </p>
+
+  <div class="honest-grid">
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>No ICO. Ever.</h4>
+      <p>RoadCoin is a utility token, not an investment vehicle. There was no token sale. No presale. No "early investor" allocation. The token exists to power the ecosystem, not to make speculators rich.</p>
+    </div>
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>No Pump-and-Dump</h4>
+      <p>RoadCoin is not listed on any exchange and has no plans to be. It's a stablecoin pegged to USD. There is no price appreciation mechanism because it's not designed to be traded &mdash; it's designed to be used.</p>
+    </div>
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>No Anonymous Team</h4>
+      <p>BlackRoad OS, Inc. is a Delaware C-Corp incorporated November 17, 2025 via Stripe Atlas. Real name, real EIN, real registered agent. Public company records. The founder is building in public with full accountability.</p>
+    </div>
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>Real Products, Real Revenue</h4>
+      <p>BlackRoad OS has 92 products across 20 domains. Real users. Real infrastructure. RoadChain isn't a whitepaper &mdash; it's a layer of an already-operating system. The blockchain serves the product, not the other way around.</p>
+    </div>
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>Real Infrastructure</h4>
+      <p>5 Raspberry Pi nodes, 2 DigitalOcean servers, 26 TOPS of edge AI compute, WireGuard mesh, self-hosted everything. The chain runs on hardware we own and operate. No cloud abstraction. No "nodes coming soon."</p>
+    </div>
+    <div class="honest-card">
+      <span class="check" style="color: #22c55e;">&#10003;</span>
+      <h4>Honest About Limitations</h4>
+      <p>Blockchain is slow for most things. We don't use it where a database works better. RoadChain handles verification and audit &mdash; PostgreSQL handles everything else. Right tool for the right job.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Regulatory Compliance ────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" id="compliance">
+  <div class="section-badge">
+    <div class="dot" style="background: var(--magenta);"></div>
+    <span>Legal framework</span>
+  </div>
+  <h2 class="section-title">Regulatory<br><span class="gradient-text">Compliance</span></h2>
+  <p class="section-sub">
+    Built with regulators in mind, not in spite of them. RoadChain is designed to comply with existing securities law, privacy regulations, and financial reporting requirements.
+  </p>
+
+  <div class="compliance-content">
+    <div class="compliance-text">
+      <div class="compliance-block">
+        <h4>SEC Howey Test Awareness</h4>
+        <p>RoadCoin is structured as a utility token, not a security. It does not represent an investment contract, does not promise profits from the efforts of others, and is not marketed as an investment. However, we maintain awareness of the Howey Test criteria and have documented our analysis. If classification changes, we have a Form S-1 filing path ready.</p>
+      </div>
+      <div class="compliance-block">
+        <h4>AML/KYC Compliance</h4>
+        <p>All RoadCoin on-ramp and off-ramp transactions go through Stripe, which provides KYC verification. The permissioned chain requires identity verification for node operators. Transaction monitoring for suspicious patterns is built into the audit trail. FinCEN MSB registration path documented.</p>
+      </div>
+      <div class="compliance-block">
+        <h4>GDPR &amp; Privacy</h4>
+        <p>Personal data never touches the chain. Only hashes of consent records are stored on-chain. Off-chain data can be deleted per right-to-erasure requests while the hash remains as proof the consent existed. Data Processing Agreements (DPAs) available for enterprise customers.</p>
+      </div>
+      <div class="compliance-block">
+        <h4>Delaware C-Corp Structure</h4>
+        <p>BlackRoad OS, Inc. is a properly formed Delaware C-Corp with Bylaws, Board Actions, Stock Purchase Agreement, CIIAA, and 83(b) election on file. EIN assigned. Corporate governance is real, not a DAO experiment. This means real legal liability, real accountability, and real recourse for customers.</p>
+      </div>
+    </div>
+
+    <div class="compliance-code">
+      <pre><span class="comment">// RoadChain Compliance Configuration</span>
+{
+  <span class="key">"entity"</span>: {
+    <span class="key">"name"</span>: <span class="val">"BlackRoad OS, Inc."</span>,
+    <span class="key">"type"</span>: <span class="val">"Delaware C-Corp"</span>,
+    <span class="key">"formed"</span>: <span class="val">"2025-11-17"</span>,
+    <span class="key">"ein"</span>: <span class="val">"41-2663817"</span>,
+    <span class="key">"file_number"</span>: <span class="val">"10405914"</span>
+  },
+
+  <span class="key">"token"</span>: {
+    <span class="key">"name"</span>: <span class="val">"RoadCoin"</span>,
+    <span class="key">"symbol"</span>: <span class="val">"RC"</span>,
+    <span class="key">"type"</span>: <span class="val">"utility"</span>,
+    <span class="key">"is_security"</span>: <span class="bool-false">false</span>,
+    <span class="key">"ico"</span>: <span class="bool-false">false</span>,
+    <span class="key">"exchange_listed"</span>: <span class="bool-false">false</span>,
+    <span class="key">"stablecoin_peg"</span>: <span class="val">"USD"</span>,
+    <span class="key">"s1_path_ready"</span>: <span class="bool-true">true</span>
+  },
+
+  <span class="key">"compliance"</span>: {
+    <span class="key">"howey_test_analyzed"</span>: <span class="bool-true">true</span>,
+    <span class="key">"aml_kyc"</span>: <span class="bool-true">true</span>,
+    <span class="key">"kyc_provider"</span>: <span class="val">"Stripe Identity"</span>,
+    <span class="key">"gdpr_compliant"</span>: <span class="bool-true">true</span>,
+    <span class="key">"data_on_chain"</span>: <span class="val">"hashes only"</span>,
+    <span class="key">"pii_on_chain"</span>: <span class="bool-false">false</span>,
+    <span class="key">"right_to_erasure"</span>: <span class="bool-true">true</span>,
+    <span class="key">"soc2_ready"</span>: <span class="bool-true">true</span>,
+    <span class="key">"fincen_msb_path"</span>: <span class="val">"documented"</span>
+  },
+
+  <span class="key">"chain"</span>: {
+    <span class="key">"type"</span>: <span class="val">"permissioned"</span>,
+    <span class="key">"consensus"</span>: <span class="val">"PoS + BFT"</span>,
+    <span class="key">"node_identity"</span>: <span class="val">"required"</span>,
+    <span class="key">"audit_log"</span>: <span class="bool-true">true</span>,
+    <span class="key">"tx_monitoring"</span>: <span class="bool-true">true</span>
+  }
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA ───────────────────────────────────────────────────────── -->
+<div class="section-divider"></div>
+<section class="section fade-section" style="text-align: center; padding: 120px 40px;">
+  <h2 class="section-title" style="max-width: 700px; margin: 0 auto 20px;">Verification you can<br><span class="gradient-text">actually trust.</span></h2>
+  <p class="section-sub" style="margin: 0 auto 48px; text-align: center;">
+    No hype. No speculation. Just cryptographic proof that things happened the way they're supposed to. Built by a real company, on real hardware, with real accountability.
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+    <a href="https://blackroad.company" target="_blank"><button class="grad-btn">View the Company</button></a>
+    <a href="https://github.com/blackboxprogramming" target="_blank"><button class="outline-btn">GitHub &rarr;</button></a>
+  </div>
+</section>
+
+<!-- ─── Footer ───────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand">
+        <div class="nav-bars" style="transform: scale(0.85);">
+          <div class="nav-bar" style="background:#FF6B2B;"></div>
+          <div class="nav-bar" style="background:#FF2255;"></div>
+          <div class="nav-bar" style="background:#CC00AA;"></div>
+          <div class="nav-bar" style="background:#8844FF;"></div>
+          <div class="nav-bar" style="background:#4488FF;"></div>
+          <div class="nav-bar" style="background:#00D4FF;"></div>
+        </div>
+        <span class="footer-brand-name">RoadChain</span>
+      </div>
+      <p class="footer-desc">
+        BlackRoad's blockchain verification layer. Immutable audit trails, consent management, and zero-knowledge proofs. Built on real infrastructure by a real company.
+      </p>
+    </div>
+    <div class="footer-col">
+      <h5>Ecosystem</h5>
+      <a href="https://roadcoin.io" target="_blank">roadcoin.io</a>
+      <a href="https://blackroad.company" target="_blank">blackroad.company</a>
+      <a href="https://blackroad.io" target="_blank">blackroad.io</a>
+      <a href="https://roadcode.io" target="_blank">roadcode.io</a>
+    </div>
+    <div class="footer-col">
+      <h5>Platform</h5>
+      <a href="#usecases">Use Cases</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#roadcoin">RoadCoin</a>
+      <a href="#compliance">Compliance</a>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <a href="https://github.com/blackboxprogramming" target="_blank">GitHub</a>
+      <a href="https://github.com/BlackRoad-OS-Inc" target="_blank">BlackRoad OS Inc</a>
+      <a href="https://blackroad.company" target="_blank">About</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>&copy; 2025-2026 BlackRoad OS, Inc. &middot; Delaware C-Corp</span>
+    <span>Pave Tomorrow.</span>
+  </div>
+</footer>
+
+<script>
+// ─── Nav scroll behavior ──────────────────────────────────────────
+const nav = document.getElementById('mainNav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ─── Intersection Observer for fade-in sections ───────────────────
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      fadeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.fade-section').forEach(el => {
+  fadeObserver.observe(el);
+});
+
+// ─── Stat bar animation ───────────────────────────────────────────
+const barObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const fill = entry.target.querySelector('.fill');
+      if (fill && fill.dataset.width) {
+        setTimeout(() => { fill.style.width = fill.dataset.width; }, 200);
+      }
+      barObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.why-stat-bar').forEach(el => {
+  barObserver.observe(el);
+});
+
+// ─── Hash Ticker ──────────────────────────────────────────────────
+function fakeHash(seed) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) {
+    h = (Math.imul(31, h) + seed.charCodeAt(i)) | 0;
+  }
+  const hex = (Math.abs(h) * 7919 + 1234567).toString(16).padStart(8, '0');
+  return (hex + hex + hex + hex + hex + hex + hex + hex).slice(0, 64);
+}
+
+const tickerEl = document.getElementById('hashTicker');
+const agents = ['lucidia', 'blackbot', 'aura', 'sentinel', 'cecilia', 'alice'];
+const events = ['memory.commit', 'agent.verified', 'task.created', 'truth.state.commit', 'consent.recorded', 'data.fingerprint'];
+let tickerHTML = '';
+
+for (let i = 0; i < 40; i++) {
+  const agent = agents[i % agents.length];
+  const evt = events[i % events.length];
+  const hash = fakeHash(agent + evt + i + 'roadchain');
+  const short = '0x' + hash.slice(0, 8) + '...' + hash.slice(-6);
+  const isActive = i % 5 === 0;
+  tickerHTML += `<span${isActive ? ' class="active"' : ''}>${short} ${agent}::${evt}</span>`;
+}
+// Duplicate for seamless loop
+tickerEl.innerHTML = tickerHTML + tickerHTML;
+
+// ─── Explorer Rows ────────────────────────────────────────────────
+const explorerRows = document.getElementById('explorerRows');
+const eventTypes = ['memory.commit', 'agent.verified', 'task.created', 'consent.hash', 'data.fingerprint', 'soul.chain.update', 'audit.write', 'truth.commit'];
+
+function genExplorerRow(blockNum) {
+  const agent = agents[Math.floor(Math.random() * agents.length)];
+  const evt = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+  const hash = fakeHash(agent + evt + blockNum + Date.now());
+  const short = '0x' + hash.slice(0, 10);
+  const highlight = hash.slice(10, 18);
+  const rest = hash.slice(18, 24) + '...';
+  const ago = Math.floor(Math.random() * 30) + 1;
+  return `<div class="explorer-row">
+    <span class="block-num">#${blockNum}</span>
+    <span class="hash">${short}<span class="highlight">${highlight}</span>${rest}</span>
+    <span class="type">${evt}</span>
+    <span class="agent">${agent}</span>
+    <span class="time">${ago}s ago</span>
+  </div>`;
+}
+
+let currentBlock = 847291;
+let rowsHTML = '';
+for (let i = 0; i < 8; i++) {
+  rowsHTML += genExplorerRow(currentBlock - i);
+}
+explorerRows.innerHTML = rowsHTML;
+
+// Live update
+setInterval(() => {
+  currentBlock++;
+  const newRow = document.createElement('div');
+  newRow.innerHTML = genExplorerRow(currentBlock);
+  const row = newRow.firstElementChild;
+  row.style.opacity = '0';
+  row.style.transform = 'translateY(-8px)';
+  explorerRows.insertBefore(row, explorerRows.firstChild);
+  requestAnimationFrame(() => {
+    row.style.transition = 'opacity 0.4s, transform 0.4s';
+    row.style.opacity = '1';
+    row.style.transform = 'translateY(0)';
+  });
+  // Remove last row if more than 10
+  if (explorerRows.children.length > 10) {
+    const last = explorerRows.lastElementChild;
+    last.style.opacity = '0';
+    setTimeout(() => last.remove(), 300);
+  }
+}, 4000);
+
+// ─── Smooth scroll for anchor links ──────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// ─── Gradient text angle rotation ─────────────────────────────────
+const heroGradient = document.querySelector('.hero h1 .gradient-text');
+if (heroGradient) {
+  let angle = 0;
+  function rotateGrad() {
+    angle = (angle + 0.5) % 360;
+    heroGradient.style.background = `linear-gradient(${angle}deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF)`;
+    heroGradient.style.webkitBackgroundClip = 'text';
+    heroGradient.style.webkitTextFillColor = 'transparent';
+    heroGradient.style.backgroundClip = 'text';
+    requestAnimationFrame(rotateGrad);
+  }
+  rotateGrad();
+}
+
+// ─── Card hover color accents ─────────────────────────────────────
+document.querySelectorAll('.usecase-card').forEach(card => {
+  const accent = getComputedStyle(card).getPropertyValue('--card-accent').trim();
+  card.addEventListener('mouseenter', () => {
+    card.style.borderColor = accent ? accent.replace(')', ', 0.25)').replace('rgb', 'rgba') : 'rgba(136, 68, 255, 0.2)';
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.borderColor = '#141414';
+  });
+});
+
+// ─── Console Easter Egg ──────────────────────────────────────────
+console.log(
+  '%cRoadChain %c| Immutable by Design',
+  'color: #8844FF; font-weight: bold; font-size: 14px;',
+  'color: #666; font-size: 14px;'
+);
+console.log(
+  '%cBlackRoad OS, Inc. — Delaware C-Corp — Pave Tomorrow.',
+  'color: #444; font-size: 11px;'
+);
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

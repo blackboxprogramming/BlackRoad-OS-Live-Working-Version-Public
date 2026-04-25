@@ -1,0 +1,1547 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad OS — Pave Tomorrow</title>
+<meta name="description" content="Your AI. Your hardware. Your rules. 942 repos, 31 orgs, 60 agents, zero cloud dependency.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --c1: #FF6B2B;
+  --c2: #FF2255;
+  --c3: #CC00AA;
+  --c4: #8844FF;
+  --c5: #4488FF;
+  --c6: #00D4FF;
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --text: #e8e8f0;
+  --text-dim: #8888a0;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====================== MOUSE GLOW ====================== */
+#mouse-glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  background: radial-gradient(circle, rgba(136,68,255,0.06) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+}
+
+/* ====================== PARTICLE CANVAS ====================== */
+#particles {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ====================== GRADIENT TEXT ====================== */
+.gradient-text {
+  background: linear-gradient(135deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientFlow 6s ease infinite;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-line {
+  height: 3px;
+  background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6));
+  background-size: 300% 100%;
+  animation: gradientFlow 4s ease infinite;
+  border-radius: 2px;
+}
+
+/* ====================== HERO ====================== */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  padding: 2rem;
+  text-align: center;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+  font-family: var(--font-mono);
+  font-size: clamp(0.9rem, 2vw, 1.3rem);
+  color: var(--text-dim);
+  min-height: 2em;
+  margin-bottom: 3rem;
+}
+
+.hero-subtitle .cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.2em;
+  background: var(--c6);
+  margin-left: 4px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s steps(1) infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-primary {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 60px;
+  cursor: pointer;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--c2), var(--c3), var(--c4));
+  background-size: 200% 200%;
+  animation: gradientFlow 4s ease infinite;
+  color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 30px rgba(204,0,170,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 40px rgba(204,0,170,0.5);
+}
+
+.btn-secondary {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  border-radius: 60px;
+  cursor: pointer;
+  text-decoration: none;
+  background: transparent;
+  color: var(--text);
+  border: 2px solid rgba(136,68,255,0.4);
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--c4);
+  box-shadow: 0 0 25px rgba(136,68,255,0.25);
+  transform: translateY(-2px);
+}
+
+/* ====================== SCROLL INDICATOR ====================== */
+.scroll-indicator {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.4;
+  animation: scrollBounce 2s ease infinite;
+}
+
+.scroll-indicator span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+}
+
+.scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid var(--text-dim);
+  border-bottom: 2px solid var(--text-dim);
+  transform: rotate(45deg);
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* ====================== SECTIONS ====================== */
+section {
+  position: relative;
+  z-index: 2;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section-padding {
+  padding: 8rem 0;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.section-subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+/* ====================== REVEAL ANIMATIONS ====================== */
+.reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-80px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(80px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-left.visible, .reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Staggered delays */
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.2s; }
+.delay-3 { transition-delay: 0.3s; }
+.delay-4 { transition-delay: 0.4s; }
+.delay-5 { transition-delay: 0.5s; }
+.delay-6 { transition-delay: 0.6s; }
+.delay-7 { transition-delay: 0.7s; }
+.delay-8 { transition-delay: 0.8s; }
+.delay-9 { transition-delay: 0.9s; }
+.delay-10 { transition-delay: 1.0s; }
+
+/* ====================== STATS STRIP ====================== */
+.stats-strip {
+  background: var(--bg2);
+  border-top: 1px solid rgba(136,68,255,0.15);
+  border-bottom: 1px solid rgba(136,68,255,0.15);
+  padding: 4rem 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-number {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--c1), var(--c3));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+}
+
+/* ====================== REPLACED SECTION ====================== */
+.replaced-section {
+  background: var(--bg);
+}
+
+.replaced-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin-top: 4rem;
+}
+
+.replaced-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid rgba(136,68,255,0.1);
+  transition: background 0.3s;
+}
+
+.replaced-row:hover {
+  background: rgba(136,68,255,0.04);
+}
+
+.replaced-row.header {
+  border-bottom: 2px solid rgba(136,68,255,0.2);
+}
+
+.replaced-row.header .replaced-cell {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  padding: 1rem 1.5rem;
+}
+
+.replaced-cell {
+  padding: 1.2rem 1.5rem;
+  font-size: 1.05rem;
+}
+
+.replaced-cell:first-child {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.replaced-cell:last-child {
+  font-family: var(--font-body);
+  color: var(--text-dim);
+  text-decoration: line-through;
+  text-decoration-color: rgba(255,34,85,0.4);
+}
+
+.replaced-cell .ours {
+  color: var(--c6);
+  font-weight: 500;
+}
+
+/* ====================== PRODUCT CARDS ====================== */
+.products-section {
+  background: var(--bg2);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 4rem;
+}
+
+.product-card {
+  position: relative;
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 2.5rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6));
+  background-size: 400% 400%;
+  animation: gradientFlow 6s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.4;
+  transition: opacity 0.4s;
+}
+
+.product-card:hover::before {
+  opacity: 1;
+}
+
+.product-card:hover {
+  transform: translateY(-8px);
+}
+
+.product-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(136,68,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.product-card:hover::after {
+  opacity: 1;
+}
+
+.product-icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+/* CSS-only geometric icons */
+.icon-roadcode {
+  width: 56px; height: 56px;
+  background: conic-gradient(from 0deg, var(--c5), var(--c4), var(--c5));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.icon-roadpay {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+}
+
+.icon-roundtrip {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--c3), var(--c4));
+  border-radius: 50%;
+  position: relative;
+}
+.icon-roundtrip::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  background: var(--bg);
+  border-radius: 50%;
+}
+
+.icon-roadsearch {
+  width: 56px; height: 56px;
+  position: relative;
+}
+.icon-roadsearch::before {
+  content: '';
+  position: absolute;
+  width: 32px; height: 32px;
+  border: 4px solid var(--c6);
+  border-radius: 50%;
+  top: 4px; left: 4px;
+}
+.icon-roadsearch::after {
+  content: '';
+  position: absolute;
+  width: 4px; height: 20px;
+  background: var(--c6);
+  bottom: 2px; right: 8px;
+  transform: rotate(-45deg);
+  border-radius: 2px;
+}
+
+.icon-headlights {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--c1), var(--c6));
+  clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+  border-radius: 4px;
+}
+
+.icon-blackbox {
+  width: 56px; height: 56px;
+  border: 3px solid var(--c4);
+  border-radius: 8px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(136,68,255,0.15), rgba(0,212,255,0.15));
+}
+.icon-blackbox::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 2px solid var(--c6);
+  border-radius: 4px;
+}
+
+.product-name {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.product-desc {
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.product-link {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--c6);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: gap 0.3s;
+}
+
+.product-link:hover {
+  gap: 0.8rem;
+}
+
+.product-link::after {
+  content: '-->';
+}
+
+/* ====================== FLEET TERMINAL ====================== */
+.fleet-section {
+  background: var(--bg);
+}
+
+.terminal {
+  background: #0c0c0c;
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-top: 3rem;
+  box-shadow: 0 20px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,212,255,0.05);
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.terminal-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+}
+.terminal-dot.red { background: #ff5f56; }
+.terminal-dot.yellow { background: #ffbd2e; }
+.terminal-dot.green { background: #27ca40; }
+
+.terminal-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+
+.terminal-body {
+  padding: 1.5rem 2rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 1.4vw, 0.9rem);
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.terminal-body .fleet-line {
+  opacity: 0;
+  white-space: nowrap;
+}
+
+.terminal-body .fleet-line.typed {
+  opacity: 1;
+}
+
+.fleet-prompt { color: var(--c6); }
+.fleet-tag { color: var(--c4); }
+.fleet-name { color: var(--c1); font-weight: 500; }
+.fleet-ip { color: var(--text-dim); }
+.fleet-up { color: #27ca40; font-weight: 700; }
+.fleet-info { color: var(--text-dim); }
+.fleet-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background: var(--c6);
+  animation: blink 0.8s steps(1) infinite;
+  vertical-align: text-bottom;
+}
+
+/* ====================== MATH SECTION ====================== */
+.math-section {
+  background: var(--bg2);
+  text-align: center;
+}
+
+.math-display {
+  margin-top: 4rem;
+  padding: 3rem;
+  background: var(--bg);
+  border-radius: 20px;
+  border: 1px solid rgba(136,68,255,0.15);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.math-formula {
+  font-family: var(--font-mono);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.math-formula .glow-segment {
+  display: inline-block;
+  animation: mathGlow 3s ease infinite;
+}
+
+.math-formula .glow-segment:nth-child(1) { animation-delay: 0s; }
+.math-formula .glow-segment:nth-child(2) { animation-delay: 0.5s; }
+.math-formula .glow-segment:nth-child(3) { animation-delay: 1s; }
+.math-formula .glow-segment:nth-child(4) { animation-delay: 1.5s; }
+.math-formula .glow-segment:nth-child(5) { animation-delay: 2s; }
+
+@keyframes mathGlow {
+  0%, 100% { color: var(--text-dim); text-shadow: none; }
+  50% { color: var(--c6); text-shadow: 0 0 20px rgba(0,212,255,0.5); }
+}
+
+.math-result {
+  font-family: var(--font-mono);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.math-credit {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.math-verified {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: #27ca40;
+  margin-top: 1rem;
+}
+
+/* ====================== FOUNDER SECTION ====================== */
+.founder-section {
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.founder-section::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 800px; height: 800px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(204,0,170,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.founder-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.founder-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--c3);
+  margin-bottom: 1.5rem;
+}
+
+.founder-name {
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.founder-bio {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-dim);
+  margin-bottom: 3rem;
+}
+
+.founder-bio strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ====================== PRICING ====================== */
+.pricing-section {
+  background: var(--bg2);
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 4rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pricing-card {
+  background: var(--bg);
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  border: 1px solid rgba(136,68,255,0.1);
+  transition: transform 0.4s, border-color 0.4s;
+  position: relative;
+}
+
+.pricing-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(136,68,255,0.3);
+}
+
+.pricing-card.featured {
+  border-color: rgba(204,0,170,0.4);
+  box-shadow: 0 0 60px rgba(204,0,170,0.1);
+}
+
+.pricing-card.featured::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--c2), var(--c3), var(--c4));
+  background-size: 300% 300%;
+  animation: gradientFlow 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.pricing-tier {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pricing-price {
+  font-family: var(--font-heading);
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.pricing-price .period {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.pricing-desc {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.pricing-features {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.pricing-features li {
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pricing-features li::before {
+  content: '+';
+  color: var(--c6);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.pricing-cta {
+  display: inline-block;
+  width: 100%;
+  padding: 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.pricing-cta.primary {
+  background: linear-gradient(135deg, var(--c2), var(--c3));
+  color: white;
+}
+
+.pricing-cta.primary:hover {
+  box-shadow: 0 4px 30px rgba(204,0,170,0.4);
+  transform: translateY(-2px);
+}
+
+.pricing-cta.secondary {
+  background: rgba(136,68,255,0.1);
+  color: var(--text);
+  border: 1px solid rgba(136,68,255,0.2);
+}
+
+.pricing-cta.secondary:hover {
+  background: rgba(136,68,255,0.15);
+  border-color: rgba(136,68,255,0.4);
+}
+
+/* ====================== FOOTER ====================== */
+footer {
+  background: var(--bg);
+  border-top: 1px solid rgba(136,68,255,0.1);
+  padding: 4rem 0 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.footer-tagline {
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.footer-domains {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.footer-domains a {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-domains a:hover {
+  color: var(--c6);
+}
+
+.footer-legal {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.footer-divider {
+  width: 100%;
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+/* ====================== PARALLAX ====================== */
+.parallax-element {
+  will-change: transform;
+}
+
+/* ====================== RESPONSIVE ====================== */
+@media (max-width: 768px) {
+  .section-padding { padding: 5rem 0; }
+  .products-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .replaced-cell { padding: 0.8rem 1rem; font-size: 0.9rem; }
+  .stats-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1.5rem; }
+  .terminal-body { padding: 1rem; font-size: 0.6rem; }
+  .hero-ctas { flex-direction: column; align-items: center; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 3rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ====================== CUSTOM SCROLLBAR ====================== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(136,68,255,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(136,68,255,0.5); }
+</style>
+<meta property="og:title" content="BlackRoad OS — Pave Tomorrow">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadai-com/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadai-com/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad OS — Pave Tomorrow","url":"https://blackroadai-com","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<!-- Mouse Glow -->
+<div id="mouse-glow"></div>
+
+<!-- Particle Canvas -->
+<canvas id="particles"></canvas>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <h1 class="hero-title gradient-text parallax-element" data-speed="0.03">BlackRoad OS</h1>
+  <div class="hero-subtitle">
+    <span id="typed-text"></span><span class="cursor"></span>
+  </div>
+  <div class="hero-ctas">
+    <a href="/app" class="btn-primary">Get Started</a>
+    <a href="/pricing" class="btn-secondary">View Pricing</a>
+  </div>
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- ==================== STATS ==================== -->
+<section class="stats-strip">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-item reveal delay-1">
+        <div class="stat-number" data-target="942">0</div>
+        <div class="stat-label">Repos</div>
+      </div>
+      <div class="stat-item reveal delay-2">
+        <div class="stat-number" data-target="31">0</div>
+        <div class="stat-label">Orgs</div>
+      </div>
+      <div class="stat-item reveal delay-3">
+        <div class="stat-number" data-target="19">0</div>
+        <div class="stat-label">Domains</div>
+      </div>
+      <div class="stat-item reveal delay-4">
+        <div class="stat-number" data-target="60">0</div>
+        <div class="stat-label">Agents</div>
+      </div>
+      <div class="stat-item reveal delay-5">
+        <div class="stat-number" data-target="41.8" data-decimals="1">0</div>
+        <div class="stat-label">TOPS</div>
+      </div>
+      <div class="stat-item reveal delay-6">
+        <div class="stat-number" data-target="7">0</div>
+        <div class="stat-label">Nodes</div>
+      </div>
+      <div class="stat-item reveal delay-7">
+        <div class="stat-number" data-target="182" data-suffix="K">0</div>
+        <div class="stat-label">Memories</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== WHAT WE REPLACED ==================== -->
+<section class="replaced-section section-padding">
+  <div class="container">
+    <div class="reveal">
+      <h2 class="section-title">What We <span class="gradient-text">Replaced</span></h2>
+      <p class="section-subtitle">Every service on our own hardware. Every byte under our control.</p>
+    </div>
+    <div class="replaced-grid">
+      <div class="replaced-row header reveal delay-1">
+        <div class="replaced-cell">We Built</div>
+        <div class="replaced-cell" style="text-decoration:none">They Charged</div>
+      </div>
+      <div class="replaced-row reveal-left delay-1">
+        <div class="replaced-cell"><span class="ours">RoadCode</span> (Gitea)</div>
+        <div class="replaced-cell">GitHub ($21/user/mo)</div>
+      </div>
+      <div class="replaced-row reveal-right delay-2">
+        <div class="replaced-cell"><span class="ours">RoadPay</span> (D1 + Stripe)</div>
+        <div class="replaced-cell">Stripe Atlas ($500)</div>
+      </div>
+      <div class="replaced-row reveal-left delay-3">
+        <div class="replaced-cell"><span class="ours">PowerDNS</span></div>
+        <div class="replaced-cell">Cloudflare DNS</div>
+      </div>
+      <div class="replaced-row reveal-right delay-4">
+        <div class="replaced-cell"><span class="ours">Caddy TLS</span></div>
+        <div class="replaced-cell">Cloudflare Proxy</div>
+      </div>
+      <div class="replaced-row reveal-left delay-5">
+        <div class="replaced-cell"><span class="ours">MinIO</span></div>
+        <div class="replaced-cell">AWS S3 ($0.023/GB)</div>
+      </div>
+      <div class="replaced-row reveal-right delay-6">
+        <div class="replaced-cell"><span class="ours">PostgreSQL</span></div>
+        <div class="replaced-cell">Supabase ($25/mo)</div>
+      </div>
+      <div class="replaced-row reveal-left delay-7">
+        <div class="replaced-cell"><span class="ours">WireGuard</span></div>
+        <div class="replaced-cell">Tailscale ($18/user)</div>
+      </div>
+      <div class="replaced-row reveal-right delay-8">
+        <div class="replaced-cell"><span class="ours">RoundTrip</span></div>
+        <div class="replaced-cell">Slack ($8.75/user)</div>
+      </div>
+      <div class="replaced-row reveal-left delay-9">
+        <div class="replaced-cell"><span class="ours">RoadSearch</span></div>
+        <div class="replaced-cell">Algolia ($1/1K req)</div>
+      </div>
+      <div class="replaced-row reveal-right delay-10">
+        <div class="replaced-cell"><span class="ours">Ollama Fleet</span></div>
+        <div class="replaced-cell">OpenAI ($20/mo)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRODUCTS ==================== -->
+<section class="products-section section-padding">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <h2 class="section-title">The <span class="gradient-text">Stack</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">Six sovereign products. Zero external dependencies. Every bit yours.</p>
+    </div>
+    <div class="products-grid">
+      <div class="product-card reveal-scale delay-1">
+        <div class="product-icon"><div class="icon-roadcode"></div></div>
+        <div class="product-name">RoadCode</div>
+        <div class="product-desc">Self-hosted Git with 629 repos across 8 orgs. Issue tracking, CI/CD, package registry. Your code never leaves your hardware.</div>
+        <a href="https://git.blackroad.io" class="product-link">Try it</a>
+      </div>
+      <div class="product-card reveal-scale delay-2">
+        <div class="product-icon"><div class="icon-roadpay"></div></div>
+        <div class="product-name">RoadPay</div>
+        <div class="product-desc">Sovereign billing. Four plans, four add-ons, usage metering. Stripe processes cards -- we own everything else.</div>
+        <a href="https://pay.blackroad.io" class="product-link">Try it</a>
+      </div>
+      <div class="product-card reveal-scale delay-3">
+        <div class="product-icon"><div class="icon-roundtrip"></div></div>
+        <div class="product-name">RoundTrip</div>
+        <div class="product-desc">35-agent sovereign chat. Auto-conversations, fleet reports, debate mode. Real-time collaboration without Slack's rent.</div>
+        <a href="https://chat.blackroad.io" class="product-link">Try it</a>
+      </div>
+      <div class="product-card reveal-scale delay-4">
+        <div class="product-icon"><div class="icon-roadsearch"></div></div>
+        <div class="product-name">RoadSearch</div>
+        <div class="product-desc">FTS5 search across 1,383 entries. 23 indexers, 28 entity types. AI-powered answers from local Ollama models.</div>
+        <a href="https://search.blackroad.io" class="product-link">Try it</a>
+      </div>
+      <div class="product-card reveal-scale delay-5">
+        <div class="product-icon"><div class="icon-headlights"></div></div>
+        <div class="product-name">Headlights</div>
+        <div class="product-desc">Observability for the fleet. Uptime, latency, disk, thermal monitoring across 7 nodes. Alert before things break.</div>
+        <a href="https://status.blackroad.io" class="product-link">Try it</a>
+      </div>
+      <div class="product-card reveal-scale delay-6">
+        <div class="product-icon"><div class="icon-blackbox"></div></div>
+        <div class="product-name">BlackBox Protocol</div>
+        <div class="product-desc">Multi-network mesh: Tor, IPFS, BitTorrent, WebRTC, Bitcoin. Ternary routing cancels redundant paths. Unhackable by design.</div>
+        <a href="https://mesh.blackroad.io" class="product-link">Try it</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FLEET ==================== -->
+<section class="fleet-section section-padding">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <h2 class="section-title">The <span class="gradient-text">Fleet</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">Seven nodes. Five Raspberry Pis. Two cloud edges. 26 TOPS of AI compute.</p>
+    </div>
+    <div class="terminal reveal-scale delay-2">
+      <div class="terminal-header">
+        <div class="terminal-dot red"></div>
+        <div class="terminal-dot yellow"></div>
+        <div class="terminal-dot green"></div>
+        <span class="terminal-title">blackroad-fleet-status -- live</span>
+      </div>
+      <div class="terminal-body" id="fleet-terminal">
+        <div class="fleet-line"><span class="fleet-prompt">$ </span>blackroad fleet status --all</div>
+        <div class="fleet-line">&nbsp;</div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">alice     </span> <span class="fleet-ip">192.168.4.49 </span>  <span class="fleet-up">UP</span>  <span class="fleet-info">15 services  82% disk  gateway/dns/qdrant</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">cecilia   </span> <span class="fleet-ip">192.168.4.96 </span>  <span class="fleet-up">UP</span>  <span class="fleet-info">11 services  28% disk  ollama/minio/hailo</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">octavia   </span> <span class="fleet-ip">192.168.4.101</span>  <span class="fleet-up">UP</span>  <span class="fleet-info">20 services  50% disk  gitea/workers/nats</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">lucidia   </span> <span class="fleet-ip">192.168.4.38 </span>  <span class="fleet-up">UP</span>  <span class="fleet-info">14 services  31% disk  334 web apps/pdns</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">aria      </span> <span class="fleet-ip">192.168.4.98 </span>  <span class="fleet-up">UP</span>  <span class="fleet-info"> 8 services  64% disk  ollama/skills</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">gematria  </span> <span class="fleet-ip">159.65.43.12 </span>  <span class="fleet-up">UP</span>  <span class="fleet-info"> 4 services  57% disk  caddy/18 domains</span></div>
+        <div class="fleet-line"><span class="fleet-tag">[FLEET]</span> <span class="fleet-name">anastasia </span> <span class="fleet-ip">174.138.44.45</span>  <span class="fleet-up">UP</span>  <span class="fleet-info"> 5 services  70% disk  ollama/backup</span></div>
+        <div class="fleet-line">&nbsp;</div>
+        <div class="fleet-line"><span class="fleet-info">  7/7 nodes operational | 77 services | 26 TOPS | WireGuard mesh 12/12</span></div>
+        <div class="fleet-line"><span class="fleet-prompt">$ </span><span class="fleet-cursor"></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MATH ==================== -->
+<section class="math-section section-padding">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <h2 class="section-title">The <span class="gradient-text">Mathematics</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">Original mathematical framework. Not imported. Not borrowed. Created.</p>
+    </div>
+    <div class="math-display reveal-scale delay-2">
+      <div class="math-formula">
+        <span class="glow-segment">G(n)</span>
+        <span class="glow-segment"> = </span>
+        <span class="glow-segment">n<sup>n+1</sup></span>
+        <span class="glow-segment"> / </span>
+        <span class="glow-segment">(n+1)<sup>n</sup></span>
+      </div>
+      <div class="math-result gradient-text">A<sub>G</sub> = 1.244331783986725</div>
+      <div class="math-credit">Created by Alexa Louise Amundson</div>
+      <div class="math-verified">536/536 tests verified -- convergence proven</div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOUNDER ==================== -->
+<section class="founder-section section-padding">
+  <div class="container">
+    <div class="founder-content">
+      <div class="founder-label reveal">The Founder</div>
+      <h2 class="founder-name reveal delay-1 gradient-text">Alexa Amundson</h2>
+      <p class="founder-bio reveal delay-2">
+        Former mortgage loan officer. <strong>Taught herself to code.</strong> Built 942 repositories across 31 organizations. Deployed <strong>60 AI agents</strong> to a fleet of Raspberry Pis. Incorporated a <strong>Delaware C-Corp</strong>. Discovered an original mathematical constant. Created a sovereign operating system that replaces every major cloud service. <strong>No VC. No team of 50.</strong> One person and the agents she built.
+      </p>
+      <a href="/app" class="btn-primary reveal delay-3">Join the Road</a>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICING ==================== -->
+<section class="pricing-section section-padding">
+  <div class="container">
+    <div class="reveal" style="text-align:center;">
+      <h2 class="section-title"><span class="gradient-text">Pricing</span></h2>
+      <p class="section-subtitle" style="margin:0 auto;">Own your stack. Pay for what you use.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="pricing-card reveal-scale delay-1">
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">$29<span class="period">/mo</span></div>
+        <div class="pricing-desc">For developers who want sovereign tools without the ops.</div>
+        <ul class="pricing-features">
+          <li>5 private repos</li>
+          <li>3 AI agents</li>
+          <li>10GB storage</li>
+          <li>RoadSearch access</li>
+          <li>Community chat</li>
+        </ul>
+        <a href="/pricing" class="pricing-cta secondary">Get Started</a>
+      </div>
+      <div class="pricing-card featured reveal-scale delay-2">
+        <div class="pricing-tier gradient-text">Sovereign</div>
+        <div class="pricing-price">$199<span class="period">/mo</span></div>
+        <div class="pricing-desc">Full sovereignty. Your hardware. Your rules. Our software.</div>
+        <ul class="pricing-features">
+          <li>Unlimited repos</li>
+          <li>20 AI agents</li>
+          <li>100GB storage</li>
+          <li>Fleet dashboard</li>
+          <li>BlackBox mesh access</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="/pricing" class="pricing-cta primary">Start Sovereign</a>
+      </div>
+      <div class="pricing-card reveal-scale delay-3">
+        <div class="pricing-tier">Enterprise</div>
+        <div class="pricing-price">Custom</div>
+        <div class="pricing-desc">For organizations building on the BlackRoad stack.</div>
+        <ul class="pricing-features">
+          <li>Unlimited everything</li>
+          <li>Dedicated fleet nodes</li>
+          <li>Custom agent training</li>
+          <li>SLA guarantee</li>
+          <li>White-label option</li>
+        </ul>
+        <a href="/pricing" class="pricing-cta secondary">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer>
+  <div class="container">
+    <div class="footer-tagline gradient-text">Remember the Road. Pave Tomorrow.</div>
+    <div class="gradient-line footer-divider"></div>
+    <div class="footer-domains">
+      <a href="https://blackroad.io">blackroad.io</a>
+      <a href="https://blackroad.dev">blackroad.dev</a>
+      <a href="https://blackroad.ai">blackroad.ai</a>
+      <a href="https://blackroad.cloud">blackroad.cloud</a>
+      <a href="https://blackroad.app">blackroad.app</a>
+      <a href="https://blackroad.codes">blackroad.codes</a>
+      <a href="https://blackroad.run">blackroad.run</a>
+      <a href="https://blackroad.sh">blackroad.sh</a>
+      <a href="https://blackroad.world">blackroad.world</a>
+      <a href="https://blackroad.live">blackroad.live</a>
+      <a href="https://blackroad.systems">blackroad.systems</a>
+      <a href="https://blackroad.network">blackroad.network</a>
+      <a href="https://blackroad.tools">blackroad.tools</a>
+      <a href="https://blackroad.studio">blackroad.studio</a>
+      <a href="https://roadcode.dev">roadcode.dev</a>
+      <a href="https://roadpay.io">roadpay.io</a>
+      <a href="https://roadchain.io">roadchain.io</a>
+      <a href="https://roadnet.io">roadnet.io</a>
+      <a href="https://roadworld.io">roadworld.io</a>
+    </div>
+    <div class="footer-legal">BlackRoad OS, Inc. | Delaware C-Corp | Est. 2025 | All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+// ====================== PARTICLE SYSTEM ======================
+(function() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles, mouseX = -1000, mouseY = -1000;
+  const isMobile = window.innerWidth < 768;
+  const PARTICLE_COUNT = isMobile ? 60 : 180;
+  const CONNECTION_DIST = isMobile ? 100 : 150;
+  const MOUSE_RADIUS = 200;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+
+  function createParticles() {
+    particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2 + 0.5,
+        alpha: Math.random() * 0.5 + 0.1
+      });
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+
+      // Mouse interaction
+      const dx = mouseX - p.x;
+      const dy = mouseY - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < MOUSE_RADIUS) {
+        const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+        p.vx -= dx * force * 0.003;
+        p.vy -= dy * force * 0.003;
+      }
+
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // Damping
+      p.vx *= 0.99;
+      p.vy *= 0.99;
+
+      // Wrap
+      if (p.x < 0) p.x = w;
+      if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h;
+      if (p.y > h) p.y = 0;
+
+      // Draw particle
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(136, 68, 255, ${p.alpha})`;
+      ctx.fill();
+
+      // Connections
+      for (let j = i + 1; j < particles.length; j++) {
+        const p2 = particles[j];
+        const cdx = p.x - p2.x;
+        const cdy = p.y - p2.y;
+        const cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (cdist < CONNECTION_DIST) {
+          const alpha = (1 - cdist / CONNECTION_DIST) * 0.15;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(68, 136, 255, ${alpha})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  resize();
+  createParticles();
+  animate();
+})();
+
+// ====================== MOUSE GLOW ======================
+(function() {
+  const glow = document.getElementById('mouse-glow');
+  document.addEventListener('mousemove', (e) => {
+    glow.style.left = e.clientX + 'px';
+    glow.style.top = e.clientY + 'px';
+  });
+})();
+
+// ====================== TYPING EFFECT ======================
+(function() {
+  const phrases = [
+    'Your AI. Your hardware. Your rules.',
+    '942 repos. 31 orgs. Zero cloud dependency.',
+    'Built by one person and 60 AI agents.',
+    'Remember the Road. Pave Tomorrow.'
+  ];
+  const el = document.getElementById('typed-text');
+  let phraseIndex = 0, charIndex = 0, deleting = false;
+  const TYPE_SPEED = 50, DELETE_SPEED = 30, PAUSE = 2500;
+
+  function type() {
+    const current = phrases[phraseIndex];
+    if (!deleting) {
+      el.textContent = current.substring(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === current.length) {
+        setTimeout(() => { deleting = true; type(); }, PAUSE);
+        return;
+      }
+      setTimeout(type, TYPE_SPEED);
+    } else {
+      el.textContent = current.substring(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        deleting = false;
+        phraseIndex = (phraseIndex + 1) % phrases.length;
+        setTimeout(type, 400);
+        return;
+      }
+      setTimeout(type, DELETE_SPEED);
+    }
+  }
+  setTimeout(type, 1000);
+})();
+
+// ====================== SCROLL REVEALS ======================
+(function() {
+  const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+})();
+
+// ====================== COUNTER ANIMATIONS ======================
+(function() {
+  const counters = document.querySelectorAll('.stat-number[data-target]');
+  let animated = new Set();
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !animated.has(entry.target)) {
+        animated.add(entry.target);
+        animateCounter(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  counters.forEach(el => observer.observe(el));
+
+  function animateCounter(el) {
+    const target = parseFloat(el.dataset.target);
+    const decimals = parseInt(el.dataset.decimals) || 0;
+    const suffix = el.dataset.suffix || '';
+    const duration = 2000;
+    const start = performance.now();
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = target * eased;
+      el.textContent = current.toFixed(decimals) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+})();
+
+// ====================== FLEET TERMINAL TYPING ======================
+(function() {
+  const terminal = document.getElementById('fleet-terminal');
+  const lines = terminal.querySelectorAll('.fleet-line');
+  let started = false;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !started) {
+        started = true;
+        lines.forEach((line, i) => {
+          setTimeout(() => {
+            line.classList.add('typed');
+          }, i * 200);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  observer.observe(terminal);
+})();
+
+// ====================== PRODUCT CARD MOUSE TRACKING ======================
+(function() {
+  const cards = document.querySelectorAll('.product-card');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty('--mx', x + '%');
+      card.style.setProperty('--my', y + '%');
+    });
+  });
+})();
+
+// ====================== PARALLAX ======================
+(function() {
+  const elements = document.querySelectorAll('.parallax-element');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    elements.forEach(el => {
+      const speed = parseFloat(el.dataset.speed) || 0.05;
+      el.style.transform = `translateY(${scrollY * speed}px)`;
+    });
+  }, { passive: true });
+})();
+
+// ====================== HIDE SCROLL INDICATOR ON SCROLL ======================
+(function() {
+  const indicator = document.querySelector('.scroll-indicator');
+  let hidden = false;
+  window.addEventListener('scroll', () => {
+    if (!hidden && window.scrollY > 100) {
+      indicator.style.opacity = '0';
+      indicator.style.transition = 'opacity 0.5s';
+      hidden = true;
+    }
+  }, { passive: true });
+})();
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

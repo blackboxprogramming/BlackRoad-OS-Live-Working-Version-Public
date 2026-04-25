@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BlackRoad OS documentation — CLI reference, architecture, API gateway, agent system, and database search.">
+<meta name="theme-color" content="#CC00AA">
+<link rel="canonical" href="https://docs.blackroad.io">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://docs.blackroad.io">
+<meta property="og:title" content="Documentation — BlackRoad OS">
+<meta property="og:description" content="BlackRoad OS documentation — CLI reference, architecture, API gateway, agent system, and database search.">
+<title>Documentation — BlackRoad OS</title>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://blackroad.systems.js" defer></script>
+<script src="https://blackroad.io.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:hidden;background:#000}
+body{background:#000;color:#f5f5f5;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--b:#1a1a1a;--jb:'JetBrains Mono',monospace;--in:'Inter',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:0}
+a{color:#f5f5f5;text-decoration:none}
+
+.gb{height:3px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite}
+@keyframes gs{0%{background-position:0%}100%{background-position:200%}}
+@keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.fi{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fi.v{opacity:1;transform:translateY(0)}
+
+/* Hero */
+.hero{text-align:center;padding:100px 24px 64px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--b);border-radius:0;font-size:12px;margin-bottom:32px;animation:fu .6s ease both}
+.hero-dot{width:8px;height:8px;border-radius:50%;background:var(--g)}
+.hero h1{font-size:clamp(40px,8vw,72px);font-weight:700;line-height:1.05;margin-bottom:24px;letter-spacing:-.04em;animation:fu .6s ease .1s both}
+.hero p{font-family:var(--in);font-size:18px;color:#737373;max-width:520px;margin:0 auto;line-height:1.7;animation:fu .6s ease .2s both}
+
+/* Cards grid */
+.sec{padding:64px 24px;max-width:1200px;margin:0 auto}
+.cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{border:1px solid var(--b);border-radius:0;padding:32px;transition:border-color .25s,transform .25s}
+.card:hover{border-color:#333;transform:translateY(-2px)}
+.card-label{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.card h3{font-size:20px;font-weight:600;margin-bottom:10px}
+.card p{font-family:var(--in);font-size:14px;color:#737373;line-height:1.7;margin-bottom:16px}
+.card-link{font-family:var(--jb);font-size:12px;color:#444;display:inline-flex;align-items:center;gap:4px;transition:color .15s}
+.card-link:hover{color:#f5f5f5}
+
+/* Code blocks */
+pre{background:#050505;border:1px solid var(--b);border-radius:0;padding:16px 20px;font-family:var(--jb);font-size:12px;color:#737373;line-height:1.7;overflow-x:auto;margin-bottom:16px}
+pre .cmd{color:#f5f5f5}
+pre .comment{color:#333}
+
+/* Tag list */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.tag{font-family:var(--jb);font-size:10px;color:#555;border:1px solid #1a1a1a;border-radius:0;padding:3px 8px}
+
+/* Footer */
+.page-footer{border-top:1px solid var(--b);max-width:1200px;margin:0 auto;padding:48px 24px}
+.footer-grad{height:2px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite;margin-bottom:32px}
+.footer-links{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:24px}
+.footer-links a{font-family:var(--in);font-size:13px;color:#737373;transition:color .15s}
+.footer-links a:hover{color:#f5f5f5}
+.footer-copy{font-family:var(--jb);font-size:11px;color:#333}
+
+@media(max-width:768px){
+  .hero{padding:72px 16px 48px}
+  .cards-grid{grid-template-columns:1fr}
+  .sec{padding:32px 16px}
+  .footer-links{flex-direction:column;gap:12px}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+<div class="gb"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge"><div class="hero-dot"></div> Reference</div>
+  <h1>Docs</h1>
+  <p>Everything you need to build on BlackRoad OS. CLI tools, architecture, APIs, and agents.</p>
+</section>
+
+<!-- Cards -->
+<section class="sec">
+  <div class="cards-grid">
+
+    <div class="card fi">
+      <div class="card-label">Quick Start</div>
+      <h3>Getting Started</h3>
+      <p>Install the br CLI, connect to the fleet, and run your first command in under a minute.</p>
+      <pre><span class="cmd">curl -fsSL https://docs.blackroad.io.sh | bash && br status</span></pre>
+      <a href="/getting-started" class="card-link">Step-by-step guide &#8594;</a>
+    </div>
+
+    <div class="card fi">
+      <div class="card-label">Reference</div>
+      <h3>CLI Reference</h3>
+      <p>223 tools across the br CLI. Shell dispatcher routes to purpose-built scripts for every operation.</p>
+      <div class="tags">
+        <span class="tag">agents</span>
+        <span class="tag">ai</span>
+        <span class="tag">git</span>
+        <span class="tag">devops</span>
+        <span class="tag">cloud</span>
+        <span class="tag">database</span>
+        <span class="tag">monitoring</span>
+        <span class="tag">security</span>
+        <span class="tag">pi</span>
+        <span class="tag">identity</span>
+        <span class="tag">comms</span>
+      </div>
+      <a href="https://github.com/blackboxprogramming/BlackRoad-Operating-System" class="card-link">View on GitHub &#8594;</a>
+    </div>
+
+    <div class="card fi">
+      <div class="card-label">System Design</div>
+      <h3>Architecture</h3>
+      <p>The full stack: Raspberry Pi fleet with Hailo-8 accelerators, WireGuard mesh networking, Cloudflare tunnels for global ingress, and Workers at the edge. The tokenless gateway sits at the center — agents never touch API keys.</p>
+      <pre><span class="comment"># Request flow</span>
+<span class="cmd">Client &#8594; Cloudflare Tunnel &#8594; Pi Gateway :8787 &#8594; WireGuard Mesh &#8594; Model Node
+                                                  &#8594; Hailo-8 Accelerator (26 TOPS)
+                                                  &#8594; Response (streamed)</span></pre>
+    </div>
+
+    <div class="card fi">
+      <div class="card-label">Integration</div>
+      <h3>API Gateway</h3>
+      <p>OpenAI-compatible inference at api.blackroad.io. 29 models across 7 providers. Drop-in replacement for any OpenAI client.</p>
+      <pre><span class="cmd">curl https://api.blackroad.io/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3",
+    "messages": [{"role": "user", "content": "Hello"}],
+    "stream": true
+  }'</span></pre>
+      <a href="/api" class="card-link">Full API reference &#8594;</a>
+    </div>
+
+    <div class="card fi">
+      <div class="card-label">Autonomous</div>
+      <h3>Agent System</h3>
+      <p>27 agents, each with a name, email, persistent memory, and specialized capabilities. Agents coordinate through a shared mesh — invoke them by name.</p>
+      <pre><span class="comment"># List all agents</span>
+<span class="cmd">br agents list</span>
+
+<span class="comment"># Invoke an agent with a task</span>
+<span class="cmd">br invoke alice "deploy auth-worker to cloudflare"</span>
+
+<span class="comment"># Check agent status</span>
+<span class="cmd">br invoke octavia "fleet health report"</span></pre>
+    </div>
+
+    <div class="card fi">
+      <div class="card-label">Search</div>
+      <h3>Database</h3>
+      <p>Full-text search across 159 indexed items at db.blackroad.io. FTS5 index with sub-millisecond queries. Search repos, scripts, agents, and infrastructure.</p>
+      <pre><span class="comment"># API</span>
+<span class="cmd">GET https://db.blackroad.io/api/search?q=fleet+health</span>
+
+<span class="comment"># CLI</span>
+<span class="cmd">br search "wireguard mesh"</span></pre>
+      <a href="https://db.blackroad.io" class="card-link">db.blackroad.io &#8594;</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<div class="page-footer">
+  <div class="footer-grad"></div>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/getting-started">Getting Started</a>
+    <a href="/api">API Reference</a>
+    <a href="https://wiki.blackroad.io">Wiki</a>
+    <a href="https://agents.blackroad.io">Agents</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+</div>
+
+<script>
+// Fade-in observer
+const obs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting){n.target.classList.add('v');obs.unobserve(n.target)}})},{threshold:.1});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+// Consent
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:var(--in),system-ui;animation:fu .4s ease';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">Your hardware, your rules. Privacy-first analytics only. <a href="https://stats.blackroad.io/privacy" style="color:#8844FF;text-decoration:none">Privacy details</a>.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
+<script src="https://blackroad-backend.blackroad.workers.dev/br-analytics.js" data-site="blackroad-io" defer></script>
+</body>
+</html>

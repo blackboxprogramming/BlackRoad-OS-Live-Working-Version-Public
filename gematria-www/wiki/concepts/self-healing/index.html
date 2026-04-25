@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Healing — BR Wiki</title>
+  <script src="https://blackroad.io/nav.js" defer></script>
+  <script src="https://blackroad.io/footer.js" defer></script>
+  <script src="https://blackroad.systems.js" defer></script>
+  <script src="https://blackroad.io.js" defer></script>
+  <script src="https://blackroad.io/pulse.js" defer></script>
+  <script src="https://blackroad.io/related.js" defer></script>
+  <meta name="description" content="Self-Healing Infrastructure — Every node monitors itself and its neighbors. Zero human intervention for common failures.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    :root { --accent: #22c55e; --accent-dim: rgba(34,197,94,0.1); }
+
+    .hero {
+      min-height: 60vh; display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 120px 55px 55px; position: relative; overflow: hidden;
+    }
+    .orb {
+      position: absolute; top: 10%; right: 8%; width: 280px; height: 280px;
+      border-radius:50%; pointer-events: none;
+      background: radial-gradient(circle, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.05) 50%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:0.8;} 50%{transform:scale(1.1);opacity:1;} }
+    .concept-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: var(--sp-sm);
+    }
+    .concept-title {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: clamp(3.5rem, 9vw, 7rem); font-weight: 700;
+      line-height: 0.95; margin-bottom: var(--sp-lg);
+    }
+    .concept-summary {
+      font-size: 1.05rem; color: var(--subtle); max-width: 560px; line-height: 1.7;
+    }
+
+    .section { padding: 55px; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--subtle); margin-bottom: var(--sp-md);
+    }
+    .section p {
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      color: var(--subtle); line-height: 1.75; max-width: 680px;
+    }
+
+    .genesis-block {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .genesis-hash {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+      color: var(--accent); letter-spacing: 0.05em; word-break: break-all;
+    }
+    .genesis-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: var(--muted); margin-top: var(--sp-xs);
+    }
+
+    .event-list {
+      display: flex; flex-direction: column; gap: var(--sp-xs);
+      margin-top: var(--sp-md); font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+    .event-item { color: var(--subtle); }
+    .event-type { color: var(--accent); }
+
+    .card-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: var(--sp-md); margin-top: var(--sp-md);
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-lg);
+    }
+    .card-title {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+      font-weight: 700; color: var(--white); margin-bottom: var(--sp-xs);
+    }
+    .card-body {
+      font-size: 0.82rem; color: var(--subtle); line-height: 1.65;
+    }
+
+    .philosophy {
+      background: var(--surface); border: 1px solid var(--border); border-radius:0;
+      padding: var(--sp-xl); margin-top: var(--sp-md); max-width: 600px;
+    }
+    .philosophy p {
+      font-family: 'Playfair Display', serif; font-style: italic;
+      font-size: 1rem; color: var(--subtle); line-height: 1.8;
+    }
+
+    .conn-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-top: var(--sp-md); }
+    .conn-card {
+      display: flex; align-items: center; gap: var(--sp-xs);
+      padding: 8px 16px; background: var(--surface);
+      border: 1px solid var(--border); border-radius:0;
+      font-size: 0.78rem; color: var(--subtle); transition: border-color 0.2s;
+      text-decoration: none;
+    }
+    .conn-card:hover { border-color: var(--muted); }
+    .conn-dot { width: 6px; height: 6px; border-radius:50%; }
+  </style>
+  <script src="https://bb.blackroad.io/bb.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body class="dot-bg">
+
+  <div class="hero">
+    <div class="orb"></div>
+    <div class="concept-label">Concept &middot; Autonomous Recovery</div>
+    <div class="concept-title">Self-Healing</div>
+    <div class="concept-summary">
+      Every node monitors itself and its neighbors. Heartbeat every minute, heal every five. Auto-restart of critical services. Zero human intervention for common failures.
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Cycle</div>
+    <p>
+      Two cron loops run on every node. The heartbeat fires every 60 seconds &mdash; a pulse that says "I'm alive." The heal cycle fires every 5 minutes &mdash; checking stats-proxy, Ollama, and critical services. If something's down, it comes back up. No tickets, no pages, no humans.
+    </p>
+    <div class="genesis-block">
+      <div class="genesis-hash">*/1 * * * * heartbeat.sh &amp;&amp; */5 * * * * heal.sh</div>
+      <div class="genesis-label">cron &middot; heartbeat (1m) + heal (5m) &middot; every node</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">How it works</div>
+    <p>
+      Autonomy scripts run as blackroad user cron jobs on Cecilia and Octavia. Alice runs a watchdog timer every 30 seconds via systemd. Lucidia uses brnode heartbeat on a 5-minute timer. Each layer is independent &mdash; if one fails, the others still heal.
+    </p>
+    <div class="event-list">
+      <div class="event-item"><span class="event-type">heartbeat.alive</span> &mdash; node confirms it is running</div>
+      <div class="event-item"><span class="event-type">heal.check</span> &mdash; critical services inspected</div>
+      <div class="event-item"><span class="event-type">service.restart</span> &mdash; downed service auto-restarted</div>
+      <div class="event-item"><span class="event-type">watchdog.trigger</span> &mdash; Alice task queue anomaly detected</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Why it matters</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-title">Uptime</div>
+        <div class="card-body">Common failures resolve in under 5 minutes. No waiting for a human to wake up, SSH in, and restart a service. The fleet heals itself while you sleep.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Layered Defense</div>
+        <div class="card-body">Cron jobs, systemd watchdogs, and brnode heartbeats &mdash; three independent recovery mechanisms. If one layer fails, the next catches it.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Observable</div>
+        <div class="card-body">Every heal action is logged. Every restart is recorded. The KPI system tracks fleet health daily. You know exactly what healed and when.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">The Philosophy</div>
+    <div class="philosophy">
+      <p>
+        Infrastructure that needs you to fix it is infrastructure that owns you. Self-healing flips the relationship. The machines serve you, not the other way around.
+      </p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Related Concepts</div>
+    <div class="conn-grid">
+      <a href="../local-intelligence/" class="conn-card"><span class="conn-dot" style="background:#CC00AA;"></span> Local Intelligence</a>
+      <a href="../edge-compute/" class="conn-card"><span class="conn-dot" style="background:#FF6B2B;"></span> Edge Compute</a>
+      <a href="../soul-chain/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> Soul Chain</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Autonomy Scripts &middot; Fleet &middot; KPI System
+    </p>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Connected Agents</div>
+    <div class="conn-grid">
+      <a href="../../agents/alice/" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> ALICE</a>
+      <a href="../../agents/cecilia/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> CECILIA</a>
+      <a href="../../agents/octavia/" class="conn-card"><span class="conn-dot" style="background:#8844FF;"></span> OCTAVIA</a>
+    </div>
+    <p style="margin-top:var(--sp-md);font-size:0.78rem;color:var(--muted);">
+      Alice runs the watchdog timer. Cecilia and Octavia run autonomy cron jobs. All three auto-restart stats-proxy and Ollama.
+    </p>
+  </div>
+
+  <div class="section" style="border-bottom:none;">
+    <div class="section-label">Go Deeper</div>
+    <div class="conn-grid">
+      <a href="https://blackroad.io" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> blackroad.io</a>
+      <a href="https://status.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> status.blackroad.io</a>
+      <a href="https://dashboard.blackroad.io" class="conn-card"><span class="conn-dot" style="background:#22c55e;"></span> dash.blackroad.io</a>
+    </div>
+  </div>
+
+  <footer style="max-width:none;padding:34px 55px;">
+    <span>Self-Healing &middot; BlackRoad OS, Inc.</span>
+    <a href="../../" style="color:var(--subtle);transition:color 0.2s" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">&#8592; BR Wiki</a>
+  </footer>
+
+<script>
+(function(){if(!localStorage.getItem("br-consent-seen")){var b=document.createElement("div");b.id="br-consent";b.style.cssText="position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:'Inter',sans-serif;animation:brC .4s ease";b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">We don\'t collect your data because we don\'t want it. Your hardware, your rules, your privacy.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">I understand</button></div></div>';var s=document.createElement("style");s.textContent="@keyframes brC{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}";document.head.appendChild(s);document.body.appendChild(b)}}());
+</script>
+</body>
+</html>

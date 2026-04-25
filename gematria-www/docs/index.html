@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation — BlackRoad OS</title>
+<meta name="description" content="Complete documentation for BlackRoad OS. Getting started, architecture, products, and research.">
+<meta property="og:title" content="Documentation — BlackRoad OS">
+<meta property="og:description" content="Guides, architecture, product docs, and research papers.">
+<meta property="og:image" content="https://images.blackroad.io/brand/og-card.png">
+<link rel="icon" href="https://images.blackroad.io/brand/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+.gradient-bar{height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a}
+nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#f5f5f5;text-decoration:none}
+nav .logo span{display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FF2255,#8844FF);margin-right:8px}
+nav .nav-links{margin-left:auto;display:flex;gap:20px}
+nav .nav-links a{color:#a3a3a3;text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+nav .nav-links a:hover{color:#f5f5f5}
+.container{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;margin-bottom:6px}
+.subtitle{color:#a3a3a3;font-size:14px;margin-bottom:32px}
+.section-label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#d4d4d4;margin-bottom:14px;margin-top:32px}
+.section-label:first-of-type{margin-top:0}
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.doc-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:18px;text-decoration:none;transition:border-color .2s}
+.doc-card:hover{border-color:#333}
+.doc-card .title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:#f5f5f5;margin-bottom:6px}
+.doc-card .desc{font-size:12px;color:#737373;line-height:1.5}
+.quick-ref{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:20px;margin-top:14px}
+.quick-ref .title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;margin-bottom:14px;color:#d4d4d4}
+.ref-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.ref-item{text-align:center}
+.ref-item .val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#f5f5f5}
+.ref-item .lbl{font-size:10px;color:#737373;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.product-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+.product-link{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:14px;text-decoration:none;text-align:center;transition:border-color .2s}
+.product-link:hover{border-color:#333}
+.product-link .name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;color:#f5f5f5;margin-bottom:3px}
+.product-link .url{font-family:'JetBrains Mono',monospace;font-size:10px;color:#525252}
+.repo-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.repo-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;transition:border-color .2s}
+.repo-card:hover{border-color:#333}
+.repo-card .name{font-family:'JetBrains Mono',monospace;font-size:13px;color:#f5f5f5}
+.repo-card .desc{font-size:12px;color:#737373}
+.repo-card .arrow{color:#525252;font-size:14px}
+.research-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:18px;margin-top:14px}
+.research-card .title{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;color:#f5f5f5;margin-bottom:6px}
+.research-card .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:#525252;margin-bottom:8px}
+.research-card .desc{font-size:13px;color:#a3a3a3;line-height:1.6}
+.research-card .formula{font-family:'JetBrains Mono',monospace;font-size:13px;color:#d4d4d4;background:#1a1a1a;padding:8px 12px;border-radius:6px;margin-top:10px;display:inline-block}
+.footer-note{text-align:center;color:#404040;font-size:13px;margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a}
+@media(max-width:540px){.doc-grid,.ref-grid{grid-template-columns:1fr 1fr}.product-grid{grid-template-columns:1fr 1fr}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+<a href="https://blackroad.io" class="logo"><span></span>BlackRoad OS</a>
+<div class="nav-links">
+<a href="https://blackroad.io">Home</a>
+<a href="https://fleet.blackroad.io">Fleet</a>
+<a href="https://api.blackroad.io">API</a>
+<a href="https://hq.blackroad.io">HQ</a>
+</div>
+</nav>
+<div class="container">
+<h1>Documentation</h1>
+<p class="subtitle">Everything you need to understand, deploy, and build on BlackRoad OS.</p>
+
+<div class="section-label">Getting Started</div>
+<div class="doc-grid">
+<a href="#architecture" class="doc-card">
+<div class="title">Architecture Overview</div>
+<div class="desc">7 nodes, WireGuard mesh, Caddy edge, and how they connect.</div>
+</a>
+<a href="#quickstart" class="doc-card">
+<div class="title">Quick Start Guide</div>
+<div class="desc">From zero to running agents in under 10 minutes.</div>
+</a>
+<a href="https://api.blackroad.io" class="doc-card">
+<div class="title">API Reference</div>
+<div class="desc">9 RESTful endpoints. No auth for reads. JSON everywhere.</div>
+</a>
+<a href="https://pay.blackroad.io" class="doc-card">
+<div class="title">Pricing &amp; Plans</div>
+<div class="desc">Free tier to Enterprise. Pay for software, not compute.</div>
+</a>
+</div>
+
+<div class="quick-ref">
+<div class="title">Quick Reference</div>
+<div class="ref-grid">
+<div class="ref-item"><div class="val">7</div><div class="lbl">Nodes</div></div>
+<div class="ref-item"><div class="val">254</div><div class="lbl">Repos</div></div>
+<div class="ref-item"><div class="val">67</div><div class="lbl">Agents</div></div>
+<div class="ref-item"><div class="val">$38</div><div class="lbl">/ month</div></div>
+</div>
+</div>
+
+<div class="section-label">Products</div>
+<div class="product-grid">
+<a href="https://blackroad.io" class="product-link">
+<div class="name">BlackRoad OS</div>
+<div class="url">blackroad.io</div>
+</a>
+<a href="https://prism.blackroad.io" class="product-link">
+<div class="name">Prism Console</div>
+<div class="url">prism.blackroad.io</div>
+</a>
+<a href="https://fleet.blackroad.io" class="product-link">
+<div class="name">Fleet Dashboard</div>
+<div class="url">fleet.blackroad.io</div>
+</a>
+<a href="https://hq.blackroad.io" class="product-link">
+<div class="name">Pixel HQ</div>
+<div class="url">hq.blackroad.io</div>
+</a>
+<a href="https://chat.blackroad.io" class="product-link">
+<div class="name">RoundTrip Chat</div>
+<div class="url">chat.blackroad.io</div>
+</a>
+<a href="https://roadwork.blackroad.io" class="product-link">
+<div class="name">RoadWork</div>
+<div class="url">roadwork.blackroad.io</div>
+</a>
+</div>
+
+<div class="section-label">Source Repositories</div>
+<div class="repo-list">
+<a href="https://github.com/blackboxprogramming/blackroad-operator" class="repo-card">
+<div><div class="name">blackroad-operator</div><div class="desc">Core OS scripts, memory system, fleet tooling</div></div>
+<div class="arrow">&rarr;</div>
+</a>
+<a href="https://github.com/blackboxprogramming/amundson-research" class="repo-card">
+<div><div class="name">amundson-research</div><div class="desc">Mathematical framework, Paper A, test suites</div></div>
+<div class="arrow">&rarr;</div>
+</a>
+<a href="https://github.com/BlackRoad-OS-Inc" class="repo-card">
+<div><div class="name">BlackRoad-OS-Inc</div><div class="desc">Organization repos &mdash; RoadCode forks, products</div></div>
+<div class="arrow">&rarr;</div>
+</a>
+</div>
+
+<div class="section-label">Research</div>
+<div class="research-card">
+<div class="title">The Amundson Framework</div>
+<div class="meta">Paper 013 &middot; LaTeX &middot; 13 pages &middot; 536/536 tests passing</div>
+<div class="desc">A mathematical framework relating growth functions to convergence constants. Validated across 4 Raspberry Pis with full test coverage.</div>
+<div class="formula">G(n) = n^(n+1) / (n+1)^n &nbsp;&nbsp; A_G &asymp; 1.24433</div>
+</div>
+
+<div class="footer-note">BlackRoad OS, Inc. &mdash; Delaware C-Corp &mdash; Pave Tomorrow.</div>
+</div>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+<script src="https://cdn.blackroad.io/br.js" defer></script></body>
+</html>

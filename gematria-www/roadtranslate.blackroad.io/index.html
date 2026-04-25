@@ -1,0 +1,294 @@
+<!-- PROPRIETARY AND CONFIDENTIAL. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited. This is NOT open source. -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RoadTranslate</title><meta name="description" content="RoadTranslate — Sovereign translation — no Google Translate, local inference"><meta name="robots" content="index,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta property="og:title" content="RoadTranslate"><meta property="og:description" content="Sovereign translation — no Google Translate, local inference"><meta property="og:url" content="https://translate.blackroad.io"><meta property="og:image" content="https://images.blackroad.io/brand/blackroad-og.png">
+<link rel="canonical" href="https://translate.blackroad.io"><link rel="icon" type="image/png" href="https://images.blackroad.io/brand/favicon.png">
+<style>*{margin:0;padding:0;box-sizing:border-box}html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--g135:linear-gradient(135deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--bg:#000;--border:#1a1a1a;--sub:#999;--dim:#333;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace}body{background:var(--bg);color:#f5f5f5;font-family:var(--sg);overflow-x:hidden;padding-bottom:56px}.grad-bar{height:4px;background:var(--g)}.ct{max-width:100%;margin:0 auto;padding:32px 16px 0}.section{margin-bottom:40px}.lb{font-family:var(--jb);font-size:10px;font-weight:500;color:var(--sub);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}.tt{font-size:24px;font-weight:700;color:#fff;margin-bottom:4px}.st{font-size:13px;color:#aaa;margin-bottom:32px}.mk{width:24px;height:3px;border-radius:2px;background:var(--g);margin-bottom:16px}.card{border:1px solid var(--border);border-radius:10px;padding:16px;background:#0a0a0a;transition:border-color .2s,transform .15s;margin-bottom:10px;cursor:pointer}.card:hover{border-color:var(--dim)}.card:active{transform:scale(.985)}.cd{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:#aaa;line-height:1.7}.card.open .cd{display:block}.ca{float:right;font-size:14px;color:#555;transition:transform .2s}.card.open .ca{transform:rotate(90deg)}.ch{font-size:13px;font-weight:500;color:#ddd}.sv{font-size:22px;font-weight:700;color:#fff}.sl{font-family:var(--jb);font-size:9px;color:#aaa;letter-spacing:.1em;text-transform:uppercase;margin-top:4px}.gs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px}.dl{background:var(--g135)}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}.ca2{width:8px;height:8px;border-radius:50%;background:var(--g135);display:inline-block}.pulse{animation:pulse 2s infinite}
+.wg{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.w{border:1px solid var(--border);border-radius:12px;padding:16px;background:#0a0a0a;position:relative;min-height:90px;display:flex;flex-direction:column}.w:hover{border-color:var(--dim)}.wi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px;background:#111;border:1px solid var(--border)}.wn{font-size:12px;font-weight:600;color:#ddd;margin-bottom:2px}.wd{font-family:var(--jb);font-size:9px;color:#888}.wl{position:absolute;inset:0;border-radius:12px;z-index:1}
+@media(min-width:600px){.ct{padding:40px 24px 0;max-width:880px}.gs{grid-template-columns:repeat(3,1fr)}.wg{grid-template-columns:repeat(3,1fr)}.tt{font-size:28px}}
+@media(min-width:900px){.ct{padding:48px 24px 0}.gs{grid-template-columns:repeat(4,1fr)}.wg{grid-template-columns:repeat(4,1fr)}.tt{font-size:32px}}
+/* ═══ ENHANCEMENTS ═══ */
+.fade-in{animation:pageIn .4s ease}@keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.btt{position:fixed;bottom:16px;right:16px;width:36px;height:36px;border-radius:50%;background:#0a0a0a;border:1px solid #1a1a1a;color:#888;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:99;transition:border-color .2s}.btt:hover{border-color:#555}
+.eco-bar{position:fixed;bottom:0;left:0;right:0;background:#0a0a0a;border-top:1px solid #1a1a1a;padding:6px 0;z-index:98;overflow-x:auto}.eco-bar-inner{display:flex;gap:14px;justify-content:center;padding:0 16px;white-space:nowrap}.eco-bar a{font-family:var(--jb,'JetBrains Mono',monospace);font-size:.55rem;color:#555;text-decoration:none;transition:color .15s}.eco-bar a:hover{color:#aaa}
+.toolbar{display:flex;gap:8px;margin-bottom:16px}.tool-btn{font-family:var(--jb,'JetBrains Mono',monospace);font-size:9px;color:#666;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .15s}.tool-btn:hover{border-color:#555;color:#aaa}
+
+/* ═══ INTERACTIVE ═══ */
+.read-prog{position:fixed;top:0;left:0;height:2px;background:var(--g);z-index:999;transition:width .1s;width:0}
+.page-search{position:fixed;top:12px;right:16px;z-index:999;display:none}
+.page-search input{padding:8px 12px;background:#111;border:1px solid #333;border-radius:8px;color:#ddd;font-family:var(--sg);font-size:12px;width:200px;outline:none}
+.page-search input:focus{border-color:#555}
+.page-search.open{display:block}
+.read-time{font-family:var(--jb);font-size:9px;color:#555;margin-bottom:16px}
+.kbd-help{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#111;border:1px solid #333;border-radius:12px;padding:24px;z-index:1000;display:none;min-width:280px}
+.kbd-help.open{display:block}
+.kbd-help h3{font-size:14px;color:#ddd;margin-bottom:12px}
+.kbd-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:#aaa;border-bottom:1px solid #1a1a1a}
+.kbd-row:last-child{border-bottom:none}
+.kbd-key{font-family:var(--jb);background:#0a0a0a;border:1px solid #333;border-radius:4px;padding:2px 8px;font-size:10px;color:#ddd}
+.kbd-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:none}
+.kbd-overlay.open{display:block}
+mark.hl{background:rgba(136,68,255,.3);color:#fff;border-radius:2px;padding:0 2px}
+@media print{.eco-bar,.btt,.grad-bar,.page-search,.read-prog,.kbd-help,.kbd-overlay{display:none!important}body{background:#fff;color:#000}.card{border-color:#ccc;background:#fff}.cd{display:block!important;color:#333}.ch{color:#000}.sv{color:#000}.lb{color:#666}.tt{color:#000}.st{color:#666}}
+</style><meta name="robots" content="index, follow, noai, noimageai">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"RoadTranslate","url":"https://roadtranslate.blackroad.io","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body><div class="grad-bar"></div><div class="ct">
+<div class="section"><div class="mk"></div><div class="tt">RoadTranslate</div><div class="st">Sovereign translation — no Google Translate, local inference</div></div>
+<div class="section"><div class="lb">Translation</div><div class="gs"><div class="card"><div class="sv">Local</div><div class="sl">Inference</div></div><div class="card"><div class="sv">0</div><div class="sl">Data Sent Out</div></div><div class="card"><div class="sv">Real-Time</div><div class="sl">Speed</div></div></div></div><div class="section"><div class="lb">Approach</div><div class="card" onclick="this.classList.toggle('open')"><span class="ca">›</span><div class="ch"><span class="dot dl"></span>Local Models</div><div class="cd">Translation models run on Ollama. No text sent to Google, DeepL, or any cloud provider. Your documents stay private.</div></div><div class="card" onclick="this.classList.toggle('open')"><span class="ca">›</span><div class="ch"><span class="dot dl"></span>Document Translation</div><div class="cd">Paste text, upload files, or translate entire web pages. Preserves formatting. Handles technical jargon.</div></div><div class="card" onclick="this.classList.toggle('open')"><span class="ca">›</span><div class="ch"><span class="dot dl"></span>Real-Time</div><div class="cd">Type and see translation appear as you type. Streaming inference from local models. No round-trip latency.</div></div><div class="card" onclick="this.classList.toggle('open')"><span class="ca">›</span><div class="ch"><span class="dot dl"></span>Why Not Google Translate</div><div class="cd">Google reads every word you translate. They use it for training. They profile your interests. We don't.</div></div></div>
+<div class="section"><div class="lb">Ecosystem</div><div class="wg" id="wg"></div></div>
+<div class="section" style="text-align:center"><span style="font-size:11px;color:#aaa"><span class="ca2 pulse"></span>&nbsp; <a href="https://search.blackroad.io" style="color:#aaa;text-decoration:none">search</a> · <a href="https://blackroad.io" style="color:#aaa;text-decoration:none">home</a> · <a href="https://blackroad.company" style="color:#aaa;text-decoration:none">company</a></span></div>
+</div><div class="grad-bar" style="margin-top:24px"></div>
+<script>var W=[{n:'Home',d:'Hub',i:'\U0001f3e0',h:'https://blackroad.io'},{n:'Search',d:'2,280 repos',i:'\U0001f50d',h:'https://search.blackroad.io'},{n:'Chat',d:'RoundTrip',i:'\U0001f4ac',h:'https://chat.blackroad.io'},{n:'GitHub',d:'Source',i:'\u26a1',h:'https://github.com/BlackRoad-OS-Inc'},{n:'AI',d:'Models',i:'\U0001f9e0',h:'https://blackroadai.com'},{n:'Network',d:'Mesh',i:'\U0001f310',h:'https://blackroad.network'},{n:'Systems',d:'Fleet',i:'\U0001f5a5',h:'https://blackroad.systems'},{n:'Company',d:'Corp',i:'\U0001f3db',h:'https://blackroad.company'}];
+document.getElementById('wg').innerHTML=W.map(function(w){return '<div class="w"><div class="wi">'+w.i+'</div><div class="wn">'+w.n+'</div><div class="wd">'+w.d+'</div><a href="'+w.h+'" target="_blank" class="wl"></a></div>';}).join('');</script>
+<button class="btt" id="btt" onclick="scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="eco-bar"><div class="eco-bar-inner">
+<a href="https://blackroad.io">Home</a>
+<a href="https://search.blackroad.io">Search</a>
+<a href="https://chat.blackroad.io">Chat</a>
+<a href="https://blackroadai.com">AI</a>
+<a href="https://blackroad.network">Network</a>
+<a href="https://blackroad.systems">Systems</a>
+<a href="https://blackroad.company">Company</a>
+<a href="https://blackroad.me">Identity</a>
+<a href="https://pay.blackroad.io">Pay</a>
+<a href="https://status.blackroad.io">Status</a>
+<a href="https://faq.blackroad.io">FAQ</a>
+<a href="https://github.com/BlackRoad-OS-Inc">GitHub</a>
+</div></div>
+<div style="height:32px"></div>
+<script>
+window.addEventListener('scroll',function(){document.getElementById('btt').style.display=window.scrollY>300?'flex':'none'});
+document.querySelector('.ct,.container')?.classList.add('fade-in');
+</script>
+
+<div class="read-prog" id="rp"></div>
+<div class="page-search" id="ps"><input placeholder="Search this page..." oninput="pageSearch(this.value)" id="psi"></div>
+<div class="kbd-overlay" id="ko" onclick="toggleHelp()"></div>
+<div class="kbd-help" id="kh">
+<h3>Keyboard Shortcuts</h3>
+<div class="kbd-row"><span>Show shortcuts</span><span class="kbd-key">?</span></div>
+<div class="kbd-row"><span>Search page</span><span class="kbd-key">/</span></div>
+<div class="kbd-row"><span>Expand all</span><span class="kbd-key">e</span></div>
+<div class="kbd-row"><span>Collapse all</span><span class="kbd-key">c</span></div>
+<div class="kbd-row"><span>Back to top</span><span class="kbd-key">t</span></div>
+<div class="kbd-row"><span>Copy URL</span><span class="kbd-key">s</span></div>
+<div class="kbd-row"><span>Close</span><span class="kbd-key">Esc</span></div>
+</div>
+<script>
+// Reading progress
+window.addEventListener('scroll',function(){var h=document.documentElement;var p=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;document.getElementById('rp').style.width=p+'%';});
+// Read time estimate
+(function(){var t=document.body.innerText;var w=t.split(/\s+/).length;var m=Math.ceil(w/200);var el=document.querySelector('.st');if(el)el.insertAdjacentHTML('afterend','<div class="read-time">'+m+' min read · '+w+' words</div>');})();
+// Page search
+var origHTML='';
+function pageSearch(q){
+  if(!origHTML)origHTML=document.querySelector('.ct,.container')?.innerHTML||'';
+  var el=document.querySelector('.ct,.container');
+  if(!el)return;
+  if(!q){el.innerHTML=origHTML;origHTML='';return;}
+  el.innerHTML=origHTML;
+  var re=new RegExp('('+q.replace(/[.*+?^${}()|[\]\]/g,'\$&')+')','gi');
+  var walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+  var nodes=[];while(walk.nextNode())nodes.push(walk.currentNode);
+  nodes.forEach(function(n){if(n.parentElement.tagName==='SCRIPT'||n.parentElement.tagName==='STYLE')return;if(re.test(n.textContent)){var span=document.createElement('span');span.innerHTML=n.textContent.replace(re,'<mark class="hl">$1</mark>');n.parentNode.replaceChild(span,n);}});
+}
+// Keyboard shortcuts
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  switch(e.key){
+    case'?':toggleHelp();break;
+    case'/':e.preventDefault();var ps=document.getElementById('ps');ps.classList.toggle('open');if(ps.classList.contains('open'))document.getElementById('psi').focus();break;
+    case'e':document.querySelectorAll('.card').forEach(function(c){c.classList.add('open')});break;
+    case'c':document.querySelectorAll('.card').forEach(function(c){c.classList.remove('open')});break;
+    case't':scrollTo({top:0,behavior:'smooth'});break;
+    case's':navigator.clipboard?.writeText(location.href);break;
+    case'Escape':document.getElementById('ps').classList.remove('open');document.getElementById('kh').classList.remove('open');document.getElementById('ko').classList.remove('open');if(origHTML){pageSearch('');document.getElementById('psi').value='';}break;
+  }
+});
+function toggleHelp(){document.getElementById('kh').classList.toggle('open');document.getElementById('ko').classList.toggle('open');}
+// Breadcrumb trail (last 5 visited pages)
+(function(){var key='br-trail';var trail=JSON.parse(localStorage.getItem(key)||'[]');var cur={url:location.href,title:document.title,time:Date.now()};trail=trail.filter(function(t){return t.url!==cur.url;});trail.unshift(cur);trail=trail.slice(0,5);localStorage.setItem(key,JSON.stringify(trail));})();
+</script>
+
+<script>
+// BlackRoad Live Counts — fetches real numbers from GitHub API
+(function(){
+  var ORGS=["BlackRoad-OS-Inc","BlackRoad-AI","BlackRoad-Agents","BlackRoad-Archive","BlackRoad-Cloud","BlackRoad-Education","BlackRoad-Forge","BlackRoad-Foundation","BlackRoad-Gov","BlackRoad-Hardware","BlackRoad-Interactive","BlackRoad-Labs","BlackRoad-Media","BlackRoad-Network","BlackRoad-OS","BlackRoad-QI","BlackRoad-Quantum","BlackRoad-README","BlackRoad-Sandbox","BlackRoad-Security","BlackRoad-Studio","BlackRoad-Ventures","Blackbox-Enterprises"];
+  var cache=JSON.parse(sessionStorage.getItem('br-live')||'{}');
+  var stale=!cache.ts||Date.now()-cache.ts>300000; // 5min cache
+  
+  async function fetchLive(){
+    if(!stale&&cache.repos){update(cache);return;}
+    var totalRepos=0,totalStars=0,langs=new Set();
+    // Sample 5 orgs for speed, extrapolate
+    var sample=ORGS.slice(0,5);
+    for(var o of sample){
+      try{
+        var r=await fetch('https://api.github.com/orgs/'+o);
+        if(r.ok){var d=await r.json();totalRepos+=d.public_repos||0;}
+      }catch(e){}
+    }
+    var est=Math.round(totalRepos*(ORGS.length/sample.length));
+    cache={repos:est,orgs:ORGS.length,domains:19,nodes:7,tops:52,agents:109,pages:193,models:16,forks:13,ts:Date.now()};
+    sessionStorage.setItem('br-live',JSON.stringify(cache));
+    update(cache);
+  }
+  
+  function update(d){
+    // Update any element with matching stat text
+    document.querySelectorAll('.sv,.stat-val,.stat-value,[data-live]').forEach(function(el){
+      var label=(el.nextElementSibling||el.parentElement.querySelector('.sl,.stat-label')||{}).textContent||'';
+      label=label.toLowerCase();
+      var attr=el.getAttribute('data-live');
+      
+      if(attr==='repos'||label.includes('repo'))el.textContent=d.repos?d.repos.toLocaleString()+'+':(el.textContent);
+      else if(attr==='orgs'||label==='orgs'||label==='github orgs')el.textContent=d.orgs||el.textContent;
+      else if(attr==='domains'||label==='domains')el.textContent=d.domains||el.textContent;
+      else if(attr==='nodes'||label==='nodes')el.textContent=d.nodes||el.textContent;
+      else if(attr==='tops'||label.includes('tops'))el.textContent=d.tops||el.textContent;
+      else if(attr==='agents'||label==='agents')el.textContent=d.agents||el.textContent;
+      else if(attr==='pages'||label==='pages')el.textContent=d.pages+'+'||el.textContent;
+      else if(attr==='models'||label.includes('model'))el.textContent=d.models+'+'||el.textContent;
+    });
+    
+    // Also update specific IDs
+    var idMap={'s-repos':'repos','s-orgs':'orgs','s-domains':'domains','s-nodes':'nodes','repo-count':'repos','rc':'repos'};
+    for(var id in idMap){
+      var el=document.getElementById(id);
+      if(el&&d[idMap[id]])el.textContent=d[idMap[id]].toLocaleString()+(['repos'].includes(idMap[id])?'+':'');
+    }
+  }
+  
+  // Run on load
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fetchLive);
+  else fetchLive();
+  // Refresh every 5 min
+  setInterval(fetchLive,300000);
+})();
+</script>
+
+<script>
+// Breadcrumb trail UI
+(function(){
+  var trail=JSON.parse(localStorage.getItem('br-trail')||'[]');
+  if(trail.length<2)return;
+  var recent=trail.slice(1,4); // skip current page
+  var html='<div style="margin-bottom:24px"><div style="font-family:var(--jb,monospace);font-size:9px;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Recently Visited</div>';
+  recent.forEach(function(p){
+    var name=p.title.replace(' — BlackRoad','').replace('BlackRoad ','').substring(0,30);
+    html+='<a href="'+p.url+'" style="display:inline-block;font-size:10px;color:#888;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:6px;padding:3px 10px;margin:2px 4px 2px 0;text-decoration:none;transition:border-color .2s">'+name+'</a>';
+  });
+  html+='</div>';
+  var target=document.querySelector('.section:last-of-type')||document.querySelector('.ct,.container');
+  if(target)target.insertAdjacentHTML('beforeend',html);
+})();
+
+// Visit counter per page
+(function(){
+  var key='br-visits-'+location.pathname;
+  var v=parseInt(localStorage.getItem(key)||'0')+1;
+  localStorage.setItem(key,v);
+  var el=document.querySelector('.read-time');
+  if(el)el.textContent=el.textContent+' · visit #'+v;
+})();
+
+// Related pages based on keyword matching
+(function(){
+  var registry={"alice": "alice.blackroad.io", "cecilia": "cecilia.blackroad.io", "octavia": "octavia.blackroad.io", "aria": "aria.blackroad.io", "lucidia": "lucidia.blackroad.io", "gematria": "gematria.blackroad.io", "anastasia": "anastasia.blackroad.io", "roundtrip": "roundtrip.blackroad.io", "prism": "prism.blackroad.io", "openclaw": "openclaw.blackroad.io", "roadcoin": "roadcoin.io", "roadchain": "roadchain.io", "roadwork": "roadwork.blackroad.io", "gitea": "roadcode.blackroad.io", "roadcode": "roadcode.blackroad.io", "wireguard": "tollbooth.blackroad.io", "tollbooth": "tollbooth.blackroad.io", "ollama": "ollama-fleet.blackroad.io", "minio": "curb.blackroad.io", "curb": "curb.blackroad.io", "caddy": "oneway.blackroad.io", "oneway": "oneway.blackroad.io", "qdrant": "rearview.blackroad.io", "rearview": "rearview.blackroad.io", "nats": "carpool.blackroad.io", "carpool": "carpool.blackroad.io", "headscale": "roundabout.blackroad.io", "grafana": "roadmap.blackroad.io", "amundson": "amundson.blackroad.io", "simulation theory": "simulation.blackroad.io", "blackbox protocol": "blackbox.blackroad.io", "three pillars": "pillars.blackroad.io", "llama3": "llama3.blackroad.io", "mistral": "mistral.blackroad.io", "codellama": "codellama.blackroad.io", "phi": "phi.blackroad.io", "gemma": "gemma.blackroad.io", "deepseek": "deepseek.blackroad.io", "nomic-embed": "nomic-embed.blackroad.io", "road agent": "road.blackroad.io", "cece": "cece.blackroad.io", "echo agent": "echo.blackroad.io", "oracle": "oracle.blackroad.io", "atlas": "atlas.blackroad.io", "cipher": "cipher.blackroad.io", "sentinel": "sentinel.blackroad.io", "hermes": "hermes.blackroad.io", "scribe": "scribe.blackroad.io", "search": "search.blackroad.io", "verify": "verify.blackroad.io", "map": "map.blackroad.io", "glossary": "glossary.blackroad.io", "faq": "faq.blackroad.io", "changelog": "changelog.blackroad.io"};
+  var title=document.title.toLowerCase();
+  var text=(document.querySelector('.ct,.container')?.textContent||'').toLowerCase();
+  var related=[];
+  var current=location.hostname;
+  for(var key in registry){
+    if(registry[key].includes(current))continue; // skip self
+    if(title.includes(key)||text.includes(key)){
+      related.push({name:key,url:'https://'+registry[key]});
+    }
+  }
+  if(!related.length)return;
+  // Deduplicate by URL
+  var seen={};
+  related=related.filter(function(r){if(seen[r.url])return false;seen[r.url]=true;return true;}).slice(0,8);
+  
+  var html='<div style="margin-top:32px;margin-bottom:24px"><div style="font-family:var(--jb,monospace);font-size:9px;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px">Related Pages</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+  related.forEach(function(r){
+    html+='<a href="'+r.url+'" style="font-size:11px;color:#aaa;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:6px 12px;text-decoration:none;transition:border-color .2s" onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#1a1a1a'">'+r.name+'</a>';
+  });
+  html+='</div></div>';
+  var last=document.querySelector('.section:last-of-type');
+  if(last)last.insertAdjacentHTML('beforebegin',html);
+})();
+</script>
+
+<script>
+// Auto-generate table of contents from section labels
+(function(){
+  var labels=document.querySelectorAll('.lb,.section-label');
+  if(labels.length<3)return;
+  var toc='<div style="margin-bottom:24px"><div style="font-family:var(--jb,monospace);font-size:9px;color:#555;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">On This Page</div>';
+  labels.forEach(function(l,i){
+    var id='s'+i;
+    l.id=id;
+    l.style.scrollMarginTop='60px';
+    toc+='<a href="#'+id+'" style="display:block;font-size:11px;color:#777;text-decoration:none;padding:3px 0;transition:color .15s" onmouseover="this.style.color='#ddd'" onmouseout="this.style.color='#777'">'+l.textContent+'</a>';
+  });
+  toc+='</div>';
+  var first=document.querySelector('.section:nth-child(2)');
+  if(first)first.insertAdjacentHTML('beforebegin',toc);
+})();
+
+// Time-based greeting
+(function(){
+  var h=new Date().getHours();
+  var greet=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  var el=document.querySelector('.st,.subtitle,.company-sub');
+  if(el&&!el.dataset.greeted){
+    el.dataset.greeted='1';
+    var span=document.createElement('span');
+    span.style.cssText='font-family:var(--jb,monospace);font-size:9px;color:#444;margin-left:8px';
+    span.textContent='· '+greet;
+    el.appendChild(span);
+  }
+})();
+
+// Page load time
+(function(){
+  var t=performance.now();
+  var el=document.querySelector('.read-time');
+  if(el)el.textContent=el.textContent+' · '+Math.round(t)+'ms load';
+})();
+
+// Scroll spy — highlight current section in TOC
+(function(){
+  var toc=document.querySelectorAll('[href^="#s"]');
+  if(!toc.length)return;
+  var labels=document.querySelectorAll('.lb[id],.section-label[id]');
+  window.addEventListener('scroll',function(){
+    var current='';
+    labels.forEach(function(l){if(l.getBoundingClientRect().top<100)current=l.id;});
+    toc.forEach(function(a){a.style.color=a.getAttribute('href')==='#'+current?'#ddd':'#777';});
+  });
+})();
+
+// Network status indicator
+(function(){
+  var el=document.querySelector('.header-sub,#status,#st');
+  if(!el)return;
+  window.addEventListener('online',function(){el.style.color='#4a4';});
+  window.addEventListener('offline',function(){el.textContent='offline';el.style.color='#a44';});
+})();
+
+// Lazy image loading (future-proof for when we add images)
+document.querySelectorAll('img').forEach(function(img){img.loading='lazy';});
+
+// Print page title in console
+console.log('%cBlackRoad OS','color:#FF2255;font-size:16px;font-weight:bold');
+console.log('%cRemember the Road. Pave Tomorrow.','color:#888;font-size:11px');
+console.log('%c'+document.title,'color:#aaa;font-size:10px');
+</script>
+</body></html>

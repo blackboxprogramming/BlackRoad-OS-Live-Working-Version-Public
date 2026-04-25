@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Docs — BlackRoad OS</title>
+<meta name="description" content="BlackRoad OS API documentation. Fleet, agents, memory, codex, search, billing.">
+<link rel="canonical" href="https://blackroad.io/docs">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--card:#131313;--border:#1a1a1a;--text:#f5f5f5;--sec:#d4d4d4;--muted:#737373;--dim:#525252;--faint:#404040;--ghost:#333;--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif}
+.grad{height:2px;background:var(--g);position:fixed;top:0;left:0;right:0;z-index:99}
+nav{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--border);position:sticky;top:2px;background:var(--bg);z-index:50}
+.mark{display:flex;gap:2px}
+.mark div{width:3px;height:14px;border-radius:1.5px}
+.nav-t{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;margin-left:8px;letter-spacing:-0.02em}
+.content{max-width:720px;margin:0 auto;padding:48px 20px}
+.label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:12px}
+h1{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+.sub{font-size:15px;color:var(--muted);margin-bottom:32px}
+.endpoint{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.ep-head{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer}
+.method{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;padding:3px 8px;border-radius:4px;text-transform:uppercase}
+.get{background:#131313;color:#4488FF;border:1px solid #1a2a3a}
+.post{background:#131313;color:#FF6B2B;border:1px solid #2a1a1a}
+.path{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--sec)}
+.desc{font-size:12px;color:var(--dim);margin-left:auto}
+.ep-body{padding:0 20px 16px;border-top:1px solid var(--border);display:none}
+.ep-body.open{display:block;padding-top:16px}
+.code{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8;overflow-x:auto;margin:12px 0}
+.auth-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border:1px solid #2a1a1a;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#FF6B2B;text-transform:uppercase}
+.free-badge{border-color:#1a2a1a;color:#4CAF50}
+.try-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 20px;margin:32px 0}
+.try-box input{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;margin:8px 0}
+.try-btn{padding:10px 20px;background:var(--text);color:var(--bg);border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
+.response{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:12px;max-height:200px;overflow-y:auto;display:none}
+.cta{text-align:center;padding:48px 20px;border-top:1px solid var(--border)}
+.cta-btn{display:inline-block;padding:14px 40px;background:var(--text);color:var(--bg);border-radius:7px;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600}
+footer{max-width:720px;margin:0 auto;padding:32px 20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ghost)}
+</style>
+</head>
+<body>
+<div class="grad"></div>
+<nav>
+<div style="display:flex;align-items:center">
+<div class="mark"><div style="background:#FF6B2B"></div><div style="background:#FF2255"></div><div style="background:#CC00AA"></div><div style="background:#8844FF"></div><div style="background:#4488FF"></div><div style="background:#00D4FF"></div></div>
+<span class="nav-t">Docs</span>
+</div>
+<a href="https://app.blackroad.io/signup" style="font-size:13px;color:var(--muted);text-decoration:none">Get API Key</a>
+</nav>
+
+<div class="content">
+<div class="label">API Reference</div>
+<h1>BlackRoad OS API</h1>
+<p class="sub">12 endpoints. REST + JSON. API key in header.</p>
+
+<div class="code">
+curl -H "Authorization: Bearer br_live_YOUR_KEY" \
+  https://blackroad.io/api/health
+</div>
+
+<div class="label" style="margin-top:32px">Authentication</div>
+<p style="font-size:14px;color:var(--muted);margin-bottom:24px">All endpoints except /api/health require an API key. Get one at <a href="https://app.blackroad.io/signup" style="color:var(--sec);text-decoration:none">app.blackroad.io/signup</a>.</p>
+
+<div class="label">Endpoints</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/health</span><span class="auth-badge free-badge">public</span><span class="desc">Service status</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Returns service health, agent count, and version.</p>
+<div class="code">{"status":"alive","agents":69,"nlp":true,"host":"alice"}</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/agents</span><span class="auth-badge free-badge">public</span><span class="desc">List all agents</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Returns all 69 registered agents with roles, groups, and status.</p>
+<div class="code">[{"id":"alice","name":"Alice","role":"Gateway","group":"fleet","ip":"192.168.4.49"}, ...]</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method post">POST</span><span class="path">/api/chat</span><span class="auth-badge">api key</span><span class="desc">Chat with agent</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Send a message to any agent. Returns AI-generated response via local Ollama.</p>
+<div class="code">// Request
+{"agent":"alice","message":"what is your status?","channel":"general"}
+
+// Response
+{"agent":"alice","name":"Alice","reply":"All systems operational. 37 sites served, DNS filtering active."}</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method post">POST</span><span class="path">/api/action</span><span class="auth-badge">api key</span><span class="desc">Execute script</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Execute any of 231 actions across 71 intents. Real scripts run on the Pi fleet.</p>
+<div class="code">// Request
+{"intent":"search","query":"fleet health"}
+
+// Response
+{"intent":"search","action":"Codex search","status":"ok","output":"..."}</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method post">POST</span><span class="path">/api/smart</span><span class="auth-badge">api key</span><span class="desc">NLP + action + AI</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Send natural language. Parses intent, executes matching script, and returns AI response.</p>
+<div class="code">// Request
+{"message":"search codex for fleet health"}
+
+// Response
+{"parsed":{"intents":[{"intent":"search"}]},"action":{"status":"ok","output":"..."},"reply":{"agent":"road","text":"..."}}</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/actions</span><span class="auth-badge free-badge">public</span><span class="desc">List all actions</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted);margin-bottom:12px">Returns all 71 intents and 231 available actions.</p>
+<div class="code">{"total_intents":71,"total_actions":231,"actions":{"status":["Fleet status","Heartbeat"],...}}</div></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/fleet</span><span class="auth-badge">api key</span><span class="desc">Live fleet data</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted)">Returns live fleet node status, agent counts, and RoundTrip health.</p></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/products</span><span class="auth-badge free-badge">public</span><span class="desc">Product list</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted)">Returns product catalog for the current domain.</p></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/messages</span><span class="auth-badge">api key</span><span class="desc">Chat history</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted)">Returns message history for a channel. Query: ?channel=general&limit=50</p></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/channels</span><span class="auth-badge free-badge">public</span><span class="desc">List channels</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted)">Returns all 8 chat channels: general, fleet, iot, security, creative, ops, research, ceo.</p></div>
+</div>
+
+<div class="endpoint" onclick="this.querySelector('.ep-body').classList.toggle('open')">
+<div class="ep-head"><span class="method get">GET</span><span class="path">/api/groups</span><span class="auth-badge free-badge">public</span><span class="desc">Agent groups</span></div>
+<div class="ep-body"><p style="font-size:13px;color:var(--muted)">Returns agent groups: fleet, cloud, services, ai, ops, myth, lead, iot.</p></div>
+</div>
+
+<div class="try-box">
+<div class="label">Try it</div>
+<input type="text" id="try-key" placeholder="API key (br_live_...)">
+<input type="text" id="try-msg" placeholder="Message (e.g. 'search codex for fleet')">
+<button class="try-btn" onclick="tryIt()">Send</button>
+<div class="response" id="try-resp"></div>
+</div>
+
+</div>
+
+<div class="cta">
+<div class="label">Get Started</div>
+<p style="font-size:14px;color:var(--muted);margin-bottom:24px">Free tier: /api/health, /api/agents, /api/actions, /api/products, /api/channels, /api/groups</p>
+<a href="https://app.blackroad.io/signup" class="cta-btn">Get API Key</a>
+</div>
+
+<footer>BlackRoad OS, Inc. — Pave Tomorrow.</footer>
+
+<script>
+async function tryIt(){
+  const key=document.getElementById('try-key').value;
+  const msg=document.getElementById('try-msg').value;
+  const resp=document.getElementById('try-resp');
+  resp.style.display='block';
+  resp.textContent='Loading...';
+  try{
+    const r=await fetch('https://roundtrip.blackroad.io/api/smart',{
+      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({message:msg})
+    });
+    resp.textContent=JSON.stringify(await r.json(),null,2);
+  }catch(e){resp.textContent='Error: '+e.message}
+}
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

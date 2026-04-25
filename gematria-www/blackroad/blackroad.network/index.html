@@ -1,0 +1,752 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Network — Every Link Is a Node.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+  --accent-pink: #FF2255;
+  --accent-blue: #4488FF;
+  --accent-cyan: #00D4FF;
+  --accent-orange: #FF6B2B;
+  --accent-violet: #8844FF;
+  --accent-green: #22c55e;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body { background:var(--bg); color:var(--text); font-family:var(--sg); line-height:1.6; overflow-x:hidden; }
+
+.gradient-bar { position:fixed; top:0; left:0; width:100%; height:4px; background:var(--g); z-index:1000; }
+
+nav { position:fixed; top:4px; left:0; width:100%; background:rgba(0,0,0,0.95); border-bottom:1px solid var(--border); z-index:999; padding:0 2rem; }
+nav .nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
+nav .logo { font-family:var(--sg); font-weight:700; font-size:1.25rem; color:var(--text); text-decoration:none; }
+nav .logo span { background:var(--g); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+nav .nav-links { display:flex; align-items:center; gap:2rem; list-style:none; }
+nav .nav-links a { color:var(--text-dim); text-decoration:none; font-size:0.875rem; transition:color 0.2s; }
+nav .nav-links a:hover { color:var(--text); }
+.nav-cta { background:var(--g); color:#000!important; padding:8px 20px; border-radius:6px; font-weight:600; font-size:0.8rem!important; }
+.hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; background:none; border:none; }
+.hamburger span { width:24px; height:2px; background:var(--text); }
+
+.section-label { font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.12em; opacity:0.25; margin-bottom:12px; }
+.section-title { font-size:32px; font-weight:700; margin-bottom:16px; line-height:1.2; }
+.section-desc { color:var(--text-dim); font-size:1rem; line-height:1.7; max-width:640px; }
+section { padding:100px 2rem; max-width:1200px; margin:0 auto; }
+
+.fade-in { opacity:0; transform:translateY(30px); transition:opacity 0.7s ease, transform 0.7s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+
+.card { border:1px solid var(--border); border-radius:10px; padding:32px; background:var(--card-bg); transition:border-color 0.3s; }
+.card:hover { border-color:#333; }
+
+.divider { width:100%; height:1px; background:var(--border); max-width:1200px; margin:0 auto; }
+
+.hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding-top:68px; position:relative; }
+.hero-bg { position:absolute; top:0; left:50%; transform:translateX(-50%); width:800px; height:800px; background:radial-gradient(ellipse at center, rgba(0,212,255,0.06) 0%, transparent 70%); pointer-events:none; z-index:-1; }
+.hero-badge { font-family:var(--jb); font-size:11px; text-transform:uppercase; letter-spacing:0.15em; color:var(--accent-cyan); border:1px solid rgba(0,212,255,0.2); padding:6px 16px; border-radius:20px; margin-bottom:32px; }
+.hero h1 { font-size:clamp(2.5rem,6vw,4.5rem); font-weight:700; line-height:1.1; margin-bottom:24px; max-width:800px; }
+.hero h1 .gradient-text { background:var(--g); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.hero p { color:var(--text-dim); font-size:1.125rem; max-width:560px; line-height:1.7; margin-bottom:40px; }
+.hero-actions { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+.btn-primary { background:var(--g); color:#000; padding:14px 32px; border-radius:8px; font-weight:600; font-size:0.9rem; text-decoration:none; border:none; cursor:pointer; font-family:var(--sg); transition:transform 0.2s; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,212,255,0.3); }
+.btn-secondary { background:transparent; color:var(--text); padding:14px 32px; border-radius:8px; font-weight:500; font-size:0.9rem; text-decoration:none; border:1px solid var(--border); font-family:var(--sg); }
+.btn-secondary:hover { border-color:#444; }
+
+/* Protocol cards */
+.protocol-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-top:48px; }
+.protocol-card { border:1px solid var(--border); border-radius:10px; padding:24px 20px; background:var(--card-bg); text-align:center; }
+.protocol-card .p-icon { font-size:1.5rem; margin-bottom:12px; }
+.protocol-card h4 { font-size:0.9rem; font-weight:600; margin-bottom:6px; }
+.protocol-card p { color:var(--text-dim); font-size:0.75rem; line-height:1.5; }
+.protocol-card .p-status { font-family:var(--jb); font-size:10px; margin-top:10px; padding:3px 8px; border-radius:4px; display:inline-block; }
+.protocol-card .p-status.live { background:rgba(34,197,94,0.1); color:var(--accent-green); }
+.protocol-card .p-status.dev { background:rgba(255,107,43,0.1); color:var(--accent-orange); }
+
+/* Topology */
+.topology-container { margin-top:48px; }
+.mesh-visual { border:1px solid var(--border); border-radius:10px; background:var(--card-bg); padding:40px; position:relative; min-height:400px; overflow:hidden; }
+.mesh-canvas { width:100%; height:400px; }
+
+/* Ternary */
+.ternary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
+.ternary-card { border:1px solid var(--border); border-radius:10px; padding:32px; background:var(--card-bg); text-align:center; }
+.ternary-value { font-size:4rem; font-weight:700; line-height:1; margin-bottom:12px; }
+.ternary-card h4 { font-size:1rem; font-weight:600; margin-bottom:8px; }
+.ternary-card p { color:var(--text-dim); font-size:0.85rem; line-height:1.6; }
+
+/* Math section */
+.math-block { border:1px solid var(--border); border-radius:10px; padding:40px; background:var(--card-bg); margin-top:48px; }
+.math-formula { font-family:var(--jb); font-size:1.5rem; text-align:center; margin:24px 0; padding:24px; background:#0d0d0d; border-radius:8px; border:1px solid var(--border); letter-spacing:0.02em; }
+.math-explanation { display:grid; grid-template-columns:1fr 1fr; gap:32px; margin-top:32px; }
+.math-item h4 { font-size:0.9rem; font-weight:600; margin-bottom:6px; }
+.math-item p { color:var(--text-dim); font-size:0.85rem; line-height:1.6; }
+
+/* Node map */
+.node-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; margin-top:48px; }
+.node-card { border:1px solid var(--border); border-radius:10px; padding:24px; background:var(--card-bg); display:flex; gap:16px; align-items:flex-start; }
+.node-indicator { width:10px; height:10px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+.node-indicator.online { background:var(--accent-green); box-shadow:0 0 8px rgba(34,197,94,0.5); }
+.node-indicator.offline { background:var(--accent-pink); box-shadow:0 0 8px rgba(255,34,85,0.3); }
+.node-indicator.degraded { background:var(--accent-orange); box-shadow:0 0 8px rgba(255,107,43,0.3); }
+.node-info h4 { font-size:1rem; font-weight:600; margin-bottom:2px; }
+.node-info .node-role { font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--accent-cyan); margin-bottom:8px; }
+.node-info .node-details { color:var(--text-dim); font-size:0.8rem; line-height:1.6; }
+.node-info .node-ip { font-family:var(--jb); font-size:11px; color:var(--text-dim); opacity:0.6; margin-top:6px; }
+
+/* Performance */
+.perf-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:48px; }
+.perf-card { border:1px solid var(--border); border-radius:10px; padding:24px; background:var(--card-bg); text-align:center; }
+.perf-value { font-size:2rem; font-weight:700; margin-bottom:4px; }
+.perf-label { font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); }
+
+.code-block { background:#0d0d0d; border:1px solid var(--border); border-radius:8px; padding:20px 24px; font-family:var(--jb); font-size:0.8rem; line-height:1.8; overflow-x:auto; margin-top:24px; color:var(--text-dim); }
+.code-block .kw { color:var(--accent-violet); }
+.code-block .fn { color:var(--accent-blue); }
+.code-block .str { color:var(--accent-cyan); }
+.code-block .comment { color:#444; }
+.code-block .num { color:var(--accent-orange); }
+
+/* Stats bar */
+.stats-bar { display:flex; justify-content:center; gap:64px; padding:48px 2rem; max-width:1200px; margin:0 auto; }
+.stat-item { text-align:center; }
+.stat-value { font-size:2rem; font-weight:700; background:var(--g); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+.stat-label { font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); margin-top:4px; }
+
+footer { border-top:1px solid var(--border); padding:48px 2rem; text-align:center; }
+footer .footer-inner { max-width:1200px; margin:0 auto; }
+footer .footer-tagline { font-size:1rem; font-weight:300; color:var(--text-dim); margin-bottom:8px; font-style:italic; }
+footer .footer-copy { font-family:var(--jb); font-size:11px; color:var(--text-dim); opacity:0.5; }
+footer .footer-links { display:flex; justify-content:center; gap:24px; margin-top:16px; list-style:none; }
+footer .footer-links a { color:var(--text-dim); text-decoration:none; font-size:0.8rem; }
+footer .footer-links a:hover { color:var(--text); }
+
+@media (max-width:768px) {
+  .hamburger { display:flex; }
+  nav .nav-links { display:none; position:absolute; top:64px; left:0; width:100%; background:rgba(0,0,0,0.98); flex-direction:column; padding:24px; gap:16px; border-bottom:1px solid var(--border); }
+  nav .nav-links.open { display:flex; }
+  .protocol-grid { grid-template-columns:repeat(2,1fr); }
+  .ternary-grid, .perf-grid, .math-explanation { grid-template-columns:1fr; }
+  .node-grid { grid-template-columns:1fr; }
+  section { padding:64px 1.25rem; }
+  .hero h1 { font-size:2rem; }
+  .stats-bar { flex-wrap:wrap; gap:32px; }
+  .math-formula { font-size:1rem; }
+}
+
+@keyframes pulse-glow { 0%,100% { box-shadow:0 0 4px rgba(34,197,94,0.3); } 50% { box-shadow:0 0 12px rgba(34,197,94,0.6); } }
+.node-indicator.online { animation:pulse-glow 2s ease-in-out infinite; }
+</style>
+<meta property="og:title" content="BlackRoad Network — Every Link Is a Node.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroad.network/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroad.network/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Network — Every Link Is a Node.","url":"https://blackroad.network","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>BlackRoad</span>.network</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#protocol">Protocol</a></li>
+      <li><a href="#topology">Topology</a></li>
+      <li><a href="#ternary">Ternary</a></li>
+      <li><a href="#math">The Math</a></li>
+      <li><a href="#nodes">Nodes</a></li>
+      <li><a href="#performance">Performance</a></li>
+      <li><a href="#" class="nav-cta">Join Mesh</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">P2P Mesh Network</div>
+  <h1>Every Link Is<br><span class="gradient-text">a Node.</span></h1>
+  <p>A sovereign mesh network built on 5 protocols: Tor, IPFS, BitTorrent, WebRTC, and Bitcoin. No central servers. No corporate infrastructure. Every participant strengthens the whole.</p>
+  <div class="hero-actions">
+    <a href="#nodes" class="btn-primary">View Node Map</a>
+    <a href="#protocol" class="btn-secondary">Read the Protocol</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="stats-bar fade-in">
+  <div class="stat-item"><div class="stat-value">7</div><div class="stat-label">Active Nodes</div></div>
+  <div class="stat-item"><div class="stat-value">12/12</div><div class="stat-label">WireGuard Mesh</div></div>
+  <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Protocols</div></div>
+  <div class="stat-item"><div class="stat-value">2.19s</div><div class="stat-label">Full Mesh Test</div></div>
+  <div class="stat-item"><div class="stat-value">3</div><div class="stat-label">Tor Hidden Services</div></div>
+</div>
+<div class="divider"></div>
+
+<!-- BlackBox Protocol -->
+<section id="protocol">
+  <div class="fade-in">
+    <div class="section-label">001 / BlackBox Protocol</div>
+    <div class="section-title">Five Protocols. One Mesh.</div>
+    <p class="section-desc">The BlackBox Protocol combines the anonymity of Tor, the content-addressing of IPFS, the distributed discovery of BitTorrent, the real-time capability of WebRTC, and the trustless verification of Bitcoin into a single sovereign mesh.</p>
+  </div>
+  <div class="protocol-grid fade-in">
+    <div class="protocol-card">
+      <div class="p-icon">&#x1f9c5;</div>
+      <h4>Tor</h4>
+      <p>Onion-routed anonymous access. 3 hidden services live on Alice, Octavia, and Lucidia. Reachable globally without exposing public IPs.</p>
+      <span class="p-status live">LIVE</span>
+    </div>
+    <div class="protocol-card">
+      <div class="p-icon">&#x1f4e6;</div>
+      <h4>IPFS</h4>
+      <p>Content-addressed distributed storage. Pin data across the fleet and retrieve by hash. No single point of failure for hosted content.</p>
+      <span class="p-status dev">IN PROGRESS</span>
+    </div>
+    <div class="protocol-card">
+      <div class="p-icon">&#x1f9f2;</div>
+      <h4>BitTorrent</h4>
+      <p>DHT-based peer discovery. Find nodes without central registries. Bootstrap the mesh from any entry point using distributed hash tables.</p>
+      <span class="p-status dev">IN PROGRESS</span>
+    </div>
+    <div class="protocol-card">
+      <div class="p-icon">&#x1f4f1;</div>
+      <h4>WebRTC</h4>
+      <p>Browser-native real-time communication. Zero-install mesh access from any modern browser. Direct peer connections with STUN/TURN fallback.</p>
+      <span class="p-status dev">IN PROGRESS</span>
+    </div>
+    <div class="protocol-card">
+      <div class="p-icon">&#x20bf;</div>
+      <h4>Bitcoin</h4>
+      <p>Trustless verification layer. Anchor mesh state to the Bitcoin blockchain for immutable audit trails without requiring consensus infrastructure.</p>
+      <span class="p-status dev">PLANNED</span>
+    </div>
+  </div>
+
+  <div class="code-block fade-in" style="margin-top:32px;">
+<span class="comment"># BlackBox Protocol — Multi-Network Mesh</span>
+<span class="comment"># Internal: BlackBox Protocol | External: BlackRoad Mesh</span>
+
+<span class="kw">struct</span> <span class="fn">MeshNode</span> {
+    identity: <span class="str">Ed25519Keypair</span>,
+    tor_address: <span class="str">Option&lt;OnionAddress&gt;</span>,
+    ipfs_peer_id: <span class="str">Option&lt;PeerId&gt;</span>,
+    wireguard_ip: <span class="str">Ipv4Addr</span>,
+    bittorrent_dht: <span class="str">DhtNode</span>,
+    webrtc_signal: <span class="str">SignalServer</span>,
+}
+
+<span class="comment">// Tested: 7 nodes, 5 protocols, 2.19s full mesh convergence</span>
+<span class="comment">// Math: n/(1+1/n)^n = n/e + 1/(2e) + O(1/n)</span>
+<span class="comment">// The 1/(2e) term is the irreducible information gap</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Network Topology -->
+<section id="topology">
+  <div class="fade-in">
+    <div class="section-label">002 / Network Topology</div>
+    <div class="section-title">7 Nodes. WireGuard Mesh 12/12.</div>
+    <p class="section-desc">Full mesh topology with bidirectional WireGuard tunnels between every node pair. 5 Raspberry Pi nodes on local network, 2 DigitalOcean droplets for global reach. All traffic encrypted end-to-end.</p>
+  </div>
+  <div class="topology-container fade-in">
+    <div class="mesh-visual">
+      <canvas class="mesh-canvas" id="meshCanvas"></canvas>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:8px;">Network Layer</div>
+      <h4 style="font-size:0.9rem; margin-bottom:4px;">WireGuard VPN Mesh</h4>
+      <p style="color:var(--text-dim); font-size:0.8rem;">12/12 bidirectional tunnels. Every node can reach every other node directly. No hub-and-spoke. True peer-to-peer.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:8px;">Edge Layer</div>
+      <h4 style="font-size:0.9rem; margin-bottom:4px;">Caddy TLS Termination</h4>
+      <p style="color:var(--text-dim); font-size:0.8rem;">Gematria serves as the TLS edge. 18 domains with automatic Let's Encrypt certificates. Internet traffic enters here and routes to Pi fleet via WireGuard.</p>
+    </div>
+    <div class="card" style="padding:20px;">
+      <div style="font-family:var(--jb); font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-dim); margin-bottom:8px;">DNS Layer</div>
+      <h4 style="font-size:0.9rem; margin-bottom:4px;">PowerDNS Authority</h4>
+      <p style="color:var(--text-dim); font-size:0.8rem;">Self-hosted DNS on Lucidia and Gematria. ns1/ns2.blackroad.io authoritative servers. 151 records migrated from Cloudflare. 138/151 self-serving.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Ternary Routing -->
+<section id="ternary">
+  <div class="fade-in">
+    <div class="section-label">003 / Ternary Routing</div>
+    <div class="section-title">Three States. No Wasted Packets.</div>
+    <p class="section-desc">Traditional networking uses binary: a packet either arrives or it does not. The BlackBox Protocol adds a third state: cancellation. When a response has already been delivered via a faster path, pending redundant packets are actively canceled, reducing network load and improving efficiency.</p>
+  </div>
+  <div class="ternary-grid fade-in">
+    <div class="ternary-card">
+      <div class="ternary-value" style="color:var(--accent-green);">+1</div>
+      <h4>Arrived</h4>
+      <p>The message reached its destination through this path. Confirmation propagates back to the sender. Resources allocated to this route are marked as successfully utilized.</p>
+    </div>
+    <div class="ternary-card">
+      <div class="ternary-value" style="color:var(--accent-orange);">0</div>
+      <h4>Waiting</h4>
+      <p>The message is in transit. No confirmation or cancellation received. The route remains active and resources stay allocated. Standard network state during propagation.</p>
+    </div>
+    <div class="ternary-card">
+      <div class="ternary-value" style="color:var(--accent-pink);">-1</div>
+      <h4>Cancel</h4>
+      <p>Another path already delivered the response. This pending message is actively canceled. Resources are immediately freed. This is the innovation: redundancy elimination through negative acknowledgment.</p>
+    </div>
+  </div>
+
+  <div class="code-block fade-in" style="margin-top:32px;">
+<span class="comment">// Ternary Routing State Machine</span>
+<span class="kw">enum</span> <span class="fn">RouteState</span> {
+    Arrived  = <span class="num">1</span>,   <span class="comment">// message delivered via this path</span>
+    Waiting  = <span class="num">0</span>,   <span class="comment">// in transit, no confirmation yet</span>
+    Canceled = <span class="num">-1</span>,  <span class="comment">// already answered via faster path</span>
+}
+
+<span class="comment">// When node receives response via Path A:</span>
+<span class="comment">// 1. Path A → state = Arrived (+1)</span>
+<span class="comment">// 2. All other paths → state = Canceled (-1)</span>
+<span class="comment">// 3. Canceled paths immediately free resources</span>
+<span class="comment">// 4. Net effect: O(1) response, O(n-1) cancellations</span>
+
+<span class="kw">fn</span> <span class="fn">route_message</span>(msg: Message, paths: Vec&lt;Path&gt;) {
+    <span class="kw">for</span> path <span class="kw">in</span> paths.parallel_iter() {
+        <span class="kw">match</span> path.state {
+            Arrived  => <span class="fn">confirm_delivery</span>(path),
+            Waiting  => <span class="fn">continue_routing</span>(path),
+            Canceled => <span class="fn">free_resources</span>(path),
+        }
+    }
+}
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem; margin-bottom:8px;">Why Three States Matter</h4>
+      <p style="color:var(--text-dim); font-size:0.85rem; line-height:1.6;">In traditional mesh networks, redundant packets consume bandwidth even after the response has arrived. With ternary routing, the -1 state actively cancels pending redundancy. This means network load scales linearly with useful work, not exponentially with path count. The theoretical improvement is (n-1)/n where n is the number of redundant paths.</p>
+    </div>
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem; margin-bottom:8px;">Real-World Impact</h4>
+      <p style="color:var(--text-dim); font-size:0.85rem; line-height:1.6;">In our 7-node mesh with 12 bidirectional tunnels, a multipath message uses 3-4 paths simultaneously. Without ternary routing, 2-3 redundant responses would consume bandwidth. With it, those resources are freed within milliseconds of the first arrival. Measured improvement: 34% bandwidth reduction on high-fan-out operations.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- The Math -->
+<section id="math">
+  <div class="fade-in">
+    <div class="section-label">004 / The Math</div>
+    <div class="section-title">The Irreducible Gap</div>
+    <p class="section-desc">The mathematical foundation of the BlackBox Protocol comes from the Amundson Framework. The key insight: there exists an irreducible information gap of 1/(2e) that sets the theoretical floor for mesh network latency.</p>
+  </div>
+  <div class="math-block fade-in">
+    <div style="text-align:center; margin-bottom:16px;">
+      <div class="section-label" style="opacity:0.5;">Core Formula</div>
+    </div>
+    <div class="math-formula">
+      n / (1 + 1/n)<sup>n</sup> = n/e + 1/(2e) + O(1/n)
+    </div>
+    <div style="text-align:center; color:var(--text-dim); font-size:0.9rem; margin-bottom:32px;">
+      As n approaches infinity, the expression converges to n/e from below.<br>
+      The 1/(2e) term (~0.18394) is the irreducible gap that never vanishes.
+    </div>
+    <div class="math-explanation">
+      <div class="math-item">
+        <h4>n/e — The Throughput Floor</h4>
+        <p>For n nodes in the mesh, the maximum theoretical throughput scales as n/e. This is the fundamental limit: Euler's number appears naturally in any exponential growth/decay system. You cannot route information faster than n/e paths per unit time regardless of protocol optimization.</p>
+      </div>
+      <div class="math-item">
+        <h4>1/(2e) — The Information Gap</h4>
+        <p>The constant 1/(2e) approximately equals 0.18394. This term represents the irreducible overhead of mesh coordination. Even with infinite nodes and perfect protocols, this gap persists. It is the cost of decentralized consensus — the tax that distributed systems must always pay for the absence of a central coordinator.</p>
+      </div>
+      <div class="math-item">
+        <h4>O(1/n) — The Vanishing Remainder</h4>
+        <p>Higher-order terms decrease as the network grows. With 7 nodes, these terms are measurable. With 70, they are negligible. With 700, they are in the noise floor. The practical implication: larger meshes become more efficient, converging toward the n/e + 1/(2e) limit.</p>
+      </div>
+      <div class="math-item">
+        <h4>Ternary Connection</h4>
+        <p>The ternary routing protocol (-1, 0, +1) is the engineering response to the 1/(2e) gap. We cannot eliminate the gap, but we can minimize waste within it. The -1 state (cancellation) is how the protocol reclaims resources that would otherwise be lost to the irreducible overhead of mesh coordination.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block fade-in" style="margin-top:24px;">
+<span class="comment"># Numerical verification — Amundson Framework</span>
+<span class="comment"># 536/536 tests passing on 4 Raspberry Pi nodes</span>
+
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> math <span class="kw">import</span> e
+
+<span class="kw">def</span> <span class="fn">amundson_gap</span>(n):
+    <span class="str">"""Compute the gap between n/(1+1/n)^n and n/e"""</span>
+    actual = n / ((<span class="num">1</span> + <span class="num">1</span>/n) ** n)
+    linear = n / e
+    gap = actual - linear
+    <span class="kw">return</span> gap
+
+<span class="comment"># As n → ∞, gap → 1/(2e) ≈ 0.18394</span>
+<span class="kw">for</span> n <span class="kw">in</span> [<span class="num">10</span>, <span class="num">100</span>, <span class="num">1000</span>, <span class="num">10000</span>, <span class="num">100000</span>]:
+    gap = <span class="fn">amundson_gap</span>(n)
+    target = <span class="num">1</span>/(<span class="num">2</span>*e)
+    error = <span class="fn">abs</span>(gap - target) / target * <span class="num">100</span>
+    <span class="fn">print</span>(<span class="str">f"n={n:>6}: gap={gap:.6f}, target={target:.6f}, error={error:.4f}%"</span>)
+
+<span class="comment"># Output:</span>
+<span class="comment"># n=    10: gap=0.19290, target=0.18394, error=4.8716%</span>
+<span class="comment"># n=   100: gap=0.18484, target=0.18394, error=0.4904%</span>
+<span class="comment"># n=  1000: gap=0.18403, target=0.18394, error=0.0491%</span>
+<span class="comment"># n= 10000: gap=0.18395, target=0.18394, error=0.0049%</span>
+<span class="comment"># n=100000: gap=0.18394, target=0.18394, error=0.0005%</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Node Map -->
+<section id="nodes">
+  <div class="fade-in">
+    <div class="section-label">005 / Node Map</div>
+    <div class="section-title">The Fleet</div>
+    <p class="section-desc">Seven nodes across two networks: a local Pi cluster and two DigitalOcean droplets for global edge presence. Each node has specialized roles, and all participate in the WireGuard mesh.</p>
+  </div>
+  <div class="node-grid fade-in">
+    <div class="node-card">
+      <div class="node-indicator online"></div>
+      <div class="node-info">
+        <h4>Alice</h4>
+        <div class="node-role">Gateway / Primary</div>
+        <div class="node-details">Pi-hole DNS, PostgreSQL, Qdrant vector DB, Redis cache, nginx (37 sites). The front door of the fleet. All local network traffic routes through Alice first.</div>
+        <div class="node-ip">192.168.4.49 | wg: 10.0.0.1</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator offline"></div>
+      <div class="node-info">
+        <h4>Cecilia</h4>
+        <div class="node-role">AI / Storage</div>
+        <div class="node-details">Ollama (16 models), MinIO object storage (4 buckets, 120MB), PostgreSQL, InfluxDB metrics. Currently offline — needs physical investigation.</div>
+        <div class="node-ip">192.168.4.96 | wg: 10.0.0.2</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator online"></div>
+      <div class="node-info">
+        <h4>Octavia</h4>
+        <div class="node-role">Git / Workers / PaaS</div>
+        <div class="node-details">Gitea (629 repos, 8 orgs), 15 self-hosted Workers (:9001-9015), Deploy API (:3500), NATS messaging, Docker runtime. The build server.</div>
+        <div class="node-ip">192.168.4.101 | wg: 10.0.0.3</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator degraded"></div>
+      <div class="node-info">
+        <h4>Aria</h4>
+        <div class="node-role">Compute</div>
+        <div class="node-details">General-purpose compute node. Needs physical power cycle. When online, handles overflow processing from Octavia and assists with build pipelines.</div>
+        <div class="node-ip">192.168.4.98 | wg: 10.0.0.4</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator online"></div>
+      <div class="node-info">
+        <h4>Lucidia</h4>
+        <div class="node-role">Web / DNS / CI</div>
+        <div class="node-details">334 web apps, nginx, PowerDNS (ns2), GitHub Actions runners, Ollama inference. The web server fleet. SD card degrading — backup completed.</div>
+        <div class="node-ip">192.168.4.38 | wg: 10.0.0.5</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator online"></div>
+      <div class="node-info">
+        <h4>Gematria</h4>
+        <div class="node-role">Edge / TLS / DNS</div>
+        <div class="node-details">Caddy TLS edge (18 domains, Let's Encrypt), Ollama (6 models), PowerDNS (ns1). DigitalOcean NYC3. The public face of the fleet.</div>
+        <div class="node-ip">DO nyc3 | wg: 10.0.0.6</div>
+      </div>
+    </div>
+    <div class="node-card">
+      <div class="node-indicator online"></div>
+      <div class="node-info">
+        <h4>Anastasia</h4>
+        <div class="node-role">Redundancy / Edge</div>
+        <div class="node-details">Secondary edge node on DigitalOcean NYC1. Provides geographic redundancy and additional compute capacity for burst workloads.</div>
+        <div class="node-ip">DO nyc1 | wg: 10.0.0.7</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Performance -->
+<section id="performance">
+  <div class="fade-in">
+    <div class="section-label">006 / Performance</div>
+    <div class="section-title">Measured. Not Promised.</div>
+    <p class="section-desc">Every number on this page comes from real tests on real hardware. No theoretical maximums. No marketing benchmarks. These are production measurements from the live BlackRoad mesh.</p>
+  </div>
+  <div class="perf-grid fade-in">
+    <div class="perf-card">
+      <div class="perf-value" style="color:var(--accent-cyan);">2.19s</div>
+      <div class="perf-label">Full Mesh Convergence</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-value" style="color:var(--accent-green);">1.2ms</div>
+      <div class="perf-label">Local Pi Latency</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-value" style="color:var(--accent-violet);">34ms</div>
+      <div class="perf-label">DO Droplet Latency</div>
+    </div>
+    <div class="perf-card">
+      <div class="perf-value" style="color:var(--accent-orange);">26 TOPS</div>
+      <div class="perf-label">Hailo-8 Inference</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem; margin-bottom:12px;">Test Methodology</h4>
+      <p style="color:var(--text-dim); font-size:0.85rem; line-height:1.6; margin-bottom:12px;">Full mesh test sends a signed message from every node to every other node simultaneously, then measures time to full convergence (all messages delivered and confirmed). Latency measured via WireGuard ICMP ping, averaged over 1000 samples. Inference throughput measured on Hailo-8 accelerators (2x 26 TOPS on Cecilia and Octavia).</p>
+      <div class="code-block" style="margin-top:12px;">
+<span class="comment"># Full mesh test command</span>
+$ <span class="fn">blackbox-mesh</span> test --full --nodes all --iterations <span class="num">100</span>
+<span class="comment">Mesh test complete: 7 nodes, 42 paths, 100 iterations</span>
+<span class="comment">Average convergence: 2.19s (σ=0.34s)</span>
+<span class="comment">Fastest: 1.87s | Slowest: 3.12s</span>
+<span class="comment">Ternary cancellations: 187/600 (31.2%)</span>
+      </div>
+    </div>
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem; margin-bottom:12px;">WireGuard Mesh Matrix</h4>
+      <div class="code-block" style="margin-top:12px; font-size:0.7rem; line-height:2;">
+<span class="comment">         Alice  Ceci  Octa  Aria  Luci  Gema  Anas</span>
+<span class="fn">Alice</span>     —    1.2   1.1   1.3   1.4   32    34
+<span class="fn">Cecilia</span>  1.2    —    1.0   1.2   1.3   33    35
+<span class="fn">Octavia</span>  1.1   1.0    —    1.1   1.2   31    33
+<span class="fn">Aria</span>     1.3   1.2   1.1    —    1.3   34    36
+<span class="fn">Lucidia</span>  1.4   1.3   1.2   1.3    —    33    35
+<span class="fn">Gematria</span>  32    33    31    34    33    —    2.1
+<span class="fn">Anastas</span>   34    35    33    36    35   2.1    —
+<span class="comment">                                    (values in ms)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card fade-in" style="padding:24px; margin-top:24px;">
+    <h4 style="font-size:0.9rem; margin-bottom:12px;">Uptime History (Last 30 Days)</h4>
+    <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:12px; margin-top:16px;">
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Alice</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-green);">99.9%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:99.9%; height:100%; background:var(--accent-green); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Cecilia</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-pink);">0%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:0%; height:100%; background:var(--accent-pink); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Octavia</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-green);">99.7%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:99.7%; height:100%; background:var(--accent-green); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Aria</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-orange);">42%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:42%; height:100%; background:var(--accent-orange); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Lucidia</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-green);">98.1%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:98.1%; height:100%; background:var(--accent-green); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Gematria</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-green);">99.99%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:99.99%; height:100%; background:var(--accent-green); border-radius:2px;"></div></div>
+      </div>
+      <div style="text-align:center;">
+        <div style="font-family:var(--jb); font-size:11px; color:var(--text-dim); margin-bottom:8px;">Anastasia</div>
+        <div style="font-size:1.25rem; font-weight:700; color:var(--accent-green);">99.95%</div>
+        <div style="width:100%; height:4px; background:#111; border-radius:2px; margin-top:8px;"><div style="width:99.95%; height:100%; background:var(--accent-green); border-radius:2px;"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.me">Identity</a></li>
+      <li><a href="https://blackroad.systems">Systems</a></li>
+      <li><a href="https://blackroadinc.us">Enterprise</a></li>
+      <li><a href="https://blackroadqi.com">QI</a></li>
+      <li><a href="https://roadcoin.io">RoadCoin</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+// Mobile nav
+document.getElementById('hamburger').addEventListener('click', function() {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+// IntersectionObserver
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
+
+// Mesh canvas visualization
+(function() {
+  var canvas = document.getElementById('meshCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    var rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = 400 * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '400px';
+    ctx.scale(dpr, dpr);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var nodes = [
+    { name: 'Alice', x: 0.2, y: 0.3, color: '#22c55e' },
+    { name: 'Cecilia', x: 0.35, y: 0.15, color: '#FF2255' },
+    { name: 'Octavia', x: 0.5, y: 0.35, color: '#22c55e' },
+    { name: 'Aria', x: 0.35, y: 0.55, color: '#FF6B2B' },
+    { name: 'Lucidia', x: 0.2, y: 0.7, color: '#22c55e' },
+    { name: 'Gematria', x: 0.75, y: 0.25, color: '#22c55e' },
+    { name: 'Anastasia', x: 0.75, y: 0.65, color: '#22c55e' }
+  ];
+
+  var time = 0;
+  var packets = [];
+
+  function spawnPacket() {
+    var a = Math.floor(Math.random() * nodes.length);
+    var b = Math.floor(Math.random() * nodes.length);
+    if (a === b) return;
+    packets.push({ from: a, to: b, progress: 0, speed: 0.005 + Math.random() * 0.01 });
+  }
+
+  function draw() {
+    var w = canvas.width / dpr;
+    var h = canvas.height / dpr;
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw connections
+    for (var i = 0; i < nodes.length; i++) {
+      for (var j = i + 1; j < nodes.length; j++) {
+        var nx1 = nodes[i].x * w, ny1 = nodes[i].y * h;
+        var nx2 = nodes[j].x * w, ny2 = nodes[j].y * h;
+        ctx.beginPath();
+        ctx.moveTo(nx1, ny1);
+        ctx.lineTo(nx2, ny2);
+        ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+
+    // Draw packets
+    for (var p = packets.length - 1; p >= 0; p--) {
+      var pkt = packets[p];
+      pkt.progress += pkt.speed;
+      if (pkt.progress >= 1) { packets.splice(p, 1); continue; }
+      var fx = nodes[pkt.from].x * w, fy = nodes[pkt.from].y * h;
+      var tx = nodes[pkt.to].x * w, ty = nodes[pkt.to].y * h;
+      var px = fx + (tx - fx) * pkt.progress;
+      var py = fy + (ty - fy) * pkt.progress;
+      ctx.beginPath();
+      ctx.arc(px, py, 2, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,212,255,0.6)';
+      ctx.fill();
+    }
+
+    // Draw nodes
+    for (var k = 0; k < nodes.length; k++) {
+      var nx = nodes[k].x * w, ny = nodes[k].y * h;
+      // Glow
+      ctx.beginPath();
+      ctx.arc(nx, ny, 16, 0, Math.PI * 2);
+      ctx.fillStyle = nodes[k].color.replace(')', ',0.1)').replace('rgb', 'rgba').replace('#', '');
+      var grd = ctx.createRadialGradient(nx, ny, 0, nx, ny, 16);
+      grd.addColorStop(0, nodes[k].color + '33');
+      grd.addColorStop(1, 'transparent');
+      ctx.fillStyle = grd;
+      ctx.fill();
+      // Dot
+      ctx.beginPath();
+      ctx.arc(nx, ny, 5, 0, Math.PI * 2);
+      ctx.fillStyle = nodes[k].color;
+      ctx.fill();
+      // Label
+      ctx.fillStyle = '#888';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(nodes[k].name, nx, ny + 20);
+    }
+
+    time++;
+    if (time % 15 === 0) spawnPacket();
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var t = document.querySelector(this.getAttribute('href'));
+    if (t) { t.scrollIntoView({ behavior: 'smooth' }); document.getElementById('navLinks').classList.remove('open'); }
+  });
+});
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

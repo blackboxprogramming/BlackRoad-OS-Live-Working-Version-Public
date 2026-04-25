@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Documentation — BlackRoad OS</title>
+<meta name="description" content="RESTful API documentation for BlackRoad OS. 9 endpoints, real data.">
+<meta property="og:title" content="API Documentation — BlackRoad OS">
+<meta property="og:description" content="Build on BlackRoad. 9 endpoints for domains, repos, agents, and more.">
+<meta property="og:image" content="https://images.blackroad.io/brand/og-card.png">
+<link rel="icon" href="https://images.blackroad.io/brand/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#f5f5f5;font-family:'Inter',sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased}
+.gradient-bar{height:3px;background:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF)}
+nav{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #1a1a1a}
+nav .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#f5f5f5;text-decoration:none}
+nav .logo span{display:inline-block;width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#FF2255,#8844FF);margin-right:8px}
+nav .nav-links{margin-left:auto;display:flex;gap:20px}
+nav .nav-links a{color:#a3a3a3;text-decoration:none;font-size:13px;font-weight:500;transition:color .2s}
+nav .nav-links a:hover{color:#f5f5f5}
+.container{max-width:720px;margin:0 auto;padding:32px 20px 64px}
+h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;margin-bottom:6px}
+.subtitle{color:#a3a3a3;font-size:14px;margin-bottom:28px}
+.base-url{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:14px 18px;margin-bottom:28px;display:flex;align-items:center;gap:10px}
+.base-url .label{font-size:11px;color:#737373;text-transform:uppercase;letter-spacing:.5px}
+.base-url code{font-family:'JetBrains Mono',monospace;font-size:14px;color:#d4d4d4}
+.section-label{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;color:#d4d4d4;margin-bottom:14px;margin-top:32px}
+.endpoint-card{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:16px 18px;margin-bottom:10px}
+.endpoint-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.method{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#0a0a0a;background:#d4d4d4;padding:2px 8px;border-radius:4px;letter-spacing:.5px}
+.path{font-family:'JetBrains Mono',monospace;font-size:14px;color:#f5f5f5}
+.endpoint-desc{font-size:13px;color:#a3a3a3;line-height:1.5}
+.response-fields{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+.field-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#737373;background:#1a1a1a;padding:2px 7px;border-radius:4px}
+.example-block{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:18px;margin-top:14px;margin-bottom:10px}
+.example-block .label{font-size:11px;color:#737373;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.example-block pre{font-family:'JetBrains Mono',monospace;font-size:12px;color:#d4d4d4;line-height:1.6;overflow-x:auto;white-space:pre}
+.example-block .cmd{color:#a3a3a3}
+.example-block .comment{color:#525252}
+.stats-example{background:#131313;border:1px solid #1a1a1a;border-radius:10px;padding:18px;margin-top:14px}
+.stats-example .label{font-size:11px;color:#737373;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.stats-example pre{font-family:'JetBrains Mono',monospace;font-size:12px;color:#d4d4d4;line-height:1.6;overflow-x:auto;white-space:pre}
+.footer-note{text-align:center;color:#404040;font-size:13px;margin-top:40px;padding-top:24px;border-top:1px solid #1a1a1a}
+@media(max-width:540px){h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+<a href="https://blackroad.io" class="logo"><span></span>BlackRoad OS</a>
+<div class="nav-links">
+<a href="https://blackroad.io">Home</a>
+<a href="https://fleet.blackroad.io">Fleet</a>
+<a href="https://docs.blackroad.io">Docs</a>
+<a href="https://hq.blackroad.io">HQ</a>
+</div>
+</nav>
+<div class="container">
+<h1>API Documentation</h1>
+<p class="subtitle">RESTful endpoints for every service in the fleet. No auth required for read access.</p>
+
+<div class="base-url">
+<div class="label">Base URL</div>
+<code>https://backend.blackroad.io</code>
+</div>
+
+<div class="section-label">Endpoints</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/health</span></div>
+<div class="endpoint-desc">Health check. Returns fleet uptime and node count.</div>
+<div class="response-fields"><span class="field-tag">status</span><span class="field-tag">uptime</span><span class="field-tag">nodes</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/stats</span></div>
+<div class="endpoint-desc">Aggregate statistics across the entire fleet.</div>
+<div class="response-fields"><span class="field-tag">domains</span><span class="field-tag">orgs</span><span class="field-tag">repos</span><span class="field-tag">agents</span><span class="field-tag">nodes</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/domains</span></div>
+<div class="endpoint-desc">List all 19 registered domains and their DNS status.</div>
+<div class="response-fields"><span class="field-tag">domain</span><span class="field-tag">registrar</span><span class="field-tag">status</span><span class="field-tag">dns_provider</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/orgs</span></div>
+<div class="endpoint-desc">List all 16 GitHub organizations and Gitea orgs.</div>
+<div class="response-fields"><span class="field-tag">name</span><span class="field-tag">platform</span><span class="field-tag">repo_count</span><span class="field-tag">url</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/repos</span></div>
+<div class="endpoint-desc">List all 254 repositories across all orgs.</div>
+<div class="response-fields"><span class="field-tag">name</span><span class="field-tag">org</span><span class="field-tag">platform</span><span class="field-tag">language</span><span class="field-tag">updated</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/agents</span></div>
+<div class="endpoint-desc">List all 67 active agents and their assigned nodes.</div>
+<div class="response-fields"><span class="field-tag">name</span><span class="field-tag">role</span><span class="field-tag">node</span><span class="field-tag">status</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/nodes</span></div>
+<div class="endpoint-desc">Detailed info for each of the 7 fleet nodes.</div>
+<div class="response-fields"><span class="field-tag">name</span><span class="field-tag">ip</span><span class="field-tag">role</span><span class="field-tag">services</span><span class="field-tag">status</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/products</span></div>
+<div class="endpoint-desc">Product registry with deployment status and URLs.</div>
+<div class="response-fields"><span class="field-tag">name</span><span class="field-tag">category</span><span class="field-tag">url</span><span class="field-tag">status</span></div>
+</div>
+
+<div class="endpoint-card">
+<div class="endpoint-header"><span class="method">GET</span><span class="path">/api/roadcode</span></div>
+<div class="endpoint-desc">RoadCode fork registry with upstream tracking.</div>
+<div class="response-fields"><span class="field-tag">road_name</span><span class="field-tag">upstream</span><span class="field-tag">version</span><span class="field-tag">size</span></div>
+</div>
+
+<div class="section-label">Quick Start</div>
+
+<div class="example-block">
+<div class="label">curl example</div>
+<pre><span class="comment"># Get fleet statistics</span>
+<span class="cmd">curl -s https://backend.blackroad.io/api/stats | python3 -m json.tool</span></pre>
+</div>
+
+<div class="stats-example">
+<div class="label">Example Response &mdash; /api/stats</div>
+<pre>{
+  "domains": 19,
+  "orgs": 16,
+  "repos": 254,
+  "agents": 67,
+  "nodes": 7,
+  "tops": 52,
+  "monthly_cost": "$38",
+  "uptime": "99.2%"
+}</pre>
+</div>
+
+<div class="example-block">
+<div class="label">fetch example</div>
+<pre><span class="cmd">const res = await fetch('https://backend.blackroad.io/api/agents');
+const agents = await res.json();
+console.log(`${agents.length} agents online`);</span></pre>
+</div>
+
+<div class="footer-note">All endpoints return JSON. No API key required for read access.</div>
+</div>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+<script src="https://cdn.blackroad.io/br.js" defer></script></body>
+</html>

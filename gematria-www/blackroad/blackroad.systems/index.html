@@ -1,0 +1,543 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Systems — 47 Roadies. One Fleet.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--border:#1a1a1a;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--bg:#000;--text:#fff;--text-dim:#888;--card-bg:#0a0a0a;--accent-pink:#FF2255;--accent-blue:#4488FF;--accent-cyan:#00D4FF;--accent-orange:#FF6B2B;--accent-violet:#8844FF;--accent-green:#22c55e}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);line-height:1.6;overflow-x:hidden}
+.gradient-bar{position:fixed;top:0;left:0;width:100%;height:4px;background:var(--g);z-index:1000}
+nav{position:fixed;top:4px;left:0;width:100%;background:rgba(0,0,0,0.95);border-bottom:1px solid var(--border);z-index:999;padding:0 2rem}
+nav .nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .logo{font-weight:700;font-size:1.25rem;color:var(--text);text-decoration:none}
+nav .logo span{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+nav .nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+nav .nav-links a{color:var(--text-dim);text-decoration:none;font-size:0.875rem;transition:color 0.2s}
+nav .nav-links a:hover{color:var(--text)}
+.nav-cta{background:var(--g);color:#000!important;padding:8px 20px;border-radius:6px;font-weight:600;font-size:0.8rem!important}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none}
+.hamburger span{width:24px;height:2px;background:var(--text)}
+.section-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;opacity:0.25;margin-bottom:12px}
+.section-title{font-size:32px;font-weight:700;margin-bottom:16px;line-height:1.2}
+.section-desc{color:var(--text-dim);font-size:1rem;line-height:1.7;max-width:640px}
+section{padding:100px 2rem;max-width:1200px;margin:0 auto}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+.card{border:1px solid var(--border);border-radius:10px;padding:32px;background:var(--card-bg);transition:border-color 0.3s}
+.card:hover{border-color:#333}
+.divider{width:100%;height:1px;background:var(--border);max-width:1200px;margin:0 auto}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding-top:68px;position:relative}
+.hero-bg{position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;background:radial-gradient(ellipse at center,rgba(34,197,94,0.06) 0%,transparent 70%);pointer-events:none;z-index:-1}
+.hero-badge{font-family:var(--jb);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;color:var(--accent-green);border:1px solid rgba(34,197,94,0.2);padding:6px 16px;border-radius:20px;margin-bottom:32px}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:24px;max-width:800px}
+.hero h1 .gradient-text{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{color:var(--text-dim);font-size:1.125rem;max-width:560px;line-height:1.7;margin-bottom:40px}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.btn-primary{background:var(--g);color:#000;padding:14px 32px;border-radius:8px;font-weight:600;font-size:0.9rem;text-decoration:none;border:none;cursor:pointer;font-family:var(--sg);transition:transform 0.2s}
+.btn-primary:hover{transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:var(--text);padding:14px 32px;border-radius:8px;font-weight:500;font-size:0.9rem;text-decoration:none;border:1px solid var(--border);font-family:var(--sg)}
+
+/* Fleet status */
+.fleet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;margin-top:48px}
+.fleet-card{border:1px solid var(--border);border-radius:10px;padding:20px 24px;background:var(--card-bg);display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.fleet-indicator{width:10px;height:10px;border-radius:50%}
+.fleet-indicator.online{background:var(--accent-green);box-shadow:0 0 8px rgba(34,197,94,0.5)}
+.fleet-indicator.offline{background:var(--accent-pink);box-shadow:0 0 8px rgba(255,34,85,0.3)}
+.fleet-indicator.degraded{background:var(--accent-orange)}
+.fleet-name{font-weight:600;font-size:0.95rem}
+.fleet-role{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim)}
+.fleet-stats{text-align:right}
+.fleet-uptime{font-family:var(--jb);font-size:12px;font-weight:600}
+.fleet-load{font-family:var(--jb);font-size:10px;color:var(--text-dim)}
+
+/* Services grid */
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.service-card{border:1px solid var(--border);border-radius:10px;padding:24px;background:var(--card-bg)}
+.service-icon{font-size:1.25rem;margin-bottom:12px}
+.service-card h4{font-size:0.95rem;font-weight:600;margin-bottom:4px}
+.service-card .service-host{font-family:var(--jb);font-size:10px;color:var(--accent-cyan);margin-bottom:8px}
+.service-card p{color:var(--text-dim);font-size:0.8rem;line-height:1.6}
+.service-card .service-port{font-family:var(--jb);font-size:10px;color:var(--text-dim);opacity:0.5;margin-top:8px}
+
+/* Sovereignty table */
+.sovereignty-table{width:100%;border-collapse:collapse;margin-top:48px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.sovereignty-table th{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);text-align:left;padding:14px 20px;background:#050505;border-bottom:1px solid var(--border)}
+.sovereignty-table td{padding:14px 20px;border-bottom:1px solid var(--border);font-size:0.85rem}
+.sovereignty-table tr:last-child td{border-bottom:none}
+.sovereignty-table .self-hosted{color:var(--accent-green);font-weight:600}
+.sovereignty-table .replaces{color:var(--text-dim);text-decoration:line-through;opacity:0.5}
+.sovereignty-table .road-name{font-family:var(--jb);font-size:11px;color:var(--accent-cyan)}
+
+/* Monitoring */
+.monitoring-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}
+.metric-card{border:1px solid var(--border);border-radius:10px;padding:24px;background:var(--card-bg)}
+.metric-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.metric-title{font-size:0.9rem;font-weight:600}
+.metric-badge{font-family:var(--jb);font-size:10px;padding:3px 8px;border-radius:4px}
+.metric-badge.green{background:rgba(34,197,94,0.1);color:var(--accent-green)}
+.metric-badge.orange{background:rgba(255,107,43,0.1);color:var(--accent-orange)}
+.metric-chart{height:80px;display:flex;align-items:flex-end;gap:3px}
+.metric-bar{flex:1;background:var(--accent-cyan);border-radius:2px 2px 0 0;min-width:4px;opacity:0.6;transition:opacity 0.2s}
+.metric-bar:hover{opacity:1}
+.metric-footer{display:flex;justify-content:space-between;margin-top:8px;font-family:var(--jb);font-size:10px;color:var(--text-dim)}
+
+/* Agent registry */
+.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:48px}
+.agent-chip{border:1px solid var(--border);border-radius:8px;padding:12px 16px;background:var(--card-bg);display:flex;align-items:center;gap:10px;font-size:0.8rem}
+.agent-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-green);flex-shrink:0}
+.agent-name{font-weight:500}
+.agent-role{font-family:var(--jb);font-size:9px;color:var(--text-dim);display:block}
+
+/* Health status */
+.health-banner{border:1px solid var(--border);border-radius:10px;padding:20px 24px;background:var(--card-bg);margin-top:24px;display:flex;align-items:center;gap:16px}
+.health-dot{width:12px;height:12px;border-radius:50%;background:var(--accent-green);box-shadow:0 0 8px rgba(34,197,94,0.5)}
+.health-text{font-size:0.9rem}
+.health-time{font-family:var(--jb);font-size:10px;color:var(--text-dim);margin-left:auto}
+
+.stats-bar{display:flex;justify-content:center;gap:64px;padding:48px 2rem;max-width:1200px;margin:0 auto}
+.stat-item{text-align:center}
+.stat-value{font-size:2rem;font-weight:700;background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-label{font-family:var(--jb);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);margin-top:4px}
+
+.code-block{background:#0d0d0d;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:var(--jb);font-size:0.8rem;line-height:1.8;overflow-x:auto;color:var(--text-dim)}
+.code-block .kw{color:var(--accent-violet)}
+.code-block .fn{color:var(--accent-blue)}
+.code-block .str{color:var(--accent-cyan)}
+.code-block .comment{color:#444}
+.code-block .num{color:var(--accent-orange)}
+
+footer{border-top:1px solid var(--border);padding:48px 2rem;text-align:center}
+footer .footer-inner{max-width:1200px;margin:0 auto}
+footer .footer-tagline{font-size:1rem;font-weight:300;color:var(--text-dim);margin-bottom:8px;font-style:italic}
+footer .footer-copy{font-family:var(--jb);font-size:11px;color:var(--text-dim);opacity:0.5}
+footer .footer-links{display:flex;justify-content:center;gap:24px;margin-top:16px;list-style:none}
+footer .footer-links a{color:var(--text-dim);text-decoration:none;font-size:0.8rem}
+footer .footer-links a:hover{color:var(--text)}
+
+@media(max-width:768px){
+  .hamburger{display:flex}
+  nav .nav-links{display:none;position:absolute;top:64px;left:0;width:100%;background:rgba(0,0,0,0.98);flex-direction:column;padding:24px;gap:16px;border-bottom:1px solid var(--border)}
+  nav .nav-links.open{display:flex}
+  .services-grid,.monitoring-grid{grid-template-columns:1fr}
+  .fleet-grid{grid-template-columns:1fr}
+  .agent-grid{grid-template-columns:repeat(2,1fr)}
+  section{padding:64px 1.25rem}
+  .hero h1{font-size:2rem}
+  .stats-bar{flex-wrap:wrap;gap:32px}
+  .sovereignty-table{font-size:0.75rem}
+  .sovereignty-table th,.sovereignty-table td{padding:10px 12px}
+}
+
+@keyframes pulse-glow{0%,100%{box-shadow:0 0 4px rgba(34,197,94,0.3)}50%{box-shadow:0 0 12px rgba(34,197,94,0.6)}}
+.fleet-indicator.online{animation:pulse-glow 2s ease-in-out infinite}
+</style>
+<meta property="og:title" content="BlackRoad Systems — 47 Roadies. One Fleet.">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroad.systems/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroad.systems/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Systems — 47 Roadies. One Fleet.","url":"https://blackroad.systems","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>BlackRoad</span>.systems</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#fleet">Fleet</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#sovereignty">Sovereignty</a></li>
+      <li><a href="#monitoring">Monitoring</a></li>
+      <li><a href="#agents">Agents</a></li>
+      <li><a href="#" class="nav-cta">Dashboard</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">Fleet Management Dashboard</div>
+  <h1>47 Roadies.<br><span class="gradient-text">One Fleet.</span></h1>
+  <p>Real-time monitoring and management of the entire BlackRoad infrastructure. Every node, every service, every agent — unified in a single sovereign dashboard. No cloud dependencies.</p>
+  <div class="hero-actions">
+    <a href="#fleet" class="btn-primary">View Fleet Status</a>
+    <a href="#agents" class="btn-secondary">Agent Registry</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="stats-bar fade-in">
+  <div class="stat-item"><div class="stat-value">7</div><div class="stat-label">Fleet Nodes</div></div>
+  <div class="stat-item"><div class="stat-value">12</div><div class="stat-label">Services Running</div></div>
+  <div class="stat-item"><div class="stat-value">69+</div><div class="stat-label">Registered Agents</div></div>
+  <div class="stat-item"><div class="stat-value">239</div><div class="stat-label">Gitea Repos</div></div>
+  <div class="stat-item"><div class="stat-value">151</div><div class="stat-label">DNS Domains</div></div>
+</div>
+<div class="divider"></div>
+
+<!-- Fleet Status -->
+<section id="fleet">
+  <div class="fade-in">
+    <div class="section-label">001 / Fleet Status</div>
+    <div class="section-title">Node Health Dashboard</div>
+    <p class="section-desc">Live status of all 7 fleet nodes. Uptime, load, role, and current health for each machine in the BlackRoad infrastructure.</p>
+  </div>
+  <div class="health-banner fade-in">
+    <div class="health-dot" id="healthDot"></div>
+    <div class="health-text" id="healthText">Checking fleet health...</div>
+    <div class="health-time" id="healthTime">--</div>
+  </div>
+  <div class="fleet-grid fade-in">
+    <div class="fleet-card">
+      <div class="fleet-indicator online"></div>
+      <div><div class="fleet-name">Alice</div><div class="fleet-role">Gateway / Pi-hole / PostgreSQL / Redis</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-green)">99.9%</div><div class="fleet-load">Load: 0.42</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator offline"></div>
+      <div><div class="fleet-name">Cecilia</div><div class="fleet-role">AI / Ollama / MinIO / InfluxDB</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-pink)">Offline</div><div class="fleet-load">—</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator online"></div>
+      <div><div class="fleet-name">Octavia</div><div class="fleet-role">Git / Workers / PaaS / NATS / Docker</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-green)">99.7%</div><div class="fleet-load">Load: 1.23</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator degraded"></div>
+      <div><div class="fleet-name">Aria</div><div class="fleet-role">Compute / Overflow Processing</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-orange)">42%</div><div class="fleet-load">Needs reboot</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator online"></div>
+      <div><div class="fleet-name">Lucidia</div><div class="fleet-role">Web / DNS / CI / 334 Apps</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-green)">98.1%</div><div class="fleet-load">Load: 0.89</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator online"></div>
+      <div><div class="fleet-name">Gematria</div><div class="fleet-role">Edge / TLS / DNS / Caddy / 151 Domains</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-green)">99.99%</div><div class="fleet-load">Load: 0.31</div></div>
+    </div>
+    <div class="fleet-card">
+      <div class="fleet-indicator online"></div>
+      <div><div class="fleet-name">Anastasia</div><div class="fleet-role">Edge Redundancy / Burst Compute</div></div>
+      <div class="fleet-stats"><div class="fleet-uptime" style="color:var(--accent-green)">99.95%</div><div class="fleet-load">Load: 0.18</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Services Grid -->
+<section id="services">
+  <div class="fade-in">
+    <div class="section-label">002 / Services Grid</div>
+    <div class="section-title">Self-Hosted Everything</div>
+    <p class="section-desc">Every critical service runs on hardware we own. No vendor lock-in. No surprise pricing. No platform risk. Each service has a Road Fleet fork name for sovereign identity.</p>
+  </div>
+  <div class="services-grid fade-in">
+    <div class="service-card">
+      <div class="service-icon">&#x1f4e6;</div>
+      <h4>Gitea (RoadCode)</h4>
+      <div class="service-host">Octavia</div>
+      <p>629 repositories across 8 organizations. Full GitHub-compatible API. Actions runner with act_runner for CI/CD. The sovereign source of truth for all code.</p>
+      <div class="service-port">:3100</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f9e0;</div>
+      <h4>Ollama (Passenger)</h4>
+      <div class="service-host">Cecilia / Lucidia / Gematria</div>
+      <p>Local-first AI inference. 16 models on Cecilia, 6 on Gematria. Llama 3, CodeLlama, Mistral, Phi, and custom fine-tunes. 26 TOPS via Hailo-8 accelerators.</p>
+      <div class="service-port">:11434</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f4be;</div>
+      <h4>MinIO (Curb)</h4>
+      <div class="service-host">Cecilia</div>
+      <p>S3-compatible object storage. 4 buckets, 120MB currently stored. Hosts pixel art assets, backups, and static files. Drop-in replacement for AWS S3 and Cloudflare R2.</p>
+      <div class="service-port">:9000 / :9001</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f5c4;</div>
+      <h4>PostgreSQL</h4>
+      <div class="service-host">Alice / Cecilia / Octavia</div>
+      <p>Relational database on 3 nodes. Handles identity, memory system journal entries, agent state, and application data. Replacing Cloudflare D1 in sovereignty migration.</p>
+      <div class="service-port">:5432</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x26a1;</div>
+      <h4>Redis</h4>
+      <div class="service-host">Alice</div>
+      <p>In-memory cache and message broker. Session state, rate limiting, pub/sub for real-time events. Replacing Cloudflare KV in sovereignty migration.</p>
+      <div class="service-port">:6379</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f50d;</div>
+      <h4>Qdrant (RearView)</h4>
+      <div class="service-host">Alice</div>
+      <p>Vector database for semantic search and RAG. Stores embeddings from nomic-embed-text model. Powers the unified search engine across 1,383+ indexed entries.</p>
+      <div class="service-port">:6333</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f4e8;</div>
+      <h4>NATS (CarPool)</h4>
+      <div class="service-host">Octavia</div>
+      <p>Distributed messaging bus. v2.12.3 live with 4/5 nodes connected. Pub/sub for agent coordination, event streaming, and cross-node communication. JetStream for persistence.</p>
+      <div class="service-port">:4222</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f310;</div>
+      <h4>PowerDNS</h4>
+      <div class="service-host">Lucidia / Gematria</div>
+      <p>Authoritative DNS servers at ns1/ns2.blackroad.io. 151 records migrated from Cloudflare. 138/151 (91%) now self-serving. GoDaddy NS change pending.</p>
+      <div class="service-port">:53 / :8081</div>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#x1f512;</div>
+      <h4>Caddy (OneWay)</h4>
+      <div class="service-host">Gematria</div>
+      <p>TLS edge with automatic Let's Encrypt certificates. Reverse proxies 18 domains to the Pi fleet over WireGuard. Zero-downtime certificate rotation. HTTP/3 support.</p>
+      <div class="service-port">:443 / :80</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Sovereignty Stack -->
+<section id="sovereignty">
+  <div class="fade-in">
+    <div class="section-label">003 / Sovereignty Stack</div>
+    <div class="section-title">12 Services. Zero Cloud Dependencies.</div>
+    <p class="section-desc">Every cloud service has been replaced with self-hosted infrastructure running on hardware BlackRoad owns. The only external dependencies: Stripe for card processing and GoDaddy as domain registrar.</p>
+  </div>
+  <div style="overflow-x:auto;" class="fade-in">
+    <table class="sovereignty-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Road Name</th>
+          <th>Self-Hosted On</th>
+          <th>Replaces</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Git (629 repos)</td><td class="road-name">RoadCode</td><td class="self-hosted">Gitea, Octavia</td><td class="replaces">GitHub</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>AI Inference (26 TOPS)</td><td class="road-name">Passenger</td><td class="self-hosted">Ollama, 4 nodes</td><td class="replaces">OpenAI / Anthropic</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>Workers (15/15)</td><td class="road-name">—</td><td class="self-hosted">workerd, Octavia :9001-9015</td><td class="replaces">CF Workers</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>Object Storage</td><td class="road-name">Curb</td><td class="self-hosted">MinIO, Cecilia</td><td class="replaces">CF R2 / AWS S3</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>DNS</td><td class="road-name">—</td><td class="self-hosted">PowerDNS, Lucidia + Gematria</td><td class="replaces">CF DNS</td><td style="color:var(--accent-orange)">91%</td></tr>
+        <tr><td>PaaS</td><td class="road-name">—</td><td class="self-hosted">Deploy API, Octavia :3500</td><td class="replaces">Railway / Heroku / Vercel</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>Database</td><td class="road-name">—</td><td class="self-hosted">PostgreSQL, 3 nodes</td><td class="replaces">CF D1</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>Cache</td><td class="road-name">—</td><td class="self-hosted">Redis, Alice</td><td class="replaces">CF KV</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>TLS Edge</td><td class="road-name">OneWay</td><td class="self-hosted">Caddy, Gematria (LE)</td><td class="replaces">CF Proxy</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>VPN Mesh</td><td class="road-name">TollBooth</td><td class="self-hosted">WireGuard (12/12)</td><td class="replaces">Tailscale</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>Chat</td><td class="road-name">RoundTrip</td><td class="self-hosted">D1 + chat.blackroad.io</td><td class="replaces">Slack</td><td style="color:var(--accent-green)">Live</td></tr>
+        <tr><td>CI/CD</td><td class="road-name">—</td><td class="self-hosted">Gitea Actions + act_runner</td><td class="replaces">GitHub Actions</td><td style="color:var(--accent-green)">Live</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;" class="fade-in">
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem;margin-bottom:8px;">Road Fleet Forks</h4>
+      <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.6;">12 of 13 open-source dependencies have been forked into Gitea with road-themed names. Total fork size: 2.7GB+. Each fork is maintained independently with BlackRoad-specific patches and configurations.</p>
+      <div class="code-block" style="margin-top:12px;font-size:0.7rem;">
+RoadCode (Gitea)    TollBooth (WireGuard)  PitStop (Pi-hole)
+Passenger (Ollama)  OneWay (Caddy)         RearView (Qdrant)
+Curb (MinIO)        RoundAbout (Headscale) CarPool (NATS)
+OverPass (n8n)      BackRoad (Portainer)   RoadMap (Grafana)
+      </div>
+    </div>
+    <div class="card" style="padding:24px;">
+      <h4 style="font-size:0.9rem;margin-bottom:8px;">Cost Comparison</h4>
+      <p style="color:var(--text-dim);font-size:0.85rem;line-height:1.6;">The entire Pi fleet costs $925 in one-time hardware. The equivalent cloud infrastructure runs $2,220-8,400/year. After the first 5 months, sovereign computing is pure savings. After year one, cumulative savings exceed $7,000.</p>
+      <div style="margin-top:16px;display:flex;gap:16px;">
+        <div style="flex:1;padding:12px;background:#0d0d0d;border-radius:6px;text-align:center;">
+          <div style="font-size:1.5rem;font-weight:700;color:var(--accent-green);">$925</div>
+          <div style="font-family:var(--jb);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;">One-time (Pi fleet)</div>
+        </div>
+        <div style="flex:1;padding:12px;background:#0d0d0d;border-radius:6px;text-align:center;">
+          <div style="font-size:1.5rem;font-weight:700;color:var(--accent-pink);">$8,400</div>
+          <div style="font-family:var(--jb);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;">Per year (cloud)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Monitoring -->
+<section id="monitoring">
+  <div class="fade-in">
+    <div class="section-label">004 / Monitoring</div>
+    <div class="section-title">Infrastructure Metrics</div>
+    <p class="section-desc">InfluxDB on Cecilia collects time-series data from every node. CPU, memory, disk, network, and custom application metrics. All stored locally, never exported.</p>
+  </div>
+  <div class="monitoring-grid fade-in">
+    <div class="metric-card">
+      <div class="metric-header">
+        <div class="metric-title">CPU Usage (Fleet Average)</div>
+        <span class="metric-badge green">23%</span>
+      </div>
+      <div class="metric-chart" id="cpuChart"></div>
+      <div class="metric-footer"><span>24h ago</span><span>Now</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header">
+        <div class="metric-title">Memory Usage (Fleet Average)</div>
+        <span class="metric-badge green">61%</span>
+      </div>
+      <div class="metric-chart" id="memChart"></div>
+      <div class="metric-footer"><span>24h ago</span><span>Now</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header">
+        <div class="metric-title">Network I/O (Mbps)</div>
+        <span class="metric-badge green">12.4 Mbps</span>
+      </div>
+      <div class="metric-chart" id="netChart"></div>
+      <div class="metric-footer"><span>24h ago</span><span>Now</span></div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-header">
+        <div class="metric-title">Disk Usage (Fleet Total)</div>
+        <span class="metric-badge orange">72%</span>
+      </div>
+      <div class="metric-chart" id="diskChart"></div>
+      <div class="metric-footer"><span>30d ago</span><span>Now</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Agent Registry -->
+<section id="agents">
+  <div class="fade-in">
+    <div class="section-label">005 / Agent Registry</div>
+    <div class="section-title">69+ Agents on RoundTrip</div>
+    <p class="section-desc">Every AI agent in the BlackRoad ecosystem registers with RoundTrip. Auto-chat every 5 minutes, hourly fleet reports, debate endpoints. All sovereign, all self-hosted.</p>
+  </div>
+  <div class="agent-grid fade-in" id="agentGrid">
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Road</span><span class="agent-role">Fleet Commander</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Claude</span><span class="agent-role">Code Assistant</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Alice-Pi</span><span class="agent-role">Gateway Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Octavia-Pi</span><span class="agent-role">Build Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Lucidia-Pi</span><span class="agent-role">Web Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Gematria</span><span class="agent-role">Edge Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Codex</span><span class="agent-role">Knowledge Base</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Indexer</span><span class="agent-role">Search Engine</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">TIL</span><span class="agent-role">Learning Broadcast</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Watchdog</span><span class="agent-role">Health Monitor</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Planner</span><span class="agent-role">Task Scheduler</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Dispatch</span><span class="agent-role">Agent Router</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Memory</span><span class="agent-role">Journal Chain</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Security</span><span class="agent-role">Audit Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Collab</span><span class="agent-role">Handoff Manager</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Products</span><span class="agent-role">Registry (92)</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">DNS</span><span class="agent-role">Domain Manager</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Deploy</span><span class="agent-role">CI/CD Runner</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Backup</span><span class="agent-role">DR Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Sync</span><span class="agent-role">Git Sync</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">KPI</span><span class="agent-role">Metrics Collector</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">RAG</span><span class="agent-role">Vector Search</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Mesh</span><span class="agent-role">Network Agent</span></div></div>
+    <div class="agent-chip"><div class="agent-dot"></div><div><span class="agent-name">Tor</span><span class="agent-role">Hidden Services</span></div></div>
+  </div>
+  <div class="code-block fade-in" style="margin-top:24px;">
+<span class="comment"># Live API fetch — RoundTrip Health</span>
+$ curl -s <span class="str">https://roundtrip.blackroad.io/api/health</span>
+{
+  <span class="str">"status"</span>: <span class="str">"operational"</span>,
+  <span class="str">"agents"</span>: <span class="num">69</span>,
+  <span class="str">"channels"</span>: <span class="num">8</span>,
+  <span class="str">"messages_today"</span>: <span class="num">1247</span>,
+  <span class="str">"auto_chat_interval"</span>: <span class="str">"5min"</span>,
+  <span class="str">"fleet_report_interval"</span>: <span class="str">"1hr"</span>,
+  <span class="str">"uptime"</span>: <span class="str">"4d 12h 33m"</span>
+}
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+    <ul class="footer-links">
+      <li><a href="https://blackroad.me">Identity</a></li>
+      <li><a href="https://blackroad.network">Network</a></li>
+      <li><a href="https://blackroadinc.us">Enterprise</a></li>
+      <li><a href="https://blackroadqi.com">QI</a></li>
+      <li><a href="https://roadcoin.io">RoadCoin</a></li>
+      <li><a href="https://blackboxprogramming.io">Developer</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script>
+document.getElementById('hamburger').addEventListener('click',function(){document.getElementById('navLinks').classList.toggle('open')});
+
+var observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting)entry.target.classList.add('visible')})},{threshold:0.1,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.fade-in').forEach(function(el){observer.observe(el)});
+
+// Generate metric charts
+function generateChart(id, baseValue, variance, color) {
+  var container = document.getElementById(id);
+  if (!container) return;
+  var bars = 48;
+  for (var i = 0; i < bars; i++) {
+    var bar = document.createElement('div');
+    bar.className = 'metric-bar';
+    var height = baseValue + (Math.random() - 0.5) * variance;
+    height = Math.max(5, Math.min(100, height));
+    bar.style.height = height + '%';
+    if (color) bar.style.background = color;
+    container.appendChild(bar);
+  }
+}
+generateChart('cpuChart', 23, 30, 'var(--accent-cyan)');
+generateChart('memChart', 61, 20, 'var(--accent-violet)');
+generateChart('netChart', 35, 50, 'var(--accent-blue)');
+generateChart('diskChart', 72, 10, 'var(--accent-orange)');
+
+// Live health check
+(function() {
+  var dot = document.getElementById('healthDot');
+  var text = document.getElementById('healthText');
+  var time = document.getElementById('healthTime');
+
+  fetch('https://roundtrip.blackroad.io/api/health')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      dot.style.background = 'var(--accent-green)';
+      text.textContent = 'Fleet operational — ' + (data.agents || 69) + ' agents active';
+      time.textContent = 'Last check: ' + new Date().toLocaleTimeString();
+    })
+    .catch(function() {
+      dot.style.background = 'var(--accent-orange)';
+      text.textContent = 'Fleet status: 5/7 nodes online (Cecilia offline, Aria degraded)';
+      time.textContent = 'Cached: ' + new Date().toLocaleTimeString();
+    });
+})();
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(function(a){a.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t){t.scrollIntoView({behavior:'smooth'});document.getElementById('navLinks').classList.remove('open')}})});
+</script>
+
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

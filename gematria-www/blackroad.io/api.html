@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BlackRoad API reference — OpenAI-compatible inference, agent invocation, health checks, and rate limits.">
+<meta name="theme-color" content="#CC00AA">
+<link rel="canonical" href="https://api.blackroad.io">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23FF6B2B'/%3E%3Cstop offset='20%25' stop-color='%23FF2255'/%3E%3Cstop offset='40%25' stop-color='%23CC00AA'/%3E%3Cstop offset='60%25' stop-color='%238844FF'/%3E%3Cstop offset='80%25' stop-color='%234488FF'/%3E%3Cstop offset='100%25' stop-color='%2300D4FF'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='%23000'/%3E%3Crect x='1' y='1' width='30' height='30' rx='5' fill='none' stroke='url(%23g)' stroke-width='1.5'/%3E%3Ctext x='16' y='22' text-anchor='middle' fill='%23f5f5f5' font-family='system-ui' font-size='14' font-weight='700'%3EBR%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://api.blackroad.io">
+<meta property="og:title" content="API Reference — BlackRoad OS">
+<meta property="og:description" content="BlackRoad API reference — OpenAI-compatible inference, agent invocation, health checks, and rate limits.">
+<title>API Reference — BlackRoad OS</title>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://blackroad.systems.js" defer></script>
+<script src="https://blackroad.io.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;overflow-x:hidden;background:#000}
+body{background:#000;color:#f5f5f5;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
+:root{--g:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--b:#1a1a1a;--jb:'JetBrains Mono',monospace;--in:'Inter',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#222;border-radius:0}
+a{color:#f5f5f5;text-decoration:none}
+
+.gb{height:3px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite}
+@keyframes gs{0%{background-position:0%}100%{background-position:200%}}
+@keyframes fu{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.fi{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}.fi.v{opacity:1;transform:translateY(0)}
+
+/* Hero */
+.hero{text-align:center;padding:100px 24px 48px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--b);border-radius:0;font-size:12px;margin-bottom:32px;animation:fu .6s ease both}
+.hero-dot{width:8px;height:8px;border-radius:50%;background:var(--g)}
+.hero h1{font-size:clamp(40px,8vw,72px);font-weight:700;line-height:1.05;margin-bottom:24px;letter-spacing:-.04em;animation:fu .6s ease .1s both}
+.hero p{font-family:var(--in);font-size:18px;color:#737373;max-width:560px;margin:0 auto;line-height:1.7;animation:fu .6s ease .2s both}
+
+/* Base URL bar */
+.base-url{max-width:900px;margin:0 auto 48px;padding:0 24px}
+.base-url-box{border:1px solid var(--b);border-radius:0;padding:16px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.base-url-label{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.15em}
+.base-url-val{font-family:var(--jb);font-size:14px;color:#f5f5f5}
+.base-url-alt{font-family:var(--jb);font-size:12px;color:#333}
+
+/* Content */
+.content{max-width:900px;margin:0 auto;padding:0 24px 64px}
+
+/* Endpoint */
+.endpoint{border:1px solid var(--b);border-radius:0;margin-bottom:24px;overflow:hidden}
+.endpoint-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--b)}
+.method{font-family:var(--jb);font-size:11px;font-weight:600;padding:4px 10px;border-radius:0;letter-spacing:.05em}
+.method-get{color:#00D4FF;border:1px solid #00D4FF33}
+.method-post{color:#FF6B2B;border:1px solid #FF6B2B33}
+.endpoint-path{font-family:var(--jb);font-size:14px;color:#f5f5f5}
+.endpoint-body{padding:20px}
+.endpoint-desc{font-family:var(--in);font-size:14px;color:#737373;line-height:1.7;margin-bottom:16px}
+.endpoint-subtitle{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.15em;margin-bottom:10px;margin-top:20px}
+
+/* Code blocks */
+pre{background:#050505;border:1px solid var(--b);border-radius:0;padding:16px 20px;font-family:var(--jb);font-size:12px;color:#737373;line-height:1.7;overflow-x:auto;margin-bottom:12px}
+pre .cmd{color:#f5f5f5}
+pre .str{color:#8844FF}
+pre .key{color:#4488FF}
+pre .comment{color:#333}
+
+/* Response example */
+.response{background:#050505;border:1px solid var(--b);border-radius:0;padding:16px 20px;font-family:var(--jb);font-size:12px;color:#555;line-height:1.7;overflow-x:auto}
+
+/* Section heading */
+.sec-heading{font-size:24px;font-weight:700;margin-bottom:8px;margin-top:48px;letter-spacing:-.02em}
+.sec-desc{font-family:var(--in);font-size:14px;color:#737373;line-height:1.7;margin-bottom:24px}
+
+/* Table */
+table{width:100%;border-collapse:collapse;margin-bottom:24px}
+th{font-family:var(--jb);font-size:10px;color:#444;text-transform:uppercase;letter-spacing:.12em;text-align:left;padding:10px 16px;border-bottom:1px solid var(--b)}
+td{font-family:var(--in);font-size:13px;color:#737373;padding:12px 16px;border-bottom:1px solid #111}
+td:first-child{font-family:var(--jb);color:#f5f5f5;font-size:12px}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:0}
+.tab{font-family:var(--jb);font-size:11px;color:#444;padding:8px 16px;cursor:pointer;border:1px solid var(--b);border-bottom:none;border-radius:0 4px 0 0;transition:color .15s}
+.tab.active{color:#f5f5f5;background:#050505}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.tab-content pre{border-radius:0 4px 4px 4px;margin-top:0}
+
+/* Footer */
+.page-footer{border-top:1px solid var(--b);max-width:900px;margin:0 auto;padding:48px 24px}
+.footer-grad{height:2px;background:var(--g);background-size:200% 100%;animation:gs 4s linear infinite;margin-bottom:32px}
+.footer-links{display:flex;gap:32px;flex-wrap:wrap;margin-bottom:24px}
+.footer-links a{font-family:var(--in);font-size:13px;color:#737373;transition:color .15s}
+.footer-links a:hover{color:#f5f5f5}
+.footer-copy{font-family:var(--jb);font-size:11px;color:#333}
+
+@media(max-width:768px){
+  .hero{padding:72px 16px 40px}
+  .content{padding:0 16px 48px}
+  .base-url{padding:0 16px}
+  .endpoint-header{flex-wrap:wrap}
+  table{font-size:12px}
+  .tabs{overflow-x:auto}
+}
+</style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+</head>
+<body>
+<div class="gb"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge"><div class="hero-dot"></div> Reference</div>
+  <h1>API</h1>
+  <p>OpenAI-compatible inference, agent invocation, and fleet management. Drop-in replacement for any OpenAI client library.</p>
+</section>
+
+<!-- Base URL -->
+<div class="base-url">
+  <div class="base-url-box">
+    <span class="base-url-label">Base URL</span>
+    <span class="base-url-val">https://api.blackroad.io</span>
+    <span class="base-url-alt">or http://127.0.0.1:8787</span>
+  </div>
+</div>
+
+<!-- Endpoints -->
+<div class="content">
+
+  <!-- Health -->
+  <div class="endpoint fi">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/v1/health</span>
+    </div>
+    <div class="endpoint-body">
+      <p class="endpoint-desc">Health check. Returns gateway status, version, and uptime. No authentication required.</p>
+      <div class="endpoint-subtitle">Response</div>
+      <div class="response">{
+  "status": "ok",
+  "version": "1.4.2",
+  "uptime": 847291,
+  "nodes": 5,
+  "models": 29
+}</div>
+    </div>
+  </div>
+
+  <!-- Agents List -->
+  <div class="endpoint fi">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/v1/agents</span>
+    </div>
+    <div class="endpoint-body">
+      <p class="endpoint-desc">List all registered agents with their name, role, status, and capabilities.</p>
+      <div class="endpoint-subtitle">Response</div>
+      <div class="response">{
+  "agents": [
+    {"name": "octavia", "role": "architect", "status": "active", "node": "octavia.local"},
+    {"name": "alice", "role": "operator", "status": "active", "node": "alice.local"},
+    {"name": "lucidia", "role": "dreamer", "status": "active", "node": "lucidia.local"}
+  ]
+}</div>
+    </div>
+  </div>
+
+  <!-- Invoke -->
+  <div class="endpoint fi">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/v1/invoke</span>
+    </div>
+    <div class="endpoint-body">
+      <p class="endpoint-desc">Invoke a specific agent with a task. The gateway routes the request to the appropriate node and returns the result.</p>
+      <div class="endpoint-subtitle">Request Body</div>
+      <pre><span class="cmd">{
+  <span class="key">"agent"</span>: <span class="str">"alice"</span>,
+  <span class="key">"task"</span>: <span class="str">"deploy auth-worker to cloudflare"</span>
+}</span></pre>
+
+      <div class="tabs" data-group="invoke">
+        <div class="tab active" onclick="switchTab(this,'invoke','curl')">curl</div>
+        <div class="tab" onclick="switchTab(this,'invoke','js')">JavaScript</div>
+      </div>
+      <div class="tab-content active" data-group="invoke" data-tab="curl">
+        <pre><span class="cmd">curl -X POST https://api.blackroad.io/v1/invoke \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer br_your_api_key" \
+  -d '{"agent": "alice", "task": "deploy auth-worker to cloudflare"}'</span></pre>
+      </div>
+      <div class="tab-content" data-group="invoke" data-tab="js">
+        <pre><span class="cmd">const res = await fetch("https://api.blackroad.io/v1/invoke", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer br_your_api_key"
+  },
+  body: JSON.stringify({
+    agent: "alice",
+    task: "deploy auth-worker to cloudflare"
+  })
+});
+const data = await res.json();</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Completions -->
+  <div class="endpoint fi">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/v1/chat/completions</span>
+    </div>
+    <div class="endpoint-body">
+      <p class="endpoint-desc">OpenAI-compatible chat completions. Supports streaming. Drop-in replacement for any OpenAI client — just change the base URL.</p>
+      <div class="endpoint-subtitle">Request Body</div>
+      <pre><span class="cmd">{
+  <span class="key">"model"</span>: <span class="str">"llama3"</span>,
+  <span class="key">"messages"</span>: [
+    {<span class="key">"role"</span>: <span class="str">"user"</span>, <span class="key">"content"</span>: <span class="str">"Explain sovereign infrastructure"</span>}
+  ],
+  <span class="key">"stream"</span>: true
+}</span></pre>
+
+      <div class="tabs" data-group="chat">
+        <div class="tab active" onclick="switchTab(this,'chat','curl')">curl</div>
+        <div class="tab" onclick="switchTab(this,'chat','js')">JavaScript</div>
+      </div>
+      <div class="tab-content active" data-group="chat" data-tab="curl">
+        <pre><span class="cmd">curl https://api.blackroad.io/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer br_your_api_key" \
+  -d '{
+    "model": "llama3",
+    "messages": [{"role": "user", "content": "Explain sovereign infrastructure"}],
+    "stream": true
+  }'</span></pre>
+      </div>
+      <div class="tab-content" data-group="chat" data-tab="js">
+        <pre><span class="cmd">const res = await fetch("https://api.blackroad.io/v1/chat/completions", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer br_your_api_key"
+  },
+  body: JSON.stringify({
+    model: "llama3",
+    messages: [{ role: "user", content: "Explain sovereign infrastructure" }],
+    stream: true
+  })
+});
+
+const reader = res.body.getReader();
+const decoder = new TextDecoder();
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  console.log(decoder.decode(value));
+}</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentication -->
+  <h2 class="sec-heading fi">Authentication</h2>
+  <p class="sec-desc fi">API keys are passed in the Authorization header. Keys are tier-based — the tier determines rate limits and available providers.</p>
+
+  <pre class="fi"><span class="cmd">Authorization: Bearer br_your_api_key</span></pre>
+
+  <table class="fi">
+    <thead>
+      <tr><th>Tier</th><th>Rate Limit</th><th>Providers</th><th>Streaming</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Free</td><td>10 RPM</td><td>Groq, Ollama</td><td>Yes</td></tr>
+      <tr><td>Pro</td><td>60 RPM</td><td>All 7 providers</td><td>Yes</td></tr>
+      <tr><td>Fleet</td><td>300 RPM</td><td>All + priority routing</td><td>Yes</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Rate Limits -->
+  <h2 class="sec-heading fi">Rate Limits</h2>
+  <p class="sec-desc fi">Limits are enforced per API key. Exceeding the limit returns HTTP 429 with a Retry-After header.</p>
+
+  <table class="fi">
+    <thead>
+      <tr><th>Endpoint</th><th>Free</th><th>Pro</th><th>Fleet</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>/v1/chat/completions</td><td>10/min</td><td>60/min</td><td>300/min</td></tr>
+      <tr><td>/v1/invoke</td><td>5/min</td><td>30/min</td><td>120/min</td></tr>
+      <tr><td>/v1/agents</td><td>30/min</td><td>120/min</td><td>600/min</td></tr>
+      <tr><td>/v1/health</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- Footer -->
+<div class="page-footer">
+  <div class="footer-grad"></div>
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/docs">Documentation</a>
+    <a href="/getting-started">Getting Started</a>
+    <a href="https://wiki.blackroad.io">Wiki</a>
+    <a href="https://github.com/blackboxprogramming">GitHub</a>
+  </div>
+  <div class="footer-copy">&copy; 2026 BlackRoad OS, Inc. All rights reserved.</div>
+</div>
+
+<script>
+// Tab switcher
+function switchTab(el, group, tab) {
+  document.querySelectorAll('.tab[onclick*="'+group+'"]').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-content[data-group="'+group+'"]').forEach(c=>{
+    c.classList.toggle('active', c.dataset.tab===tab);
+  });
+}
+
+// Fade-in observer
+const obs=new IntersectionObserver(e=>{e.forEach(n=>{if(n.isIntersecting){n.target.classList.add('v');obs.unobserve(n.target)}})},{threshold:.1});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+
+// Consent
+(function(){if(!localStorage.getItem('br-consent-seen')){var b=document.createElement('div');b.id='br-consent';b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#0a0a0a;border-top:1px solid #222;padding:20px 24px;font-family:var(--in),system-ui;animation:fu .4s ease';b.innerHTML='<div style="max-width:900px;margin:0 auto;display:flex;align-items:center;gap:24px;flex-wrap:wrap"><div style="flex:1;min-width:280px"><div style="font-size:14px;color:#f5f5f5;font-weight:600;margin-bottom:6px">No cookies. No cross-site tracking. No data sold.</div><div style="font-size:12px;color:#737373;line-height:1.7">Your hardware, your rules. Privacy-first analytics only. <a href="https://stats.blackroad.io/privacy" style="color:#8844FF;text-decoration:none">Privacy details</a>.</div></div><div style="display:flex;gap:12px;flex-shrink:0"><button onclick="document.getElementById(\'br-consent\').remove();localStorage.setItem(\'br-consent-seen\',\'1\')" style="padding:10px 28px;background:#f5f5f5;color:#000;border:none;border-radius:0;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Got it</button></div></div>';document.body.appendChild(b)}})();
+</script>
+<script src="https://blackroad.io/_shared/feedback.js" defer></script>
+<script src="https://blackroad.io/_shared/crosslinks.js" defer></script>
+<script src="https://blackroad.io/_shared/cta-banner.js" defer></script>
+</body>
+</html>

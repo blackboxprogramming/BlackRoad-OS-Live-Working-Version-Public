@@ -1,0 +1,93 @@
+<!-- PROPRIETARY AND CONFIDENTIAL. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. Unauthorized copying, modification, distribution, or use of this software is strictly prohibited. This is NOT open source. -->
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lucidia Studio — Creative</title>
+<meta name="description" content="Full animated video platform. Next.js + Remotion + Workers AI.">
+<meta property="og:title" content="Lucidia Studio"><meta property="og:description" content="Full animated video platform. Next.js + Remotion + Workers AI.">
+<meta property="og:url" content="https://lucidia.studio"><meta name="robots" content="index, follow">
+<link rel="canonical" href="https://lucidia.studio/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230a0a0a'/><circle cx='10' cy='16' r='5' fill='%23FF2255'/><rect x='18' y='11' width='10' height='10' rx='2' fill='%238844FF'/></svg>" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400&family=Inter:wght@400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#000;--card:#0a0a0a;--border:#1a1a1a;--text:#f5f5f5;--sub:#737373;--muted:#444;--sg:'Space Grotesk',sans-serif;--jb:'JetBrains Mono',monospace;--in:'Inter',sans-serif;--grad:linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);--accent:#00E676}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:var(--sg);overflow-x:hidden}
+::selection{background:rgba(136,68,255,.3)}a{color:inherit;text-decoration:none}
+.bar{height:3px;background:var(--grad);position:fixed;top:0;left:0;right:0;z-index:1000}
+nav{position:fixed;top:3px;left:0;right:0;z-index:999;background:rgba(0,0,0,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:48px;display:flex;align-items:center;padding:0 24px}
+.n-left{display:flex;align-items:center;gap:8px}.n-dot{width:8px;height:8px;border-radius:50%;background:var(--accent)}.n-name{font-weight:700;font-size:15px}.n-tag{font-family:var(--jb);font-size:10px;color:var(--muted);margin-left:8px}
+.n-right{margin-left:auto;display:flex;gap:12px;align-items:center}.n-right a{font-family:var(--in);font-size:12px;color:var(--sub)}.n-right a:hover{color:var(--text)}
+.cta{font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:var(--sg)}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 24px 60px;position:relative;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.1;animation:d 20s ease-in-out infinite}
+@keyframes d{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,20px)}}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:48px 48px}
+.badge{font-family:var(--jb);font-size:10px;color:var(--sub);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px;position:relative;display:flex;align-items:center;gap:8px}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(32px,7vw,64px);font-weight:700;letter-spacing:-.03em;line-height:1.05;max-width:700px;margin-bottom:12px;position:relative}
+.sub{font-family:var(--in);font-size:clamp(14px,2vw,17px);color:var(--sub);max-width:500px;line-height:1.6;margin-bottom:32px;position:relative}
+.btns{display:flex;gap:10px;position:relative;flex-wrap:wrap;justify-content:center}
+.btn-p{padding:11px 28px;border-radius:7px;font-size:13px;font-weight:600;background:var(--text);color:var(--bg);border:none;cursor:pointer;font-family:var(--sg)}
+.btn-g{padding:11px 28px;border-radius:7px;font-size:13px;font-weight:600;background:transparent;color:var(--text);border:1px solid var(--border);cursor:pointer;font-family:var(--sg)}
+.btn-g:hover{border-color:#444}
+.section{max-width:900px;margin:0 auto;padding:64px 24px}
+.s-label{font-family:var(--jb);font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}
+.s-title{font-size:clamp(22px,4vw,32px);font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+.s-desc{font-family:var(--in);font-size:14px;color:var(--sub);max-width:500px;line-height:1.6;margin-bottom:32px}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.prod{border:1px solid var(--border);border-radius:8px;background:var(--card);padding:14px;transition:border-color .2s;display:block}
+.prod:hover{border-color:#333}
+.prod-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:6px}
+.prod-name{font-size:13px;font-weight:600}
+.prod-tag{font-family:var(--jb);font-size:10px;color:var(--muted);margin-top:4px}
+footer{border-top:1px solid var(--border);padding:40px 24px;text-align:center}
+.f-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.f-links a{font-family:var(--in);font-size:11px;color:var(--sub)}.f-links a:hover{color:var(--text)}
+.f-copy{font-family:var(--jb);font-size:9px;color:var(--muted)}
+@media(max-width:768px){nav{padding:0 16px}.products{grid-template-columns:1fr 1fr}}
+</style><meta name="robots" content="index, follow, noai, noimageai">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lucidia Studio — Creative","url":"https://lucidia.studio","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head><body>
+<div class="bar"></div>
+<nav><div class="n-left"><div class="n-dot"></div><span class="n-name">Lucidia Studio</span><span class="n-tag">Creative</span></div>
+<div class="n-right"><a href="https://blackroad.io">Highway</a><a href="https://app.blackroad.io" class="cta">Open OS</a></div></nav>
+<section class="hero">
+<div class="orb" style="width:400px;height:400px;background:#00E676;top:-10%;left:-15%"></div>
+<div class="orb" style="width:300px;height:300px;background:#8844FF;bottom:-5%;right:-10%;animation-delay:-10s"></div>
+<div class="grid-bg"></div>
+<div class="badge">BLACKROAD OS</div>
+<h1>Lucidia Studio</h1>
+<p class="sub">Full animated video platform. Next.js + Remotion + Workers AI.</p>
+<div class="btns"><a href="https://app.blackroad.io"><button class="btn-p">Open BlackRoad OS</button></a><a href="https://blackroad.io"><button class="btn-g">The Highway</button></a></div>
+</section>
+<section class="section">
+<div class="s-label">15 Products</div>
+<div class="s-title">The full highway.</div>
+<div class="s-desc">Every product is real, working, and connected.</div>
+<div class="products">
+<a class="prod" href="https://os.blackroad.io"><span class="prod-dot" style="background:#FF2255"></span><span class="prod-name">BlackRoad OS</span><div class="prod-tag">Open a tab. Open your world.</div></a>
+<a class="prod" href="https://roadcode.blackroad.io"><span class="prod-dot" style="background:#FF2255"></span><span class="prod-name">RoadCode</span><div class="prod-tag">Write it. Ship it.</div></a>
+<a class="prod" href="https://carpool.blackroad.io"><span class="prod-dot" style="background:#8844FF"></span><span class="prod-name">CarPool</span><div class="prod-tag">Your AIs, riding together.</div></a>
+<a class="prod" href="https://oneway.blackroad.io"><span class="prod-dot" style="background:#00D4FF"></span><span class="prod-name">OneWay</span><div class="prod-tag">Your data. Never look back.</div></a>
+<a class="prod" href="https://roadside.blackroad.io"><span class="prod-dot" style="background:#4488FF"></span><span class="prod-name">RoadSide</span><div class="prod-tag">Pull over. We got it.</div></a>
+<a class="prod" href="https://roadview.blackroad.io"><span class="prod-dot" style="background:#4488FF"></span><span class="prod-name">RoadView</span><div class="prod-tag">Every answer verified.</div></a>
+<a class="prod" href="https://roadtrip.blackroad.io"><span class="prod-dot" style="background:#CC00AA"></span><span class="prod-name">RoadTrip</span><div class="prod-tag">They never forget the ride.</div></a>
+<a class="prod" href="https://backroad.blackroad.io"><span class="prod-dot" style="background:#00D4FF"></span><span class="prod-name">BackRoad</span><div class="prod-tag">Content everywhere.</div></a>
+<a class="prod" href="https://roadwork.blackroad.io"><span class="prod-dot" style="background:#FF6B2B"></span><span class="prod-name">RoadWork</span><div class="prod-tag">Business builds itself.</div></a>
+<a class="prod" href="https://roadie.blackroad.io"><span class="prod-dot" style="background:#FF6B2B"></span><span class="prod-name">Roadie</span><div class="prod-tag">Patient friend. Passenger seat.</div></a>
+<a class="prod" href="https://blackboard.blackroad.io"><span class="prod-dot" style="background:#CC00AA"></span><span class="prod-name">BlackBoard</span><div class="prod-tag">The billboard is yours.</div></a>
+<a class="prod" href="https://carkeys.blackroad.io"><span class="prod-dot" style="background:#8844FF"></span><span class="prod-name">CarKeys</span><div class="prod-tag">Grab your keys.</div></a>
+<a class="prod" href="https://roadchain.blackroad.io"><span class="prod-dot" style="background:#FF2255"></span><span class="prod-name">RoadChain</span><div class="prod-tag">Every mile sealed.</div></a>
+<a class="prod" href="https://roadcoin.blackroad.io"><span class="prod-dot" style="background:#FF6B2B"></span><span class="prod-name">RoadCoin</span><div class="prod-tag">Drive. Earn fuel.</div></a>
+<a class="prod" href="https://roadworld.blackroad.io"><span class="prod-dot" style="background:#9C27B0"></span><span class="prod-name">RoadWorld</span><div class="prod-tag">Build worlds. Play forever.</div></a>
+</div></section>
+<footer><div class="f-links">
+<a href="https://blackroad.io">blackroad.io</a><a href="https://blackroad.me">About</a><a href="https://blackroad.company">Company</a>
+<a href="https://blackroadai.com">AI</a><a href="https://roadchain.io">Chain</a><a href="https://roadcoin.io">Coin</a>
+<a href="https://github.com/BlackRoadOS">GitHub</a></div>
+<div class="f-copy">2025-2026 BlackRoad OS, Inc. Remember the Road. Pave Tomorrow.</div></footer>
+</body></html>

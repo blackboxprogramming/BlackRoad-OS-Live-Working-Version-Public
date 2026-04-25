@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mesh Topology — Road TV</title>
+  <meta name="description" content="Real-time visualization of the BlackRoad WireGuard mesh network. 7 nodes, hub-and-spoke from Anastasia.">
+  <link rel="icon" type="image/svg+xml" href="https://blackroad.io/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700;800&family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../../_shared/design.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .back-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .back-nav a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+      color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;
+    }
+    .back-nav a:hover { color: #fff; }
+    .back-nav .title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem;
+      font-weight: 700; color: #fff;
+    }
+
+    .viz-container {
+      position: fixed; inset: 0;
+      background: #000;
+    }
+    .viz-container canvas {
+      width: 100%; height: 100%;
+    }
+
+    .info-panel {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      padding: 16px 24px;
+      background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .info-panel h2 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1rem;
+      font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .info-panel p {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.45); line-height: 1.5;
+    }
+    .info-panel .links {
+      margin-top: 8px; display: flex; gap: 16px;
+    }
+    .info-panel .links a {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: rgba(255,255,255,0.35); text-decoration: none; transition: color 0.2s;
+    }
+    .info-panel .links a:hover { color: #fff; }
+  </style>
+<script src="https://bb.blackroad.io/bb.js" defer></script>
+<script src="https://blackroad.io/nav.js" defer></script>
+<script src="https://blackroad.io/footer.js" defer></script>
+<script src="https://blackroad.systems.js" defer></script>
+<script src="https://blackroad.io.js" defer></script>
+<script src="https://blackroad.io/pulse.js" defer></script>
+<script src="https://blackroad.io/related.js" defer></script>
+  <script src="https://blackroad-mesh.amundsonalexa.workers.dev/mesh.js" defer></script>
+</head>
+<body>
+
+  <div class="back-nav">
+    <a href="../../">&larr; Road TV</a>
+    <span class="title">Mesh Topology</span>
+    <span></span>
+  </div>
+
+  <div class="viz-container">
+    <canvas id="mesh-canvas"></canvas>
+  </div>
+
+  <div class="info-panel">
+    <h2>Mesh Topology</h2>
+    <p>WireGuard mesh visualization. Anastasia is the hub (10.8.0.x). Aria and Octavia are offline (dimmed). Hub-and-spoke with encrypted tunnels to all edge nodes.</p>
+    <div class="links">
+      <a href="../tokenless-flow/">Tokenless Flow</a>
+      <a href="../kpi-dashboard/">KPI Dashboard</a>
+      <a href="../fleet-pulse/">Fleet Pulse</a>
+      <a href="/wiki/wireguard-mesh">Wiki: WireGuard Mesh</a>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const canvas = document.getElementById('mesh-canvas');
+  const ctx = canvas.getContext('2d');
+
+  const nodes = [
+    { name: 'Alice',      ip: '.49',  wg: '10.8.0.6',  color: '#FF6B2B', online: true },
+    { name: 'Cecilia',    ip: '.96',  wg: '10.8.0.3',  color: '#CC00AA', online: true },
+    { name: 'Octavia',    ip: '.100', wg: '10.8.0.4',  color: '#8844FF', online: false },
+    { name: 'Aria',       ip: '.98',  wg: '10.8.0.7',  color: '#4488FF', online: false },
+    { name: 'Lucidia',    ip: '.38',  wg: '10.8.0.5',  color: '#00D4FF', online: true },
+    { name: 'Gematria',   ip: '.8',   wg: '10.8.0.8',  color: '#FF2255', online: true }
+  ];
+
+  // Anastasia is the hub, drawn at center
+  const hub = { name: 'Anastasia', ip: 'nyc1', wg: '10.8.0.1', color: '#FF2255', online: true };
+
+  let w, h, dpr;
+
+  function resize() {
+    dpr = window.devicePixelRatio;
+    w = canvas.width = window.innerWidth * dpr;
+    h = canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+
+    const cx = w / 2;
+    const cy = h / 2;
+    const radius = Math.min(w, h) * 0.28;
+
+    hub.x = cx;
+    hub.y = cy;
+
+    nodes.forEach((n, i) => {
+      const angle = -Math.PI / 2 + (2 * Math.PI * i) / nodes.length;
+      n.x = cx + radius * Math.cos(angle);
+      n.y = cy + radius * Math.sin(angle);
+    });
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  let time = 0;
+  function draw() {
+    time += 0.016;
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw hub-and-spoke connections
+    nodes.forEach((n, i) => {
+      const alpha = n.online ? (0.1 + 0.08 * Math.sin(time * (0.7 + i * 0.15))) : 0.04;
+      ctx.beginPath();
+      ctx.moveTo(hub.x, hub.y);
+      ctx.lineTo(n.x, n.y);
+      ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
+      ctx.lineWidth = (n.online ? 1.5 : 0.8) * dpr;
+      ctx.stroke();
+
+      // Traffic dot on line (only if online)
+      if (n.online) {
+        const t = (Math.sin(time * (0.9 + i * 0.25)) + 1) / 2;
+        const dx = hub.x + (n.x - hub.x) * t;
+        const dy = hub.y + (n.y - hub.y) * t;
+        ctx.beginPath();
+        ctx.arc(dx, dy, 2.5 * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = n.color + '88';
+        ctx.fill();
+      }
+    });
+
+    // Draw all nodes (ring + hub)
+    function drawNode(n, isHub) {
+      const dimFactor = n.online ? 1.0 : 0.25;
+      const pulse = Math.sin(time * (isHub ? 1.5 : 1.0 + Math.random() * 0.01) * 2) * 0.5 + 0.5;
+      const baseRadius = (isHub ? 24 : 18) * dpr;
+      const glowRadius = baseRadius + pulse * 14 * dpr * dimFactor;
+
+      // Glow
+      const grad = ctx.createRadialGradient(n.x, n.y, baseRadius * 0.3, n.x, n.y, glowRadius * 2);
+      const alphaHex = Math.round(0x55 * dimFactor).toString(16).padStart(2, '0');
+      const alphaHex2 = Math.round(0x18 * dimFactor).toString(16).padStart(2, '0');
+      grad.addColorStop(0, n.color + alphaHex);
+      grad.addColorStop(0.5, n.color + alphaHex2);
+      grad.addColorStop(1, n.color + '00');
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, glowRadius * 2, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Pulse ring
+      if (n.online) {
+        const ringRadius = baseRadius + pulse * 22 * dpr;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, ringRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = n.color + Math.round((1 - pulse) * 60).toString(16).padStart(2, '0');
+        ctx.lineWidth = 1.5 * dpr;
+        ctx.stroke();
+      }
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, baseRadius, 0, Math.PI * 2);
+      ctx.globalAlpha = dimFactor;
+      ctx.fillStyle = n.color;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Hub gradient border
+      if (isHub) {
+        const gradBorder = ctx.createLinearGradient(n.x - baseRadius, n.y - baseRadius, n.x + baseRadius, n.y + baseRadius);
+        ['#FF6B2B','#FF2255','#CC00AA','#8844FF','#4488FF','#00D4FF'].forEach((c, i, a) =>
+          gradBorder.addColorStop(i / (a.length - 1), c));
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, baseRadius + 2 * dpr, 0, Math.PI * 2);
+        ctx.strokeStyle = gradBorder;
+        ctx.lineWidth = 2 * dpr;
+        ctx.globalAlpha = 0.5 + pulse * 0.5;
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // Name label
+      ctx.font = `600 ${(isHub ? 14 : 13) * dpr}px 'JetBrains Mono', monospace`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = n.online ? '#fff' : 'rgba(255,255,255,0.3)';
+      ctx.fillText(n.name, n.x, n.y + baseRadius + 22 * dpr);
+
+      // IP sublabel
+      ctx.font = `400 ${10 * dpr}px 'JetBrains Mono', monospace`;
+      ctx.fillStyle = n.online ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.15)';
+      const ipLabel = isHub ? n.wg + ' (hub)' : '192.168.4' + n.ip;
+      ctx.fillText(ipLabel, n.x, n.y + baseRadius + 38 * dpr);
+
+      // WG address for ring nodes
+      if (!isHub) {
+        ctx.font = `400 ${9 * dpr}px 'JetBrains Mono', monospace`;
+        ctx.fillStyle = n.online ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)';
+        ctx.fillText(n.wg, n.x, n.y + baseRadius + 52 * dpr);
+      }
+
+      // Offline badge
+      if (!n.online) {
+        ctx.font = `700 ${8 * dpr}px 'JetBrains Mono', monospace`;
+        ctx.fillStyle = 'rgba(255,80,80,0.5)';
+        ctx.fillText('OFFLINE', n.x, n.y - baseRadius - 10 * dpr);
+      }
+    }
+
+    nodes.forEach(n => drawNode(n, false));
+    drawNode(hub, true);
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+</body>
+</html>

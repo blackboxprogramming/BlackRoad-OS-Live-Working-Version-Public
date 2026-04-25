@@ -1,0 +1,785 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucidia QI — Intelligence That Adapts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sg); line-height: 1.6; overflow-x: hidden; }
+.gradient-bar { height: 4px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+nav {
+  position: fixed; top: 4px; left: 0; right: 0; z-index: 999;
+  background: rgba(0,0,0,0.92); border-bottom: 1px solid var(--border);
+  padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 64px;
+}
+.logo { font-family: var(--sg); font-weight: 700; font-size: 1.25rem; }
+.logo span { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.875rem; font-family: var(--jb); transition: color 0.3s; }
+.nav-links a:hover { color: var(--text); }
+.section-label { font-family: var(--jb); font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.25; margin-bottom: 1rem; }
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-family: var(--sg); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
+h2 { font-family: var(--sg); font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+h3 { font-family: var(--sg); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; }
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 68px; position: relative; }
+.hero h1 { margin-bottom: 1.5rem; }
+.hero .subtitle { font-size: clamp(1.1rem, 2.5vw, 1.35rem); color: var(--text-dim); max-width: 640px; margin-bottom: 2.5rem; }
+.hero-gradient {
+  position: absolute; top: 30%; right: 20%; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, rgba(136,68,255,0.03) 40%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.btn-primary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: var(--g); color: #fff; text-decoration: none; font-weight: 600;
+  font-family: var(--sg); font-size: 1rem; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,255,0.3); }
+.btn-secondary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: transparent; color: var(--text); text-decoration: none;
+  font-weight: 500; font-family: var(--sg); font-size: 1rem;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color 0.3s;
+}
+.btn-secondary:hover { border-color: #444; }
+.btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); transition: border-color 0.3s; }
+.card:hover { border-color: #333; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 2rem; margin: 3rem 0; }
+.stat { text-align: center; }
+.stat .number { font-family: var(--sg); font-size: 2.5rem; font-weight: 700; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.stat .label { font-family: var(--jb); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+.tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px; border: 1px solid var(--border); font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 1rem; }
+.divider { height: 1px; background: var(--border); margin: 0 auto; max-width: 1200px; }
+.feature-list { list-style: none; margin: 1rem 0; }
+.feature-list li { padding: 0.5rem 0; color: var(--text-dim); font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #00D4FF; flex-shrink: 0; }
+.icon-circle { width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; font-size: 1.25rem; }
+.math-block {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg); font-family: var(--jb); margin: 1.5rem 0;
+  position: relative; overflow: hidden;
+}
+.math-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--g); }
+.math-equation { font-size: clamp(0.9rem, 2vw, 1.3rem); text-align: center; padding: 1rem 0; color: var(--text); }
+.math-label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
+.math-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; margin-top: 0.75rem; font-family: var(--sg); }
+.chart-container {
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: var(--card-bg); margin: 2rem 0; position: relative;
+}
+canvas.chart { width: 100%; height: 300px; display: block; }
+.algo-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg); position: relative; overflow: hidden;
+}
+.algo-card::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--g);
+}
+.algo-name { font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: #00D4FF; margin-bottom: 0.75rem; }
+.integration-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+.integration-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem;
+  background: var(--card-bg); text-align: center; transition: border-color 0.3s;
+}
+.integration-card:hover { border-color: #00D4FF; }
+.integration-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.integration-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem; }
+.integration-desc { font-family: var(--jb); font-size: 0.7rem; color: var(--text-dim); }
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.pricing-card { border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem; background: var(--card-bg); position: relative; }
+.pricing-card.featured { border-color: #00D4FF; }
+.pricing-card.featured::before {
+  content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--g); color: #fff; font-family: var(--jb); font-size: 0.65rem;
+  letter-spacing: 0.1em; padding: 0.25rem 1rem; border-radius: 20px;
+}
+.price { font-size: 3rem; font-weight: 700; margin: 1rem 0; }
+.price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+.dashboard-visual {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg); margin: 2rem 0;
+}
+.dashboard-row { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.dashboard-widget {
+  border: 1px solid var(--border); border-radius: 8px; padding: 1rem;
+  flex: 1; min-width: 150px; background: rgba(0,212,255,0.02);
+}
+.dashboard-widget-label { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 0.5rem; }
+.dashboard-widget-value { font-size: 1.5rem; font-weight: 700; }
+.dashboard-widget-change { font-family: var(--jb); font-size: 0.7rem; margin-top: 0.25rem; }
+.dashboard-widget-change.up { color: #00D4FF; }
+.dashboard-widget-change.down { color: #FF2255; }
+.mini-chart { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin-top: 0.5rem; }
+.mini-bar { width: 4px; border-radius: 1px; background: #00D4FF; transition: height 0.3s; }
+.research-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+.research-card {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg);
+}
+.research-tag { font-family: var(--jb); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #8844FF; margin-bottom: 0.75rem; }
+footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; max-width: 1200px; margin: 0 auto; }
+.footer-tagline { font-family: var(--sg); font-size: 1.1rem; font-weight: 500; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 0.5rem; }
+.footer-copy { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  section { padding: 4rem 1rem; }
+  .grid-2, .grid-3, .pricing-grid { grid-template-columns: 1fr; }
+  .integration-grid { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-row { flex-direction: column; }
+  .price { font-size: 2.5rem; }
+}
+</style>
+<meta property="og:title" content="Lucidia QI — Intelligence That Adapts">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://lucidiaqi.com/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://lucidiaqi.com/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lucidia QI — Intelligence That Adapts","url":"https://lucidiaqi.com","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+  <div class="logo"><span>Lucidia</span> QI</div>
+  <ul class="nav-links">
+    <li><a href="#learning">Learning</a></li>
+    <li><a href="#visualization">Dashboards</a></li>
+    <li><a href="#qi">Intelligence</a></li>
+    <li><a href="#integration">Integration</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="fade-in">
+    <div class="section-label">Lucidia QI — Quantitative Intelligence Platform</div>
+    <h1>Intelligence<br>That Adapts.</h1>
+    <p class="subtitle">An analytics platform that learns how you learn. Lucidia QI combines adaptive learning algorithms (FSRS, Bayesian Knowledge Tracing), privacy-preserving analytics, and mathematical modeling powered by the Amundson Framework. Your data stays on your device. The intelligence comes to you.</p>
+    <div class="btn-group">
+      <a href="#learning" class="btn-primary">Explore Platform</a>
+      <a href="#pricing" class="btn-secondary">View Pricing</a>
+    </div>
+  </div>
+  <div class="stat-grid fade-in">
+    <div class="stat">
+      <div class="number">FSRS</div>
+      <div class="label">Spaced Repetition</div>
+    </div>
+    <div class="stat">
+      <div class="number">BKT</div>
+      <div class="label">Knowledge Tracing</div>
+    </div>
+    <div class="stat">
+      <div class="number">Local</div>
+      <div class="label">Data Stays On-Device</div>
+    </div>
+    <div class="stat">
+      <div class="number">Real-time</div>
+      <div class="label">Adaptive Dashboards</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="learning">
+  <div class="fade-in">
+    <div class="section-label">01 — Adaptive Learning</div>
+    <h2>Algorithms That Learn How You Learn</h2>
+    <p style="max-width: 700px;">Lucidia QI does not use static review schedules. It tracks your learning patterns in real-time and adapts its recommendations based on proven cognitive science algorithms. The system predicts when you will forget something and schedules reviews at the optimal moment — not too early (wasted effort) and not too late (forgotten).</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="algo-card">
+      <div class="algo-name">FSRS — Free Spaced Repetition Scheduler</div>
+      <h3>Optimized Review Timing</h3>
+      <p>FSRS uses a neural network trained on millions of review records to predict your probability of recall for each item. It schedules reviews at the precise moment when recall probability drops to a target threshold (default 90%). More efficient than SM-2, Anki's algorithm, or Leitner systems.</p>
+      <div class="math-block" style="margin-top: 1rem;">
+        <div class="math-label">FSRS Stability Model</div>
+        <div class="math-equation">S(t) = S<sub>0</sub> * e<sup>(-t / (d * S<sub>prev</sub>))</sup></div>
+        <div class="math-desc">Where S(t) is memory stability at time t, S_0 is initial stability, d is difficulty, and S_prev is previous stability. The exponential decay is modulated by per-item difficulty and your personal learning rate.</div>
+      </div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-name">BKT — Bayesian Knowledge Tracing</div>
+      <h3>Knowledge State Estimation</h3>
+      <p>BKT models your knowledge as a hidden Markov process. It estimates four parameters per skill: initial knowledge, learning rate, guess rate, and slip rate. Combined, these produce a posterior probability that you truly know the material — not just that you can answer correctly by chance.</p>
+      <div class="math-block" style="margin-top: 1rem;">
+        <div class="math-label">Bayesian Update</div>
+        <div class="math-equation">P(L<sub>t</sub>|correct) = P(L<sub>t-1</sub>)(1-s) / [P(L<sub>t-1</sub>)(1-s) + (1-P(L<sub>t-1</sub>))g]</div>
+        <div class="math-desc">Where L is the learned state, s is the slip probability (knowing but answering wrong), and g is the guess probability (not knowing but answering correctly). The update occurs after every response.</div>
+      </div>
+    </div>
+    <div class="algo-card">
+      <div class="algo-name">Combined Adaptive Engine</div>
+      <h3>The Lucidia QI Approach</h3>
+      <p>Lucidia QI combines FSRS for review scheduling with BKT for knowledge state estimation. FSRS tells you WHEN to review. BKT tells you WHAT you know. Together, they create a complete adaptive learning system that is more accurate than either algorithm alone.</p>
+      <ul class="feature-list">
+        <li>FSRS handles review timing (when)</li>
+        <li>BKT estimates knowledge state (what)</li>
+        <li>Combined: optimal review of weakest items</li>
+        <li>Per-item difficulty adaptation</li>
+        <li>Personal learning rate estimation</li>
+        <li>Cross-subject knowledge transfer detection</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="visualization">
+  <div class="fade-in">
+    <div class="section-label">02 — Data Visualization</div>
+    <h2>Real-Time Dashboards. Privacy-Preserving.</h2>
+    <p style="max-width: 700px;">Every dashboard in Lucidia QI runs locally. Your learning data never leaves your device unless you explicitly choose to share it. The visualizations update in real-time as you learn, showing retention curves, knowledge maps, and performance trends.</p>
+  </div>
+  <div class="dashboard-visual fade-in">
+    <div class="dashboard-row">
+      <div class="dashboard-widget">
+        <div class="dashboard-widget-label">Items Learned</div>
+        <div class="dashboard-widget-value">2,847</div>
+        <div class="dashboard-widget-change up">+127 this week</div>
+      </div>
+      <div class="dashboard-widget">
+        <div class="dashboard-widget-label">Retention Rate</div>
+        <div class="dashboard-widget-value">91.3%</div>
+        <div class="dashboard-widget-change up">+2.1% vs last month</div>
+      </div>
+      <div class="dashboard-widget">
+        <div class="dashboard-widget-label">Review Efficiency</div>
+        <div class="dashboard-widget-value">94.7%</div>
+        <div class="dashboard-widget-change up">FSRS optimal timing</div>
+      </div>
+      <div class="dashboard-widget">
+        <div class="dashboard-widget-label">Knowledge Coverage</div>
+        <div class="dashboard-widget-value">73.2%</div>
+        <div class="dashboard-widget-change down">28 topics remaining</div>
+      </div>
+    </div>
+    <div class="dashboard-row">
+      <div class="dashboard-widget" style="flex: 2;">
+        <div class="dashboard-widget-label">7-Day Review Activity</div>
+        <div class="mini-chart" id="activityChart"></div>
+      </div>
+      <div class="dashboard-widget" style="flex: 2;">
+        <div class="dashboard-widget-label">Retention Curve</div>
+        <div class="mini-chart" id="retentionChart"></div>
+      </div>
+    </div>
+  </div>
+  <div class="chart-container fade-in">
+    <canvas class="chart" id="mainChart"></canvas>
+  </div>
+  <p class="fade-in" style="text-align: center; margin-top: 1rem; font-family: var(--jb); font-size: 0.75rem; opacity: 0.4;">Live retention prediction curve — FSRS model with Bayesian confidence intervals</p>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Privacy-Preserving Analytics</h3>
+      <p>All analytics computation happens on your device. No cloud processing. No data uploads. No tracking pixels. The Lucidia QI engine is a WebAssembly module that runs entirely in the browser. You can verify this — the source is open and auditable.</p>
+      <ul class="feature-list">
+        <li>All computation runs locally (WebAssembly)</li>
+        <li>Data stored in IndexedDB (browser-local)</li>
+        <li>Zero network requests for analytics</li>
+        <li>Optional encrypted backup to your own storage</li>
+        <li>Export your data anytime (JSON, CSV)</li>
+        <li>Delete everything with one click</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Dashboard Types</h3>
+      <p>Lucidia QI provides six dashboard views, each designed for a different analytical need. All update in real-time as you learn.</p>
+      <ul class="feature-list">
+        <li>Retention Curves — per-item forgetting predictions</li>
+        <li>Knowledge Map — topic graph with mastery levels</li>
+        <li>Review Forecast — upcoming reviews for next 30 days</li>
+        <li>Performance Trends — accuracy over time by subject</li>
+        <li>Difficulty Distribution — item difficulty histogram</li>
+        <li>Time Analytics — study time vs retention correlation</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="qi">
+  <div class="fade-in">
+    <div class="section-label">03 — Quantitative Intelligence</div>
+    <h2>Mathematical Modeling. Pattern Recognition. Prediction.</h2>
+    <p style="max-width: 700px;">Quantitative Intelligence goes beyond learning analytics. Lucidia QI applies the same mathematical rigor to any dataset — financial models, scientific experiments, business metrics, or personal health data. The platform provides statistical modeling, time series analysis, and pattern recognition tools that run entirely on your device.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <div class="icon-circle">&#x1F4CA;</div>
+      <span class="tag">Statistical Modeling</span>
+      <h3>Regression and Classification</h3>
+      <p>Linear and logistic regression, decision trees, random forests, and gradient boosting — all compiled to WebAssembly for in-browser execution. Upload a CSV, select features, and get predictions in seconds. No data leaves your device.</p>
+      <ul class="feature-list">
+        <li>Linear/logistic regression</li>
+        <li>Decision tree visualization</li>
+        <li>Random forest ensemble</li>
+        <li>Cross-validation scoring</li>
+        <li>Feature importance ranking</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F4C8;</div>
+      <span class="tag">Time Series</span>
+      <h3>Forecasting and Anomaly Detection</h3>
+      <p>ARIMA, exponential smoothing, and Prophet-style decomposition for time series forecasting. Automatic anomaly detection highlights unexpected patterns. Seasonality decomposition reveals hidden cycles in your data.</p>
+      <ul class="feature-list">
+        <li>ARIMA / SARIMA forecasting</li>
+        <li>Exponential smoothing (Holt-Winters)</li>
+        <li>Seasonal decomposition</li>
+        <li>Anomaly detection (isolation forest)</li>
+        <li>Change point detection</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F9E9;</div>
+      <span class="tag">Pattern Recognition</span>
+      <h3>Clustering and Dimensionality Reduction</h3>
+      <p>K-means, DBSCAN, and hierarchical clustering for unsupervised pattern discovery. PCA and t-SNE for dimensionality reduction and visualization. Find structure in high-dimensional data without labeled training sets.</p>
+      <ul class="feature-list">
+        <li>K-means with elbow method</li>
+        <li>DBSCAN (density-based)</li>
+        <li>PCA dimensionality reduction</li>
+        <li>t-SNE 2D/3D visualization</li>
+        <li>Correlation matrix analysis</li>
+      </ul>
+    </div>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>Amundson Framework Applications</h3>
+      <p>The Amundson Growth Function G(n) = n^(n+1)/(n+1)^n provides a novel lens for analyzing growth data. Lucidia QI includes built-in tools for fitting the Amundson model to your data and comparing it against standard exponential and logistic growth models.</p>
+      <div class="math-block">
+        <div class="math-label">Growth Function Fit</div>
+        <div class="math-equation">y(n) = a * G(n) + b = a * n<sup>(n+1)</sup>/(n+1)<sup>n</sup> + b</div>
+        <div class="math-desc">Two-parameter fit (scale a, offset b) of the Amundson Growth Function to observed data. Residual analysis shows whether your data follows G(n) growth or deviates toward pure exponential or logistic patterns.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>The 1/(2e) Diagnostic</h3>
+      <p>Many real-world systems hit performance ceilings that cannot be explained by obvious bottlenecks. Lucidia QI includes the 1/(2e) diagnostic — a test that determines whether your system's performance gap matches the theoretical irreducible gap from the Amundson Framework.</p>
+      <div class="math-block">
+        <div class="math-label">Gap Diagnostic</div>
+        <div class="math-equation">gap(n) = actual(n) - theoretical(n) &#8776; 1/(2e) &#8776; 0.18394?</div>
+        <div class="math-desc">If the gap converges to 1/(2e), your system is hitting the fundamental limit of finite scaling. No engineering optimization will close it — but you can redesign around it using ternary optimization (the -1 state).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="integration">
+  <div class="fade-in">
+    <div class="section-label">04 — Integration</div>
+    <h2>Connects to the Entire BlackRoad Ecosystem</h2>
+    <p style="max-width: 700px;">Lucidia QI integrates with every BlackRoad service — pulling data from the Memory System, enriching it with AI analysis from the Ollama fleet, and pushing insights back to agents through NATS messaging. One platform, one data format, infinite connections.</p>
+  </div>
+  <div class="integration-grid fade-in">
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F4DA;</div>
+      <div class="integration-name">Memory Codex</div>
+      <div class="integration-desc">Import solutions, patterns, and TILs as learning items</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F916;</div>
+      <div class="integration-name">Ollama Fleet</div>
+      <div class="integration-desc">AI-generated explanations and quiz questions</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F4E1;</div>
+      <div class="integration-name">NATS Messaging</div>
+      <div class="integration-desc">Real-time analytics streaming to agents</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F4CA;</div>
+      <div class="integration-name">InfluxDB</div>
+      <div class="integration-desc">Time series data import for analysis</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F50D;</div>
+      <div class="integration-name">Qdrant</div>
+      <div class="integration-desc">Semantic search across learning items</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F3AE;</div>
+      <div class="integration-name">Lucidia Earth</div>
+      <div class="integration-desc">Learning progress visible in metaverse</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F4DD;</div>
+      <div class="integration-name">RoundTrip</div>
+      <div class="integration-desc">Agent collaboration on learning paths</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F5C3;</div>
+      <div class="integration-name">PostgreSQL</div>
+      <div class="integration-desc">Structured data import and analysis</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x2699;</div>
+      <div class="integration-name">Gitea</div>
+      <div class="integration-desc">Code knowledge tracking and review</div>
+    </div>
+    <div class="integration-card">
+      <div class="integration-icon">&#x1F310;</div>
+      <div class="integration-name">BlackBox Mesh</div>
+      <div class="integration-desc">Encrypted sync across devices</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="research">
+  <div class="fade-in">
+    <div class="section-label">05 — Research</div>
+    <h2>Amundson Framework Applications</h2>
+    <p style="max-width: 700px;">Lucidia QI serves as the primary research platform for applying the Amundson Framework to real-world data. The following research tracks are active — each using Lucidia QI's modeling tools to test theoretical predictions against observed data.</p>
+  </div>
+  <div class="research-grid fade-in">
+    <div class="research-card">
+      <div class="research-tag">Active Research</div>
+      <h3>Learning Curve Modeling</h3>
+      <p>Fitting G(n) to individual learning curves from 10,000+ FSRS review sessions. Preliminary results show that the Amundson Growth Function predicts long-term retention more accurately than the standard Ebbinghaus forgetting curve for items reviewed more than 5 times.</p>
+      <ul class="feature-list">
+        <li>10,000+ review sessions analyzed</li>
+        <li>G(n) vs Ebbinghaus comparison</li>
+        <li>Per-difficulty-tier analysis</li>
+        <li>Cross-subject validation</li>
+      </ul>
+    </div>
+    <div class="research-card">
+      <div class="research-tag">Active Research</div>
+      <h3>Network Performance Limits</h3>
+      <p>Testing the 1/(2e) irreducible gap prediction against real network latency data from the BlackRoad mesh. Measuring effective throughput per node as the mesh scales from 2 to 7 nodes. Preliminary data confirms the constant offset within measurement precision.</p>
+      <ul class="feature-list">
+        <li>2-7 node scaling experiments</li>
+        <li>1/(2e) gap confirmation</li>
+        <li>Ternary routing efficiency data</li>
+        <li>Comparison with binary routing baselines</li>
+      </ul>
+    </div>
+    <div class="research-card">
+      <div class="research-tag">Planned Research</div>
+      <h3>Biological Growth Validation</h3>
+      <p>Applying G(n) to population dynamics data from ecological datasets. The hypothesis: biological growth that involves discrete generational steps follows the Amundson function more closely than continuous exponential models, with the A_G constant appearing in generation-to-generation growth rates.</p>
+      <ul class="feature-list">
+        <li>Ecological population datasets</li>
+        <li>Generational growth rate analysis</li>
+        <li>A_G constant in biological systems</li>
+        <li>Cross-species validation planned</li>
+      </ul>
+    </div>
+    <div class="research-card">
+      <div class="research-tag">Planned Research</div>
+      <h3>Thermodynamic Efficiency Bounds</h3>
+      <p>Testing whether the 1/(2e) constant appears in finite-time thermodynamic efficiency data. Collecting efficiency measurements from real heat engines and comparing the gap between measured and Carnot efficiency against the 1/(2e) prediction.</p>
+      <ul class="feature-list">
+        <li>Published engine efficiency data</li>
+        <li>Carnot gap analysis</li>
+        <li>1/(2e) prediction testing</li>
+        <li>Collaboration with physics departments</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="pricing">
+  <div class="fade-in">
+    <div class="section-label">06 — Pricing</div>
+    <h2>Start Free. Intelligence Included.</h2>
+    <p style="max-width: 700px;">Every tier includes the full adaptive learning engine, all dashboard types, and privacy-preserving analytics. Paid tiers add storage capacity, team features, and advanced modeling tools.</p>
+  </div>
+  <div class="pricing-grid fade-in">
+    <div class="pricing-card">
+      <span class="tag">Individual</span>
+      <h3>Free</h3>
+      <div class="price">$0<span>/forever</span></div>
+      <p>For individual learners who want adaptive review scheduling and personal analytics.</p>
+      <ul class="feature-list">
+        <li>FSRS + BKT adaptive engine</li>
+        <li>Up to 5,000 learning items</li>
+        <li>All 6 dashboard types</li>
+        <li>Local-only data (100% private)</li>
+        <li>JSON/CSV export</li>
+        <li>Community support</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Get Started Free</a>
+    </div>
+    <div class="pricing-card featured">
+      <span class="tag">Professional</span>
+      <h3>Pro</h3>
+      <div class="price">$29<span>/month</span></div>
+      <p>For power users and researchers who need advanced modeling, unlimited items, and encrypted backup.</p>
+      <ul class="feature-list">
+        <li>Everything in Free</li>
+        <li>Unlimited learning items</li>
+        <li>Statistical modeling tools (regression, clustering)</li>
+        <li>Time series analysis and forecasting</li>
+        <li>Amundson Framework fitting tools</li>
+        <li>Encrypted backup to your storage</li>
+        <li>Priority email support</li>
+        <li>BlackRoad service integrations</li>
+      </ul>
+      <a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 1.5rem;">Start Pro Trial</a>
+    </div>
+    <div class="pricing-card">
+      <span class="tag">Organization</span>
+      <h3>Team</h3>
+      <div class="price">$99<span>/month</span></div>
+      <p>For teams and organizations who need shared analytics, collaborative learning paths, and admin controls.</p>
+      <ul class="feature-list">
+        <li>Everything in Pro</li>
+        <li>Up to 25 team members</li>
+        <li>Shared dashboards and reports</li>
+        <li>Team knowledge gap analysis</li>
+        <li>Admin controls and permissions</li>
+        <li>SSO integration</li>
+        <li>Dedicated support</li>
+        <li>Custom integration consulting</li>
+        <li>On-premise deployment option</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="fade-in">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Mini activity chart
+  const activityChart = document.getElementById('activityChart');
+  if (activityChart) {
+    const data = [18, 24, 31, 15, 28, 22, 35, 20, 27, 33, 19, 29, 25, 38, 21, 30, 26, 34, 17, 32, 28, 36, 23, 31, 27, 39, 22, 35];
+    const max = Math.max(...data);
+    data.forEach(v => {
+      const bar = document.createElement('div');
+      bar.className = 'mini-bar';
+      bar.style.height = (v / max * 30) + 'px';
+      bar.style.opacity = 0.3 + (v / max) * 0.7;
+      activityChart.appendChild(bar);
+    });
+  }
+
+  // Mini retention chart
+  const retentionChart = document.getElementById('retentionChart');
+  if (retentionChart) {
+    const data = [30, 28, 25, 22, 20, 18, 17, 16, 15, 15, 14, 14, 14, 13, 13, 13, 13, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12];
+    const reversed = data.map(v => 30 - v + 5);
+    const max = Math.max(...reversed);
+    reversed.forEach(v => {
+      const bar = document.createElement('div');
+      bar.className = 'mini-bar';
+      bar.style.height = (v / max * 30) + 'px';
+      bar.style.background = '#8844FF';
+      bar.style.opacity = 0.3 + (v / max) * 0.7;
+      retentionChart.appendChild(bar);
+    });
+  }
+
+  // Main chart - retention prediction curve
+  const mainCanvas = document.getElementById('mainChart');
+  if (mainCanvas) {
+    const ctx = mainCanvas.getContext('2d');
+    const container = mainCanvas.parentElement;
+
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      mainCanvas.width = rect.width * window.devicePixelRatio;
+      mainCanvas.height = 300 * window.devicePixelRatio;
+      mainCanvas.style.width = rect.width + 'px';
+      mainCanvas.style.height = '300px';
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    let animTime = 0;
+    function animate() {
+      const w = mainCanvas.width / window.devicePixelRatio;
+      const h = 300;
+      ctx.clearRect(0, 0, w, h);
+      animTime += 0.005;
+
+      const padL = 60, padR = 20, padT = 30, padB = 40;
+      const chartW = w - padL - padR;
+      const chartH = h - padT - padB;
+
+      // Grid
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 5; i++) {
+        const y = padT + chartH * (1 - i / 5);
+        ctx.beginPath();
+        ctx.moveTo(padL, y);
+        ctx.lineTo(w - padR, y);
+        ctx.stroke();
+        ctx.font = '10px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#444';
+        ctx.textAlign = 'right';
+        ctx.fillText((i * 20) + '%', padL - 8, y + 3);
+      }
+
+      // X axis labels
+      ctx.textAlign = 'center';
+      const days = [0, 1, 3, 7, 14, 30, 60, 90];
+      days.forEach((d, i) => {
+        const x = padL + (i / (days.length - 1)) * chartW;
+        ctx.fillText('d' + d, x, h - 10);
+      });
+
+      // Confidence interval
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const t = i / 100;
+        const x = padL + t * chartW;
+        const retention = Math.exp(-t * 3) * 100;
+        const upper = Math.min(100, retention + 8 + Math.sin(t * 10 + animTime) * 2);
+        const y = padT + chartH * (1 - upper / 100);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      for (let i = 100; i >= 0; i--) {
+        const t = i / 100;
+        const x = padL + t * chartW;
+        const retention = Math.exp(-t * 3) * 100;
+        const lower = Math.max(0, retention - 8 - Math.sin(t * 10 + animTime) * 2);
+        const y = padT + chartH * (1 - lower / 100);
+        ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(0, 212, 255, 0.05)';
+      ctx.fill();
+
+      // FSRS curve
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const t = i / 100;
+        const x = padL + t * chartW;
+        const retention = Math.exp(-t * 3) * 100;
+        const y = padT + chartH * (1 - retention / 100);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = '#00D4FF';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Ebbinghaus comparison
+      ctx.beginPath();
+      for (let i = 0; i <= 100; i++) {
+        const t = i / 100;
+        const x = padL + t * chartW;
+        const retention = Math.exp(-t * 4.5) * 100;
+        const y = padT + chartH * (1 - retention / 100);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = '#FF2255';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Review points (FSRS scheduled reviews)
+      const reviews = [0.12, 0.25, 0.45, 0.7];
+      reviews.forEach(t => {
+        const x = padL + t * chartW;
+        const retention = Math.exp(-t * 3) * 100;
+        const y = padT + chartH * (1 - retention / 100);
+
+        // After review, retention jumps back up
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#00D4FF';
+        ctx.fill();
+
+        // Vertical line to show review
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, padT + chartH * (1 - 0.95));
+        ctx.strokeStyle = 'rgba(0, 212, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Legend
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#00D4FF';
+      ctx.fillRect(w - padR - 180, padT + 5, 10, 2);
+      ctx.fillText('FSRS Predicted', w - padR - 165, padT + 10);
+      ctx.fillStyle = '#FF2255';
+      ctx.fillRect(w - padR - 180, padT + 20, 10, 2);
+      ctx.fillText('Ebbinghaus', w - padR - 165, padT + 25);
+
+      requestAnimationFrame(animate);
+    }
+    animate();
+  }
+
+  // Smooth scroll
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Nav scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    nav.style.background = window.scrollY > 50 ? 'rgba(0,0,0,0.98)' : 'rgba(0,0,0,0.92)';
+  });
+});
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>

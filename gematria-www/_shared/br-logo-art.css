@@ -1,0 +1,243 @@
+/* BlackRoad Logo Art — animated treatments for the BR road mark */
+
+/* ── Logo Container ── */
+.br-logo {
+  display: inline-block;
+  position: relative;
+}
+
+.br-logo img {
+  display: block;
+  width: var(--br-logo-size, 64px);
+  height: var(--br-logo-size, 64px);
+  border-radius: var(--br-logo-radius, 16px);
+}
+
+.br-logo-circle img {
+  border-radius: 50%;
+}
+
+/* ── Glow Effect ── */
+.br-logo-glow {
+  position: relative;
+}
+
+.br-logo-glow::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  background-size: 300% 300%;
+  animation: br-glow-rotate 4s ease-in-out infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s;
+  filter: blur(12px);
+}
+
+.br-logo-glow:hover::after {
+  opacity: 0.6;
+}
+
+@keyframes br-glow-rotate {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ── Pulse Effect ── */
+.br-logo-pulse {
+  animation: br-pulse 3s ease-in-out infinite;
+}
+
+@keyframes br-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.05); filter: brightness(1.15); }
+}
+
+/* ── Road Lines Animation (dashed center line moves) ── */
+.br-logo-drive {
+  position: relative;
+  overflow: hidden;
+}
+
+.br-logo-drive::before {
+  content: '';
+  position: absolute;
+  top: 60%;
+  left: 30%;
+  width: 40%;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #fff 0, #fff 8px, transparent 8px, transparent 16px);
+  animation: br-road-move 1.5s linear infinite;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes br-road-move {
+  0% { transform: translateX(-16px); }
+  100% { transform: translateX(0); }
+}
+
+/* ── Spin on Hover ── */
+.br-logo-spin:hover img {
+  animation: br-spin-once 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes br-spin-once {
+  0% { transform: rotate(0deg) scale(1); }
+  40% { transform: rotate(-10deg) scale(0.95); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* ── Loading Spinner (logo spins with road trail) ── */
+.br-loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.br-loading img {
+  animation: br-loading-spin 2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+.br-loading::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border: 2px solid transparent;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: br-loading-ring 1.2s linear infinite;
+}
+
+@keyframes br-loading-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes br-loading-ring {
+  0% { transform: rotate(0deg); opacity: 0.3; }
+  50% { opacity: 0.8; }
+  100% { transform: rotate(360deg); opacity: 0.3; }
+}
+
+/* ── Hero Logo (large, centered, with gradient border) ── */
+.br-logo-hero {
+  --br-logo-size: 160px;
+  --br-logo-radius: 32px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.br-logo-hero::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: calc(var(--br-logo-radius) + 3px);
+  background: linear-gradient(135deg, #FF6B2B, #FF2255, #CC00AA, #8844FF, #4488FF, #00D4FF);
+  background-size: 400% 400%;
+  animation: br-gradient-shift 6s ease infinite;
+  z-index: -1;
+}
+
+@keyframes br-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+/* ── Floating Logo (subtle up/down drift) ── */
+.br-logo-float {
+  animation: br-float 4s ease-in-out infinite;
+}
+
+@keyframes br-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ── Appear from Road (slide up + fade in) ── */
+.br-logo-appear {
+  animation: br-appear 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes br-appear {
+  0% { opacity: 0; transform: translateY(40px) scale(0.8); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Stamp Effect (quick scale bounce) ── */
+.br-logo-stamp {
+  animation: br-stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes br-stamp {
+  0% { transform: scale(2); opacity: 0; }
+  60% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Watermark (bottom-right corner, faded) ── */
+.br-watermark {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+  --br-logo-size: 80px;
+}
+
+.br-watermark:hover {
+  opacity: 0.2;
+  transition: opacity 0.5s;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ── Favicon Bounce (tab notification) ── */
+@keyframes br-favicon-bounce {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-4px); }
+  40% { transform: translateY(0); }
+  60% { transform: translateY(-2px); }
+  80% { transform: translateY(0); }
+}
+
+/* ── Gradient Text with Logo ── */
+.br-logo-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Space Grotesk', 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #fff 0%, #ccc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Dark Mode Card with Logo ── */
+.br-logo-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: all 0.3s;
+  --br-logo-size: 48px;
+  --br-logo-radius: 12px;
+}
+
+.br-logo-card:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}

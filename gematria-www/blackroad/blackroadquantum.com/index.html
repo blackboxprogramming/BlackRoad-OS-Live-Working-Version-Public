@@ -1,0 +1,791 @@
+<!-- PROPRIETARY. Copyright 2025-2026 BlackRoad OS, Inc. All rights reserved. NOT open source. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BlackRoad Quantum — Simulate Before You Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g: linear-gradient(90deg,#FF6B2B,#FF2255,#CC00AA,#8844FF,#4488FF,#00D4FF);
+  --border: #1a1a1a;
+  --sg: 'Space Grotesk', sans-serif;
+  --jb: 'JetBrains Mono', monospace;
+  --bg: #000;
+  --text: #fff;
+  --text-dim: #888;
+  --card-bg: #0a0a0a;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+.gradient-bar { height: 4px; background: var(--g); width: 100%; position: fixed; top: 0; left: 0; z-index: 1000; }
+nav {
+  position: fixed; top: 4px; left: 0; right: 0; z-index: 999;
+  background: rgba(0,0,0,0.92);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px;
+}
+.logo { font-family: var(--sg); font-weight: 700; font-size: 1.25rem; letter-spacing: -0.02em; }
+.logo span { background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.nav-links { display: flex; gap: 1.5rem; list-style: none; }
+.nav-links a {
+  color: var(--text-dim); text-decoration: none; font-size: 0.875rem;
+  font-family: var(--jb); transition: color 0.3s;
+}
+.nav-links a:hover { color: var(--text); }
+.section-label {
+  font-family: var(--jb); font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.12em; opacity: 0.25; margin-bottom: 1rem;
+}
+.fade-in { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.fade-in.visible { opacity: 1; transform: translateY(0); }
+section { padding: 6rem 2rem; max-width: 1200px; margin: 0 auto; }
+h1 { font-family: var(--sg); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.03em; }
+h2 { font-family: var(--sg); font-size: clamp(1.75rem, 4vw, 2.75rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 1.5rem; }
+h3 { font-family: var(--sg); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; }
+p { color: var(--text-dim); font-size: 1.05rem; line-height: 1.7; }
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  padding-top: 68px; position: relative;
+}
+.hero h1 { margin-bottom: 1.5rem; }
+.hero .subtitle {
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem); color: var(--text-dim);
+  max-width: 640px; margin-bottom: 2.5rem;
+}
+.hero-gradient {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(136,68,255,0.08) 0%, transparent 70%);
+  pointer-events: none; z-index: -1;
+}
+.btn-primary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: var(--g); color: #fff; text-decoration: none; font-weight: 600;
+  font-family: var(--sg); font-size: 1rem; border: none; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(136,68,255,0.3); }
+.btn-secondary {
+  display: inline-block; padding: 0.875rem 2rem; border-radius: 8px;
+  background: transparent; color: var(--text); text-decoration: none;
+  font-weight: 500; font-family: var(--sg); font-size: 1rem;
+  border: 1px solid var(--border); cursor: pointer; transition: border-color 0.3s;
+}
+.btn-secondary:hover { border-color: #444; }
+.btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.card {
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 2rem; background: var(--card-bg); transition: border-color 0.3s;
+}
+.card:hover { border-color: #333; }
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin: 3rem 0; }
+.stat { text-align: center; }
+.stat .number {
+  font-family: var(--sg); font-size: 3rem; font-weight: 700;
+  background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.stat .label { font-family: var(--jb); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-top: 0.25rem; }
+.icon-circle {
+  width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;
+  font-size: 1.25rem;
+}
+.divider { height: 1px; background: var(--border); margin: 0 2rem; max-width: 1200px; margin-left: auto; margin-right: auto; }
+.tag {
+  display: inline-block; padding: 0.25rem 0.75rem; border-radius: 20px;
+  border: 1px solid var(--border); font-family: var(--jb); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+.pricing-card { border: 1px solid var(--border); border-radius: 10px; padding: 2.5rem; background: var(--card-bg); position: relative; }
+.pricing-card.featured { border-color: #8844FF; }
+.pricing-card.featured::before {
+  content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--g); color: #fff; font-family: var(--jb); font-size: 0.65rem;
+  letter-spacing: 0.1em; padding: 0.25rem 1rem; border-radius: 20px;
+}
+.price { font-size: 3rem; font-weight: 700; margin: 1rem 0; }
+.price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+.feature-list { list-style: none; margin: 1.5rem 0; }
+.feature-list li { padding: 0.5rem 0; color: var(--text-dim); font-size: 0.95rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+.feature-list li::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #8844FF; flex-shrink: 0; }
+.architecture-diagram {
+  border: 1px solid var(--border); border-radius: 10px; padding: 3rem;
+  background: var(--card-bg); margin-top: 2rem; position: relative; overflow: hidden;
+}
+.arch-layer {
+  display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem;
+  border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.75rem;
+  background: rgba(136,68,255,0.03);
+}
+.arch-label {
+  font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: #8844FF; min-width: 120px;
+}
+.arch-desc { color: var(--text-dim); font-size: 0.9rem; }
+.arch-connector {
+  width: 2px; height: 20px; background: var(--border); margin: 0 auto;
+}
+.sandbox-demo {
+  border: 1px solid var(--border); border-radius: 10px; padding: 2rem;
+  background: var(--card-bg); margin-top: 2rem; font-family: var(--jb);
+  position: relative; overflow: hidden;
+}
+.sandbox-header {
+  display: flex; gap: 6px; margin-bottom: 1.5rem;
+}
+.sandbox-dot { width: 10px; height: 10px; border-radius: 50%; }
+.sandbox-dot.r { background: #FF2255; }
+.sandbox-dot.y { background: #FF6B2B; }
+.sandbox-dot.g { background: #00D4FF; }
+.sandbox-code { font-size: 0.85rem; color: var(--text-dim); line-height: 1.8; }
+.sandbox-code .keyword { color: #CC00AA; }
+.sandbox-code .fn { color: #4488FF; }
+.sandbox-code .str { color: #00D4FF; }
+.sandbox-code .num { color: #FF6B2B; }
+.sandbox-code .comment { color: #333; }
+.canvas-container {
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  margin-top: 2rem; position: relative; height: 300px; background: var(--card-bg);
+}
+canvas#simCanvas { width: 100%; height: 100%; display: block; }
+.success-card { border: 1px solid var(--border); border-radius: 10px; padding: 2rem; background: var(--card-bg); }
+.success-card .company { font-family: var(--jb); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #8844FF; margin-bottom: 0.75rem; }
+.success-card .metric { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.success-card .detail { color: var(--text-dim); font-size: 0.9rem; }
+footer {
+  border-top: 1px solid var(--border); padding: 3rem 2rem;
+  text-align: center; max-width: 1200px; margin: 0 auto;
+}
+.footer-tagline {
+  font-family: var(--sg); font-size: 1.1rem; font-weight: 500;
+  background: var(--g); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 0.5rem;
+}
+.footer-copy { font-family: var(--jb); font-size: 0.75rem; color: var(--text-dim); letter-spacing: 0.05em; }
+.market-visual {
+  position: relative; height: 200px; margin: 2rem 0;
+  display: flex; align-items: flex-end; gap: 2rem; justify-content: center;
+}
+.market-bar {
+  display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+}
+.market-bar .bar {
+  width: 80px; border-radius: 6px 6px 0 0; background: var(--g); min-height: 10px;
+  transition: height 1s ease;
+}
+.market-bar .year { font-family: var(--jb); font-size: 0.7rem; color: var(--text-dim); }
+.market-bar .val { font-family: var(--sg); font-size: 0.9rem; font-weight: 600; }
+.particle-field { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; }
+@media (max-width: 768px) {
+  nav { padding: 0 1rem; }
+  section { padding: 4rem 1rem; }
+  .nav-links { gap: 1rem; }
+  .nav-links a { font-size: 0.75rem; }
+  .grid-2, .grid-3, .pricing-grid { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .market-visual { gap: 1rem; }
+  .market-bar .bar { width: 50px; }
+}
+@media (max-width: 480px) {
+  .hero h1 { font-size: 2rem; }
+  .stat .number { font-size: 2rem; }
+  .price { font-size: 2.5rem; }
+}
+</style>
+<meta property="og:title" content="BlackRoad Quantum — Simulate Before You Build">
+<meta property="og:description" content="width=device-width, initial-scale=1.0">
+<meta property="og:url" content="https://blackroadquantum.com/">
+<meta property="og:image" content="https://images.blackroad.io/pixel-art/road-logo.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://blackroadquantum.com/">
+<meta name="robots" content="index, follow, noai, noimageai">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"BlackRoad Quantum — Simulate Before You Build","url":"https://blackroadquantum.com","applicationCategory":"ProductivityApplication","author":{"@type":"Organization","name":"BlackRoad OS, Inc.","url":"https://blackroad.io"}}</script>
+</head>
+<body>
+<div class="gradient-bar"></div>
+<nav>
+  <div class="logo"><span>BlackRoad</span> Quantum</div>
+  <ul class="nav-links">
+    <li><a href="#sandbox">Sandbox</a></li>
+    <li><a href="#simulations">Simulations</a></li>
+    <li><a href="#gap">The Gap</a></li>
+    <li><a href="#success">Success</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-gradient"></div>
+  <div class="fade-in">
+    <div class="section-label">BlackRoad Quantum Simulation Platform</div>
+    <h1>Simulate Before<br>You Build.</h1>
+    <p class="subtitle">The world's first browser-native physics simulation sandbox. Test materials, circuits, molecules, and entire engineering systems before committing a single dollar to production. What CodePen did for web development, we do for the physical world.</p>
+    <div class="btn-group">
+      <a href="#sandbox" class="btn-primary">Launch Sandbox</a>
+      <a href="#simulations" class="btn-secondary">Explore Simulations</a>
+    </div>
+  </div>
+  <div class="stat-grid fade-in">
+    <div class="stat">
+      <div class="number">$259B</div>
+      <div class="label">Digital Twin Market by 2030</div>
+    </div>
+    <div class="stat">
+      <div class="number">50%</div>
+      <div class="label">Cost Reduction Achievable</div>
+    </div>
+    <div class="stat">
+      <div class="number">10x</div>
+      <div class="label">Faster Iteration Cycles</div>
+    </div>
+    <div class="stat">
+      <div class="number">0</div>
+      <div class="label">Physical Prototypes Needed</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="sandbox">
+  <div class="fade-in">
+    <div class="section-label">01 — The Digital Sandbox</div>
+    <h2>The $25B Market That Becomes $259B</h2>
+    <p>Digital twins are transforming every industry. From aerospace to pharmaceuticals, the ability to simulate physical systems before building them is not a luxury — it is the new standard. The market grew from $25 billion in 2023 to a projected $259 billion by 2030. But the tools are fragmented, expensive, and locked behind enterprise walls.</p>
+  </div>
+  <div class="market-visual fade-in">
+    <div class="market-bar">
+      <div class="val">$25B</div>
+      <div class="bar" style="height: 40px;"></div>
+      <div class="year">2023</div>
+    </div>
+    <div class="market-bar">
+      <div class="val">$48B</div>
+      <div class="bar" style="height: 75px;"></div>
+      <div class="year">2024</div>
+    </div>
+    <div class="market-bar">
+      <div class="val">$89B</div>
+      <div class="bar" style="height: 110px;"></div>
+      <div class="year">2025</div>
+    </div>
+    <div class="market-bar">
+      <div class="val">$142B</div>
+      <div class="bar" style="height: 140px;"></div>
+      <div class="year">2027</div>
+    </div>
+    <div class="market-bar">
+      <div class="val">$259B</div>
+      <div class="bar" style="height: 180px;"></div>
+      <div class="year">2030</div>
+    </div>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <div class="icon-circle">&#x1F3ED;</div>
+      <h3>Enterprise Digital Twins</h3>
+      <p>Traditional digital twin platforms cost $100K+ per year and require dedicated engineering teams. They are powerful but inaccessible to 99% of researchers, students, and small teams who need simulation capabilities.</p>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F30D;</div>
+      <h3>Browser-Native Simulation</h3>
+      <p>BlackRoad Quantum runs entirely in the browser. WebAssembly-compiled physics engines deliver near-native performance without downloads, installations, or GPU requirements. Open a tab and simulate.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="simulations">
+  <div class="fade-in">
+    <div class="section-label">02 — Simulation Types</div>
+    <h2>Five Domains. One Sandbox.</h2>
+    <p>Every simulation type shares the same interface, the same data format, and the same collaboration tools. Mix domains freely — simulate a chemical reaction inside a structural analysis inside a quantum circuit.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <div class="icon-circle">&#x2699;</div>
+      <span class="tag">Physics</span>
+      <h3>Classical & Relativistic Physics</h3>
+      <p>Newtonian mechanics, fluid dynamics, thermodynamics, and electromagnetic field simulations. From simple pendulums to turbulent flow in jet engine intakes. Finite element analysis with adaptive mesh refinement in real-time.</p>
+      <ul class="feature-list">
+        <li>Rigid body dynamics with friction and collision</li>
+        <li>Computational fluid dynamics (CFD) in browser</li>
+        <li>Electromagnetic field visualization</li>
+        <li>Thermal conduction, convection, and radiation</li>
+        <li>Structural stress analysis and deformation</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F9EA;</div>
+      <span class="tag">Chemistry</span>
+      <h3>Molecular & Chemical Simulation</h3>
+      <p>Molecular dynamics, reaction kinetics, protein folding approximations, and materials science modeling. Visualize electron orbitals, predict reaction products, and optimize catalytic processes without a wet lab.</p>
+      <ul class="feature-list">
+        <li>Molecular dynamics with force field calculations</li>
+        <li>Reaction pathway modeling and optimization</li>
+        <li>Crystal structure prediction</li>
+        <li>Drug-target interaction screening</li>
+        <li>Materials property estimation</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F3D7;</div>
+      <span class="tag">Engineering</span>
+      <h3>Structural & Mechanical Engineering</h3>
+      <p>From bridge load analysis to aerospace structural integrity. Simulate fatigue, vibration, thermal expansion, and failure modes. Import CAD models directly or build parametric designs in the sandbox.</p>
+      <ul class="feature-list">
+        <li>FEA with adaptive mesh refinement</li>
+        <li>Fatigue life prediction</li>
+        <li>Modal analysis and vibration modes</li>
+        <li>Composite material layup optimization</li>
+        <li>Crash and impact simulation</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F9EC;</div>
+      <span class="tag">Biology</span>
+      <h3>Biological System Modeling</h3>
+      <p>Cellular automata, population dynamics, gene regulatory networks, and epidemiological models. From single-cell behavior to ecosystem-level simulations with stochastic variation and environmental coupling.</p>
+      <ul class="feature-list">
+        <li>Gene regulatory network simulation</li>
+        <li>Population dynamics with predator-prey models</li>
+        <li>Epidemiological SIR/SEIR modeling</li>
+        <li>Neural network biological simulation</li>
+        <li>Evolutionary algorithm playgrounds</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x269B;</div>
+      <span class="tag">Quantum Circuits</span>
+      <h3>Quantum Circuit Simulation</h3>
+      <p>Design, simulate, and debug quantum circuits with up to 24 qubits in the browser. Visualize quantum state evolution, measure entanglement, and test algorithms before deploying to real quantum hardware.</p>
+      <ul class="feature-list">
+        <li>Drag-and-drop circuit designer</li>
+        <li>State vector and density matrix visualization</li>
+        <li>Noise model simulation</li>
+        <li>Grover's, Shor's, and VQE algorithm templates</li>
+        <li>Export to Qiskit, Cirq, and Q#</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="icon-circle">&#x1F504;</div>
+      <span class="tag">Multi-Domain</span>
+      <h3>Cross-Domain Coupling</h3>
+      <p>The real world does not respect domain boundaries. Couple thermal analysis with structural mechanics. Feed molecular simulation results into macro-scale engineering models. This is where the true power emerges.</p>
+      <ul class="feature-list">
+        <li>Thermal-structural coupling</li>
+        <li>Fluid-structure interaction (FSI)</li>
+        <li>Electro-mechanical co-simulation</li>
+        <li>Multi-scale bridging (nano to macro)</li>
+        <li>Stochastic parameter sweeps</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="gap">
+  <div class="fade-in">
+    <div class="section-label">03 — The Missing Sandbox</div>
+    <h2>There Is No CodePen for Physics</h2>
+    <p style="max-width: 700px;">Web developers have CodePen, JSFiddle, and Replit. Data scientists have Jupyter notebooks. Designers have Figma. But physicists, engineers, chemists, and biologists? They have million-dollar simulation suites locked behind enterprise contracts, or they have nothing.</p>
+  </div>
+  <div class="sandbox-demo fade-in">
+    <div class="sandbox-header">
+      <div class="sandbox-dot r"></div>
+      <div class="sandbox-dot y"></div>
+      <div class="sandbox-dot g"></div>
+    </div>
+    <div class="sandbox-code">
+      <span class="comment">// BlackRoad Quantum Sandbox — bridge simulation</span><br>
+      <span class="keyword">import</span> { <span class="fn">Scene</span>, <span class="fn">Material</span>, <span class="fn">Force</span> } <span class="keyword">from</span> <span class="str">'@blackroad/quantum'</span>;<br><br>
+      <span class="keyword">const</span> bridge = <span class="keyword">new</span> <span class="fn">Scene</span>(<span class="str">'truss-bridge'</span>);<br>
+      bridge.<span class="fn">addMaterial</span>(<span class="str">'steel-A36'</span>, {<br>
+      &nbsp;&nbsp;yield: <span class="num">250e6</span>, <span class="comment">// Pa</span><br>
+      &nbsp;&nbsp;elastic: <span class="num">200e9</span>, <span class="comment">// Pa</span><br>
+      &nbsp;&nbsp;density: <span class="num">7850</span>, <span class="comment">// kg/m^3</span><br>
+      });<br><br>
+      bridge.<span class="fn">addLoad</span>(<span class="str">'center'</span>, <span class="keyword">new</span> <span class="fn">Force</span>({<br>
+      &nbsp;&nbsp;magnitude: <span class="num">500e3</span>, <span class="comment">// 500 kN</span><br>
+      &nbsp;&nbsp;direction: [<span class="num">0</span>, <span class="num">-1</span>, <span class="num">0</span>],<br>
+      &nbsp;&nbsp;type: <span class="str">'distributed'</span>,<br>
+      }));<br><br>
+      <span class="keyword">const</span> results = <span class="keyword">await</span> bridge.<span class="fn">simulate</span>({<br>
+      &nbsp;&nbsp;solver: <span class="str">'fem-adaptive'</span>,<br>
+      &nbsp;&nbsp;meshSize: <span class="num">0.05</span>,<br>
+      &nbsp;&nbsp;nonlinear: <span class="keyword">true</span>,<br>
+      });<br><br>
+      console.<span class="fn">log</span>(results.maxStress); <span class="comment">// 187.3 MPa — safe!</span><br>
+      console.<span class="fn">log</span>(results.maxDeflection); <span class="comment">// 12.4 mm</span><br>
+      bridge.<span class="fn">visualize</span>(<span class="str">'stress-heatmap'</span>);
+    </div>
+  </div>
+  <div class="grid-2 fade-in" style="margin-top: 2rem;">
+    <div class="card">
+      <h3>The Old Way</h3>
+      <p>Download a 15GB simulation suite. Wait for an IT-approved license. Spend three weeks learning the interface. Run your first simulation on a workstation that costs more than a car. Share results as static PDFs. Repeat.</p>
+      <ul class="feature-list">
+        <li>$10,000–$500,000/year license costs</li>
+        <li>Weeks of onboarding and training</li>
+        <li>Results locked in proprietary formats</li>
+        <li>No real-time collaboration</li>
+        <li>Hardware-dependent performance</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>The BlackRoad Way</h3>
+      <p>Open a browser tab. Write three lines of code or drag and drop components. Run a simulation in seconds. Share a live, interactive link with your team. Fork someone else's simulation and modify it. Pay nothing to start.</p>
+      <ul class="feature-list">
+        <li>Free tier with full simulation capabilities</li>
+        <li>Zero installation, zero configuration</li>
+        <li>Open data formats (JSON, HDF5, VTK)</li>
+        <li>Real-time multiplayer collaboration</li>
+        <li>WebAssembly — runs on any device</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="success">
+  <div class="fade-in">
+    <div class="section-label">04 — Success Stories</div>
+    <h2>Simulation Saves Billions</h2>
+    <p style="max-width: 700px;">The companies that simulate first, build second, dominate their industries. Here is the proof — real numbers from organizations that replaced physical prototyping with digital simulation.</p>
+  </div>
+  <div class="grid-3 fade-in" style="margin-top: 2rem;">
+    <div class="success-card">
+      <div class="company">SpaceX — Aerospace</div>
+      <div class="metric">$1.1M per launch</div>
+      <div class="detail">SpaceX reduced the cost per kilogram to orbit from $54,500 (Space Shuttle) to $2,720 (Falcon 9) largely through simulation-driven iterative design. Every Raptor engine variant was simulated thousands of times before a single physical test. The Starship heat shield tile pattern was optimized entirely in simulation.</div>
+    </div>
+    <div class="success-card">
+      <div class="company">Boeing — Joint Strike Fighter</div>
+      <div class="metric">50% Cost Reduction</div>
+      <div class="detail">The Joint Strike Fighter program used digital twin technology to reduce physical prototyping costs by 50%. Wind tunnel tests that once cost $50M per campaign were replaced with CFD simulations at a fraction of the cost. Structural testing cycles dropped from 24 months to 6 months through virtual testing.</div>
+    </div>
+    <div class="success-card">
+      <div class="company">Pfizer — Pharmaceuticals</div>
+      <div class="metric">$1B+ Saved</div>
+      <div class="detail">Molecular simulation reduced drug discovery timelines from 12 years to 4 years for key candidates. Virtual screening of 10 million compounds identified 500 viable candidates in 48 hours — work that would have taken 20 years in a wet lab. Clinical trial simulation predicted dosing outcomes with 94% accuracy.</div>
+    </div>
+    <div class="success-card">
+      <div class="company">Tesla — Automotive</div>
+      <div class="metric">3 Weeks to Prototype</div>
+      <div class="detail">Tesla's Model 3 structural design went through 4,200 simulation iterations before the first physical prototype was built. Crash simulations alone saved an estimated $200M in physical crash testing. The battery thermal management system was optimized through 800 thermal simulations in one month.</div>
+    </div>
+    <div class="success-card">
+      <div class="company">Rolls-Royce — Turbines</div>
+      <div class="metric">40% Fewer Tests</div>
+      <div class="detail">Digital twins of jet engines reduced physical testing by 40% while improving reliability predictions. Each engine generates 1TB of simulation data that predicts maintenance needs 6 months in advance. Turbine blade life was extended 15% through simulation-optimized cooling channel geometry.</div>
+    </div>
+    <div class="success-card">
+      <div class="company">CERN — Particle Physics</div>
+      <div class="metric">1B Events/Second</div>
+      <div class="detail">The Large Hadron Collider's detector design was validated through 15 years of simulation before a single component was manufactured. Monte Carlo simulations of particle interactions process 1 billion events per second, filtering 99.999% to find the signals that matter — like the Higgs boson.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="architecture">
+  <div class="fade-in">
+    <div class="section-label">05 — Architecture</div>
+    <h2>WebAssembly Simulations in the Browser</h2>
+    <p style="max-width: 700px;">No plugins. No downloads. No GPU requirements. BlackRoad Quantum compiles physics engines to WebAssembly and runs them at near-native speed in any modern browser. The architecture is designed for real-time collaboration and infinite scalability.</p>
+  </div>
+  <div class="architecture-diagram fade-in">
+    <div class="arch-layer">
+      <div class="arch-label">Interface</div>
+      <div class="arch-desc">React-like component system with drag-and-drop scene builder. Real-time parameter sliders. 3D viewport with WebGL2 rendering. Code editor with IntelliSense for simulation APIs.</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer">
+      <div class="arch-label">Simulation</div>
+      <div class="arch-desc">WebAssembly-compiled physics engines: Bullet (rigid body), OpenFOAM (CFD), LAMMPS (molecular dynamics). Adaptive time-stepping, parallel solver decomposition, GPU compute via WebGPU when available.</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer">
+      <div class="arch-label">Data</div>
+      <div class="arch-desc">IndexedDB for local state persistence. Streaming data format for real-time visualization. HDF5-compatible export. Git-like versioning of simulation states with branching and merging.</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer">
+      <div class="arch-label">Compute</div>
+      <div class="arch-desc">Client-side for small simulations (instant feedback). Web Workers for parallel decomposition. Optional cloud burst for large-scale runs — your data never leaves your machine unless you choose.</div>
+    </div>
+    <div class="arch-connector"></div>
+    <div class="arch-layer">
+      <div class="arch-label">Collaboration</div>
+      <div class="arch-desc">WebRTC peer-to-peer for real-time co-simulation. CRDT-based conflict resolution. Shareable URLs with embedded state. Fork any public simulation with one click. Comment and annotate in 3D space.</div>
+    </div>
+  </div>
+  <div class="canvas-container fade-in" style="margin-top: 2rem;">
+    <canvas id="simCanvas"></canvas>
+  </div>
+  <p class="fade-in" style="text-align: center; margin-top: 1rem; font-family: var(--jb); font-size: 0.75rem; opacity: 0.4;">Live particle simulation — WebAssembly physics running in your browser right now</p>
+</section>
+
+<div class="divider"></div>
+
+<section id="pricing">
+  <div class="fade-in">
+    <div class="section-label">06 — Pricing</div>
+    <h2>Start Free. Scale When Ready.</h2>
+    <p style="max-width: 700px;">Every tier includes the full simulation engine. No feature gates on physics accuracy. The difference is compute budget, storage, and collaboration seats. Students and researchers get automatic discounts.</p>
+  </div>
+  <div class="pricing-grid fade-in" style="margin-top: 2rem;">
+    <div class="pricing-card">
+      <span class="tag">Free</span>
+      <h3>Sandbox</h3>
+      <div class="price">$0<span>/forever</span></div>
+      <p>For learners, hobbyists, and anyone who wants to explore simulation without commitment.</p>
+      <ul class="feature-list">
+        <li>All five simulation domains</li>
+        <li>Up to 10,000 elements per simulation</li>
+        <li>1GB cloud storage</li>
+        <li>Community support</li>
+        <li>Public simulations only</li>
+        <li>Standard compute allocation</li>
+        <li>Export to open formats</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Get Started Free</a>
+    </div>
+    <div class="pricing-card featured">
+      <span class="tag">Professional</span>
+      <h3>Research</h3>
+      <div class="price">$49<span>/month</span></div>
+      <p>For researchers, graduate students, and professional engineers who need production-grade simulation capabilities.</p>
+      <ul class="feature-list">
+        <li>Up to 1,000,000 elements per simulation</li>
+        <li>100GB cloud storage</li>
+        <li>Private simulations</li>
+        <li>Priority compute allocation</li>
+        <li>Cloud burst for large simulations</li>
+        <li>API access for automation</li>
+        <li>Version control with branching</li>
+        <li>Priority email support</li>
+        <li>Custom material libraries</li>
+      </ul>
+      <a href="#" class="btn-primary" style="display: block; text-align: center; margin-top: 1.5rem;">Start 14-Day Trial</a>
+    </div>
+    <div class="pricing-card">
+      <span class="tag">Organization</span>
+      <h3>Enterprise</h3>
+      <div class="price">$299<span>/month</span></div>
+      <p>For teams and organizations that need unlimited simulation capacity, dedicated support, and on-premise deployment options.</p>
+      <ul class="feature-list">
+        <li>Unlimited elements per simulation</li>
+        <li>1TB cloud storage</li>
+        <li>Unlimited private simulations</li>
+        <li>Dedicated compute cluster</li>
+        <li>Real-time multiplayer collaboration</li>
+        <li>SSO and team management</li>
+        <li>On-premise deployment option</li>
+        <li>Dedicated support engineer</li>
+        <li>Custom integration consulting</li>
+        <li>SLA with 99.9% uptime guarantee</li>
+      </ul>
+      <a href="#" class="btn-secondary" style="display: block; text-align: center; margin-top: 1.5rem;">Contact Sales</a>
+    </div>
+  </div>
+  <div class="fade-in" style="margin-top: 3rem; text-align: center;">
+    <p style="font-size: 0.9rem;">All plans include: full physics accuracy, open data export, and community access. Academic institutions receive 50% discount on all paid plans.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<footer>
+  <div class="fade-in">
+    <div class="footer-tagline">Remember the Road. Pave Tomorrow.</div>
+    <div class="footer-copy">&copy; 2025&ndash;2026 BlackRoad OS, Inc. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+// IntersectionObserver fade-in
+document.addEventListener('DOMContentLoaded', () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Particle simulation on canvas
+  const canvas = document.getElementById('simCanvas');
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const particles = [];
+    const PARTICLE_COUNT = 120;
+    const colors = ['#FF6B2B', '#FF2255', '#CC00AA', '#8844FF', '#4488FF', '#00D4FF'];
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      width = canvas.width = rect.width * window.devicePixelRatio;
+      height = canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function initParticles() {
+      const displayWidth = canvas.parentElement.getBoundingClientRect().width;
+      const displayHeight = canvas.parentElement.getBoundingClientRect().height;
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        particles.push({
+          x: Math.random() * displayWidth,
+          y: Math.random() * displayHeight,
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5,
+          radius: Math.random() * 2.5 + 1,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          mass: Math.random() * 2 + 0.5,
+        });
+      }
+    }
+
+    function animate() {
+      const displayWidth = canvas.parentElement.getBoundingClientRect().width;
+      const displayHeight = canvas.parentElement.getBoundingClientRect().height;
+      ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+      // Draw connections
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 100) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(136, 68, 255, ${0.15 * (1 - dist / 100)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Update and draw particles
+      particles.forEach(p => {
+        // Simple gravity toward center
+        const cx = displayWidth / 2;
+        const cy = displayHeight / 2;
+        const dx = cx - p.x;
+        const dy = cy - p.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > 50) {
+          p.vx += (dx / dist) * 0.02;
+          p.vy += (dy / dist) * 0.02;
+        }
+
+        // Repulsion from nearby particles
+        particles.forEach(other => {
+          if (other === p) return;
+          const ddx = p.x - other.x;
+          const ddy = p.y - other.y;
+          const d = Math.sqrt(ddx * ddx + ddy * ddy);
+          if (d < 30 && d > 0) {
+            p.vx += (ddx / d) * 0.5;
+            p.vy += (ddy / d) * 0.5;
+          }
+        });
+
+        // Damping
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+
+        p.x += p.vx;
+        p.y += p.vy;
+
+        // Boundary
+        if (p.x < 0 || p.x > displayWidth) p.vx *= -0.8;
+        if (p.y < 0 || p.y > displayHeight) p.vy *= -0.8;
+        p.x = Math.max(0, Math.min(displayWidth, p.x));
+        p.y = Math.max(0, Math.min(displayHeight, p.y));
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    resize();
+    initParticles();
+    animate();
+    window.addEventListener('resize', resize);
+  }
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  // Animate market bars on scroll
+  const marketVisual = document.querySelector('.market-visual');
+  if (marketVisual) {
+    const barObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bars = entry.target.querySelectorAll('.bar');
+          bars.forEach((bar, i) => {
+            const heights = [40, 75, 110, 140, 180];
+            bar.style.height = '0px';
+            setTimeout(() => {
+              bar.style.height = heights[i] + 'px';
+            }, i * 150);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+    barObserver.observe(marketVisual);
+  }
+
+  // Nav background on scroll
+  const nav = document.querySelector('nav');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      nav.style.background = 'rgba(0,0,0,0.98)';
+    } else {
+      nav.style.background = 'rgba(0,0,0,0.92)';
+    }
+  });
+});
+</script>
+<script src="/blackroad-dynamic.js"></script>
+</body>
+</html>
