@@ -1,0 +1,163 @@
+# BlackRoad OS - Kernel Validation Workflow
+#
+# This workflow validates that the service correctly implements the BlackRoad OS kernel.
+# Copy this file to .github/workflows/validate-kernel.yml in your satellite repo.
+#
+# Usage:
+# 1. Copy to .github/workflows/validate-kernel.yml
+
+name: Validate Kernel Implementation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-kernel:
+    name: Validate Kernel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check kernel directory exists
+        run: |
+          if [ ! -d "src/kernel" ]; then
+            echo "❌ Kernel directory not found at src/kernel"
+            exit 1
+          fi
+          echo "✅ Kernel directory found"
+
+      - name: Validate kernel modules
+        run: |
+          REQUIRED_MODULES=(
+            "types.ts"
+            "serviceRegistry.ts"
+            "identity.ts"
+            "config.ts"
+            "logger.ts"
+            "rpc.ts"
+            "events.ts"
+            "jobs.ts"
+            "state.ts"
+            "index.ts"
+          )
+
+          for module in "${REQUIRED_MODULES[@]}"; do
+            if [ ! -f "src/kernel/${module}" ]; then
+              echo "❌ Required kernel module not found: ${module}"
+              exit 1
+            fi
+          done
+          echo "✅ All required kernel modules present"
+
+      - name: Validate syscall endpoints
+        run: |
+          REQUIRED_ENDPOINTS=(
+            "/health"
+            "/version"
+            "/v1/sys/identity"
+            "/v1/sys/health"
+            "/v1/sys/rpc"
+          )
+
+          echo "Checking for syscall endpoint implementations..."
+          for endpoint in "${REQUIRED_ENDPOINTS[@]}"; do
+            # Check if endpoint is implemented in route files
+            if ! grep -r "${endpoint}" src/routes/ >/dev/null 2>&1; then
+              echo "⚠️  Warning: Syscall endpoint may not be implemented: ${endpoint}"
+            else
+              echo "✅ Found implementation for: ${endpoint}"
+            fi
+          done
+
+      - name: Check service registry
+        run: |
+          if ! grep -q "SERVICE_REGISTRY" src/kernel/serviceRegistry.ts; then
+            echo "❌ SERVICE_REGISTRY not found in serviceRegistry.ts"
+            exit 1
+          fi
+          echo "✅ SERVICE_REGISTRY found"
+
+      - name: Validate TypeScript compilation
+        run: |
+          npm ci
+          npm run build
+          if [ $? -ne 0 ]; then
+            echo "❌ TypeScript compilation failed"
+            exit 1
+          fi
+          echo "✅ TypeScript compilation successful"
+
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check railway.json
+        run: |
+          if [ ! -f "railway.json" ]; then
+            echo "❌ railway.json not found"
+            exit 1
+          fi
+          echo "✅ railway.json found"
+
+      - name: Validate railway.json structure
+        run: |
+          if ! grep -q '"healthcheck"' railway.json; then
+            echo "❌ healthcheck not configured in railway.json"
+            exit 1
+          fi
+          echo "✅ railway.json is valid"
+
+      - name: Check Dockerfile (if present)
+        run: |
+          if [ -f "Dockerfile" ]; then
+            echo "Found Dockerfile, validating..."
+            if ! grep -q "EXPOSE" Dockerfile; then
+              echo "⚠️  Warning: No EXPOSE directive in Dockerfile"
+            fi
+            echo "✅ Dockerfile present"
+          else
+            echo "ℹ️  No Dockerfile (using Nixpacks)"
+          fi
+
+  validate-docs:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check README.md
+        run: |
+          if [ ! -f "README.md" ]; then
+            echo "❌ README.md not found"
+            exit 1
+          fi
+          echo "✅ README.md found"
+
+      - name: Validate README content
+        run: |
+          REQUIRED_SECTIONS=("Installation" "Usage" "Environment" "API")
+          for section in "${REQUIRED_SECTIONS[@]}"; do
+            if ! grep -qi "${section}" README.md; then
+              echo "⚠️  Warning: README may be missing ${section} section"
+            fi
+          done
+          echo "✅ README validation complete"

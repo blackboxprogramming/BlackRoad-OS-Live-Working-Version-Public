@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BlackRoad OS — Lucidia Shell v0.1</title>
+  <style>
+    /* ===============================
+       GLOBAL / DESKTOP STYLES
+       =============================== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #008080;
+    }
+
+    #desktop {
+      position: absolute;
+      inset: 0 0 32px 0;
+      background: linear-gradient(135deg, #008080, #006b6b);
+      color: #000;
+    }
+
+    /* ===============================
+       DESKTOP ICONS
+       =============================== */
+    .desktop-icon {
+      position: absolute;
+      width: 80px;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+      color: #f0f0f0;
+      text-shadow: 0 1px 1px #000;
+      font-size: 11px;
+    }
+
+    .desktop-icon img {
+      display: block;
+      margin: 0 auto 4px;
+      width: 32px;
+      height: 32px;
+      image-rendering: pixelated;
+    }
+
+    .desktop-icon .label {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 2px;
+      padding: 2px 4px;
+    }
+
+    .desktop-icon:hover .label {
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    /* ===============================
+       TASKBAR
+       =============================== */
+    #taskbar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 32px;
+      background: linear-gradient(to top, #3c3c3c, #707070);
+      border-top: 2px solid #b0b0b0;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+      gap: 4px;
+      box-sizing: border-box;
+    }
+
+    #start-button {
+      background: #c0c0c0;
+      border: 2px solid #ffffff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      padding: 2px 8px;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    #start-button:hover {
+      filter: brightness(1.1);
+    }
+
+    #taskbar-windows {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .taskbar-item {
+      background: #c0c0c0;
+      border: 2px solid #ffffff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 140px;
+    }
+
+    .taskbar-item.active {
+      background: #808080;
+      color: #fff;
+    }
+
+    #taskbar-clock {
+      min-width: 60px;
+      text-align: center;
+      font-size: 11px;
+      color: #f0f0f0;
+      text-shadow: 0 1px 1px #000;
+    }
+
+    /* ===============================
+       WINDOWS
+       =============================== */
+    .window {
+      position: absolute;
+      background: #c0c0c0;
+      border: 2px solid #ffffff;
+      border-right-color: #404040;
+      border-bottom-color: #404040;
+      box-shadow: 0 0 0 1px #000;
+      min-width: 260px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .window-titlebar {
+      background: linear-gradient(to right, #000080, #1084d0);
+      color: #fff;
+      font-size: 12px;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .window-titlebar .title {
+      font-weight: bold;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 2px;
+    }
+
+    .window-controls button {
+      width: 16px;
+      height: 16px;
+      padding: 0;
+      border: 1px solid #404040;
+      font-size: 10px;
+      background: #c0c0c0;
+      cursor: pointer;
+    }
+
+    .window-content {
+      flex: 1;
+      background: #efefef;
+      padding: 4px;
+      overflow: auto;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+
+    .window.focused {
+      box-shadow: 0 0 0 2px #ffd700;
+    }
+
+    /* ===============================
+       OPERATOR CORE
+       =============================== */
+    #operator-core {
+      position: absolute;
+      right: 8px;
+      bottom: 40px;
+      width: 200px;
+      background: #202020;
+      color: #e0e0e0;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+      font-size: 11px;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    #operator-core-header {
+      background: #404040;
+      padding: 4px 6px;
+      font-weight: bold;
+      font-size: 10px;
+      letter-spacing: 1px;
+    }
+
+    #operator-core-body {
+      padding: 4px 6px 2px;
+    }
+
+    #operator-core-body .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    #operator-core-controls {
+      display: flex;
+      gap: 4px;
+      padding: 4px 6px 6px;
+    }
+
+    #operator-core-controls button {
+      flex: 1;
+      font-size: 10px;
+      padding: 2px 4px;
+      border-radius: 3px;
+      border: none;
+      cursor: pointer;
+      background: #1565c0;
+      color: white;
+    }
+
+    #operator-core-controls button.secondary {
+      background: #555;
+    }
+
+    /* ===============================
+       TERMINAL APP
+       =============================== */
+    .terminal-output {
+      background: #000;
+      color: #00ff9c;
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      padding: 4px;
+      height: 150px;
+      overflow-y: auto;
+      border: 1px inset #808080;
+    }
+
+    .terminal-input-row {
+      display: flex;
+      margin-top: 4px;
+    }
+
+    .terminal-input-row span {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      padding: 2px 4px;
+      background: #000;
+      color: #00ff9c;
+      border: 1px inset #808080;
+      border-right: none;
+    }
+
+    .terminal-input-row input {
+      flex: 1;
+      border: 1px inset #808080;
+      border-left: none;
+      background: #000;
+      color: #00ff9c;
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      padding: 2px;
+    }
+
+    .terminal-line.error {
+      color: #ff6b6b;
+    }
+
+    /* Safe mode overlay */
+    #safe-mode-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+    }
+
+    #safe-mode-panel {
+      background: #202020;
+      color: #f0f0f0;
+      padding: 16px 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 0 16px rgba(0,0,0,0.8);
+      max-width: 320px;
+    }
+
+    #safe-mode-panel button {
+      margin-top: 8px;
+      padding: 4px 10px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: none;
+      background: #1565c0;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="desktop"></div>
+  <div id="taskbar">
+    <button id="start-button">🟢 Start</button>
+    <div id="taskbar-windows"></div>
+    <div id="taskbar-clock"></div>
+  </div>
+  <div id="operator-core">
+    <div id="operator-core-header">OPERATOR · LUCIDIA</div>
+    <div id="operator-core-body">
+      <div class="row"><span>ENV</span><span id="op-env">-</span></div>
+      <div class="row"><span>WINDOWS</span><span id="op-windows">0</span></div>
+      <div class="row"><span>HEALTH</span><span id="op-health">OK</span></div>
+    </div>
+    <div id="operator-core-controls">
+      <button id="btn-safe" class="secondary">Safe Mode</button>
+      <button id="btn-3d">3D View</button>
+    </div>
+  </div>
+
+  <script>
+    /***********************************************************
+     * SECTION: Lucidia v0.1 – In-Memory Config
+     * PURPOSE: A tiny Lucidia-like structure the OS can consume.
+     * NOTE: This is JSON-based so we can upgrade to full .luc parsing later.
+     ***********************************************************/
+    const LUCIDIA_CONFIG = {
+      envs: [
+        {
+          id: "env.lab",
+          name: "BlackRoad Lab",
+          type: "workspace",
+          layout: "desktop_2d",
+          apps: ["terminal", "explorer", "notes"],
+          onInit: ["open:terminal", "open:notes"]
+        },
+        {
+          id: "env.studio",
+          name: "Creator Studio",
+          type: "studio",
+          layout: "desktop_2d",
+          apps: ["terminal", "notes"],
+          onInit: ["open:terminal"]
+        }
+      ],
+      apps: [
+        {
+          id: "terminal",
+          name: "Lucidia Terminal",
+          icon: "💻",
+          defaultSize: [700, 260]
+        },
+        {
+          id: "explorer",
+          name: "Explorer",
+          icon: "📂",
+          defaultSize: [480, 260]
+        },
+        {
+          id: "notes",
+          name: "Notes",
+          icon: "📝",
+          defaultSize: [420, 260]
+        }
+      ],
+      flows: [
+        {
+          id: "flow.scaffold",
+          name: "Scaffold Project",
+          trigger: { type: "command", name: "scaffold" },
+          steps: [
+            { action: "log", message: "Scaffolding project (stub)..." }
+          ]
+        }
+      ]
+    };
+
+    /***********************************************************
+     * SECTION: Lucidia Runtime
+     * PURPOSE: Minimal env/app/flow registry & helpers.
+     ***********************************************************/
+    class LucRuntime {
+      constructor(config) {
+        this.envs = new Map();
+        this.apps = new Map();
+        this.flows = new Map();
+
+        config.envs.forEach(e => this.envs.set(e.id, e));
+        config.apps.forEach(a => this.apps.set(a.id, a));
+        config.flows.forEach(f => this.flows.set(f.id, f));
+      }
+
+      getEnv(id) { return this.envs.get(id); }
+      getApp(id) { return this.apps.get(id); }
+      getFlow(id) { return this.flows.get(id); }
+      listEnvs() { return Array.from(this.envs.values()); }
+      listApps() { return Array.from(this.apps.values()); }
+      listFlows() { return Array.from(this.flows.values()); }
+    }
+
+    const lucRuntime = new LucRuntime(LUCIDIA_CONFIG);
+    window.lucRuntime = lucRuntime; // for debugging
+
+    /***********************************************************
+     * SECTION: Desktop & Window Manager
+     ***********************************************************/
+    class Desktop {
+      constructor(desktopEl, taskbarEl) {
+        this.desktopEl = desktopEl;
+        this.taskbarEl = taskbarEl;
+        this.currentEnv = null;
+        this.windows = new Map(); // id -> Window
+        this.zCounter = 10;
+      }
+
+      setEnv(env) {
+        this.currentEnv = env;
+        this.clearDesktop();
+        this.renderDesktopIcons(env);
+        this.runEnvOnInit(env);
+        updateOperatorEnv(env);
+      }
+
+      clearDesktop() {
+        this.desktopEl.innerHTML = "";
+        this.windows.clear();
+        refreshOperatorWindowCount(0);
+        updateTaskbar();
+      }
+
+      renderDesktopIcons(env) {
+        const apps = env.apps || [];
+        apps.forEach((appId, index) => {
+          const app = lucRuntime.getApp(appId);
+          if (!app) return;
+          const icon = document.createElement("div");
+          icon.className = "desktop-icon";
+          icon.style.left = (16 + (index % 6) * 96) + "px";
+          icon.style.top = (16 + Math.floor(index / 6) * 96) + "px";
+
+          icon.innerHTML = `
+            <div class="icon-symbol">${app.icon ?? "📦"}</div>
+            <div class="label">${app.name}</div>
+          `;
+          icon.addEventListener("dblclick", () => {
+            this.openApp(appId);
+          });
+          this.desktopEl.appendChild(icon);
+        });
+      }
+
+      runEnvOnInit(env) {
+        (env.onInit || []).forEach(action => {
+          const [kind, arg] = action.split(":");
+          if (kind === "open") this.openApp(arg);
+        });
+      }
+
+      openApp(appId) {
+        const appDef = lucRuntime.getApp(appId);
+        if (!appDef) return;
+
+        const winId = "win-" + Date.now() + "-" + Math.floor(Math.random() * 9999);
+        const win = new Win({
+          id: winId,
+          appId,
+          title: appDef.name,
+          size: appDef.defaultSize || [480, 260],
+          position: [80 + this.windows.size * 20, 80 + this.windows.size * 20]
+        }, this);
+
+        this.windows.set(winId, win);
+        win.render(this.desktopEl);
+        refreshOperatorWindowCount(this.windows.size);
+        updateTaskbar();
+        return win;
+      }
+
+      closeWindow(winId) {
+        const win = this.windows.get(winId);
+        if (!win) return;
+        win.destroy();
+        this.windows.delete(winId);
+        refreshOperatorWindowCount(this.windows.size);
+        updateTaskbar();
+      }
+
+      focusWindow(winId) {
+        const win = this.windows.get(winId);
+        if (!win) return;
+        this.windows.forEach(w => w.setFocused(false));
+        win.setFocused(true);
+        win.setZIndex(this.zCounter++);
+        updateTaskbarActive(winId);
+      }
+
+      minimizeWindow(winId) {
+        const win = this.windows.get(winId);
+        if (!win) return;
+        win.setMinimized(true);
+        updateTaskbar();
+      }
+
+      restoreWindow(winId) {
+        const win = this.windows.get(winId);
+        if (!win) return;
+        win.setMinimized(false);
+        this.focusWindow(winId);
+      }
+    }
+
+    class Win {
+      constructor(config, desktop) {
+        this.id = config.id;
+        this.appId = config.appId;
+        this.title = config.title;
+        this.size = config.size;
+        this.position = config.position;
+        this.desktop = desktop;
+        this.el = null;
+        this.minimized = false;
+      }
+
+      render(container) {
+        const [w, h] = this.size;
+        const [x, y] = this.position;
+        const el = document.createElement("div");
+        el.className = "window";
+        el.style.width = w + "px";
+        el.style.height = h + "px";
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+        el.dataset.winId = this.id;
+
+        el.innerHTML = `
+          <div class="window-titlebar">
+            <span class="title">${this.title}</span>
+            <div class="window-controls">
+              <button data-action="minimize">_</button>
+              <button data-action="close">×</button>
+            </div>
+          </div>
+          <div class="window-content"></div>
+        `;
+        container.appendChild(el);
+        this.el = el;
+
+        this.setupDrag();
+        this.setupControls();
+        this.desktop.focusWindow(this.id);
+        this.mountAppContent();
+      }
+
+      setupDrag() {
+        const bar = this.el.querySelector(".window-titlebar");
+        let dragging = false;
+        let startX, startY, startLeft, startTop;
+
+        bar.addEventListener("mousedown", (e) => {
+          if (e.target.closest(".window-controls")) return;
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          startLeft = this.el.offsetLeft;
+          startTop = this.el.offsetTop;
+          this.desktop.focusWindow(this.id);
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          this.el.style.left = startLeft + dx + "px";
+          this.el.style.top = startTop + dy + "px";
+        });
+
+        document.addEventListener("mouseup", () => dragging = false);
+      }
+
+      setupControls() {
+        const controls = this.el.querySelector(".window-controls");
+        controls.addEventListener("click", (e) => {
+          const action = e.target.dataset.action;
+          if (!action) return;
+          if (action === "close") {
+            this.desktop.closeWindow(this.id);
+          } else if (action === "minimize") {
+            this.desktop.minimizeWindow(this.id);
+          }
+        });
+
+        this.el.addEventListener("mousedown", () => {
+          this.desktop.focusWindow(this.id);
+        });
+      }
+
+      setFocused(focused) {
+        if (!this.el) return;
+        this.el.classList.toggle("focused", focused);
+      }
+
+      setZIndex(z) {
+        if (this.el) this.el.style.zIndex = z;
+      }
+
+      setMinimized(min) {
+        this.minimized = min;
+        if (!this.el) return;
+        this.el.style.display = min ? "none" : "flex";
+      }
+
+      destroy() {
+        if (this.el) this.el.remove();
+      }
+
+      mountAppContent() {
+        const container = this.el.querySelector(".window-content");
+        const appId = this.appId;
+        if (appId === "terminal") {
+          mountTerminal(container);
+        } else if (appId === "explorer") {
+          container.innerHTML = "<strong>Explorer</strong><br><br>Lucidia entities will show here (stub).";
+        } else if (appId === "notes") {
+          mountNotes(container);
+        } else {
+          container.innerHTML = `<em>${appId}</em> app stub.`;
+        }
+      }
+    }
+
+    const desktop = new Desktop(
+      document.getElementById("desktop"),
+      document.getElementById("taskbar-windows")
+    );
+    window.desktop = desktop; // for debugging
+
+    /***********************************************************
+     * SECTION: Operator Core bindings
+     ***********************************************************/
+    function updateOperatorEnv(env) {
+      document.getElementById("op-env").textContent = env ? env.id : "-";
+    }
+    function refreshOperatorWindowCount(count) {
+      document.getElementById("op-windows").textContent = String(count);
+    }
+
+    let SAFE_MODE = false;
+    function enterSafeMode() {
+      SAFE_MODE = true;
+      const overlay = document.createElement("div");
+      overlay.id = "safe-mode-overlay";
+      overlay.innerHTML = `
+        <div id="safe-mode-panel">
+          <h2>SAFE MODE</h2>
+          <p>All non-essential windows minimized.</p>
+          <button id="btn-exit-safe">Exit Safe Mode</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      desktop.windows.forEach(win => {
+        if (win.appId !== "terminal") win.setMinimized(true);
+      });
+      document.getElementById("btn-exit-safe").onclick = exitSafeMode;
+    }
+    function exitSafeMode() {
+      SAFE_MODE = false;
+      document.getElementById("safe-mode-overlay")?.remove();
+      desktop.windows.forEach(win => win.setMinimized(false));
+    }
+
+    document.getElementById("btn-safe").addEventListener("click", () => {
+      SAFE_MODE ? exitSafeMode() : enterSafeMode();
+    });
+
+    document.getElementById("btn-3d").addEventListener("click", () => {
+      console.log("[3D VIEW] Envs:", lucRuntime.listEnvs());
+      console.log("[3D VIEW] Windows:", Array.from(desktop.windows.keys()));
+      alert("3D view is future work — check console for topology stub.");
+    });
+
+    /***********************************************************
+     * SECTION: Taskbar binding
+     ***********************************************************/
+    function updateTaskbar() {
+      const bar = document.getElementById("taskbar-windows");
+      bar.innerHTML = "";
+      desktop.windows.forEach((win, id) => {
+        const item = document.createElement("div");
+        item.className = "taskbar-item" + (win.minimized ? "" : " active");
+        item.textContent = win.title;
+        item.dataset.winId = id;
+        item.addEventListener("click", () => {
+          if (win.minimized) {
+            desktop.restoreWindow(id);
+          } else {
+            desktop.minimizeWindow(id);
+          }
+          updateTaskbar();
+        });
+        bar.appendChild(item);
+      });
+    }
+
+    function updateTaskbarActive(activeId) {
+      document.querySelectorAll(".taskbar-item").forEach(el => {
+        el.classList.toggle("active", el.dataset.winId === activeId);
+      });
+    }
+
+    /***********************************************************
+     * SECTION: Terminal App Implementation
+     ***********************************************************/
+    class LucidiaTerminal {
+      constructor(rootEl) {
+        this.rootEl = rootEl;
+        this.outputEl = rootEl.querySelector(".terminal-output");
+        this.inputEl = rootEl.querySelector(".terminal-input");
+        this.history = [];
+        this.historyIndex = 0;
+        this.currentEnv = lucRuntime.getEnv("env.lab");
+
+        this.bindEvents();
+        this.print("Lucidia Terminal v0.1");
+        this.print('Type "help" to see commands.');
+      }
+
+      bindEvents() {
+        this.inputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            const value = this.inputEl.value.trim();
+            if (!value) return;
+            this.inputEl.value = "";
+            this.print("> " + value);
+            this.history.push(value);
+            this.historyIndex = this.history.length;
+            this.handleCommand(value);
+          } else if (e.key === "ArrowUp") {
+            if (this.historyIndex > 0) {
+              this.historyIndex--;
+              this.inputEl.value = this.history[this.historyIndex] || "";
+            }
+          } else if (e.key === "ArrowDown") {
+            if (this.historyIndex < this.history.length - 1) {
+              this.historyIndex++;
+              this.inputEl.value = this.history[this.historyIndex] || "";
+            } else {
+              this.historyIndex = this.history.length;
+              this.inputEl.value = "";
+            }
+          }
+        });
+      }
+
+      print(text, type = "normal") {
+        if (text == null) return;
+        const line = document.createElement("div");
+        line.textContent = text;
+        if (type === "error") line.classList.add("error");
+        this.outputEl.appendChild(line);
+        this.outputEl.scrollTop = this.outputEl.scrollHeight;
+      }
+
+      clear() {
+        this.outputEl.innerHTML = "";
+      }
+
+      async handleCommand(input) {
+        const [command, sub, ...rest] = input.split(/\s+/);
+        const args = rest;
+
+        try {
+          switch (command) {
+            case "help":
+              this.print(`
+env list              - list environments
+env current           - show current env
+env switch <id>       - switch environment
+
+app list              - list apps in current env
+app open <id>         - open app window
+
+flow list             - list flows
+flow run <id>         - run a flow (stub)
+
+clear                 - clear terminal
+              `.trim());
+              break;
+
+            case "env":
+              if (sub === "list") {
+                lucRuntime.listEnvs().forEach(e => {
+                  this.print(`${e.id}  (${e.name})${e.id === this.currentEnv?.id ? "  [current]" : ""}`);
+                });
+              } else if (sub === "current") {
+                if (!this.currentEnv) this.print("No env set");
+                else this.print(`${this.currentEnv.id} (${this.currentEnv.name})`);
+              } else if (sub === "switch") {
+                const id = args[0];
+                const env = lucRuntime.getEnv(id);
+                if (!env) this.print(`No such env: ${id}`, "error");
+                else {
+                  this.currentEnv = env;
+                  desktop.setEnv(env);
+                  this.print(`Switched to ${id}`);
+                }
+              } else {
+                this.print('Usage: env [list|current|switch <id>]', "error");
+              }
+              break;
+
+            case "app":
+              if (sub === "list") {
+                if (!this.currentEnv) {
+                  this.print("No env set", "error");
+                  break;
+                }
+                (this.currentEnv.apps || []).forEach(aId => {
+                  const a = lucRuntime.getApp(aId);
+                  this.print(`${aId}  (${a?.name || "Unknown"})`);
+                });
+              } else if (sub === "open") {
+                const id = args[0];
+                if (!id) { this.print("Usage: app open <id>", "error"); break; }
+                desktop.openApp(id);
+              } else {
+                this.print('Usage: app [list|open <id>]', "error");
+              }
+              break;
+
+            case "flow":
+              if (sub === "list") {
+                lucRuntime.listFlows().forEach(f => {
+                  this.print(`${f.id}  (${f.name})`);
+                });
+              } else if (sub === "run") {
+                const id = args[0];
+                const flow = lucRuntime.getFlow(id);
+                if (!flow) { this.print(`No flow: ${id}`, "error"); break; }
+                this.print(`Running ${id} (stub)...`);
+                flow.steps.forEach(step => {
+                  if (step.action === "log") {
+                    this.print(step.message);
+                  }
+                });
+                this.print(`${id} finished.`);
+              } else {
+                this.print('Usage: flow [list|run <id>]', "error");
+              }
+              break;
+
+            case "clear":
+              this.clear();
+              break;
+
+            default:
+              this.print(`Unknown command: ${input}`, "error");
+              this.print('Type "help" for commands.');
+          }
+        } catch (err) {
+          console.error(err);
+          this.print("Error: " + err.message, "error");
+        }
+      }
+    }
+
+    let terminalInstance = null;
+
+    function mountTerminal(container) {
+      container.innerHTML = `
+        <div class="terminal-output"></div>
+        <div class="terminal-input-row">
+          <span>lucidia&gt;</span>
+          <input class="terminal-input" autocomplete="off" />
+        </div>
+      `;
+      terminalInstance = new LucidiaTerminal(container);
+    }
+
+    /***********************************************************
+     * SECTION: Notes App (simple localStorage scratchpad)
+     ***********************************************************/
+    function mountNotes(container) {
+      container.innerHTML = `
+        <div><strong>Notes</strong></div>
+        <textarea id="notes-area" style="width:100%;height:180px;box-sizing:border-box;font-size:12px;"></textarea>
+      `;
+      const area = container.querySelector("#notes-area");
+      area.value = localStorage.getItem("blackroad.notes") || "";
+      area.addEventListener("input", () => {
+        localStorage.setItem("blackroad.notes", area.value);
+      });
+    }
+
+    /***********************************************************
+     * SECTION: Clock + Boot
+     ***********************************************************/
+    function startClock() {
+      const clockEl = document.getElementById("taskbar-clock");
+      function tick() {
+        const d = new Date();
+        const hh = String(d.getHours()).padStart(2, "0");
+        const mm = String(d.getMinutes()).padStart(2, "0");
+        clockEl.textContent = `${hh}:${mm}`;
+      }
+      tick();
+      setInterval(tick, 1000 * 30);
+    }
+
+    document.getElementById("start-button").addEventListener("click", () => {
+      alert("Start menu coming soon.\nFor now: use desktop icons or the Terminal.");
+    });
+
+    // Boot into env.lab on load
+    window.addEventListener("load", () => {
+      const env = lucRuntime.getEnv("env.lab");
+      desktop.setEnv(env);
+      startClock();
+    });
+  </script>
+</body>
+</html>

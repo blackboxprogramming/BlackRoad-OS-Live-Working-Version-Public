@@ -1,0 +1,22 @@
+# Railway Deployment Configuration for Prism Console
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "uvicorn server:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Watch patterns for auto-redeploy
+watchPatterns = [
+    "**/*.html",
+    "**/*.css",
+    "**/*.js",
+    "server.py",
+    "requirements.txt",
+    "Dockerfile"
+]

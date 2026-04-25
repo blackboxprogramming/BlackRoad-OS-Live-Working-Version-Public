@@ -1,0 +1,49 @@
+# 075: Ephemeral Storage
+# Temporary data that doesn't persist
+
+# Store in memory only (lost on refresh)
+store session_token ephemeral
+store temporary_files ephemeral
+
+# Session-specific data
+current_session = {
+  id: generate_session_id(),
+  started_at: now(),
+  active_tab: "home"
+}
+
+store current_session ephemeral as "session"
+
+# Form draft (auto-save while editing)
+state draft_message = ""
+
+watch draft_message:
+  # Save draft in memory
+  store draft_message ephemeral as "message_draft"
+
+# Load draft on page reload
+draft = load "message_draft" ephemeral or ""
+
+# Ephemeral vs local comparison
+save_user_data(data, remember_me):
+  if remember_me:
+    # Persist across sessions
+    store data locally as "user"
+  else:
+    # Only for this session
+    store data ephemeral as "user"
+
+# Shopping cart example
+state cart = []
+
+add_to_cart(item):
+  cart.append(item)
+  # Don't persist - cart resets on page refresh
+  store cart ephemeral as "cart"
+
+# Upload progress (doesn't need to persist)
+track_upload(file):
+  progress = { file: file.name, percent: 0 }
+  store progress ephemeral as "upload_progress"
+
+  # Update as upload progresses...

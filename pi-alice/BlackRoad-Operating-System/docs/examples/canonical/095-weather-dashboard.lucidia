@@ -1,0 +1,108 @@
+# 095: Weather Dashboard
+# Real-time weather with location and forecasts
+
+state location = null
+state weather_data = null
+state forecast = []
+state units = "celsius"  # celsius or fahrenheit
+
+# Get user's location
+get_location():
+  ask permission for: location
+    purpose: "Show weather for your location"
+
+  if granted:
+    with consent.record:
+      location = get_current_location()
+      load_weather()
+  else:
+    show "Enter a city to see weather"
+
+# Load weather data
+load_weather():
+  if location == null: return
+
+  ask permission for: network
+    purpose: "Fetch weather data"
+
+  if granted:
+    # Fetch current weather
+    weather_data = fetch "https://api.weather.com/current" with:
+      params: {
+        lat: location.latitude,
+        lon: location.longitude,
+        units: units
+      }
+
+    # Fetch 7-day forecast
+    forecast = fetch "https://api.weather.com/forecast" with:
+      params: {
+        lat: location.latitude,
+        lon: location.longitude,
+        days: 7,
+        units: units
+      }
+
+    # Cache locally
+    store weather_data locally as "weather_cache"
+      expires: "1 hour"
+
+    show "Weather updated"
+
+# Manual city search
+form search_city:
+  input city_name -> city
+    placeholder: "Enter city name"
+
+  button "Search" -> search_weather(city)
+
+search_weather(city):
+  location = geocode(city)  # Convert city name to coordinates
+  load_weather()
+
+# Display current weather
+if weather_data != null:
+  show_current_weather:
+    temperature: weather_data.temp
+    feels_like: weather_data.feels_like
+    condition: weather_data.description
+    humidity: weather_data.humidity
+    wind_speed: weather_data.wind_speed
+    icon: weather_data.icon
+
+  # 7-day forecast
+  show "7-Day Forecast"
+  for day in forecast:
+    show_forecast_card:
+      date: format_date(day.date)
+      high: day.temp_max
+      low: day.temp_min
+      condition: day.description
+      icon: day.icon
+      precipitation: day.precipitation_chance
+
+# Settings
+button "Toggle Units" -> toggle_units()
+
+toggle_units():
+  units = units == "celsius" ? "fahrenheit" : "celsius"
+  load_weather()  # Reload with new units
+
+# Refresh
+button "Refresh" -> load_weather()
+
+# Works offline with cached data
+if network.offline and weather_data == null:
+  cached = load "weather_cache" locally
+  if cached != null:
+    weather_data = cached
+    show "⚠️  Showing cached data (offline)"
+
+# Auto-refresh every 30 minutes
+on interval(30 * 60 * 1000):
+  if network.online:
+    load_weather()
+
+# Initialize
+on app.start:
+  get_location()

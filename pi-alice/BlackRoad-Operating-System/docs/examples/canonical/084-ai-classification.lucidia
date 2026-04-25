@@ -1,0 +1,52 @@
+# 084: AI Classification
+# Categorize data automatically
+
+# Classify text
+email_body = "Congratulations! You've won $1,000,000! Click here to claim..."
+
+classification = ai.classify(email_body, {
+  categories: ["spam", "legitimate", "promotional"],
+  confidence: true
+})
+
+show "Category: {classification.category}"
+show "Confidence: {classification.confidence}%"
+
+if classification.category == "spam":
+  move_to_spam(email_body)
+
+# Classify support tickets
+ticket = {
+  subject: "Cannot login to my account",
+  body: "I keep getting 'invalid password' even though I'm sure it's correct"
+}
+
+category = ai.classify(ticket, {
+  categories: ["bug", "feature_request", "support", "billing"],
+  output: "category_only"
+})
+
+category is:
+  "bug": assign_to_engineering(ticket)
+  "support": assign_to_support(ticket)
+  "billing": assign_to_billing(ticket)
+  "feature_request": add_to_roadmap(ticket)
+
+# Classify images (if available)
+photo = load_image("photo.jpg")
+
+tags = ai.classify(photo, {
+  categories: ["nature", "city", "people", "food", "animals"],
+  multiple: true  # Can have multiple tags
+})
+
+show "Tags: {tags}"  # ["nature", "animals"]
+
+# Sentiment analysis
+review = "This product is absolutely terrible. Waste of money!"
+
+sentiment = ai.classify(review, {
+  categories: ["positive", "negative", "neutral"]
+})
+
+show "Sentiment: {sentiment}"  # negative

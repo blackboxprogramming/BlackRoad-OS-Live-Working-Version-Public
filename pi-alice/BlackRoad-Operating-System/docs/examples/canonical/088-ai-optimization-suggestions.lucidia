@@ -1,0 +1,57 @@
+# 088: AI Optimization Suggestions
+# AI finds inefficiencies
+
+# Slow code
+find_duplicates(list1, list2):
+  duplicates = []
+  for item1 in list1:
+    for item2 in list2:
+      if item1 == item2:
+        duplicates.append(item1)
+  return duplicates
+
+# Ask for optimization
+optimization = ai.optimize(find_duplicates)
+
+show optimization.issues
+# "Nested loop is O(n²). For large lists, this is slow."
+
+show optimization.improved_version
+# Improved (O(n)):
+# find_duplicates(list1, list2):
+#   set2 = set(list2)
+#   return list1.filter(item => set2.contains(item))
+
+show optimization.performance_gain
+# "Estimated: 100x faster for 1000-item lists"
+
+# Database query optimization
+get_user_posts(user_id):
+  user = db.query("SELECT * FROM users WHERE id = ?", [user_id])
+  posts = db.query("SELECT * FROM posts WHERE author_id = ?", [user_id])
+  comments = db.query("SELECT * FROM comments WHERE author_id = ?", [user_id])
+  return { user, posts, comments }
+
+# N+1 query problem
+suggestions = ai.optimize_queries(get_user_posts)
+
+show suggestions
+# "Combine into single JOIN query to avoid multiple round-trips"
+# Suggested:
+# db.query("""
+#   SELECT users.*, posts.*, comments.*
+#   FROM users
+#   LEFT JOIN posts ON posts.author_id = users.id
+#   LEFT JOIN comments ON comments.author_id = users.id
+#   WHERE users.id = ?
+# """, [user_id])
+
+# Memory optimization
+load_all_users():
+  return db.query("SELECT * FROM users")  # Could be millions of rows!
+
+memory_suggestions = ai.optimize_memory(load_all_users)
+
+show memory_suggestions
+# "Loading all rows into memory can crash the app"
+# "Use pagination or streaming instead"

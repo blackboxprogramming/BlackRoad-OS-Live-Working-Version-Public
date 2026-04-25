@@ -1,0 +1,39 @@
+# 058: Event Listeners
+# Respond to custom events
+
+# Listen for events
+on event "user.logged_in":
+  show "Welcome back, {event.data.user.name}!"
+  load_user_dashboard(event.data.user)
+
+on event "purchase.completed":
+  show "Purchase: {event.data.item} for ${event.data.price}"
+  update_inventory(event.data.item)
+
+on event "app.error":
+  show "Error: {event.data.message}"
+  log_error(event.data.message)
+
+# Multiple listeners for same event
+on event "user.logged_in":
+  track_analytics("user_login")
+
+on event "user.logged_in":
+  sync_user_data()
+
+# Listeners are independent - one failing doesn't affect others
+
+load_user_dashboard(user):
+  show "Loading dashboard for user {user.id}"
+
+update_inventory(item):
+  show "Updating inventory after purchase of {item}"
+
+log_error(msg):
+  show "Logged: {msg}"
+
+track_analytics(action):
+  show "Analytics: {action}"
+
+sync_user_data():
+  show "Syncing user data"

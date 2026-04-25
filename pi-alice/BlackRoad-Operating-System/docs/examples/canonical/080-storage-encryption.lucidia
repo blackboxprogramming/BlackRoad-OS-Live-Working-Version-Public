@@ -1,0 +1,62 @@
+# 080: Storage Encryption
+# Encrypt sensitive data before storing
+
+# Encrypt by default
+sensitive_data = {
+  password: "secret123",
+  api_key: "sk_live_xxxx",
+  ssn: "123-45-6789"
+}
+
+store sensitive_data locally as "credentials"
+  encrypt: true
+  # Uses device key or user-provided password
+
+# Encrypted storage is automatic for sensitive field names
+# (password, ssn, credit_card, api_key, etc.)
+
+# User-provided encryption key
+save_encrypted_diary(entry):
+  ask "Enter encryption password:" -> password
+    type: "password"
+
+  store entry locally as "diary/{entry.id}"
+    encrypt: true
+    key: password
+
+  show "Diary entry saved (encrypted)"
+
+# Load encrypted data
+load_encrypted_diary(entry_id):
+  ask "Enter encryption password:" -> password
+    type: "password"
+
+  entry = load "diary/{entry_id}" locally
+    decrypt: true
+    key: password
+
+  if entry == null:
+    show "Wrong password or entry doesn't exist"
+  else:
+    show entry.text
+
+# Automatic encryption for regulated data
+store_medical_record(record):
+  # Medical data automatically encrypted (HIPAA compliance)
+  store record locally as "medical_records/{record.id}"
+  # encryption: true is implicit for medical data
+
+# Sync encrypted
+sync_encrypted_data():
+  # Data synced to cloud remains encrypted
+  # Cloud never sees unencrypted data
+  encrypted_notes = load "private_notes" locally
+    encrypt: true
+
+  sync encrypted_notes to cloud
+    # Still encrypted in transit and at rest
+
+  show "Private notes synced (encrypted)"
+
+# Everything sensitive is encrypted by default
+# Lucidia assumes privacy, not surveillance

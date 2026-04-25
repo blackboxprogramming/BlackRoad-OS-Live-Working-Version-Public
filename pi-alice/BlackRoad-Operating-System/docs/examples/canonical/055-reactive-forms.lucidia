@@ -1,0 +1,41 @@
+# 055: Reactive Forms
+# Forms that respond to user input in real-time
+
+state email = ""
+state password = ""
+state password_confirm = ""
+
+# Reactive validation
+computed email_valid = email.length > 0 and email.contains("@")
+computed password_valid = password.length >= 8
+computed passwords_match = password == password_confirm
+
+computed form_valid = email_valid and password_valid and passwords_match
+
+form signup:
+  input email -> email
+    placeholder: "your@email.com"
+
+  # Show validation feedback in real-time
+  if email != "" and not email_valid:
+    show_error "Invalid email format"
+
+  input password -> password
+    type: "password"
+
+  if password != "" and not password_valid:
+    show_error "Password must be at least 8 characters"
+
+  input password_confirm -> password_confirm
+    type: "password"
+    placeholder: "Confirm password"
+
+  if password_confirm != "" and not passwords_match:
+    show_error "Passwords don't match"
+
+  # Button disabled until form is valid
+  button "Sign Up" -> submit()
+    disabled: not form_valid
+
+submit():
+  show "Account created for {email}"

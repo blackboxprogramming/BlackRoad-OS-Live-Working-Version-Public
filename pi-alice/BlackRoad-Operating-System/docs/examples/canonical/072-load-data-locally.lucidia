@@ -1,0 +1,43 @@
+# 072: Load Data Locally
+# Retrieve saved data
+
+# Load with default value
+preferences = load "user_prefs" locally or {
+  theme: "light",
+  language: "en",
+  notifications: true
+}
+
+show "Theme: {preferences.theme}"
+
+# Load and check if exists
+todos = load "todos" locally
+
+if todos != null:
+  show "Found {todos.length} saved todos"
+  for todo in todos:
+    show "- {todo.text}"
+else:
+  show "No saved todos"
+  todos = []
+
+# Load multiple items
+user = load "user" locally
+settings = load "settings" locally
+
+if user != null:
+  show "Welcome back, {user.name}!"
+
+# Common pattern: load or initialize
+get_user_data():
+  data = load "user_data" locally
+  if data == null:
+    # First time - create default
+    data = { visits: 0, last_login: null }
+  data.visits = data.visits + 1
+  data.last_login = now()
+  store data locally as "user_data"
+  return data
+
+user_data = get_user_data()
+show "Visit #{user_data.visits}"

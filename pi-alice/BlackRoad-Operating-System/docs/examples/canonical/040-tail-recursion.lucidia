@@ -1,0 +1,33 @@
+# 040: Tail Recursion
+# Efficient recursion (last call is recursive call)
+
+# Regular recursion (not tail-recursive)
+factorial_regular(n):
+  if n <= 1:
+    return 1
+  return n * factorial_regular(n - 1)  # Multiplication happens AFTER recursive call
+
+# Tail-recursive version (with accumulator)
+factorial_tail(n, accumulator = 1):
+  if n <= 1:
+    return accumulator
+  return factorial_tail(n - 1, n * accumulator)  # Recursive call is LAST thing
+
+show factorial_tail(5)  # 120
+
+# Sum with tail recursion
+sum_tail(numbers, accumulator = 0):
+  if numbers.length == 0:
+    return accumulator
+  return sum_tail(numbers[1:], accumulator + numbers[0])
+
+show sum_tail([1, 2, 3, 4, 5])  # 15
+
+# Range generator
+make_range(start, end, result = []):
+  if start > end:
+    return result
+  result.append(start)
+  return make_range(start + 1, end, result)
+
+show make_range(1, 10)  # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

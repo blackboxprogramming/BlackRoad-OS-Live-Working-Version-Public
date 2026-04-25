@@ -1,0 +1,38 @@
+# 065: Consent Recording
+# Audit trail of data access
+
+ask permission for: user.health_data
+  purpose: "Calculate fitness stats"
+
+if granted:
+  # Record this access in audit log
+  with consent.record:
+    health_data = read_health_data()
+    stats = calculate_fitness_stats(health_data)
+    show "Your fitness stats: {stats}"
+
+  # Consent log entry created:
+  # {
+  #   timestamp: 2025-01-15T10:30:00Z,
+  #   resource: "user.health_data",
+  #   purpose: "Calculate fitness stats",
+  #   action: "read",
+  #   user_approved: true
+  # }
+
+# API call with consent recording
+ask permission for: api.financial_data
+  purpose: "Show account balance"
+
+if granted:
+  with consent.record:
+    balance = fetch "/api/account/balance"
+    show "Balance: ${balance}"
+
+  # User can later review: "This app accessed my financial data on [date]"
+
+# Consent records are:
+# - Stored locally (encrypted)
+# - Never sent to cloud without explicit user action
+# - Viewable in app settings
+# - Can be exported for GDPR compliance

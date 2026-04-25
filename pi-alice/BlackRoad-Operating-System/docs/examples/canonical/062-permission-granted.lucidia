@@ -1,0 +1,25 @@
+# 062: Permission Granted Flow
+# Execute code only if permission is granted
+
+ask permission for: location
+
+if granted:
+  # This code only runs if user clicks "Allow"
+  current_location = get_current_location()
+  show "You are at: {current_location.latitude}, {current_location.longitude}"
+
+  # Find nearby restaurants
+  restaurants = find_nearby("restaurants", current_location)
+  show "Found {restaurants.length} nearby restaurants"
+
+# If permission denied, this block doesn't execute
+# App continues safely without location data
+
+# Complex example with multiple permissions
+ask permission for: [camera, storage]
+  purpose: "Save photos"
+
+if granted:
+  photo = take_photo()
+  save_to_storage(photo)
+  show "Photo saved!"

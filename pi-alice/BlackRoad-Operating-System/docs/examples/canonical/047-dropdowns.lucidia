@@ -1,0 +1,29 @@
+# 047: Dropdowns
+# Select from options
+
+form preferences:
+  select theme -> user.theme
+    options: ["light", "dark", "auto"]
+    default: "auto"
+
+  select language -> user.language
+    options: [
+      { value: "en", label: "English" },
+      { value: "es", label: "Español" },
+      { value: "fr", label: "Français" }
+    ]
+    default: "en"
+
+  select country -> user.country
+    options: get_countries()
+    searchable: true
+
+  button "Save" -> save_preferences(user)
+
+get_countries():
+  return ["USA", "Canada", "Mexico", "UK", "France", "Germany"]
+
+save_preferences(prefs):
+  show "Theme: {prefs.theme}"
+  show "Language: {prefs.language}"
+  show "Country: {prefs.country}"

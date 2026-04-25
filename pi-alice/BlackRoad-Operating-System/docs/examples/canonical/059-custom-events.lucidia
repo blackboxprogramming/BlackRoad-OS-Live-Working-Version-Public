@@ -1,0 +1,38 @@
+# 059: Custom Events
+# Create your own event system
+
+# Shopping cart events
+state cart = []
+
+add_to_cart(item):
+  cart.append(item)
+  emit event "cart.item_added" with { item, cart_size: cart.length }
+
+remove_from_cart(item_id):
+  cart = cart.filter((item) => item.id != item_id)
+  emit event "cart.item_removed" with { item_id, cart_size: cart.length }
+
+clear_cart():
+  cart = []
+  emit event "cart.cleared"
+
+# Cart listeners
+on event "cart.item_added":
+  show "Added: {event.data.item.name}"
+  show "Cart size: {event.data.cart_size}"
+
+on event "cart.item_removed":
+  show "Removed item {event.data.item_id}"
+  show "Cart size: {event.data.cart_size}"
+
+on event "cart.cleared":
+  show "Cart is now empty"
+
+# Usage
+button "Add Apple" -> add_to_cart({ id: 1, name: "Apple", price: 1.50 })
+button "Add Banana" -> add_to_cart({ id: 2, name: "Banana", price: 0.75 })
+button "Remove Apple" -> remove_from_cart(1)
+button "Clear Cart" -> clear_cart()
+
+# Events decouple components - cart logic doesn't need to know
+# about UI updates, analytics, etc. They just listen for events.

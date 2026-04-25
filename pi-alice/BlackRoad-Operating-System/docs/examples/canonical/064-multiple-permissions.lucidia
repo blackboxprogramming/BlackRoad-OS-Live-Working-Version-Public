@@ -1,0 +1,42 @@
+# 064: Multiple Permissions
+# Handle complex permission scenarios
+
+# Sequential permissions
+start_video_call():
+  # Ask for camera first
+  ask permission for: camera
+    purpose: "Video call"
+
+  if granted:
+    # Camera allowed, now ask for microphone
+    ask permission for: microphone
+      purpose: "Voice during video call"
+
+    if granted:
+      # Both granted - start call
+      initiate_call()
+      show "Call started with video and audio"
+    else:
+      # Camera yes, microphone no
+      initiate_call(video_only: true)
+      show "Call started with video only"
+  else:
+    # Camera denied
+    show "Camera is required for video calls"
+
+# Batch permissions
+start_photo_app():
+  ask permission for: [camera, storage, location]
+    purpose: "Take and save geotagged photos"
+
+  # Check individual grants
+  if granted.camera and granted.storage:
+    if granted.location:
+      show "Full features enabled"
+    else:
+      show "Photos will be saved without location data"
+  else:
+    show "Camera and storage access required"
+
+button "Start Video Call" -> start_video_call()
+button "Open Photo App" -> start_photo_app()

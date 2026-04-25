@@ -1,0 +1,651 @@
+version: "1.0"
+workspace: "BlackRoad OS, Inc."
+control_plane_repo: "blackboxprogramming/BlackRoad-Operating-System"
+last_updated: "2025-11-19"
+operator: "Alexa Louise Amundson (Cadillac)"
+
+# =============================================================================
+# BLACKROAD OS SERVICE MANIFEST
+# =============================================================================
+# This file is the single source of truth for all BlackRoad services, their
+# deployment configuration, dependencies, and infrastructure mapping.
+#
+# Usage:
+#   - Read by br-ops CLI tool for service management
+#   - Referenced by CI/CD workflows for deployment automation
+#   - Used by documentation generation tools
+#   - Maintained by AI agents (Atlas, Cece) and human operators
+# =============================================================================
+
+# Current deployment state
+deployment_state:
+  phase: "Phase 1 - Monolith"
+  strategy: "Monorepo with consolidation"
+  active_services: 3
+  planned_services: 11
+  target_phase: "Phase 2 - Strategic Split"
+
+# Railway production environment
+railway:
+  project_id: "TBD"  # Set after Railway connection
+  project_name: "blackroad-production"
+  region: "us-west1"
+
+# Domain configuration (managed via Cloudflare)
+domains:
+  primary: "blackroad.systems"
+  api: "api.blackroad.systems"
+  prism: "prism.blackroad.systems"
+  docs: "docs.blackroad.systems"
+  console: "console.blackroad.systems"
+  lucidia: "lucidia.earth"
+  network: "blackroad.network"
+
+# =============================================================================
+# ACTIVE PROJECTS (PHASE 1)
+# =============================================================================
+
+projects:
+  # ---------------------------------------------------------------------------
+  # CORE BACKEND (Current Production)
+  # ---------------------------------------------------------------------------
+  blackroad-core:
+    description: "Core backend API + static UI serving (monolith)"
+    railway_project: "blackroad-production"
+    status: "active"
+    phase: 1
+
+    services:
+      blackroad-backend:
+        repo: "blackboxprogramming/BlackRoad-Operating-System"
+        branch: "main"
+        kind: "backend"
+        language: "python"
+        framework: "FastAPI 0.104.1"
+        runtime: "Python 3.11+"
+
+        # Deployment configuration
+        deployment:
+          dockerfile: "backend/Dockerfile"
+          build_context: "."
+          start_command: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+          healthcheck_path: "/health"
+          port: "${PORT:-8000}"
+
+        # Health & monitoring endpoints
+        entrypoints:
+          - path: "/health"
+            method: "GET"
+            description: "Basic health check"
+          - path: "/api/health/summary"
+            method: "GET"
+            description: "Comprehensive health with integration status"
+          - path: "/api/system/version"
+            method: "GET"
+            description: "System version and build info"
+          - path: "/api/docs"
+            method: "GET"
+            description: "OpenAPI/Swagger documentation"
+
+        # Domain routing
+        domains:
+          prod: "blackroad.systems"
+          staging: "staging.blackroad.systems"
+          dev: "dev.blackroad.systems"
+
+        # Routes served
+        routes:
+          - path: "/"
+            serves: "Pocket OS UI (backend/static/)"
+            type: "static"
+          - path: "/api/*"
+            serves: "REST API (33+ routers)"
+            type: "api"
+          - path: "/prism"
+            serves: "Prism Console UI"
+            type: "static"
+            status: "planned"
+          - path: "/api/docs"
+            serves: "Swagger UI"
+            type: "docs"
+
+        # Environment variables
+        env:
+          required:
+            - name: "DATABASE_URL"
+              description: "PostgreSQL connection string"
+              source: "${{Postgres.DATABASE_URL}}"
+              example: "postgresql+asyncpg://user:pass@host:5432/blackroad"
+            - name: "REDIS_URL"
+              description: "Redis connection string"
+              source: "${{Redis.REDIS_URL}}"
+              example: "redis://host:6379/0"
+            - name: "SECRET_KEY"
+              description: "JWT signing key"
+              generate: "openssl rand -hex 32"
+              secret: true
+            - name: "ENVIRONMENT"
+              description: "Deployment environment"
+              values: ["development", "staging", "production"]
+            - name: "DEBUG"
+              description: "Debug mode flag"
+              values: ["True", "False"]
+              default: "False"
+            - name: "ALLOWED_ORIGINS"
+              description: "CORS allowed origins"
+              example: "https://blackroad.systems,https://prism.blackroad.systems"
+
+          important:
+            - name: "ACCESS_TOKEN_EXPIRE_MINUTES"
+              description: "JWT access token expiry"
+              default: "30"
+            - name: "REFRESH_TOKEN_EXPIRE_DAYS"
+              description: "JWT refresh token expiry"
+              default: "7"
+            - name: "WALLET_MASTER_KEY"
+              description: "Blockchain wallet encryption key"
+              generate: "openssl rand -hex 32"
+              secret: true
+            - name: "API_BASE_URL"
+              description: "Public API base URL"
+              example: "https://blackroad.systems"
+            - name: "FRONTEND_URL"
+              description: "Frontend base URL"
+              example: "https://blackroad.systems"
+
+          optional:
+            - name: "OPENAI_API_KEY"
+              description: "OpenAI API access"
+              secret: true
+            - name: "GITHUB_TOKEN"
+              description: "GitHub API access for agents"
+              secret: true
+            - name: "GITHUB_WEBHOOK_SECRET"
+              description: "GitHub webhook validation secret"
+              generate: "openssl rand -hex 32"
+              secret: true
+            - name: "STRIPE_SECRET_KEY"
+              description: "Stripe payment processing"
+              secret: true
+            - name: "SENTRY_DSN"
+              description: "Sentry error tracking"
+              secret: true
+
+        # Database dependencies
+        databases:
+          primary:
+            service: "Postgres"
+            type: "postgresql"
+            version: "15+"
+            connection_var: "DATABASE_URL"
+            migrations: "alembic"
+            models_path: "backend/app/models/"
+
+        # Cache dependencies
+        caches:
+          primary:
+            service: "Redis"
+            type: "redis"
+            version: "7+"
+            connection_var: "REDIS_URL"
+            usage:
+              - "Session storage"
+              - "API response caching"
+              - "WebSocket state"
+              - "Pub/sub for events"
+
+        # Monitoring & observability
+        observability:
+          metrics:
+            - "Prometheus metrics at /metrics"
+            - "Railway built-in metrics"
+          logging:
+            - "Structured JSON logs"
+            - "Log level: INFO (prod), DEBUG (dev)"
+          tracing:
+            - "Sentry for error tracking"
+          alerts:
+            - "Railway health check failures"
+            - "High error rate (>5%)"
+            - "Response time > 1s (p95)"
+
+      # -----------------------------------------------------------------------
+      # DATABASE (Railway managed)
+      # -----------------------------------------------------------------------
+      postgres:
+        kind: "database"
+        type: "postgresql"
+        version: "15+"
+        provider: "railway-managed"
+
+        env:
+          exported:
+            - name: "DATABASE_URL"
+              description: "Full PostgreSQL connection string"
+              format: "postgresql+asyncpg://user:pass@host:port/db"
+
+        configuration:
+          max_connections: 100
+          shared_buffers: "256MB"
+          effective_cache_size: "1GB"
+
+        backups:
+          enabled: true
+          frequency: "daily"
+          retention_days: 30
+
+        migrations:
+          tool: "alembic"
+          location: "backend/alembic/"
+          auto_upgrade: false  # Manual for safety
+
+      # -----------------------------------------------------------------------
+      # CACHE (Railway managed)
+      # -----------------------------------------------------------------------
+      redis:
+        kind: "cache"
+        type: "redis"
+        version: "7+"
+        provider: "railway-managed"
+
+        env:
+          exported:
+            - name: "REDIS_URL"
+              description: "Redis connection string"
+              format: "redis://host:port/db"
+
+        configuration:
+          maxmemory: "256MB"
+          maxmemory_policy: "allkeys-lru"
+
+        usage:
+          - service: "blackroad-backend"
+            purposes:
+              - "HTTP session storage"
+              - "API response caching"
+              - "WebSocket connection state"
+              - "Pub/sub for agent events"
+
+  # ---------------------------------------------------------------------------
+  # DOCUMENTATION (GitHub Pages)
+  # ---------------------------------------------------------------------------
+  blackroad-docs:
+    description: "Technical documentation (MkDocs)"
+    status: "active"
+    phase: 1
+
+    services:
+      docs-site:
+        repo: "blackboxprogramming/BlackRoad-Operating-System"
+        branch: "gh-pages"
+        kind: "docs"
+        framework: "MkDocs Material"
+
+        deployment:
+          platform: "github-pages"
+          source: "codex-docs/"
+          build_command: "mkdocs build"
+          output_dir: "site/"
+
+        domains:
+          prod: "docs.blackroad.systems"
+
+        # CDN configuration
+        cdn:
+          provider: "cloudflare"
+          caching: true
+          ssl: true
+
+        env:
+          required:
+            - name: "SITE_URL"
+              value: "https://docs.blackroad.systems"
+
+# =============================================================================
+# PLANNED PROJECTS (PHASE 2)
+# =============================================================================
+
+planned_projects:
+  # ---------------------------------------------------------------------------
+  # PUBLIC API GATEWAY (Phase 2 extraction)
+  # ---------------------------------------------------------------------------
+  blackroad-api:
+    description: "Public API gateway (extracted from monolith)"
+    railway_project: "blackroad-api"
+    status: "planned"
+    phase: 2
+    target_date: "2026-Q2"
+
+    services:
+      public-api:
+        repo: "blackboxprogramming/blackroad-api"  # Future split
+        kind: "api-gateway"
+        language: "python"
+        framework: "FastAPI 0.104.1"
+
+        entrypoints:
+          - path: "/health"
+          - path: "/version"
+          - path: "/v1/*"
+            description: "Versioned API endpoints"
+
+        domains:
+          prod: "api.blackroad.systems"
+          staging: "staging.api.blackroad.systems"
+
+        env:
+          required:
+            - "NODE_ENV"
+            - "CORE_API_URL"  # Points to internal core service
+            - "AGENTS_API_URL"
+            - "API_KEYS_ENCRYPTION_KEY"
+
+  # ---------------------------------------------------------------------------
+  # PRISM CONSOLE (Phase 2 standalone UI)
+  # ---------------------------------------------------------------------------
+  blackroad-prism-console:
+    description: "Admin console UI for job queue & observability"
+    railway_project: "blackroad-prism-console"
+    status: "planned"
+    phase: 2
+    target_date: "2026-Q1"
+
+    services:
+      prism-console-web:
+        repo: "blackboxprogramming/blackroad-prism-console"  # Future split
+        kind: "frontend-console"
+        language: "javascript"
+        framework: "React 18+ or Vanilla JS"
+
+        domains:
+          prod: "prism.blackroad.systems"
+          staging: "staging.prism.blackroad.systems"
+
+        env:
+          required:
+            - "REACT_APP_API_URL"
+            - "REACT_APP_CORE_API_URL"
+            - "REACT_APP_AGENTS_API_URL"
+
+  # ---------------------------------------------------------------------------
+  # OPERATOR/WORKER ENGINE (Phase 2 background jobs)
+  # ---------------------------------------------------------------------------
+  blackroad-agents:
+    description: "Agent orchestration runtime + workers"
+    railway_project: "blackroad-agents"
+    status: "planned"
+    phase: 2
+    target_date: "2026-Q2"
+
+    services:
+      agents-api:
+        repo: "blackboxprogramming/blackroad-operator"  # Future split
+        kind: "backend"
+        language: "python"
+        framework: "FastAPI"
+
+        domains:
+          prod: "agents.blackroad.systems"
+          staging: "staging.agents.blackroad.systems"
+
+        env:
+          required:
+            - "DATABASE_URL"
+            - "REDIS_URL"
+            - "CORE_API_URL"
+            - "PUBLIC_AGENTS_URL"
+
+      agents-worker:
+        repo: "blackboxprogramming/blackroad-operator"
+        kind: "worker"
+        language: "python"
+        framework: "Celery or custom"
+
+        env:
+          required:
+            - "DATABASE_URL"
+            - "REDIS_URL"
+            - "CORE_API_URL"
+
+  # ---------------------------------------------------------------------------
+  # MARKETING SITE (Phase 1-2 transition)
+  # ---------------------------------------------------------------------------
+  blackroad-web:
+    description: "Corporate marketing website"
+    status: "planned"
+    phase: 1  # Should be created soon
+    target_date: "2026-Q1"
+
+    services:
+      web-app:
+        repo: "blackboxprogramming/blackroad.io"  # Future repo
+        kind: "frontend"
+        language: "javascript"
+        framework: "Next.js 14+ or static HTML"
+
+        domains:
+          prod: "blackroad.systems"  # Will replace current root
+          staging: "staging.blackroad.systems"
+
+        env:
+          required:
+            - "NEXT_PUBLIC_API_URL"
+            - "NEXT_PUBLIC_APP_URL"
+
+  # ---------------------------------------------------------------------------
+  # AI ORCHESTRATION (Phase 2)
+  # ---------------------------------------------------------------------------
+  lucidia:
+    description: "Multi-model AI orchestration layer"
+    status: "development"
+    phase: 2
+    target_date: "2026-Q3"
+
+    services:
+      lucidia-api:
+        repo: "blackboxprogramming/lucidia"
+        kind: "backend"
+        language: "python"
+        framework: "FastAPI"
+
+        domains:
+          prod: "lucidia.blackroad.systems"
+          staging: "staging.lucidia.blackroad.systems"
+
+        env:
+          required:
+            - "OPENAI_API_KEY"
+            - "ANTHROPIC_API_KEY"
+            - "GROQ_API_KEY"
+            - "DATABASE_URL"
+            - "REDIS_URL"
+
+# =============================================================================
+# EXPERIMENTAL/RESEARCH (NOT FOR PRODUCTION)
+# =============================================================================
+
+experimental_projects:
+  lucidia-lab:
+    description: "AI research & testing environment"
+    repo: "blackboxprogramming/lucidia-lab"
+    status: "research"
+    phase: 3
+
+  quantum-math-lab:
+    description: "Quantum computing research"
+    repo: "blackboxprogramming/quantum-math-lab"
+    status: "research"
+    phase: 3
+
+  native-ai-quantum-energy:
+    description: "Quantum + AI integration research"
+    repo: "blackboxprogramming/native-ai-quantum-energy"
+    status: "research"
+    phase: 3
+
+# =============================================================================
+# INFRASTRUCTURE DEPENDENCIES
+# =============================================================================
+
+infrastructure:
+  # DNS & CDN
+  cloudflare:
+    zones:
+      - domain: "blackroad.systems"
+        records_managed: true
+        proxy_enabled: true
+        ssl_mode: "full"
+      - domain: "lucidia.earth"
+        records_managed: true
+        proxy_enabled: true
+        ssl_mode: "full"
+
+  # Primary hosting platform
+  railway:
+    projects:
+      production:
+        name: "blackroad-production"
+        region: "us-west1"
+        services: 3  # backend, postgres, redis
+      staging:
+        name: "blackroad-staging"
+        region: "us-west1"
+        services: 3
+
+  # Code & CI/CD
+  github:
+    organization: "blackboxprogramming"
+    repositories:
+      active: 4  # Core repos in Phase 1
+      total: 23  # Including experimental
+    workflows:
+      - "backend-tests.yml"
+      - "railway-deploy.yml"
+      - "docs-deploy.yml"
+      - "railway-automation.yml"
+      - "infra-ci-bucketed.yml"
+
+  # Monitoring & observability
+  monitoring:
+    railway:
+      - "Built-in metrics"
+      - "Health checks"
+      - "Log aggregation"
+    sentry:
+      - "Error tracking"
+      - "Performance monitoring"
+    prometheus:
+      - "Custom metrics export"
+
+# =============================================================================
+# CI/CD CONFIGURATION
+# =============================================================================
+
+ci_cd:
+  github_actions:
+    workflows:
+      backend_tests:
+        file: ".github/workflows/backend-tests.yml"
+        triggers: ["push", "pull_request"]
+        paths: ["backend/**", "agents/**"]
+
+      railway_deploy:
+        file: ".github/workflows/railway-deploy.yml"
+        triggers: ["push"]
+        branches: ["main"]
+        requires: ["backend_tests"]
+
+      docs_deploy:
+        file: ".github/workflows/docs-deploy.yml"
+        triggers: ["push"]
+        paths: ["codex-docs/**"]
+
+    secrets_required:
+      - "RAILWAY_TOKEN"
+      - "CF_API_TOKEN"
+      - "CF_ZONE_ID"
+      - "SENTRY_DSN"
+
+  railway:
+    auto_deploy:
+      enabled: true
+      branch: "main"
+      healthcheck_timeout: 300  # 5 minutes
+      rollback_on_failure: true
+
+# =============================================================================
+# OPERATIONAL RUNBOOKS
+# =============================================================================
+
+runbooks:
+  deployment:
+    manual_deploy:
+      - "git checkout main"
+      - "git pull origin main"
+      - "git push origin main  # Triggers CI/CD"
+      - "Watch Railway dashboard for deploy status"
+      - "Verify /health endpoint returns 200"
+
+    rollback:
+      - "Railway dashboard → Deployments → Previous deployment → Rollback"
+      - "Or: git revert <commit> && git push"
+
+  incident_response:
+    service_down:
+      - "Check Railway service logs"
+      - "Verify DATABASE_URL and REDIS_URL are set"
+      - "Check /health endpoint"
+      - "Review recent deployments"
+      - "Rollback if necessary"
+
+    database_issues:
+      - "Check Postgres logs in Railway"
+      - "Verify connection string"
+      - "Check for migration issues"
+      - "Contact Railway support if managed DB issue"
+
+# =============================================================================
+# MIGRATION PATHS
+# =============================================================================
+
+migrations:
+  phase_1_to_2:
+    description: "Extract API gateway and Prism console from monolith"
+    steps:
+      - step: 1
+        action: "Create blackroad-api repo"
+        command: "git subtree split --prefix=backend/app/routers"
+      - step: 2
+        action: "Deploy blackroad-api to Railway"
+        command: "railway up --service blackroad-api"
+      - step: 3
+        action: "Update DNS routing"
+        command: "Update Cloudflare DNS: api.blackroad.systems"
+      - step: 4
+        action: "Verify health checks"
+        command: "curl https://api.blackroad.systems/health"
+
+    rollback_plan:
+      - "Keep monolith running during migration"
+      - "Blue-green deployment with DNS switch"
+      - "Monitor error rates for 24 hours before removing old service"
+
+# =============================================================================
+# METADATA
+# =============================================================================
+
+metadata:
+  version: "1.0"
+  schema_version: "2025-11-19"
+  maintained_by:
+    - "Alexa Louise Amundson (Operator)"
+    - "Atlas (AI Infrastructure Orchestrator)"
+    - "Cece (AI Engineer)"
+  last_audit: "2025-11-18"
+  next_review: "2025-12-19"
+
+  references:
+    - "MASTER_ORCHESTRATION_PLAN.md"
+    - "ORG_STRUCTURE.md"
+    - "PRODUCTION_STACK_AUDIT_2025-11-18.md"
+    - "BLACKROAD_OS_BIG_KAHUNA_VISION.md"

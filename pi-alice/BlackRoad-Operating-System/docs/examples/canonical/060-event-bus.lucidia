@@ -1,0 +1,54 @@
+# 060: Event Bus
+# Central event coordination
+
+# Create event bus for app-wide communication
+bus = event_bus()
+
+# Module 1: User authentication
+module auth:
+  login(email, password):
+    # Authenticate user
+    user = { email, name: "Alex", id: 123 }
+    bus.emit("auth.login", user)
+
+  logout():
+    bus.emit("auth.logout")
+
+# Module 2: Analytics
+module analytics:
+  bus.on("auth.login", (user) => {
+    track("user_login", { user_id: user.id })
+  })
+
+  bus.on("auth.logout", () => {
+    track("user_logout")
+  })
+
+  track(event, data):
+    show "📊 Analytics: {event} {data}"
+
+# Module 3: UI updates
+module ui:
+  bus.on("auth.login", (user) => {
+    show "Welcome, {user.name}!"
+    show_dashboard()
+  })
+
+  bus.on("auth.logout", () => {
+    show "Goodbye!"
+    show_login_screen()
+  })
+
+  show_dashboard():
+    show "Dashboard loaded"
+
+  show_login_screen():
+    show "Login screen loaded"
+
+# Modules don't know about each other
+# They only know about events
+# This makes the app easy to extend and maintain
+
+# Usage
+button "Login" -> auth.login("alex@example.com", "password")
+button "Logout" -> auth.logout()

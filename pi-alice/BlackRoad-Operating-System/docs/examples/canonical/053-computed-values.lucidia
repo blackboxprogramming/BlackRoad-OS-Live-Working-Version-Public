@@ -1,0 +1,36 @@
+# 053: Computed Values
+# Derived state that updates automatically
+
+state firstname = "Alex"
+state lastname = "Chen"
+
+# Computed value - automatically recalculates when dependencies change
+computed fullname = "{firstname} {lastname}"
+
+show fullname  # "Alex Chen"
+
+# Update state
+button "Change Name" -> change_name()
+
+change_name():
+  firstname = "Jordan"
+  lastname = "Lee"
+  # fullname automatically becomes "Jordan Lee"
+
+# Shopping cart example
+state items = [
+  { name: "Apple", price: 1.50, quantity: 3 },
+  { name: "Banana", price: 0.75, quantity: 5 }
+]
+
+computed total = items.reduce((sum, item) => {
+  sum + (item.price * item.quantity)
+}, 0)
+
+show "Total: ${total}"  # Automatically updates when items change
+
+button "Add Orange" -> add_item()
+
+add_item():
+  items.append({ name: "Orange", price: 2.00, quantity: 2 })
+  # total automatically recalculates

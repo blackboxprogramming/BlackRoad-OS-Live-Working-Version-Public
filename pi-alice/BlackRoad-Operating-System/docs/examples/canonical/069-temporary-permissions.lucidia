@@ -1,0 +1,51 @@
+# 069: Temporary Permissions
+# Permissions that auto-expire
+
+# Permission expires after 1 hour
+ask permission for: api.financial_data
+  expires_in: "1 hour"
+  purpose: "Show account balance"
+
+if granted:
+  show_balance_dashboard()
+
+  # Permission is valid for 1 hour
+  # After that, must request again
+
+# Permission expires after N uses
+ask permission for: camera
+  expires_after_uses: 3
+  purpose: "Take up to 3 photos"
+
+if granted:
+  for i in 1..3:
+    photo = take_photo()
+    save_photo(photo)
+    show "Photo {i} saved"
+
+  # Permission automatically revoked after 3 uses
+
+# Until specific time
+ask permission for: location
+  expires_at: "2025-01-15T23:59:59Z"
+  purpose: "Track run (today only)"
+
+if granted:
+  track_running_session()
+  # At midnight, permission expires
+
+# Conditional expiration
+ask permission for: microphone
+  expires_when: call_ended
+  purpose: "Voice call"
+
+if granted:
+  start_voice_call()
+  # When call_ended event fires, permission expires
+
+# Check if permission is still valid
+if consent.is_valid("camera"):
+  take_photo()
+else:
+  show "Camera permission has expired"
+  # Request again if needed

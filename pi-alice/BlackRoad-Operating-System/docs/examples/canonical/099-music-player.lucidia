@@ -1,0 +1,162 @@
+# 099: Music Player
+# Audio player with playlists and controls
+
+state playlist = load "playlist" locally or []
+state current_track = null
+state playing = false
+state current_time = 0
+state volume = 0.7
+
+# Add songs
+button "Add Songs" -> add_songs()
+
+add_songs():
+  ask permission for: [filesystem.read, storage]
+    purpose: "Add music files"
+
+  if granted:
+    files = open_file_picker(accept: "audio/*", multiple: true)
+
+    for file in files:
+      track = {
+        id: generate_id(),
+        title: extract_title(file.name),
+        artist: "Unknown Artist",
+        duration: 0,  # Will be set when loaded
+        file: file,
+        added_at: now()
+      }
+
+      playlist.append(track)
+
+    store playlist locally as "playlist"
+    show "Added {files.length} songs"
+
+# Playback controls
+play():
+  if current_track == null and playlist.length > 0:
+    current_track = playlist[0]
+
+  if current_track != null:
+    audio.play(current_track.file)
+    playing = true
+
+pause():
+  audio.pause()
+  playing = false
+
+stop():
+  audio.stop()
+  playing = false
+  current_time = 0
+
+next_track():
+  index = playlist.find_index(t => t.id == current_track.id)
+  if index < playlist.length - 1:
+    current_track = playlist[index + 1]
+    play()
+
+previous_track():
+  index = playlist.find_index(t => t.id == current_track.id)
+  if index > 0:
+    current_track = playlist[index - 1]
+    play()
+
+seek(time):
+  audio.seek(time)
+  current_time = time
+
+set_volume(vol):
+  volume = vol
+  audio.set_volume(vol)
+
+# Audio events
+on audio.timeupdate:
+  current_time = audio.current_time
+
+on audio.ended:
+  next_track()
+
+# Now playing
+if current_track != null:
+  show_now_playing:
+    title: current_track.title
+    artist: current_track.artist
+    artwork: current_track.artwork or "default.jpg"
+
+  # Progress bar
+  show_progress_bar:
+    current: current_time
+    total: current_track.duration
+    on_seek: (time) => seek(time)
+
+  # Time display
+  show "{format_time(current_time)} / {format_time(current_track.duration)}"
+
+# Controls
+show_controls:
+  button "⏮" -> previous_track()
+
+  if playing:
+    button "⏸" -> pause()
+  else:
+    button "▶" -> play()
+
+  button "⏹" -> stop()
+  button "⏭" -> next_track()
+
+# Volume
+show_volume_slider:
+  value: volume
+  on_change: (vol) => set_volume(vol)
+
+# Playlist
+show "Playlist ({playlist.length} songs)"
+
+for track in playlist:
+  show_track_row:
+    title: track.title
+    artist: track.artist
+    duration: format_time(track.duration)
+    playing: current_track?.id == track.id
+    on_click: () => {
+      current_track = track
+      play()
+    }
+    on_remove: () => remove_track(track.id)
+
+remove_track(id):
+  playlist = playlist.filter(t => t.id != id)
+
+  if current_track?.id == id:
+    stop()
+    current_track = null
+
+  store playlist locally as "playlist"
+
+# Shuffle
+button "Shuffle" -> shuffle_playlist()
+
+shuffle_playlist():
+  playlist = shuffle(playlist)
+  show "Playlist shuffled"
+
+# Clear playlist
+button "Clear Playlist" -> clear_playlist()
+
+clear_playlist():
+  playlist = []
+  current_track = null
+  stop()
+  store playlist locally as "playlist"
+
+extract_title(filename):
+  return filename.replace(/\.[^.]+$/, "")  # Remove extension
+
+format_time(seconds):
+  mins = Math.floor(seconds / 60)
+  secs = Math.floor(seconds % 60)
+  return "{mins}:{secs.pad(2)}"
+
+generate_id():
+  return now() + Math.random()

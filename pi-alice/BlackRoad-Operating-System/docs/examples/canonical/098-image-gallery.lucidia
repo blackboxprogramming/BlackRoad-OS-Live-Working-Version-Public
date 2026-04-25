@@ -1,0 +1,149 @@
+# 098: Image Gallery
+# Photo gallery with local storage and albums
+
+state images = load "images" locally or []
+state current_album = "all"
+state selected_image = null
+
+# Upload images
+button "Add Photos" -> upload_images()
+
+upload_images():
+  ask permission for: [filesystem.read, storage]
+    purpose: "Upload and save photos"
+
+  if granted:
+    files = open_file_picker(accept: "image/*", multiple: true)
+
+    for file in files:
+      image = {
+        id: generate_id(),
+        name: file.name,
+        data: file.read_as_data_url(),
+        size: file.size,
+        uploaded_at: now(),
+        album: current_album,
+        tags: [],
+        favorite: false
+      }
+
+      images.append(image)
+
+    store images locally as "images"
+    show "Uploaded {files.length} photos"
+
+# Create album
+form create_album:
+  input album_name -> new_album
+
+  button "Create Album" -> create_album_action(new_album)
+
+create_album_action(name):
+  # Albums are derived from image data
+  current_album = name
+  show "Album '{name}' created"
+
+# Move to album
+move_to_album(image_id, album):
+  images = images.map(img => {
+    if img.id == image_id:
+      { ...img, album: album }
+    else:
+      img
+  })
+
+  store images locally as "images"
+
+# Toggle favorite
+toggle_favorite(id):
+  images = images.map(img => {
+    if img.id == id:
+      { ...img, favorite: not img.favorite }
+    else:
+      img
+  })
+
+  store images locally as "images"
+
+# Delete image
+delete_image(id):
+  ask "Delete this image?" -> confirm
+
+  if confirm == "yes":
+    images = images.filter(img => img.id != id)
+    store images locally as "images"
+    selected_image = null
+
+# Filter by album
+computed filtered_images = images.filter(img => {
+  current_album == "all" or img.album == current_album
+})
+
+# Get unique albums
+computed albums = images
+  .map(img => img.album)
+  .unique()
+  .sort()
+
+# Album switcher
+show "Albums:"
+button "All ({images.length})" -> current_album = "all"
+
+for album in albums:
+  count = images.filter(img => img.album == album).length
+  button "{album} ({count})" -> current_album = album
+
+# Gallery grid
+show_gallery_grid:
+  for image in filtered_images:
+    show_thumbnail:
+      src: image.data
+      name: image.name
+      favorite: image.favorite
+      on_click: () => selected_image = image
+      on_favorite: () => toggle_favorite(image.id)
+
+# Lightbox view
+if selected_image != null:
+  show_lightbox:
+    image: selected_image.data
+    name: selected_image.name
+    size: format_file_size(selected_image.size)
+    uploaded: format_date(selected_image.uploaded_at)
+
+    button "Close" -> selected_image = null
+    button "Delete" -> delete_image(selected_image.id)
+    button "Previous" -> show_previous()
+    button "Next" -> show_next()
+
+show_previous():
+  index = filtered_images.find_index(img => img.id == selected_image.id)
+  if index > 0:
+    selected_image = filtered_images[index - 1]
+
+show_next():
+  index = filtered_images.find_index(img => img.id == selected_image.id)
+  if index < filtered_images.length - 1:
+    selected_image = filtered_images[index + 1]
+
+# Auto-tag with AI
+button "Auto-Tag All" -> auto_tag_images()
+
+auto_tag_images():
+  for image in images:
+    if image.tags.length == 0:
+      tags = ai.classify(image.data, {
+        categories: ["nature", "people", "food", "architecture", "animals"],
+        multiple: true
+      })
+
+      image.tags = tags
+
+  store images locally as "images"
+  show "Images auto-tagged"
+
+generate_id():
+  return now() + Math.random()
+
+format_file_size(bytes):
+  return "{(bytes / 1024).toFixed(1)} KB"

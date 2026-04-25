@@ -1,0 +1,55 @@
+# 085: AI Data Transformation
+# Transform data between formats
+
+# Convert formats
+json_data = """
+{
+  "users": [
+    {"id": 1, "name": "Alex"},
+    {"id": 2, "name": "Jordan"}
+  ]
+}
+"""
+
+### Intent: Convert this JSON to CSV format
+csv_data = ai.transform(json_data, {
+  from: "json",
+  to: "csv"
+})
+
+show csv_data
+# Output:
+# id,name
+# 1,Alex
+# 2,Jordan
+
+# Restructure data
+flat_data = [
+  { user_id: 1, order_id: 101, amount: 50 },
+  { user_id: 1, order_id: 102, amount: 75 },
+  { user_id: 2, order_id: 103, amount: 30 }
+]
+
+### Intent: Group orders by user_id
+nested_data = ai.transform(flat_data, {
+  operation: "group_by",
+  key: "user_id",
+  aggregate: "orders"
+})
+
+show nested_data
+# Output:
+# [
+#   { user_id: 1, orders: [{ order_id: 101, amount: 50 }, { order_id: 102, amount: 75 }] },
+#   { user_id: 2, orders: [{ order_id: 103, amount: 30 }] }
+# ]
+
+# Extract specific fields
+complex_response = fetch "/api/users/detailed"
+
+### Intent: Extract only name, email, and signup_date
+simplified = ai.extract(complex_response, {
+  fields: ["name", "email", "signup_date"]
+})
+
+# AI handles nested structures, missing fields, different naming conventions

@@ -1,0 +1,38 @@
+# 054: Multiple Watchers
+# Several reactions to the same state
+
+state user_count = 0
+
+# Watcher 1: Update display
+watch user_count:
+  show "Users online: {user_count}"
+
+# Watcher 2: Check capacity
+watch user_count:
+  if user_count > 100:
+    show "⚠️  Server at capacity!"
+
+# Watcher 3: Log changes
+watch user_count:
+  log("User count changed to: {user_count}")
+
+# All three watchers run when state changes
+button "Add User" -> add_user()
+button "Remove User" -> remove_user()
+
+add_user():
+  user_count = user_count + 1
+
+remove_user():
+  if user_count > 0:
+    user_count = user_count - 1
+
+# Watch multiple states
+state email = ""
+state password = ""
+
+watch email, password:
+  if email != "" and password != "":
+    show "Form is complete"
+  else:
+    show "Please fill in all fields"

@@ -1,0 +1,119 @@
+# 096: Chat Application
+# Real-time messaging with WebSocket
+
+state messages = []
+state username = load "username" locally or null
+state connected = false
+state websocket = null
+
+# Set username
+if username == null:
+  ask "Choose a username:" -> username
+  store username locally as "username"
+
+# Connect to chat server
+connect():
+  ask permission for: network
+    purpose: "Connect to chat server"
+
+  if granted:
+    websocket = connect_websocket("wss://chat.example.com")
+
+    on websocket.connected:
+      connected = true
+      show "Connected to chat"
+
+    on websocket.message:
+      handle_message(event.data)
+
+    on websocket.disconnected:
+      connected = false
+      show "Disconnected from chat"
+      # Auto-reconnect after 5 seconds
+      wait(5000)
+      connect()
+
+# Handle incoming messages
+handle_message(data):
+  message = JSON.parse(data)
+
+  message.type is:
+    "chat": {
+      messages.append({
+        id: message.id,
+        user: message.user,
+        text: message.text,
+        timestamp: message.timestamp
+      })
+
+      # Limit to last 100 messages
+      if messages.length > 100:
+        messages = messages.slice(-100)
+    }
+    "user_joined": {
+      show "{message.user} joined the chat"
+    }
+    "user_left": {
+      show "{message.user} left the chat"
+    }
+
+# Send message
+state new_message = ""
+
+form chat_input:
+  input new_message -> new_message
+    placeholder: "Type a message..."
+    on_enter: send_message()
+
+  button "Send" -> send_message()
+
+send_message():
+  if new_message == "" or not connected: return
+
+  msg = {
+    type: "chat",
+    user: username,
+    text: new_message,
+    timestamp: now()
+  }
+
+  websocket.send(JSON.stringify(msg))
+
+  new_message = ""  # Clear input
+
+# Display messages
+show_chat_window:
+  for message in messages:
+    show_message:
+      user: message.user
+      text: message.text
+      time: format_time(message.timestamp)
+      is_mine: message.user == username
+
+# Status indicator
+if connected:
+  show "🟢 Connected"
+else:
+  show "🔴 Disconnected"
+
+# Leave chat
+button "Leave Chat" -> disconnect()
+
+disconnect():
+  if websocket != null:
+    websocket.send(JSON.stringify({
+      type: "user_left",
+      user: username
+    }))
+    websocket.close()
+
+# Initialize
+on app.start:
+  connect()
+
+# Clean up on exit
+on app.close:
+  disconnect()
+
+format_time(timestamp):
+  return "12:34 PM"  # AI: Format timestamp

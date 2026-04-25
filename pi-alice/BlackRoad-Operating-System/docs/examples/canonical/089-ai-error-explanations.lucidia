@@ -1,0 +1,80 @@
+# 089: AI Error Explanations
+# AI explains what went wrong and how to fix it
+
+# Runtime error
+users = null
+
+# This will error:
+# first_user = users[0]
+
+# Error message with AI explanation:
+"""
+Error: Cannot access property of null
+
+AI Explanation:
+The variable 'users' is null, so you can't access users[0].
+This usually happens when:
+  1. Data hasn't loaded yet
+  2. API request failed
+  3. Database returned no results
+
+Suggested fix:
+  if users != null and users.length > 0:
+    first_user = users[0]
+  else:
+    show "No users found"
+"""
+
+# Type error
+age = "28"  # String
+adult = age >= 18  # Comparing string to number
+
+# AI explains:
+"""
+Error: Type mismatch (string vs number)
+
+AI Explanation:
+You're comparing age (string "28") with 18 (number).
+JavaScript allows this but results in weird behavior.
+
+Suggested fixes:
+  1. Convert age to number: Number(age) >= 18
+  2. Or compare as strings: age >= "18"
+  3. Better: Store age as number from the start
+"""
+
+# Logic error (AI detected)
+calculate_discount(price, percent):
+  discount = price * percent  # Wrong! percent should be divided by 100
+  return price - discount
+
+ai_warning = ai.analyze(calculate_discount)
+
+show ai_warning
+"""
+⚠️  Logic Warning:
+If percent is 20 (meaning 20%), you're calculating price * 20,
+which would give a negative result after subtraction.
+
+Did you mean: discount = price * (percent / 100)?
+"""
+
+# API error with AI context
+try:
+  data = fetch "/api/users/999999"
+catch error:
+  show ai.explain_error(error)
+
+# Output:
+"""
+HTTP 404: Not Found
+
+AI Explanation:
+The user with ID 999999 doesn't exist in the database.
+This is normal - just handle it gracefully:
+
+  user = fetch "/api/users/{id}"
+  if user == null:
+    show "User not found"
+    redirect_to "/users"
+"""

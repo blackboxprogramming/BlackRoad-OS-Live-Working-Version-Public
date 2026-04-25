@@ -1,0 +1,41 @@
+# 066: Revoking Consent
+# Users can take back permission anytime
+
+# In app settings
+form privacy_settings:
+  show "Your Permissions:"
+
+  for permission in consent.list_granted():
+    show "{permission.resource} - Granted on {permission.date}"
+    button "Revoke" -> revoke_permission(permission.resource)
+
+revoke_permission(resource):
+  consent.revoke(resource)
+  show "Permission revoked for {resource}"
+
+# Attempting to use revoked permission
+use_location():
+  # Check if still granted
+  if consent.is_granted("location"):
+    location = get_current_location()
+    show "Location: {location}"
+  else:
+    # Permission was revoked
+    show "Location access has been revoked"
+
+    # Optionally re-request
+    ask permission for: location
+      purpose: "Show nearby places"
+
+    if granted:
+      use_location()  # Try again
+    else:
+      show "Cannot show nearby places without location"
+
+# Revoke all permissions
+button "Clear All Permissions" -> clear_all()
+
+clear_all():
+  consent.revoke_all()
+  show "All permissions cleared"
+  show "You'll be asked again when needed"

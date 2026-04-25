@@ -1,0 +1,50 @@
+# 068: Scoped Permissions
+# Fine-grained control over access duration
+
+# One-time permission
+ask permission for: camera
+  scope: "one-time"
+  purpose: "Take profile photo"
+
+if granted:
+  photo = take_photo()
+  upload_profile_photo(photo)
+  # Permission automatically expires after this block
+
+# Session-based permission
+ask permission for: location
+  scope: "session"
+  purpose: "Show nearby restaurants"
+
+if granted:
+  # Permission lasts until app closes
+  update_location_periodically()
+
+# Persistent permission
+ask permission for: notifications
+  scope: "persistent"
+  purpose: "Daily reminders"
+
+if granted:
+  # Permission persists across sessions
+  # User must manually revoke
+  schedule_daily_notifications()
+
+# Time-limited permission
+ask permission for: api.user_data
+  scope: "time-limited"
+  duration: "24 hours"
+  purpose: "Generate weekly report"
+
+if granted:
+  # Permission expires after 24 hours
+  generate_report()
+
+# Resource-specific scoping
+ask permission for: user.contacts
+  scope: "read-only"  # Cannot modify
+  purpose: "Find friends"
+
+if granted:
+  contacts = read_contacts()
+  # Cannot write to contacts - scope enforced by runtime

@@ -1,0 +1,426 @@
+# Cloudflare DNS Records Configuration
+# Version: 1.0
+# Purpose: Structured DNS configuration for all BlackRoad domains
+#
+# This file is the single source of truth for DNS records.
+# Use cloudflare_dns_sync.py to apply these records to Cloudflare.
+#
+# Format:
+#   domain: Domain name being managed
+#   zone_id: Cloudflare zone ID (get from Cloudflare dashboard)
+#   records: List of DNS records for this domain
+#     - type: Record type (A, AAAA, CNAME, TXT, MX, etc.)
+#       name: Record name (@ for root, subdomain for others)
+#       content: Target value
+#       ttl: Time to live (1 = Auto)
+#       proxied: Whether to proxy through Cloudflare (true/false)
+#       priority: MX priority (for MX records only)
+#       comment: Human-readable description
+
+---
+
+# ============================================================================
+# PHASE 1 DOMAINS (Active Now)
+# ============================================================================
+
+- domain: blackroad.systems
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: true
+  phase: 1
+  records:
+    # Root domain → Railway backend
+    - type: CNAME
+      name: '@'
+      content: blackroad-os-production.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Root domain points to Railway production (CNAME flattening)
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # OS subdomain (explicit alias)
+    - type: CNAME
+      name: os
+      content: blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Explicit OS subdomain (alternative entry point)
+
+    # API subdomain
+    - type: CNAME
+      name: api
+      content: blackroad-os-production.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Explicit API subdomain for developers
+
+    # Prism Console subdomain
+    - type: CNAME
+      name: prism
+      content: blackroad-os-production.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Prism Console admin interface
+
+    # Documentation subdomain → GitHub Pages
+    - type: CNAME
+      name: docs
+      content: blackboxprogramming.github.io
+      ttl: 1
+      proxied: true
+      comment: Documentation hosted on GitHub Pages
+
+    # CDN subdomain (for future asset delivery)
+    - type: CNAME
+      name: cdn
+      content: blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: CDN alias for static assets
+
+    # Email records (Google Workspace configuration)
+    - type: TXT
+      name: '@'
+      content: v=spf1 include:_spf.google.com ~all
+      ttl: 1
+      proxied: false
+      comment: SPF record for Google Workspace email
+
+    - type: MX
+      name: '@'
+      content: aspmx.l.google.com
+      ttl: 1
+      proxied: false
+      priority: 1
+      comment: Google Workspace MX record (priority 1)
+
+    - type: MX
+      name: '@'
+      content: alt1.aspmx.l.google.com
+      ttl: 1
+      proxied: false
+      priority: 5
+      comment: Google Workspace MX record (priority 5)
+
+    - type: MX
+      name: '@'
+      content: alt2.aspmx.l.google.com
+      ttl: 1
+      proxied: false
+      priority: 5
+      comment: Google Workspace MX record (priority 5)
+
+    # Verification records (add as needed)
+    # - type: TXT
+    #   name: '@'
+    #   content: google-site-verification=YOUR_CODE_HERE
+    #   ttl: 1
+    #   proxied: false
+    #   comment: Google Search Console verification
+
+- domain: blackroad.ai
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 1
+  records:
+    # Root → Alias to main OS
+    - type: CNAME
+      name: '@'
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Product console entry point
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroad.ai
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # Console subdomain (explicit)
+    - type: CNAME
+      name: console
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Explicit console subdomain
+
+- domain: blackroad.network
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 1
+  records:
+    # Root → GitHub Pages (developer docs)
+    - type: CNAME
+      name: '@'
+      content: blackboxprogramming.github.io
+      ttl: 1
+      proxied: true
+      comment: Developer hub and documentation
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroad.network
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # API subdomain (for developer API access)
+    - type: CNAME
+      name: api
+      content: blackroad-os-production.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: API access for developers
+
+    # Sandbox subdomain → Railway staging
+    - type: CNAME
+      name: sandbox
+      content: blackroad-os-staging.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Staging/sandbox environment for testing
+
+- domain: blackroad.me
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 1
+  records:
+    # Root → Identity portal (via main OS)
+    - type: CNAME
+      name: '@'
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Personal identity portal
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroad.me
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # ID subdomain (explicit identity)
+    - type: CNAME
+      name: id
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Explicit identity subdomain
+
+# ============================================================================
+# PHASE 2 DOMAINS (Launch Later)
+# ============================================================================
+
+- domain: lucidia.earth
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → GitHub Pages (narrative site)
+    - type: CNAME
+      name: '@'
+      content: blackboxprogramming.github.io
+      ttl: 1
+      proxied: true
+      comment: Narrative experiences and interactive storytelling
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: lucidia.earth
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # Studio subdomain (Phase 3 - creative tools)
+    - type: CNAME
+      name: studio
+      content: lucidia-studio.vercel.app
+      ttl: 1
+      proxied: true
+      comment: Lucidia Studio creative production platform
+
+- domain: aliceqi.com
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → GitHub Pages (research showcase)
+    - type: CNAME
+      name: '@'
+      content: blackboxprogramming.github.io
+      ttl: 1
+      proxied: true
+      comment: ALICE QI research showcase
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: aliceqi.com
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # Research subdomain
+    - type: CNAME
+      name: research
+      content: aliceqi.com
+      ttl: 1
+      proxied: true
+      comment: Research portal
+
+    # Docs subdomain
+    - type: CNAME
+      name: docs
+      content: aliceqi.com
+      ttl: 1
+      proxied: true
+      comment: Technical documentation
+
+- domain: blackroadqi.com
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → Dedicated QI app on Railway
+    - type: CNAME
+      name: '@'
+      content: blackroadqi-app.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Financial/quantitative intelligence product
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroadqi.com
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # API subdomain
+    - type: CNAME
+      name: api
+      content: blackroadqi-api.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: QI API endpoint
+
+- domain: roadwallet.com
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → Alias to main OS wallet interface
+    - type: CNAME
+      name: '@'
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Wallet interface via main OS
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: roadwallet.com
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+- domain: aliceos.io
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → Legacy alias to main OS
+    - type: CNAME
+      name: '@'
+      content: os.blackroad.systems
+      ttl: 1
+      proxied: true
+      comment: Legacy domain alias
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: aliceos.io
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+- domain: blackroadquantum.com
+  zone_id: REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE
+  primary: false
+  phase: 2
+  records:
+    # Root → GitHub Pages (research hub)
+    - type: CNAME
+      name: '@'
+      content: blackboxprogramming.github.io
+      ttl: 1
+      proxied: true
+      comment: Quantum research hub
+
+    # WWW redirect
+    - type: CNAME
+      name: www
+      content: blackroadquantum.com
+      ttl: 1
+      proxied: true
+      comment: WWW subdomain redirects to apex
+
+    # Lab subdomain → Dedicated Quantum Lab app
+    - type: CNAME
+      name: lab
+      content: quantum-lab.up.railway.app
+      ttl: 1
+      proxied: true
+      comment: Quantum Lab application
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# CNAME Flattening:
+#   Cloudflare allows CNAME records at the root (@) level via CNAME flattening.
+#   This is not standard DNS but works with Cloudflare proxy enabled.
+#
+# Railway Targets:
+#   Replace 'blackroad-os-production.up.railway.app' with your actual Railway
+#   app URL from Railway dashboard → Service → Settings → Domains.
+#
+# Zone IDs:
+#   Get zone IDs from Cloudflare dashboard → Domain → Overview (right sidebar).
+#   Replace all 'REPLACE_WITH_ZONE_ID_FROM_CLOUDFLARE' with actual zone IDs.
+#
+# GitHub Pages CNAME:
+#   For GitHub Pages domains, you must also create a CNAME file in your
+#   GitHub Pages repo root containing the custom domain:
+#     echo "blackroad.network" > CNAME
+#
+# Email Configuration:
+#   The MX/SPF records are examples for Google Workspace. Update or remove
+#   if using a different email provider.
+#
+# SSL/TLS:
+#   Set Cloudflare SSL/TLS mode to "Full (strict)" for all domains.
+#   Railway automatically provides SSL certificates.
+#
+# Proxied vs DNS-only:
+#   - proxied: true → Traffic goes through Cloudflare (CDN, DDoS protection)
+#   - proxied: false → Direct DNS resolution (required for MX, some TXT records)
+#
+# Automation:
+#   Use cloudflare_dns_sync.py to apply these records automatically via API.

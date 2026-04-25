@@ -1,0 +1,31 @@
+# Railway Deployment Configuration Template
+# Copy this file to your service repository and customize
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"  # Adjust if Dockerfile is in a subdirectory
+
+[deploy]
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"  # Adjust for your service
+healthcheckPath = "/health"
+healthcheckTimeout = 300  # 5 minutes
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+# Watch patterns for auto-redeployment
+[deploy.watchPatterns]
+patterns = ["**/*.py", "requirements.txt", "Dockerfile"]
+
+# Environment variables (set these in Railway dashboard)
+# Required:
+# - DATABASE_URL
+# - REDIS_URL
+# - SECRET_KEY
+# - ENVIRONMENT
+# - DEBUG
+# - ALLOWED_ORIGINS
+
+# Optional:
+# - OPENAI_API_KEY
+# - GITHUB_TOKEN
+# - SENTRY_DSN

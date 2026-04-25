@@ -1,0 +1,401 @@
+# Auto-Labeling Configuration for BlackRoad OS
+# Labels are automatically applied based on which files are changed in a PR
+#
+# Related docs: GITHUB_AUTOMATION_RULES.md, AUTO_MERGE_POLICY.md
+
+# Documentation
+docs:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'docs/**/*'
+      - '*.md'
+      - 'README.*'
+      - '!backend/README.md'  # Let backend CI handle
+      - '!sdk/python/README.md'  # Let SDK CI handle
+      - '!sdk/typescript/README.md'  # Let SDK CI handle
+
+# Backend
+# GitHub PR Labeler Configuration
+#
+# Automatically applies labels to pull requests based on file paths.
+# This integrates with the PR Action Queue to enable intelligent routing and auto-merge.
+#
+# Documentation: https://github.com/actions/labeler
+
+# ============================================================================
+# COMPONENT LABELS
+# ============================================================================
+
+backend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/**/*'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+
+# Frontend / OS
+frontend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'blackroad-os/**/*'
+      - 'backend/static/**/*'
+
+# Agents
+      - '!backend/static/**'
+      - '!backend/tests/**'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/static/**/*'
+      - 'blackroad-os/**/*'
+
+core:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/main.py'
+      - 'backend/app/config.py'
+      - 'backend/app/database.py'
+      - 'backend/app/models/**/*'
+
+api:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/routers/**/*'
+
+services:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/services/**/*'
+
+operator:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'operator_engine/**/*'
+
+prism:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'prism-console/**/*'
+
+agents:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'agents/**/*'
+
+# Infrastructure
+infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/**/*'
+      - 'infra/**/*'
+      - 'ops/**/*'
+      - 'railway.toml'
+      - 'railway.json'
+      - '*.toml'
+      - '!package.json'
+
+# Python SDK
+sdk-python:
+sdk:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'sdk/**/*'
+
+python-sdk:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'sdk/python/**/*'
+
+# TypeScript SDK
+sdk-typescript:
+typescript-sdk:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'sdk/typescript/**/*'
+
+# Tests
+# ============================================================================
+# TYPE LABELS
+# ============================================================================
+
+docs:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+      - 'README*'
+      - 'CHANGELOG*'
+      - 'CONTRIBUTING*'
+      - 'LICENSE*'
+      - 'implementation-plans/**/*'
+
+tests:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/tests/**/*'
+      - '**/*test*.py'
+      - '**/*.test.js'
+      - '**/*.spec.js'
+      - '**/*.spec.ts'
+
+# Dependencies
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'requirements.txt'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'Pipfile'
+      - 'Pipfile.lock'
+      - 'pyproject.toml'
+
+# Cognitive / Research
+cognitive:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'cognitive/**/*'
+      - 'blackroad-universe/**/*'
+
+# SOP (Standard Operating Procedures)
+sop:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'sop/**/*'
+
+# Implementation Plans
+implementation:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'implementation-plans/**/*'
+
+# Scripts
+scripts:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'scripts/**/*'
+      - '*.py'
+      - '*.sh'
+      - '!backend/**/*.py'
+      - '!agents/**/*.py'
+      - '!sdk/**/*.py'
+      - '**/test_*.py'
+      - '**/*_test.py'
+      - '**/*.test.js'
+      - '**/*.test.ts'
+      - 'backend/pytest.ini'
+
+tests-only:
+  - changed-files:
+    - all-globs-to-all-files:
+      - '**/tests/**/*'
+      - '**/test_*.py'
+      - '**/*_test.py'
+      - '**/*.test.js'
+      - '**/*.test.ts'
+
+ci:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.github/workflows/**/*'
+      - '.github/actions/**/*'
+      - 'ci/**/*'
+
+infra:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'infra/**/*'
+      - 'ops/**/*'
+      - 'scripts/**/*'
+      - 'railway.toml'
+      - 'railway.json'
+      - 'docker-compose.yml'
+      - 'Dockerfile'
+      - '**/Dockerfile'
+
+config:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/.env.example'
+      - '**/config.py'
+      - '**/settings.py'
+      - '**/*.toml'
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '**/*.json'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/requirements.txt'
+      - 'sdk/python/requirements.txt'
+      - 'sdk/typescript/package.json'
+      - '**/package-lock.json'
+      - '**/yarn.lock'
+      - '**/poetry.lock'
+
+# ============================================================================
+# IMPACT LABELS
+# ============================================================================
+
+breaking-change:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/database.py'
+      - 'backend/app/models/**/*'
+      - 'backend/app/config.py'
+  - body-contains:
+    - 'BREAKING CHANGE'
+    - 'breaking change'
+
+security:
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/auth*.py'
+      - '**/security*.py'
+      - 'SECURITY.md'
+  - title-contains:
+    - 'security'
+    - 'vulnerability'
+    - 'CVE'
+  - body-contains:
+    - 'security'
+    - 'vulnerability'
+
+hotfix:
+  - title-contains:
+    - 'hotfix'
+    - 'urgent'
+    - 'critical'
+  - body-contains:
+    - 'hotfix'
+    - 'urgent'
+    - 'critical'
+
+# ============================================================================
+# AUTOMATION LABELS (for auto-merge)
+# ============================================================================
+
+claude-auto:
+  - head-branch:
+    - '^claude/.*'
+  - author:
+    - 'claude-code'
+    - 'github-actions[bot]'
+
+atlas-auto:
+  - head-branch:
+    - '^atlas/.*'
+
+chore:
+  - title-contains:
+    - 'chore:'
+    - '[chore]'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '.gitignore'
+      - '.editorconfig'
+      - '.prettierrc'
+      - '.eslintrc'
+      - '**/LICENSE'
+
+refactor:
+  - title-contains:
+    - 'refactor:'
+    - '[refactor]'
+
+# ============================================================================
+# PRIORITY LABELS
+# ============================================================================
+
+high-priority:
+  - title-contains:
+    - 'urgent'
+    - 'critical'
+    - 'hotfix'
+    - 'P0'
+  - body-contains:
+    - 'urgent'
+    - 'critical'
+
+medium-priority:
+  - title-contains:
+    - 'P1'
+
+low-priority:
+  - title-contains:
+    - 'P2'
+    - 'nice to have'
+  - changed-files:
+    - any-glob-to-any-file:
+      - '**/*.md'
+      - 'docs/**/*'
+
+# ============================================================================
+# SPECIAL CATEGORIES
+# ============================================================================
+
+blockchain:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/routers/blockchain*.py'
+      - 'backend/app/routers/wallet*.py'
+      - 'backend/app/routers/miner*.py'
+
+ai-ml:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'agents/**/*'
+      - 'cognitive/**/*'
+      - '**/ai_*.py'
+      - '**/*_ai.py'
+
+database:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/app/database.py'
+      - 'backend/app/models/**/*'
+      - 'backend/alembic/**/*'
+      - '**/migrations/**/*'
+
+ui-ux:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'backend/static/**/*.css'
+      - 'backend/static/**/*.html'
+      - '**/styles/**/*'
+      - '**/assets/**/*'
+
+performance:
+  - title-contains:
+    - 'performance'
+    - 'optimize'
+    - 'perf'
+  - body-contains:
+    - 'performance'
+    - 'optimization'
+
+bug:
+  - title-contains:
+    - 'fix:'
+    - 'bug:'
+    - '[fix]'
+    - '[bug]'
+  - body-contains:
+    - 'fixes #'
+    - 'closes #'
+    - 'resolves #'
+
+feature:
+  - title-contains:
+    - 'feat:'
+    - 'feature:'
+    - '[feat]'
+    - '[feature]'
+
+enhancement:
+  - title-contains:
+    - 'enhance:'
+    - 'improvement:'
+    - '[enhance]'

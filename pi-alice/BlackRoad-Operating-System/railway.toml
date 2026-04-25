@@ -1,0 +1,25 @@
+# ==============================================================================
+# BlackRoad Operating System - Railway Configuration
+# ==============================================================================
+#
+# This configuration deploys the monorepo as a SINGLE web service to Railway.
+#
+# Service: BlackRoad-Operating-System
+# Project: gregarious-wonder
+# Domain: app.blackroad.systems
+#
+# This is a temporary configuration. The long-term architecture uses satellite
+# repos (see DEPLOYMENT_ARCHITECTURE.md), but for now we're deploying the
+# monorepo directly to get the BR-95 desktop UI online.
+#
+# ==============================================================================
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

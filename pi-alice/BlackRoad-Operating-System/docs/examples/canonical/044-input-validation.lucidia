@@ -1,0 +1,27 @@
+# 044: Input Validation
+# Ensure data is correct
+
+form signup:
+  input email -> user.email
+    validate: is_email
+    error: "Please enter a valid email"
+
+  input password -> user.password
+    validate: (pw) => pw.length >= 8
+    error: "Password must be at least 8 characters"
+
+  input age -> user.age
+    validate: (a) => a >= 18
+    error: "Must be 18 or older"
+
+  button "Sign Up" -> create_account(user)
+
+create_account(data):
+  show "Account created for {data.email}"
+
+# Built-in validators:
+# - is_email
+# - is_url
+# - is_phone
+# - is_number
+# Custom validators are just functions that return true/false

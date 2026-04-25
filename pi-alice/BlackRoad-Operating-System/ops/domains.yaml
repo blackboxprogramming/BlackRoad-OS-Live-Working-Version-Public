@@ -1,0 +1,343 @@
+# Universal domain registry configuration
+# Each entry describes how a domain or subdomain should be handled.
+# Supported providers: "godaddy", "cloudflare"
+# Supported modes:
+#   - forward: use registrar forwarding (HTTPS 301)
+#   - dns: set DNS records (CNAME or A)
+
+domains:
+  # === blackroad.systems (primary corporate + OS surface) ===
+  - name: "blackroad.systems"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "cname.vercel-dns.com"  # Production corporate site on Vercel
+    notes: "Flagship corporate site served by blackroad.io deployment"
+    healthcheck: true
+
+  - name: "www.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"  # www redirect handled at Vercel/Cloudflare
+    notes: "Redirects to apex domain"
+
+  - name: "os.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-os-production.up.railway.app"
+    notes: "Primary OS interface (blackroad-os-core)"
+    healthcheck: true
+
+  - name: "api.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-api-production.up.railway.app"
+    notes: "API gateway"
+    healthcheck: true
+
+  - name: "console.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-prism-console.vercel.app"
+    notes: "Prism Console (public UI)"
+
+  - name: "prism.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-prism-console.vercel.app"
+    notes: "Prism Console"
+
+  - name: "operator.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-operator.up.railway.app"
+    notes: "Internal operator service (proxy off)"
+
+  - name: "lucidia.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia-api.up.railway.app"
+    notes: "Lucidia API"
+
+  - name: "docs.blackroad.systems"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackboxprogramming.github.io"
+    notes: "Developer docs"
+
+  # === blackroad.ai (alias to OS) ===
+  - name: "blackroad.ai"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "os.blackroad.systems"
+    notes: "Alias to OS"
+
+  - name: "www.blackroad.ai"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.ai"
+    notes: "www redirect"
+
+  # === blackroad.network (developer portal alias) ===
+  - name: "blackroad.network"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackboxprogramming.github.io"
+    notes: "Developer docs alias"
+    healthcheck: true
+
+  - name: "www.blackroad.network"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.network"
+    notes: "www redirect"
+
+  - name: "api.blackroad.network"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-api-production.up.railway.app"
+    notes: "Developer API"
+
+  # === blackroad.me (identity alias) ===
+  - name: "blackroad.me"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Personal identity alias"
+
+  - name: "www.blackroad.me"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.me"
+    notes: "www redirect"
+
+  # === aliceqi.com (ALICE QI engine) ===
+  - name: "aliceqi.com"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia-api.up.railway.app"
+    notes: "ALICE QI endpoint"
+
+  - name: "www.aliceqi.com"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "aliceqi.com"
+    notes: "www redirect"
+
+  # === blackroadqi.com (QI module) ===
+  - name: "blackroadqi.com"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad-api-production.up.railway.app"
+    notes: "Financial intelligence module"
+
+  - name: "www.blackroadqi.com"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroadqi.com"
+    notes: "www redirect"
+
+  # === lucidia.earth (narrative experiences) ===
+  - name: "lucidia.earth"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia-api.up.railway.app"
+    notes: "Narrative experiences"
+
+  - name: "www.lucidia.earth"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia.earth"
+    notes: "www redirect"
+
+  # === blackroadquantum.com (placeholder redirect to main) ===
+  - name: "blackroadquantum.com"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Placeholder until quantum hub is live"
+
+  - name: "www.blackroadquantum.com"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroadquantum.com"
+    notes: "www redirect"
+
+  # === roadwallet.com (wallet alias) ===
+  - name: "roadwallet.com"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Wallet alias placeholder"
+
+  - name: "www.roadwallet.com"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "roadwallet.com"
+    notes: "www redirect"
+
+  # === aliceos.io (legacy alias) ===
+  - name: "aliceos.io"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Legacy OS alias"
+
+  - name: "www.aliceos.io"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "aliceos.io"
+    notes: "www redirect"
+
+  # === Quantum family placeholders ===
+  - name: "blackroadquantum.net"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Hold with 301/alias to main site"
+
+  - name: "blackroadquantum.info"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Hold with 301/alias to main site"
+
+  - name: "blackroadquantum.store"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Hold with 301/alias to main site"
+
+  # === lucidia.studio (creative stack) ===
+  - name: "lucidia.studio"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia-api.up.railway.app"
+    notes: "Creative production endpoint"
+
+  - name: "www.lucidia.studio"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "lucidia.studio"
+    notes: "www redirect"
+
+  # === blackroad.store (commerce placeholder) ===
+  - name: "blackroad.store"
+    type: "root"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.systems"
+    notes: "Commerce placeholder forwarding to main site"
+
+  - name: "www.blackroad.store"
+    type: "subdomain"
+    provider: "cloudflare"
+    mode: "dns"
+    record:
+      type: "CNAME"
+      value: "blackroad.store"
+    notes: "www redirect"
+
+# Add additional domains or subdomains here following the same pattern.
+# By default you can set mode: "dns" with a CNAME pointing to os.blackroad.systems,
+# or override as needed.

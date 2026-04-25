@@ -1,0 +1,60 @@
+# 070: Consent Audit Log
+# Complete transparency of data access
+
+# View all consent events
+show_consent_history():
+  events = consent.get_audit_log()
+
+  show "Consent History ({events.length} events)"
+
+  for event in events:
+    show "━━━━━━━━━━━━━━━━"
+    show "Resource: {event.resource}"
+    show "Action: {event.action}"
+    show "Time: {event.timestamp}"
+    show "Purpose: {event.purpose}"
+    show "Granted: {event.granted}"
+
+    if event.access_count:
+      show "Times accessed: {event.access_count}"
+
+# Filter audit log
+show_last_24_hours():
+  recent = consent.get_audit_log()
+    .filter((e) => e.timestamp > now() - 24h)
+
+  show "Recent activity: {recent.length} events"
+
+# Export for GDPR compliance
+export_consent_data():
+  data = consent.export_all()
+
+  # Returns JSON with:
+  # - All permission grants
+  # - All access events
+  # - Timestamps
+  # - Purposes
+  # - User IP addresses (optional)
+
+  save_file("consent_data.json", data)
+  show "Consent data exported"
+
+# Consent analytics (privacy-preserving)
+show_consent_stats():
+  stats = consent.get_stats()
+
+  show "Most frequently accessed: {stats.most_accessed}"
+  show "Recently revoked: {stats.recently_revoked}"
+  show "Never used permissions: {stats.unused}"
+
+# Settings UI
+form consent_settings:
+  show "Your Privacy Dashboard"
+
+  button "View History" -> show_consent_history()
+  button "Export Data" -> export_consent_data()
+  button "Show Stats" -> show_consent_stats()
+  button "Revoke All" -> consent.revoke_all()
+
+# This level of transparency builds trust
+# Users see exactly what data is accessed, when, and why

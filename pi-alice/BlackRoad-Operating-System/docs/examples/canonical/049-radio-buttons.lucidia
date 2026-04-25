@@ -1,0 +1,35 @@
+# 049: Radio Buttons
+# Single selection from options
+
+form survey:
+  radio_group "How satisfied are you?" -> feedback.satisfaction
+    options: [
+      "Very satisfied",
+      "Satisfied",
+      "Neutral",
+      "Dissatisfied",
+      "Very dissatisfied"
+    ]
+
+  radio_group "Would you recommend us?" -> feedback.recommend
+    options: ["Yes", "No", "Maybe"]
+
+  button "Submit" -> submit_feedback(feedback)
+
+submit_feedback(data):
+  show "Satisfaction: {data.satisfaction}"
+  show "Recommend: {data.recommend}"
+
+# Radio with custom values
+form payment:
+  radio_group "Payment method" -> order.payment_method
+    options: [
+      { value: "card", label: "Credit Card" },
+      { value: "paypal", label: "PayPal" },
+      { value: "crypto", label: "Cryptocurrency" }
+    ]
+
+  button "Continue" -> process_payment(order)
+
+process_payment(data):
+  show "Payment method: {data.payment_method}"

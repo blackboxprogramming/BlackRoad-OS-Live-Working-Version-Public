@@ -1,0 +1,130 @@
+# 097: Markdown Editor
+# Live markdown editing with preview and export
+
+state content = load "draft" locally or """
+# Welcome to Lucidia Markdown Editor
+
+Start writing your markdown here...
+
+## Features
+- Live preview
+- Syntax highlighting
+- Export to HTML/PDF
+- Auto-save
+"""
+
+state preview_mode = "split"  # split, edit, preview
+
+# Editor
+form markdown_editor:
+  textarea content -> content
+    rows: 25
+    font: "monospace"
+    on_change: auto_save()
+
+  # Toolbar
+  toolbar:
+    button "Bold" -> insert("**bold**")
+    button "Italic" -> insert("*italic*")
+    button "Link" -> insert("[text](url)")
+    button "Image" -> insert("![alt](url)")
+    button "Code" -> insert("`code`")
+    button "Heading" -> insert("## ")
+
+insert(syntax):
+  # Insert at cursor position
+  content = content + syntax
+
+# Auto-save
+auto_save():
+  store content locally as "draft"
+
+# Preview modes
+button "Split View" -> preview_mode = "split"
+button "Edit Only" -> preview_mode = "edit"
+button "Preview Only" -> preview_mode = "preview"
+
+# Display based on mode
+preview_mode is:
+  "split": {
+    show_layout:
+      left:
+        show_editor(content)
+      right:
+        show_markdown_preview(content)
+  }
+  "edit": {
+    show_editor(content)
+  }
+  "preview": {
+    show_markdown_preview(content)
+  }
+
+# Word count
+computed word_count = content.split(/\s+/).length
+computed char_count = content.length
+
+show "Words: {word_count} | Characters: {char_count}"
+
+# Export options
+button "Export HTML" -> export_html()
+button "Export PDF" -> export_pdf()
+button "Download MD" -> export_md()
+
+export_html():
+  html = ai.transform(content, {
+    from: "markdown",
+    to: "html",
+    include_css: true
+  })
+
+  save_file("document.html", html)
+  show "Exported to HTML"
+
+export_pdf():
+  ### Intent: Convert markdown to PDF
+  pdf = ai.transform(content, {
+    from: "markdown",
+    to: "pdf"
+  })
+
+  save_file("document.pdf", pdf)
+  show "Exported to PDF"
+
+export_md():
+  save_file("document.md", content)
+  show "Downloaded markdown file"
+
+# Load file
+button "Open File" -> open_file()
+
+open_file():
+  ask permission for: filesystem.read
+    purpose: "Open markdown file"
+
+  if granted:
+    file = open_file_picker(accept: ".md,.txt")
+    if file != null:
+      content = file.read_text()
+      show "File loaded"
+
+# Save file
+button "Save File" -> save_file_dialog()
+
+save_file_dialog():
+  ask permission for: filesystem.write
+    purpose: "Save markdown file"
+
+  if granted:
+    save_file_picker("document.md", content)
+    show "File saved"
+
+# Keyboard shortcuts
+on key "Ctrl+B":
+  insert("**bold**")
+
+on key "Ctrl+I":
+  insert("*italic*")
+
+on key "Ctrl+S":
+  save_file_dialog()

@@ -1,0 +1,59 @@
+# 078: Conflict Resolution
+# Handle sync conflicts when local and cloud differ
+
+# Simple strategy: last write wins
+sync_notes():
+  notes = load "notes" locally
+
+  sync notes to cloud with:
+    on_conflict: "last_write_wins"
+
+  show "Notes synced (last write wins)"
+
+# Keep both versions
+sync_documents():
+  docs = load "documents" locally
+
+  sync docs to cloud with:
+    on_conflict: "keep_both"
+
+  # Creates: doc_local.txt and doc_cloud.txt
+  show "Sync complete (both versions saved)"
+
+# Manual conflict resolution
+sync_with_manual_resolution():
+  local_data = load "user_data" locally
+  cloud_data = fetch_from_cloud("user_data")
+
+  if local_data != cloud_data:
+    # Show conflict to user
+    show "Conflict detected!"
+    show "Local version: {local_data}"
+    show "Cloud version: {cloud_data}"
+
+    ask "Which version to keep?" -> choice
+      options: ["local", "cloud", "merge"]
+
+    choice is:
+      "local": {
+        sync local_data to cloud
+        show "Kept local version"
+      }
+      "cloud": {
+        store cloud_data locally as "user_data"
+        show "Kept cloud version"
+      }
+      "merge": {
+        merged = merge_data(local_data, cloud_data)
+        store merged locally as "user_data"
+        sync merged to cloud
+        show "Merged versions"
+      }
+
+# Smart merge
+merge_data(local, cloud):
+  return {
+    # Keep newer values for each field
+    name: local.updated_at > cloud.updated_at ? local.name : cloud.name,
+    email: local.updated_at > cloud.updated_at ? local.email : cloud.email
+  }

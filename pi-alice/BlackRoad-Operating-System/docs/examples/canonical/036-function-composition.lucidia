@@ -1,0 +1,29 @@
+# 036: Function Composition
+# Combine functions to create new ones
+
+# Simple functions
+add_one = (x) => x + 1
+double = (x) => x * 2
+square = (x) => x * x
+
+# Manual composition
+result = square(double(add_one(3)))
+show result  # (3+1)*2 = 8, 8*8 = 64
+
+# Compose helper
+compose(f, g):
+  return (x) => f(g(x))
+
+# Create composed function
+double_then_square = compose(square, double)
+show double_then_square(5)  # (5*2)^2 = 100
+
+# Chain multiple operations
+numbers = [1, 2, 3, 4, 5]
+
+result = numbers
+  .map((x) => x * 2)      # double each
+  .filter((x) => x > 5)   # keep if > 5
+  .reduce((sum, x) => sum + x, 0)  # sum all
+
+show result  # 6 + 8 + 10 = 24

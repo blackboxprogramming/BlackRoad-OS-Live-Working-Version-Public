@@ -1,0 +1,77 @@
+# 091: Todo App
+# Complete task management application
+
+state todos = load "todos" locally or []
+state filter = "all"  # all, active, completed
+
+# Add new todo
+form add_todo:
+  input new_todo_text -> todo_text
+    placeholder: "What needs to be done?"
+
+  button "Add" -> add(todo_text)
+
+add(text):
+  if text == "": return
+
+  new_todo = {
+    id: generate_id(),
+    text: text,
+    completed: false,
+    created_at: now()
+  }
+
+  todos.append(new_todo)
+  store todos locally as "todos"
+  todo_text = ""  # Clear input
+
+# Toggle completion
+toggle(id):
+  todos = todos.map(todo => {
+    if todo.id == id:
+      { ...todo, completed: not todo.completed }
+    else:
+      todo
+  })
+  store todos locally as "todos"
+
+# Delete todo
+delete_todo(id):
+  todos = todos.filter(todo => todo.id != id)
+  store todos locally as "todos"
+
+# Filter todos
+computed filtered_todos = todos.filter(todo => {
+  filter is:
+    "all": true
+    "active": not todo.completed
+    "completed": todo.completed
+})
+
+# Display todos
+for todo in filtered_todos:
+  show_todo:
+    text: todo.text
+    completed: todo.completed
+    on_toggle: () => toggle(todo.id)
+    on_delete: () => delete_todo(todo.id)
+
+# Filter buttons
+show "Show: "
+button "All ({todos.length})" -> filter = "all"
+button "Active ({active_count})" -> filter = "active"
+button "Completed ({completed_count})" -> filter = "completed"
+
+computed active_count = todos.filter(t => not t.completed).length
+computed completed_count = todos.filter(t => t.completed).length
+
+# Clear completed
+if completed_count > 0:
+  button "Clear Completed" -> clear_completed()
+
+clear_completed():
+  todos = todos.filter(todo => not todo.completed)
+  store todos locally as "todos"
+
+generate_id():
+  return now() + Math.random()

@@ -1,0 +1,303 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  RAILWAY_SERVICE: backend
+  ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend to Railway
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: |
+          curl -fsSL https://railway.app/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up --service ${{ env.RAILWAY_SERVICE }} --environment ${{ env.ENVIRONMENT }}
+
+      - name: Wait for deployment to complete
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          echo "Waiting for Railway deployment to stabilize..."
+          sleep 30
+
+      - name: Get deployment URL
+        id: get-url
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          DEPLOY_URL=$(railway domain --service ${{ env.RAILWAY_SERVICE }} --environment ${{ env.ENVIRONMENT }} 2>/dev/null || echo "")
+          echo "DEPLOY_URL=$DEPLOY_URL" >> $GITHUB_OUTPUT
+          echo "Backend deployed to: $DEPLOY_URL"
+
+      - name: Health check
+        if: steps.get-url.outputs.DEPLOY_URL != ''
+        run: |
+          echo "Running health check on ${{ steps.get-url.outputs.DEPLOY_URL }}"
+
+          # Retry health check up to 10 times
+          for i in {1..10}; do
+            if curl -f "${{ steps.get-url.outputs.DEPLOY_URL }}/health" 2>/dev/null; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Health check attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "❌ Health check failed after 10 attempts"
+          exit 1
+
+      - name: Save deployment metadata
+        id: metadata
+        run: |
+          echo "DEPLOY_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_OUTPUT
+          echo "DEPLOY_SHA=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "DEPLOY_ACTOR=${{ github.actor }}" >> $GITHUB_OUTPUT
+          echo "DEPLOY_BRANCH=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+
+    outputs:
+      deploy_url: ${{ steps.get-url.outputs.DEPLOY_URL }}
+      deploy_time: ${{ steps.metadata.outputs.DEPLOY_TIME }}
+      deploy_sha: ${{ steps.metadata.outputs.DEPLOY_SHA }}
+
+  deploy-frontend:
+    name: Deploy Frontend to Cloudflare Pages
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ENV: ${{ env.ENVIRONMENT }}
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref_name }}
+
+      - name: Verify frontend deployment
+        run: |
+          FRONTEND_URL="${{ secrets.CLOUDFLARE_PAGES_URL }}"
+          echo "Verifying frontend at $FRONTEND_URL"
+
+          # Wait for Cloudflare propagation
+          sleep 30
+
+          # Check if frontend loads
+          for i in {1..5}; do
+            if curl -f "$FRONTEND_URL" 2>/dev/null; then
+              echo "✅ Frontend is accessible"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "❌ Frontend verification failed"
+          exit 1
+
+  notify-stakeholders:
+    name: Notify Stakeholders
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+      - name: Extract Project Key from repo name
+        id: project-key
+        run: |
+          # Extract from repo name: blackroad-ACME-X7K9-backend → ACME-X7K9
+          REPO_NAME="${{ github.repository }}"
+          PROJECT_KEY=$(echo "$REPO_NAME" | sed -n 's/.*blackroad-\([A-Z0-9-]*\)-.*/\1/p')
+
+          if [ -z "$PROJECT_KEY" ]; then
+            echo "Warning: Could not extract project key from repo name"
+            PROJECT_KEY="UNKNOWN"
+          fi
+
+          echo "PROJECT_KEY=$PROJECT_KEY" >> $GITHUB_OUTPUT
+          echo "Extracted project key: $PROJECT_KEY"
+
+      - name: Update Salesforce Project record
+        if: steps.project-key.outputs.PROJECT_KEY != 'UNKNOWN'
+        env:
+          SF_INSTANCE_URL: ${{ secrets.SALESFORCE_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SALESFORCE_ACCESS_TOKEN }}
+        run: |
+          curl -X PATCH \
+            "$SF_INSTANCE_URL/services/data/v58.0/sobjects/Project__c/Project_Key__c/${{ steps.project-key.outputs.PROJECT_KEY }}" \
+            -H "Authorization: Bearer $SF_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "Last_Deploy_At__c": "${{ needs.deploy-backend.outputs.deploy_time }}",
+              "Last_Deploy_SHA__c": "${{ needs.deploy-backend.outputs.deploy_sha }}",
+              "Last_Deploy_Branch__c": "${{ github.ref_name }}",
+              "Last_Deploy_Actor__c": "${{ github.actor }}",
+              "Deploy_Status__c": "Success",
+              "Environment__c": "${{ env.ENVIRONMENT }}",
+              "Backend_URL__c": "${{ needs.deploy-backend.outputs.deploy_url }}",
+              "Release_Notes_URL__c": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+            }' || echo "Warning: Failed to update Salesforce"
+
+      - name: Create Salesforce Deployment record
+        if: steps.project-key.outputs.PROJECT_KEY != 'UNKNOWN'
+        env:
+          SF_INSTANCE_URL: ${{ secrets.SALESFORCE_INSTANCE_URL }}
+          SF_ACCESS_TOKEN: ${{ secrets.SALESFORCE_ACCESS_TOKEN }}
+        run: |
+          curl -X POST \
+            "$SF_INSTANCE_URL/services/data/v58.0/sobjects/Deployment__c" \
+            -H "Authorization: Bearer $SF_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "Name": "${{ steps.project-key.outputs.PROJECT_KEY }} - ${{ github.sha }}",
+              "Project_Key__c": "${{ steps.project-key.outputs.PROJECT_KEY }}",
+              "Deployed_At__c": "${{ needs.deploy-backend.outputs.deploy_time }}",
+              "Git_SHA__c": "${{ github.sha }}",
+              "Git_Branch__c": "${{ github.ref_name }}",
+              "Deployed_By__c": "${{ github.actor }}",
+              "Status__c": "Success",
+              "Environment__c": "${{ env.ENVIRONMENT }}",
+              "Repository__c": "${{ github.repository }}",
+              "Commit_URL__c": "https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+            }' || echo "Warning: Failed to create Deployment record"
+
+      - name: Update Asana tasks
+        if: steps.project-key.outputs.PROJECT_KEY != 'UNKNOWN' && env.ENVIRONMENT == 'production'
+        env:
+          ASANA_PAT: ${{ secrets.ASANA_PAT }}
+          ASANA_WORKSPACE_GID: ${{ secrets.ASANA_WORKSPACE_GID }}
+        run: |
+          PROJECT_KEY="${{ steps.project-key.outputs.PROJECT_KEY }}"
+
+          # Find Asana project by name containing PROJECT_KEY
+          PROJECT_GID=$(curl -s "https://app.asana.com/api/1.0/projects?workspace=$ASANA_WORKSPACE_GID&opt_fields=name,gid" \
+            -H "Authorization: Bearer $ASANA_PAT" | \
+            jq -r ".data[] | select(.name | contains(\"$PROJECT_KEY\")) | .gid" | head -n 1)
+
+          if [ -z "$PROJECT_GID" ]; then
+            echo "Warning: Could not find Asana project for $PROJECT_KEY"
+            exit 0
+          fi
+
+          echo "Found Asana project: $PROJECT_GID"
+
+          # Find "Deploy" task
+          TASK_GID=$(curl -s "https://app.asana.com/api/1.0/projects/$PROJECT_GID/tasks?opt_fields=name,gid,completed" \
+            -H "Authorization: Bearer $ASANA_PAT" | \
+            jq -r '.data[] | select(.name | test("Deploy.*production"; "i")) | select(.completed == false) | .gid' | head -n 1)
+
+          if [ -z "$TASK_GID" ]; then
+            echo "No pending deploy task found in Asana"
+            exit 0
+          fi
+
+          echo "Found deploy task: $TASK_GID"
+
+          # Mark task as complete
+          curl -X PUT "https://app.asana.com/api/1.0/tasks/$TASK_GID" \
+            -H "Authorization: Bearer $ASANA_PAT" \
+            -H "Content-Type: application/json" \
+            -d '{"data": {"completed": true}}' || echo "Warning: Failed to complete task"
+
+          # Add comment with deploy details
+          curl -X POST "https://app.asana.com/api/1.0/tasks/$TASK_GID/stories" \
+            -H "Authorization: Bearer $ASANA_PAT" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "data": {
+                "text": "✅ Deployed to production\n\n**Commit:** ${{ github.sha }}\n**By:** ${{ github.actor }}\n**Time:** ${{ needs.deploy-backend.outputs.deploy_time }}\n**Link:** https://github.com/${{ github.repository }}/commit/${{ github.sha }}"
+              }
+            }' || echo "Warning: Failed to add comment"
+
+      - name: Notify Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_DEPLOYS }}
+        run: |
+          STATUS_EMOJI="✅"
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "'"$STATUS_EMOJI"' *Deploy to '"${{ env.ENVIRONMENT }}"'*\n\n*Project:* '"${{ steps.project-key.outputs.PROJECT_KEY }}"'\n*Repo:* `${{ github.repository }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|'"${GITHUB_SHA:0:7}"'>\n*By:* ${{ github.actor }}\n*Backend:* ${{ needs.deploy-backend.outputs.deploy_url }}"
+                  }
+                }
+              ]
+            }' || echo "Warning: Failed to send Slack notification"
+
+  rollback-on-failure:
+    name: Rollback on Failure
+    needs: [deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: failure()
+
+    steps:
+      - name: Notify failure
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_DEPLOYS }}
+        run: |
+          curl -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *Deploy FAILED*\n\n*Repo:* `${{ github.repository }}`\n*Commit:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|'"${GITHUB_SHA:0:7}"'>\n*By:* ${{ github.actor }}\n\n⚠️ Manual intervention may be required. Check the <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|workflow run> for details."
+                  }
+                }
+              ]
+            }' || true

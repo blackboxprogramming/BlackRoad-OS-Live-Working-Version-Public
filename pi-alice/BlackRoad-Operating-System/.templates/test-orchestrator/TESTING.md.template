@@ -1,0 +1,376 @@
+# Testing Guide - {{REPO_NAME}}
+
+> **Comprehensive testing documentation**
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Quick Start](#quick-start)
+3. [Test Orchestrator](#test-orchestrator)
+4. [Test Suites](#test-suites)
+5. [Local Development](#local-development)
+6. [CI/CD Integration](#cicd-integration)
+7. [Writing Tests](#writing-tests)
+8. [Troubleshooting](#troubleshooting)
+9. [Best Practices](#best-practices)
+
+---
+
+## Overview
+
+{{PROJECT_DESCRIPTION}}
+
+This project uses a **unified test orchestrator** that coordinates all test suites. This ensures consistent testing behavior between local development and CI/CD environments.
+
+### Testing Philosophy
+
+- **Comprehensive**: All components are tested
+- **Fast Feedback**: Tests run quickly with clear output
+- **Isolated**: Each suite runs independently
+- **Consistent**: Same test runner works locally and in CI
+- **Extensible**: Easy to add new test suites
+
+### Test Coverage
+
+| Component | Framework | Location | Status |
+|-----------|-----------|----------|--------|
+| TODO: Component 1 | TODO: Framework | `path/to/tests/` | ✅ Active |
+| TODO: Component 2 | TODO: Framework | `path/to/tests/` | ✅ Active |
+<!-- Add your test suites here -->
+
+---
+
+## Quick Start
+
+### Run All Tests
+
+```bash
+# Best-effort mode - runs all suites, reports summary
+./test_all.sh
+
+# Strict mode - fails on first error
+./test_all.sh --strict
+
+# Verbose output
+./test_all.sh --verbose
+```
+
+### Run Specific Suite
+
+```bash
+# TODO: Replace with your actual suite names
+./test_all.sh --suite example-suite-1
+./test_all.sh --suite example-suite-2
+```
+
+---
+
+## Test Orchestrator
+
+The **Test Orchestrator** (`test_all.sh`) is the central test runner.
+
+### Features
+
+✅ **Unified Interface**: Single command to run all tests
+✅ **Smart Detection**: Automatically finds and runs test suites
+✅ **Two Modes**: Best-effort (run all) and strict (fail-fast)
+✅ **Clear Output**: Color-coded, structured output with summary
+✅ **CI-Friendly**: Same script works locally and in GitHub Actions
+
+### Usage
+
+```bash
+# Run all suites with detailed output
+./test_all.sh --verbose
+
+# Run specific suite in strict mode
+./test_all.sh --suite my-suite --strict
+
+# Get help
+./test_all.sh --help
+```
+
+### Output Example
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{{REPO_NAME}} - Test Orchestrator
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+▶ Example Suite 1
+  ✓ Tests passed
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEST SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Suite                     Result     Duration
+─────────────────────────────────────────────────────────
+example-suite-1           ✓ PASS     5s
+
+Total: 1 suites | 1 passed | 0 failed | 0 skipped
+
+✅ ALL TESTS PASSED
+```
+
+---
+
+## Test Suites
+
+<!-- TODO: Document each of your test suites -->
+
+### 1. Example Suite
+
+**Framework**: pytest / jest / etc.
+**Location**: `path/to/tests/`
+**Coverage**: Description of what this suite tests
+
+#### Running This Suite
+
+```bash
+# Via orchestrator
+./test_all.sh --suite example-suite-1
+
+# Direct command
+# TODO: Add direct test command
+```
+
+<!-- Add more test suite sections as needed -->
+
+---
+
+## Local Development
+
+### Prerequisites
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+<!-- TODO: List your required tools -->
+| **Python** | 3.11+ | Backend tests |
+| **Node.js** | 20+ | Frontend tests |
+| **Git** | 2.30+ | Version control |
+
+### Setup
+
+```bash
+# 1. Clone repository
+git clone https://github.com/{{ORG_NAME}}/{{REPO_NAME}}.git
+cd {{REPO_NAME}}
+
+# 2. Install dependencies
+# TODO: Add your installation commands
+
+# 3. Run tests
+./test_all.sh
+```
+
+### Environment Variables
+
+```bash
+# TODO: Document required environment variables
+# Example:
+DATABASE_URL=postgresql://localhost/testdb
+API_KEY=your-test-api-key
+```
+
+---
+
+## CI/CD Integration
+
+### GitHub Actions Workflow
+
+**File**: `.github/workflows/test-orchestrator.yml`
+
+The CI workflow uses the same `test_all.sh` script as local development.
+
+#### Workflow Features
+
+✅ Runs on push to main branch
+✅ Runs on pull requests
+✅ Supports manual dispatch
+✅ Uploads test artifacts
+✅ Generates test summary
+
+#### Triggering CI
+
+```bash
+# Push to main
+git push origin main
+
+# Create pull request
+gh pr create --title "My Feature" --body "Description"
+```
+
+#### Manual Dispatch
+
+1. Go to **Actions** → **Test Orchestrator**
+2. Click **Run workflow**
+3. Select branch and options
+
+---
+
+## Writing Tests
+
+### Test Structure
+
+```
+tests/
+├── unit/              # Fast, isolated tests
+├── integration/       # Tests with dependencies
+├── fixtures/          # Shared test data
+└── conftest.py        # Shared configuration
+```
+
+### Example Test
+
+<!-- TODO: Add framework-specific examples -->
+
+```python
+# Example pytest test
+def test_example():
+    assert 1 + 1 == 2
+```
+
+```javascript
+// Example Jest test
+test('example test', () => {
+  expect(1 + 1).toBe(2);
+});
+```
+
+### Test Naming
+
+- **Files**: `test_*.py` or `*.test.ts`
+- **Functions**: `test_feature_scenario()`
+- **Classes**: `TestFeature`
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### Issue: Permission Denied
+
+```bash
+# Solution
+chmod +x test_all.sh
+```
+
+#### Issue: Command Not Found
+
+```bash
+# Solution: Install missing tool
+# TODO: Add installation commands for your tools
+```
+
+#### Issue: Tests Pass Locally but Fail in CI
+
+**Possible causes**:
+- Missing environment variables
+- Different tool versions
+- Service dependencies not ready
+
+**Solution**: Check CI logs for specific errors
+
+### Debugging
+
+```bash
+# Verbose output
+./test_all.sh --verbose
+
+# Run single test
+# TODO: Add framework-specific command
+```
+
+---
+
+## Best Practices
+
+### General
+
+1. **Write tests first** (TDD when possible)
+2. **Keep tests isolated** and independent
+3. **Use descriptive names**
+4. **Mock external dependencies**
+5. **Test both success and error paths**
+
+### Specific to Your Stack
+
+<!-- TODO: Add framework-specific best practices -->
+
+---
+
+## FAQ
+
+### Q: How do I add a new test suite?
+
+**A**: Edit `test_all.sh`:
+
+1. Add a new `run_mysuite_tests()` function
+2. Call it in the main execution block
+3. Update the suite list in `print_summary()`
+
+### Q: How do I skip a test temporarily?
+
+**A**: Use your framework's skip decorator:
+
+```python
+# Pytest
+@pytest.mark.skip(reason="TODO")
+def test_something():
+    pass
+```
+
+```javascript
+// Jest
+test.skip('something', () => {
+  // Skipped
+});
+```
+
+### Q: How do I run tests with coverage?
+
+**A**: Use framework-specific coverage tools:
+
+```bash
+# TODO: Add coverage commands for your frameworks
+```
+
+---
+
+## Resources
+
+- [Project README](./README.md)
+- [Contributing Guide](./CONTRIBUTING.md)
+<!-- TODO: Add links to your documentation -->
+
+### Testing Frameworks
+
+<!-- TODO: Add links to framework docs you use -->
+- [pytest](https://docs.pytest.org/)
+- [Jest](https://jestjs.io/)
+
+---
+
+## Contributing
+
+When adding tests:
+
+1. **Run all tests** before submitting PR: `./test_all.sh`
+2. **Ensure tests pass** in CI
+3. **Add tests for new features**
+4. **Update this documentation** if changing test infrastructure
+
+---
+
+**Questions?** Open an issue or check the project documentation.
+
+**Happy Testing! 🧪✨**
+
+---
+
+*This testing guide uses the BlackRoad Operating System Test Orchestrator pattern.*
+*Adapted from: https://github.com/blackboxprogramming/BlackRoad-Operating-System*

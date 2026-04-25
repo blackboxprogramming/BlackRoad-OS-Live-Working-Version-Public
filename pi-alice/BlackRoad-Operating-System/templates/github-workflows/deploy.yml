@@ -1,0 +1,93 @@
+# BlackRoad OS - Railway Deployment Workflow
+#
+# This workflow automatically deploys to Railway when code is pushed to main.
+# Copy this file to .github/workflows/deploy.yml in your satellite repo.
+#
+# Required Secrets:
+# - RAILWAY_TOKEN: Railway API token (get from railway.app)
+#
+# Usage:
+# 1. Copy to .github/workflows/deploy.yml
+# 2. Replace {SERVICE_NAME} with actual service name (e.g., "core", "api")
+# 3. Replace {DOMAIN} with Cloudflare subdomain (e.g., "core", "api")
+# 4. Add RAILWAY_TOKEN to GitHub repo secrets
+
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+        continue-on-error: false
+
+      - name: Build application
+        run: npm run build
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        run: railway up --service blackroad-os-{SERVICE_NAME}-production
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Wait for deployment
+        run: sleep 15
+
+      - name: Health check
+        run: |
+          MAX_RETRIES=5
+          RETRY_COUNT=0
+          until [ $RETRY_COUNT -ge $MAX_RETRIES ]
+          do
+            if curl -f https://{DOMAIN}.blackroad.systems/health; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            RETRY_COUNT=$((RETRY_COUNT+1))
+            echo "Health check failed, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+            sleep 5
+          done
+          echo "Health check failed after $MAX_RETRIES attempts"
+          exit 1
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Deployment failed! Check Railway logs."
+
+  notify:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: always()
+
+    steps:
+      - name: Deployment succeeded
+        if: needs.deploy.result == 'success'
+        run: echo "✅ Deployment to production succeeded"
+
+      - name: Deployment failed
+        if: needs.deploy.result == 'failure'
+        run: echo "❌ Deployment to production failed"

@@ -1,0 +1,68 @@
+# 079: Offline-First Pattern
+# App works without internet, syncs when available
+
+# Always write to local first
+save_note(note):
+  # Save locally immediately
+  notes = load "notes" locally or []
+  note.id = generate_id()
+  note.synced = false
+  notes.append(note)
+  store notes locally as "notes"
+
+  show "Note saved"
+
+  # Try to sync in background
+  if network.online:
+    sync_in_background(note)
+  else:
+    show "(Will sync when online)"
+
+# Background sync
+sync_in_background(note):
+  try:
+    sync note to cloud
+    note.synced = true
+    update_note(note)
+  catch:
+    # Sync failed, will retry later
+    queue_for_retry(note)
+
+# Load data (local always available)
+load_notes():
+  notes = load "notes" locally or []
+
+  # Try to fetch updates from cloud
+  if network.online:
+    cloud_notes = fetch_from_cloud("notes")
+    merged = merge_notes(notes, cloud_notes)
+    store merged locally as "notes"
+    return merged
+  else:
+    # Offline - return local data
+    return notes
+
+# Indicate sync status
+display_notes():
+  notes = load_notes()
+
+  for note in notes:
+    show note.text
+    if note.synced:
+      show "✓ Synced"
+    else:
+      show "⋯ Pending sync"
+
+# Retry pending syncs when back online
+on network.online:
+  pending = load "sync_queue" locally or []
+
+  for item in pending:
+    sync item to cloud
+    mark_as_synced(item)
+
+  delete "sync_queue" locally
+  show "Synced {pending.length} pending items"
+
+# The app ALWAYS works locally
+# Cloud is enhancement, not requirement

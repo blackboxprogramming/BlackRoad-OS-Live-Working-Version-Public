@@ -1,0 +1,45 @@
+# 074: Delete Local Data
+# Remove stored data
+
+# Delete specific item
+delete_user_preferences():
+  delete "user_prefs" locally
+  show "Preferences deleted"
+
+# Delete with confirmation
+clear_all_todos():
+  ask "Are you sure? This cannot be undone." -> confirm
+
+  if confirm == "yes":
+    delete "todos" locally
+    show "All todos deleted"
+  else:
+    show "Cancelled"
+
+# Delete multiple items
+reset_app():
+  delete "user" locally
+  delete "settings" locally
+  delete "cache" locally
+  show "App reset to defaults"
+
+# Delete all local data
+clear_all_storage():
+  storage.clear_all()
+  show "All local data deleted"
+
+# Conditional deletion
+cleanup_old_data():
+  cached_data = load "cache" locally
+
+  if cached_data != null:
+    age = now() - cached_data.timestamp
+
+    if age > 7 * 24 * 60 * 60:  # 7 days
+      delete "cache" locally
+      show "Old cache deleted"
+
+button "Delete Preferences" -> delete_user_preferences()
+button "Clear Todos" -> clear_all_todos()
+button "Reset App" -> reset_app()
+button "Cleanup" -> cleanup_old_data()

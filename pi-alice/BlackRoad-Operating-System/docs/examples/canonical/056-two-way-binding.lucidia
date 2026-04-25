@@ -1,0 +1,48 @@
+# 056: Two-Way Binding
+# State and UI stay in sync automatically
+
+state message = "Hello, World!"
+
+# Input field binds to state
+form editor:
+  input message -> message
+
+# Display automatically updates as you type
+show "Preview: {message}"
+show "Length: {message.length} characters"
+
+# Computed values update too
+computed word_count = message.split(" ").length
+show "Words: {word_count}"
+
+# Slider example
+state volume = 50
+
+form volume_control:
+  slider volume -> volume
+    min: 0
+    max: 100
+    step: 1
+
+show "Volume: {volume}%"
+
+# Visual indicator
+if volume > 75:
+  show "🔊 Loud"
+else if volume > 25:
+  show "🔉 Medium"
+else:
+  show "🔈 Quiet"
+
+# Color picker
+state color = "#3366ff"
+
+form color_picker:
+  input color -> color
+    type: "color"
+
+# Preview box updates in real-time
+show_box:
+  background: color
+  width: 100
+  height: 100

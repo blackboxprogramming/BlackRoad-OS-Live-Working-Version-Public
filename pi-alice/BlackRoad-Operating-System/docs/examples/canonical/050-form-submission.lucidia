@@ -1,0 +1,47 @@
+# 050: Form Submission
+# Handle complete form workflows
+
+form login:
+  input email -> credentials.email
+    type: "email"
+    validate: is_email
+    required: true
+
+  input password -> credentials.password
+    type: "password"
+    validate: (pw) => pw.length >= 8
+    required: true
+
+  checkbox "Remember me" -> credentials.remember
+
+  button "Log In" -> attempt_login(credentials)
+  button "Forgot Password?" -> reset_password()
+
+attempt_login(creds):
+  # Validate all fields are present
+  if not creds.email or not creds.password:
+    show "Please fill in all fields"
+    return
+
+  # In real app, this would call an API
+  show "Logging in as {creds.email}..."
+
+  # Simulate API call
+  success = true
+
+  if success:
+    show "Login successful!"
+    if creds.remember:
+      show "You will be remembered"
+  else:
+    show "Invalid credentials"
+
+reset_password():
+  ask "Enter your email:" -> email
+  show "Password reset link sent to {email}"
+
+# Form automatically handles:
+# - Validation before submission
+# - Disabled submit button if invalid
+# - Error messages next to fields
+# - Loading states during async operations

@@ -1,0 +1,100 @@
+# 092: Note Taking App
+# Markdown notes with local storage and search
+
+state notes = load "notes" locally or []
+state current_note = null
+state search_query = ""
+
+# Create new note
+create_note():
+  note = {
+    id: generate_id(),
+    title: "Untitled",
+    content: "",
+    created_at: now(),
+    updated_at: now(),
+    tags: []
+  }
+
+  notes.append(note)
+  current_note = note
+  store notes locally as "notes"
+
+# Save note
+save_note():
+  if current_note == null: return
+
+  current_note.updated_at = now()
+
+  notes = notes.map(note => {
+    if note.id == current_note.id:
+      current_note
+    else:
+      note
+  })
+
+  store notes locally as "notes"
+  show "Note saved"
+
+# Delete note
+delete_note(id):
+  notes = notes.filter(note => note.id != id)
+  current_note = null
+  store notes locally as "notes"
+
+# Search notes
+computed filtered_notes = notes.filter(note => {
+  if search_query == "": return true
+
+  query_lower = search_query.lowercase()
+  return note.title.lowercase().contains(query_lower) or
+         note.content.lowercase().contains(query_lower)
+})
+
+# UI Layout
+show_layout:
+  # Sidebar
+  sidebar:
+    button "New Note" -> create_note()
+
+    input search_query -> search_query
+      placeholder: "Search notes..."
+
+    show "{filtered_notes.length} notes"
+
+    for note in filtered_notes:
+      note_list_item:
+        title: note.title
+        preview: note.content[0:50]
+        date: format_date(note.updated_at)
+        active: current_note?.id == note.id
+        on_click: () => current_note = note
+
+  # Editor
+  editor:
+    if current_note != null:
+      input current_note.title -> current_note.title
+        on_change: save_note()
+
+      textarea current_note.content -> current_note.content
+        on_change: save_note()
+        rows: 20
+
+      # Markdown preview
+      show_markdown(current_note.content)
+
+      # Tags
+      show "Tags:"
+      for tag in current_note.tags:
+        show_tag(tag)
+
+      button "Delete Note" -> delete_note(current_note.id)
+    else:
+      show "Select a note or create a new one"
+
+format_date(timestamp):
+  # AI: Format as relative time
+  return "2 hours ago"
+
+generate_id():
+  return now() + Math.random()

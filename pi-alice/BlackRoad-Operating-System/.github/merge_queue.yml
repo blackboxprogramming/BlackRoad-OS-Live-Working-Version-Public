@@ -1,0 +1,170 @@
+# GitHub Merge Queue Configuration
+#
+# This file configures the merge queue behavior for BlackRoad OS.
+# The merge queue ensures safe, orderly merging of PRs with automated testing.
+#
+# Documentation: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue
+
+# Queue Configuration
+queue:
+  # Required status checks that must pass before merging
+  required_checks:
+    - "Backend Tests"
+    - "CI / validate-html"
+    - "CI / validate-javascript"
+    - "CI / security-scan"
+
+  # Merge method (options: merge, squash, rebase)
+  merge_method: squash
+
+  # Number of PRs that can be merged together in a batch
+  # Higher values increase throughput but may make failures harder to debug
+  batch_size: 5
+
+  # Maximum time (in minutes) to wait for checks to complete
+  check_timeout: 30
+
+  # Automatically update PRs in the queue with the base branch
+  auto_update: true
+
+  # Minimum number of approvals required
+  min_approvals: 0  # Set to 0 for auto-merge of safe PRs
+
+  # Allow bypassing the queue for specific labels
+  bypass_labels:
+    - "hotfix"
+    - "emergency"
+
+# Auto-merge Configuration
+auto_merge:
+  # Enable auto-merge for PRs with these labels
+  enabled_labels:
+    - "claude-auto"
+    - "atlas-auto"
+    - "docs"
+    - "chore"
+    - "tests-only"
+    - "dependencies"
+
+  # Require all checks to pass
+  require_checks: true
+
+  # Require reviews for auto-merge
+  require_reviews: false
+
+  # Auto-dismiss stale reviews
+  dismiss_stale_reviews: true
+
+  # Allowed base branches for auto-merge
+  allowed_base_branches:
+    - "main"
+    - "develop"
+
+  # Excluded file patterns (PRs touching these files won't auto-merge)
+  excluded_patterns:
+    - ".github/workflows/**"
+    - "backend/app/config.py"
+    - "backend/app/database.py"
+    - "railway.toml"
+    - "railway.json"
+
+# Branch Protection Requirements
+# These are enforced before a PR enters the merge queue
+branch_protection:
+  # Require status checks to pass
+  require_status_checks: true
+
+  # Require branches to be up to date before merging
+  require_up_to_date: true
+
+  # Require pull request reviews
+  require_pull_request_reviews: false  # Disabled for AI auto-merge
+
+  # Require signed commits
+  require_signed_commits: false
+
+  # Restrict who can push to matching branches
+  restrictions:
+    users: []
+    teams: []
+
+# Notification Settings
+notifications:
+  # Notify when PR is added to queue
+  on_queue_add: true
+
+  # Notify when PR is merged
+  on_merge: true
+
+  # Notify when PR fails checks in queue
+  on_failure: true
+
+  # Channels to notify (Slack, Discord, etc.)
+  channels:
+    - type: "github_comment"
+      enabled: true
+    # - type: "slack"
+    #   webhook_url: "${SLACK_WEBHOOK_URL}"
+    #   enabled: false
+
+# Queue Priority Rules
+# Higher priority PRs are processed first
+priority_rules:
+  - label: "hotfix"
+    priority: 100
+  - label: "security"
+    priority: 90
+  - label: "breaking-change"
+    priority: 80
+  - label: "claude-auto"
+    priority: 50
+  - label: "docs"
+    priority: 30
+  - label: "chore"
+    priority: 20
+
+# Conflict Resolution
+conflict_resolution:
+  # Action to take when conflicts are detected
+  # Options: remove_from_queue, notify, auto_resolve
+  action: "remove_from_queue"
+
+  # Notify PR author
+  notify_author: true
+
+  # Comment template
+  comment: |
+    This PR has been removed from the merge queue due to merge conflicts.
+    Please resolve the conflicts and re-add to the queue.
+
+# Rate Limiting
+rate_limiting:
+  # Maximum merges per hour
+  max_merges_per_hour: 20
+
+  # Maximum queue size
+  max_queue_size: 50
+
+  # Cooldown period (minutes) after a failed merge
+  failure_cooldown: 5
+
+# Integration with Operator Engine
+operator_integration:
+  # Enable Operator Engine automation
+  enabled: true
+
+  # Webhook URL for Operator Engine
+  webhook_url: "${OPERATOR_WEBHOOK_URL}"
+
+  # Actions to trigger via Operator
+  actions:
+    - "update_branch"
+    - "rerun_checks"
+    - "resolve_conflicts"
+    - "add_labels"
+
+  # Auto-trigger actions
+  auto_trigger:
+    update_branch_on_queue: true
+    rerun_failed_checks: true
+    sync_labels: true

@@ -1,0 +1,48 @@
+# 067: Checking Permission Status
+# Query current permission state
+
+# Check before requesting
+show_location_feature():
+  status = consent.check_status("location")
+
+  status is:
+    "granted": {
+      # Already have permission
+      show_location_map()
+    }
+    "denied": {
+      # User previously denied
+      show "You denied location access"
+      show "To enable, grant permission below:"
+      button "Enable Location" -> request_location()
+    }
+    "not_asked": {
+      # Never requested before
+      show "Enable location to see nearby places"
+      button "Enable" -> request_location()
+    }
+
+request_location():
+  ask permission for: location
+  if granted:
+    show_location_map()
+
+show_location_map():
+  show "📍 Map view enabled"
+
+# Check multiple permissions
+check_video_call_ready():
+  camera_status = consent.check_status("camera")
+  mic_status = consent.check_status("microphone")
+
+  if camera_status == "granted" and mic_status == "granted":
+    show "✅ Ready for video call"
+    button "Start Call" -> start_call()
+  else:
+    show "⚠️  Missing permissions:"
+    if camera_status != "granted":
+      show "  - Camera"
+    if mic_status != "granted":
+      show "  - Microphone"
+
+button "Check Video Status" -> check_video_call_ready()

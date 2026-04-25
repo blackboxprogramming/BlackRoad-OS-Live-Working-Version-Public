@@ -1,0 +1,58 @@
+# 087: AI Code Review
+# AI suggests improvements
+
+# Your code
+calculate_total(items):
+  total = 0
+  for item in items:
+    total = total + item.price
+  return total
+
+# Ask AI for review
+review = ai.review_code(calculate_total)
+
+show review.suggestions
+# Suggestions:
+# 1. Consider using reduce() for more idiomatic functional style
+# 2. Add null check for items parameter
+# 3. Add type hint for clarity: calculate_total(items: list) -> number
+
+show review.improved_version
+# Improved code:
+# calculate_total(items: list) -> number:
+#   if items == null: return 0
+#   return items.reduce((sum, item) => sum + item.price, 0)
+
+# Security review
+handle_user_input(input):
+  query = "SELECT * FROM users WHERE name = '{input}'"
+  # SQL injection vulnerability!
+
+security_review = ai.review_security(handle_user_input)
+
+show security_review.issues
+# Issues:
+# ⚠️  Critical: SQL injection vulnerability
+# - Never concatenate user input into SQL queries
+# - Use parameterized queries instead
+
+show security_review.fix
+# Corrected code:
+# handle_user_input(input):
+#   query = db.query("SELECT * FROM users WHERE name = ?", [input])
+
+# Performance review
+process_large_list(data):
+  results = []
+  for item in data:
+    if item.active:
+      results.append(transform(item))
+  return results
+
+perf_review = ai.review_performance(process_large_list)
+
+show perf_review.optimizations
+# Optimizations:
+# 1. Use filter and map instead of manual loop (10x faster)
+# 2. Consider lazy evaluation for very large lists
+# 3. Cache transform() results if same item processed multiple times

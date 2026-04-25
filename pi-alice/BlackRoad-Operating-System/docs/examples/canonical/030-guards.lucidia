@@ -1,0 +1,33 @@
+# 030: Guards
+# Early returns and validation
+
+# Guard clause pattern
+process_payment(amount, balance):
+  # Guard: insufficient funds
+  if amount > balance:
+    return "Insufficient funds"
+
+  # Guard: invalid amount
+  if amount <= 0:
+    return "Invalid amount"
+
+  # Main logic only runs if guards pass
+  new_balance = balance - amount
+  return "Payment successful, new balance: {new_balance}"
+
+show process_payment(50, 100)   # Success
+show process_payment(150, 100)  # Insufficient funds
+show process_payment(-10, 100)  # Invalid amount
+
+# Guards make code clearer than nested ifs
+validate_user(user):
+  if user == null:
+    return "User is required"
+
+  if not user.has("email"):
+    return "Email is required"
+
+  if user.email.length < 5:
+    return "Invalid email"
+
+  return "Valid user"

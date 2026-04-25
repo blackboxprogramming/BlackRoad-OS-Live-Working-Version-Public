@@ -1,0 +1,33 @@
+# 038: Partial Application
+# Pre-fill some arguments
+
+# Generic function
+multiply(a, b):
+  a * b
+
+# Partially apply
+double = (x) => multiply(2, x)
+triple = (x) => multiply(3, x)
+
+show double(5)  # 10
+show triple(5)  # 15
+
+# Partial application helper
+partial(fn, ...fixed_args):
+  return (...remaining_args) => fn(...fixed_args, ...remaining_args)
+
+# Create specialized versions
+greet(greeting, name):
+  "{greeting}, {name}!"
+
+say_hello = partial(greet, "Hello")
+say_goodbye = partial(greet, "Goodbye")
+
+show say_hello("Alex")    # Hello, Alex!
+show say_goodbye("Alex")  # Goodbye, Alex!
+
+# Useful for map/filter
+numbers = [1, 2, 3, 4, 5]
+add_ten = partial((a, b) => a + b, 10)
+result = numbers.map(add_ten)
+show result  # [11, 12, 13, 14, 15]

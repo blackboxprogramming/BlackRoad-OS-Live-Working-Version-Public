@@ -1,0 +1,58 @@
+# 077: Conditional Sync
+# Sync only when conditions are met
+
+# Sync only on WiFi
+save_document(doc):
+  store doc locally as "documents/{doc.id}"
+
+  # Only sync to cloud if on WiFi
+  if network.type == "wifi" and user.settings.cloud_sync:
+    sync doc to cloud
+
+# Sync only if changed
+update_preferences(prefs):
+  old_prefs = load "preferences" locally
+
+  store prefs locally as "preferences"
+
+  # Only sync if actually different
+  if prefs != old_prefs:
+    sync prefs to cloud
+
+# Sync based on data size
+save_photo(photo):
+  store photo locally as "photos/{photo.id}"
+
+  # Large files only sync on WiFi
+  if photo.size > 10MB:
+    if network.type == "wifi":
+      sync photo to cloud
+  else:
+    # Small files sync on any connection
+    sync photo to cloud
+
+# Sync during idle time
+queue_sync(data):
+  store data locally as "sync_queue/{data.id}"
+
+  # Wait for idle period
+  on idle:
+    process_sync_queue()
+
+process_sync_queue():
+  queue = load "sync_queue" locally
+
+  for item in queue:
+    if network.online:
+      sync item to cloud
+      delete "sync_queue/{item.id}" locally
+
+# User-controlled sync
+button "Sync Now" -> manual_sync()
+button "Sync All" -> sync_all_data()
+
+manual_sync():
+  if network.online:
+    sync_all_data()
+  else:
+    show "No internet connection"

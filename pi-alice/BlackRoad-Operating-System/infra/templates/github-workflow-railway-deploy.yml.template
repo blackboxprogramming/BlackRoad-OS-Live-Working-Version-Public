@@ -1,0 +1,93 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - dev
+    paths:
+      - '**/*.py'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - 'railway.toml'
+      - 'railway.json'
+      - '.github/workflows/railway-deploy.yml'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+
+jobs:
+  deploy:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/staging" ]; then
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          else
+            echo "environment=development" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up --service ${{ secrets.RAILWAY_SERVICE_NAME }} \
+                     --environment ${{ steps.env.outputs.environment }} \
+                     --ci
+
+      - name: Wait for deployment
+        run: sleep 30
+
+      - name: Health check
+        run: |
+          if [ "${{ steps.env.outputs.environment }}" = "production" ]; then
+            HEALTH_URL="https://${{ secrets.PRODUCTION_DOMAIN }}/health"
+          elif [ "${{ steps.env.outputs.environment }}" = "staging" ]; then
+            HEALTH_URL="https://${{ secrets.STAGING_DOMAIN }}/health"
+          else
+            HEALTH_URL="${{ secrets.DEV_DOMAIN }}/health"
+          fi
+
+          echo "Checking health at: $HEALTH_URL"
+
+          for i in {1..10}; do
+            if curl -f "$HEALTH_URL"; then
+              echo "✅ Health check passed!"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+
+          echo "❌ Health check failed after 10 attempts"
+          exit 1
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Deployment to ${{ steps.env.outputs.environment }} failed!"
+          # Add notification logic here (Slack, Discord, email, etc.)

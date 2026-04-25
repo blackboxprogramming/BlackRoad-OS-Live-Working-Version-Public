@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlackRoad OS – BR‑95 Edition</title>
+  <style>
+    :root {
+      /* Brand system */
+      --br-black: #02030a;
+      --br-bg-elevated: #050816;
+      --br-bg-alt: #090c1f;
+      --br-white: #ffffff;
+      --br-muted: #a7b0c7;
+      --br-border-subtle: rgba(255,255,255,0.08);
+      /* BlackRoad Brand Gradient: #FF9D00 → #FF6B00 → #FF0066 → #FF006B → #D600AA → #7700FF → #0066FF */
+      --br-accent-warm: #FF9D00;   /* orange - top of logo gradient */
+      --br-accent-orange: #FF6B00; /* deep orange */
+      --br-accent-pink: #FF0066;   /* hot pink */
+      --br-accent-mid: #FF006B;    /* magenta-pink */
+      --br-accent-magenta: #D600AA; /* magenta */
+      --br-accent-purple: #7700FF; /* electric purple */
+      --br-accent-cool: #0066FF;   /* electric blue */
+      --br-accent-neo: #69f7ff;    /* cyan (for terminal/highlights) */
+      /* Brand gradient for use across UI */
+      --br-gradient: linear-gradient(135deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF);
+      --br-gradient-horizontal: linear-gradient(90deg, #FF9D00, #FF6B00, #FF0066, #D600AA, #7700FF, #0066FF);
+      --br-radius-lg: 24px;
+      --br-radius-md: 16px;
+      --br-radius-sm: 10px;
+      --br-shadow-soft: 0 18px 45px rgba(0,0,0,0.45);
+      --br-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      --br-font-mono: "JetBrains Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+
+      /* BR‑95 chrome (retro-style, brand-colored) */
+      --br95-gray: #181c2a;
+      --br95-gray-light: #232842;
+      --br95-gray-lighter: #2f3554;
+      --br95-border-light: #4b5378;
+      --br95-border-dark: #050816;
+      --br95-border-darkest: #000000;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--br-font-sans);
+      background: radial-gradient(circle at top, #121735 0, var(--br-black) 60%);
+      height: 100vh;
+      overflow: hidden;
+      color: var(--br-white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* CRT scanline overlay */
+    .scanline {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.06) 50%);
+      background-size: 100% 3px;
+      mix-blend-mode: soft-light;
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Boot screen (from Desktop OS vibe) */
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--br-black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9000;
+      animation: bootFadeOut 0.6s ease 2.6s forwards;
+    }
+
+    @keyframes bootFadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .boot-logo-container {
+      text-align: center;
+      animation: bootIn 0.7s ease-out;
+    }
+
+    @keyframes bootIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .boot-logo {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 28px;
+      background: conic-gradient(from 180deg,
+        var(--br-accent-warm),
+        var(--br-accent-orange),
+        var(--br-accent-pink),
+        var(--br-accent-mid),
+        var(--br-accent-magenta),
+        var(--br-accent-purple),
+        var(--br-accent-cool),
+        var(--br-accent-warm));
+      border-radius: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow:
+        0 0 60px rgba(255,157,0,0.35),
+        0 0 100px rgba(255,0,102,0.28),
+        0 20px 40px rgba(0,0,0,0.8);
+      animation: logoGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes logoGlow {
+      0%,100% {
+        box-shadow:
+          0 0 60px rgba(255,157,0,0.35),
+          0 0 100px rgba(255,0,102,0.28),
+          0 20px 40px rgba(0,0,0,0.8);
+      }
+      50% {
+        box-shadow:
+          0 0 80px rgba(255,107,0,0.5),
+          0 0 120px rgba(214,0,170,0.4),
+          0 20px 40px rgba(0,0,0,0.9);
+      }
+    }
+
+    .boot-logo::before {
+      content: 'R';
+      font-size: 130px;
+      font-weight: 900;
+      color: var(--br-black);
+      font-family: var(--br-font-sans);
+      position: relative;
+      line-height: 1;
+    }
+
+    .boot-road {
+      position: absolute;
+      width: 34px;
+      height: 110px;
+      background: linear-gradient(to bottom,
+        transparent 0%,
+        rgba(255,255,255,0.98) 30%,
+        rgba(255,255,255,0.98) 70%,
+        transparent 100%);
+      border-radius: 17px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(-18deg);
+      opacity: 0.96;
+    }
+
+    .boot-title {
+      background: linear-gradient(120deg,
+        var(--br-accent-warm),
+        var(--br-accent-mid),
+        var(--br-accent-cool));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .boot-sub {
+      font-size: 12px;
+      color: var(--br-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .boot-loading {
+      margin-top: 18px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--br-muted);
+    }
+
+    .boot-loading::after {
+      content: '...';
+      animation: dots 1.2s infinite;
+    }
+
+    @keyframes dots {
+      0%,20% { content: '.'; }
+      40% { content: '..'; }
+      60%,100% { content: '...'; }
+    }
+
+    /* Desktop shell */
+    .shell {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .shell.ready {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Top menubar (from Desktop OS) */
+    .menubar {
+      background: linear-gradient(180deg, rgba(5,8,22,0.98) 0%, rgba(2,3,10,0.98) 100%);
+      backdrop-filter: blur(18px);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid var(--br-border-subtle);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+      z-index: 50;
+    }
+
+    .menu-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: conic-gradient(from 180deg,
+        var(--br-accent-warm),
+        var(--br-accent-pink),
+        var(--br-accent-magenta),
+        var(--br-accent-purple),
+        var(--br-accent-cool),
+        var(--br-accent-warm));
+      margin-right: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.7);
+    }
+
+    .menu-items {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .menu-item {
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--br-white);
+      cursor: pointer;
+      transition: background 0.14s ease, transform 0.14s ease;
+    }
+
+    .menu-item:hover {
+      background: rgba(255,255,255,0.05);
+      transform: translateY(-1px);
+    }
+
+    .system-info {
+      display: flex;
+      gap: 10px;
+      font-size: 11px;
+      color: var(--br-muted);
+      font-family: var(--br-font-mono);
+    }
+
+    .system-info span {
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.03);
+    }
+
+    /* Desktop icons grid (retro layout) */
+    .desktop-area {
+      flex: 1;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 90px);
+      grid-auto-rows: 95px;
+      gap: 22px;
+      align-content: start;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 24px 24px;
+      position: relative;
+      overflow: auto;
+    }
+
+    .icon {
+      width: 86px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease;
+    }
+
+    .icon:hover {
+      transform: translateY(-3px);
+    }
+
+    .icon-image {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--br-radius-md);
+      border: 1px solid var(--br-border-subtle);
+      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .icon-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--br-radius-md);
+      background: radial-gradient(circle at 18% 18%, rgba(255,255,255,0.18), transparent 60%);
+      pointer-events: none;
+    }
+
+    .icon-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+    }
+
+    /* BR‑95 window chrome (retro + brand) */
+    .window {
+      position: absolute;
+      background: var(--br95-gray);
+      border-radius: 10px;
+      border-top: 2px solid var(--br95-border-light);
+      border-left: 2px solid var(--br95-border-light);
+      border-right: 2px solid var(--br95-border-darkest);
+      border-bottom: 2px solid var(--br95-border-darkest);
+      box-shadow:
+        inset 1px 1px 0 var(--br95-gray-lighter),
+        0 14px 40px rgba(0,0,0,0.7);
+      min-width: 420px;
+      min-height: 260px;
+      display: none;
+      z-index: 10;
+      overflow: hidden;
+    }
+
+    .window.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .window.focused {
+      box-shadow:
+        inset 1px 1px 0 var(--br95-gray-lighter),
+        0 14px 40px rgba(0,0,0,0.8),
+        0 0 0 2px rgba(105,247,255,0.16);
+    }
+
+    .window.maximized {
+      left: 0 !important;
+      top: 36px !important;
+      width: 100% !important;
+      height: calc(100vh - 36px - 40px) !important;
+      border-radius: 0;
+      z-index: 100;
+    }
+
+    .title-bar {
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 3px 4px 3px 6px;
+      background: linear-gradient(90deg,
+        var(--br-accent-warm),
+        var(--br-accent-mid),
+        var(--br-accent-cool));
+      color: var(--br-white);
+      cursor: move;
+      user-select: none;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .title-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+    }
+
+    .title-buttons {
+      display: flex;
+      gap: 2px;
+    }
+
+    .title-button {
+      width: 18px;
+      height: 18px;
+      background: var(--br95-gray-light);
+      border-top: 1px solid var(--br95-border-light);
+      border-left: 1px solid var(--br95-border-light);
+      border-right: 1px solid var(--br95-border-darkest);
+      border-bottom: 1px solid var(--br95-border-darkest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--br-black);
+      cursor: pointer;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4);
+    }
+
+    .title-button:active {
+      border-top: 1px solid var(--br95-border-darkest);
+      border-left: 1px solid var(--br95-border-darkest);
+      border-right: 1px solid var(--br95-border-light);
+      border-bottom: 1px solid var(--br95-border-light);
+      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.4);
+    }
+
+    .window-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--br-bg-elevated);
+      padding: 10px;
+      color: var(--br-white);
+      font-size: 13px;
+    }
+
+    .content-header {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: linear-gradient(135deg,
+        rgba(255,154,60,0.08),
+        rgba(255,79,163,0.08),
+        rgba(50,124,255,0.08));
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 10px;
+    }
+
+    .content-header h2 {
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .content-header p {
+      font-size: 12px;
+      color: var(--br-muted);
+    }
+
+    .content-body {
+      flex: 1;
+      overflow: auto;
+      padding: 4px 2px 2px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .grid-2 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+    .card {
+      background: rgba(4,10,32,0.98);
+      border-radius: 14px;
+      border: 1px solid var(--br-border-subtle);
+      padding: 10px 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .stat-row:last-child { border-bottom: none; }
+
+    .stat-label { color: var(--br-muted); }
+    .stat-value { font-family: var(--br-font-mono); }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .badge-success {
+      background: rgba(34,197,94,0.16);
+      border: 1px solid rgba(34,197,94,0.5);
+      color: #22c55e;
+    }
+
+    .badge-info {
+      background: rgba(105,247,255,0.16);
+      border: 1px solid rgba(105,247,255,0.45);
+      color: var(--br-accent-neo);
+    }
+
+    .badge-warning {
+      background: rgba(251,191,36,0.16);
+      border: 1px solid rgba(251,191,36,0.45);
+      color: #fbbf24;
+    }
+
+    .btn-primary {
+      padding: 7px 16px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, var(--br-accent-warm), var(--br-accent-mid));
+      color: var(--br-black);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.7);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.9);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.8);
+    }
+
+    /* Terminal styling */
+    .terminal-screen {
+      background: var(--br-black);
+      color: var(--br-accent-neo);
+      font-family: var(--br-font-mono);
+      padding: 12px;
+      font-size: 12px;
+      height: 100%;
+      border-radius: 10px;
+      overflow-y: auto;
+    }
+
+    .terminal-line { margin-bottom: 4px; }
+
+    .terminal-prompt { color: var(--br-accent-mid); }
+
+    .terminal-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--br-accent-neo);
+      margin-left: 2px;
+      animation: blink 1s steps(1) infinite;
+    }
+
+    @keyframes blink {
+      0%,49% { opacity: 1; }
+      50%,100% { opacity: 0; }
+    }
+
+    /* Taskbar – BR‑95 style */
+    .taskbar {
+      height: 40px;
+      background: var(--br95-gray-light);
+      border-top: 2px solid var(--br95-border-light);
+      display: flex;
+      align-items: center;
+      padding: 4px;
+      gap: 4px;
+      box-shadow: 0 -6px 18px rgba(0,0,0,0.7);
+      z-index: 60;
+    }
+
+    .road-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--br95-gray);
+      border-top: 2px solid var(--br95-border-light);
+      border-left: 2px solid var(--br95-border-light);
+      border-right: 2px solid var(--br95-border-darkest);
+      border-bottom: 2px solid var(--br95-border-darkest);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--br-white);
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.4);
+    }
+
+    .road-logo {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      background: conic-gradient(from 180deg,
+        var(--br-accent-warm),
+        var(--br-accent-pink),
+        var(--br-accent-magenta),
+        var(--br-accent-purple),
+        var(--br-accent-cool),
+        var(--br-accent-warm));
+      display: inline-block;
+    }
+
+    .taskbar-apps {
+      flex: 1;
+      display: flex;
+      gap: 4px;
+      padding: 0 6px;
+      overflow-x: auto;
+    }
+
+    .taskbar-app {
+      min-width: 120px;
+      max-width: 160px;
+      height: 30px;
+      background: var(--br95-gray);
+      border-top: 2px solid var(--br95-border-light);
+      border-left: 2px solid var(--br95-border-light);
+      border-right: 2px solid var(--br95-border-darkest);
+      border-bottom: 2px solid var(--br95-border-darkest);
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: var(--br-white);
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.25);
+    }
+
+    .taskbar-app.active-app {
+      border-top: 2px solid var(--br95-border-darkest);
+      border-left: 2px solid var(--br95-border-darkest);
+      border-right: 2px solid var(--br95-border-light);
+      border-bottom: 2px solid var(--br95-border-light);
+      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+      background: var(--br95-gray-lighter);
+    }
+
+    .system-tray {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 6px;
+      color: var(--br-white);
+      font-size: 14px;
+    }
+
+    .clock {
+      min-width: 80px;
+      padding: 3px 8px;
+      border-top: 2px solid var(--br95-border-darkest);
+      border-left: 2px solid var(--br95-border-darkest);
+      border-right: 2px solid var(--br95-border-light);
+      border-bottom: 2px solid var(--br95-border-light);
+      font-size: 12px;
+      text-align: center;
+      background: var(--br95-gray);
+      font-family: var(--br-font-mono);
+    }
+
+    /* Road menu (Start menu but BlackRoad) */
+    .road-menu {
+      position: fixed;
+      left: 4px;
+      bottom: 44px;
+      width: 280px;
+      background: rgba(4,10,32,0.98);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.85);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 80;
+    }
+
+    .road-menu.active { display: flex; }
+
+    .road-menu-header {
+      padding: 14px;
+      background: linear-gradient(135deg,
+        rgba(255,154,60,0.2),
+        rgba(255,79,163,0.18),
+        rgba(50,124,255,0.18));
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .road-menu-header h3 {
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .road-menu-header p {
+      font-size: 11px;
+      color: var(--br-muted);
+    }
+
+    .road-menu-content {
+      padding: 6px;
+      max-height: 60vh;
+      overflow-y: auto;
+      background: rgba(2,5,18,0.96);
+    }
+
+    .road-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--br-muted);
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .road-menu-item span.emoji { font-size: 18px; }
+
+    .road-menu-item:hover {
+      background: rgba(255,255,255,0.07);
+      color: var(--br-white);
+    }
+
+    .road-menu-separator {
+      height: 1px;
+      margin: 4px 4px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 12px; height: 12px; }
+    ::-webkit-scrollbar-track {
+      background: var(--br95-gray);
+      border-left: 1px solid var(--br95-border-darkest);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--br95-gray-light);
+      border-top: 2px solid var(--br95-border-light);
+      border-left: 2px solid var(--br95-border-light);
+      border-right: 2px solid var(--br95-border-darkest);
+      border-bottom: 2px solid var(--br95-border-darkest);
+    }
+  </style>
+</head>
+<body>
+  <div class="scanline"></div>
+
+  <!-- Boot screen -->
+  <div class="boot-screen" id="boot">
+    <div class="boot-logo-container">
+      <div class="boot-logo">
+        <div class="boot-road"></div>
+      </div>
+      <div class="boot-title">BlackRoad OS</div>
+      <div class="boot-sub">BR‑95 Edition · Safe Passage Through The Chaos</div>
+      <div class="boot-loading">System Loading</div>
+    </div>
+  </div>
+
+  <!-- Desktop shell -->
+  <div class="shell" id="shell">
+    <div class="menubar">
+      <div class="menu-logo"></div>
+      <div class="menu-items">
+        <div class="menu-item">File</div>
+        <div class="menu-item">View</div>
+        <div class="menu-item">Agents</div>
+        <div class="menu-item">RoadChain</div>
+      </div>
+      <div class="system-info">
+        <span>BlackRoad OS v1.0</span>
+        <span>Agents: 1000</span>
+      </div>
+    </div>
+
+    <div class="desktop-area" id="desktop">
+      <div class="icon" ondblclick="openWindow('lucidia')">
+        <div class="icon-image">🧠</div>
+        <div class="icon-label">Lucidia Core</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('agents')">
+        <div class="icon-image">🤖</div>
+        <div class="icon-label">AI Agents</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('roadchain')">
+        <div class="icon-image">⛓️</div>
+        <div class="icon-label">RoadChain</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('wallet')">
+        <div class="icon-image">💰</div>
+        <div class="icon-label">Wallet</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('terminal')">
+        <div class="icon-image">💻</div>
+        <div class="icon-label">Terminal</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('roadmail')">
+        <div class="icon-image">📧</div>
+        <div class="icon-label">RoadMail</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('social')">
+        <div class="icon-image">👥</div>
+        <div class="icon-label">Social</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('blackstream')">
+        <div class="icon-image">📺</div>
+        <div class="icon-label">BlackStream</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('roadview')">
+        <div class="icon-image">🌍</div>
+        <div class="icon-label">RoadView</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('pi')">
+        <div class="icon-image">🥧</div>
+        <div class="icon-label">Pi Network</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('miner')">
+        <div class="icon-image">⛏️</div>
+        <div class="icon-label">Miner</div>
+      </div>
+      <div class="icon" ondblclick="openWindow('roadcraft')">
+        <div class="icon-image">⛏️</div>
+        <div class="icon-label">RoadCraft</div>
+      </div>
+    </div>
+
+    <!-- Windows -->
+    <div class="window" id="lucidia" style="left: 60px; top: 90px; width: 680px; height: 420px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'lucidia')">
+        <div class="title-text"><span>🧠</span><span>Lucidia Core System</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('lucidia')">_</div>
+          <div class="title-button" onclick="maximizeWindow('lucidia')">□</div>
+          <div class="title-button" onclick="closeWindow('lucidia')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Recursive AI Engine</h2>
+          <p>Trinary logic · Paraconsistent reasoning · PS‑SHA∞ memory</p>
+        </div>
+        <div class="content-body">
+          <div class="grid grid-2">
+            <div class="card">
+              <div class="stat-row"><span class="stat-label">Active Agents</span><span class="stat-value">1000 / 1000</span></div>
+              <div class="stat-row"><span class="stat-label">Memory Journals</span><span class="stat-value">1000 streams</span></div>
+              <div class="stat-row"><span class="stat-label">Event Bus</span><span class="stat-value">847 events/sec</span></div>
+              <div class="stat-row"><span class="stat-label">Uptime</span><span class="stat-value">99.95%</span></div>
+            </div>
+            <div class="card">
+              <div class="stat-row"><span class="stat-label">Mode</span><span class="stat-value">Trinary (1/0/‑1)</span></div>
+              <div class="stat-row"><span class="stat-label">Contradictions</span><span class="stat-value">Paraconsistent</span></div>
+              <div class="stat-row"><span class="stat-label">Memory Hash</span><span class="stat-value">PS‑SHA∞</span></div>
+              <div class="stat-row"><span class="stat-label">Coordination</span><span class="stat-value">Hybrid P2P</span></div>
+            </div>
+          </div>
+          <div class="card" style="margin-top:10px;">
+            <div style="font-size:12px;">
+              <div style="margin-bottom:6px;"><span class="badge badge-success">Agent‑042</span> proposed new routing rule • 2m ago</div>
+              <div style="margin-bottom:6px;"><span class="badge badge-info">Agent‑189</span> memory journal sync complete • 5m ago</div>
+              <div><span class="badge badge-warning">Agent‑734</span> contradiction quarantined • 12m ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="agents" style="left: 120px; top: 120px; width: 760px; height: 460px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'agents')">
+        <div class="title-text"><span>🤖</span><span>AI Agent Orchestration</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('agents')">_</div>
+          <div class="title-button" onclick="maximizeWindow('agents')">□</div>
+          <div class="title-button" onclick="closeWindow('agents')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>1,000 Unique Agents</h2>
+          <p>Each with names, memories, families & Unity homes</p>
+        </div>
+        <div class="content-body">
+          <div class="grid grid-2">
+            <div class="card">
+              <div style="text-align:center;font-size:28px;margin-bottom:6px;">🤖</div>
+              <div class="stat-row"><span class="stat-label">ID</span><span class="stat-value">Agent‑042</span></div>
+              <div class="stat-row"><span class="stat-label">Persona</span><span class="stat-value">Alice</span></div>
+              <div class="stat-row"><span class="stat-label">Status</span><span class="badge badge-success">Active</span></div>
+              <div class="stat-row"><span class="stat-label">Tasks Today</span><span class="stat-value">247</span></div>
+            </div>
+            <div class="card">
+              <div style="text-align:center;font-size:28px;margin-bottom:6px;">🤖</div>
+              <div class="stat-row"><span class="stat-label">ID</span><span class="stat-value">Agent‑189</span></div>
+              <div class="stat-row"><span class="stat-label">Persona</span><span class="stat-value">Marcus</span></div>
+              <div class="stat-row"><span class="stat-label">Status</span><span class="badge badge-success">Active</span></div>
+              <div class="stat-row"><span class="stat-label">Tasks Today</span><span class="stat-value">189</span></div>
+            </div>
+          </div>
+          <div style="margin-top:12px;text-align:center;">
+            <button class="btn-primary">View All 1000 Agents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="roadchain" style="left: 180px; top: 80px; width: 760px; height: 440px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'roadchain')">
+        <div class="title-text"><span>⛓️</span><span>RoadChain Explorer</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('roadchain')">_</div>
+          <div class="title-button" onclick="maximizeWindow('roadchain')">□</div>
+          <div class="title-button" onclick="closeWindow('roadchain')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>RoadChain Network</h2>
+          <p>Transparent AI governance on a distributed ledger</p>
+        </div>
+        <div class="content-body">
+          <div class="grid grid-2" style="margin-bottom:10px;">
+            <div class="card">
+              <div class="stat-row"><span class="stat-label">Block Height</span><span class="stat-value">1,247,891</span></div>
+              <div class="stat-row"><span class="stat-label">Network Hash</span><span class="stat-value">847.3 TH/s</span></div>
+              <div class="stat-row"><span class="stat-label">Active Nodes</span><span class="stat-value">2,847</span></div>
+            </div>
+            <div class="card">
+              <div class="stat-row"><span class="stat-label">Your Hashrate</span><span class="stat-value">1.2 GH/s</span></div>
+              <div class="stat-row"><span class="stat-label">Shares</span><span class="stat-value">8,423 accepted</span></div>
+              <div class="stat-row"><span class="stat-label">Daily Earnings</span><span class="stat-value">47.23 RC</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-family:var(--br-font-mono);font-size:12px;">
+              <div style="margin-bottom:8px;">
+                <strong>Block #1,247,891</strong> • 23s ago<br />
+                <span style="color:var(--br-muted);">Hash: 0x8f4a2...c7b9d • 247 tx</span>
+              </div>
+              <div style="margin-bottom:8px;">
+                <strong>Block #1,247,890</strong> • 2m ago<br />
+                <span style="color:var(--br-muted);">Hash: 0x3c9e1...f2a4b • 189 tx</span>
+              </div>
+              <div>
+                <strong>Block #1,247,889</strong> • 4m ago<br />
+                <span style="color:var(--br-muted);">Hash: 0x7d2b3...e8c1f • 312 tx</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="wallet" style="left: 220px; top: 130px; width: 520px; height: 380px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'wallet')">
+        <div class="title-text"><span>💰</span><span>RoadCoin Wallet</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('wallet')">_</div>
+          <div class="title-button" onclick="maximizeWindow('wallet')">□</div>
+          <div class="title-button" onclick="closeWindow('wallet')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2 style="font-size:26px;">1,247.89 RC</h2>
+          <p>≈ $18,705 USD • Synced with RoadChain</p>
+        </div>
+        <div class="content-body">
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="btn-primary">📤 Send</button>
+            <button class="btn-primary" style="background:rgba(255,255,255,0.06);color:var(--br-white);">📥 Receive</button>
+          </div>
+          <div class="card">
+            <div class="stat-row">
+              <div>
+                <div style="font-weight:600;margin-bottom:2px;">Received</div>
+                <div style="font-size:11px;color:var(--br-muted);">Mining rewards • 2h ago</div>
+              </div>
+              <div style="color:#22c55e;font-weight:600;">+47.23 RC</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="stat-row">
+              <div>
+                <div style="font-weight:600;margin-bottom:2px;">Sent</div>
+                <div style="font-size:11px;color:var(--br-muted);">Payment to Alice • Yesterday</div>
+              </div>
+              <div style="color:#ef4444;font-weight:600;">‑12.50 RC</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="terminal" style="left: 140px; top: 180px; width: 720px; height: 420px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'terminal')">
+        <div class="title-text"><span>💻</span><span>C:\\BLACKROAD\\TERMINAL.EXE</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('terminal')">_</div>
+          <div class="title-button" onclick="maximizeWindow('terminal')">□</div>
+          <div class="title-button" onclick="closeWindow('terminal')">×</div>
+        </div>
+      </div>
+      <div class="window-inner" style="padding:8px;">
+        <div class="terminal-screen">
+          <div class="terminal-line">BlackRoad OS Terminal v2.4.1</div>
+          <div class="terminal-line">Copyright (c) 2024 BlackRoad Inc.</div>
+          <div class="terminal-line" style="margin-top:10px;">────────────────────────────────────────────────────</div>
+          <div class="terminal-line" style="margin-top:10px;"><span class="terminal-prompt">blackroad@cecilia:~$</span> lucidia status</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Lucidia Core: OPERATIONAL</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Active Agents: 1000/1000</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Memory Journals: 1000 active streams</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Event Bus: 847 events/sec</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ System Health: 99.95%</div>
+          <div class="terminal-line" style="margin-top:10px;"><span class="terminal-prompt">blackroad@cecilia:~$</span> roadchain sync</div>
+          <div class="terminal-line" style="margin-left:18px;">Syncing with RoadChain network...</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Block height: 1,247,891</div>
+          <div class="terminal-line" style="margin-left:18px;">✓ Peers: 2847 connected</div>
+          <div class="terminal-line" style="margin-top:10px;"><span class="terminal-prompt">blackroad@cecilia:~$</span><span class="terminal-cursor"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Simple placeholder windows for other icons (can be expanded later) -->
+    <div class="window" id="roadmail" style="left: 80px; top: 80px; width: 640px; height: 380px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'roadmail')">
+        <div class="title-text"><span>📧</span><span>RoadMail</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('roadmail')">_</div>
+          <div class="title-button" onclick="maximizeWindow('roadmail')">□</div>
+          <div class="title-button" onclick="closeWindow('roadmail')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Inbox</h2>
+          <p>Secure AI‑aware communication</p>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Welcome to BlackRoad OS</div>
+            <div style="font-size:11px;color:var(--br-muted);">From: BlackRoad Team • Today</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="social" style="left: 160px; top: 90px; width: 640px; height: 380px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'social')">
+        <div class="title-text"><span>👥</span><span>BlackRoad Social</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('social')">_</div>
+          <div class="title-button" onclick="maximizeWindow('social')">□</div>
+          <div class="title-button" onclick="closeWindow('social')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Your Feed</h2>
+          <p>Operators, agents, and ledgers talking in real time</p>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div style="font-size:12px;">
+              <strong>Prism Console ·</strong> New deployment shipped to RoadChain.<br />
+              <span style="color:var(--br-muted);font-size:11px;">2 minutes ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="blackstream" style="left: 200px; top: 100px; width: 720px; height: 420px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'blackstream')">
+        <div class="title-text"><span>📺</span><span>BlackStream</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('blackstream')">_</div>
+          <div class="title-button" onclick="maximizeWindow('blackstream')">□</div>
+          <div class="title-button" onclick="closeWindow('blackstream')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Trending Streams</h2>
+          <p>OS demos, agent orchestration runs, and live RoadChain dashboards</p>
+        </div>
+        <div class="content-body">
+          <div class="card" style="height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--br-muted);">
+            Embedded stream player coming soon.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="roadview" style="left: 120px; top: 70px; width: 820px; height: 460px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'roadview')">
+        <div class="title-text"><span>🌍</span><span>RoadView Browser</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('roadview')">_</div>
+          <div class="title-button" onclick="maximizeWindow('roadview')">□</div>
+          <div class="title-button" onclick="closeWindow('roadview')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Welcome to BlackRoad</h2>
+          <p>The complete AI orchestration ecosystem, in one desktop.</p>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <p style="font-size:13px;color:var(--br-muted);">
+              This browser surface will eventually connect to your real BlackRoad services:
+              <code>core.blackroad.systems</code>, <code>api.blackroad.systems</code>,
+              <code>agents.blackroad.systems</code>, and more.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="pi" style="left: 220px; top: 140px; width: 540px; height: 320px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'pi')">
+        <div class="title-text"><span>🥧</span><span>Pi Network Control Panel</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('pi')">_</div>
+          <div class="title-button" onclick="maximizeWindow('pi')">□</div>
+          <div class="title-button" onclick="closeWindow('pi')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Connected Devices</h2>
+          <p>4 devices online · 1 Jetson Orin Nano</p>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div class="stat-row"><span class="stat-label">Jetson Orin Nano</span><span class="badge badge-success">Online</span></div>
+            <div class="stat-row"><span class="stat-label">Lucidia‑Pi‑01</span><span class="badge badge-success">Online</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="miner" style="left: 260px; top: 120px; width: 560px; height: 320px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'miner')">
+        <div class="title-text"><span>⛏️</span><span>RoadCoin Miner</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('miner')">_</div>
+          <div class="title-button" onclick="maximizeWindow('miner')">□</div>
+          <div class="title-button" onclick="closeWindow('miner')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Mining Active</h2>
+          <p>Contributing work to RoadChain network</p>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div class="stat-row"><span class="stat-label">Hashrate</span><span class="stat-value">1.2 GH/s</span></div>
+            <div class="stat-row"><span class="stat-label">Accepted Shares</span><span class="stat-value">8,423</span></div>
+            <div class="stat-row"><span class="stat-label">Pool</span><span class="stat-value">BR‑Global‑01</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="window" id="roadcraft" style="left: 300px; top: 160px; width: 600px; height: 360px;">
+      <div class="title-bar" onmousedown="dragStart(event, 'roadcraft')">
+        <div class="title-text"><span>⛏️</span><span>RoadCraft</span></div>
+        <div class="title-buttons">
+          <div class="title-button" onclick="minimizeWindow('roadcraft')">_</div>
+          <div class="title-button" onclick="maximizeWindow('roadcraft')">□</div>
+          <div class="title-button" onclick="closeWindow('roadcraft')">×</div>
+        </div>
+      </div>
+      <div class="window-inner">
+        <div class="content-header">
+          <h2>Voxel World Builder</h2>
+          <p>Design agent habitats & quantum sandboxes</p>
+        </div>
+        <div class="content-body" style="display:flex;align-items:center;justify-content:center;">
+          <button class="btn-primary">New World</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Taskbar -->
+    <div class="taskbar">
+      <div class="road-button" id="road-button" onclick="toggleRoadMenu()">
+        <span class="road-logo"></span>
+        <span>Road</span>
+      </div>
+      <div class="taskbar-apps" id="taskbar-apps"></div>
+      <div class="system-tray">
+        <span>🌐</span>
+        <span>🔊</span>
+        <span>⛓️</span>
+      </div>
+      <div class="clock" id="clock"></div>
+    </div>
+
+    <!-- Road menu -->
+    <div class="road-menu" id="road-menu">
+      <div class="road-menu-header">
+        <h3>BlackRoad OS</h3>
+        <p>BR‑95 Desktop · Agent Orchestration</p>
+      </div>
+      <div class="road-menu-content">
+        <div class="road-menu-item" onclick="openWindow('lucidia'); toggleRoadMenu(false);">
+          <span class="emoji">🧠</span><span>Lucidia Core</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('agents'); toggleRoadMenu(false);">
+          <span class="emoji">🤖</span><span>AI Agents</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('roadchain'); toggleRoadMenu(false);">
+          <span class="emoji">⛓️</span><span>RoadChain Explorer</span>
+        </div>
+        <div class="road-menu-separator"></div>
+        <div class="road-menu-item" onclick="openWindow('wallet'); toggleRoadMenu(false);">
+          <span class="emoji">💰</span><span>RoadCoin Wallet</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('roadmail'); toggleRoadMenu(false);">
+          <span class="emoji">📧</span><span>RoadMail</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('terminal'); toggleRoadMenu(false);">
+          <span class="emoji">💻</span><span>Terminal</span>
+        </div>
+        <div class="road-menu-separator"></div>
+        <div class="road-menu-item" onclick="openWindow('pi'); toggleRoadMenu(false);">
+          <span class="emoji">🥧</span><span>Pi Network</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('miner'); toggleRoadMenu(false);">
+          <span class="emoji">⛏️</span><span>RoadCoin Miner</span>
+        </div>
+        <div class="road-menu-item" onclick="openWindow('roadcraft'); toggleRoadMenu(false);">
+          <span class="emoji">⛏️</span><span>RoadCraft</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Boot -> Desktop
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const shell = document.getElementById('shell');
+        const boot = document.getElementById('boot');
+        if (shell) shell.classList.add('ready');
+        if (boot) boot.style.pointerEvents = 'none';
+      }, 2400);
+      updateClock();
+      setInterval(updateClock, 1000);
+    });
+
+    function updateClock() {
+      const el = document.getElementById('clock');
+      if (!el) return;
+      const now = new Date();
+      el.textContent = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    }
+
+    let windowZIndex = 10;
+    const openWindows = new Set();
+    let focusedWindow = null;
+    let draggedWindow = null;
+    let offsetX = 0, offsetY = 0;
+
+    function openWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.classList.add('active');
+      openWindows.add(id);
+      focusWindow(id);
+      toggleRoadMenu(false);
+    }
+
+    function closeWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.classList.remove('active');
+      if (win.classList.contains('focused')) {
+        win.classList.remove('focused');
+        focusedWindow = null;
+      }
+      openWindows.delete(id);
+      updateTaskbar();
+    }
+
+    function minimizeWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.classList.remove('active');
+      if (win.classList.contains('focused')) {
+        win.classList.remove('focused');
+        focusedWindow = null;
+      }
+      updateTaskbar();
+    }
+
+    function maximizeWindow(id) {
+      const win = document.getElementById(id);
+      if (!win) return;
+      win.classList.toggle('maximized');
+      win.style.zIndex = ++windowZIndex;
+    }
+
+    function dragStart(e, id) {
+      const win = document.getElementById(id);
+      if (!win || win.classList.contains('maximized')) return;
+      draggedWindow = win;
+      const rect = win.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      win.style.zIndex = ++windowZIndex;
+      document.addEventListener('mousemove', dragMove);
+      document.addEventListener('mouseup', dragEnd);
+    }
+
+    function dragMove(e) {
+      if (!draggedWindow) return;
+      draggedWindow.style.left = (e.clientX - offsetX) + 'px';
+      draggedWindow.style.top = (e.clientY - offsetY) + 'px';
+    }
+
+    function dragEnd() {
+      draggedWindow = null;
+      document.removeEventListener('mousemove', dragMove);
+      document.removeEventListener('mouseup', dragEnd);
+    }
+
+    function updateTaskbar() {
+      const bar = document.getElementById('taskbar-apps');
+      if (!bar) return;
+      bar.innerHTML = '';
+      const titles = {
+        lucidia: '🧠 Lucidia',
+        agents: '🤖 Agents',
+        roadchain: '⛓️ Chain',
+        wallet: '💰 Wallet',
+        roadmail: '📧 Mail',
+        social: '👥 Social',
+        blackstream: '📺 Stream',
+        roadview: '🌍 RoadView',
+        terminal: '💻 Terminal',
+        pi: '🥧 Pi',
+        miner: '⛏️ Miner',
+        roadcraft: '⛏️ RoadCraft'
+      };
+      openWindows.forEach(id => {
+        const win = document.getElementById(id);
+        if (!win) return;
+        const btn = document.createElement('div');
+        btn.className = 'taskbar-app';
+        if (win.classList.contains('focused')) btn.classList.add('active-app');
+        btn.textContent = titles[id] || id;
+        btn.onclick = () => {
+          if (win.classList.contains('active')) {
+            if (win.classList.contains('focused')) {
+              minimizeWindow(id);
+            } else {
+              focusWindow(id);
+            }
+          } else {
+            openWindow(id);
+          }
+        };
+        bar.appendChild(btn);
+      });
+    }
+
+    function toggleRoadMenu(force) {
+      const menu = document.getElementById('road-menu');
+      const btn = document.getElementById('road-button');
+      if (!menu || !btn) return;
+      if (force === false) {
+        menu.classList.remove('active');
+        btn.classList.remove('active');
+        return;
+      }
+      const active = !menu.classList.contains('active');
+      menu.classList.toggle('active', active);
+      btn.classList.toggle('active', active);
+    }
+
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('road-menu');
+      const btn = document.getElementById('road-button');
+      if (!menu || !btn) return;
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        toggleRoadMenu(false);
+      }
+    });
+
+    function focusWindow(id) {
+      const win = document.getElementById(id);
+      if (!win || !win.classList.contains('active')) return;
+      document.querySelectorAll('.window.focused').forEach(w => w.classList.remove('focused'));
+      win.classList.add('focused');
+      win.style.zIndex = ++windowZIndex;
+      focusedWindow = id;
+      updateTaskbar();
+    }
+
+    document.querySelectorAll('.window').forEach(win => {
+      win.addEventListener('mousedown', () => focusWindow(win.id));
+    });
+
+    // ============================================================================
+    // BR-95 API Integration
+    // ============================================================================
+
+    const API_BASE = '/api/br95';
+    let ws = null;
+
+    /**
+     * Fetch and update Lucidia stats
+     */
+    async function updateLucidiaStats() {
+      try {
+        const response = await fetch(`${API_BASE}/lucidia`);
+        const data = await response.json();
+
+        // Update Lucidia window with real data
+        const lucidiaWindow = document.getElementById('lucidia');
+        if (lucidiaWindow) {
+          const statusEl = lucidiaWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+          const agentsEl = lucidiaWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+          const healthEl = lucidiaWindow.querySelector('.stat-row:nth-child(3) .stat-value');
+
+          if (statusEl) statusEl.textContent = data.status.toUpperCase();
+          if (agentsEl) agentsEl.textContent = `${data.active_agents}/${data.total_agents}`;
+          if (healthEl) healthEl.textContent = `${data.system_health.toFixed(2)}%`;
+        }
+
+        console.log('Lucidia stats updated:', data);
+      } catch (error) {
+        console.error('Failed to fetch Lucidia stats:', error);
+      }
+    }
+
+    /**
+     * Fetch and update RoadChain stats
+     */
+    async function updateRoadChainStats() {
+      try {
+        const response = await fetch(`${API_BASE}/roadchain`);
+        const data = await response.json();
+
+        // Update RoadChain window
+        const chainWindow = document.getElementById('roadchain');
+        if (chainWindow) {
+          const blockEl = chainWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+          const nodesEl = chainWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+          const hashEl = chainWindow.querySelector('.stat-row:nth-child(3) .stat-value');
+
+          if (blockEl) blockEl.textContent = data.current_block.toLocaleString();
+          if (nodesEl) nodesEl.textContent = data.active_nodes.toLocaleString();
+          if (hashEl) hashEl.textContent = data.network_hashrate;
+        }
+
+        console.log('RoadChain stats updated:', data);
+      } catch (error) {
+        console.error('Failed to fetch RoadChain stats:', error);
+      }
+    }
+
+    /**
+     * Fetch and update Wallet stats
+     */
+    async function updateWalletStats() {
+      try {
+        const response = await fetch(`${API_BASE}/wallet`);
+        const data = await response.json();
+
+        // Update Wallet window
+        const walletWindow = document.getElementById('wallet');
+        if (walletWindow) {
+          const balanceEl = walletWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+          const usdEl = walletWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+
+          if (balanceEl) balanceEl.textContent = `${data.balance_rc.toFixed(2)} RC`;
+          if (usdEl) usdEl.textContent = `$${data.balance_usd.toFixed(2)}`;
+        }
+
+        console.log('Wallet stats updated:', data);
+      } catch (error) {
+        console.error('Failed to fetch Wallet stats:', error);
+      }
+    }
+
+    /**
+     * Fetch and update Miner stats
+     */
+    async function updateMinerStats() {
+      try {
+        const response = await fetch(`${API_BASE}/miner`);
+        const data = await response.json();
+
+        // Update Miner window
+        const minerWindow = document.getElementById('miner');
+        if (minerWindow) {
+          const hashEl = minerWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+          const sharesEl = minerWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+          const poolEl = minerWindow.querySelector('.stat-row:nth-child(3) .stat-value');
+
+          if (hashEl) hashEl.textContent = data.hash_rate;
+          if (sharesEl) sharesEl.textContent = data.shares_accepted.toLocaleString();
+          if (poolEl) poolEl.textContent = data.pool_name;
+        }
+
+        console.log('Miner stats updated:', data);
+      } catch (error) {
+        console.error('Failed to fetch Miner stats:', error);
+      }
+    }
+
+    /**
+     * Initialize WebSocket connection for live updates
+     */
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}${API_BASE}/ws`;
+
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('✅ BR-95 WebSocket connected');
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          console.log('WebSocket message:', message);
+
+          switch (message.type) {
+            case 'connected':
+              console.log('WebSocket confirmed:', message.message);
+              break;
+
+            case 'miner_update':
+              updateMinerFromWS(message.data);
+              break;
+
+            case 'roadchain_update':
+              updateRoadChainFromWS(message.data);
+              break;
+
+            case 'wallet_update':
+              updateWalletFromWS(message.data);
+              break;
+
+            default:
+              console.log('Unknown message type:', message.type);
+          }
+        } catch (error) {
+          console.error('Failed to parse WebSocket message:', error);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed. Reconnecting in 5 seconds...');
+        setTimeout(connectWebSocket, 5000);
+      };
+    }
+
+    /**
+     * Update miner stats from WebSocket
+     */
+    function updateMinerFromWS(data) {
+      const minerWindow = document.getElementById('miner');
+      if (!minerWindow) return;
+
+      const hashEl = minerWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+      const sharesEl = minerWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+
+      if (hashEl) hashEl.textContent = data.hash_rate;
+      if (sharesEl) sharesEl.textContent = data.shares_accepted.toLocaleString();
+    }
+
+    /**
+     * Update RoadChain stats from WebSocket
+     */
+    function updateRoadChainFromWS(data) {
+      const chainWindow = document.getElementById('roadchain');
+      if (!chainWindow) return;
+
+      const blockEl = chainWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+      const nodesEl = chainWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+
+      if (blockEl) blockEl.textContent = data.current_block.toLocaleString();
+      if (nodesEl) nodesEl.textContent = data.active_nodes.toLocaleString();
+    }
+
+    /**
+     * Update Wallet stats from WebSocket
+     */
+    function updateWalletFromWS(data) {
+      const walletWindow = document.getElementById('wallet');
+      if (!walletWindow) return;
+
+      const balanceEl = walletWindow.querySelector('.stat-row:nth-child(1) .stat-value');
+      const usdEl = walletWindow.querySelector('.stat-row:nth-child(2) .stat-value');
+
+      if (balanceEl) balanceEl.textContent = `${data.balance_rc.toFixed(2)} RC`;
+      if (usdEl) usdEl.textContent = `$${data.balance_usd.toFixed(2)}`;
+    }
+
+    /**
+     * Initialize all API connections
+     */
+    function initializeAPIs() {
+      // Fetch initial data
+      updateLucidiaStats();
+      updateRoadChainStats();
+      updateWalletStats();
+      updateMinerStats();
+
+      // Connect to WebSocket for live updates
+      connectWebSocket();
+
+      // Refresh data every 30 seconds (in addition to WebSocket updates)
+      setInterval(() => {
+        updateLucidiaStats();
+      }, 30000);
+    }
+
+    // Initialize APIs after boot sequence
+    setTimeout(() => {
+      initializeAPIs();
+    }, 3000);
+
+  </script>
+</body>
+</html>

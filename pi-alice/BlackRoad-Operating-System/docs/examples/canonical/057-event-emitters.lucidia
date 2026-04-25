@@ -1,0 +1,30 @@
+# 057: Event Emitters
+# Send custom events
+
+# Define events
+on_user_login(user):
+  emit event "user.logged_in" with { user }
+
+on_purchase(item, price):
+  emit event "purchase.completed" with { item, price }
+
+on_error(message):
+  emit event "app.error" with { message }
+
+# Trigger events
+button "Login" -> login()
+button "Buy Item" -> buy()
+button "Cause Error" -> cause_error()
+
+login():
+  user = { name: "Alex", id: 123 }
+  on_user_login(user)
+
+buy():
+  on_purchase("Coffee Mug", 12.99)
+
+cause_error():
+  on_error("Something went wrong!")
+
+# Events can be caught by listeners (see next example)
+# This allows decoupled communication between parts of your app

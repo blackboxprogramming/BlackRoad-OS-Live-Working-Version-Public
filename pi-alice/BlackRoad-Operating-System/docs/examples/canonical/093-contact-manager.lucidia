@@ -1,0 +1,105 @@
+# 093: Contact Manager
+# Store and organize contacts locally
+
+state contacts = load "contacts" locally or []
+state editing = null
+
+# Add contact
+form add_contact:
+  input firstname -> new_contact.firstname
+  input lastname -> new_contact.lastname
+  input email -> new_contact.email
+    validate: is_email
+  input phone -> new_contact.phone
+  input company -> new_contact.company
+
+  button "Save Contact" -> save_contact(new_contact)
+
+save_contact(contact):
+  contact.id = generate_id()
+  contact.created_at = now()
+  contact.favorite = false
+
+  contacts.append(contact)
+  store contacts locally as "contacts"
+
+  # Clear form
+  new_contact = {}
+  show "Contact saved"
+
+# Edit contact
+edit_contact(id):
+  editing = contacts.find(c => c.id == id)
+
+save_edit():
+  contacts = contacts.map(c => {
+    if c.id == editing.id:
+      editing
+    else:
+      c
+  })
+
+  store contacts locally as "contacts"
+  editing = null
+  show "Contact updated"
+
+# Delete contact
+delete_contact(id):
+  ask "Delete this contact?" -> confirm
+
+  if confirm == "yes":
+    contacts = contacts.filter(c => c.id != id)
+    store contacts locally as "contacts"
+    show "Contact deleted"
+
+# Toggle favorite
+toggle_favorite(id):
+  contacts = contacts.map(c => {
+    if c.id == id:
+      { ...c, favorite: not c.favorite }
+    else:
+      c
+  })
+
+  store contacts locally as "contacts"
+
+# Sort and filter
+state sort_by = "lastname"
+state show_favorites_only = false
+
+computed sorted_contacts = contacts
+  .filter(c => not show_favorites_only or c.favorite)
+  .sort_by(c => c[sort_by])
+
+# Export contacts
+export_contacts():
+  csv = ai.transform(contacts, { to: "csv" })
+  save_file("contacts.csv", csv)
+  show "Contacts exported"
+
+# Import from phone (with consent)
+import_from_phone():
+  ask permission for: device.contacts
+    purpose: "Import your phone contacts"
+
+  if granted:
+    with consent.record:
+      phone_contacts = read_device_contacts()
+      contacts = contacts.concat(phone_contacts)
+      store contacts locally as "contacts"
+      show "Imported {phone_contacts.length} contacts"
+
+# Display
+for contact in sorted_contacts:
+  show_contact_card:
+    name: "{contact.firstname} {contact.lastname}"
+    email: contact.email
+    phone: contact.phone
+    company: contact.company
+    favorite: contact.favorite
+    on_favorite: () => toggle_favorite(contact.id)
+    on_edit: () => edit_contact(contact.id)
+    on_delete: () => delete_contact(contact.id)
+
+generate_id():
+  return now() + Math.random()

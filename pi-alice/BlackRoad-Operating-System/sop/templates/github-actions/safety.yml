@@ -1,0 +1,238 @@
+name: Security & Safety Checks
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    # Run weekly on Monday at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety pip-audit
+
+      - name: Run safety check
+        continue-on-error: true
+        run: |
+          safety check --json --output safety-report.json || true
+          safety check
+
+      - name: Run pip-audit
+        continue-on-error: true
+        run: |
+          pip-audit --format json --output pip-audit-report.json || true
+          pip-audit
+
+      - name: Upload vulnerability reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-vulnerability-reports
+          path: |
+            safety-report.json
+            pip-audit-report.json
+          retention-days: 90
+
+  sast-scan:
+    name: Static Application Security Testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install bandit
+        run: pip install bandit[toml]
+
+      - name: Run bandit security linter
+        run: |
+          bandit -r . \
+            -f json \
+            -o bandit-report.json \
+            --exclude './tests/*,./venv/*,./.venv/*,*/site-packages/*' \
+            -ll || true
+
+          bandit -r . \
+            -f screen \
+            --exclude './tests/*,./venv/*,./.venv/*,*/site-packages/*' \
+            -ll
+
+      - name: Upload SAST report
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-report
+          path: bandit-report.json
+          retention-days: 90
+
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
+
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python, javascript
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
+
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pip-licenses
+        run: pip install pip-licenses
+
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check licenses
+        run: |
+          echo "Generating license report..."
+          pip-licenses --format=json --output-file=licenses.json
+          pip-licenses --format=markdown --output-file=licenses.md
+
+          # Check for problematic licenses (GPL, AGPL, etc.)
+          PROBLEMATIC=$(pip-licenses --format=json | jq -r '.[] | select(.License | test("GPL|AGPL")) | .Name')
+
+          if [ -n "$PROBLEMATIC" ]; then
+            echo "⚠️ Warning: Found packages with potentially problematic licenses:"
+            echo "$PROBLEMATIC"
+            # Don't fail the build, just warn
+          else
+            echo "✅ No problematic licenses found"
+          fi
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: |
+            licenses.json
+            licenses.md
+          retention-days: 90
+
+  container-scan:
+    name: Container Image Scan
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t security-scan:${{ github.sha }} .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: security-scan:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Trivy for readable output
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: security-scan:${{ github.sha }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+  summary:
+    name: Security Summary
+    needs: [dependency-scan, sast-scan, secret-scan, license-check]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Security check summary
+        run: |
+          echo "### Security Scan Results"
+          echo ""
+          echo "- Dependency Scan: ${{ needs.dependency-scan.result }}"
+          echo "- SAST Scan: ${{ needs.sast-scan.result }}"
+          echo "- Secret Scan: ${{ needs.secret-scan.result }}"
+          echo "- License Check: ${{ needs.license-check.result }}"
+          echo ""
+
+          if [ "${{ needs.secret-scan.result }}" == "failure" ]; then
+            echo "❌ CRITICAL: Secrets detected in repository!"
+            exit 1
+          fi
+
+          if [ "${{ needs.dependency-scan.result }}" == "failure" ] || \
+             [ "${{ needs.sast-scan.result }}" == "failure" ]; then
+            echo "⚠️ Security vulnerabilities detected. Review the reports."
+            # Don't fail the build for vulnerability warnings
+          else
+            echo "✅ No critical security issues detected"
+          fi

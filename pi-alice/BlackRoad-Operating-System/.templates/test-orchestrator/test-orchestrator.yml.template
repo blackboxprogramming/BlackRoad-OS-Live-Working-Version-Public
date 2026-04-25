@@ -1,0 +1,256 @@
+# GitHub Actions Workflow - Test Orchestrator
+#
+# Adapted from: BlackRoad Operating System Test Orchestrator Pattern
+#
+# TODO: Customize this workflow for your project
+# 1. Update trigger branches
+# 2. Add/remove service containers as needed
+# 3. Adjust cache paths
+# 4. Update environment variables
+# 5. Modify suite options in workflow_dispatch
+
+name: Test Orchestrator - All Suites
+
+on:
+  push:
+    branches:
+      - "main"
+      # TODO: Add your branch patterns here
+      # - "develop"
+      # - "claude/**"
+      # - "feature/**"
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'Specific test suite to run (leave empty for all)'
+        required: false
+        type: choice
+        options:
+          - ''
+          # TODO: Add your suite names here
+          - 'example-suite-1'
+          - 'example-suite-2'
+      strict_mode:
+        description: 'Enable strict mode (fail-fast)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  orchestrator:
+    name: Run Test Orchestrator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    # TODO: Add/remove service containers as needed
+    # services:
+    #   postgres:
+    #     image: postgres:15-alpine
+    #     env:
+    #       POSTGRES_USER: testuser
+    #       POSTGRES_PASSWORD: testpass
+    #       POSTGRES_DB: testdb
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #
+    #   redis:
+    #     image: redis:7-alpine
+    #     ports:
+    #       - 6379:6379
+    #     options: >-
+    #       --health-cmd "redis-cli ping"
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #
+    #   mysql:
+    #     image: mysql:8
+    #     env:
+    #       MYSQL_ROOT_PASSWORD: testpass
+    #       MYSQL_DATABASE: testdb
+    #     ports:
+    #       - 3306:3306
+    #
+    #   mongodb:
+    #     image: mongo:7
+    #     ports:
+    #       - 27017:27017
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # TODO: Setup language runtimes as needed
+      # Uncomment and customize based on your stack
+
+      # Python setup
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.11'  # TODO: Set your Python version
+      #     cache: 'pip'
+      #     cache-dependency-path: |
+      #       requirements.txt
+      #       # Add more dependency files here
+
+      # Node.js setup
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20'  # TODO: Set your Node version
+      #     cache: 'npm'  # or 'yarn' or 'pnpm'
+      #     cache-dependency-path: 'package-lock.json'
+
+      # Go setup
+      # - name: Setup Go
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: '1.21'  # TODO: Set your Go version
+      #     cache: true
+
+      # Rust setup
+      # - name: Setup Rust
+      #   uses: actions-rs/toolchain@v1
+      #   with:
+      #     toolchain: stable
+      #     profile: minimal
+
+      # Java setup
+      # - name: Setup Java
+      #   uses: actions/setup-java@v4
+      #   with:
+      #     java-version: '17'  # TODO: Set your Java version
+      #     distribution: 'temurin'
+
+      # TODO: Install system dependencies if needed
+      # - name: Install system dependencies
+      #   run: |
+      #     sudo apt-get update
+      #     sudo apt-get install -y --no-install-recommends \
+      #       build-essential \
+      #       libpq-dev \
+      #       # Add more packages as needed
+
+      # TODO: Create environment files if needed
+      # - name: Create test environment file
+      #   run: |
+      #     cat > .env.test << EOF
+      #     DATABASE_URL=postgresql://testuser:testpass@localhost:5432/testdb
+      #     REDIS_URL=redis://localhost:6379/0
+      #     SECRET_KEY=test-secret-key-$(openssl rand -hex 16)
+      #     ENVIRONMENT=testing
+      #     # Add more environment variables
+      #     EOF
+
+      - name: Make test orchestrator executable
+        run: chmod +x test_all.sh
+
+      - name: Run Test Orchestrator (All Suites)
+        if: ${{ github.event.inputs.suite == '' }}
+        run: |
+          if [[ "${{ github.event.inputs.strict_mode }}" == "true" ]]; then
+            ./test_all.sh --strict --verbose
+          else
+            ./test_all.sh --verbose
+          fi
+
+      - name: Run Test Orchestrator (Specific Suite)
+        if: ${{ github.event.inputs.suite != '' }}
+        run: |
+          if [[ "${{ github.event.inputs.strict_mode }}" == "true" ]]; then
+            ./test_all.sh --suite "${{ github.event.inputs.suite }}" --strict --verbose
+          else
+            ./test_all.sh --suite "${{ github.event.inputs.suite }}" --verbose
+          fi
+
+      # TODO: Upload test artifacts
+      # Customize paths based on your test output locations
+      # - name: Upload test artifacts
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-results
+      #     path: |
+      #       test-results/
+      #       coverage/
+      #       *.log
+      #     retention-days: 7
+      #     if-no-files-found: ignore
+
+      - name: Generate test summary
+        if: always()
+        run: |
+          echo "## 🧪 Test Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Repository:** ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the job output above for detailed test results." >> $GITHUB_STEP_SUMMARY
+
+  # TODO: Add optional coverage job
+  # coverage:
+  #   name: Generate Coverage Report
+  #   runs-on: ubuntu-latest
+  #   needs: orchestrator
+  #   if: github.event_name == 'pull_request'
+  #
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #
+  #     # Setup language runtime
+  #     # Run tests with coverage
+  #     # Upload to Codecov or similar
+  #
+  #     - name: Upload coverage to Codecov
+  #       uses: codecov/codecov-action@v4
+  #       with:
+  #         file: ./coverage.xml
+  #         flags: unittests
+  #         name: coverage
+  #         fail_ci_if_error: false
+  #         token: ${{ secrets.CODECOV_TOKEN }}
+
+  status-check:
+    name: Final Status Check
+    runs-on: ubuntu-latest
+    needs: [orchestrator]
+    if: always()
+
+    steps:
+      - name: Check orchestrator status
+        run: |
+          if [[ "${{ needs.orchestrator.result }}" != "success" ]]; then
+            echo "❌ Test orchestrator failed or was cancelled"
+            exit 1
+          fi
+          echo "✅ All test suites passed!"
+
+      # TODO: Optional PR comment
+      # - name: Post status to PR
+      #   if: github.event_name == 'pull_request' && always()
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       const status = '${{ needs.orchestrator.result }}';
+      #       const icon = status === 'success' ? '✅' : '❌';
+      #       const message = status === 'success'
+      #         ? 'All test suites passed!'
+      #         : 'One or more test suites failed. Check the orchestrator job for details.';
+      #
+      #       github.rest.issues.createComment({
+      #         issue_number: context.issue.number,
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: `## ${icon} Test Orchestrator\n\n${message}\n\n[View Details](${context.payload.pull_request.html_url}/checks)`
+      #       });

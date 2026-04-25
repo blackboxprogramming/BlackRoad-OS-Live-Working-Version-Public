@@ -1,0 +1,191 @@
+# 100: E-Commerce Checkout
+# Complete checkout flow with payment, consent, and local cart
+
+state cart = load "cart" locally or []
+state user = load "user" locally or null
+state checkout_step = "cart"  # cart, shipping, payment, confirmation
+
+# Add to cart
+add_to_cart(product):
+  existing = cart.find(item => item.id == product.id)
+
+  if existing != null:
+    existing.quantity = existing.quantity + 1
+  else:
+    cart.append({ ...product, quantity: 1 })
+
+  store cart locally as "cart"
+  show "Added to cart"
+
+# Remove from cart
+remove_from_cart(product_id):
+  cart = cart.filter(item => item.id != product_id)
+  store cart locally as "cart"
+
+# Update quantity
+update_quantity(product_id, quantity):
+  if quantity <= 0:
+    remove_from_cart(product_id)
+    return
+
+  cart = cart.map(item => {
+    if item.id == product_id:
+      { ...item, quantity }
+    else:
+      item
+  })
+
+  store cart locally as "cart"
+
+# Cart totals
+computed subtotal = cart.reduce((sum, item) => {
+  sum + (item.price * item.quantity)
+}, 0)
+
+computed tax = subtotal * 0.08
+computed shipping = subtotal > 50 ? 0 : 5.99
+computed total = subtotal + tax + shipping
+
+# Checkout flow
+checkout_step is:
+  "cart": show_cart()
+  "shipping": show_shipping_form()
+  "payment": show_payment_form()
+  "confirmation": show_confirmation()
+
+# Step 1: Cart
+show_cart():
+  show "Shopping Cart ({cart.length} items)"
+
+  for item in cart:
+    show_cart_item:
+      name: item.name
+      price: "${item.price}"
+      quantity: item.quantity
+      total: "${(item.price * item.quantity).toFixed(2)}"
+      on_update: (qty) => update_quantity(item.id, qty)
+      on_remove: () => remove_from_cart(item.id)
+
+  show "Subtotal: ${subtotal.toFixed(2)}"
+  show "Tax: ${tax.toFixed(2)}"
+  show "Shipping: ${shipping.toFixed(2)}"
+  show "Total: ${total.toFixed(2)}"
+
+  if cart.length > 0:
+    button "Proceed to Checkout" -> checkout_step = "shipping"
+
+# Step 2: Shipping
+show_shipping_form():
+  form shipping_address:
+    input fullname -> shipping.name
+    input address -> shipping.address
+    input city -> shipping.city
+    select state -> shipping.state
+      options: ["CA", "NY", "TX", "FL", "WA"]
+    input zipcode -> shipping.zip
+      validate: is_zipcode
+
+    button "Continue to Payment" -> {
+      store shipping locally as "shipping"
+      checkout_step = "payment"
+    }
+
+# Step 3: Payment
+show_payment_form():
+  # Request payment permission
+  ask permission for: payment.process
+    purpose: "Complete purchase of ${total.toFixed(2)}"
+
+  if granted:
+    form payment_method:
+      select method -> payment.method
+        options: ["Credit Card", "PayPal", "Apple Pay"]
+
+      if payment.method == "Credit Card":
+        input card_number -> payment.card_number
+          type: "text"
+          validate: is_credit_card
+
+        input expiry -> payment.expiry
+          placeholder: "MM/YY"
+
+        input cvv -> payment.cvv
+          type: "password"
+          maxlength: 4
+
+      checkbox save_payment -> payment.save
+        label: "Save payment method for future purchases"
+
+      button "Place Order" -> process_payment()
+
+process_payment():
+  # Consent to charge
+  ask permission for: payment.charge
+    amount: total
+    purpose: "Complete purchase"
+
+  if granted:
+    with consent.record:
+      # Process payment
+      result = charge_payment(payment, total)
+
+      if result.success:
+        # Clear cart
+        order_id = result.order_id
+        cart = []
+        store cart locally as "cart"
+
+        # Save order
+        order = {
+          id: order_id,
+          items: cart,
+          total: total,
+          shipping: shipping,
+          date: now()
+        }
+
+        orders = load "orders" locally or []
+        orders.append(order)
+        store orders locally as "orders"
+
+        checkout_step = "confirmation"
+      else:
+        show "Payment failed: {result.error}"
+  else:
+    show "Payment cancelled"
+
+# Step 4: Confirmation
+show_confirmation():
+  show "✓ Order Confirmed!"
+  show "Order ID: {order_id}"
+  show "Total: ${total.toFixed(2)}"
+
+  show "A confirmation email has been sent"
+
+  button "Continue Shopping" -> {
+    checkout_step = "cart"
+  }
+
+  button "View Orders" -> show_order_history()
+
+# Order history
+show_order_history():
+  orders = load "orders" locally or []
+
+  show "Your Orders ({orders.length})"
+
+  for order in orders:
+    show_order_summary:
+      id: order.id
+      date: format_date(order.date)
+      total: "${order.total.toFixed(2)}"
+      items: order.items.length
+
+# This example shows:
+# - Local-first cart (persists across sessions)
+# - Multi-step checkout flow
+# - Consent for payment processing
+# - Real payment integration
+# - Order history
+# - All data stored locally
+# - Works offline (cart persists)

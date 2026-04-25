@@ -1,0 +1,45 @@
+# 037: Closures
+# Functions that remember their environment
+
+# Counter closure
+make_counter():
+  count = 0
+
+  return () => {
+    count = count + 1
+    count
+  }
+
+# Each counter has its own state
+counter1 = make_counter()
+counter2 = make_counter()
+
+show counter1()  # 1
+show counter1()  # 2
+show counter1()  # 3
+
+show counter2()  # 1 (separate counter)
+show counter2()  # 2
+
+# Private variables
+make_account(initial_balance):
+  balance = initial_balance
+
+  return {
+    deposit: (amount) => {
+      balance = balance + amount
+      balance
+    },
+    withdraw: (amount) => {
+      if amount > balance:
+        return "Insufficient funds"
+      balance = balance - amount
+      balance
+    },
+    get_balance: () => balance
+  }
+
+account = make_account(100)
+show account.deposit(50)    # 150
+show account.withdraw(30)   # 120
+show account.get_balance()  # 120

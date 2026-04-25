@@ -1,0 +1,100 @@
+# BlackRoad OS - Test Workflow
+#
+# This workflow runs tests on every push and pull request.
+# Copy this file to .github/workflows/test.yml in your satellite repo.
+#
+# Usage:
+# 1. Copy to .github/workflows/test.yml
+# 2. Customize test commands if needed
+
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint code
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type check
+        run: npm run type-check
+        continue-on-error: false
+
+      - name: Run tests
+        run: npm test -- --coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+        continue-on-error: true
+
+      - name: Build application
+        run: npm run build
+
+      - name: Check build artifacts
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build failed: dist directory not found"
+            exit 1
+          fi
+          echo "Build successful!"
+
+  validate-env:
+    name: Validate Environment Template
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check .env.example exists
+        run: |
+          if [ ! -f ".env.example" ]; then
+            echo "❌ .env.example not found"
+            exit 1
+          fi
+          echo "✅ .env.example found"
+
+      - name: Validate required env vars
+        run: |
+          REQUIRED_VARS=("SERVICE_NAME" "SERVICE_ROLE" "ENVIRONMENT" "PORT")
+          for var in "${REQUIRED_VARS[@]}"; do
+            if ! grep -q "^${var}=" .env.example; then
+              echo "❌ Required variable ${var} not found in .env.example"
+              exit 1
+            fi
+          done
+          echo "✅ All required environment variables present"

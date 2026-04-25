@@ -1,0 +1,47 @@
+# 076: Cloud Sync Setup
+# Optional cloud backup (local-first, cloud-optional)
+
+# User configures sync
+form sync_settings:
+  checkbox "Enable cloud sync" -> settings.cloud_sync
+
+  if settings.cloud_sync:
+    input cloud_endpoint -> settings.endpoint
+      placeholder: "https://sync.example.com"
+
+    select sync_frequency -> settings.frequency
+      options: ["on_change", "hourly", "daily", "manual"]
+
+    checkbox "Encrypt before upload" -> settings.encrypt
+      default: true
+
+  button "Save Settings" -> save_sync_settings(settings)
+
+save_sync_settings(config):
+  store config locally as "sync_config"
+
+  if config.cloud_sync:
+    initialize_sync(config)
+    show "Cloud sync enabled"
+  else:
+    disable_sync()
+    show "Using local storage only"
+
+# Sync specific data
+sync_notes():
+  # Ask for permission
+  ask permission for: cloud.storage
+    purpose: "Backup notes to cloud"
+
+  if granted:
+    notes = load "notes" locally
+
+    sync notes to cloud with:
+      endpoint: settings.endpoint
+      encrypt: true
+      on_conflict: "last_write_wins"
+
+    show "Notes synced to cloud"
+
+# Everything still works offline
+# Cloud is purely optional backup/sync across devices

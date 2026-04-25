@@ -1,0 +1,34 @@
+# 063: Permission Denied Flow
+# Handle gracefully when user says no
+
+ask permission for: contacts
+  purpose: "Find friends using the app"
+
+if granted:
+  contacts = read_contacts()
+  friends = find_matching_users(contacts)
+  show "Found {friends.length} friends!"
+else:
+  # User denied permission
+  show "You can invite friends manually using their email"
+  show_manual_invite_form()
+
+# Another example
+ask permission for: notifications
+
+if granted:
+  enable_push_notifications()
+  show "You'll receive updates!"
+else:
+  show "You can still use the app, but won't get notifications"
+  # Degrade gracefully - app still works
+
+show_manual_invite_form():
+  form invite:
+    input email -> friend_email
+    button "Send Invite" -> send_invite(friend_email)
+
+send_invite(email):
+  show "Invitation sent to {email}"
+
+# The key: denied permission = graceful degradation, not broken app

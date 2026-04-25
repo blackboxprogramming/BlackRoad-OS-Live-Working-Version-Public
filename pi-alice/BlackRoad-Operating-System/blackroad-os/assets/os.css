@@ -1,0 +1,257 @@
+/**
+ * OS Window System Styles
+ * Window chrome, dragging, animations, z-index management
+ */
+
+.os-window {
+    position: absolute;
+    min-width: 400px;
+    min-height: 300px;
+    max-width: 100%;
+    max-height: 100%;
+    background: var(--bg-window);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px var(--shadow);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: opacity 0.2s;
+}
+
+.os-window.minimized {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.os-window.focused {
+    border-color: var(--primary);
+}
+
+/* Window Titlebar */
+.window-titlebar {
+    height: 40px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    cursor: move;
+    user-select: none;
+}
+
+.window-titlebar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.window-icon {
+    font-size: 20px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.window-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.window-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.window-control-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.window-control-btn:hover {
+    background: var(--bg-surface-hover);
+}
+
+.window-control-btn.close:hover {
+    background: var(--error);
+    color: white;
+}
+
+.window-control-btn.minimize:hover {
+    background: var(--warning);
+    color: white;
+}
+
+.window-control-btn.maximize:hover {
+    background: var(--success);
+    color: white;
+}
+
+/* Window Content Area */
+.window-content {
+    flex: 1;
+    overflow: auto;
+    padding: 20px;
+    color: var(--text-primary);
+}
+
+.window-content.no-padding {
+    padding: 0;
+}
+
+/* Window Toolbar (optional) */
+.window-toolbar {
+    padding: 10px 20px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toolbar-btn {
+    padding: 6px 12px;
+    background: var(--bg-window);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+    border-color: var(--primary);
+    background: var(--bg-surface-hover);
+}
+
+.toolbar-btn:active {
+    transform: scale(0.95);
+}
+
+.toolbar-btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #000;
+    font-weight: 600;
+}
+
+.toolbar-btn.primary:hover {
+    background: var(--primary-light);
+}
+
+.toolbar-separator {
+    width: 1px;
+    height: 24px;
+    background: var(--border-color);
+}
+
+/* Window Status Bar (optional) */
+.window-statusbar {
+    padding: 8px 20px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Window Animations */
+@keyframes windowOpen {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.os-window.opening {
+    animation: windowOpen 0.2s ease;
+}
+
+/* Resize Handles (future feature) */
+.resize-handle {
+    position: absolute;
+    background: transparent;
+}
+
+.resize-handle.n {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: n-resize;
+}
+
+.resize-handle.s {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    cursor: s-resize;
+}
+
+.resize-handle.e {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: e-resize;
+}
+
+.resize-handle.w {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    cursor: w-resize;
+}
+
+.resize-handle.ne {
+    top: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    cursor: ne-resize;
+}
+
+.resize-handle.nw {
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    cursor: nw-resize;
+}
+
+.resize-handle.se {
+    bottom: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    cursor: se-resize;
+}
+
+.resize-handle.sw {
+    bottom: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    cursor: sw-resize;
+}

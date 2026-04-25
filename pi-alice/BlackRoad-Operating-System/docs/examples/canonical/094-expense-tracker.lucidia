@@ -1,0 +1,112 @@
+# 094: Expense Tracker
+# Track spending with categories and insights
+
+state expenses = load "expenses" locally or []
+state budget = load "budget" locally or { monthly: 2000 }
+
+# Add expense
+form add_expense:
+  input amount -> new_expense.amount
+    type: "number"
+    placeholder: "0.00"
+
+  input description -> new_expense.description
+    placeholder: "What was this for?"
+
+  select category -> new_expense.category
+    options: ["Food", "Transport", "Entertainment", "Bills", "Shopping", "Other"]
+
+  date_picker date -> new_expense.date
+    default: today()
+
+  button "Add Expense" -> save_expense(new_expense)
+
+save_expense(exp):
+  exp.id = generate_id()
+  exp.created_at = now()
+
+  expenses.append(exp)
+  store expenses locally as "expenses"
+
+  new_expense = {}
+  show "Expense added"
+
+# Delete expense
+delete_expense(id):
+  expenses = expenses.filter(e => e.id != id)
+  store expenses locally as "expenses"
+
+# Analytics
+computed this_month_expenses = expenses.filter(e => {
+  is_this_month(e.date)
+})
+
+computed total_this_month = this_month_expenses
+  .reduce((sum, e) => sum + e.amount, 0)
+
+computed by_category = this_month_expenses
+  .group_by(e => e.category)
+  .map(group => ({
+    category: group.key,
+    total: group.items.reduce((sum, e) => sum + e.amount, 0),
+    count: group.items.length
+  }))
+  .sort_by(g => g.total)
+  .reverse()
+
+computed budget_remaining = budget.monthly - total_this_month
+
+computed is_over_budget = total_this_month > budget.monthly
+
+# Display summary
+show_card:
+  title: "This Month"
+  value: "${total_this_month.toFixed(2)}"
+  subtitle: "of ${budget.monthly} budget"
+
+  if is_over_budget:
+    show_warning "Over budget by ${(total_this_month - budget.monthly).toFixed(2)}"
+  else:
+    show_success "${budget_remaining.toFixed(2)} remaining"
+
+# Category breakdown
+show "Spending by Category"
+for cat in by_category:
+  show_category_bar:
+    name: cat.category
+    amount: cat.total
+    percent: (cat.total / total_this_month * 100).toFixed(1)
+
+# Recent expenses
+show "Recent Expenses"
+for exp in expenses.sort_by(e => e.created_at).reverse().take(10):
+  show_expense_row:
+    description: exp.description
+    category: exp.category
+    amount: "${exp.amount.toFixed(2)}"
+    date: format_date(exp.date)
+    on_delete: () => delete_expense(exp.id)
+
+# AI Insights
+button "Get Spending Insights" -> show_insights()
+
+show_insights():
+  ### Intent: Analyze spending patterns and provide insights
+  insights = ai.analyze(expenses, {
+    focus: "patterns, unusual spending, savings opportunities"
+  })
+
+  show insights
+
+# Export
+button "Export to CSV" -> export_data()
+
+export_data():
+  csv = ai.transform(expenses, { to: "csv" })
+  save_file("expenses.csv", csv)
+
+generate_id():
+  return now() + Math.random()
+
+is_this_month(date):
+  return date.month == today().month and date.year == today().year
