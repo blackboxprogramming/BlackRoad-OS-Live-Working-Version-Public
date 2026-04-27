@@ -844,6 +844,233 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    signals: [
+      {
+        label: 'Crew state',
+        title: 'Team alignment and capacity',
+        status: 'Live',
+        indicator: '4/5 present, 1 async',
+        insight: 'Crew ready for real-time sync, one member catching up offline',
+        actions: [
+          { label: 'View roster', query: 'agents' },
+          { label: 'Update status', query: 'live update' },
+        ],
+      },
+      {
+        label: 'Decision ready',
+        title: 'Convergence status on open questions',
+        status: 'Ready',
+        indicator: '2/3 decisions converged',
+        insight: 'Team moving toward consensus, one blocker remains unresolved',
+        actions: [
+          { label: 'Review decisions', query: 'decisions roadtrip' },
+          { label: 'Unblock discussion', query: 'collab' },
+        ],
+      },
+      {
+        label: 'Room health',
+        title: 'Executive room synchronization',
+        status: 'Active',
+        indicator: 'All surfaces responding',
+        insight: 'Collab, live, and agents all current within last 30 seconds',
+        actions: [
+          { label: 'Open collab', query: 'collab' },
+          { label: 'Check live', query: 'live' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Build status',
+        title: 'Code build and gate health',
+        status: 'Green',
+        indicator: 'All gates passing, no blockers',
+        insight: 'Build lane responsive and code ready for deployment',
+        actions: [
+          { label: 'View status', query: 'status' },
+          { label: 'Check gates', query: 'doc command dock routing' },
+        ],
+      },
+      {
+        label: 'Rollout readiness',
+        title: 'Deployment pipeline status',
+        status: 'Ready',
+        indicator: '3/3 environments staged',
+        insight: 'All deployment prerequisites satisfied, gates clear',
+        actions: [
+          { label: 'Review gates', query: 'open roadcode' },
+          { label: 'Check rollout', query: 'open oneway' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Work queue',
+        title: 'Execution lane health and capacity',
+        status: 'Active',
+        indicator: '8 assigned, 3 in progress, 5 waiting',
+        insight: 'Team at capacity, next blockers becoming visible',
+        actions: [
+          { label: 'View work', query: 'open roadwork' },
+          { label: 'Check board', query: 'todo' },
+        ],
+      },
+      {
+        label: 'Execution flow',
+        title: 'Work progression and handoff status',
+        status: 'Smooth',
+        indicator: '2.1 day avg cycle time',
+        insight: 'Work moving through lane at healthy velocity',
+        actions: [
+          { label: 'Check velocity', query: 'open roadwork' },
+          { label: 'View metrics', query: 'status' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Data currency',
+        title: 'Knowledge and hypothesis freshness',
+        status: 'Current',
+        indicator: 'Latest data 2 hours old',
+        insight: 'World understanding synchronizes with live context',
+        actions: [
+          { label: 'Review data', query: 'open roadview' },
+          { label: 'Check sources', query: 'docs roadview' },
+        ],
+      },
+      {
+        label: 'Insight alignment',
+        title: 'Shared understanding of market direction',
+        status: 'Converged',
+        indicator: '4/4 viewpoints in sync',
+        insight: 'Perspective aligned on next moves and risks',
+        actions: [
+          { label: 'View insights', query: 'open roadview' },
+          { label: 'Share learning', query: 'collab' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Documentation health',
+        title: 'Knowledge base currency and coverage',
+        status: 'Green',
+        indicator: '94 docs current, 3 stale, 0 orphaned',
+        insight: 'Operators finding what they need in first search',
+        actions: [
+          { label: 'View docs', query: 'docs' },
+          { label: 'Check search', query: 'open search' },
+        ],
+      },
+      {
+        label: 'Search quality',
+        title: 'Documentation discovery effectiveness',
+        status: 'Responsive',
+        indicator: '0.8s avg query, 95% relevance',
+        insight: 'Search index fresh and operators finding answers fast',
+        actions: [
+          { label: 'Test search', query: 'open search' },
+          { label: 'Refresh index', query: 'index refresh' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'System health',
+        title: 'Infrastructure and service status',
+        status: 'Healthy',
+        indicator: '99.8% uptime, all services green',
+        insight: 'All systems responding normally, no known issues',
+        actions: [
+          { label: 'View dashboard', query: 'status' },
+          { label: 'Check alerts', query: 'open status' },
+        ],
+      },
+      {
+        label: 'Operational readiness',
+        title: 'Team and infrastructure capacity',
+        status: 'Nominal',
+        indicator: 'CPU 34%, Memory 56%, Throughput stable',
+        insight: 'Systems running well within limits, sustainable pace',
+        actions: [
+          { label: 'View metrics', query: 'status' },
+          { label: 'Check capacity', query: 'agents' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Team presence',
+        title: 'Operator availability and focus',
+        status: 'Active',
+        indicator: '6 present, 2 async, 1 away',
+        insight: 'Core team present and ready for real-time sync',
+        actions: [
+          { label: 'View roster', query: 'agents' },
+          { label: 'Share status', query: 'live' },
+        ],
+      },
+      {
+        label: 'Capacity signal',
+        title: 'Team bandwidth and workload distribution',
+        status: 'Balanced',
+        indicator: 'Avg load 73%, all operators engaged',
+        insight: 'Team at healthy utilization, no burnout signals',
+        actions: [
+          { label: 'Check load', query: 'agents' },
+          { label: 'Rebalance work', query: 'open roadwork' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Index freshness',
+        title: 'Search corpus currency and completeness',
+        status: 'Current',
+        indicator: 'Last refresh 4 hours ago, 100% coverage',
+        insight: 'Search index reflects latest changes across all docs',
+        actions: [
+          { label: 'Test search', query: 'open search' },
+          { label: 'Refresh index', query: 'index refresh' },
+        ],
+      },
+      {
+        label: 'Query performance',
+        title: 'Search responsiveness and accuracy',
+        status: 'Fast',
+        indicator: 'P95 0.6s, relevance 96%',
+        insight: 'Search responsive and operators finding right answers',
+        actions: [
+          { label: 'View analytics', query: 'open search' },
+          { label: 'Tune index', query: 'index tune' },
+        ],
+      },
+    ],
+    signals: [
+      {
+        label: 'Topology accuracy',
+        title: 'System architecture and connection map',
+        status: 'Accurate',
+        indicator: '42 nodes, 138 connections all current',
+        insight: 'Map reflects actual system topology, operators trust it',
+        actions: [
+          { label: 'View map', query: 'open atlas' },
+          { label: 'Check links', query: 'atlas verify' },
+        ],
+      },
+      {
+        label: 'Connection health',
+        title: 'Inter-system communication and dependencies',
+        status: 'Solid',
+        indicator: 'All cross-node links green, 0 broken refs',
+        insight: 'System dependencies healthy, no orphaned connections',
+        actions: [
+          { label: 'Verify connections', query: 'atlas verify' },
+          { label: 'Update map', query: 'atlas sync' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Agenda prep',
@@ -4812,6 +5039,26 @@ function buildRitualItems(items = [], limit = 2) {
   return compact(items).slice(0, limit);
 }
 
+function createSignalItem(label, title, status, indicator, insight, actions = []) {
+  return {
+    label: String(label),
+    title: String(title),
+    status: String(status),
+    indicator: String(indicator),
+    insight: String(insight),
+    actions: (actions || []).map((action) => ({
+      label: String(action.label),
+      query: action.query || null,
+      href: action.href || null,
+      surfaceId: action.surfaceId || null,
+    })),
+  };
+}
+
+function buildSignalItems(items = [], limit = 3) {
+  return compact(items).slice(0, limit);
+}
+
 function buildBoardColumns(columns = [], limit = 3) {
   return compact(columns.map((column) => {
     const items = compact(column.items || []).slice(0, limit);
@@ -4953,6 +5200,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
     primer.ready,
     primer.actions || []
   )));
+  const signalItems = buildSignalItems((config?.signals || []).map((signal) => createSignalItem(
+    signal.label,
+    signal.title,
+    signal.status,
+    signal.indicator,
+    signal.insight,
+    signal.actions || []
+  )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 
   return compact([
@@ -5084,6 +5339,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
           title: 'Ritual cards',
           note: 'Recurring practices that keep the room moving',
           items: ritualItems,
+        }
+      : null,
+    signalItems.length
+      ? {
+          kind: 'signals',
+          title: 'Signal cards',
+          note: 'Real-time status indicators showing room health',
+          items: signalItems,
         }
       : null,
     boardColumns.length
@@ -5236,6 +5499,14 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
     primer.gather,
     primer.ready,
     primer.actions || []
+  )));
+  const signalItems = buildSignalItems((config?.signals || []).map((signal) => createSignalItem(
+    signal.label,
+    signal.title,
+    signal.status,
+    signal.indicator,
+    signal.insight,
+    signal.actions || []
   )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 

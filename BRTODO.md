@@ -29,13 +29,24 @@ Remember the Road. Pave Tomorrow!
 - [ ] Pick canon: 06-CANONICAL or current PRODUCTS.md
 - [ ] If 06-CANONICAL wins: rewrite PRODUCTS.md table; add repo stubs for missing products if not present
 
-## 2026-04-27 · CLIP tile-tagger full sweep (READY)
-- Smoke test on 5 imgs/pack of sunnyside passed (exit 0); CLIP-ViT-B/32 cached
-- 53,557 images total in `commercial_ok/`; `--limit-per-pack 40` (~3,600 imgs) is the natural next step to match gallery preview
-- Then update `gen_gallery.py` to consume `_tags.json`, render tag pills under figcaptions, extend search to match tags
-- [ ] Eyeball sample `_tags.json` from sunnyside before scaling
-- [ ] Run `python3 gen_tags.py --limit-per-pack 40`
-- [ ] Wire gallery filter
+## 2026-04-27 · CLIP tile-tagger full sweep (DONE)
+- [x] Smoke test on 5 imgs/pack of sunnyside; quality terrible
+- [x] Tuned vocab (70→96 labels, sprite-specific) + 4-prompt ensemble — quality lifted (`goblin enemy 0.43` after, `child sprite 0.07` before)
+- [x] Patched transformers 5.x API surface (BaseModelOutputWithPooling)
+- [x] Sweep `--limit-per-pack 40`: 3079 imgs / 89 packs / 48.7s MPS / ~63 imgs/sec
+- [x] Wired `gen_gallery.py` to render tag pills + extend search filter
+- 1 pack `loafbrr_interiors_a` is 3D-only (no PNGs), legitimately untagged
+- Optional follow-ups: run full sweep (53,557 imgs ~75 min), add vocab terms ("zombie", "arrow icon", "round button", "starfield")
+
+## 2026-04-27 · Vision+narrate Pi pipeline (DECIDE ARCHITECTURE)
+- ollama probed: **anastasia** has llama3.2:3b + qwen2.5:3b. **lucidia** has moondream:latest (vision-language) + 9 BlackRoad named-agent models (sophia/valeria/seraphina/ophelia/lyra/sapphira/cicero/celeste/+more)
+- Three architectures, increasing on-brand-ness:
+  - **A. cecilia (precomputed CLIP oracle) → anastasia (llama narrates)** — utilitarian, two pis, generic narration
+  - **B. lucidia (moondream sees pixels) → anastasia (llama narrates)** — purest vision pipeline, two pis, moondream actually looks at the image
+  - **C. cecilia (oracle) → lucidia (named-agent narrates in character)** — uses the convoy's distinct voices; one Pi sees, one Pi speaks-in-character
+- [ ] Pick A / B / C
+- [ ] Decide first narrator agent (sophia/valeria/celeste/etc) if C
+- [ ] Scaffold `oracle.py` on cecilia + `narrate.py` on chosen narrator pi
 
 ## 2026-04-27 · fleet outage on .101–.121 block (INVESTIGATE)
 - octavia(.101), olympia(.111), calliope(.120), cadence(.121) all unreachable as of 22:08 PT
