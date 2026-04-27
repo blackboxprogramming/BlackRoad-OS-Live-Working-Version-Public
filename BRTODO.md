@@ -68,3 +68,11 @@ Remember the Road. Pave Tomorrow!
 - [ ] **Worker production deploy still pending** — `web/workers/*.js` lack wrangler.toml; deploy script likely lives on octavia or another Pi
 - [ ] **gematria-www production ship still pending** — find the deploy mechanism for that subtree
 - [ ] Verify by re-probing: all 16 product subdomains + 20 root domains should link the canonical CSS after deploy
+
+## 2026-04-26 23:30 · deploy unblock — cecilia auth needed
+Three concrete forward paths (pick one):
+1. **Interactive (fastest)** — `ssh cecilia` → `wrangler login` → paste OAuth URL into Safari → auth. Then I run `~/blackroad/websites/deploy.sh blackroad.io` (or `all`).
+2. **Permanent** — Cloudflare dashboard → Workers & Pages → blackroad-io project → "Connect to Git" → point to `BlackRoad-OS-Live-Working-Version-Public/main`. Auto-deploys forever after one setup. Eliminates the wrangler-auth dance.
+3. **API token** — generate a CF API token in dashboard, paste as `CLOUDFLARE_API_TOKEN` env var on cecilia. wrangler picks it up; no OAuth flow needed.
+
+Octavia (Gitea host) tunnel IS alive but SSH not reachable from this Mac under any username tried. Cecilia is the only host with wrangler binary + writable websites/ tree.

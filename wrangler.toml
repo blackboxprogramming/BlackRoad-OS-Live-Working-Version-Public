@@ -1,18 +1,59 @@
-name = "os-blackroad"
-main = "src/worker.js"
-compatibility_date = "2024-12-01"
+name = "blackroad-shell"
+main = "src/worker/index.js"
+compatibility_date = "2024-04-26"
+type = "service"
 
+# D1 Database binding
+[[d1_databases]]
+binding = "BLACKROAD_DB"
+database_name = "blackroad-production"
+database_id = "1d268fc3-e974-4647-978d-448cf644759a"
+
+# KV Namespace bindings
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "sessions"
+
+[[kv_namespaces]]
+binding = "CONFIG"
+id = "config"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "cache"
+
+[[kv_namespaces]]
+binding = "MEMORY"
+id = "memory"
+
+[[kv_namespaces]]
+binding = "ANALYTICS"
+id = "analytics"
+
+# Routes
 routes = [
-  { pattern = "os.blackroad.io/*", zone_name = "blackroad.io" }
+  { pattern = "blackroad.io/*", zone_name = "blackroad.io" },
+  { pattern = "*.blackroad.io/*", zone_name = "blackroad.io" },
 ]
 
-[[rules]]
-type = "Text"
-globs = ["**/*.css", "**/*.html", "**/*.txt"]
-fallthrough = false
+# Build
+build = { command = "npm run build", cwd = "." }
 
-[env.dev]
-name = "os-blackroad-dev"
-routes = [
-  { pattern = "dev.os.blackroad.io/*", zone_name = "blackroad.io" }
+# Analytics Engine
+analytics_engine_datasets = ["shell_events", "command_tracking", "workspace_usage"]
+
+# Services
+services = [
+  { binding = "AUTH", service = "blackroad-auth", environment = "production" }
 ]
+
+# Vars
+[env.production.vars]
+ENVIRONMENT = "production"
+SHELL_VERSION = "1.0.0"
+DOMAIN = "blackroad.io"
+
+[env.staging.vars]
+ENVIRONMENT = "staging"
+SHELL_VERSION = "1.0.0-staging"
+DOMAIN = "staging.blackroad.io"
