@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home · Felix & Oliver</title>
+<style>
+  :root {
+    --bg: #1a1a1a;
+    --fg: #eee;
+    --muted: #888;
+    --accent: #2a2a2a;
+    --border: #333;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px;
+    padding: 20px;
+  }
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: block;
+    outline: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    max-width: 100%;
+    height: auto;
+  }
+  .hud {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex; gap: 12px; align-items: center;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .title {
+    font-size: 16px; font-weight: 600; color: var(--fg);
+    letter-spacing: 0.04em;
+  }
+  #ho-room {
+    color: #E58B3D; font-weight: 600;
+    min-width: 100px; text-align: center;
+  }
+  kbd {
+    font: inherit;
+    font-size: 11px;
+    background: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--fg);
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    margin-top: 2px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="hoc" width="640" height="480" tabindex="0"></canvas>
+<div class="hud">
+  <span class="title">Home</span>
+  <span id="ho-room">living room</span>
+  <span>walk <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+</div>
+<div class="subtitle">click the canvas if input feels frozen · walk near Felix or Oliver</div>
+
+<script>
+(()=>{
+const TS=16, MW=40, MH=30, VW=640, VH=480;
+const cv=document.getElementById('hoc');
+const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+
+const C={
+  floor:'#C9956E', floorDk:'#A87547', floorLt:'#D9A77E', floorSeam:'#7E5532',
+  wall:'#E8DDC4', wallDk:'#9E8762', wallTrim:'#5C402B', wallStripe:'#DBCFB0',
+  window:'#BFE0F0', windowFrame:'#5C402B', windowGlow:'#FFF8DC', curtain:'#E0696A', curtainDk:'#A33A3A',
+  doorMat:'#7E5A40', doorMatPat:'#5C402B',
+  woodLt:'#C49363', woodMd:'#8C5C34', woodDk:'#5C3F22', woodAccent:'#A8754A',
+  cream:'#F5F0E0', creamDk:'#D8CFB7',
+  pinkRug:'#E6A6B7', pinkRugDk:'#C4748B', pinkRugLt:'#F5C4D1',
+  greenRug:'#7DA37D', greenRugDk:'#4F7050', greenRugLt:'#A0BFA0',
+  bedSheet:'#C0D8E0', bedFrame:'#5C402B', pillow:'#F5F0E0', blanket:'#7B5BA8', blanketTrim:'#534AB7',
+  metal:'#9E9C8E', metalDk:'#5A5852', metalLt:'#C7C5B7',
+  black:'#1F1D1A', glass:'#1A2632', glassLt:'#3E5670', glassHi:'#7BA8C8',
+  leaf:'#3F8E45', leafLt:'#5BB458', leafDk:'#2E7236', stem:'#6B4527', pot:'#A33A3A', potDk:'#7B2424',
+  felixOr:'#E58B3D', felixCr:'#F2C58A', felixDk:'#C36719',
+  oliverWh:'#F8F2E0', oliverCr:'#E0D7BE', oliverDk:'#A8A091', eyeGreen:'#5BA85B',
+  fridgeWh:'#E8E0CF', fridgeDk:'#9DA0A8', fridgeBl:'#3E5670',
+  stoveBlk:'#2A2825', stoveRed:'#FF6B6B', stoveBlue:'#7BA8C8',
+  tile:'#E0E8EC', tileDk:'#A8B0B4', tileSeam:'#7B8088',
+  tvScreen1:'#5BA85B', tvScreen2:'#7BA8C8', tvScreen3:'#E58B3D', tvScreen4:'#7B5BA8',
+  shadow:'rgba(0,0,0,0.18)', shadowDk:'rgba(0,0,0,0.32)',
+  sunRay:'rgba(255,236,170,0.20)', heart:'#E0696A',
+};
+
+const W=new Uint8Array(MW*MH);
+const B=new Uint8Array(MW*MH);
+const idx=(x,y)=>y*MW+x;
+const setW=(x,y,v=1)=>{ if(x>=0&&y>=0&&x<MW&&y<MH){W[idx(x,y)]=v; if(v) B[idx(x,y)]=1;} };
+const setB=(x,y,v=1)=>{ if(x>=0&&y>=0&&x<MW&&y<MH) B[idx(x,y)]=v; };
+const isB=(x,y)=> (x<0||y<0||x>=MW||y>=MH)?1:B[idx(x,y)];
+
+for(let x=0;x<MW;x++){ setW(x,0); setW(x,MH-1); }
+for(let y=0;y<MH;y++){ setW(0,y); setW(MW-1,y); }
+
+setW(4,0,2); setW(5,0,2); setW(6,0,2);
+setW(25,0,2); setW(26,0,2); setW(27,0,2);
+setW(0,18,2); setW(0,19,2);
+setW(MW-1,18,2); setW(MW-1,19,2);
+
+setW(18,MH-1,3); setW(19,MH-1,3);
+B[idx(18,MH-1)]=1; B[idx(19,MH-1)]=1;
+
+for(let x=1;x<MW-1;x++) setW(x,14);
+W[idx(8,14)]=0; W[idx(9,14)]=0; B[idx(8,14)]=0; B[idx(9,14)]=0;
+W[idx(28,14)]=0; W[idx(29,14)]=0; B[idx(28,14)]=0; B[idx(29,14)]=0;
+
+for(let y=1;y<MH-1;y++) setW(20,y);
+W[idx(20,6)]=0; W[idx(20,7)]=0; B[idx(20,6)]=0; B[idx(20,7)]=0;
+W[idx(20,21)]=0; W[idx(20,22)]=0; B[idx(20,21)]=0; B[idx(20,22)]=0;
+
+const furn=[];
+function place(type,x,y,w,h,blocked=true,data={}){
+  furn.push({type,x,y,w,h,data});
+  if(blocked){
+    for(let yy=y;yy<y+h;yy++) for(let xx=x;xx<x+w;xx++) setB(xx,yy);
+  }
+}
+
+place('rug', 4, 7, 9, 4, false, {kind:'pink'});
+place('bed', 3, 2, 5, 3);
+place('nightstand', 8, 3, 1, 2);
+place('dresser', 14, 2, 4, 2);
+place('mirror', 14, 1, 4, 1, false);
+place('plant', 17, 11, 1, 1);
+place('picBR', 11, 1, 2, 1, false);
+
+place('rug', 23, 9, 6, 3, false, {kind:'green'});
+place('desk', 23, 2, 8, 2);
+place('monitor', 25, 1, 3, 1, false);
+place('chair', 26, 4, 2, 2);
+place('bookshelf', 35, 2, 3, 8);
+place('cabinet', 22, 6, 1, 3);
+place('plant', 37, 11, 1, 1);
+place('picST', 32, 1, 2, 1, false);
+
+place('rug', 3, 19, 10, 5, false, {kind:'green'});
+place('couch', 2, 17, 6, 3);
+place('coffee', 4, 21, 4, 2);
+place('tvstand', 13, 17, 5, 2);
+place('lamp', 18, 18, 1, 1);
+place('plant', 18, 25, 1, 1);
+place('picLR', 9, 15, 3, 1, false);
+
+place('counter', 22, 16, 16, 1);
+place('counterRight', 38, 16, 1, 7, true);
+place('fridge', 22, 16, 2, 3);
+place('stove', 28, 16, 2, 1, false, {});
+place('sink', 32, 16, 2, 1, false, {});
+place('table', 28, 22, 3, 3);
+place('plant', 22, 19, 1, 1);
+place('chairK', 27, 23, 1, 1);
+place('chairK', 31, 23, 1, 1);
+
+place('doormat', 17, 27, 4, 1, false);
+
+const off=document.createElement('canvas');
+off.width=MW*TS; off.height=MH*TS;
+const o=off.getContext('2d'); o.imageSmoothingEnabled=false;
+
+function drawFloor(){
+  o.fillStyle=C.floor;
+  o.fillRect(0,0,MW*TS,MH*TS);
+  o.fillStyle=C.floorLt;
+  for(let i=0;i<260;i++){
+    const x=(i*37)%(MW*TS), y=(i*61)%(MH*TS);
+    o.fillRect(x,y, 6+(i%5), 1);
+  }
+  o.fillStyle=C.floorDk;
+  for(let i=0;i<200;i++){
+    const x=(i*47)%(MW*TS), y=(i*53)%(MH*TS);
+    o.fillRect(x,y, 4+(i%3), 1);
+  }
+  o.fillStyle=C.floorSeam;
+  for(let y=32;y<MH*TS;y+=32){
+    o.fillRect(0,y,MW*TS,1);
+  }
+  for(let row=0; row<MH/2; row++){
+    const offset = row%2 ? 0 : 64;
+    for(let x=offset; x<MW*TS; x+=128){
+      o.fillRect(x, row*32, 1, 32);
+    }
+  }
+  o.fillStyle=C.tile;
+  o.fillRect(21*TS,15*TS,(MW-22)*TS,8*TS);
+  o.fillStyle=C.tileDk;
+  for(let i=0;i<60;i++){
+    const x=21*TS+((i*23)%((MW-22)*TS));
+    const y=15*TS+((i*31)%(8*TS));
+    o.fillRect(x,y,1,1);
+  }
+  o.fillStyle=C.tileSeam;
+  for(let y=15*TS; y<23*TS; y+=TS){ o.fillRect(21*TS, y, (MW-22)*TS, 1);}
+  for(let x=21*TS; x<MW*TS; x+=TS){ o.fillRect(x, 15*TS, 1, 8*TS);}
+}
+
+function drawWalls(){
+  for(let y=0;y<MH;y++) for(let x=0;x<MW;x++){
+    const t=W[idx(x,y)];
+    if(!t) continue;
+    const px=x*TS, py=y*TS;
+    if(t===1){
+      o.fillStyle=C.wall;
+      o.fillRect(px,py,TS,TS);
+      o.fillStyle=C.wallStripe;
+      o.fillRect(px+3,py,1,TS); o.fillRect(px+11,py,1,TS);
+      o.fillStyle=C.wallDk;
+      o.fillRect(px,py,TS,2);
+      o.fillStyle=C.wallTrim;
+      o.fillRect(px,py+TS-2,TS,2);
+    } else if(t===2){
+      o.fillStyle=C.wall; o.fillRect(px,py,TS,TS);
+      o.fillStyle=C.wallDk; o.fillRect(px,py,TS,2);
+      o.fillStyle=C.wallTrim; o.fillRect(px,py+TS-2,TS,2);
+      o.fillStyle=C.windowFrame; o.fillRect(px+1,py+3,TS-2,10);
+      o.fillStyle=C.window; o.fillRect(px+2,py+4,TS-4,8);
+      o.fillStyle=C.windowGlow; o.fillRect(px+3,py+5,4,2);
+      o.fillStyle=C.windowFrame; o.fillRect(px+TS/2,py+3,1,10);
+      if(y===0){
+        o.fillStyle=C.curtainDk; o.fillRect(px,py+TS-2,3,4); o.fillRect(px+TS-3,py+TS-2,3,4);
+        o.fillStyle=C.curtain; o.fillRect(px,py+TS-3,3,3); o.fillRect(px+TS-3,py+TS-3,3,3);
+      }
+    } else if(t===3){
+      o.fillStyle=C.woodMd; o.fillRect(px,py,TS,TS);
+      o.fillStyle=C.woodDk; o.fillRect(px,py,TS,2);
+      o.fillStyle=C.woodLt; o.fillRect(px+1,py+3,TS-2,1);
+      o.fillStyle=C.woodAccent; o.fillRect(px+TS-4,py+TS/2,2,2);
+    }
+  }
+  o.fillStyle=C.shadow;
+  for(let y=1;y<MH-1;y++) for(let x=1;x<MW-1;x++){
+    if(!W[idx(x,y)] && W[idx(x,y-1)]===1){
+      o.fillRect(x*TS, y*TS, TS, 3);
+    }
+  }
+}
+
+function drawBed(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadowDk; o.fillRect(px+2,py+h,w,3);
+  o.fillStyle=C.woodDk; o.fillRect(px,py-2,w,h+4);
+  o.fillStyle=C.woodMd; o.fillRect(px+2,py,w-4,h);
+  o.fillStyle=C.bedSheet;
+  o.fillRect(px+3,py+1,w-6,h-2);
+  o.fillStyle=C.blanket;
+  o.fillRect(px+3,py+h*0.55,w-6,h-h*0.55-1);
+  o.fillStyle=C.blanketTrim;
+  o.fillRect(px+3,py+h*0.55,w-6,2);
+  for(let i=0;i<4;i++){ o.fillRect(px+5+i*8, py+h*0.7, 2, 1); }
+  o.fillStyle=C.pillow;
+  o.fillRect(px+4,py+2,w-8,8);
+  o.fillStyle=C.creamDk;
+  o.fillRect(px+5,py+9,w-10,1);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px,py-4,w,3);
+  o.fillStyle=C.woodAccent;
+  o.fillRect(px+2,py-3,w-4,1);
+  o.fillStyle=C.woodMd;
+  o.fillRect(px,py+h-2,2,4);
+  o.fillRect(px+w-2,py+h-2,2,4);
+}
+
+function drawNightstand(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+1,py+h,w,2);
+  o.fillStyle=C.woodDk; o.fillRect(px,py,w,h);
+  o.fillStyle=C.woodMd; o.fillRect(px+1,py+1,w-2,h-2);
+  o.fillStyle=C.woodLt; o.fillRect(px+1,py+1,w-2,1);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w/2-1,py+h-6,2,1);
+  o.fillStyle=C.metal;
+  o.fillRect(px+5,py-6,6,3);
+  o.fillStyle=C.metalLt;
+  o.fillRect(px+4,py-9,8,3);
+  o.fillStyle=C.windowGlow;
+  o.fillRect(px+5,py-8,6,2);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+7,py-3,2,3);
+}
+
+function drawDresser(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+1,py+h,w,2);
+  o.fillStyle=C.woodDk; o.fillRect(px,py,w,h);
+  o.fillStyle=C.woodMd; o.fillRect(px+1,py+1,w-2,h-2);
+  o.fillStyle=C.woodLt; o.fillRect(px+1,py+1,w-2,1);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px+1,py+h/2,w-2,1);
+  o.fillRect(px+w/2,py+1,1,h-2);
+  o.fillStyle=C.metal;
+  o.fillRect(px+w*0.25-1, py+4, 3,2);
+  o.fillRect(px+w*0.75-1, py+4, 3,2);
+  o.fillRect(px+w*0.25-1, py+h/2+4, 3,2);
+  o.fillRect(px+w*0.75-1, py+h/2+4, 3,2);
+}
+
+function drawMirror(f){
+  const px=f.x*TS, py=f.y*TS+8, w=f.w*TS, h=10;
+  o.fillStyle=C.woodDk; o.fillRect(px+w*0.25,py,w*0.5,h);
+  o.fillStyle=C.bedSheet; o.fillRect(px+w*0.25+1,py+1,w*0.5-2,h-2);
+  o.fillStyle=C.windowGlow; o.fillRect(px+w*0.25+2,py+2,3,2);
+}
+
+function drawDesk(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+1,py+h,w,2);
+  o.fillStyle=C.woodDk; o.fillRect(px,py,w,h);
+  o.fillStyle=C.woodLt; o.fillRect(px+1,py+1,w-2,h-3);
+  o.fillStyle=C.woodMd; o.fillRect(px+1,py+1,w-2,2);
+  for(let i=0;i<3;i++){
+    const dx=px+8+i*32;
+    o.fillStyle=C.woodDk;
+    o.fillRect(dx, py+h-3, 18, 3);
+    o.fillStyle=C.metal;
+    o.fillRect(dx+8, py+h-2, 2, 1);
+  }
+  o.fillStyle=C.cream;
+  o.fillRect(px+4,py+5,8,6);
+  o.fillStyle=C.black;
+  o.fillRect(px+5,py+6,1,1); o.fillRect(px+5,py+8,4,1); o.fillRect(px+5,py+10,3,1);
+  o.fillStyle='#5BA85B';
+  o.fillRect(px+w-12,py+5,8,4);
+  o.fillStyle=C.cream;
+  o.fillRect(px+w-11,py+6,2,2); o.fillRect(px+w-7,py+6,2,2);
+}
+
+function drawMonitor(f){
+  const px=f.x*TS, py=f.y*TS+8, w=f.w*TS, h=14;
+  o.fillStyle=C.black;
+  o.fillRect(px,py,w,h);
+  o.fillStyle=C.glass;
+  o.fillRect(px+2,py+2,w-4,h-5);
+  o.fillStyle=C.glassLt;
+  o.fillRect(px+3,py+3,12,2);
+  o.fillRect(px+3,py+6,8,1);
+  o.fillRect(px+3,py+8,14,1);
+  o.fillRect(px+3,py+10,10,1);
+  o.fillStyle='#5BA85B';
+  o.fillRect(px+3,py+5,1,1);
+  o.fillRect(px+3,py+8,1,1);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w/2-3,py+h-2,6,2);
+}
+
+function drawChair(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+h,w-2,2);
+  o.fillStyle=C.black;
+  o.fillRect(px+w/2-7, py-4, 14, 14);
+  o.fillStyle='#3F3D38';
+  o.fillRect(px+w/2-6, py-3, 12, 12);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w/2-1, py+10, 2, 8);
+  o.fillStyle=C.black;
+  o.fillRect(px+w/2-7, py+h-2, 14, 4);
+  o.fillStyle=C.metal;
+  o.fillRect(px+w/2-6, py+h-1, 2, 2);
+  o.fillRect(px+w/2+4, py+h-1, 2, 2);
+}
+
+function drawBookshelf(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+h,w,2);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px,py,w,h);
+  o.fillStyle=C.woodMd;
+  o.fillRect(px+2,py+2,w-4,h-4);
+  for(let i=1;i<5;i++){
+    o.fillStyle=C.woodDk;
+    o.fillRect(px+2,py+i*((h-4)/5)+1,w-4,2);
+  }
+  const colors=['#C84A4A','#3D8FB6','#D89B3D','#5BA85B','#7B5BA8','#E58B3D','#3F4682'];
+  for(let shelf=0; shelf<5; shelf++){
+    const sy=py+2+shelf*((h-4)/5);
+    let cx=px+3;
+    while(cx<px+w-4){
+      const bw=2+Math.floor(((shelf*7+cx*3)%4));
+      const bh=((h-4)/5)-3;
+      o.fillStyle=colors[(shelf*3+cx)%colors.length];
+      o.fillRect(cx, sy+1, bw, bh);
+      o.fillStyle='rgba(0,0,0,0.3)';
+      o.fillRect(cx+bw-1, sy+1, 1, bh);
+      cx+=bw+1;
+    }
+  }
+}
+
+function drawCabinet(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+1,py+h,w,2);
+  o.fillStyle=C.metalDk; o.fillRect(px,py,w,h);
+  o.fillStyle=C.metal; o.fillRect(px+1,py+1,w-2,h-2);
+  o.fillStyle=C.metalLt; o.fillRect(px+1,py+1,w-2,1);
+  for(let i=0;i<3;i++){
+    const dy=py+i*(h/3)+2;
+    o.fillStyle=C.metalDk;
+    o.fillRect(px+1, dy, w-2, 1);
+    o.fillStyle=C.black;
+    o.fillRect(px+w/2-1, dy+3, 2, 1);
+  }
+}
+
+function drawCouch(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadowDk; o.fillRect(px+2,py+h,w-2,3);
+  o.fillStyle='#7B5BA8';
+  o.fillRect(px,py,w,h);
+  o.fillStyle='#5C4185';
+  o.fillRect(px,py,w,4);
+  o.fillStyle='#9778C7';
+  o.fillRect(px+1,py+5,w-2,h-12);
+  o.fillStyle='#7B5BA8';
+  o.fillRect(px,py+h-8,w,8);
+  o.fillStyle='#5C4185';
+  o.fillRect(px,py+h-8,w,2);
+  o.fillStyle='#5C4185';
+  o.fillRect(px,py+5,3,h-13);
+  o.fillRect(px+w-3,py+5,3,h-13);
+  for(let i=0;i<3;i++){
+    const cx=px+8+i*((w-16)/3);
+    o.fillStyle=C.cream;
+    o.fillRect(cx, py+8, 12, 8);
+    o.fillStyle='#E0DBC8';
+    o.fillRect(cx+1, py+9, 10, 1);
+    o.fillStyle='#3D8FB6';
+    o.fillRect(cx+2, py+11, 8, 3);
+  }
+  o.fillStyle=C.woodDk;
+  o.fillRect(px+2,py+h-2,3,4);
+  o.fillRect(px+w-5,py+h-2,3,4);
+}
+
+function drawCoffeeTable(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+h,w-2,2);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px,py,w,h);
+  o.fillStyle=C.woodLt;
+  o.fillRect(px+1,py+1,w-2,h-3);
+  o.fillStyle=C.woodMd;
+  o.fillRect(px+1,py+1,w-2,2);
+  o.fillStyle=C.woodDk;
+  for(let xx=px+3;xx<px+w;xx+=12){
+    o.fillRect(xx, py+1, 1, h-3);
+  }
+  o.fillStyle=C.pinkRug;
+  o.fillRect(px+w/2-6, py+3, 8, 6);
+  o.fillStyle=C.cream;
+  o.fillRect(px+w/2-5, py+4, 6, 4);
+  o.fillStyle=C.glass;
+  o.fillRect(px+w/2-4, py+5, 4, 2);
+  o.fillStyle='#7B4F35';
+  o.fillRect(px+w/2+5, py+5, 4, 5);
+  o.fillStyle=C.cream;
+  o.fillRect(px+w/2+5, py+5, 4, 2);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w/2+9, py+6, 2, 1);
+}
+
+function drawTVStand(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+1,py+h,w,2);
+  o.fillStyle=C.woodDk; o.fillRect(px,py+8,w,h-8);
+  o.fillStyle=C.woodMd; o.fillRect(px+1,py+9,w-2,h-11);
+  o.fillStyle=C.woodLt; o.fillRect(px+1,py+9,w-2,1);
+  o.fillStyle=C.woodDk; o.fillRect(px+w/2,py+9,1,h-11);
+  o.fillStyle=C.metal;
+  o.fillRect(px+4,py+13,3,1); o.fillRect(px+w-7,py+13,3,1);
+}
+
+function drawLamp(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+h,w-2,2);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w/2-1, py+8, 2, h-8);
+  o.fillRect(px+w/2-3, py+h-2, 6, 2);
+  o.fillStyle='#F5C84A';
+  o.fillRect(px+3, py+3, 10, 6);
+  o.fillStyle='#F5E0A0';
+  o.fillRect(px+4, py+4, 8, 4);
+  o.fillStyle='#FFF3B0';
+  o.fillRect(px+5, py+4, 6, 2);
+  o.fillStyle='#C99B1F';
+  o.fillRect(px+3, py+9, 10, 1);
+}
+
+function drawPlant(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+h,w-2,2);
+  o.fillStyle=C.potDk; o.fillRect(px+3, py+h-7, w-6, 7);
+  o.fillStyle=C.pot; o.fillRect(px+3, py+h-7, w-6, 5);
+  o.fillStyle=C.potDk; o.fillRect(px+3, py+h-9, w-6, 2);
+  o.fillStyle=C.leafDk;
+  o.fillRect(px+5, py+1, 6, h-9);
+  o.fillStyle=C.leaf;
+  o.fillRect(px+3, py+3, 4, 5);
+  o.fillRect(px+9, py+3, 4, 5);
+  o.fillRect(px+5, py-1, 6, 4);
+  o.fillStyle=C.leafLt;
+  o.fillRect(px+5, py, 4, 2);
+  o.fillRect(px+10, py+4, 2, 2);
+}
+
+function drawPic(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS;
+  const offsetY = (f.type==='picLR') ? 4 : 6;
+  o.fillStyle=C.woodDk; o.fillRect(px+2, py+offsetY, w-4, 8);
+  o.fillStyle=C.bedSheet; o.fillRect(px+3, py+offsetY+1, w-6, 6);
+  o.fillStyle=C.leaf; o.fillRect(px+w/2-3, py+offsetY+3, 6, 4);
+  o.fillStyle=C.leafLt; o.fillRect(px+w/2-2, py+offsetY+2, 4, 2);
+  o.fillStyle=C.windowGlow; o.fillRect(px+w/2-1, py+offsetY+2, 2, 1);
+}
+
+function drawDoorMat(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS;
+  o.fillStyle=C.doorMat; o.fillRect(px, py+4, w, 10);
+  o.fillStyle=C.doorMatPat;
+  for(let i=0;i<w;i+=4){ o.fillRect(px+i, py+4, 1, 10);}
+  o.fillRect(px, py+8, w, 1);
+  o.fillStyle='#9E7050';
+  o.fillRect(px, py+5, w, 1);
+}
+
+function drawCounter(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  if(f.type==='counter'){
+    o.fillStyle=C.shadow; o.fillRect(px,py+h,w,2);
+    o.fillStyle=C.cream; o.fillRect(px,py,w,h);
+    o.fillStyle=C.creamDk; o.fillRect(px,py+h-3,w,3);
+    o.fillStyle=C.woodDk;
+    o.fillRect(px,py-12,w,4);
+    o.fillStyle=C.woodMd;
+    o.fillRect(px,py-11,w,2);
+    o.fillStyle=C.woodLt;
+    o.fillRect(px,py-11,w,1);
+  } else {
+    o.fillStyle=C.cream; o.fillRect(px,py,w,h);
+    o.fillStyle=C.creamDk; o.fillRect(px+w-3,py,3,h);
+    o.fillStyle=C.woodDk; o.fillRect(px,py,3,h);
+  }
+}
+
+function drawFridge(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  o.fillStyle=C.shadowDk; o.fillRect(px+2,py+h,w-2,3);
+  o.fillStyle=C.fridgeDk; o.fillRect(px,py,w,h);
+  o.fillStyle=C.fridgeWh; o.fillRect(px+1,py+1,w-2,h-2);
+  o.fillStyle=C.fridgeDk;
+  o.fillRect(px+1,py+h/3,w-2,1);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w-4,py+4,2,4);
+  o.fillRect(px+w-4,py+h/3+4,2,8);
+  o.fillStyle=C.fridgeBl;
+  o.fillRect(px+5, py+5, 6, 4);
+  o.fillStyle=C.cream;
+  o.fillRect(px+6, py+6, 1,1); o.fillRect(px+8, py+6, 1,1);
+  o.fillStyle='#C84A4A';
+  o.fillRect(px+5, py+h/3+5, 5, 7);
+  o.fillStyle=C.cream;
+  o.fillRect(px+6, py+h/3+6, 3, 5);
+}
+
+function drawStove(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS;
+  o.fillStyle=C.stoveBlk; o.fillRect(px,py-12,w,14);
+  o.fillStyle='#3F3D38'; o.fillRect(px+1,py-11,w-2,12);
+  o.fillStyle=C.stoveBlk;
+  o.beginPath(); o.arc(px+w*0.25, py-7, 4, 0, Math.PI*2); o.fill();
+  o.beginPath(); o.arc(px+w*0.75, py-7, 4, 0, Math.PI*2); o.fill();
+  o.fillStyle='#C84A4A';
+  o.beginPath(); o.arc(px+w*0.25, py-7, 3, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.stoveRed;
+  o.beginPath(); o.arc(px+w*0.25, py-7, 2, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+3, py-2, 3, 2); o.fillRect(px+w-6, py-2, 3, 2);
+  o.fillStyle=C.metalLt;
+  o.fillRect(px+w*0.45, py-11, w*0.1, 2);
+  o.fillStyle=C.metal;
+  o.fillRect(px+w*0.7-5, py-9, 10, 7);
+  o.fillStyle=C.metalDk;
+  o.fillRect(px+w*0.7-4, py-8, 8, 5);
+  o.fillStyle='#C84A4A';
+  o.fillRect(px+w*0.7-1, py-6, 2, 1);
+}
+
+function drawSink(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS;
+  o.fillStyle=C.cream; o.fillRect(px,py-12,w,14);
+  o.fillStyle=C.creamDk; o.fillRect(px,py-12,w,2);
+  o.fillStyle=C.metalDk; o.fillRect(px+2,py-10,w-4,10);
+  o.fillStyle=C.metal; o.fillRect(px+3,py-9,w-6,8);
+  o.fillStyle=C.metalLt; o.fillRect(px+4,py-9,w-8,1);
+  o.fillStyle=C.metalDk; o.fillRect(px+w/2-1,py-12,2,4);
+  o.fillRect(px+w/2-3,py-13,6,1);
+  o.fillStyle='#7BA8C8';
+  o.fillRect(px+w/2-2,py-9,4,2);
+}
+
+function drawTable(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  const cx=px+w/2, cy=py+h/2;
+  o.fillStyle=C.shadow;
+  o.beginPath(); o.ellipse(cx, cy+h*0.35, w*0.4, 4, 0, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.woodDk;
+  o.beginPath(); o.arc(cx, cy, w*0.42, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.woodMd;
+  o.beginPath(); o.arc(cx, cy-1, w*0.39, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.woodLt;
+  o.beginPath(); o.arc(cx-3, cy-3, w*0.28, 0, Math.PI*2); o.fill();
+  o.fillStyle=C.cream;
+  o.fillRect(cx-5, cy-3, 10, 7);
+  o.fillStyle=C.creamDk; o.fillRect(cx-5, cy-3, 10, 1);
+  o.fillStyle='#C84A4A';
+  o.fillRect(cx-3, cy-1, 6, 4);
+  o.fillStyle='#FF8888';
+  o.fillRect(cx-3, cy-1, 6, 1);
+  o.fillStyle=C.leafDk;
+  o.fillRect(cx-7, cy+5, 4, 2);
+  o.fillStyle=C.leaf;
+  o.fillRect(cx-8, cy+4, 2, 2);
+  o.fillRect(cx-4, cy+4, 2, 2);
+}
+
+function drawKitChair(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS;
+  o.fillStyle=C.shadow; o.fillRect(px+2,py+w,w-4,2);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px+1,py+1,w-2,w-2);
+  o.fillStyle=C.woodMd;
+  o.fillRect(px+2,py+2,w-4,w-4);
+  o.fillStyle=C.woodLt;
+  o.fillRect(px+2,py+2,w-4,1);
+  o.fillStyle=C.woodDk;
+  o.fillRect(px+1,py+w-2,2,3);
+  o.fillRect(px+w-3,py+w-2,2,3);
+}
+
+function drawRug(f){
+  const px=f.x*TS, py=f.y*TS, w=f.w*TS, h=f.h*TS;
+  if(f.data.kind==='pink'){
+    o.fillStyle=C.pinkRug;
+    o.fillRect(px,py,w,h);
+    o.fillStyle=C.pinkRugDk;
+    o.fillRect(px,py,w,2);
+    o.fillRect(px,py+h-2,w,2);
+    o.fillRect(px,py,2,h);
+    o.fillRect(px+w-2,py,2,h);
+    o.fillStyle=C.pinkRugLt;
+    for(let yy=py+6; yy<py+h-4; yy+=10){
+      for(let xx=px+6; xx<px+w-4; xx+=14){
+        o.fillRect(xx, yy, 2, 2);
+        o.fillRect(xx+1, yy-1, 1, 1); o.fillRect(xx-1, yy+1, 1, 1);
+        o.fillRect(xx+3, yy+1, 1, 1); o.fillRect(xx+1, yy+3, 1, 1);
+      }
+    }
+    o.fillStyle=C.pinkRugDk;
+    for(let i=0;i<w;i+=2){ o.fillRect(px+i,py-2,1,2); o.fillRect(px+i,py+h,1,2);}
+  } else {
+    o.fillStyle=C.greenRug;
+    o.fillRect(px,py,w,h);
+    o.fillStyle=C.greenRugDk;
+    for(let i=4;i<w;i+=8){ o.fillRect(px+i, py+3, 1, h-6);}
+    for(let i=4;i<h;i+=8){ o.fillRect(px+3, py+i, w-6, 1);}
+    o.fillStyle=C.greenRugLt;
+    o.fillRect(px+4,py+4,w-8,1);
+    o.fillRect(px+4,py+4,1,h-8);
+    o.fillStyle=C.greenRugDk;
+    o.fillRect(px,py,w,1); o.fillRect(px,py+h-1,w,1);
+    o.fillRect(px,py,1,h); o.fillRect(px+w-1,py,1,h);
+  }
+}
+
+function buildBg(){
+  drawFloor();
+  for(const f of furn){ if(f.type==='rug') drawRug(f); }
+  for(const f of furn){ if(f.type==='doormat') drawDoorMat(f); }
+  drawWalls();
+  for(const f of furn){
+    if(f.type==='bed') drawBed(f);
+    else if(f.type==='nightstand') drawNightstand(f);
+    else if(f.type==='dresser') drawDresser(f);
+    else if(f.type==='mirror') drawMirror(f);
+    else if(f.type==='desk') drawDesk(f);
+    else if(f.type==='monitor') drawMonitor(f);
+    else if(f.type==='chair') drawChair(f);
+    else if(f.type==='bookshelf') drawBookshelf(f);
+    else if(f.type==='cabinet') drawCabinet(f);
+    else if(f.type==='couch') drawCouch(f);
+    else if(f.type==='coffee') drawCoffeeTable(f);
+    else if(f.type==='tvstand') drawTVStand(f);
+    else if(f.type==='lamp') drawLamp(f);
+    else if(f.type==='plant') drawPlant(f);
+    else if(f.type==='counter' || f.type==='counterRight') drawCounter(f);
+    else if(f.type==='fridge') drawFridge(f);
+    else if(f.type==='stove') drawStove(f);
+    else if(f.type==='sink') drawSink(f);
+    else if(f.type==='table') drawTable(f);
+    else if(f.type==='chairK') drawKitChair(f);
+    else if(f.type==='picBR' || f.type==='picST' || f.type==='picLR') drawPic(f);
+  }
+  o.fillStyle=C.sunRay;
+  o.beginPath();
+  o.moveTo(64,16); o.lineTo(120,16); o.lineTo(180,140); o.lineTo(124,140);
+  o.closePath(); o.fill();
+  o.beginPath();
+  o.moveTo(400,16); o.lineTo(456,16); o.lineTo(516,140); o.lineTo(460,140);
+  o.closePath(); o.fill();
+}
+buildBg();
+
+const player={x:18.5*TS, y:27*TS, dir:0, frame:0, moveT:0, moving:false};
+
+const cats={
+  felix:{x:7*TS, y:21*TS, blink:0, breathT:0},
+  oliver:{x:36*TS, y:1*TS, blink:0, tailT:0, lookDir:0},
+};
+
+const hearts=[];
+
+const keys={};
+window.addEventListener('keydown',e=>{
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d','W','A','S','D'].includes(e.key)){
+    keys[e.key]=true; e.preventDefault();
+  }
+},{passive:false});
+window.addEventListener('keyup',e=>{keys[e.key]=false;});
+cv.addEventListener('click',()=>cv.focus());
+
+function canMove(px,py){
+  const x1=px-4, y1=py-2, x2=px+4, y2=py+5;
+  const tt=[
+    [Math.floor(x1/TS), Math.floor(y1/TS)],
+    [Math.floor(x2/TS), Math.floor(y1/TS)],
+    [Math.floor(x1/TS), Math.floor(y2/TS)],
+    [Math.floor(x2/TS), Math.floor(y2/TS)],
+  ];
+  for(const [tx,ty] of tt){ if(isB(tx,ty)) return false;}
+  return true;
+}
+
+function drawPlayer(g, sx, sy, dir, frame){
+  g.fillStyle=C.shadow;
+  g.fillRect(sx+2, sy+20, 12, 3);
+  g.fillStyle='#3F4682';
+  g.fillRect(sx+4, sy+13, 8, 7);
+  if(frame===1){ g.fillRect(sx+4, sy+19, 3, 2); g.fillRect(sx+9, sy+19, 3, 2);}
+  else if(frame===2){ g.fillRect(sx+5, sy+19, 3, 2); g.fillRect(sx+8, sy+19, 3, 2);}
+  g.fillStyle='#2A1F12';
+  g.fillRect(sx+4, sy+20, 4, 2); g.fillRect(sx+8, sy+20, 4, 2);
+  g.fillStyle='#C84A4A';
+  g.fillRect(sx+3, sy+8, 10, 7);
+  if(frame===1){ g.fillRect(sx+2, sy+10, 2, 4); g.fillRect(sx+12, sy+9, 2, 4);}
+  else if(frame===2){ g.fillRect(sx+2, sy+9, 2, 4); g.fillRect(sx+12, sy+10, 2, 4);}
+  else { g.fillRect(sx+2, sy+9, 2, 5); g.fillRect(sx+12, sy+9, 2, 5);}
+  g.fillStyle='#F5C9A0';
+  g.fillRect(sx+5, sy+4, 6, 5);
+  g.fillStyle='#5C3A21';
+  g.fillRect(sx+4, sy+1, 8, 4);
+  g.fillRect(sx+3, sy+2, 10, 2);
+  if(dir===1){
+    g.fillStyle='#C84A4A'; g.fillRect(sx+3, sy+1, 10, 3); g.fillRect(sx+5, sy, 6, 1);
+  } else {
+    g.fillStyle='#C84A4A'; g.fillRect(sx+3, sy+3, 10, 2);
+  }
+  g.fillStyle='#1A1310';
+  if(dir===0){ g.fillStyle='#3F2614'; g.fillRect(sx+4, sy+5, 8, 3);}
+  else if(dir===1){ g.fillRect(sx+6, sy+6, 1,1); g.fillRect(sx+9, sy+6, 1,1);}
+  else if(dir===2){ g.fillRect(sx+5, sy+6, 1,1); g.fillStyle='#3F2614'; g.fillRect(sx+10, sy+4, 2, 3);}
+  else { g.fillRect(sx+10, sy+6, 1,1); g.fillStyle='#3F2614'; g.fillRect(sx+4, sy+4, 2, 3);}
+}
+
+function drawFelix(g, x, y, blink, breath){
+  const dy=Math.sin(breath/700)*0.5;
+  g.fillStyle=C.shadow;
+  g.fillRect(x-1, y+12, 22, 3);
+  g.fillStyle=C.felixDk;
+  g.fillRect(x+1, y+5+dy, 18, 7);
+  g.fillStyle=C.felixOr;
+  g.fillRect(x+2, y+4+dy, 16, 6);
+  g.fillRect(x, y+6+dy, 20, 4);
+  g.fillStyle=C.felixCr;
+  g.fillRect(x+3, y+5+dy, 12, 2);
+  g.fillRect(x+5, y+8+dy, 10, 2);
+  g.fillStyle=C.felixOr;
+  g.fillRect(x+15, y+2+dy, 5, 5);
+  g.fillStyle=C.felixDk;
+  g.fillRect(x+15, y+1+dy, 2, 3);
+  g.fillRect(x+18, y+1+dy, 2, 3);
+  g.fillStyle=C.felixOr;
+  g.fillRect(x+16, y+2+dy, 1, 2);
+  g.fillRect(x+19, y+2+dy, 1, 2);
+  g.fillStyle=C.felixCr;
+  g.fillRect(x+16, y+5+dy, 3, 2);
+  g.fillStyle=C.felixDk;
+  if(blink){
+    g.fillRect(x+16, y+4+dy, 1,1);
+    g.fillRect(x+19, y+4+dy, 1,1);
+  } else {
+    g.fillRect(x+16, y+4+dy, 1,1);
+    g.fillRect(x+19, y+4+dy, 1,1);
+  }
+  g.fillRect(x+17, y+6+dy, 2,1);
+  g.fillStyle=C.felixOr;
+  g.fillRect(x-2, y+7+dy, 6, 3);
+  g.fillRect(x-3, y+6+dy, 4, 4);
+  g.fillStyle=C.felixDk;
+  g.fillRect(x-4, y+8+dy, 2, 2);
+}
+
+function drawOliver(g, x, y, blink, tail, look){
+  g.fillStyle=C.shadow;
+  g.fillRect(x-1, y+19, 14, 3);
+  g.fillStyle=C.oliverDk;
+  g.fillRect(x+1, y+10, 10, 10);
+  g.fillStyle=C.oliverWh;
+  g.fillRect(x+2, y+9, 8, 10);
+  g.fillStyle=C.oliverCr;
+  g.fillRect(x+4, y+12, 4, 6);
+  const tx=x+11, ty=y+13;
+  g.fillStyle=C.oliverDk;
+  g.fillRect(tx, ty, 3, 2);
+  g.fillRect(tx+2, ty-2+Math.floor(tail), 2, 4);
+  g.fillRect(tx+3, ty-4+Math.floor(tail), 2, 4);
+  g.fillStyle=C.oliverWh;
+  g.fillRect(tx+1, ty, 2, 2);
+  g.fillStyle=C.oliverDk;
+  g.fillRect(x+1, y+1, 9, 9);
+  g.fillStyle=C.oliverWh;
+  g.fillRect(x+2, y+2, 7, 7);
+  g.fillStyle=C.oliverCr;
+  g.fillRect(x+3, y+5, 5, 4);
+  g.fillStyle=C.oliverDk;
+  g.fillRect(x+1, y, 2, 3); g.fillRect(x+2, y-1, 1, 2);
+  g.fillRect(x+8, y, 2, 3); g.fillRect(x+8, y-1, 1, 2);
+  g.fillStyle='#F4A8C4';
+  g.fillRect(x+2, y+1, 1, 1); g.fillRect(x+8, y+1, 1, 1);
+  g.fillStyle=C.eyeGreen;
+  if(blink){
+    g.fillStyle=C.oliverDk;
+    g.fillRect(x+3+look, y+5, 2, 1);
+    g.fillRect(x+6+look, y+5, 2, 1);
+  } else {
+    g.fillRect(x+3+look, y+4, 2, 2);
+    g.fillRect(x+6+look, y+4, 2, 2);
+    g.fillStyle=C.oliverDk;
+    g.fillRect(x+4+look, y+5, 1, 1);
+    g.fillRect(x+7+look, y+5, 1, 1);
+  }
+  g.fillStyle='#F4A8C4';
+  g.fillRect(x+5, y+7, 1, 1);
+  g.fillStyle=C.oliverDk;
+  g.fillRect(x+4, y+8, 1, 1); g.fillRect(x+6, y+8, 1, 1);
+}
+
+function drawHeart(g, x, y, alpha){
+  g.fillStyle='rgba(224,105,106,'+alpha+')';
+  g.fillRect(x-2,y,2,2); g.fillRect(x+1,y,2,2);
+  g.fillRect(x-3,y+2,6,2);
+  g.fillRect(x-2,y+4,4,1);
+  g.fillRect(x-1,y+5,2,1);
+  g.fillStyle='rgba(255,200,200,'+alpha+')';
+  g.fillRect(x-2,y+2,1,1); g.fillRect(x+2,y+2,1,1);
+}
+
+let last=performance.now();
+let t=0;
+const tvFrame={i:0, lastFlip:0};
+const steam=[];
+for(let i=0;i<5;i++){ steam.push({x:0, y:0, age: i*200});}
+const roomEl=document.getElementById('ho-room');
+
+function whichRoom(){
+  const tx=Math.floor(player.x/TS), ty=Math.floor(player.y/TS);
+  if(ty < 14){
+    if(tx < 20) return 'bedroom';
+    return 'study';
+  } else {
+    if(tx < 20) return 'living room';
+    return 'kitchen';
+  }
+}
+
+function loop(now){
+  const dt=Math.min(50, now-last); last=now;
+  t += dt;
+  let dx=0, dy=0;
+  if(keys['ArrowUp']||keys['w']||keys['W']) dy=-1;
+  else if(keys['ArrowDown']||keys['s']||keys['S']) dy=1;
+  else if(keys['ArrowLeft']||keys['a']||keys['A']) dx=-1;
+  else if(keys['ArrowRight']||keys['d']||keys['D']) dx=1;
+  player.moving = (dx||dy);
+  if(dy<0) player.dir=0;
+  else if(dy>0) player.dir=1;
+  else if(dx<0) player.dir=2;
+  else if(dx>0) player.dir=3;
+  if(player.moving){
+    const sp=1.3*(dt/16.66);
+    const nx=player.x+dx*sp, ny=player.y+dy*sp;
+    if(canMove(nx, player.y)) player.x=nx;
+    if(canMove(player.x, ny)) player.y=ny;
+    player.moveT += dt;
+    const ph=Math.floor(player.moveT/180)%2;
+    player.frame = ph===0?1:2;
+  } else { player.moveT=0; player.frame=0; }
+
+  cats.felix.breathT += dt;
+  cats.oliver.tailT += dt;
+  cats.felix.blink = (Math.floor(t/3000)%6===0 && t%3000<150) ? 1 : 0;
+  cats.oliver.blink = (Math.floor(t/2700)%5===0 && t%2700<140) ? 1 : 0;
+  cats.oliver.lookDir = Math.floor(t/2000)%3===0 ? 1 : (Math.floor(t/2000)%3===1 ? -1 : 0);
+
+  const fdx = player.x - (cats.felix.x+10);
+  const fdy = player.y - (cats.felix.y+8);
+  if(Math.hypot(fdx, fdy) < 36 && Math.random()<0.04){
+    hearts.push({x:cats.felix.x+10+(Math.random()*8-4), y:cats.felix.y, vy:-0.3, age:0, life:1500});
+  }
+  const odx = player.x - (cats.oliver.x+5);
+  const ody = player.y - (cats.oliver.y+10);
+  if(Math.hypot(odx, ody) < 40 && Math.random()<0.03){
+    hearts.push({x:cats.oliver.x+5+(Math.random()*6-3), y:cats.oliver.y-2, vy:-0.3, age:0, life:1500});
+  }
+  for(let i=hearts.length-1;i>=0;i--){
+    const hh=hearts[i];
+    hh.y += hh.vy*(dt/16.66);
+    hh.age += dt;
+    if(hh.age>hh.life) hearts.splice(i,1);
+  }
+
+  if(t-tvFrame.lastFlip>320){ tvFrame.i=(tvFrame.i+1)%4; tvFrame.lastFlip=t; }
+  for(const s of steam){
+    s.age += dt;
+    if(s.age>1800){ s.age=0; }
+  }
+
+  ctx.drawImage(off,0,0);
+
+  const tvX = 14*TS+2, tvY = 17*TS-6;
+  ctx.fillStyle=C.black;
+  ctx.fillRect(tvX-2, tvY-2, 44, 24);
+  ctx.fillStyle=C.glass;
+  ctx.fillRect(tvX, tvY, 40, 20);
+  const tvc=[C.tvScreen1, C.tvScreen2, C.tvScreen3, C.tvScreen4][tvFrame.i];
+  ctx.fillStyle=tvc;
+  ctx.fillRect(tvX+4, tvY+4, 32, 12);
+  ctx.fillStyle='rgba(255,255,255,0.3)';
+  ctx.fillRect(tvX+4, tvY+4, 32, 2);
+  ctx.fillStyle=C.cream;
+  ctx.fillRect(tvX+10, tvY+8, 4, 4);
+  ctx.fillRect(tvX+24, tvY+8, 4, 4);
+  ctx.fillStyle=C.glassHi;
+  ctx.fillRect(tvX+1, tvY+1, 4, 1);
+  ctx.fillStyle=C.metalDk;
+  ctx.fillRect(tvX+18, tvY+20, 4, 2);
+  ctx.fillRect(tvX+15, tvY+22, 10, 1);
+
+  const stoveX = 28*TS, stoveY = 16*TS-6;
+  for(const s of steam){
+    const a = Math.max(0, 1-s.age/1800);
+    const x = stoveX + 8 + Math.sin(s.age/300)*4 + (s.age*0.005);
+    const y = stoveY - s.age*0.04;
+    ctx.fillStyle='rgba(245,240,224,'+(a*0.5)+')';
+    ctx.fillRect(Math.round(x), Math.round(y), 4, 3);
+    ctx.fillRect(Math.round(x)+5, Math.round(y)+2, 3, 2);
+  }
+
+  drawFelix(ctx, cats.felix.x, cats.felix.y, cats.felix.blink, cats.felix.breathT);
+  const tailWiggle = Math.sin(cats.oliver.tailT/600);
+  drawOliver(ctx, cats.oliver.x, cats.oliver.y, cats.oliver.blink, tailWiggle, cats.oliver.lookDir);
+
+  drawPlayer(ctx, Math.round(player.x-8), Math.round(player.y-13), player.dir, player.frame);
+
+  for(const hh of hearts){
+    const a = Math.max(0, 1-hh.age/hh.life);
+    drawHeart(ctx, Math.round(hh.x), Math.round(hh.y), a);
+  }
+
+  roomEl.textContent = whichRoom();
+
+  requestAnimationFrame(loop);
+}
+cv.focus();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

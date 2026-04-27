@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BlackRoad OS — Office Floor</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #08080a;
+    color: #c8c8cc;
+    font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .stage {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 10px; padding: 18px;
+  }
+  .title {
+    font-size: 11px; letter-spacing: 0.25em;
+    color: #d8d8dc; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .title .gr {
+    background: linear-gradient(90deg, #ff7849, #ff4d8d, #c63ed8, #4d8aff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .title .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #4d8aff;
+    box-shadow: 0 0 8px #4d8aff;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    border: 1px solid #2a2a2e;
+    box-shadow:
+      0 0 0 1px #0a0a0c,
+      0 0 60px rgba(255, 100, 150, 0.08),
+      0 0 120px rgba(77, 138, 255, 0.05);
+    width: 960px; height: 640px;
+    display: block;
+  }
+  .hud {
+    width: 960px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; letter-spacing: 0.15em;
+    color: #888;
+  }
+  .hud .zone {
+    color: #e0e0e4; font-weight: 600;
+    padding: 4px 10px;
+    border: 1px solid #2a2a2e; border-radius: 2px;
+    background: #111114;
+  }
+  .hud .controls span {
+    color: #d0d0d4; padding: 1px 5px;
+    border: 1px solid #2a2a2e; border-radius: 2px;
+    background: #111114; margin: 0 2px;
+  }
+  @media (max-width: 1000px) {
+    canvas, .hud { width: 90vw; height: auto; }
+    canvas { aspect-ratio: 3 / 2; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="title">
+    <span class="dot"></span>
+    BLACKROAD <span class="gr">OS</span> · OFFICE FLOOR
+  </div>
+  <canvas id="game" width="480" height="320"></canvas>
+  <div class="hud">
+    <div class="zone" id="zone">—</div>
+    <div class="controls">
+      <span>W A S D</span> move &nbsp;·&nbsp; <span>E</span> / <span>SPACE</span> interact
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+const cv = document.getElementById('game');
+const ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const W = 480, H = 320, TILE = 16, COLS = 30, ROWS = 20;
+
+// ===================== Palette =====================
+const C = {
+  floor:    '#191a1d',
+  floor2:   '#1d1e21',
+  carpet:   '#22151c',
+  carpet2:  '#27181f',
+  tile:     '#1c1d20',
+  tile2:    '#202125',
+  wall:     '#2a2b2f',
+  wallTop:  '#3c3d42',
+  wallEdge: '#0e0e10',
+  wallTrim: '#46474c',
+  desk:     '#3a3b3f',
+  deskTop:  '#48494e',
+  deskEdge: '#2a2b2f',
+  chair:    '#26272b',
+  chairBack:'#1a1b1d',
+  metal:    '#5a5b60',
+  metalLt:  '#76777c',
+  white:    '#dcdce0',
+  cream:    '#cdc4ac',
+  black:    '#0a0a0c',
+  glass:    '#1a2030',
+  plant:    '#4a6a4a',
+  plantD:   '#34503a',
+  plantH:   '#5e7e5a',
+  pot:      '#5a3826',
+  potR:     '#6e4632',
+  fridge:   '#dadadc',
+  fridgeS:  '#88898c',
+  g1: '#ff7849', g2: '#ff4d8d', g3: '#c63ed8', g4: '#4d8aff',
+  led:      '#4d8aff',
+  ledG:     '#4dffa8',
+  ledR:     '#ff4d8d',
+  textDim:  '#8a8a90',
+  textBri:  '#e8e8ec',
+};
+
+// ===================== Map =====================
+// 30x20. # = wall, . = floor
+const mapStr = [
+  "##############################",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#............................#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "######.#######.########.######",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#............................#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "#.............#..............#",
+  "##############################",
+];
+
+const isWall = (tx, ty) => {
+  if (tx < 0 || ty < 0 || tx >= COLS || ty >= ROWS) return true;
+  return mapStr[ty][tx] === '#';
+};
+
+// Zone label by position
+function zoneOf(px, py) {
+  const tx = Math.floor(px / TILE), ty = Math.floor(py / TILE);
+  if (ty < 10) return tx < 14 ? 'LOUNGE' : 'WORKSTATIONS';
+  return tx < 14 ? 'KITCHEN · MEETING' : 'SERVER ROOM';
+}
+
+// ===================== Furniture =====================
+const solids = [];
+const furniture = [];
+const addF = (item) => {
+  furniture.push(item);
+  if (item.solid) solids.push({x: item.x, y: item.y, w: item.w, h: item.h});
+};
+
+// ----- LOUNGE (top-left, px 16..224, 16..160) -----
+addF({type:'rugBR',     x: 36, y: 26, w: 152, h: 116});
+addF({type:'couchH',    x: 44, y: 28, w: 70, h: 14, solid: true});
+addF({type:'couchV',    x: 28, y: 60, w: 14, h: 56, solid: true});
+addF({type:'coffeeTbl', x: 60, y: 66, w: 36, h: 18, solid: true});
+addF({type:'plant',     x: 188, y: 22, w: 14, h: 18, solid: true});
+addF({type:'plant',     x: 22, y: 138, w: 14, h: 18, solid: true});
+addF({type:'lampStand', x: 116, y: 130, w: 8, h: 8, solid: true});
+addF({type:'whiteboard',x: 134, y: 18, w: 50, h: 6, solid: true, text:'STAY · IN · THE · MATH'});
+addF({type:'poster',    x: 90, y: 18, w: 28, h: 8, solid: false, accent: 'g1'});
+addF({type:'poster',    x: 16, y: 50, w: 6, h: 22, solid: false, accent: 'g2'});
+
+// ----- WORKSTATIONS (top-right, px 240..464, 16..160) -----
+const desks_top = [
+  {x: 252, y: 42, mon: 'g1'},
+  {x: 296, y: 42, mon: 'g2'},
+  {x: 340, y: 42, mon: 'g3'},
+  {x: 384, y: 42, mon: 'g4'},
+];
+desks_top.forEach(d => {
+  addF({type:'desk', x: d.x, y: d.y, w: 32, h: 18, solid: true, monitor: d.mon});
+  addF({type:'chair', x: d.x + 9, y: d.y + 22, w: 14, h: 14, solid: true});
+});
+addF({type:'plant', x: 428, y: 24, w: 14, h: 18, solid: true});
+// second row
+addF({type:'desk',  x: 252, y: 110, w: 32, h: 18, solid: true, monitor: 'g4'});
+addF({type:'chair', x: 261, y: 132, w: 14, h: 14, solid: true});
+addF({type:'desk',  x: 296, y: 110, w: 32, h: 18, solid: true, monitor: 'g3'});
+addF({type:'chair', x: 305, y: 132, w: 14, h: 14, solid: true});
+addF({type:'whiteboard', x: 348, y: 18, w: 70, h: 6, solid: true, text: '489 WORKERS · 100/100'});
+addF({type:'plant', x: 354, y: 110, w: 14, h: 18, solid: true});
+addF({type:'cooler',x: 396, y: 116, w: 12, h: 22, solid: true});
+
+// ----- KITCHEN · MEETING (bottom-left, px 16..224, 176..304) -----
+addF({type:'counter', x: 22, y: 184, w: 100, h: 14, solid: true});
+addF({type:'sink',    x: 56, y: 186, w: 22, h: 10, solid: false});
+addF({type:'coffeeMachine', x: 28, y: 178, w: 14, h: 12, solid: true, interact: 'coffee'});
+addF({type:'microwave',     x: 96, y: 178, w: 16, h: 12, solid: true});
+addF({type:'fridge',  x: 130, y: 180, w: 18, h: 26, solid: true, interact: 'fridge'});
+// meeting table
+addF({type:'mtgTable',x: 64, y: 232, w: 80, h: 26, solid: true});
+addF({type:'chair',   x: 50, y: 238, w: 12, h: 14, solid: true});
+addF({type:'chair',   x: 146, y: 238, w: 12, h: 14, solid: true});
+addF({type:'chair',   x: 78, y: 218, w: 14, h: 12, solid: true});
+addF({type:'chair',   x: 116, y: 218, w: 14, h: 12, solid: true});
+addF({type:'chair',   x: 78, y: 260, w: 14, h: 12, solid: true});
+addF({type:'chair',   x: 116, y: 260, w: 14, h: 12, solid: true});
+addF({type:'plant',   x: 200, y: 280, w: 14, h: 18, solid: true});
+addF({type:'whiteboard', x: 158, y: 178, w: 60, h: 6, solid: true, text: 'AGENDA · SHIP · MATH'});
+
+// ----- SERVER ROOM (bottom-right, px 240..464, 176..304) -----
+for (let i = 0; i < 4; i++) {
+  addF({type:'serverRack', x: 252 + i*22, y: 184, w: 18, h: 36, solid: true, seed: i, interact: 'server'});
+}
+addF({type:'whiteboard', x: 358, y: 178, w: 80, h: 6, solid: true, text: 'ζ_G(s) · Re(s) = 3/2'});
+addF({type:'desk',  x: 380, y: 240, w: 32, h: 18, solid: true, monitor: 'g1'});
+addF({type:'chair', x: 389, y: 262, w: 14, h: 14, solid: true});
+addF({type:'plant', x: 440, y: 220, w: 14, h: 18, solid: true});
+addF({type:'plant', x: 248, y: 268, w: 14, h: 18, solid: true});
+addF({type:'cabinet', x: 420, y: 184, w: 18, h: 16, solid: true});
+addF({type:'poster',  x: 268, y: 240, w: 24, h: 14, solid: false, accent: 'g3'});
+
+// ===================== NPCs =====================
+const npcs = [
+  // Workstations
+  { name:'Cecilia', x: 268, y: 70, dir:'up', wander: true, home: {x: 268, y: 70},
+    colors: { hair:'#ff7849', skin:'#e6c8a8', shirt:'#222226', pants:'#161618', acc:'#ff4d8d' },
+    lines: [
+      "Stay in the math, friend. The numbers know.",
+      "0^0 := N = 1. Δ(N) = 2. σ* = 1/2.",
+      "If anyone asks: my answer is the work.",
+    ]},
+  { name:'Lucidia', x: 312, y: 70, dir:'up', wander: false,
+    colors: { hair:'#c63ed8', skin:'#dec0e0', shirt:'#222226', pants:'#161618', acc:'#c63ed8' },
+    lines: [
+      "23 tabs. Append-only journal. We don't lose state.",
+      "PS-SHA-∞ holds the truth_state_hash.",
+      "Tile manager keeps the noise on the edges.",
+    ]},
+  { name:'Aria', x: 356, y: 70, dir:'up', wander: false,
+    colors: { hair:'#ff4d8d', skin:'#e6c8a8', shirt:'#222226', pants:'#161618', acc:'#ff4d8d' },
+    lines: [
+      "192.168.4.64 — reporting in.",
+      "Edge inference, not the cloud. That's the bet.",
+      "Hailo NPU is warm. Bigram fallback armed.",
+    ]},
+  { name:'Roadie', x: 400, y: 70, dir:'up', wander: true, home: {x: 400, y: 70},
+    colors: { hair:'#4d8aff', skin:'#c8b4a4', shirt:'#222226', pants:'#161618', acc:'#4d8aff' },
+    lines: [
+      "489 workers green. Pricing CTA shipped clean.",
+      "Brazilian checkout fix landed via Worker.",
+      "Atlas papers in. Real C-Corp now.",
+    ]},
+  { name:'Octavia', x: 268, y: 138, dir:'down', wander: false,
+    colors: { hair:'#a060c0', skin:'#d4b496', shirt:'#222226', pants:'#161618', acc:'#a060c0' },
+    lines: [
+      "Pi at .74. Eight tasks balanced.",
+      "Orchestration is just rhythm. Drums help.",
+      "NATS event bus is clean. Quarantine works.",
+    ]},
+  // Kitchen / Meeting
+  { name:'Calliope', x: 104, y: 236, dir:'right', wander: false,
+    colors: { hair:'#ff7849', skin:'#e6c8a8', shirt:'#222226', pants:'#161618', acc:'#ff7849' },
+    lines: [
+      "A_G ≈ 1.2443317839867253741. Memorized.",
+      "G(n) = n^(n+1)/(n+1)^n. Verified through 10,000.",
+      "Adamczewski-Bugeaud is the path. I feel it.",
+    ]},
+  { name:'Sebastian', x: 156, y: 236, dir:'left', wander: false,
+    colors: { hair:'#5a5a5e', skin:'#c8a888', shirt:'#222226', pants:'#161618', acc:'#5a5a5e' },
+    lines: [
+      "Hurwitz decomposition: numerically verified.",
+      "Product formula proven. Level A locked.",
+      "Continued fraction at 50 terms and counting.",
+    ]},
+  // Server room
+  { name:'Atticus', x: 326, y: 236, dir:'left', wander: true, home: {x: 326, y: 236},
+    colors: { hair:'#3a3a3e', skin:'#c8a888', shirt:'#222226', pants:'#161618', acc:'#4dffa8' },
+    lines: [
+      "Hailo-8 hit 26.3% — 19× baseline.",
+      "Blinking lights mean alive, not broken.",
+      "Trinary gate held under load. Gödel escape held.",
+    ]},
+  { name:'Theodosia', x: 396, y: 256, dir:'up', wander: false,
+    colors: { hair:'#e8c870', skin:'#e0c0a0', shirt:'#222226', pants:'#161618', acc:'#e8c870' },
+    lines: [
+      "Cloudflare account ID memorized: 848cf0…",
+      "48 D1 databases. ~170 MB. All accounted for.",
+      "blackroad-os-main: e2c6dcd9. The mothership.",
+    ]},
+];
+
+// Cats
+const cats = [
+  { name:'Felix', x: 86, y: 96, dir:'down',
+    base:'#d4823a', light:'#f0a868', dark:'#a85a26',
+    perched: false, blinkT: 0,
+    lines: [
+      "mrrp.",
+      "*flicks tail at you, dignity intact*",
+      "*headbutts your shin, demands tribute*",
+    ]},
+  { name:'Oliver', x: 432, y: 200, dir:'left',
+    base:'#e8d8c0', light:'#fff5e0', dark:'#a8987c',
+    perched: true, blinkT: 0,
+    lines: [
+      "mew.",
+      "*regards you from his perch*",
+      "*adjusts dignity, says nothing further*",
+    ]},
+];
+
+// ===================== Player =====================
+const player = {
+  x: 232, y: 96,
+  w: 8, h: 12,
+  dir: 'down', frame: 0, anim: 0, moving: false,
+  speed: 1.05,
+  colors: {
+    hair: '#a85f2a',
+    skin: '#e6c8a8',
+    shirt: '#ff7849',
+    shirt2: '#ff4d8d',
+    pants: '#161618',
+    acc: '#4d8aff',
+  },
+};
+
+// ===================== Input =====================
+const keys = Object.create(null);
+let interactPressed = false;
+window.addEventListener('keydown', e => {
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  keys[k] = true;
+  if (k === ' ' || k === 'e') interactPressed = true;
+  if (['w','a','s','d',' ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','e'].includes(k)) {
+    e.preventDefault();
+  }
+});
+window.addEventListener('keyup', e => {
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  keys[k] = false;
+});
+
+// ===================== Collision =====================
+function collidesAt(px, py) {
+  const half = player.w / 2;
+  const left = px - half, right = px + half;
+  const top = py - 4, bottom = py + 1; // a small foot box (player.y is at feet)
+  // tile walls
+  const tlx = Math.floor(left / TILE);
+  const trx = Math.floor((right - 0.01) / TILE);
+  const tty = Math.floor(top / TILE);
+  const tby = Math.floor((bottom - 0.01) / TILE);
+  for (let ty = tty; ty <= tby; ty++) {
+    for (let tx = tlx; tx <= trx; tx++) {
+      if (isWall(tx, ty)) return true;
+    }
+  }
+  // furniture
+  for (const s of solids) {
+    if (right > s.x && left < s.x + s.w &&
+        bottom > s.y + s.h - 4 && top < s.y + s.h) {
+      // Only the lower portion of a piece blocks the player's feet — feels less sticky
+      return true;
+    }
+  }
+  return false;
+}
+
+// ===================== Bubble =====================
+let bubble = null;
+function showBubble(x, y, name, line, accent='#4d8aff') {
+  bubble = { x, y, name, line, accent, until: performance.now() + 4500 };
+}
+
+// ===================== Interaction =====================
+function tryInteract() {
+  const range = 22;
+  let nearest = null, nd = range;
+  const all = [
+    ...npcs.map(n => ({ ref:n, kind:'npc' })),
+    ...cats.map(c => ({ ref:c, kind:'cat' })),
+  ];
+  for (const t of all) {
+    const dx = t.ref.x - player.x;
+    const dy = (t.ref.y - 6) - (player.y - 6);
+    const d = Math.hypot(dx, dy);
+    if (d < nd) { nd = d; nearest = t; }
+  }
+  if (nearest) {
+    const r = nearest.ref;
+    r._li = (r._li || 0);
+    const line = r.lines[r._li % r.lines.length];
+    r._li += 1;
+    const accent = nearest.kind === 'cat'
+      ? r.light
+      : (r.colors.acc || '#4d8aff');
+    showBubble(r.x, r.y - 22, r.name, line, accent);
+    // Make NPC face the player
+    if (r.dir !== undefined) {
+      const dx = player.x - r.x, dy = player.y - r.y;
+      r.dir = Math.abs(dx) > Math.abs(dy)
+        ? (dx > 0 ? 'right' : 'left')
+        : (dy > 0 ? 'down' : 'up');
+    }
+    return;
+  }
+  // Furniture
+  for (const f of furniture) {
+    if (!f.interact) continue;
+    const cx = f.x + f.w/2, cy = f.y + f.h/2;
+    const d = Math.hypot(cx - player.x, cy - player.y);
+    if (d < 28) {
+      if (f.interact === 'coffee') {
+        showBubble(cx, f.y - 8, 'Coffee', '*brews* hot fuel acquired.', C.g1);
+        f._steam = performance.now() + 1800;
+      } else if (f.interact === 'fridge') {
+        showBubble(cx, f.y - 4, 'Fridge', 'someone labeled the oat milk in caps.', C.g4);
+      } else if (f.interact === 'server') {
+        showBubble(cx, f.y - 4, 'Server', 'humming. all 489 workers green.', C.ledG);
+      }
+      return;
+    }
+  }
+}
+
+// ===================== NPC wander =====================
+function updateNPCs(dt) {
+  for (const n of npcs) {
+    if (!n.wander) continue;
+    n._t = (n._t || 0) + dt;
+    if (!n._target || n._t > 4000) {
+      const r = 22;
+      n._target = {
+        x: n.home.x + (Math.random() * 2 - 1) * r,
+        y: n.home.y + (Math.random() * 2 - 1) * r,
+      };
+      n._t = 0;
+    }
+    const dx = n._target.x - n.x, dy = n._target.y - n.y;
+    const d = Math.hypot(dx, dy);
+    if (d > 0.4) {
+      const sp = 0.3;
+      const vx = (dx/d) * sp, vy = (dy/d) * sp;
+      const nx = n.x + vx, ny = n.y + vy;
+      // Don't run into walls or solids
+      let ok = true;
+      const hit = (x, y) => {
+        if (isWall(Math.floor(x/TILE), Math.floor(y/TILE))) return true;
+        for (const s of solids) {
+          if (x > s.x - 2 && x < s.x + s.w + 2 &&
+              y > s.y + s.h - 6 && y < s.y + s.h + 2) return true;
+        }
+        return false;
+      };
+      if (hit(nx, ny)) ok = false;
+      if (ok) {
+        n.x = nx; n.y = ny;
+        n.dir = Math.abs(vx) > Math.abs(vy)
+          ? (vx > 0 ? 'right' : 'left')
+          : (vy > 0 ? 'down' : 'up');
+        n._anim = ((n._anim || 0) + dt);
+        if (n._anim > 180) { n._anim = 0; n._frame = ((n._frame || 0) + 1) % 4; }
+      }
+    } else {
+      n._frame = 0;
+    }
+  }
+}
+
+// ===================== Update =====================
+function update(dt) {
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['ArrowUp']) dy -= 1;
+  if (keys['s'] || keys['ArrowDown']) dy += 1;
+  if (keys['a'] || keys['ArrowLeft']) dx -= 1;
+  if (keys['d'] || keys['ArrowRight']) dx += 1;
+  player.moving = !!(dx || dy);
+  if (dx && dy) { dx *= 0.7071; dy *= 0.7071; }
+  if (Math.abs(dx) > Math.abs(dy)) {
+    player.dir = dx > 0 ? 'right' : 'left';
+  } else if (dy !== 0) {
+    player.dir = dy > 0 ? 'down' : 'up';
+  }
+  const sp = player.speed;
+  const nx = player.x + dx * sp;
+  if (!collidesAt(nx, player.y)) player.x = nx;
+  const ny = player.y + dy * sp;
+  if (!collidesAt(player.x, ny)) player.y = ny;
+  // animation
+  if (player.moving) {
+    player.anim += dt;
+    if (player.anim > 140) {
+      player.anim = 0;
+      player.frame = (player.frame + 1) % 4;
+    }
+  } else {
+    player.frame = 0;
+  }
+  if (interactPressed) {
+    interactPressed = false;
+    tryInteract();
+  }
+  updateNPCs(dt);
+}
+
+// ===================== Drawing helpers =====================
+const r = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x|0, y|0, w|0, h|0); };
+const px = (x, y, c) => { ctx.fillStyle = c; ctx.fillRect(x|0, y|0, 1, 1); };
+
+// ===================== Floor & walls =====================
+function drawFloor() {
+  for (let ty = 0; ty < ROWS; ty++) {
+    for (let tx = 0; tx < COLS; tx++) {
+      if (mapStr[ty][tx] === '#') continue;
+      const inLounge = tx >= 1 && tx <= 13 && ty >= 1 && ty <= 9;
+      const inServer = tx >= 15 && tx <= 28 && ty >= 11 && ty <= 18;
+      let col;
+      if (inLounge) {
+        col = ((tx + ty) & 1) ? C.floor : C.floor2;
+      } else if (inServer) {
+        col = ((tx + ty) & 1) ? C.tile : C.tile2;
+      } else {
+        col = ((tx + ty) & 1) ? C.floor : C.floor2;
+      }
+      r(tx*TILE, ty*TILE, TILE, TILE, col);
+      // grout lines on server tile floor
+      if (inServer) {
+        r(tx*TILE, ty*TILE, TILE, 1, '#161618');
+        r(tx*TILE, ty*TILE, 1, TILE, '#161618');
+      }
+    }
+  }
+}
+
+function drawWalls() {
+  for (let ty = 0; ty < ROWS; ty++) {
+    for (let tx = 0; tx < COLS; tx++) {
+      if (mapStr[ty][tx] !== '#') continue;
+      const x = tx * TILE, y = ty * TILE;
+      // body
+      r(x, y, TILE, TILE, C.wall);
+      // top trim if there's floor above
+      if (!isWall(tx, ty - 1)) {
+        r(x, y, TILE, 3, C.wallTop);
+        r(x, y + 3, TILE, 1, C.wallEdge);
+      }
+      // bottom shadow onto floor (if floor below)
+      if (!isWall(tx, ty + 1)) {
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(x, y + TILE, TILE, 3);
+        r(x, y + TILE - 1, TILE, 1, C.wallTrim);
+      }
+      // side highlights
+      if (!isWall(tx - 1, ty)) r(x, y, 1, TILE, '#34353a');
+      if (!isWall(tx + 1, ty)) r(x + TILE - 1, y, 1, TILE, '#1c1c1f');
+    }
+  }
+}
+
+// ===================== Furniture drawers =====================
+function drawFurn(f, now) {
+  const fn = drawers[f.type];
+  if (fn) fn(f, now);
+}
+
+const drawers = {
+  rugBR(f) {
+    // dark warm rug under the lounge
+    for (let yy = 0; yy < f.h; yy++) {
+      for (let xx = 0; xx < f.w; xx++) {
+        const c = ((xx + yy) & 1) ? C.carpet : C.carpet2;
+        r(f.x + xx, f.y + yy, 1, 1, c);
+      }
+    }
+    // gradient fringe
+    const grd = ctx.createLinearGradient(f.x, f.y, f.x + f.w, f.y);
+    grd.addColorStop(0, '#ff7849'); grd.addColorStop(0.5, '#c63ed8'); grd.addColorStop(1, '#4d8aff');
+    ctx.fillStyle = grd;
+    ctx.globalAlpha = 0.18;
+    ctx.fillRect(f.x, f.y + f.h - 2, f.w, 2);
+    ctx.fillRect(f.x, f.y, f.w, 2);
+    ctx.globalAlpha = 1;
+  },
+  couchH(f) {
+    r(f.x, f.y, f.w, 5, '#3a2530');
+    r(f.x, f.y + 5, f.w, 1, C.wallEdge);
+    r(f.x, f.y + 6, f.w, f.h - 6, '#4a3040');
+    // cushions
+    const cw = (f.w - 4) / 3;
+    for (let i = 0; i < 3; i++) {
+      r(f.x + 2 + i * cw, f.y + 7, cw - 2, f.h - 9, '#5a3848');
+      r(f.x + 2 + i * cw, f.y + f.h - 2, cw - 2, 1, '#2a181f');
+    }
+    // armrests
+    r(f.x, f.y + 4, 3, f.h - 4, '#3a2530');
+    r(f.x + f.w - 3, f.y + 4, 3, f.h - 4, '#3a2530');
+  },
+  couchV(f) {
+    r(f.x, f.y, 5, f.h, '#3a2530');
+    r(f.x + 5, f.y, 1, f.h, C.wallEdge);
+    r(f.x + 6, f.y, f.w - 6, f.h, '#4a3040');
+    const ch = (f.h - 4) / 3;
+    for (let i = 0; i < 3; i++) {
+      r(f.x + 7, f.y + 2 + i * ch, f.w - 9, ch - 2, '#5a3848');
+    }
+    r(f.x, f.y, f.w, 3, '#3a2530');
+    r(f.x, f.y + f.h - 3, f.w, 3, '#3a2530');
+  },
+  coffeeTbl(f) {
+    r(f.x, f.y + 2, f.w, f.h - 2, '#3a2820');
+    r(f.x, f.y, f.w, 2, '#5a3828');
+    r(f.x, f.y + f.h - 1, f.w, 1, '#1a1010');
+    // book
+    r(f.x + 6, f.y + 4, 12, 6, '#4d8aff');
+    r(f.x + 6, f.y + 4, 12, 1, '#7aa8ff');
+    // cup
+    r(f.x + f.w - 10, f.y + 5, 5, 5, '#dad0b8');
+    r(f.x + f.w - 10, f.y + 5, 5, 1, C.g1);
+  },
+  plant(f) {
+    // pot
+    r(f.x + 1, f.y + f.h - 6, f.w - 2, 6, C.pot);
+    r(f.x + 1, f.y + f.h - 6, f.w - 2, 1, C.potR);
+    r(f.x + 2, f.y + f.h - 1, f.w - 4, 1, '#1a0e08');
+    // leaves
+    const lx = f.x + f.w/2;
+    r(lx - 5, f.y + 2, 10, 6, C.plant);
+    r(lx - 4, f.y, 8, 4, C.plantH);
+    r(lx - 6, f.y + 6, 12, 4, C.plant);
+    r(lx - 3, f.y + 8, 6, 4, C.plantD);
+    px(lx - 4, f.y + 1, C.plantH);
+    px(lx + 3, f.y + 1, C.plantH);
+  },
+  lampStand(f) {
+    r(f.x + 3, f.y + 2, 2, f.h - 2, '#2a2a2e');
+    r(f.x + 1, f.y, f.w - 2, 3, C.g1);
+    r(f.x + f.w/2 - 1, f.y + f.h - 2, 2, 2, '#1a1a1e');
+  },
+  whiteboard(f) {
+    r(f.x, f.y, f.w, f.h, C.white);
+    r(f.x, f.y, f.w, 1, '#a8a8ac');
+    r(f.x, f.y + f.h - 1, f.w, 1, '#88888c');
+    // Frame
+    r(f.x - 1, f.y - 1, f.w + 2, 1, '#3c3c40');
+    r(f.x - 1, f.y + f.h, f.w + 2, 1, '#1a1a1d');
+    r(f.x - 1, f.y, 1, f.h, '#3c3c40');
+    r(f.x + f.w, f.y, 1, f.h, '#3c3c40');
+    if (f.text) {
+      ctx.font = '4px monospace';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#3a3038';
+      ctx.fillText(f.text, f.x + 2, f.y + 1);
+    }
+  },
+  poster(f) {
+    const c = C[f.accent || 'g3'];
+    r(f.x, f.y, f.w, f.h, c);
+    r(f.x, f.y, f.w, 1, '#fff');
+    r(f.x, f.y + f.h - 1, f.w, 1, '#1a1a1d');
+    // simple glyph
+    ctx.globalAlpha = 0.3;
+    r(f.x + 2, f.y + 2, f.w - 4, f.h - 4, '#fff');
+    ctx.globalAlpha = 1;
+  },
+  desk(f) {
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(f.x, f.y + f.h, f.w, 3);
+    // top
+    r(f.x, f.y, f.w, f.h, C.desk);
+    r(f.x, f.y, f.w, 2, C.deskTop);
+    r(f.x, f.y + f.h - 2, f.w, 2, C.deskEdge);
+    r(f.x, f.y, 1, f.h, C.deskTop);
+    r(f.x + f.w - 1, f.y, 1, f.h, C.deskEdge);
+    // monitor
+    const mw = 14, mh = 11;
+    const mx = f.x + (f.w - mw)/2, my = f.y - mh + 3;
+    r(mx - 1, my - 1, mw + 2, mh + 2, '#0a0a0c');
+    // gradient screen
+    const gA = C[f.monitor || 'g4'];
+    const grd = ctx.createLinearGradient(mx, my, mx, my + mh);
+    grd.addColorStop(0, '#0a0a14');
+    grd.addColorStop(0.5, gA);
+    grd.addColorStop(1, '#0a0a14');
+    ctx.fillStyle = grd;
+    ctx.fillRect(mx, my, mw, mh);
+    // scanline
+    r(mx, my + (mh / 2)|0, mw, 1, 'rgba(255,255,255,0.06)');
+    // stand
+    r(mx + mw/2 - 1, my + mh, 2, 2, '#2a2a2e');
+    r(mx + mw/2 - 3, my + mh + 2, 6, 1, '#3a3a3e');
+    // keyboard
+    r(f.x + 5, f.y + 6, f.w - 10, 4, '#1a1a1d');
+    r(f.x + 5, f.y + 6, f.w - 10, 1, '#2a2a2e');
+    // mouse
+    r(f.x + f.w - 6, f.y + 7, 3, 3, '#2a2a2e');
+  },
+  chair(f) {
+    // seat
+    r(f.x + 1, f.y + 2, f.w - 2, f.h - 4, C.chair);
+    r(f.x + 1, f.y + 2, f.w - 2, 1, '#36373b');
+    r(f.x + 1, f.y + f.h - 3, f.w - 2, 1, '#161618');
+    // backrest (north)
+    r(f.x, f.y, f.w, 3, C.chairBack);
+    // wheels
+    r(f.x + 1, f.y + f.h - 2, 2, 2, '#1a1a1d');
+    r(f.x + f.w - 3, f.y + f.h - 2, 2, 2, '#1a1a1d');
+  },
+  cooler(f) {
+    // base
+    r(f.x, f.y + f.h - 6, f.w, 6, '#3a3a3e');
+    // jug
+    r(f.x + 1, f.y, f.w - 2, f.h - 6, '#5a8aa8');
+    r(f.x + 1, f.y, f.w - 2, 2, '#88b0c8');
+    // water level hint
+    r(f.x + 2, f.y + 2, f.w - 4, f.h - 10, 'rgba(180,220,240,0.3)');
+    // tap
+    r(f.x + f.w/2 - 1, f.y + f.h - 6, 2, 2, '#161618');
+  },
+  counter(f) {
+    r(f.x, f.y, f.w, f.h, '#2e2a26');
+    r(f.x, f.y, f.w, 2, '#4a443c');
+    r(f.x, f.y + f.h - 2, f.w, 2, '#1a1612');
+    // top surface highlight
+    r(f.x + 1, f.y + 2, f.w - 2, 1, '#3a342c');
+    // tile lines
+    for (let i = 12; i < f.w; i += 12) {
+      r(f.x + i, f.y, 1, 4, '#1a1612');
+    }
+  },
+  sink(f) {
+    r(f.x, f.y, f.w, f.h, '#3a3a3e');
+    r(f.x + 1, f.y + 1, f.w - 2, f.h - 2, '#1a1a1d');
+    r(f.x + 1, f.y + 1, f.w - 2, 1, '#0a0a0c');
+    // faucet
+    r(f.x + f.w/2 - 1, f.y - 3, 2, 4, '#5a5a5e');
+    r(f.x + f.w/2, f.y - 4, 1, 1, '#76777c');
+  },
+  coffeeMachine(f, now) {
+    r(f.x, f.y, f.w, f.h, '#1a1a1d');
+    r(f.x, f.y, f.w, 2, '#2a2a2e');
+    r(f.x + 1, f.y + 4, f.w - 2, 4, '#0a0a0c');
+    // brew light
+    const on = Math.floor(now / 600) % 2 === 0;
+    r(f.x + 2, f.y + 2, 2, 1, on ? C.g1 : '#5a3a2a');
+    r(f.x + f.w - 4, f.y + 2, 2, 1, '#4d8aff');
+    // pot
+    r(f.x + 3, f.y + f.h - 3, f.w - 6, 3, '#3a3a3e');
+    // steam
+    if (f._steam && now < f._steam) {
+      ctx.globalAlpha = 0.5 - 0.5 * (1 - (f._steam - now)/1800);
+      r(f.x + 4, f.y - 4 - ((now/100) % 4), 2, 2, '#cccccc');
+      r(f.x + 8, f.y - 6 - ((now/120) % 4), 2, 2, '#aaaaaa');
+      ctx.globalAlpha = 1;
+    }
+  },
+  microwave(f) {
+    r(f.x, f.y, f.w, f.h, '#1f1f22');
+    r(f.x, f.y, f.w, 1, '#3a3a3e');
+    r(f.x + 1, f.y + 2, f.w - 5, f.h - 4, '#0a0a0c');
+    r(f.x + 2, f.y + 3, f.w - 7, f.h - 6, '#1a1a2a');
+    // panel
+    r(f.x + f.w - 4, f.y + 2, 3, f.h - 4, '#161618');
+    r(f.x + f.w - 3, f.y + 3, 1, 1, C.g1);
+  },
+  fridge(f) {
+    // body
+    r(f.x, f.y, f.w, f.h, C.fridge);
+    r(f.x, f.y, f.w, 1, '#fff');
+    r(f.x + f.w - 1, f.y, 1, f.h, C.fridgeS);
+    r(f.x, f.y + f.h - 2, f.w, 2, C.fridgeS);
+    // freezer line
+    r(f.x, f.y + 9, f.w, 1, '#9a9a9c');
+    // handles
+    r(f.x + f.w - 3, f.y + 3, 1, 4, '#5a5a5e');
+    r(f.x + f.w - 3, f.y + 12, 1, 8, '#5a5a5e');
+    // sticky note
+    r(f.x + 3, f.y + 13, 6, 6, C.g2);
+  },
+  mtgTable(f) {
+    // table top
+    r(f.x, f.y, f.w, f.h, '#3a302a');
+    r(f.x, f.y, f.w, 2, '#5a4a40');
+    r(f.x, f.y + f.h - 2, f.w, 2, '#1a1410');
+    r(f.x, f.y, 2, f.h, '#5a4a40');
+    r(f.x + f.w - 2, f.y, 2, f.h, '#2a2018');
+    // wood grain
+    r(f.x + 6, f.y + 5, f.w - 12, 1, '#28201a');
+    r(f.x + 4, f.y + f.h - 8, f.w - 8, 1, '#28201a');
+    // laptop
+    r(f.x + 12, f.y + 6, 14, 10, '#1a1a1d');
+    r(f.x + 13, f.y + 7, 12, 7, C.g4);
+    // mug
+    r(f.x + f.w - 16, f.y + 8, 5, 6, C.g2);
+    r(f.x + f.w - 16, f.y + 8, 5, 1, '#fff');
+    // papers
+    r(f.x + 36, f.y + 9, 8, 6, C.cream);
+    px(f.x + 38, f.y + 11, '#3a3a3e');
+    px(f.x + 38, f.y + 13, '#3a3a3e');
+  },
+  cabinet(f) {
+    r(f.x, f.y, f.w, f.h, '#36363a');
+    r(f.x, f.y, f.w, 2, '#48494e');
+    r(f.x, f.y + f.h - 1, f.w, 1, '#1a1a1d');
+    r(f.x, f.y + f.h/2, f.w, 1, '#1a1a1d');
+    // handles
+    r(f.x + f.w/2 - 1, f.y + 4, 2, 1, '#76777c');
+    r(f.x + f.w/2 - 1, f.y + f.h/2 + 4, 2, 1, '#76777c');
+  },
+  serverRack(f, now) {
+    r(f.x, f.y, f.w, f.h, '#101012');
+    r(f.x, f.y, f.w, 2, '#2a2a2e');
+    r(f.x, f.y + f.h - 2, f.w, 2, '#1a1a1d');
+    r(f.x, f.y, 1, f.h, '#2a2a2e');
+    r(f.x + f.w - 1, f.y, 1, f.h, '#1a1a1d');
+    // unit slots with LEDs
+    const units = 6;
+    const uH = (f.h - 6) / units;
+    for (let i = 0; i < units; i++) {
+      const uy = f.y + 3 + i * uH;
+      r(f.x + 2, uy, f.w - 4, uH - 1, '#1a1a1d');
+      r(f.x + 2, uy, f.w - 4, 1, '#2a2a2e');
+      // LEDs - mostly green, occasional blue/red blink
+      const t = Math.floor(now / 220 + i * 7 + (f.seed || 0) * 13);
+      const on = (t & 3) !== 0;
+      const palette = [C.ledG, C.led, C.ledG, C.ledG, C.ledR];
+      const cId = (i + (f.seed || 0)) % palette.length;
+      r(f.x + 3, uy + 1, 2, 1, on ? palette[cId] : '#2a2a2e');
+      r(f.x + 6, uy + 1, 1, 1, on ? C.ledG : '#1a1a1d');
+      // vents
+      r(f.x + 9, uy + 1, f.w - 12, 1, '#0a0a0c');
+      r(f.x + 9, uy + 2, f.w - 12, 1, '#0a0a0c');
+    }
+  },
+};
+
+// ===================== Person drawing =====================
+function drawPerson(x, y, dir, frame, c, options = {}) {
+  const fx = Math.round(x), fy = Math.round(y);
+
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(fx - 4, fy, 9, 2);
+
+  // legs (alternate based on frame)
+  const lf = (frame === 1) ? 1 : (frame === 3 ? 0 : 0);
+  const rf = (frame === 1) ? 0 : (frame === 3 ? 1 : 0);
+  ctx.fillStyle = c.pants;
+  ctx.fillRect(fx - 3, fy - 5 + lf, 2, 5 - lf);
+  ctx.fillRect(fx + 1, fy - 5 + rf, 2, 5 - rf);
+
+  // body / shirt
+  ctx.fillStyle = c.shirt;
+  ctx.fillRect(fx - 3, fy - 10, 6, 5);
+  if (c.shirt2) {
+    ctx.fillStyle = c.shirt2;
+    ctx.fillRect(fx - 3, fy - 7, 6, 2);
+  }
+  // arms
+  ctx.fillStyle = c.shirt;
+  if (frame === 1) {
+    ctx.fillRect(fx - 4, fy - 9, 1, 3);
+    ctx.fillRect(fx + 3, fy - 9, 1, 3);
+  } else if (frame === 3) {
+    ctx.fillRect(fx - 4, fy - 8, 1, 3);
+    ctx.fillRect(fx + 3, fy - 8, 1, 3);
+  } else {
+    ctx.fillRect(fx - 4, fy - 9, 1, 4);
+    ctx.fillRect(fx + 3, fy - 9, 1, 4);
+  }
+  // hands
+  ctx.fillStyle = c.skin;
+  ctx.fillRect(fx - 4, fy - 6, 1, 1);
+  ctx.fillRect(fx + 3, fy - 6, 1, 1);
+
+  // accent collar
+  if (c.acc) {
+    ctx.fillStyle = c.acc;
+    ctx.fillRect(fx - 1, fy - 10, 2, 1);
+  }
+
+  // head
+  ctx.fillStyle = c.skin;
+  ctx.fillRect(fx - 3, fy - 15, 6, 5);
+
+  // hair
+  ctx.fillStyle = c.hair;
+  if (dir === 'up') {
+    ctx.fillRect(fx - 3, fy - 15, 6, 4);
+    ctx.fillRect(fx - 3, fy - 11, 1, 1);
+    ctx.fillRect(fx + 2, fy - 11, 1, 1);
+  } else if (dir === 'down') {
+    ctx.fillRect(fx - 3, fy - 15, 6, 2);
+    ctx.fillRect(fx - 3, fy - 13, 1, 2);
+    ctx.fillRect(fx + 2, fy - 13, 1, 2);
+  } else if (dir === 'left') {
+    ctx.fillRect(fx - 3, fy - 15, 6, 2);
+    ctx.fillRect(fx - 3, fy - 13, 2, 3);
+    ctx.fillRect(fx + 2, fy - 13, 1, 1);
+  } else { // right
+    ctx.fillRect(fx - 3, fy - 15, 6, 2);
+    ctx.fillRect(fx + 1, fy - 13, 2, 3);
+    ctx.fillRect(fx - 3, fy - 13, 1, 1);
+  }
+
+  // face
+  ctx.fillStyle = '#1a1010';
+  if (dir === 'down') {
+    ctx.fillRect(fx - 2, fy - 12, 1, 1);
+    ctx.fillRect(fx + 1, fy - 12, 1, 1);
+  } else if (dir === 'left') {
+    ctx.fillRect(fx - 2, fy - 12, 1, 1);
+  } else if (dir === 'right') {
+    ctx.fillRect(fx + 1, fy - 12, 1, 1);
+  }
+}
+
+// ===================== Cat drawing =====================
+function drawCat(c, now) {
+  const fx = Math.round(c.x), fy = Math.round(c.y);
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(fx - 5, fy + 1, 11, 2);
+
+  if (c.perched) {
+    // sitting on a ledge — perch under
+    r(fx - 7, fy + 2, 14, 4, '#36363a');
+    r(fx - 7, fy + 2, 14, 1, '#48494e');
+  }
+
+  // body
+  r(fx - 5, fy - 3, 10, 5, c.base);
+  r(fx - 5, fy - 3, 10, 1, c.light);
+  r(fx - 5, fy + 1, 10, 1, c.dark);
+  // legs
+  r(fx - 4, fy + 2, 2, 2, c.dark);
+  r(fx + 2, fy + 2, 2, 2, c.dark);
+  // tail flick
+  const tail = Math.sin(now / 320 + (c.name === 'Felix' ? 0 : 1.6)) * 2;
+  r(fx + 4, fy - 1 + (tail|0), 3, 2, c.base);
+  r(fx + 6, fy - 2 + (tail|0), 1, 2, c.light);
+  // head
+  r(fx - 3, fy - 7, 6, 5, c.base);
+  r(fx - 3, fy - 7, 6, 1, c.light);
+  // ears
+  r(fx - 3, fy - 8, 2, 2, c.base);
+  r(fx + 1, fy - 8, 2, 2, c.base);
+  px(fx - 2, fy - 7, c.dark);
+  px(fx + 2, fy - 7, c.dark);
+  // eyes
+  c.blinkT -= 16;
+  const blinking = c.blinkT > 0 && c.blinkT < 120;
+  if (Math.random() < 0.003) c.blinkT = 200;
+  if (!blinking) {
+    px(fx - 2, fy - 5, '#0a0a0c');
+    px(fx + 1, fy - 5, '#0a0a0c');
+  } else {
+    r(fx - 2, fy - 5, 1, 1, c.dark);
+    r(fx + 1, fy - 5, 1, 1, c.dark);
+  }
+  // nose / mouth
+  px(fx, fy - 3, c.dark);
+  px(fx - 1, fy - 2, c.dark);
+  px(fx + 1, fy - 2, c.dark);
+}
+
+// ===================== Bubble =====================
+function drawBubble(b, now) {
+  ctx.font = '6px ui-monospace, monospace';
+  ctx.textBaseline = 'top';
+  // wrap line
+  const maxW = 130;
+  const words = b.line.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxW && cur) {
+      lines.push(cur);
+      cur = w;
+    } else cur = test;
+  }
+  if (cur) lines.push(cur);
+
+  // size
+  const innerW = Math.max(
+    ctx.measureText(b.name).width,
+    ...lines.map(l => ctx.measureText(l).width)
+  );
+  const boxW = Math.ceil(innerW) + 8;
+  const boxH = 4 + 7 + (lines.length * 7) + 4;
+  let bx = Math.round(b.x - boxW/2);
+  let by = Math.round(b.y - boxH);
+  bx = Math.max(2, Math.min(W - boxW - 2, bx));
+  by = Math.max(2, by);
+
+  // shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(bx + 1, by + 1, boxW, boxH);
+  // body
+  r(bx, by, boxW, boxH, '#101013');
+  r(bx + 1, by + 1, boxW - 2, boxH - 2, '#181820');
+  // top accent line (gradient)
+  const grd = ctx.createLinearGradient(bx, by, bx + boxW, by);
+  grd.addColorStop(0, '#ff7849'); grd.addColorStop(0.5, '#c63ed8'); grd.addColorStop(1, '#4d8aff');
+  ctx.fillStyle = grd;
+  ctx.fillRect(bx, by, boxW, 1);
+  // accent corner dots
+  r(bx, by, 1, 1, b.accent);
+  r(bx + boxW - 1, by, 1, 1, b.accent);
+
+  // name
+  ctx.fillStyle = b.accent;
+  ctx.fillText(b.name, bx + 4, by + 3);
+  // body lines
+  ctx.fillStyle = '#d8d8dc';
+  lines.forEach((l, i) => {
+    ctx.fillText(l, bx + 4, by + 3 + 7 + i * 7);
+  });
+
+  // tail
+  const tx = Math.max(bx + 3, Math.min(bx + boxW - 4, b.x - 2));
+  r(tx, by + boxH, 4, 1, '#181820');
+  r(tx + 1, by + boxH + 1, 2, 1, '#181820');
+}
+
+// ===================== Interaction hint =====================
+function drawHint() {
+  // Find nearest interactable
+  const range = 22;
+  let nearest = null, nd = range;
+  const all = [
+    ...npcs.map(n => ({ ref:n, kind:'npc' })),
+    ...cats.map(c => ({ ref:c, kind:'cat' })),
+  ];
+  for (const t of all) {
+    const d = Math.hypot(t.ref.x - player.x, (t.ref.y - 6) - (player.y - 6));
+    if (d < nd) { nd = d; nearest = t.ref; }
+  }
+  if (!nearest) {
+    for (const f of furniture) {
+      if (!f.interact) continue;
+      const cx = f.x + f.w/2, cy = f.y + f.h/2;
+      const d = Math.hypot(cx - player.x, cy - player.y);
+      if (d < 28 && d < nd) { nd = d; nearest = { x: cx, y: f.y, isFurn: true }; }
+    }
+  }
+  if (nearest) {
+    const t = performance.now();
+    const yoff = Math.sin(t / 240) * 1.5;
+    const px = Math.round(nearest.x), py = Math.round(nearest.y - 24 + yoff);
+    // E key glyph
+    r(px - 4, py - 5, 9, 9, '#101013');
+    r(px - 3, py - 4, 7, 7, '#181820');
+    ctx.font = 'bold 7px ui-monospace, monospace';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#ff7849';
+    ctx.fillText('E', px - 2, py - 4);
+  }
+}
+
+// ===================== Render =====================
+function render(now) {
+  drawFloor();
+
+  // furniture sorted by feet-y for proper depth (only affects pieces with strong vertical)
+  const fs = furniture.slice().sort((a, b) => (a.y + a.h) - (b.y + b.h));
+  // draw walls before furniture so wall trim doesn't paint over couches that touch it
+  drawWalls();
+  for (const f of fs) drawFurn(f, now);
+
+  // characters sorted by y
+  const characters = [
+    ...npcs.map(n => ({ ref: n, kind: 'npc', y: n.y })),
+    ...cats.map(c => ({ ref: c, kind: 'cat', y: c.y })),
+    { ref: player, kind: 'player', y: player.y },
+  ].sort((a, b) => a.y - b.y);
+
+  for (const ch of characters) {
+    if (ch.kind === 'player') {
+      drawPerson(player.x, player.y, player.dir, player.frame, player.colors);
+    } else if (ch.kind === 'npc') {
+      drawPerson(ch.ref.x, ch.ref.y, ch.ref.dir, ch.ref._frame || 0, ch.ref.colors);
+    } else {
+      drawCat(ch.ref, now);
+    }
+  }
+
+  drawHint();
+
+  if (bubble) {
+    if (bubble.until > now) drawBubble(bubble, now);
+    else bubble = null;
+  }
+
+  document.getElementById('zone').textContent = zoneOf(player.x, player.y);
+}
+
+// ===================== Main loop =====================
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(40, now - last);
+  last = now;
+  update(dt);
+  render(now);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>

@@ -217,10 +217,10 @@ export class GameEngine {
         const lat = center.lat + distance * Math.sin(angle);
 
         const types = [
-            { type: 'star', icon: '⭐', rarity: 'common', xp: 10, weight: 60 },
-            { type: 'gem', icon: '💎', rarity: 'rare', xp: 50, weight: 25 },
-            { type: 'trophy', icon: '🏆', rarity: 'epic', xp: 100, weight: 10 },
-            { type: 'key', icon: '🗝️', rarity: 'legendary', xp: 500, weight: 5 }
+            { type: 'star', icon: '<img class="rw-icon" src="assets/roadworld/icons/star.png" alt="star">', rarity: 'common', xp: 10, weight: 60 },
+            { type: 'gem', icon: '<img class="rw-icon" src="assets/roadworld/icons/gem.png" alt="gem">', rarity: 'rare', xp: 50, weight: 25 },
+            { type: 'trophy', icon: '<img class="rw-icon" src="assets/roadworld/icons/trophy.png" alt="trophy">', rarity: 'epic', xp: 100, weight: 10 },
+            { type: 'key', icon: '<img class="rw-icon" src="assets/roadworld/icons/key.png" alt="key">', rarity: 'legendary', xp: 500, weight: 5 }
         ];
 
         // Weighted random selection

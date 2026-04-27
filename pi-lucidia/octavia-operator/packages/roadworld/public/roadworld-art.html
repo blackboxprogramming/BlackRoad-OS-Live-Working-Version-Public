@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RoadWorld · Free Asset Kit Preview</title>
+  <style>
+    :root{
+      --bg:#0b0b0c;
+      --panel:#121214;
+      --fg:#ededee;
+      --muted:#8b8b92;
+      --border:#2a2a2f;
+      --accent:#00d4ff;
+      --accent2:#7b2ff7;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; background:var(--bg); color:var(--fg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+    a{ color: inherit; }
+    header{
+      padding: 16px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(18,18,20,0.95), rgba(11,11,12,0.95));
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      backdrop-filter: blur(10px);
+    }
+    h1{ margin:0; font-size: 16px; letter-spacing: 0.04em; }
+    .sub{ margin-top:6px; color:var(--muted); font-size:12px; }
+    main{ padding: 16px; max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 980px){ main{ grid-template-columns: 1fr; } }
+    .card{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(18,18,20,0.92), rgba(9,9,10,0.9));
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+    }
+    .card h2{
+      margin:0;
+      padding: 12px 12px 10px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 10px;
+      padding: 12px;
+    }
+    .tile{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0c0c0d;
+      overflow: hidden;
+    }
+    .tile img{
+      width: 100%;
+      height: 96px;
+      object-fit: contain;
+      background: radial-gradient(circle at 40% 30%, rgba(0,212,255,0.10), transparent 60%),
+                  radial-gradient(circle at 70% 80%, rgba(123,47,247,0.10), transparent 60%);
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .cap{
+      padding: 8px 9px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    canvas{
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #0c0c0d;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .btn{
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(18,18,20,0.9), rgba(11,11,12,0.9));
+      color: var(--fg);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .btn:hover{ border-color: #3a3a42; }
+    .pill{
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.25);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: var(--muted);
+    }
+    .pill b{ color: var(--fg); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ROADWORLD · FREE ASSET KIT</h1>
+    <div class="sub">Generated pixel UI + collectibles + avatar, plus CC0 Road sprites (GrafxKid). Built for a Roblox/MiniClip-ish feel.</div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2><span>UI ICONS</span><span>assets/roadworld/ui/*.png</span></h2>
+      <div class="grid" id="ui-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2><span>COLLECTIBLES</span><span>assets/roadworld/icons/*.png</span></h2>
+      <div class="grid" id="c-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2><span>WORLD SPRITES (CC0)</span><span>assets/roadworld/world/grafxkid/*</span></h2>
+      <div class="grid" id="w-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2><span>MINI SCENE</span><span>click “cycle cars”</span></h2>
+      <canvas id="scene" width="640" height="360" aria-label="Roadworld mini scene"></canvas>
+      <div class="row">
+        <button class="btn" id="cycle">cycle cars</button>
+        <div class="pill">atlas: <b>assets/roadworld/atlas.png</b></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const UI = ["home","compass","plus","minus","buildings","globe","locate","save","target","ruler","share","tools","game","menu","close"];
+    const COL = ["star","gem","trophy","key"];
+    const WORLD = ["summer_road","highway_road","road_markings","npc_cars","police"];
+
+    function addTiles(rootId, base, names){
+      const grid = document.getElementById(rootId);
+      for(const n of names){
+        const el = document.createElement("div");
+        el.className = "tile";
+        const img = document.createElement("img");
+        img.src = `${base}/${n}.png`;
+        img.alt = n;
+        const cap = document.createElement("div");
+        cap.className = "cap";
+        cap.textContent = n + ".png";
+        el.appendChild(img);
+        el.appendChild(cap);
+        grid.appendChild(el);
+      }
+    }
+    addTiles("ui-grid", "assets/roadworld/ui", UI);
+    addTiles("c-grid", "assets/roadworld/icons", COL);
+    addTiles("w-grid", "assets/roadworld/world/grafxkid", WORLD);
+
+    const cv = document.getElementById("scene");
+    const ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+
+    const imgRoad = new Image();
+    const imgCars = new Image();
+    const imgPolice = new Image();
+    imgRoad.src = "assets/roadworld/world/grafxkid/summer_road.png";
+    imgCars.src = "assets/roadworld/world/grafxkid/npc_cars.png";
+    imgPolice.src = "assets/roadworld/world/grafxkid/police.png";
+
+    let frame = 0;
+    function draw(){
+      if(!imgRoad.complete || !imgCars.complete) return;
+      // Background
+      ctx.fillStyle = "#0c0c0d";
+      ctx.fillRect(0,0,cv.width,cv.height);
+
+      // Tile road (64x64)
+      for(let y=0;y<cv.height;y+=64){
+        for(let x=0;x<cv.width;x+=64){
+          ctx.drawImage(imgRoad, x, y);
+        }
+      }
+
+      // Cars from 64x64 sheet (4x4 of 16x16)
+      const sx = (frame % 4) * 16;
+      const sy = Math.floor(frame / 4) * 16;
+      const scale = 4;
+      ctx.drawImage(imgCars, sx, sy, 16, 16, 140, 190, 16*scale, 16*scale);
+      ctx.drawImage(imgCars, ((frame+3)%16 %4)*16, Math.floor(((frame+3)%16)/4)*16, 16, 16, 320, 110, 16*scale, 16*scale);
+      if(imgPolice.complete){
+        ctx.drawImage(imgPolice, 0, 0, 16, 16, 460, 210, 16*scale, 16*scale);
+      }
+
+      // Title
+      ctx.fillStyle = "rgba(0,0,0,0.55)";
+      ctx.fillRect(10, 10, 260, 42);
+      ctx.fillStyle = "#EDEDEE";
+      ctx.font = "16px ui-monospace, Menlo, monospace";
+      ctx.fillText("ROADWORLD · MINISCENE", 18, 36);
+    }
+
+    document.getElementById("cycle").addEventListener("click", () => {
+      frame = (frame + 1) % 16;
+      draw();
+    });
+
+    Promise.all([
+      new Promise(r => imgRoad.onload = r),
+      new Promise(r => imgCars.onload = r),
+      new Promise(r => imgPolice.onload = r),
+    ]).then(draw);
+  </script>
+</body>
+</html>
+

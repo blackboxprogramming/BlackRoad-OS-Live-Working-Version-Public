@@ -15,7 +15,7 @@ export class PlayerAvatar {
         this.element.innerHTML = `
             <div class="avatar-container">
                 <div class="avatar-sprite" style="background: ${player.avatar.color};">
-                    <div class="avatar-icon">👤</div>
+                    <div class="avatar-icon"><img class="rw-avatar" src="assets/roadworld/avatars/player.png" alt="player"></div>
                 </div>
                 <div class="avatar-label">${player.username}</div>
                 <div class="avatar-level">Lv ${player.level}</div>
@@ -74,7 +74,7 @@ export class PlayerAvatar {
             .setHTML(`
                 <div class="player-info-popup">
                     <div class="popup-header">
-                        <div class="avatar-small" style="background: ${player.avatar.color};">👤</div>
+                        <div class="avatar-small" style="background: ${player.avatar.color};"><img class="rw-avatar rw-avatar-sm" src="assets/roadworld/avatars/player.png" alt="player"></div>
                         <div>
                             <div class="popup-name">${player.username}</div>
                             <div class="popup-level">Level ${player.level}</div>
@@ -110,10 +110,10 @@ export class PlayerAvatar {
                     <div class="popup-inventory">
                         <div class="inventory-title">Inventory</div>
                         <div class="inventory-items">
-                            <span>⭐ ${inventory.stars}</span>
-                            <span>💎 ${inventory.gems}</span>
-                            <span>🏆 ${inventory.trophies}</span>
-                            <span>🗝️ ${inventory.keys}</span>
+                            <span><img class="rw-icon" src="assets/roadworld/icons/star.png" alt=""> ${inventory.stars}</span>
+                            <span><img class="rw-icon" src="assets/roadworld/icons/gem.png" alt=""> ${inventory.gems}</span>
+                            <span><img class="rw-icon" src="assets/roadworld/icons/trophy.png" alt=""> ${inventory.trophies}</span>
+                            <span><img class="rw-icon" src="assets/roadworld/icons/key.png" alt=""> ${inventory.keys}</span>
                         </div>
                     </div>
                 </div>

@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Foundry · Reference Board</title>
+  <style>
+    :root{
+      --bg:#0f0f10;
+      --panel:#151517;
+      --panel2:#111113;
+      --fg:#ededee;
+      --muted:#8b8b92;
+      --border:#2a2a2f;
+      --accent:#ffcd57;
+      --accent2:#7BA8C8;
+    }
+    *{ box-sizing:border-box; }
+    html,body{
+      margin:0;
+      min-height:100vh;
+      background:linear-gradient(180deg,#0f0f10,#0b0b0c);
+      color:var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    a{ color:inherit; text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      backdrop-filter: blur(10px);
+      background: rgba(15,15,16,0.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .wrap{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 16px;
+    }
+    .top{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing: 0.04em;
+    }
+    .crumbs{
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top: 12px;
+    }
+    .btn, .file{
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      color: var(--fg);
+      padding: 9px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.35);
+      user-select:none;
+    }
+    .btn:hover{ border-color: #3a3a42; }
+    .btn:active{ transform: translateY(1px); }
+    .file{
+      padding: 7px 10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    input[type="file"]{ font-size:12px; }
+    .slider{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color: var(--muted);
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+    }
+    input[type="range"]{ width: 150px; }
+    main{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+      display:grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 16px;
+    }
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; }
+    }
+    .card{
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow:hidden;
+      background: linear-gradient(180deg, rgba(21,21,23,0.9), rgba(10,10,11,0.85));
+      box-shadow: 0 18px 60px rgba(0,0,0,0.45);
+    }
+    .card h2{
+      margin:0;
+      padding: 12px 12px 10px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .hint{
+      font-size: 11px;
+      color: #6b6b73;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      padding: 12px;
+    }
+    .thumb{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow:hidden;
+      background: #0c0c0d;
+      cursor:pointer;
+      position:relative;
+    }
+    .thumb[aria-selected="true"]{
+      border-color: rgba(255,205,87,0.8);
+      box-shadow: 0 0 0 1px rgba(255,205,87,0.18), 0 12px 34px rgba(0,0,0,0.55);
+    }
+    .thumb img{
+      display:block;
+      width:100%;
+      height: 120px;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+    .thumb .cap{
+      padding: 8px 9px;
+      font-size: 11px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow: ellipsis;
+    }
+    .pane{
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+    .preview{
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow:hidden;
+      background: #0c0c0d;
+    }
+    canvas{
+      display:block;
+      width:100%;
+      height:auto;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      cursor: crosshair;
+    }
+    .row{
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .kv{
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .kv b{ color: var(--fg); font-weight: 600; }
+    .palette{
+      display:grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+    .sw{
+      height: 22px;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.08);
+      position:relative;
+      overflow:hidden;
+    }
+    .sw::after{
+      content: attr(data-hex);
+      position:absolute;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 10px;
+      color: rgba(255,255,255,0.75);
+      text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
+    .sw:hover::after{ opacity: 1; }
+    .toast{
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(21,21,23,0.92);
+      color: var(--fg);
+      font-size: 12px;
+      box-shadow: 0 14px 50px rgba(0,0,0,0.55);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+      z-index: 999;
+    }
+    .toast.on{ opacity: 1; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <h1>REFERENCE BOARD</h1>
+        <div class="crumbs">
+          <a href="index.html">pixel foundry</a>
+          <span>·</span>
+          <span>grab palettes · make a poster · pick colors</span>
+        </div>
+      </div>
+      <div class="controls">
+        <label class="file">
+          add images
+          <input id="files" type="file" accept="image/*" multiple />
+        </label>
+        <button class="btn" id="btn-poster">make poster (PNG)</button>
+        <button class="btn" id="btn-copy-hex">copy hex list</button>
+        <button class="btn" id="btn-copy-css">copy CSS vars</button>
+        <div class="slider">
+          <span>colors</span>
+          <input id="colors" type="range" min="6" max="32" step="1" value="16" />
+          <span id="colors-v">16</span>
+        </div>
+        <div class="slider">
+          <span>sample</span>
+          <input id="sample" type="range" min="64" max="256" step="16" value="160" />
+          <span id="sample-v">160</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>
+        <span>IMAGES</span>
+        <span class="hint">click one to extract palette</span>
+      </h2>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <aside class="card">
+      <h2>
+        <span>PALETTE</span>
+        <span class="hint">hover swatches for hex</span>
+      </h2>
+      <div class="pane">
+        <div class="preview">
+          <canvas id="pv" width="640" height="400" aria-label="selected image preview"></canvas>
+        </div>
+        <div class="row">
+          <div class="kv">
+            <span>selected:</span>
+            <b id="sel">—</b>
+          </div>
+          <div class="kv">
+            <span>picked:</span>
+            <b id="picked">—</b>
+          </div>
+        </div>
+        <div class="palette" id="pal"></div>
+        <div class="kv" style="line-height:1.35">
+          tip: click the preview to sample an exact pixel color (copies hex).
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <div class="toast" id="toast">copied</div>
+
+  <script>
+  (() => {
+    const DEFAULTS = [
+      { name: "pf-index.png", url: "references/pf-index.png" },
+      { name: "transit-stop-idle.png", url: "references/transit-stop-idle.png" },
+      { name: "transit-stop-hail.png", url: "references/transit-stop-hail.png" },
+    ];
+
+    const els = {
+      grid: document.getElementById("grid"),
+      files: document.getElementById("files"),
+      pv: document.getElementById("pv"),
+      sel: document.getElementById("sel"),
+      picked: document.getElementById("picked"),
+      pal: document.getElementById("pal"),
+      toast: document.getElementById("toast"),
+      colors: document.getElementById("colors"),
+      colorsV: document.getElementById("colors-v"),
+      sample: document.getElementById("sample"),
+      sampleV: document.getElementById("sample-v"),
+      btnPoster: document.getElementById("btn-poster"),
+      btnCopyHex: document.getElementById("btn-copy-hex"),
+      btnCopyCss: document.getElementById("btn-copy-css"),
+    };
+
+    const ctx = els.pv.getContext("2d", { willReadFrequently: true });
+    ctx.imageSmoothingEnabled = false;
+
+    const state = {
+      items: [],
+      selected: null,
+      palette: [],
+      picked: null,
+    };
+
+    function toast(msg){
+      els.toast.textContent = msg;
+      els.toast.classList.add("on");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => els.toast.classList.remove("on"), 900);
+    }
+
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+    function hex2(r,g,b){
+      const h = (n) => n.toString(16).padStart(2,"0");
+      return `#${h(r)}${h(g)}${h(b)}`.toUpperCase();
+    }
+
+    async function copyText(txt){
+      try{
+        await navigator.clipboard.writeText(txt);
+        toast("copied");
+      } catch {
+        toast("copy failed (clipboard blocked)");
+      }
+    }
+
+    function quantKey(r,g,b){
+      return ((r>>3)<<10) | ((g>>3)<<5) | (b>>3);
+    }
+    function keyToRgb(k){
+      const r5 = (k>>10)&31;
+      const g5 = (k>>5)&31;
+      const b5 = k&31;
+      const r = (r5<<3) + 4;
+      const g = (g5<<3) + 4;
+      const b = (b5<<3) + 4;
+      return [clamp(r,0,255), clamp(g,0,255), clamp(b,0,255)];
+    }
+
+    function extractPaletteFromCanvas(sourceCanvas, colors, sample){
+      // Downsample to reduce work and avoid huge images
+      const w = sourceCanvas.width;
+      const h = sourceCanvas.height;
+      const scale = sample / Math.max(w, h);
+      const tw = Math.max(40, Math.round(w * scale));
+      const th = Math.max(40, Math.round(h * scale));
+
+      const c = document.createElement("canvas");
+      c.width = tw; c.height = th;
+      const g = c.getContext("2d", { willReadFrequently: true });
+      g.imageSmoothingEnabled = true;
+      g.drawImage(sourceCanvas, 0, 0, tw, th);
+      const data = g.getImageData(0,0,tw,th).data;
+
+      const counts = new Map();
+      for(let i=0;i<data.length;i+=4){
+        const a = data[i+3];
+        if(a < 24) continue;
+        const k = quantKey(data[i], data[i+1], data[i+2]);
+        counts.set(k, (counts.get(k) || 0) + 1);
+      }
+
+      const ranked = Array.from(counts.entries())
+        .sort((a,b) => b[1]-a[1])
+        .slice(0, Math.max(2, colors*3));
+
+      // Greedy pick: prefer distinct colors in RGB distance
+      const out = [];
+      const minDist = 42;
+      for(const [k] of ranked){
+        const [r,g2,b] = keyToRgb(k);
+        let ok = true;
+        for(const p of out){
+          const dr = r - p[0];
+          const dg = g2 - p[1];
+          const db = b - p[2];
+          if(Math.sqrt(dr*dr+dg*dg+db*db) < minDist){ ok = false; break; }
+        }
+        if(ok) out.push([r,g2,b]);
+        if(out.length >= colors) break;
+      }
+
+      // If we didn't reach target, fill from ranked
+      for(const [k] of ranked){
+        if(out.length >= colors) break;
+        const rgb = keyToRgb(k);
+        const exists = out.some(p => p[0]===rgb[0] && p[1]===rgb[1] && p[2]===rgb[2]);
+        if(!exists) out.push(rgb);
+      }
+
+      return out.slice(0, colors).map(([r,g2,b]) => hex2(r,g2,b));
+    }
+
+    function resizeCanvas(canvas, cssW, cssH){
+      const dpr = window.devicePixelRatio || 1;
+      canvas.style.width = cssW + "px";
+      canvas.style.height = cssH + "px";
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(cssH * dpr);
+      const g = canvas.getContext("2d", { willReadFrequently: true });
+      g.setTransform(dpr,0,0,dpr,0,0);
+      g.imageSmoothingEnabled = false;
+      return g;
+    }
+
+    function renderPalette(hexes){
+      els.pal.innerHTML = "";
+      for(const hex of hexes){
+        const sw = document.createElement("div");
+        sw.className = "sw";
+        sw.style.background = hex;
+        sw.dataset.hex = hex;
+        sw.title = hex;
+        sw.addEventListener("click", () => copyText(hex));
+        els.pal.appendChild(sw);
+      }
+    }
+
+    function drawSelected(){
+      const item = state.selected;
+      if(!item){
+        els.sel.textContent = "—";
+        renderPalette([]);
+        ctx.clearRect(0,0,els.pv.width,els.pv.height);
+        return;
+      }
+      els.sel.textContent = item.name;
+
+      const iw = item.img.naturalWidth;
+      const ih = item.img.naturalHeight;
+      const cw = Math.min(520, Math.max(320, document.querySelector("aside").clientWidth - 24));
+      const ch = Math.max(220, Math.round(cw * (ih/iw)));
+      const g = resizeCanvas(els.pv, cw, ch);
+      g.clearRect(0,0,cw,ch);
+      g.drawImage(item.img, 0, 0, cw, ch);
+
+      // Also draw into a working canvas for palette extraction (original pixels)
+      const work = document.createElement("canvas");
+      work.width = iw;
+      work.height = ih;
+      const wg = work.getContext("2d", { willReadFrequently: true });
+      wg.imageSmoothingEnabled = false;
+      wg.drawImage(item.img, 0, 0);
+
+      const colors = parseInt(els.colors.value, 10);
+      const sample = parseInt(els.sample.value, 10);
+      const pal = extractPaletteFromCanvas(work, colors, sample);
+      state.palette = pal;
+      renderPalette(pal);
+    }
+
+    function addItem(name, src){
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.decoding = "async";
+        img.onload = () => resolve({ name, url: src, img });
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function renderGrid(){
+      els.grid.innerHTML = "";
+      for(const item of state.items){
+        const el = document.createElement("div");
+        el.className = "thumb";
+        el.setAttribute("role","button");
+        el.tabIndex = 0;
+        el.setAttribute("aria-selected", state.selected && state.selected.name === item.name ? "true" : "false");
+
+        const im = document.createElement("img");
+        im.src = item.url;
+        im.alt = item.name;
+        const cap = document.createElement("div");
+        cap.className = "cap";
+        cap.textContent = item.name;
+
+        el.appendChild(im);
+        el.appendChild(cap);
+
+        const pick = () => {
+          state.selected = item;
+          renderGrid();
+          drawSelected();
+        };
+        el.addEventListener("click", pick);
+        el.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(); }
+        });
+        els.grid.appendChild(el);
+      }
+    }
+
+    function makePoster(){
+      const items = state.items.slice(0, 4);
+      if(items.length === 0){ toast("no images"); return; }
+
+      const W = 1200, H = 900;
+      const c = document.createElement("canvas");
+      c.width = W; c.height = H;
+      const g = c.getContext("2d");
+      g.imageSmoothingEnabled = true;
+
+      g.fillStyle = "#0b0b0c";
+      g.fillRect(0,0,W,H);
+
+      // header
+      g.fillStyle = "rgba(255,255,255,0.06)";
+      g.fillRect(0,0,W,70);
+      g.fillStyle = "#EDEDEE";
+      g.font = "600 20px ui-monospace, Menlo, monospace";
+      g.fillText("PIXEL FOUNDRY · REFERENCE POSTER", 22, 44);
+      g.fillStyle = "rgba(255,205,87,0.9)";
+      g.fillRect(22, 56, 220, 3);
+
+      const pad = 18;
+      const top = 88;
+      const cols = 2;
+      const rows = 2;
+      const cellW = Math.floor((W - pad*(cols+1))/cols);
+      const cellH = Math.floor((H - top - pad*(rows+1))/rows);
+
+      for(let i=0;i<items.length;i++){
+        const it = items[i];
+        const cx = i % cols;
+        const cy = Math.floor(i / cols);
+        const x = pad + cx*(cellW + pad);
+        const y = top + pad + cy*(cellH + pad);
+
+        g.fillStyle = "rgba(255,255,255,0.05)";
+        g.fillRect(x-2,y-2,cellW+4,cellH+4);
+        g.fillStyle = "#0c0c0d";
+        g.fillRect(x,y,cellW,cellH);
+
+        const iw = it.img.naturalWidth;
+        const ih = it.img.naturalHeight;
+        const s = Math.min(cellW/iw, cellH/ih);
+        const dw = Math.round(iw*s);
+        const dh = Math.round(ih*s);
+        const dx = x + Math.floor((cellW - dw)/2);
+        const dy = y + Math.floor((cellH - dh)/2);
+        g.drawImage(it.img, dx, dy, dw, dh);
+
+        g.fillStyle = "rgba(0,0,0,0.55)";
+        g.fillRect(x, y+cellH-34, cellW, 34);
+        g.fillStyle = "rgba(237,237,238,0.9)";
+        g.font = "12px ui-monospace, Menlo, monospace";
+        g.fillText(it.name, x+10, y+cellH-12);
+      }
+
+      const a = document.createElement("a");
+      a.download = "pixel-foundry-reference-poster.png";
+      a.href = c.toDataURL("image/png");
+      a.click();
+      toast("downloaded poster");
+    }
+
+    function hexList(){
+      return (state.palette || []).join(", ");
+    }
+    function cssVars(){
+      const pal = state.palette || [];
+      const lines = [
+        ":root{",
+        ...pal.map((h,i) => `  --pf-ref-${String(i).padStart(2,"0")}: ${h};`),
+        "}"
+      ];
+      return lines.join("\n");
+    }
+
+    function initPickFromPreview(){
+      els.pv.addEventListener("click", (ev) => {
+        if(!state.selected) return;
+
+        const rect = els.pv.getBoundingClientRect();
+        const x = clamp(Math.floor((ev.clientX - rect.left) * (els.pv.width / rect.width)), 0, els.pv.width-1);
+        const y = clamp(Math.floor((ev.clientY - rect.top) * (els.pv.height / rect.height)), 0, els.pv.height-1);
+        const px = ctx.getImageData(x, y, 1, 1).data;
+        const hex = hex2(px[0], px[1], px[2]);
+        state.picked = hex;
+        els.picked.textContent = hex;
+        copyText(hex);
+      });
+    }
+
+    function initControls(){
+      els.colors.addEventListener("input", () => {
+        els.colorsV.textContent = els.colors.value;
+        drawSelected();
+      });
+      els.sample.addEventListener("input", () => {
+        els.sampleV.textContent = els.sample.value;
+        drawSelected();
+      });
+      els.btnPoster.addEventListener("click", makePoster);
+      els.btnCopyHex.addEventListener("click", () => copyText(hexList()));
+      els.btnCopyCss.addEventListener("click", () => copyText(cssVars()));
+
+      els.files.addEventListener("change", async () => {
+        const files = Array.from(els.files.files || []);
+        for(const f of files){
+          if(!f.type.startsWith("image/")) continue;
+          const url = URL.createObjectURL(f);
+          try{
+            const item = await addItem(f.name, url);
+            state.items.unshift(item);
+          } catch {
+            // ignore
+          }
+        }
+        renderGrid();
+        if(!state.selected && state.items.length) { state.selected = state.items[0]; drawSelected(); renderGrid(); }
+        els.files.value = "";
+      });
+    }
+
+    async function boot(){
+      const loaded = [];
+      for(const d of DEFAULTS){
+        try{
+          loaded.push(await addItem(d.name, d.url));
+        } catch {
+          // ok: missing refs
+        }
+      }
+      state.items = loaded;
+      if(state.items.length) state.selected = state.items[0];
+      renderGrid();
+      initPickFromPreview();
+      initControls();
+      drawSelected();
+      els.colorsV.textContent = els.colors.value;
+      els.sampleV.textContent = els.sample.value;
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>

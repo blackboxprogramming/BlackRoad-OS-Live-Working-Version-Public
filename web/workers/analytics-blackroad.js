@@ -261,27 +261,114 @@ export default {
       // ── Public stats ──
       if (path === '/stats' && request.method === 'GET') {
         const range = url.searchParams.get('range') || '24h';
-        const since = range === '7d' ? "datetime('now', '-7 days')"
-                    : range === '30d' ? "datetime('now', '-30 days')"
-                    : "datetime('now', '-24 hours')";
+        const windowDays = range === '30d' ? 30 : range === '7d' ? 7 : 1;
+        const since = `datetime('now', '-${windowDays} days')`;
+        const priorSince = `datetime('now', '-${windowDays * 2} days')`;
+        const priorEnd = `datetime('now', '-${windowDays} days')`;
 
-        const [views, uniques, events, topPages, topEvents, countries] = await Promise.all([
+        const [views, uniques, events, topPages, topEvents, topReferrers, topExits, topExitSources, countries, daily, hourly, priorViews, priorUniques, priorEvents, bounceSessions, sourceBreakdown] = await Promise.all([
           env.DB.prepare(`SELECT COUNT(*) as c FROM page_views WHERE created_at > ${since}`).first(),
           env.DB.prepare(`SELECT COUNT(DISTINCT session_id) as c FROM page_views WHERE created_at > ${since}`).first(),
           env.DB.prepare(`SELECT COUNT(*) as c FROM events WHERE created_at > ${since}`).first(),
-          env.DB.prepare(`SELECT path, COUNT(*) as views FROM page_views WHERE created_at > ${since} GROUP BY path ORDER BY views DESC LIMIT 10`).all(),
+          env.DB.prepare(`SELECT path, COUNT(*) as views, COUNT(DISTINCT session_id) as sessions FROM page_views WHERE created_at > ${since} GROUP BY path ORDER BY views DESC LIMIT 10`).all(),
           env.DB.prepare(`SELECT name, COUNT(*) as count FROM events WHERE created_at > ${since} GROUP BY name ORDER BY count DESC LIMIT 10`).all(),
+          env.DB.prepare(`SELECT CASE
+              WHEN referrer IS NULL OR referrer = '' THEN 'direct'
+              WHEN referrer LIKE 'https://blackroad.io/%' OR referrer LIKE 'http://blackroad.io/%' THEN 'blackroad.io'
+              WHEN referrer LIKE 'https://%.blackroad.io/%' OR referrer LIKE 'http://%.blackroad.io/%' THEN 'blackroad subdomain'
+              ELSE referrer
+            END as referrer,
+            COUNT(*) as views
+            FROM page_views WHERE created_at > ${since}
+            GROUP BY referrer ORDER BY views DESC LIMIT 10`).all(),
+          env.DB.prepare(`SELECT path, COUNT(*) as exits
+            FROM page_views pv
+            WHERE created_at > ${since}
+              AND created_at = (
+                SELECT MAX(created_at)
+                FROM page_views
+                WHERE session_id = pv.session_id AND created_at > ${since}
+              )
+            GROUP BY path ORDER BY exits DESC LIMIT 10`).all(),
+          env.DB.prepare(`SELECT CASE
+              WHEN s.first_path LIKE '/Users/%' OR s.first_path LIKE 'file:%' THEN 'local'
+              WHEN s.first_path LIKE 'localhost%' OR s.first_path LIKE '127.0.0.1%' THEN 'localhost'
+              WHEN s.first_path LIKE '%.pages.dev/%' OR s.first_path LIKE '%.workers.dev/%' THEN 'preview'
+              WHEN s.first_path = 'blackroad.io/' OR s.first_path LIKE 'blackroad.io/%' OR s.first_path LIKE '%.blackroad.io/%' THEN 'public_blackroad'
+              WHEN s.first_path LIKE '%/%' THEN 'external_host'
+              ELSE 'other'
+            END as source,
+            COUNT(*) as exits
+            FROM page_views pv
+            JOIN sessions s ON s.id = pv.session_id
+            WHERE pv.created_at > ${since}
+              AND pv.created_at = (
+                SELECT MAX(created_at)
+                FROM page_views
+                WHERE session_id = pv.session_id AND created_at > ${since}
+              )
+            GROUP BY source ORDER BY exits DESC LIMIT 10`).all(),
           env.DB.prepare(`SELECT country, COUNT(*) as views FROM page_views WHERE created_at > ${since} AND country != '' GROUP BY country ORDER BY views DESC LIMIT 10`).all(),
+          env.DB.prepare(`SELECT date(created_at) as day, COUNT(*) as views
+            FROM page_views WHERE created_at > ${since}
+            GROUP BY day ORDER BY day`).all(),
+          env.DB.prepare(`SELECT strftime('%H', created_at) as hour, COUNT(*) as views
+            FROM page_views WHERE created_at > ${since}
+            GROUP BY hour ORDER BY hour`).all(),
+          env.DB.prepare(`SELECT COUNT(*) as c FROM page_views WHERE created_at > ${priorSince} AND created_at <= ${priorEnd}`).first(),
+          env.DB.prepare(`SELECT COUNT(DISTINCT session_id) as c FROM page_views WHERE created_at > ${priorSince} AND created_at <= ${priorEnd}`).first(),
+          env.DB.prepare(`SELECT COUNT(*) as c FROM events WHERE created_at > ${priorSince} AND created_at <= ${priorEnd}`).first(),
+          env.DB.prepare(`SELECT COUNT(*) as c FROM (
+            SELECT session_id
+            FROM page_views
+            WHERE created_at > ${since}
+            GROUP BY session_id
+            HAVING COUNT(*) = 1
+          )`).first(),
+          env.DB.prepare(`SELECT CASE
+              WHEN first_path LIKE '/Users/%' OR first_path LIKE 'file:%' THEN 'local'
+              WHEN first_path LIKE 'localhost%' OR first_path LIKE '127.0.0.1%' THEN 'localhost'
+              WHEN first_path LIKE '%.pages.dev/%' OR first_path LIKE '%.workers.dev/%' THEN 'preview'
+              WHEN first_path = 'blackroad.io/' OR first_path LIKE 'blackroad.io/%' OR first_path LIKE '%.blackroad.io/%' THEN 'public_blackroad'
+              WHEN first_path LIKE '%/%' THEN 'external_host'
+              ELSE 'other'
+            END as source,
+            COUNT(*) as sessions
+            FROM sessions WHERE created_at > ${since}
+            GROUP BY source ORDER BY sessions DESC`).all(),
         ]);
+
+        const viewsValue = views?.c || 0;
+        const uniqueValue = uniques?.c || 0;
+        const eventsValue = events?.c || 0;
+        const priorViewsValue = priorViews?.c || 0;
+        const priorUniqueValue = priorUniques?.c || 0;
+        const priorEventsValue = priorEvents?.c || 0;
+        const bounceValue = bounceSessions?.c || 0;
+        const bounceRate = uniqueValue ? (bounceValue / uniqueValue) * 100 : null;
 
         return json({
           range,
-          views: views?.c || 0,
-          unique_sessions: uniques?.c || 0,
-          events: events?.c || 0,
+          views: viewsValue,
+          unique_sessions: uniqueValue,
+          events: eventsValue,
+          bounce_sessions: bounceValue,
+          bounce_rate_pct: bounceRate,
+          delta_views: viewsValue - priorViewsValue,
+          delta_unique_sessions: uniqueValue - priorUniqueValue,
+          delta_events: eventsValue - priorEventsValue,
+          delta_views_pct: priorViewsValue ? ((viewsValue - priorViewsValue) / priorViewsValue) * 100 : null,
+          delta_unique_sessions_pct: priorUniqueValue ? ((uniqueValue - priorUniqueValue) / priorUniqueValue) * 100 : null,
+          delta_events_pct: priorEventsValue ? ((eventsValue - priorEventsValue) / priorEventsValue) * 100 : null,
           top_pages: topPages?.results || [],
           top_events: topEvents?.results || [],
+          top_referrers: topReferrers?.results || [],
+          top_exits: topExits?.results || [],
+          top_exit_sources: topExitSources?.results || [],
           countries: countries?.results || [],
+          daily: daily?.results || [],
+          hourly: hourly?.results || [],
+          source_breakdown: sourceBreakdown?.results || [],
         });
       }
 
@@ -364,7 +451,7 @@ export default {
         const previewFilter = buildPreviewFilter('human_sessions');
         const localFilter = buildLocalFilter('human_sessions');
         const internalTaggedFilter = buildInternalTaggedFilter('human_sessions');
-        const [total, recent, topPages, meaningful, publicWeb, publicMeaningful, previewSessions, localSessions, internalTagged] = await Promise.all([
+        const [total, recent, topPages, meaningful, publicWeb, publicMeaningful, previewSessions, localSessions, internalTagged, deviceBreakdown] = await Promise.all([
           env.DB.prepare(`SELECT COUNT(*) as c, AVG(pages) as avg_pages, AVG(duration_ms) as avg_ms FROM human_sessions WHERE created_at > ${since}`).first(),
           env.DB.prepare(`SELECT session_id, first_path, pages, duration_ms, screen, lang, country, signals, created_at FROM human_sessions WHERE created_at > ${since} ORDER BY created_at DESC LIMIT 50`).all(),
           env.DB.prepare(`SELECT first_path as path, COUNT(*) as sessions FROM human_sessions WHERE created_at > ${since} GROUP BY first_path ORDER BY sessions DESC LIMIT 10`).all(),
@@ -374,6 +461,15 @@ export default {
           env.DB.prepare(`SELECT COUNT(*) as c FROM human_sessions WHERE created_at > ${since} AND ${previewFilter}`).first(),
           env.DB.prepare(`SELECT COUNT(*) as c FROM human_sessions WHERE created_at > ${since} AND ${localFilter}`).first(),
           env.DB.prepare(`SELECT COUNT(*) as c FROM human_sessions WHERE created_at > ${since} AND ${internalTaggedFilter}`).first(),
+          env.DB.prepare(`SELECT CASE
+            WHEN screen IS NULL OR screen = '' THEN 'unknown'
+            WHEN instr(screen, 'x') = 0 THEN 'unknown'
+            WHEN CAST(substr(screen, 1, instr(screen, 'x') - 1) AS INT) < 768 THEN 'mobile'
+            WHEN CAST(substr(screen, 1, instr(screen, 'x') - 1) AS INT) < 1024 THEN 'tablet'
+            ELSE 'desktop'
+          END as device, COUNT(*) as count
+          FROM human_sessions WHERE created_at > ${since}
+          GROUP BY device ORDER BY count DESC`).all(),
         ]);
         const classifiedRecent = (recent?.results || []).map((session) => ({
           ...session,
@@ -397,6 +493,7 @@ export default {
           avg_pages: Math.round((total?.avg_pages || 0) * 10) / 10,
           avg_duration_s: Math.round((total?.avg_ms || 0) / 1000),
           top_landing_pages: topPages?.results || [],
+          device_breakdown: deviceBreakdown?.results || [],
           source_breakdown,
           recent_sessions: classifiedRecent,
         });

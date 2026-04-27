@@ -6,8 +6,15 @@ import { PRODUCTS } from './products.js';
 // Standard CTA patterns by page type
 export const CTA_PATTERNS = {
   home: (product) => ({
-    primary: { label: `Open ${product.name}`, url: `https://os.blackroad.io/open/${product.id}` },
-    secondary: { label: 'Learn more', url: `https://${product.domain}/about` }
+    ...(product.id === 'roadworld'
+      ? {
+          primary: { label: 'Open okReusePixel', url: 'https://blackroad.io/home/apps/OkReusePixel/' },
+          secondary: { label: 'Open PixelTown', url: 'https://blackroad.io/home/apps/PixelTown/' }
+        }
+      : {
+          primary: { label: `Open ${product.name}`, url: `https://os.blackroad.io/open/${product.id}` },
+          secondary: { label: 'Learn more', url: `https://${product.domain}/about` }
+        })
   }),
   about: (product) => ({
     primary: { label: `Try ${product.name}`, url: `https://${product.domain}/demo` },

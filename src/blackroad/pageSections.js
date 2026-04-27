@@ -148,12 +148,37 @@ export const LANDING_SECTIONS = [
 export function buildLandingSections(productId) {
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return [];
-  return LANDING_SECTIONS.map(section => ({
+  const sections = LANDING_SECTIONS.map(section => ({
     sectionId: section.id,
     label: section.label,
     required: section.required,
     ...section.build(product)
   }));
+
+  if (product.id === 'roadworld') {
+    sections.splice(4, 0, {
+      sectionId: 'builder-tools',
+      label: 'Builder tools',
+      required: false,
+      type: 'builder-tools',
+      heading: 'Asset toolkit',
+      text: 'Use the curated commercial-ok asset launcher and the tile painter to block out rooms, districts, and game scenes for RoadWorld.',
+      items: [
+        {
+          label: 'Open okReusePixel',
+          url: 'https://blackroad.io/home/apps/OkReusePixel/',
+          note: 'Curated gallery and license index'
+        },
+        {
+          label: 'Open PixelTown',
+          url: 'https://blackroad.io/home/apps/PixelTown/',
+          note: 'Tile painter and map composer'
+        }
+      ]
+    });
+  }
+
+  return sections;
 }
 
 // Validate that all required sections are present

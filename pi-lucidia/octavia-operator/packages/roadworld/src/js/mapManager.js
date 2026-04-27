@@ -28,6 +28,7 @@ export class MapManager {
     }
 
     setFog(type = 'default') {
+        if (!this.map || typeof this.map.setFog !== 'function') return;
         const fogConfig = FOG_CONFIG[type] || FOG_CONFIG.default;
         this.map.setFog(fogConfig);
     }

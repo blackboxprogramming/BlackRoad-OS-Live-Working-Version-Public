@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>okReusePixel Gallery</title>
+  <meta name="blackroad-traffic" content="asset-tool" />
+  <script defer src="https://analytics.blackroad.io/beacon.js"></script>
+  <style>
+    :root{
+      --bg:#07080d;
+      --card:#111522;
+      --card2:#0d1018;
+      --text:#eef1f8;
+      --muted:#98a2b7;
+      --border:#243047;
+      --accent:#7cb6ff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(124,182,255,.12), transparent 30%),
+        linear-gradient(180deg, #07080d, #090b11 55%, #050608);
+      color:var(--text);
+      font:14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    header, main{width:min(1200px, calc(100vw - 32px)); margin:0 auto}
+    header{
+      padding:22px 0 14px;
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:flex-start;
+      flex-wrap:wrap;
+    }
+    h1{margin:0;font-size:22px}
+    .sub{color:var(--muted);max-width:70ch;margin-top:6px}
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:14px;
+    }
+    input{
+      min-width:260px;
+      padding:10px 12px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#0d111b;
+      color:var(--text);
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:42px;
+      padding:0 14px;
+      border-radius:999px;
+      text-decoration:none;
+      color:#fff;
+      background:linear-gradient(135deg, var(--accent), #8f63ff);
+      font-weight:700;
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--border);
+      color:var(--text);
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0,1fr));
+      gap:10px;
+      margin:8px 0 18px;
+    }
+    .stat{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:linear-gradient(180deg, var(--card), var(--card2));
+      padding:14px;
+    }
+    .k{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+    .v{font-size:20px;font-weight:700;margin-top:4px}
+    .panel{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(17,21,34,.88);
+      overflow:hidden;
+      box-shadow:0 18px 70px rgba(0,0,0,.35);
+    }
+    .panelHead{
+      padding:14px 16px;
+      border-bottom:1px solid var(--border);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .panelHead .meta{color:var(--muted);font-size:12px}
+    .packGrid{
+      padding:14px;
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(260px,1fr));
+      gap:10px;
+    }
+    .pack{
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#0d111b;
+      padding:10px 12px;
+      min-height:72px;
+    }
+    .pack .name{font-weight:700}
+    .pack .note{color:var(--muted);font-size:12px;margin-top:4px}
+    .hidden{display:none}
+    code{
+      background:#0d111b;
+      border:1px solid var(--border);
+      padding:2px 6px;
+      border-radius:8px;
+      color:var(--text);
+    }
+    @media (max-width: 900px){
+      .stats{grid-template-columns:1fr}
+      input{min-width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>okReusePixel — hosted gallery</h1>
+      <div class="sub">This mirrors the curated commercial-ok library as a lightweight hosted catalog. The raw preview browser stays local because the source pack set is large.</div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Filter packs…" autocomplete="off" />
+        <a class="btn" href="/home/apps/PixelTown/">Open PixelTown</a>
+        <a class="btn secondary" href="/home/apps/OkReusePixel/">Back to launcher</a>
+      </div>
+    </div>
+    <div class="meta">Route: <code>/home/apps/OkReusePixel/gallery.html</code></div>
+  </header>
+
+  <main>
+    <section class="stats">
+      <div class="stat"><div class="k">packs</div><div class="v" id="packCount">—</div></div>
+      <div class="stat"><div class="k">source</div><div class="v">INDEX.md</div></div>
+      <div class="stat"><div class="k">policy</div><div class="v">commercial ok</div></div>
+    </section>
+
+    <section class="panel">
+      <div class="panelHead">
+        <div>
+          <div class="name">Curated pack list</div>
+          <div class="meta">Imported from <code>Index.md</code> and filtered by license audit at import time.</div>
+        </div>
+        <div class="meta" id="visibleCount">— visible</div>
+      </div>
+      <div class="packGrid" id="packs"></div>
+    </section>
+  </main>
+
+  <script>
+    const packsEl = document.getElementById('packs');
+    const qEl = document.getElementById('q');
+    const packCountEl = document.getElementById('packCount');
+    const visibleCountEl = document.getElementById('visibleCount');
+
+    function parsePacks(md) {
+      return md
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.startsWith('- `') && line.endsWith('`'))
+        .map((line) => line.slice(3, -1));
+    }
+
+    function render(allPacks, visiblePacks) {
+      packsEl.innerHTML = visiblePacks.map((name) => `
+        <div class="pack" data-name="${name.toLowerCase()}">
+          <div class="name">${name}</div>
+          <div class="note">Commercial-ok import. See local <code>Index.md</code> for the full audit notes.</div>
+        </div>
+      `).join('');
+      packCountEl.textContent = String(allPacks.length);
+      visibleCountEl.textContent = `${visiblePacks.length} visible`;
+    }
+
+    fetch('Index.md')
+      .then((res) => res.text())
+      .then((md) => {
+        const packs = parsePacks(md);
+        render(packs, packs);
+        qEl.addEventListener('input', () => {
+          const term = qEl.value.trim().toLowerCase();
+          const filtered = packs.filter((name) => name.toLowerCase().includes(term));
+          render(packs, filtered);
+        });
+      })
+      .catch(() => {
+        packsEl.innerHTML = '<div class="pack">Failed to load <code>Index.md</code>.</div>';
+        packCountEl.textContent = '0';
+        visibleCountEl.textContent = '0 visible';
+      });
+  </script>
+</body>
+</html>

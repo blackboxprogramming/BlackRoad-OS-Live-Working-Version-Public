@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Town — okReusePixel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="title">Pixel Town</div>
+      <div class="subtitle">Tile painter · multi-layer · save/load · commercial-OK assets</div>
+    </div>
+    <div class="controls">
+      <label>
+        Atlas
+        <select id="atlasSelect"></select>
+      </label>
+      <label>
+        Tile size
+        <input id="tileSize" type="number" min="4" max="128" step="1" value="16" />
+      </label>
+      <label>
+        Map W
+        <input id="mapW" type="number" min="8" max="256" step="1" value="64" />
+      </label>
+      <label>
+        Map H
+        <input id="mapH" type="number" min="8" max="256" step="1" value="36" />
+      </label>
+      <label>
+        Brush
+        <select id="brushSize">
+          <option value="1">1×1</option>
+          <option value="2">2×2</option>
+          <option value="3">3×3</option>
+          <option value="4">4×4</option>
+          <option value="5">5×5</option>
+        </select>
+      </label>
+      <button id="resizeBtn" type="button">Resize</button>
+      <button id="clearBtn" type="button">Clear layer</button>
+      <button id="saveBtn" type="button">Save</button>
+      <button id="loadBtn" type="button">Load</button>
+      <button id="exportBtn" type="button" class="primary">Export HTML</button>
+      <div class="toolGroup" id="toolGroup">
+        <button data-tool="paint"      type="button" class="tool active" title="B · Paint">Paint</button>
+        <button data-tool="erase"      type="button" class="tool"        title="X · Erase">Erase</button>
+        <button data-tool="eyedropper" type="button" class="tool"        title="E · Eyedropper">Eyedropper</button>
+        <button data-tool="select"     type="button" class="tool"        title="V · Select">Select</button>
+      </div>
+      <input id="loadFile" type="file" accept="application/json" style="display:none" />
+      <a class="link" href="credits.html">Credits</a>
+    </div>
+  </header>
+
+  <div class="layerbar">
+    <span class="layerLabel">Layers</span>
+    <div id="layerTabs" class="layerTabs"></div>
+    <span class="layerHint">click a layer to paint there · checkbox toggles visibility</span>
+  </div>
+
+  <main>
+    <section class="panel">
+      <div class="panelHeader">
+        <div>
+          <div class="panelTitle">Atlas</div>
+          <div class="panelMeta" id="atlasMeta">Loading…</div>
+        </div>
+        <div class="hint">Click tile to select · Wheel zooms · Space + drag pans</div>
+      </div>
+      <canvas id="atlas" width="520" height="520"></canvas>
+      <div class="status" id="tileStatus">Selected tile: —</div>
+    </section>
+
+    <section class="panel">
+      <div class="panelHeader">
+        <div>
+          <div class="panelTitle">Map</div>
+          <div class="panelMeta">L-click paint · R-click erase · Space+drag pan · Wheel zoom</div>
+        </div>
+        <div class="hud">
+          <img id="hudBar" alt="" />
+          <div class="hudText" id="hudText">tile: —</div>
+        </div>
+      </div>
+      <canvas id="map" width="800" height="520"></canvas>
+      <div class="status" id="mapStatus">Auto-saves to your browser · Save button downloads JSON</div>
+    </section>
+  </main>
+
+  <script src="pixel-town.js"></script>
+</body>
+</html>

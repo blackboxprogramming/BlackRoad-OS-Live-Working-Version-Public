@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pixel Foundry — BlackRoad OS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #08080a; color: #e8e8ec; font-family: 'JetBrains Mono', ui-monospace, monospace; min-height: 100vh; }
+  canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+
+  header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(8,8,10,0.95);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid #1a1a1f;
+    padding: 16px 24px 0;
+  }
+  .title-row { display: flex; align-items: center; gap: 16px; padding-bottom: 14px; }
+  h1 {
+    font-family: 'Press Start 2P', monospace; font-size: 12px;
+    letter-spacing: 2px; color: #fff;
+  }
+  .stripe { width: 32px; height: 4px; background: #FF1D6C; }
+  .meta { color: #888; font-size: 10px; letter-spacing: 1px; margin-left: auto; }
+  .meta b { color: #fff; font-weight: 600; }
+
+  .controls { display: flex; gap: 12px; align-items: center; padding-bottom: 14px; flex-wrap: wrap; }
+  input.search {
+    flex: 1; min-width: 240px;
+    background: #111114; border: 1px solid #2a2a2e; color: #fff;
+    padding: 8px 12px; font-family: inherit; font-size: 11px;
+    border-radius: 2px; outline: none;
+  }
+  input.search:focus { border-color: #FF1D6C; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    background: #111114; border: 1px solid #2a2a2e; color: #aaa;
+    padding: 6px 10px; font-family: inherit; font-size: 10px;
+    cursor: pointer; border-radius: 2px;
+    letter-spacing: 0.5px;
+  }
+  .chip:hover { color: #fff; border-color: #4a4a4e; }
+  .chip.active { background: #fff; color: #000; border-color: #fff; }
+  .chip .n { opacity: 0.5; margin-left: 6px; font-size: 9px; }
+  .chip.active .n { opacity: 0.7; }
+
+  .hero {
+    padding: 18px 24px 10px;
+    display: grid;
+    grid-template-columns: minmax(360px, 1.1fr) minmax(320px, 0.9fr);
+    gap: 16px;
+  }
+  .panel {
+    background: linear-gradient(180deg, rgba(18,18,24,0.95), rgba(10,10,14,0.98));
+    border: 1px solid #1a1a1f;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .panel:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at top right, rgba(255,29,108,0.12), transparent 36%),
+      radial-gradient(circle at bottom left, rgba(41,121,255,0.08), transparent 30%);
+    pointer-events: none;
+  }
+  .panel > * { position: relative; z-index: 1; }
+  .eyebrow, .kicker {
+    font-size: 9px;
+    letter-spacing: 1.6px;
+    color: #FF1D6C;
+  }
+  .intro-panel h2 {
+    margin-top: 12px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px;
+    line-height: 1.7;
+    max-width: 18ch;
+  }
+  .intro-panel p {
+    margin-top: 16px;
+    color: #a6a6b1;
+    font-size: 12px;
+    line-height: 1.7;
+    max-width: 64ch;
+  }
+  .action-row {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    background: #111114;
+    color: #ddd;
+    border: 1px solid #2a2a2e;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: 0.7px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  .btn:hover { border-color: #4d8aff; color: #fff; }
+  .btn.primary {
+    background: linear-gradient(90deg, #ff7849, #ff1d6c);
+    border-color: #ff1d6c;
+    color: #fff;
+  }
+  .btn.small { padding: 8px 10px; font-size: 9px; }
+  .metric-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .metric {
+    background: #111114;
+    border: 1px solid #1a1a1f;
+    padding: 12px 10px;
+  }
+  .metric .v {
+    display: block;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .metric .l {
+    display: block;
+    color: #7f7f88;
+    font-size: 9px;
+    letter-spacing: 0.8px;
+  }
+  .signal-strip {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .signal {
+    background: #0e0e12;
+    border: 1px solid #1a1a1f;
+    padding: 12px;
+  }
+  .signal b {
+    display: block;
+    color: #fff;
+    font-size: 10px;
+    margin-bottom: 6px;
+    letter-spacing: 0.7px;
+  }
+  .signal span {
+    color: #888;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .showcase-panel canvas {
+    width: 100%;
+    height: auto;
+    border: 1px solid #2a2a2e;
+    background: #090a10;
+    margin-top: 12px;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .panel-head span:last-child {
+    color: #8d8d95;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+  .feature-meta {
+    margin-top: 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .feature-meta h3 {
+    color: #fff;
+    font-size: 15px;
+    margin-bottom: 6px;
+    letter-spacing: 0.7px;
+  }
+  .feature-meta p {
+    color: #888;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+  .feature-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .feature-note {
+    margin-top: 14px;
+    color: #acacb4;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .progress-block { margin-top: 16px; }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    color: #7f7f88;
+    margin-bottom: 6px;
+  }
+  .progress {
+    height: 8px;
+    background: #111114;
+    border: 1px solid #1a1a1f;
+    overflow: hidden;
+  }
+  .progress span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #ff7849, #ff1d6c, #4d8aff);
+  }
+  .quickstrip {
+    padding: 0 24px 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .quick-link {
+    background: #0e0e12;
+    border: 1px solid #1a1a1f;
+    color: #8f8f98;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    cursor: pointer;
+  }
+  .quick-link:hover { color: #fff; border-color: #FF1D6C; }
+
+  main { padding: 8px 24px 240px; }
+  .group { margin-bottom: 32px; }
+  .group h2 {
+    font-size: 10px; color: #fff; padding: 8px 0;
+    border-bottom: 1px solid #1a1a1f; margin-bottom: 12px;
+    letter-spacing: 1.5px;
+  }
+  .group h2 .gn { color: #888; margin-left: 12px; font-size: 9px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .tile {
+    background: #111114; border: 1px solid #1a1a1f;
+    padding: 12px; cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    min-height: 184px;
+  }
+  .tile:hover { border-color: #FF1D6C; }
+  .tile.has-variants { border-left: 2px solid #FF1D6C; }
+  .tile canvas {
+    background: #1a1a2e;
+    max-width: 100%;
+    max-height: 156px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    object-fit: contain;
+  }
+  .tile p { font-size: 7px; color: #aaa; text-align: center; margin-top: 8px; letter-spacing: 0.5px; }
+  .tile .badge {
+    font-size: 6px; color: #FF1D6C; margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* variant drawer */
+  #drawer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #0a0a0c; border-top: 1px solid #FF1D6C;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.6);
+    max-height: 70vh; overflow-y: auto;
+    transform: translateY(100%); transition: transform 0.25s;
+    z-index: 100;
+  }
+  #drawer.open { transform: translateY(0); }
+  #drawer header { position: static; padding: 12px 24px; background: #0a0a0c; border-bottom: 1px solid #1a1a1f; display: flex; align-items: center; gap: 16px; }
+  #drawer h3 { font-size: 11px; color: #fff; letter-spacing: 1px; }
+  #drawer .close { margin-left: auto; cursor: pointer; color: #888; font-size: 14px; padding: 4px 8px; border: 1px solid #2a2a2e; }
+  #drawer .close:hover { color: #fff; border-color: #FF1D6C; }
+  #drawer .axes { display: flex; gap: 8px; padding: 12px 24px; flex-wrap: wrap; font-size: 9px; color: #888; }
+  #drawer .axis { background: #111114; padding: 4px 8px; border: 1px solid #2a2a2e; }
+  #drawer .axis b { color: #fff; }
+  #drawer .vgrid { padding: 16px 24px 32px; }
+
+  footer { padding: 24px; text-align: center; color: #555; font-size: 8px; letter-spacing: 1.5px; }
+  .empty { padding: 64px 24px; text-align: center; color: #555; font-size: 10px; }
+
+  @media (max-width: 1100px) {
+    .hero { grid-template-columns: 1fr; }
+    .metric-grid, .signal-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .feature-meta { flex-direction: column; }
+    .feature-actions { justify-content: flex-start; }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 16px 16px 0; }
+    .hero, .quickstrip, main { padding-left: 16px; padding-right: 16px; }
+    .title-row { flex-wrap: wrap; }
+    .meta { margin-left: 0; }
+    .metric-grid, .signal-strip { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title-row">
+    <div class="stripe"></div>
+    <h1>PIXEL FOUNDRY</h1>
+    <div class="meta">
+      <span id="visible-count">0</span> shown · <b id="total-count">0</b> bases · <b id="variant-count">0</b> variant universe · <b>10,000</b> goal
+    </div>
+  </div>
+  <div class="controls">
+    <input class="search" id="q" placeholder="search sprites..." autocomplete="off">
+    <div class="chips" id="chips"></div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="panel intro-panel">
+    <div class="eyebrow">ROADWORLD · BLACKBOARD · ROADOS</div>
+    <h2>Procedural pixel assets for rooms, agents, worlds, and operating-system surfaces.</h2>
+    <p>
+      Pixel Foundry is the sprite forge for BlackRoad: a standalone asset surface that can feed RoadWorld scenes,
+      BlackBoard compositions, product demos, and browser-native interface moments. It keeps the library explorable
+      while making the output feel like a usable system instead of a pile of art tests.
+    </p>
+    <div class="action-row">
+      <button class="btn primary" id="random-btn">RANDOM SPRITE</button>
+      <button class="btn" id="show-scenes-btn">SHOW SCENES</button>
+      <button class="btn" id="show-buildings-btn">SHOW BUILDINGS</button>
+    </div>
+    <div class="metric-grid">
+      <div class="metric"><span class="v" id="metric-categories">0</span><span class="l">CATEGORIES</span></div>
+      <div class="metric"><span class="v" id="metric-scenes">0</span><span class="l">SHOWCASE SCENES</span></div>
+      <div class="metric"><span class="v" id="metric-agents">0</span><span class="l">AGENT SPRITES</span></div>
+      <div class="metric"><span class="v" id="metric-variantable">0</span><span class="l">VARIANT BASES</span></div>
+    </div>
+    <div class="signal-strip">
+      <div class="signal">
+        <b>ROADWORLD READY</b>
+        <span>Rooms, buildings, weather, people, and props already read like map pieces for social spaces.</span>
+      </div>
+      <div class="signal">
+        <b>BLACKBOARD READY</b>
+        <span>Art, signs, interfaces, and scenes can become drag-and-drop compositions and social graphics.</span>
+      </div>
+      <div class="signal">
+        <b>ROADOS READY</b>
+        <span>UI, agents, architecture, and icon tiles can evolve into system-native shells and product views.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel showcase-panel">
+    <div class="panel-head">
+      <span class="kicker">FEATURE STAGE</span>
+      <span id="feature-kind">SCENE</span>
+    </div>
+    <canvas id="showcase" width="320" height="216"></canvas>
+    <div class="feature-meta">
+      <div>
+        <h3 id="feature-title">LOADING...</h3>
+        <p id="feature-subtitle">Preparing featured sprite</p>
+      </div>
+      <div class="feature-actions">
+        <button class="btn small primary" id="feature-open-btn">OPEN VARIANTS</button>
+        <button class="btn small" id="feature-next-btn">NEXT FEATURE</button>
+      </div>
+    </div>
+    <div class="feature-note" id="feature-note">
+      A living preview of the current sprite surface.
+    </div>
+    <div class="progress-block">
+      <div class="progress-label">
+        <span>PROGRESS TO THE 10,000 VARIANT GOAL</span>
+        <span id="goal-progress">0%</span>
+      </div>
+      <div class="progress"><span id="goal-bar"></span></div>
+    </div>
+  </div>
+</section>
+
+<div class="quickstrip">
+  <button class="quick-link" data-jump="scenes">SCENES</button>
+  <button class="quick-link" data-jump="agents">AGENTS</button>
+  <button class="quick-link" data-jump="buildings">BUILDINGS</button>
+  <button class="quick-link" data-jump="architecture">ARCHITECTURE</button>
+  <button class="quick-link" data-jump="ui">UI / ICONS</button>
+  <button class="quick-link" data-jump="weather">WEATHER</button>
+</div>
+
+<main id="main"></main>
+
+<div id="drawer">
+  <header>
+    <div class="stripe" style="width:16px"></div>
+    <h3 id="drawer-title">VARIANTS</h3>
+    <div class="axes" id="drawer-axes" style="padding:0;flex:1"></div>
+    <div class="close" id="drawer-close">×</div>
+  </header>
+  <div class="vgrid grid" id="vgrid"></div>
+</div>
+
+<footer>BLACKROAD OS · PIXEL FOUNDRY · v0.1 · <a href="transit-stop.html" style="color:#777">demo: transit stop</a></footer>
+
+<!-- shared helper -->
+<script src="lib/_variants.js"></script>
+<!-- existing modules -->
+<script src="lib/floor.js"></script>
+<script src="lib/wall.js"></script>
+<script src="lib/desk.js"></script>
+<script src="lib/chair.js"></script>
+<script src="lib/agent.js"></script>
+<script src="lib/server.js"></script>
+<script src="lib/plant.js"></script>
+<script src="lib/furniture.js"></script>
+<script src="lib/lighting.js"></script>
+<script src="lib/props.js"></script>
+<script src="lib/agent-extra.js"></script>
+<script src="lib/kitchen.js"></script>
+<script src="lib/bedroom.js"></script>
+<script src="lib/outdoor.js"></script>
+<script src="lib/vehicles.js"></script>
+<script src="lib/electronics.js"></script>
+<script src="lib/food.js"></script>
+<script src="lib/pets.js"></script>
+<script src="lib/signs.js"></script>
+<!-- new modules -->
+<script src="lib/architecture.js"></script>
+<script src="lib/bathroom.js"></script>
+<script src="lib/lamps.js"></script>
+<script src="lib/particles.js"></script>
+<script src="lib/buildings.js"></script>
+<script src="lib/plants.js"></script>
+<script src="lib/animals.js"></script>
+<script src="lib/magical.js"></script>
+<script src="lib/cosmic.js"></script>
+<script src="lib/tilesets.js"></script>
+<script src="lib/weather.js"></script>
+<script src="lib/wardrobe.js"></script>
+<script src="lib/furniture-plus.js"></script>
+<script src="lib/tools.js"></script>
+<script src="lib/instruments.js"></script>
+<script src="lib/seasonal.js"></script>
+<script src="lib/ui.js"></script>
+<script src="lib/sports.js"></script>
+<script src="lib/dishes.js"></script>
+<script src="lib/transport.js"></script>
+<script src="lib/tech.js"></script>
+<script src="lib/breakfast.js"></script>
+<script src="lib/kitchen-extra.js"></script>
+<script src="lib/office-extra.js"></script>
+<script src="lib/garden.js"></script>
+<script src="lib/buildings-extra.js"></script>
+<script src="lib/people.js"></script>
+<script src="lib/art.js"></script>
+<script src="lib/medical.js"></script>
+<script src="lib/scenes.js"></script>
+<script src="lib/carnival.js"></script>
+<script src="lib/school.js"></script>
+<script src="lib/diner.js"></script>
+<script src="lib/sheets.js"></script>
+
+<script>
+'use strict';
+const GOAL = 10000;
+let t = 0;
+const visibleTiles = new Set();
+const drawnOnce = new WeakSet();
+
+// ============== REGISTRY ==============
+// Each entry: { id, cat, name, w, h, draw(ctx,t), base?, axes? }
+const REG = [];
+const add = (cat, name, w, h, draw, opts = {}) => {
+  REG.push({ id: cat + '.' + name.toLowerCase().replace(/\s+/g, '-'), cat, name, w, h, draw, ...opts });
+};
+
+// ARCHITECTURE — base sprites with axes. Click → variant explorer.
+add('architecture', 'Floor',  64, 64, (ctx, time) => ARCHITECTURE.floor(ctx,  0, 0, { pattern: 'plain',       color: 'wood' }, time),  { baseObj: ARCHITECTURE, baseKey: 'floor',  axes: ARCHITECTURE.AXES.floor });
+add('architecture', 'Wall',   96, 72, (ctx, time) => ARCHITECTURE.wall(ctx,   0, 0, { material: 'drywall',    color: 'white' }, time), { baseObj: ARCHITECTURE, baseKey: 'wall',   axes: ARCHITECTURE.AXES.wall });
+add('architecture', 'Door',   44, 72, (ctx, time) => ARCHITECTURE.door(ctx,   0, 0, { style: 'panel',         color: 'wood' }, time),  { baseObj: ARCHITECTURE, baseKey: 'door',   axes: ARCHITECTURE.AXES.door });
+add('architecture', 'Window', 60, 52, (ctx, time) => ARCHITECTURE.window(ctx, 0, 0, { style: 'rect',          time: 'day' }, time),    { baseObj: ARCHITECTURE, baseKey: 'window', axes: ARCHITECTURE.AXES.window });
+add('architecture', 'Roof',   96, 44, (ctx, time) => ARCHITECTURE.roof(ctx,   0, 0, { pitch: 'gable', material: 'shingle', color: 'amber' }, time), { baseObj: ARCHITECTURE, baseKey: 'roof', axes: ARCHITECTURE.AXES.roof });
+add('architecture', 'Path',   64, 32, (ctx, time) => ARCHITECTURE.path(ctx,   0, 0, { surface: 'stone',       pattern: 'straight' }, time),         { baseObj: ARCHITECTURE, baseKey: 'path', axes: ARCHITECTURE.AXES.path });
+
+// OFFICE
+add('office', 'Wood Floor',     64, 64, (ctx) => FLOOR.fillWood(ctx, 0, 0, 4, 4));
+add('office', 'Tile Floor',     64, 64, (ctx) => FLOOR.fillTile(ctx, 0, 0, 4, 4));
+add('office', 'Carpet',         64, 64, (ctx) => FLOOR.fillCarpet(ctx, 0, 0, 4, 4, 'red'));
+add('office', 'Wall (legacy)',  96, 72, (ctx) => WALL.fullWall(ctx, 0, 0, 6, 'cream'));
+add('office', 'Brick',          64, 64, (ctx) => WALL.fillBrick(ctx, 0, 0, 4, 4));
+add('office', 'Desk',           96, 72, (ctx, time) => DESK.workstation(ctx, 8, 36, time));
+add('office', 'Chair Up',       32, 48, (ctx) => CHAIR.facingUp(ctx, 4, 6, 'blue'));
+add('office', 'Chair Down',     32, 40, (ctx) => CHAIR.facingDown(ctx, 4, 4, 'blue'));
+add('office', 'Server Rack',    48, 88, (ctx, time) => SERVER.rack(ctx, 4, 4, time));
+add('office', 'Mini Rack',      32, 56, (ctx, time) => SERVER.miniRack(ctx, 4, 4, time));
+add('office', 'Small Plant',    24, 32, (ctx, time) => PLANT.small(ctx, 4, 6, time, 'terra'));
+add('office', 'Large Plant',    32, 48, (ctx, time) => PLANT.large(ctx, 4, 6, time));
+add('office', 'Cactus',         16, 24, (ctx) => PLANT.cactus(ctx, 2, 2));
+add('office', 'Couch',          80, 52, (ctx) => FURNITURE.couch(ctx, 4, 4, 'blue'));
+add('office', 'Coffee Table',   64, 36, (ctx) => FURNITURE.coffeeTable(ctx, 4, 4));
+add('office', 'Bookshelf',      44, 80, (ctx) => FURNITURE.bookshelf(ctx, 4, 4));
+add('office', 'Filing Cabinet', 40, 72, (ctx) => FURNITURE.filingCabinet(ctx, 4, 4));
+add('office', 'Water Cooler',   36, 64, (ctx, time) => FURNITURE.waterCooler(ctx, 4, 4, time));
+add('office', 'Vending',        48, 80, (ctx) => FURNITURE.vendingMachine(ctx, 4, 4));
+add('office', 'Ceiling Light',  40, 56, (ctx, time) => LIGHTING.ceilingLight(ctx, 4, 16, time));
+add('office', 'Window (legacy)',80, 72, (ctx, time) => LIGHTING.window(ctx, 8, 8, time));
+add('office', 'Clock',          40, 40, (ctx, time) => PROPS.clock(ctx, 4, 4, time));
+add('office', 'Whiteboard',     72, 60, (ctx) => PROPS.whiteboard(ctx, 4, 4));
+add('office', 'Poster',         40, 52, (ctx) => PROPS.poster(ctx, 4, 4, 'chart'));
+
+// AGENTS
+const agentTile = (cat, name, preset, color) => add(cat, name, 28, 56, (ctx, time) => {
+  AGENT.draw(ctx, 6, 8, preset, 0, time); AGENT.nameBadge(ctx, 6, 8, name, color);
+});
+agentTile('agents', 'LUCIDIA',  AGENT.presets.LUCIDIA,  '#FF1D6C');
+agentTile('agents', 'ALICE',    AGENT.presets.ALICE,    '#2979FF');
+agentTile('agents', 'OCTAVIA',  AGENT.presets.OCTAVIA,  '#9C27B0');
+agentTile('agents', 'PRISM',    AGENT.presets.PRISM,    '#F5A623');
+agentTile('agents', 'ECHO',     AGENT.presets.ECHO,     '#9C27B0');
+agentTile('agents', 'CIPHER',   AGENT.presets.CIPHER,   '#F5A623');
+agentTile('agents', 'CORDELIA', AGENT_EXTRA.presets.CORDELIA, '#FF1D6C');
+agentTile('agents', 'GAIA',     AGENT_EXTRA.presets.GAIA,     '#3a8a4a');
+agentTile('agents', 'CECILIA',  AGENT_EXTRA.presets.CECILIA,  '#F5A623');
+agentTile('agents', 'GEMATRIA', AGENT_EXTRA.presets.GEMATRIA, '#9C27B0');
+agentTile('agents', 'ARIA',     AGENT_EXTRA.presets.ARIA,     '#2979FF');
+agentTile('agents', 'SHELLFISH',AGENT_EXTRA.presets.SHELLFISH,'#fff');
+agentTile('agents', 'ALEXA',    AGENT_EXTRA.presets.ALEXA,    '#fff');
+
+// KITCHEN
+add('kitchen', 'Fridge',       48, 88, (ctx) => KITCHEN.fridge(ctx, 4, 4, 'steel'));
+add('kitchen', 'Fridge White', 48, 88, (ctx) => KITCHEN.fridge(ctx, 4, 4, 'white'));
+add('kitchen', 'Stove',        52, 52, (ctx, time) => KITCHEN.stove(ctx, 4, 4, time));
+add('kitchen', 'Microwave',    60, 40, (ctx, time) => KITCHEN.microwave(ctx, 4, 4, time));
+add('kitchen', 'Sink',         64, 44, (ctx) => KITCHEN.sink(ctx, 4, 4));
+add('kitchen', 'Coffee Maker', 36, 52, (ctx, time) => KITCHEN.coffeeMaker(ctx, 4, 4, time));
+add('kitchen', 'Toaster',      40, 32, (ctx, time) => KITCHEN.toaster(ctx, 4, 4, time));
+
+// BEDROOM
+add('bedroom', 'Bed Pink',     80, 60, (ctx) => BEDROOM.bed(ctx, 4, 4, 'pink'));
+add('bedroom', 'Bed Blue',     80, 60, (ctx) => BEDROOM.bed(ctx, 4, 4, 'blue'));
+add('bedroom', 'Bed Amber',    80, 60, (ctx) => BEDROOM.bed(ctx, 4, 4, 'amber'));
+add('bedroom', 'Dresser',      60, 52, (ctx) => BEDROOM.dresser(ctx, 4, 4));
+add('bedroom', 'Nightstand',   36, 40, (ctx) => BEDROOM.nightstand(ctx, 4, 4));
+add('bedroom', 'Table Lamp',   28, 44, (ctx, time) => BEDROOM.tableLamp(ctx, 4, 4, time));
+add('bedroom', 'Mirror',       36, 48, (ctx) => BEDROOM.mirror(ctx, 4, 4));
+add('bedroom', 'Rug',          72, 48, (ctx) => BEDROOM.rug(ctx, 4, 4, 'violet'));
+
+// OUTDOOR
+add('outdoor', 'Tree',         48, 72, (ctx, time) => OUTDOOR.tree(ctx, 4, 4, time));
+add('outdoor', 'Bush',         40, 32, (ctx) => OUTDOOR.bush(ctx, 4, 4));
+add('outdoor', 'Mailbox',      32, 48, (ctx) => OUTDOOR.mailbox(ctx, 4, 4, false));
+add('outdoor', 'Mailbox Up',   32, 48, (ctx) => OUTDOOR.mailbox(ctx, 4, 4, true));
+add('outdoor', 'Street Light', 28, 88, (ctx, time) => OUTDOOR.streetlight(ctx, 4, 4, time));
+add('outdoor', 'Bench',        68, 36, (ctx) => OUTDOOR.bench(ctx, 4, 4));
+add('outdoor', 'Fence',        68, 36, (ctx) => OUTDOOR.fence(ctx, 4, 4));
+add('outdoor', 'Trash Can',    32, 44, (ctx) => OUTDOOR.trashcan(ctx, 4, 4));
+
+// VEHICLES
+add('vehicles', 'Car Pink',    80, 40, (ctx) => VEHICLES.car(ctx, 4, 4, 'pink'));
+add('vehicles', 'Car Blue',    80, 40, (ctx) => VEHICLES.car(ctx, 4, 4, 'blue'));
+add('vehicles', 'Car Amber',   80, 40, (ctx) => VEHICLES.car(ctx, 4, 4, 'amber'));
+add('vehicles', 'Car Black',   80, 40, (ctx) => VEHICLES.car(ctx, 4, 4, 'black'));
+add('vehicles', 'Bike',        52, 44, (ctx) => VEHICLES.bike(ctx, 4, 4, 'blue'));
+add('vehicles', 'Scooter',     40, 44, (ctx) => VEHICLES.scooter(ctx, 4, 4, 'amber'));
+add('vehicles', 'Motorcycle',  64, 40, (ctx, time) => VEHICLES.motorcycle(ctx, 4, 4, 'violet', time));
+
+// ELECTRONICS
+add('electronics', 'TV',       104, 72, (ctx, time) => ELECTRONICS.tv(ctx, 4, 4, time));
+add('electronics', 'Monitor',   72, 60, (ctx, time) => ELECTRONICS.monitor(ctx, 4, 4, time));
+add('electronics', 'Laptop',    60, 48, (ctx, time) => ELECTRONICS.laptop(ctx, 4, 4, time));
+add('electronics', 'Phone',     24, 40, (ctx, time) => ELECTRONICS.phone(ctx, 4, 4, time));
+add('electronics', 'Console',   48, 36, (ctx, time) => ELECTRONICS.gameConsole(ctx, 4, 4, time));
+add('electronics', 'Speaker',   36, 60, (ctx, time) => ELECTRONICS.speaker(ctx, 4, 4, time));
+
+// FOOD
+add('food', 'Coffee',   28, 32, (ctx, time) => FOOD.coffee(ctx, 4, 4, time));
+add('food', 'Donut',    36, 36, (ctx) => FOOD.donut(ctx, 4, 4));
+add('food', 'Pizza',    48, 44, (ctx) => FOOD.pizza(ctx, 4, 4));
+add('food', 'Apple',    28, 32, (ctx) => FOOD.apple(ctx, 4, 4));
+add('food', 'Cake',     40, 40, (ctx) => FOOD.cake(ctx, 4, 4));
+add('food', 'Sandwich', 48, 32, (ctx) => FOOD.sandwich(ctx, 4, 4));
+
+// PETS
+add('pets', 'Cat Black',  32, 28, (ctx, time) => PETS.cat(ctx, 4, 4, 'black', time));
+add('pets', 'Cat Orange', 32, 28, (ctx, time) => PETS.cat(ctx, 4, 4, 'orange', time));
+add('pets', 'Cat Tabby',  32, 28, (ctx, time) => PETS.cat(ctx, 4, 4, 'tabby', time));
+add('pets', 'Dog',        36, 30, (ctx, time) => PETS.dog(ctx, 4, 4, time));
+add('pets', 'Bird',       24, 22, (ctx, time) => PETS.bird(ctx, 4, 4, time));
+add('pets', 'Fish Tank',  60, 52, (ctx, time) => PETS.fishtank(ctx, 4, 4, time));
+add('pets', 'Hamster',    36, 36, (ctx, time) => PETS.hamsterBall(ctx, 4, 4, time));
+
+// SIGNS
+add('signs', 'Neon OPEN',  64, 36, (ctx, time) => SIGNS.neonOpen(ctx, 4, 4, time));
+add('signs', 'Billboard',  96, 60, (ctx, time) => SIGNS.billboard(ctx, 4, 4, time));
+add('signs', 'Exit',       52, 32, (ctx) => SIGNS.exit(ctx, 4, 4));
+add('signs', 'Road Sign',  48, 52, (ctx) => SIGNS.roadSign(ctx, 4, 4));
+add('signs', 'Banner',     96, 40, (ctx, time) => SIGNS.banner(ctx, 4, 4, time));
+
+// BATHROOM
+add('bathroom', 'Toilet',        40, 52, (ctx) => BATHROOM.toilet(ctx, 4, 4));
+add('bathroom', 'Sink',          60, 44, (ctx) => BATHROOM.sink(ctx, 4, 4));
+add('bathroom', 'Bathtub',       104, 48, (ctx) => BATHROOM.tub(ctx, 4, 4));
+add('bathroom', 'Shower',        60, 92, (ctx, time) => BATHROOM.shower(ctx, 4, 4, time));
+add('bathroom', 'Towel · White', 52, 28, (ctx) => BATHROOM.towelRack(ctx, 4, 4, 'white'));
+add('bathroom', 'Towel · Pink',  52, 28, (ctx) => BATHROOM.towelRack(ctx, 4, 4, 'pink'));
+add('bathroom', 'Towel · Amber', 52, 28, (ctx) => BATHROOM.towelRack(ctx, 4, 4, 'amber'));
+add('bathroom', 'Towel · Blue',  52, 28, (ctx) => BATHROOM.towelRack(ctx, 4, 4, 'blue'));
+add('bathroom', 'TP Roll',       24, 28, (ctx) => BATHROOM.toiletPaper(ctx, 4, 4));
+
+// LAMPS — all with axes
+add('lamps', 'Pendant',     40, 60, (ctx, time) => LAMPS.pendant(ctx,    0, 0, { color: 'amber',  state: 'on' }, time),  { baseObj: LAMPS, baseKey: 'pendant',    axes: LAMPS.AXES.pendant });
+add('lamps', 'Floor Lamp',  32, 88, (ctx, time) => LAMPS.floorLamp(ctx,  0, 0, { color: 'amber',  style: 'cone', state: 'on' }, time), { baseObj: LAMPS, baseKey: 'floorLamp', axes: LAMPS.AXES.floorLamp });
+add('lamps', 'Sconce',      28, 36, (ctx, time) => LAMPS.sconce(ctx,     0, 0, { color: 'amber',  state: 'on' }, time),  { baseObj: LAMPS, baseKey: 'sconce',     axes: LAMPS.AXES.sconce });
+add('lamps', 'Chandelier',  60, 52, (ctx, time) => LAMPS.chandelier(ctx, 0, 0, { color: 'amber',  size: 'm' }, time),    { baseObj: LAMPS, baseKey: 'chandelier', axes: LAMPS.AXES.chandelier });
+add('lamps', 'Desk Lamp',   24, 36, (ctx, time) => LAMPS.deskLamp(ctx,   0, 0, { color: 'amber',  state: 'on' }, time),  { baseObj: LAMPS, baseKey: 'deskLamp',   axes: LAMPS.AXES.deskLamp });
+
+// BUILDINGS — all with axes
+add('buildings', 'House',      96, 88,  (ctx, time) => BUILDINGS.house(ctx,      0, 0, { color: 'pink',  roof: 'amber' }, time),                  { baseObj: BUILDINGS, baseKey: 'house',      axes: BUILDINGS.AXES.house });
+add('buildings', 'Storefront', 104, 80, (ctx, time) => BUILDINGS.storefront(ctx, 0, 0, { color: 'amber', sign: 'neon' }, time),                   { baseObj: BUILDINGS, baseKey: 'storefront', axes: BUILDINGS.AXES.storefront });
+add('buildings', 'Tower',      60, 140, (ctx, time) => BUILDINGS.tower(ctx,      0, 0, { color: 'blue',  windows: 'night', height: 'tall' }, time), { baseObj: BUILDINGS, baseKey: 'tower',      axes: BUILDINGS.AXES.tower });
+add('buildings', 'Cafe',       88, 76,  (ctx, time) => BUILDINGS.cafe(ctx,       0, 0, { color: 'amber', time: 'dusk' }, time),                   { baseObj: BUILDINGS, baseKey: 'cafe',       axes: BUILDINGS.AXES.cafe });
+add('buildings', 'Lab',        88, 80,  (ctx, time) => BUILDINGS.lab(ctx,        0, 0, { color: 'white', state: 'active' }, time),                { baseObj: BUILDINGS, baseKey: 'lab',        axes: BUILDINGS.AXES.lab });
+add('buildings', 'Cottage',    72, 68,  (ctx, time) => BUILDINGS.cottage(ctx,    0, 0, { color: 'pink',  season: 'summer' }, time),               { baseObj: BUILDINGS, baseKey: 'cottage',    axes: BUILDINGS.AXES.cottage });
+
+// PLANTS — most with axes
+add('plants', 'Flower',   36, 48, (ctx, time) => PLANTS.flower(ctx,   0, 0, { species: 'rose',   color: 'pink',  size: 'm' }, time), { baseObj: PLANTS, baseKey: 'flower',   axes: PLANTS.AXES.flower });
+add('plants', 'Tree',     68, 88, (ctx, time) => PLANTS.tree(ctx,     0, 0, { species: 'oak',    season: 'summer' }, time),         { baseObj: PLANTS, baseKey: 'tree',     axes: PLANTS.AXES.tree });
+add('plants', 'Bush',     48, 40, (ctx, time) => PLANTS.bush(ctx,     0, 0, { size: 'm', flowering: 'yes', color: 'pink' }, time),  { baseObj: PLANTS, baseKey: 'bush',     axes: PLANTS.AXES.bush });
+add('plants', 'Mushroom', 32, 40, (ctx, time) => PLANTS.mushroom(ctx, 0, 0, { kind: 'classic',   color: 'pink' }, time),            { baseObj: PLANTS, baseKey: 'mushroom', axes: PLANTS.AXES.mushroom });
+add('plants', 'Cactus',   36, 52, (ctx, time) => PLANTS.cactus(ctx,   0, 0, { kind: 'barrel',    flower: 'yes' }, time),            { baseObj: PLANTS, baseKey: 'cactus',   axes: PLANTS.AXES.cactus });
+add('plants', 'Grass',    48, 32, (ctx, time) => PLANTS.grass(ctx,    0, 0, { length: 'long',    dry: 'no', flowers: 'yes' }, time), { baseObj: PLANTS, baseKey: 'grass',    axes: PLANTS.AXES.grass });
+add('plants', 'Vine',     32, 68, (ctx, time) => PLANTS.vine(ctx,     0, 0, { length: 'm',       leafy: 'yes', flowers: 'yes' }, time), { baseObj: PLANTS, baseKey: 'vine',     axes: PLANTS.AXES.vine });
+add('plants', 'Fern',     48, 52, (ctx, time) => PLANTS.fern(ctx,     0, 0, { size: 'm' }, time),                                   { baseObj: PLANTS, baseKey: 'fern',     axes: PLANTS.AXES.fern });
+
+// ANIMALS — wild
+add('animals', 'Deer',      52, 52, (ctx, time) => ANIMALS.deer(ctx, 4, 4, time));
+add('animals', 'Fox',       40, 32, (ctx, time) => ANIMALS.fox(ctx, 4, 4, time));
+add('animals', 'Rabbit',    32, 40, (ctx, time) => ANIMALS.rabbit(ctx,    0, 4, { color: 'brown', pose: 'sitting' }, time), { baseObj: ANIMALS, baseKey: 'rabbit',    axes: ANIMALS.AXES.rabbit });
+add('animals', 'Owl',       32, 40, (ctx, time) => ANIMALS.owl(ctx,       0, 4, { color: 'brown' }, time),                  { baseObj: ANIMALS, baseKey: 'owl',       axes: ANIMALS.AXES.owl });
+add('animals', 'Butterfly', 40, 32, (ctx, time) => ANIMALS.butterfly(ctx, 0, 4, { color: 'pink' }, time),                   { baseObj: ANIMALS, baseKey: 'butterfly', axes: ANIMALS.AXES.butterfly });
+add('animals', 'Frog',      32, 28, (ctx, time) => ANIMALS.frog(ctx,      0, 4, { color: 'green' }, time),                  { baseObj: ANIMALS, baseKey: 'frog',      axes: ANIMALS.AXES.frog });
+add('animals', 'Snail',     36, 28, (ctx, time) => ANIMALS.snail(ctx, 4, 4, time));
+add('animals', 'Bear',      48, 40, (ctx, time) => ANIMALS.bear(ctx,      0, 4, { color: 'brown', pose: 'standing' }, time),{ baseObj: ANIMALS, baseKey: 'bear',      axes: ANIMALS.AXES.bear });
+add('animals', 'Raccoon',   40, 32, (ctx, time) => ANIMALS.raccoon(ctx, 4, 4, time));
+add('animals', 'Squirrel',  32, 36, (ctx, time) => ANIMALS.squirrel(ctx, 4, 4, time));
+
+// MAGICAL — most with axes
+add('magical', 'Crystal',    32, 48, (ctx, time) => MAGICAL.crystal(ctx,   0, 4, { color: 'violet', size: 'm' }, time),                  { baseObj: MAGICAL, baseKey: 'crystal',   axes: MAGICAL.AXES.crystal });
+add('magical', 'Potion',     32, 44, (ctx, time) => MAGICAL.potion(ctx,    0, 4, { color: 'pink',   shape: 'round' }, time),             { baseObj: MAGICAL, baseKey: 'potion',    axes: MAGICAL.AXES.potion });
+add('magical', 'Rune',       36, 40, (ctx, time) => MAGICAL.rune(ctx,      0, 4, { symbol: 'fehu',  glow: 'on' }, time),                 { baseObj: MAGICAL, baseKey: 'rune',      axes: MAGICAL.AXES.rune });
+add('magical', 'Portal',     52, 60, (ctx, time) => MAGICAL.portal(ctx,    0, 4, { color: 'violet', state: 'active' }, time),            { baseObj: MAGICAL, baseKey: 'portal',    axes: MAGICAL.AXES.portal });
+add('magical', 'Spellbook',  48, 40, (ctx, time) => MAGICAL.spellbook(ctx, 0, 4, { color: 'violet' }, time),                             { baseObj: MAGICAL, baseKey: 'spellbook', axes: MAGICAL.AXES.spellbook });
+add('magical', 'Wand',       44, 44, (ctx, time) => MAGICAL.wand(ctx,      0, 4, { color: 'pink' }, time),                               { baseObj: MAGICAL, baseKey: 'wand',      axes: MAGICAL.AXES.wand });
+add('magical', 'Scroll',     48, 40, (ctx, time) => MAGICAL.scroll(ctx, 4, 4, time));
+add('magical', 'Candle',     24, 40, (ctx, time) => MAGICAL.candle(ctx,    0, 4, { color: 'amber',  lit: 'lit' }, time),                 { baseObj: MAGICAL, baseKey: 'candle',    axes: MAGICAL.AXES.candle });
+add('magical', 'Cauldron',   48, 44, (ctx, time) => MAGICAL.cauldron(ctx,  0, 4, { contents: 'brewing' }, time),                         { baseObj: MAGICAL, baseKey: 'cauldron',  axes: MAGICAL.AXES.cauldron });
+add('magical', 'Pentagram',  48, 48, (ctx, time) => MAGICAL.pentagram(ctx, 0, 4, { color: 'pink' }, time),                               { baseObj: MAGICAL, baseKey: 'pentagram', axes: { color: ['pink','amber','violet','blue','white'] } });
+
+// COSMIC
+add('cosmic', 'Planet',     68, 68, (ctx, time) => COSMIC.planet(ctx,    0, 4, { kind: 'gas',    ring: 'yes' }, time),       { baseObj: COSMIC, baseKey: 'planet',    axes: COSMIC.AXES.planet });
+add('cosmic', 'Star',       40, 40, (ctx, time) => COSMIC.star(ctx,      0, 4, { size: 'm',      color: 'amber' }, time),    { baseObj: COSMIC, baseKey: 'star',      axes: COSMIC.AXES.star });
+add('cosmic', 'Comet',      68, 40, (ctx, time) => COSMIC.comet(ctx, 4, 4, time));
+add('cosmic', 'Spaceship',  68, 48, (ctx, time) => COSMIC.spaceship(ctx, 0, 4, { kind: 'shuttle', color: 'amber' }, time),   { baseObj: COSMIC, baseKey: 'spaceship', axes: COSMIC.AXES.spaceship });
+add('cosmic', 'Asteroid',   36, 36, (ctx, time) => COSMIC.asteroid(ctx, 4, 4, time));
+add('cosmic', 'Alien',      36, 48, (ctx, time) => COSMIC.alien(ctx,     0, 4, { color: 'violet', size: 'm' }, time),        { baseObj: COSMIC, baseKey: 'alien',     axes: COSMIC.AXES.alien });
+add('cosmic', 'Nebula',     68, 48, (ctx, time) => COSMIC.nebula(ctx,    0, 4, { color: 'violet' }, time),                   { baseObj: COSMIC, baseKey: 'nebula',    axes: COSMIC.AXES.nebula });
+add('cosmic', 'Moon',       40, 40, (ctx, time) => COSMIC.moon(ctx,      0, 4, { phase: 'crescent' }, time),                 { baseObj: COSMIC, baseKey: 'moon',      axes: COSMIC.AXES.moon });
+add('cosmic', 'Black Hole', 48, 48, (ctx, time) => COSMIC.blackhole(ctx, 4, 4, time));
+add('cosmic', 'Satellite',  44, 40, (ctx, time) => COSMIC.satellite(ctx, 4, 4, time));
+
+// TILE SETS — pure variant multiplier
+add('tilesets', 'Checker',     64, 64, (ctx, time) => TILESETS.checker(ctx,     0, 0, { color: 'wood',  accent: 'white' }, time), { baseObj: TILESETS, baseKey: 'checker',     axes: TILESETS.AXES.checker });
+add('tilesets', 'Stripe',      64, 64, (ctx, time) => TILESETS.stripe(ctx,      0, 0, { color: 'pink',  accent: 'white', direction: 'horizontal' }, time), { baseObj: TILESETS, baseKey: 'stripe', axes: TILESETS.AXES.stripe });
+add('tilesets', 'Dot',         64, 64, (ctx, time) => TILESETS.dot(ctx,         0, 0, { color: 'violet', accent: 'amber' }, time), { baseObj: TILESETS, baseKey: 'dot',         axes: TILESETS.AXES.dot });
+add('tilesets', 'Diamond',     64, 64, (ctx, time) => TILESETS.diamond(ctx,     0, 0, { color: 'blue',  accent: 'white' }, time), { baseObj: TILESETS, baseKey: 'diamond',     axes: TILESETS.AXES.diamond });
+add('tilesets', 'Brick',       64, 64, (ctx, time) => TILESETS.brick(ctx,       0, 0, { color: 'pink',  accent: 'black' }, time), { baseObj: TILESETS, baseKey: 'brick',       axes: TILESETS.AXES.brick });
+add('tilesets', 'Wave',        64, 64, (ctx, time) => TILESETS.wave(ctx,        0, 0, { color: 'blue',  accent: 'white' }, time), { baseObj: TILESETS, baseKey: 'wave',        axes: TILESETS.AXES.wave });
+add('tilesets', 'Herringbone', 64, 64, (ctx, time) => TILESETS.herringbone(ctx, 0, 0, { color: 'wood',  accent: 'black' }, time), { baseObj: TILESETS, baseKey: 'herringbone', axes: TILESETS.AXES.herringbone });
+add('tilesets', 'Hex',         64, 64, (ctx, time) => TILESETS.hex(ctx,         0, 0, { color: 'amber', accent: 'white' }, time), { baseObj: TILESETS, baseKey: 'hex',         axes: TILESETS.AXES.hex });
+
+// WEATHER
+add('weather', 'Sun',          60, 60, (ctx, time) => WEATHER.sun(ctx,         0, 4, { time: 'noon',  size: 'm' }, time),       { baseObj: WEATHER, baseKey: 'sun',    axes: WEATHER.AXES.sun });
+add('weather', 'Cloud',        68, 40, (ctx, time) => WEATHER.cloud(ctx,       0, 4, { kind: 'fluffy', color: 'white' }, time), { baseObj: WEATHER, baseKey: 'cloud',  axes: WEATHER.AXES.cloud });
+add('weather', 'Rainbow',      104, 60, (ctx, time) => WEATHER.rainbow(ctx,    0, 4, { extent: 'arc' }, time),                  { baseObj: WEATHER, baseKey: 'rainbow', axes: WEATHER.AXES.rainbow });
+add('weather', 'Rain Cloud',   68, 68, (ctx, time) => WEATHER.rainCloud(ctx, 4, 4, time));
+add('weather', 'Snow Cloud',   68, 68, (ctx, time) => WEATHER.snowCloud(ctx, 4, 4, time));
+add('weather', 'Fog',          72, 48, (ctx, time) => WEATHER.fog(ctx, 4, 4, time));
+add('weather', 'Aurora',       96, 60, (ctx, time) => WEATHER.aurora(ctx,      0, 4, { color: 'violet' }, time),                { baseObj: WEATHER, baseKey: 'aurora', axes: WEATHER.AXES.aurora });
+add('weather', 'Sunset',       96, 60, (ctx, time) => WEATHER.sunset(ctx,      0, 4, { time: 'dusk' }, time),                   { baseObj: WEATHER, baseKey: 'sunset', axes: WEATHER.AXES.sunset });
+add('weather', 'Thunderstorm', 68, 68, (ctx, time) => WEATHER.thunderstorm(ctx, 4, 4, time));
+add('weather', 'Sun Rays',     60, 68, (ctx, time) => WEATHER.sunRays(ctx, 4, 4, time));
+
+// FURNITURE PLUS — all axed
+add('office', 'Armchair',     60, 60, (ctx, time) => FURNITURE_PLUS.armchair(ctx,    0, 4, { style: 'lounge',   color: 'violet' }, time), { baseObj: FURNITURE_PLUS, baseKey: 'armchair',    axes: FURNITURE_PLUS.AXES.armchair });
+add('office', 'Dining Chair', 40, 52, (ctx, time) => FURNITURE_PLUS.diningChair(ctx, 0, 4, { style: 'modern',   color: 'wood' }, time),   { baseObj: FURNITURE_PLUS, baseKey: 'diningChair', axes: FURNITURE_PLUS.AXES.diningChair });
+add('office', 'Stool',        32, 48, (ctx, time) => FURNITURE_PLUS.stool(ctx,       0, 4, { style: 'bar',      color: 'amber' }, time),  { baseObj: FURNITURE_PLUS, baseKey: 'stool',       axes: FURNITURE_PLUS.AXES.stool });
+add('office', 'Round Table',  60, 56, (ctx, time) => FURNITURE_PLUS.roundTable(ctx,  0, 4, { material: 'wood',  size: 'm' }, time),       { baseObj: FURNITURE_PLUS, baseKey: 'roundTable',  axes: FURNITURE_PLUS.AXES.roundTable });
+add('office', 'Console Table',96, 52, (ctx, time) => FURNITURE_PLUS.console(ctx,     0, 8, { material: 'wood',  color: 'black' }, time),  { baseObj: FURNITURE_PLUS, baseKey: 'console',     axes: FURNITURE_PLUS.AXES.console });
+add('office', 'Shelf',        60, 88, (ctx, time) => FURNITURE_PLUS.shelf(ctx,       0, 4, { style: 'bookcase', color: 'wood' }, time),   { baseObj: FURNITURE_PLUS, baseKey: 'shelf',       axes: FURNITURE_PLUS.AXES.shelf });
+add('office', 'Wardrobe',     68, 104,(ctx, time) => FURNITURE_PLUS.wardrobe(ctx,    0, 4, { style: 'double',   color: 'wood' }, time),   { baseObj: FURNITURE_PLUS, baseKey: 'wardrobe',    axes: FURNITURE_PLUS.AXES.wardrobe });
+add('office', 'Ottoman',      48, 40, (ctx, time) => FURNITURE_PLUS.ottoman(ctx,     0, 4, { shape: 'round',    color: 'pink' }, time),   { baseObj: FURNITURE_PLUS, baseKey: 'ottoman',     axes: FURNITURE_PLUS.AXES.ottoman });
+add('office', 'TV Stand',     96, 48, (ctx, time) => FURNITURE_PLUS.tvStand(ctx,     0, 4, { material: 'wood',  color: 'black' }, time),  { baseObj: FURNITURE_PLUS, baseKey: 'tvStand',     axes: FURNITURE_PLUS.AXES.tvStand });
+add('office', 'Side Table',   40, 52, (ctx, time) => FURNITURE_PLUS.sideTable(ctx,   0, 4, { style: 'square',   color: 'wood' }, time),   { baseObj: FURNITURE_PLUS, baseKey: 'sideTable',   axes: FURNITURE_PLUS.AXES.sideTable });
+
+// WARDROBE — clothing pieces
+add('wardrobe', 'Hat',     40, 32, (ctx, time) => WARDROBE.hat(ctx,     0, 4, { style: 'cap',     color: 'pink' }, time),  { baseObj: WARDROBE, baseKey: 'hat',     axes: WARDROBE.AXES.hat });
+add('wardrobe', 'Shirt',   40, 44, (ctx, time) => WARDROBE.shirt(ctx,   0, 4, { style: 'tee',     color: 'amber' }, time), { baseObj: WARDROBE, baseKey: 'shirt',   axes: WARDROBE.AXES.shirt });
+add('wardrobe', 'Pants',   32, 44, (ctx, time) => WARDROBE.pants(ctx,   0, 4, { style: 'jeans',   color: 'blue' }, time),  { baseObj: WARDROBE, baseKey: 'pants',   axes: WARDROBE.AXES.pants });
+add('wardrobe', 'Shoes',   40, 24, (ctx, time) => WARDROBE.shoes(ctx,   0, 4, { style: 'sneaker', color: 'pink' }, time),  { baseObj: WARDROBE, baseKey: 'shoes',   axes: WARDROBE.AXES.shoes });
+add('wardrobe', 'Glasses', 36, 20, (ctx, time) => WARDROBE.glasses(ctx, 0, 4, { style: 'round',   color: 'black' }, time), { baseObj: WARDROBE, baseKey: 'glasses', axes: WARDROBE.AXES.glasses });
+add('wardrobe', 'Bag',     40, 48, (ctx, time) => WARDROBE.bag(ctx,     0, 4, { style: 'tote',    color: 'pink' }, time),  { baseObj: WARDROBE, baseKey: 'bag',     axes: WARDROBE.AXES.bag });
+add('wardrobe', 'Scarf',   48, 24, (ctx, time) => WARDROBE.scarf(ctx,   0, 4, { style: 'plain',   color: 'amber' }, time), { baseObj: WARDROBE, baseKey: 'scarf',   axes: WARDROBE.AXES.scarf });
+
+// TOOLS
+add('tools', 'Hammer',      40, 44, (ctx, time) => TOOLS.hammer(ctx,      0, 4, { color: 'amber' }, time),                  { baseObj: TOOLS, baseKey: 'hammer',      axes: TOOLS.AXES.hammer });
+add('tools', 'Screwdriver', 40, 40, (ctx, time) => TOOLS.screwdriver(ctx, 0, 4, { color: 'pink',  head: 'phillips' }, time), { baseObj: TOOLS, baseKey: 'screwdriver', axes: TOOLS.AXES.screwdriver });
+add('tools', 'Wrench',      48, 24, (ctx, time) => TOOLS.wrench(ctx,      0, 4, { color: 'stone', size: 'm' }, time),       { baseObj: TOOLS, baseKey: 'wrench',      axes: TOOLS.AXES.wrench });
+add('tools', 'Drill',       48, 40, (ctx, time) => TOOLS.drill(ctx,       0, 4, { color: 'amber' }, time),                  { baseObj: TOOLS, baseKey: 'drill',       axes: TOOLS.AXES.drill });
+add('tools', 'Saw',         48, 40, (ctx, time) => TOOLS.saw(ctx, 4, 4, time));
+add('tools', 'Paintbrush',  40, 44, (ctx, time) => TOOLS.paintbrush(ctx,  0, 4, { color: 'amber', paint: 'pink' }, time),   { baseObj: TOOLS, baseKey: 'paintbrush',  axes: TOOLS.AXES.paintbrush });
+add('tools', 'Scissors',    36, 44, (ctx, time) => TOOLS.scissors(ctx,    0, 4, { color: 'pink' }, time),                   { baseObj: TOOLS, baseKey: 'scissors',    axes: TOOLS.AXES.scissors });
+add('tools', 'Pencil',      48, 20, (ctx, time) => TOOLS.pencil(ctx,      0, 4, { color: 'amber' }, time),                  { baseObj: TOOLS, baseKey: 'pencil',      axes: TOOLS.AXES.pencil });
+add('tools', 'Ruler',       68, 20, (ctx, time) => TOOLS.ruler(ctx, 4, 4, time));
+add('tools', 'Microscope',  48, 60, (ctx, time) => TOOLS.microscope(ctx, 4, 4, time));
+add('tools', 'Beaker',      36, 48, (ctx, time) => TOOLS.beaker(ctx,      0, 4, { liquid: 'green', state: 'bubbling' }, time), { baseObj: TOOLS, baseKey: 'beaker', axes: TOOLS.AXES.beaker });
+add('tools', 'Telescope',   52, 52, (ctx, time) => TOOLS.telescope(ctx, 4, 4, time));
+
+// INSTRUMENTS
+add('instruments', 'Guitar',     40, 76, (ctx, time) => INSTRUMENTS.guitar(ctx,     0, 4, { kind: 'electric', color: 'pink' }, time),     { baseObj: INSTRUMENTS, baseKey: 'guitar',     axes: INSTRUMENTS.AXES.guitar });
+add('instruments', 'Piano',      96, 48, (ctx, time) => INSTRUMENTS.piano(ctx, 4, 4, time));
+add('instruments', 'Drum Kit',   68, 60, (ctx, time) => INSTRUMENTS.drumKit(ctx, 4, 4, time));
+add('instruments', 'Microphone', 36, 60, (ctx, time) => INSTRUMENTS.microphone(ctx, 0, 4, { color: 'pink', stand: 'stand' }, time),       { baseObj: INSTRUMENTS, baseKey: 'microphone', axes: INSTRUMENTS.AXES.microphone });
+add('instruments', 'Violin',     36, 68, (ctx, time) => INSTRUMENTS.violin(ctx, 4, 4, time));
+add('instruments', 'Vinyl',      48, 48, (ctx, time) => INSTRUMENTS.vinyl(ctx,      0, 4, { color: 'black' }, time),                       { baseObj: INSTRUMENTS, baseKey: 'vinyl',      axes: INSTRUMENTS.AXES.vinyl });
+add('instruments', 'Headphones', 52, 52, (ctx, time) => INSTRUMENTS.headphones(ctx, 0, 4, { color: 'pink' }, time),                        { baseObj: INSTRUMENTS, baseKey: 'headphones', axes: INSTRUMENTS.AXES.headphones });
+add('instruments', 'Synth',      80, 40, (ctx, time) => INSTRUMENTS.synth(ctx,      0, 4, { color: 'black' }, time),                       { baseObj: INSTRUMENTS, baseKey: 'synth',      axes: INSTRUMENTS.AXES.synth });
+
+// SEASONAL & HOLIDAY
+add('seasonal', 'Pumpkin',         48, 44, (ctx, time) => SEASONAL.pumpkin(ctx,        0, 4, { color: 'amber',  face: 'classic' }, time),       { baseObj: SEASONAL, baseKey: 'pumpkin',       axes: SEASONAL.AXES.pumpkin });
+add('seasonal', 'Christmas Tree',  52, 76, (ctx, time) => SEASONAL.christmasTree(ctx,  0, 4, { size: 'm',       lights: 'rainbow' }, time),     { baseObj: SEASONAL, baseKey: 'christmasTree', axes: SEASONAL.AXES.christmasTree });
+add('seasonal', 'Gift',            40, 40, (ctx, time) => SEASONAL.gift(ctx,           0, 4, { color: 'pink',   ribbon: 'amber' }, time),        { baseObj: SEASONAL, baseKey: 'gift',          axes: SEASONAL.AXES.gift });
+add('seasonal', 'Ornament',        32, 40, (ctx, time) => SEASONAL.ornament(ctx,       0, 4, { color: 'pink',   pattern: 'glitter' }, time),     { baseObj: SEASONAL, baseKey: 'ornament',      axes: SEASONAL.AXES.ornament });
+add('seasonal', 'Snowman',         40, 60, (ctx, time) => SEASONAL.snowman(ctx, 4, 4, time));
+add('seasonal', 'Easter Egg',      32, 40, (ctx, time) => SEASONAL.easterEgg(ctx,      0, 4, { color: 'pink',   pattern: 'zigzag' }, time),      { baseObj: SEASONAL, baseKey: 'easterEgg',     axes: SEASONAL.AXES.easterEgg });
+add('seasonal', 'Valentine',       44, 44, (ctx, time) => SEASONAL.valentine(ctx,      0, 4, { style: 'heart' }, time),                          { baseObj: SEASONAL, baseKey: 'valentine',     axes: SEASONAL.AXES.valentine });
+add('seasonal', 'Menorah',         60, 48, (ctx, time) => SEASONAL.menorah(ctx, 4, 4, time));
+
+// UI / ICONS
+add('ui', 'Button',       68, 32, (ctx, time) => UI.button(ctx,      0, 4, { color: 'pink',  state: 'default', shape: 'round' }, time),  { baseObj: UI, baseKey: 'button',      axes: UI.AXES.button });
+add('ui', 'Frame',        60, 60, (ctx, time) => UI.frame(ctx,       0, 4, { color: 'amber', style: 'beveled' }, time),                  { baseObj: UI, baseKey: 'frame',       axes: UI.AXES.frame });
+add('ui', 'Badge',        40, 44, (ctx, time) => UI.badge(ctx,       0, 4, { color: 'amber', shape: 'shield' }, time),                   { baseObj: UI, baseKey: 'badge',       axes: UI.AXES.badge });
+add('ui', 'Arrow',        40, 40, (ctx, time) => UI.arrow(ctx,       0, 4, { color: 'pink',  direction: 'right' }, time),                { baseObj: UI, baseKey: 'arrow',       axes: UI.AXES.arrow });
+add('ui', 'Star',         36, 36, (ctx, time) => UI.star(ctx,        0, 4, { color: 'amber', style: 'sparkle' }, time),                  { baseObj: UI, baseKey: 'star',        axes: UI.AXES.star });
+add('ui', 'Heart Icon',   32, 32, (ctx, time) => UI.heart(ctx,       0, 4, { color: 'pink',  state: 'filled' }, time),                   { baseObj: UI, baseKey: 'heart',       axes: UI.AXES.heart });
+add('ui', 'Check',        32, 32, (ctx, time) => UI.check(ctx, 4, 4, time));
+add('ui', 'Cross',        32, 32, (ctx, time) => UI.cross(ctx, 4, 4, time));
+add('ui', 'Cursor',       32, 36, (ctx, time) => UI.cursor(ctx,      0, 4, { color: 'white', style: 'arrow' }, time),                    { baseObj: UI, baseKey: 'cursor',      axes: UI.AXES.cursor });
+add('ui', 'Avatar Frame', 60, 60, (ctx, time) => UI.avatarFrame(ctx, 0, 4, { color: 'pink',  style: 'crown' }, time),                    { baseObj: UI, baseKey: 'avatarFrame', axes: UI.AXES.avatarFrame });
+
+// SPORTS
+add('sports', 'Ball',          40, 40, (ctx, time) => SPORTS.ball(ctx,        0, 4, { kind: 'basketball' }),                            { baseObj: SPORTS, baseKey: 'ball',       axes: SPORTS.AXES.ball });
+add('sports', 'Bat',           68, 24, (ctx, time) => SPORTS.bat(ctx, 4, 4, time));
+add('sports', 'Racket',        40, 68, (ctx, time) => SPORTS.racket(ctx,      0, 4, { kind: 'tennis',   color: 'pink' }, time),         { baseObj: SPORTS, baseKey: 'racket',     axes: SPORTS.AXES.racket });
+add('sports', 'Skateboard',    68, 28, (ctx, time) => SPORTS.skateboard(ctx,  0, 4, { deck: 'pink',     graphic: 'flames' }, time),     { baseObj: SPORTS, baseKey: 'skateboard', axes: SPORTS.AXES.skateboard });
+add('sports', 'Dumbbell',      52, 24, (ctx, time) => SPORTS.dumbbell(ctx,    0, 4, { size: 'm',        color: 'black' }, time),        { baseObj: SPORTS, baseKey: 'dumbbell',   axes: SPORTS.AXES.dumbbell });
+add('sports', 'Bowling Pin',   32, 48, (ctx, time) => SPORTS.bowlingPin(ctx, 4, 4, time));
+add('sports', 'Helmet',        48, 40, (ctx, time) => SPORTS.helmet(ctx,      0, 4, { kind: 'football', color: 'pink' }, time),         { baseObj: SPORTS, baseKey: 'helmet',     axes: SPORTS.AXES.helmet });
+add('sports', 'Whistle',       40, 24, (ctx, time) => SPORTS.whistle(ctx, 4, 4, time));
+add('sports', 'Trophy',        48, 60, (ctx, time) => SPORTS.trophy(ctx,      0, 4, { tier: 'gold',     size: 'm' }, time),             { baseObj: SPORTS, baseKey: 'trophy',     axes: SPORTS.AXES.trophy });
+
+// DISHES
+add('dishes', 'Ramen',     52, 44, (ctx, time) => DISHES.ramen(ctx, 4, 4, time));
+add('dishes', 'Pasta',     48, 44, (ctx, time) => DISHES.pasta(ctx, 4, 4, time));
+add('dishes', 'Sushi',     52, 36, (ctx, time) => DISHES.sushi(ctx,      0, 4, { kind: 'nigiri' }),                                     { baseObj: DISHES, baseKey: 'sushi',    axes: DISHES.AXES.sushi });
+add('dishes', 'Salad',     48, 44, (ctx, time) => DISHES.salad(ctx, 4, 4, time));
+add('dishes', 'Taco',      48, 40, (ctx, time) => DISHES.taco(ctx, 4, 4, time));
+add('dishes', 'Burger',    48, 44, (ctx, time) => DISHES.burger(ctx, 4, 4, time));
+add('dishes', 'Fries',     40, 48, (ctx, time) => DISHES.fries(ctx, 4, 4, time));
+add('dishes', 'Sundae',    40, 60, (ctx, time) => DISHES.sundae(ctx,     0, 4, { flavor: 'strawberry' }),                              { baseObj: DISHES, baseKey: 'sundae',   axes: DISHES.AXES.sundae });
+add('dishes', 'Popsicle',  32, 52, (ctx, time) => DISHES.popsicle(ctx,   0, 4, { color: 'pink' }, time),                                 { baseObj: DISHES, baseKey: 'popsicle', axes: DISHES.AXES.popsicle });
+add('dishes', 'Soup',      48, 40, (ctx, time) => DISHES.soup(ctx,       0, 4, { kind: 'tomato' }, time),                                { baseObj: DISHES, baseKey: 'soup',     axes: DISHES.AXES.soup });
+add('dishes', 'Steak',     48, 40, (ctx, time) => DISHES.steak(ctx, 4, 4, time));
+
+// TRANSPORT
+add('transport', 'Boat',           68, 48, (ctx, time) => TRANSPORT.boat(ctx,       0, 4, { kind: 'sailboat',   color: 'wood' }, time), { baseObj: TRANSPORT, baseKey: 'boat',       axes: TRANSPORT.AXES.boat });
+add('transport', 'Plane',          68, 48, (ctx, time) => TRANSPORT.plane(ctx,      0, 4, { kind: 'jet',        color: 'pink' }, time), { baseObj: TRANSPORT, baseKey: 'plane',      axes: TRANSPORT.AXES.plane });
+add('transport', 'Train',          96, 52, (ctx, time) => TRANSPORT.train(ctx,      0, 4, { kind: 'steam',      color: 'pink' }, time), { baseObj: TRANSPORT, baseKey: 'train',      axes: TRANSPORT.AXES.train });
+add('transport', 'Hot Air Balloon',52, 76, (ctx, time) => TRANSPORT.balloon(ctx,    0, 4, { color: 'rainbow' }, time),                  { baseObj: TRANSPORT, baseKey: 'balloon',    axes: TRANSPORT.AXES.balloon });
+add('transport', 'Helicopter',     68, 48, (ctx, time) => TRANSPORT.helicopter(ctx, 0, 4, { color: 'amber' }, time),                    { baseObj: TRANSPORT, baseKey: 'helicopter', axes: TRANSPORT.AXES.helicopter });
+add('transport', 'Submarine',      68, 44, (ctx, time) => TRANSPORT.submarine(ctx,  0, 4, { color: 'amber' }, time),                    { baseObj: TRANSPORT, baseKey: 'submarine',  axes: TRANSPORT.AXES.submarine });
+
+// TECH
+add('tech', 'Robot Vacuum',  52, 24, (ctx, time) => TECH.robotVacuum(ctx,  0, 4, { color: 'white', state: 'cleaning' }, time),         { baseObj: TECH, baseKey: 'robotVacuum',  axes: TECH.AXES.robotVacuum });
+add('tech', 'Drone',         52, 40, (ctx, time) => TECH.drone(ctx,        0, 4, { color: 'black' }, time),                              { baseObj: TECH, baseKey: 'drone',        axes: TECH.AXES.drone });
+add('tech', 'Smart Speaker', 40, 52, (ctx, time) => TECH.smartSpeaker(ctx, 0, 4, { color: 'white', state: 'listening' }, time),         { baseObj: TECH, baseKey: 'smartSpeaker', axes: TECH.AXES.smartSpeaker });
+add('tech', 'Router',        68, 40, (ctx, time) => TECH.router(ctx,       0, 4, { color: 'black', leds: 'on' }, time),                  { baseObj: TECH, baseKey: 'router',       axes: TECH.AXES.router });
+add('tech', 'Battery',       40, 24, (ctx, time) => TECH.battery(ctx,      0, 4, { color: 'white', charge: 'full' }, time),              { baseObj: TECH, baseKey: 'battery',      axes: TECH.AXES.battery });
+add('tech', 'USB Stick',     52, 24, (ctx, time) => TECH.usb(ctx,          0, 4, { color: 'pink' }, time),                              { baseObj: TECH, baseKey: 'usb',          axes: TECH.AXES.usb });
+add('tech', 'Cable',         68, 40, (ctx, time) => TECH.cable(ctx,        0, 4, { color: 'white', type: 'usb-c' }, time),               { baseObj: TECH, baseKey: 'cable',        axes: TECH.AXES.cable });
+add('tech', 'VR Headset',    60, 40, (ctx, time) => TECH.vrHeadset(ctx, 4, 4, time));
+add('tech', 'Smart Watch',   36, 44, (ctx, time) => TECH.smartWatch(ctx, 4, 4, time));
+add('tech', 'SD Card',       32, 36, (ctx, time) => TECH.sdCard(ctx, 4, 4, time));
+
+// BREAKFAST
+add('breakfast', 'Eggs',       48, 36, (ctx, time) => BREAKFAST.eggs(ctx,     0, 4, { style: 'sunnyside' }, time),                      { baseObj: BREAKFAST, baseKey: 'eggs',     axes: BREAKFAST.AXES.eggs });
+add('breakfast', 'Bacon',      52, 24, (ctx, time) => BREAKFAST.bacon(ctx, 4, 4, time));
+add('breakfast', 'Pancakes',   56, 48, (ctx, time) => BREAKFAST.pancakes(ctx, 0, 4, { count: 'tall', topping: 'syrup' }, time),         { baseObj: BREAKFAST, baseKey: 'pancakes', axes: BREAKFAST.AXES.pancakes });
+add('breakfast', 'Waffle',     48, 40, (ctx, time) => BREAKFAST.waffle(ctx, 4, 4, time));
+add('breakfast', 'Toast',      40, 40, (ctx, time) => BREAKFAST.toast(ctx,    0, 4, { topping: 'avocado' }, time),                      { baseObj: BREAKFAST, baseKey: 'toast',    axes: BREAKFAST.AXES.toast });
+add('breakfast', 'Cereal',     52, 44, (ctx, time) => BREAKFAST.cereal(ctx,   0, 4, { color: 'amber' }, time),                          { baseObj: BREAKFAST, baseKey: 'cereal',   axes: BREAKFAST.AXES.cereal });
+add('breakfast', 'Omelet',     52, 40, (ctx, time) => BREAKFAST.omelet(ctx, 4, 4, time));
+add('breakfast', 'Smoothie',   36, 52, (ctx, time) => BREAKFAST.smoothie(ctx, 0, 4, { color: 'pink' }, time),                           { baseObj: BREAKFAST, baseKey: 'smoothie', axes: BREAKFAST.AXES.smoothie });
+add('breakfast', 'Bagel',      48, 40, (ctx, time) => BREAKFAST.bagel(ctx,    0, 4, { topping: 'sesame' }, time),                       { baseObj: BREAKFAST, baseKey: 'bagel',    axes: BREAKFAST.AXES.bagel });
+add('breakfast', 'Croissant',  48, 36, (ctx, time) => BREAKFAST.croissant(ctx, 4, 4, time));
+
+// KITCHEN EXTRA
+add('kitchen', 'Blender',       40, 60, (ctx, time) => KITCHEN_EXTRA.blender(ctx,    0, 4, { color: 'pink',  state: 'blending' }, time), { baseObj: KITCHEN_EXTRA, baseKey: 'blender',    axes: KITCHEN_EXTRA.AXES.blender });
+add('kitchen', 'Kettle',        48, 52, (ctx, time) => KITCHEN_EXTRA.kettle(ctx,     0, 4, { color: 'amber', state: 'boiling' }, time),  { baseObj: KITCHEN_EXTRA, baseKey: 'kettle',     axes: KITCHEN_EXTRA.AXES.kettle });
+add('kitchen', 'Dishwasher',    60, 68, (ctx, time) => KITCHEN_EXTRA.dishwasher(ctx, 4, 4, time));
+add('kitchen', 'Stand Mixer',   48, 60, (ctx, time) => KITCHEN_EXTRA.mixer(ctx, 4, 4, time));
+add('kitchen', 'Knife Block',   40, 48, (ctx, time) => KITCHEN_EXTRA.knifeBlock(ctx, 4, 4, time));
+add('kitchen', 'Cutting Board', 60, 40, (ctx, time) => KITCHEN_EXTRA.cuttingBoard(ctx, 4, 4, time));
+add('kitchen', 'Pot',           52, 44, (ctx, time) => KITCHEN_EXTRA.pot(ctx,        0, 4, { color: 'stone', lid: 'on' }, time),         { baseObj: KITCHEN_EXTRA, baseKey: 'pot',       axes: KITCHEN_EXTRA.AXES.pot });
+add('kitchen', 'Pan',           60, 44, (ctx, time) => KITCHEN_EXTRA.pan(ctx,        0, 4, { kind: 'frying', color: 'black' }, time),    { baseObj: KITCHEN_EXTRA, baseKey: 'pan',       axes: KITCHEN_EXTRA.AXES.pan });
+add('kitchen', 'Cookbook',      48, 40, (ctx, time) => KITCHEN_EXTRA.cookbook(ctx, 4, 4, time));
+add('kitchen', 'Spice Rack',    60, 48, (ctx, time) => KITCHEN_EXTRA.spiceRack(ctx,  0, 4, { color: 'wood' }, time),                     { baseObj: KITCHEN_EXTRA, baseKey: 'spiceRack', axes: KITCHEN_EXTRA.AXES.spiceRack });
+
+// OFFICE EXTRA
+add('office', 'Printer',       56, 44, (ctx, time) => OFFICE_EXTRA.printer(ctx, 4, 4, time));
+add('office', 'Stapler',       52, 24, (ctx, time) => OFFICE_EXTRA.stapler(ctx,    0, 4, { color: 'red' }, time),                        { baseObj: OFFICE_EXTRA, baseKey: 'stapler',    axes: OFFICE_EXTRA.AXES.stapler });
+add('office', 'Calculator',    40, 52, (ctx, time) => OFFICE_EXTRA.calculator(ctx, 4, 4, time));
+add('office', 'Sticky Note',   40, 40, (ctx, time) => OFFICE_EXTRA.stickyNote(ctx, 0, 4, { color: 'amber' }, time),                       { baseObj: OFFICE_EXTRA, baseKey: 'stickyNote', axes: OFFICE_EXTRA.AXES.stickyNote });
+add('office', 'Paperclip',     32, 40, (ctx, time) => OFFICE_EXTRA.paperclip(ctx, 4, 4, time));
+add('office', 'Notebook',      40, 52, (ctx, time) => OFFICE_EXTRA.notebook(ctx,   0, 4, { color: 'pink' }, time),                        { baseObj: OFFICE_EXTRA, baseKey: 'notebook',   axes: OFFICE_EXTRA.AXES.notebook });
+add('office', 'Pen Holder',    40, 44, (ctx, time) => OFFICE_EXTRA.penHolder(ctx,  0, 4, { color: 'black' }, time),                       { baseObj: OFFICE_EXTRA, baseKey: 'penHolder',  axes: OFFICE_EXTRA.AXES.penHolder });
+add('office', 'Mousepad',      60, 40, (ctx, time) => OFFICE_EXTRA.mousepad(ctx,   0, 4, { color: 'black', pattern: 'gradient' }, time),  { baseObj: OFFICE_EXTRA, baseKey: 'mousepad',   axes: OFFICE_EXTRA.AXES.mousepad });
+add('office', 'Folding File',  48, 44, (ctx, time) => OFFICE_EXTRA.foldingFile(ctx, 4, 4, time));
+add('office', 'Hourglass',     40, 52, (ctx, time) => OFFICE_EXTRA.hourglass(ctx,  0, 4, { sand: 'amber' }, time),                        { baseObj: OFFICE_EXTRA, baseKey: 'hourglass',  axes: OFFICE_EXTRA.AXES.hourglass });
+
+// GARDEN
+add('garden', 'Shovel',        36, 68, (ctx, time) => GARDEN.shovel(ctx,        0, 4, { color: 'amber' }, time),                          { baseObj: GARDEN, baseKey: 'shovel',      axes: GARDEN.AXES.shovel });
+add('garden', 'Rake',          40, 68, (ctx, time) => GARDEN.rake(ctx, 4, 4, time));
+add('garden', 'Hoe',           40, 68, (ctx, time) => GARDEN.hoe(ctx, 4, 4, time));
+add('garden', 'Watering Can',  52, 44, (ctx, time) => GARDEN.wateringCan(ctx,   0, 4, { color: 'green' }, time),                          { baseObj: GARDEN, baseKey: 'wateringCan', axes: GARDEN.AXES.wateringCan });
+add('garden', 'Gloves',        48, 40, (ctx, time) => GARDEN.gloves(ctx,        0, 4, { color: 'pink' }, time),                           { baseObj: GARDEN, baseKey: 'gloves',      axes: GARDEN.AXES.gloves });
+add('garden', 'Wheelbarrow',   68, 52, (ctx, time) => GARDEN.wheelbarrow(ctx, 4, 4, time));
+add('garden', 'Seed Packet',   40, 52, (ctx, time) => GARDEN.seedPacket(ctx,    0, 4, { kind: 'rose' }, time),                            { baseObj: GARDEN, baseKey: 'seedPacket',  axes: GARDEN.AXES.seedPacket });
+add('garden', 'Plant Pot',     36, 44, (ctx, time) => GARDEN.plantPot(ctx,      0, 4, { color: 'terra', plant: 'flower' }, time),         { baseObj: GARDEN, baseKey: 'plantPot',    axes: GARDEN.AXES.plantPot });
+add('garden', 'Hose Reel',     60, 48, (ctx, time) => GARDEN.hose(ctx, 4, 4, time));
+add('garden', 'Garden Gnome',  40, 52, (ctx, time) => GARDEN.gardenGnome(ctx,   0, 4, { color: 'red' }, time),                            { baseObj: GARDEN, baseKey: 'gardenGnome', axes: GARDEN.AXES.gardenGnome });
+
+// BUILDINGS EXTRA — all axed
+add('buildings', 'Apartment',  68, 128,(ctx, time) => BUILDINGS_EXTRA.apartment(ctx,  0, 4, { color: 'amber', floors: 5 }, time),         { baseObj: BUILDINGS_EXTRA, baseKey: 'apartment',  axes: BUILDINGS_EXTRA.AXES.apartment });
+add('buildings', 'School',     104, 88,(ctx, time) => BUILDINGS_EXTRA.school(ctx,     0, 4, { color: 'pink' }, time),                     { baseObj: BUILDINGS_EXTRA, baseKey: 'school',     axes: BUILDINGS_EXTRA.AXES.school });
+add('buildings', 'Church',     68, 108,(ctx, time) => BUILDINGS_EXTRA.church(ctx,     0, 4, { color: 'white', time: 'dusk' }, time),      { baseObj: BUILDINGS_EXTRA, baseKey: 'church',     axes: BUILDINGS_EXTRA.AXES.church });
+add('buildings', 'Hospital',   96, 84, (ctx, time) => BUILDINGS_EXTRA.hospital(ctx,   0, 4, { state: 'night' }, time),                    { baseObj: BUILDINGS_EXTRA, baseKey: 'hospital',   axes: BUILDINGS_EXTRA.AXES.hospital });
+add('buildings', 'Factory',    104, 76,(ctx, time) => BUILDINGS_EXTRA.factory(ctx,    0, 4, { state: 'active', color: 'stone' }, time),   { baseObj: BUILDINGS_EXTRA, baseKey: 'factory',    axes: BUILDINGS_EXTRA.AXES.factory });
+add('buildings', 'Library',    92, 96, (ctx, time) => BUILDINGS_EXTRA.library(ctx,    0, 4, { color: 'wood' }, time),                     { baseObj: BUILDINGS_EXTRA, baseKey: 'library',    axes: BUILDINGS_EXTRA.AXES.library });
+add('buildings', 'Restaurant', 84, 76, (ctx, time) => BUILDINGS_EXTRA.restaurant(ctx, 0, 4, { color: 'amber', time: 'dusk' }, time),      { baseObj: BUILDINGS_EXTRA, baseKey: 'restaurant', axes: BUILDINGS_EXTRA.AXES.restaurant });
+add('buildings', 'Lighthouse', 48, 128,(ctx, time) => BUILDINGS_EXTRA.lighthouse(ctx, 4, 4, time));
+add('buildings', 'Mansion',    112, 96,(ctx, time) => BUILDINGS_EXTRA.mansion(ctx,    0, 4, { color: 'white' }, time),                    { baseObj: BUILDINGS_EXTRA, baseKey: 'mansion',    axes: BUILDINGS_EXTRA.AXES.mansion });
+
+// PEOPLE
+add('people', 'Child',     28, 48, (ctx, time) => PEOPLE.child(ctx,     0, 4, { skin: 'light',  hair: 'blonde', shirt: 'pink' }, time),         { baseObj: PEOPLE, baseKey: 'child',     axes: PEOPLE.AXES.child });
+add('people', 'Elder',     32, 48, (ctx, time) => PEOPLE.elder(ctx,     0, 4, { skin: 'light',  hair: 'gray' }, time),                          { baseObj: PEOPLE, baseKey: 'elder',     axes: PEOPLE.AXES.elder });
+add('people', 'Chef',      28, 52, (ctx, time) => PEOPLE.chef(ctx,      0, 8, { skin: 'light' }, time),                                         { baseObj: PEOPLE, baseKey: 'chef',      axes: PEOPLE.AXES.chef });
+add('people', 'Doctor',    28, 48, (ctx, time) => PEOPLE.doctor(ctx,    0, 4, { skin: 'light',  hair: 'brown' }, time),                         { baseObj: PEOPLE, baseKey: 'doctor',    axes: PEOPLE.AXES.doctor });
+add('people', 'Scientist', 28, 48, (ctx, time) => PEOPLE.scientist(ctx, 0, 4, { skin: 'light',  hair: 'red' }, time),                           { baseObj: PEOPLE, baseKey: 'scientist', axes: PEOPLE.AXES.scientist });
+add('people', 'Artist',    28, 48, (ctx, time) => PEOPLE.artist(ctx,    0, 4, { skin: 'light',  hair: 'pink' }, time),                          { baseObj: PEOPLE, baseKey: 'artist',    axes: PEOPLE.AXES.artist });
+add('people', 'Business',  28, 48, (ctx, time) => PEOPLE.business(ctx,  0, 4, { skin: 'light',  hair: 'brown', suit: 'black' }, time),          { baseObj: PEOPLE, baseKey: 'business',  axes: PEOPLE.AXES.business });
+add('people', 'Athlete',   28, 48, (ctx, time) => PEOPLE.athlete(ctx,   0, 4, { skin: 'medium', color: 'pink' }, time),                         { baseObj: PEOPLE, baseKey: 'athlete',   axes: PEOPLE.AXES.athlete });
+add('people', 'Wizard',    32, 56, (ctx, time) => PEOPLE.wizard(ctx,    0, 8, { color: 'violet' }, time),                                       { baseObj: PEOPLE, baseKey: 'wizard',    axes: PEOPLE.AXES.wizard });
+add('people', 'Witch',     28, 56, (ctx, time) => PEOPLE.witch(ctx,     0, 8, { hair: 'black',  color: 'violet' }, time),                       { baseObj: PEOPLE, baseKey: 'witch',     axes: PEOPLE.AXES.witch });
+add('people', 'Knight',    32, 52, (ctx, time) => PEOPLE.knight(ctx,    0, 4, { armor: 'silver' }, time),                                       { baseObj: PEOPLE, baseKey: 'knight',    axes: PEOPLE.AXES.knight });
+add('people', 'Farmer',    28, 48, (ctx, time) => PEOPLE.farmer(ctx,    0, 4, { skin: 'medium', hair: 'brown' }, time),                         { baseObj: PEOPLE, baseKey: 'farmer',    axes: PEOPLE.AXES.farmer });
+add('people', 'Royalty',   32, 56, (ctx, time) => PEOPLE.royalty(ctx, 4, 8, time));
+add('people', 'Ninja',     28, 48, (ctx, time) => PEOPLE.ninja(ctx, 4, 4, time));
+
+// ART
+add('art', 'Canvas',      48, 52, (ctx, time) => ART.canvas(ctx,     0, 4, { painting: 'abstract' }, time),                                { baseObj: ART, baseKey: 'canvas',    axes: ART.AXES.canvas });
+add('art', 'Palette',     48, 40, (ctx, time) => ART.palette(ctx,    0, 4, { used: 'fresh' }, time),                                       { baseObj: ART, baseKey: 'palette',   axes: ART.AXES.palette });
+add('art', 'Easel',       52, 76, (ctx, time) => ART.easel(ctx, 4, 4, time));
+add('art', 'Sculpture',   40, 60, (ctx, time) => ART.sculpture(ctx,  0, 4, { material: 'marble' }, time),                                  { baseObj: ART, baseKey: 'sculpture', axes: ART.AXES.sculpture });
+add('art', 'Charcoal',    36, 24, (ctx, time) => ART.charcoal(ctx, 4, 4, time));
+add('art', 'Paint Tube',  48, 24, (ctx, time) => ART.paintTube(ctx,  0, 4, { color: 'pink' }, time),                                       { baseObj: ART, baseKey: 'paintTube', axes: ART.AXES.paintTube });
+add('art', 'Brush Set',   52, 40, (ctx, time) => ART.brushSet(ctx, 4, 4, time));
+add('art', 'Frame',       68, 68, (ctx, time) => ART.frame(ctx,      0, 4, { style: 'ornate', color: 'amber' }, time),                     { baseObj: ART, baseKey: 'frame',     axes: ART.AXES.frame });
+add('art', 'Sketchbook',  48, 44, (ctx, time) => ART.sketchbook(ctx, 4, 4, time));
+
+// MEDICAL
+add('medical', 'Bandaid',       40, 24, (ctx, time) => MEDICAL.bandaid(ctx,        0, 4, { color: 'amber' }, time),                          { baseObj: MEDICAL, baseKey: 'bandaid',    axes: MEDICAL.AXES.bandaid });
+add('medical', 'Pill Bottle',   36, 48, (ctx, time) => MEDICAL.pillBottle(ctx,     0, 4, { color: 'amber' }, time),                          { baseObj: MEDICAL, baseKey: 'pillBottle', axes: MEDICAL.AXES.pillBottle });
+add('medical', 'Pill',          32, 24, (ctx, time) => MEDICAL.pill(ctx,           0, 4, { color: 'pink',   shape: 'capsule' }, time),       { baseObj: MEDICAL, baseKey: 'pill',       axes: MEDICAL.AXES.pill });
+add('medical', 'Syringe',       60, 24, (ctx, time) => MEDICAL.syringe(ctx, 4, 4, time));
+add('medical', 'Thermometer',   40, 48, (ctx, time) => MEDICAL.thermometer(ctx, 4, 4, time));
+add('medical', 'IV Bag',        40, 60, (ctx, time) => MEDICAL.ivBag(ctx,          0, 4, { fluid: 'red' }, time),                            { baseObj: MEDICAL, baseKey: 'ivBag',      axes: MEDICAL.AXES.ivBag });
+add('medical', 'First Aid Kit', 48, 40, (ctx, time) => MEDICAL.firstAidKit(ctx, 4, 4, time));
+add('medical', 'Stethoscope',   52, 52, (ctx, time) => MEDICAL.stethoscope(ctx, 4, 4, time));
+add('medical', 'Crutches',      40, 68, (ctx, time) => MEDICAL.crutches(ctx, 4, 4, time));
+add('medical', 'Mask',          40, 32, (ctx, time) => MEDICAL.mask(ctx,           0, 4, { color: 'blue' }, time),                           { baseObj: MEDICAL, baseKey: 'mask',       axes: MEDICAL.AXES.mask });
+add('medical', 'Heart Monitor', 68, 52, (ctx, time) => MEDICAL.heartMonitor(ctx, 4, 4, time));
+
+// SCENES — composed rooms (showcases the whole library)
+add('scenes', 'Bedroom',     248, 168, (ctx, time) => SCENES.bedroomScene(ctx,  0, 4, { palette: 'warm', time: 'day' }, time),       { baseObj: SCENES, baseKey: 'bedroomScene', axes: SCENES.AXES.bedroomScene });
+add('scenes', 'Kitchen',     248, 168, (ctx, time) => SCENES.kitchenScene(ctx,  0, 4, { palette: 'white' }, time),                   { baseObj: SCENES, baseKey: 'kitchenScene', axes: SCENES.AXES.kitchenScene });
+add('scenes', 'Living Room', 248, 168, (ctx, time) => SCENES.livingRoom(ctx,    0, 4, { palette: 'warm', time: 'dusk' }, time),       { baseObj: SCENES, baseKey: 'livingRoom',   axes: SCENES.AXES.livingRoom });
+add('scenes', 'Office',      248, 168, (ctx, time) => SCENES.officeRoom(ctx,    0, 4, { palette: 'white', state: 'working' }, time),  { baseObj: SCENES, baseKey: 'officeRoom',   axes: SCENES.AXES.officeRoom });
+add('scenes', 'Bathroom',    208, 148, (ctx, time) => SCENES.bathroomScene(ctx, 0, 4, { palette: 'white' }, time),                    { baseObj: SCENES, baseKey: 'bathroomScene',axes: SCENES.AXES.bathroomScene });
+add('scenes', 'Dining Room', 248, 168, (ctx, time) => SCENES.diningRoom(ctx,    0, 4, { palette: 'wood' }, time),                     { baseObj: SCENES, baseKey: 'diningRoom',   axes: SCENES.AXES.diningRoom });
+add('scenes', 'Cafe',        268, 168, (ctx, time) => SCENES.cafe(ctx,          0, 4, { time: 'dusk' }, time),                        { baseObj: SCENES, baseKey: 'cafe',         axes: SCENES.AXES.cafe });
+add('scenes', 'Lab',         248, 168, (ctx, time) => SCENES.lab(ctx,           0, 4, { state: 'active' }, time),                     { baseObj: SCENES, baseKey: 'lab',          axes: SCENES.AXES.lab });
+add('scenes', 'Wizard Room', 248, 168, (ctx, time) => SCENES.wizardRoom(ctx,    0, 4, { color: 'violet' }, time),                     { baseObj: SCENES, baseKey: 'wizardRoom',   axes: SCENES.AXES.wizardRoom });
+add('scenes', 'Garden',      248, 168, (ctx, time) => SCENES.gardenScene(ctx,   0, 4, { season: 'summer' }, time),                    { baseObj: SCENES, baseKey: 'gardenScene',  axes: SCENES.AXES.gardenScene });
+add('scenes', 'Street',      268, 188, (ctx, time) => SCENES.street(ctx,        0, 4, { time: 'dusk' }, time),                        { baseObj: SCENES, baseKey: 'street',       axes: SCENES.AXES.street });
+add('scenes', 'Classroom',   248, 168, (ctx, time) => SCENES.classroom(ctx,     0, 4, { state: 'busy' }, time),                       { baseObj: SCENES, baseKey: 'classroom',    axes: SCENES.AXES.classroom });
+
+// CARNIVAL — amusement park props
+add('carnival', 'Ferris Wheel',     68, 68, (ctx, time) => CARNIVAL.ferrisWheel(ctx, 4, 4, time));
+add('carnival', 'Carousel Horse',   40, 48, (ctx, time) => CARNIVAL.carouselHorse(ctx, 4, 4, time));
+add('carnival', 'Balloon Bunch',    36, 52, (ctx, time) => CARNIVAL.balloonBunch(ctx, 0, 4, { color: 'rainbow' }, time),                  { baseObj: CARNIVAL, baseKey: 'balloonBunch',     axes: CARNIVAL.AXES.balloonBunch });
+add('carnival', 'Ticket',           48, 28, (ctx, time) => CARNIVAL.ticket(ctx,        0, 4, { color: 'amber' }, time),                    { baseObj: CARNIVAL, baseKey: 'ticket',           axes: CARNIVAL.AXES.ticket });
+add('carnival', 'Popcorn Box',      36, 44, (ctx, time) => CARNIVAL.popcornBox(ctx, 4, 4, time));
+add('carnival', 'Cotton Candy',     32, 52, (ctx, time) => CARNIVAL.cottonCandyStick(ctx, 0, 4, { color: 'pink' }, time),                  { baseObj: CARNIVAL, baseKey: 'cottonCandyStick', axes: CARNIVAL.AXES.cottonCandyStick });
+add('carnival', 'Ring Toss Bottle', 24, 40, (ctx, time) => CARNIVAL.ringTossBottle(ctx, 4, 4, time));
+add('carnival', 'Prize Teddy',      40, 48, (ctx, time) => CARNIVAL.prizeTeddy(ctx,    0, 4, { color: 'brown' }, time),                    { baseObj: CARNIVAL, baseKey: 'prizeTeddy',       axes: CARNIVAL.AXES.prizeTeddy });
+add('carnival', 'Festival Flags',   68, 40, (ctx, time) => CARNIVAL.festivalFlags(ctx, 0, 4, { palette: 'rainbow' }, time),                { baseObj: CARNIVAL, baseKey: 'festivalFlags',    axes: CARNIVAL.AXES.festivalFlags });
+add('carnival', 'Gondola',          40, 48, (ctx, time) => CARNIVAL.gondola(ctx, 4, 4, time));
+
+// SCHOOL
+add('school', 'Chalkboard',      68, 44, (ctx, time) => SCHOOL.chalkboard(ctx, 4, 4, { content: 'math' }, time),    { baseObj: SCHOOL, baseKey: 'chalkboard',     axes: SCHOOL.AXES.chalkboard });
+add('school', 'School Desk',     36, 40, (ctx, time) => SCHOOL.schoolDesk(ctx, 4, 4, time));
+add('school', 'Locker',          28, 60, (ctx, time) => SCHOOL.locker(ctx, 4, 4, { color: 'blue' }, time),          { baseObj: SCHOOL, baseKey: 'locker',         axes: SCHOOL.AXES.locker });
+add('school', 'Globe',           32, 40, (ctx, time) => SCHOOL.globe(ctx, 4, 4, time));
+add('school', 'Hamster Cage',    48, 40, (ctx, time) => SCHOOL.hamsterCage(ctx, 4, 4, time));
+add('school', 'Supply Cabinet',  40, 52, (ctx, time) => SCHOOL.supplyCabinet(ctx, 4, 4, time));
+add('school', 'Art Easel',       36, 52, (ctx, time) => SCHOOL.artEasel(ctx, 4, 4, { painting: 'sunset' }, time),   { baseObj: SCHOOL, baseKey: 'artEasel',       axes: SCHOOL.AXES.artEasel });
+add('school', 'Periodic Table',  52, 36, (ctx, time) => SCHOOL.periodicTable(ctx, 4, 4, time));
+add('school', 'Lunch Tray',      40, 28, (ctx, time) => SCHOOL.lunchTray(ctx, 4, 4, time));
+add('school', 'School Backpack', 32, 36, (ctx, time) => SCHOOL.schoolBackpack(ctx, 4, 4, { color: 'pink' }, time),  { baseObj: SCHOOL, baseKey: 'schoolBackpack', axes: SCHOOL.AXES.schoolBackpack });
+add('school', 'School Bus',      68, 40, (ctx, time) => SCHOOL.schoolBus(ctx, 4, 4, time));
+
+// DINER
+add('diner', 'Diner Booth',      68, 48, (ctx, time) => DINER.dinerBooth(ctx, 4, 4, { color: 'red' }, time),         { baseObj: DINER, baseKey: 'dinerBooth',    axes: DINER.AXES.dinerBooth });
+add('diner', 'Diner Counter',    68, 40, (ctx, time) => DINER.dinerCounter(ctx, 4, 4, time));
+add('diner', 'Jukebox',          40, 60, (ctx, time) => DINER.jukebox(ctx, 4, 4, time));
+add('diner', 'Milkshake',        28, 44, (ctx, time) => DINER.milkshake(ctx, 4, 4, { flavor: 'vanilla' }, time),     { baseObj: DINER, baseKey: 'milkshake',     axes: DINER.AXES.milkshake });
+add('diner', 'Neon Sign',        60, 32, (ctx, time) => DINER.neonSign(ctx, 4, 4, { word: 'EAT' }, time),            { baseObj: DINER, baseKey: 'neonSign',      axes: DINER.AXES.neonSign });
+add('diner', 'Pie Display',      48, 44, (ctx, time) => DINER.pieDisplay(ctx, 4, 4, time));
+add('diner', 'Coffee Mug',       24, 24, (ctx, time) => DINER.coffeeMug(ctx, 4, 4, time));
+add('diner', 'Soda Glass',       24, 36, (ctx, time) => DINER.sodaGlass(ctx, 4, 4, { color: 'cola' }, time),         { baseObj: DINER, baseKey: 'sodaGlass',     axes: DINER.AXES.sodaGlass });
+add('diner', 'Ketchup Bottle',   18, 32, (ctx, time) => DINER.ketchupBottle(ctx, 4, 4, time));
+add('diner', 'Diner Stool',      24, 40, (ctx, time) => DINER.dinerStool(ctx, 4, 4, time));
+
+// === EXTERNAL ASSET PACKS (PNG sprite sheets, commercial-OK) ===
+
+// LIMEZU — Serene Village (CC BY 4.0)
+add('limezu',   'Serene Village 32x32 (sheet)', 200, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'limezu-serene-32',  200, 200));
+add('limezu',   'Serene Village 16x16 (sheet)', 200, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'limezu-serene-16',  200, 200));
+add('limezu',   'Serene Village 48x48 (sheet)', 200, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'limezu-serene-48',  200, 200));
+add('limezu',   'Campfire (anim)',  64, 64, (ctx, time) => SHEETS.animStrip(ctx, 16, 16, 'limezu-campfire', 32, 32, 4, time, 6, 32, 32));
+add('limezu',   'Door (anim)',      64, 32, (ctx, time) => SHEETS.animStrip(ctx, 16, 8,  'limezu-door',     16, 16, 4, time, 4, 32, 32));
+add('limezu',   'Water Waves',     200, 32, (ctx) => SHEETS.preview(ctx, 0, 0, 'limezu-water', 200, 32));
+
+// PENZILLA — Top Down Retro Interior
+add('penzilla', 'Floors & Walls (sheet)',     200, 100, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-floors',    200, 100));
+add('penzilla', 'Floors & Walls Open Doors',  200, 100, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-floors-od', 200, 100));
+add('penzilla', 'Doors & Windows (sheet)',    200, 110, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-doors',     200, 110));
+add('penzilla', 'Furniture State 1 (sheet)',  150, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-furn1',     150, 200));
+add('penzilla', 'Furniture State 2 (sheet)',  150, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-furn2',     150, 200));
+add('penzilla', 'Small Items (sheet)',        130, 130, (ctx) => SHEETS.preview(ctx, 0, 0, 'penzilla-small',     130, 130));
+
+// SNOWHEX — Pixel Plains
+add('snowhex',  'All Free Tiles (sheet)',     200, 100, (ctx) => SHEETS.preview(ctx, 0, 0, 'snowhex-all',   200, 100));
+add('snowhex',  'New Basic Tiles (sheet)',    200, 200, (ctx) => SHEETS.preview(ctx, 0, 0, 'snowhex-basic', 200, 200));
+add('snowhex',  'Trees & Bushes (sheet)',     200, 60,  (ctx) => SHEETS.preview(ctx, 0, 0, 'snowhex-trees', 200, 60));
+
+// PARTICLES / FX
+add('particles', 'Smoke',     40, 56, (ctx, time) => PARTICLES.smoke(ctx, 4, 4, time));
+add('particles', 'Fire',      36, 48, (ctx, time) => PARTICLES.fire(ctx, 4, 4, time));
+add('particles', 'Sparkle',   32, 32, (ctx, time) => PARTICLES.sparkle(ctx, 4, 4, time));
+add('particles', 'Rain',      28, 40, (ctx, time) => PARTICLES.raindrop(ctx, 4, 4, time));
+add('particles', 'Snow',      40, 40, (ctx, time) => PARTICLES.snow(ctx, 4, 4, time));
+add('particles', 'Leaves',    40, 40, (ctx, time) => PARTICLES.leaf(ctx, 4, 4, time));
+add('particles', 'Bubbles',   32, 48, (ctx, time) => PARTICLES.bubble(ctx, 4, 4, time));
+add('particles', 'Lightning', 32, 68, (ctx, time) => PARTICLES.lightning(ctx, 4, 4, time));
+add('particles', 'Dust',      40, 40, (ctx, time) => PARTICLES.dust(ctx, 4, 4, time));
+add('particles', 'Magic',     36, 36, (ctx, time) => PARTICLES.magic(ctx, 4, 4, time));
+add('particles', 'Electric',  48, 40, (ctx, time) => PARTICLES.electric(ctx, 4, 4, time));
+add('particles', 'Heart',     32, 32, (ctx, time) => PARTICLES.heart(ctx, 4, 4, time));
+
+// ============== CATEGORY ORDER ==============
+const CAT_ORDER = ['scenes', 'ui', 'architecture', 'buildings', 'tilesets', 'limezu', 'penzilla', 'snowhex', 'office', 'agents', 'people', 'wardrobe', 'kitchen', 'bathroom', 'bedroom', 'lamps', 'art', 'medical', 'school', 'diner', 'outdoor', 'garden', 'plants', 'animals', 'pets', 'vehicles', 'transport', 'electronics', 'tech', 'tools', 'instruments', 'food', 'breakfast', 'dishes', 'signs', 'sports', 'carnival', 'weather', 'seasonal', 'magical', 'cosmic', 'particles'];
+const CAT_LABELS = {
+  scenes: 'SCENES', ui: 'UI / ICONS', architecture: 'ARCHITECTURE', buildings: 'BUILDINGS',
+  tilesets: 'TILE SETS', limezu: 'LIMEZU · SERENE VILLAGE', penzilla: 'PENZILLA · INTERIORS', snowhex: 'SNOWHEX · PIXEL PLAINS',
+  office: 'OFFICE', agents: 'AGENTS', people: 'PEOPLE',
+  wardrobe: 'WARDROBE', kitchen: 'KITCHEN', bathroom: 'BATHROOM', bedroom: 'BEDROOM',
+  lamps: 'LAMPS', art: 'ART', medical: 'MEDICAL', school: 'SCHOOL', diner: 'DINER', outdoor: 'OUTDOOR',
+  garden: 'GARDEN', plants: 'PLANTS', animals: 'ANIMALS', pets: 'PETS',
+  vehicles: 'VEHICLES', transport: 'TRANSPORT', electronics: 'ELECTRONICS', tech: 'TECH',
+  tools: 'TOOLS', instruments: 'INSTRUMENTS', food: 'FOOD', breakfast: 'BREAKFAST',
+  dishes: 'DISHES', signs: 'SIGNS', sports: 'SPORTS', carnival: 'CARNIVAL',
+  weather: 'WEATHER', seasonal: 'SEASONAL', magical: 'MAGICAL', cosmic: 'COSMIC',
+  particles: 'PARTICLES'
+};
+
+// ============== STATE ==============
+let activeCat = 'all';
+let query = '';
+let featuredReg = null;
+let featureIndex = 0;
+
+// ============== RENDER ==============
+const tilesByEl = new Map();
+const main = document.getElementById('main');
+const chips = document.getElementById('chips');
+const totalCount = document.getElementById('total-count');
+const visibleCount = document.getElementById('visible-count');
+const showcase = document.getElementById('showcase');
+const showcaseCtx = showcase.getContext('2d');
+const featureKind = document.getElementById('feature-kind');
+const featureTitle = document.getElementById('feature-title');
+const featureSubtitle = document.getElementById('feature-subtitle');
+const featureNote = document.getElementById('feature-note');
+const featureOpenBtn = document.getElementById('feature-open-btn');
+const featureNextBtn = document.getElementById('feature-next-btn');
+const randomBtn = document.getElementById('random-btn');
+const showScenesBtn = document.getElementById('show-scenes-btn');
+const showBuildingsBtn = document.getElementById('show-buildings-btn');
+const goalProgress = document.getElementById('goal-progress');
+const goalBar = document.getElementById('goal-bar');
+const FEATURE_IDS = ['scenes.street', 'scenes.cafe', 'scenes.classroom', 'buildings.library', 'architecture.wall', 'agents.octavia', 'weather.aurora', 'ui.button'];
+const FEATURE_NOTES = {
+  'scenes.street': 'A public-facing street scene that reads like the RoadWorld city block, transit layer, and ambient social shell all at once.',
+  'scenes.cafe': 'A warm interior vignette suitable for public demos, social posts, and drop-in community room previews.',
+  'scenes.classroom': 'A classroom surface that connects directly to the educational lane in the product map.',
+  'buildings.library': 'A world object that can anchor districts, campus maps, and institutional spaces in BlackRoad pixel geography.',
+  'architecture.wall': 'Core architecture primitives are the bridge between handcrafted scenes and a real room or builder system.',
+  'agents.octavia': 'Agent sprites make the fleet visible and turn the operating model into something spatial and legible.',
+  'weather.aurora': 'Atmosphere tiles help scenes feel alive without needing a separate effects engine.',
+  'ui.button': 'UI sprites are how Pixel Foundry plugs back into RoadOS shells, overlays, and creator tools.'
+};
+const variantCountFor = reg => reg.axes ? Object.values(reg.axes).reduce((a, b) => a * b.length, 1) : 1;
+const byId = id => REG.find(r => r.id === id) || null;
+const setCategory = cat => {
+  activeCat = cat;
+  buildChips();
+  buildLayout();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+function setFeatured(reg) {
+  if (!reg) return;
+  featuredReg = reg;
+  const idx = FEATURE_IDS.indexOf(reg.id);
+  if (idx >= 0) featureIndex = idx;
+  featureKind.textContent = CAT_LABELS[reg.cat] || reg.cat.toUpperCase();
+  featureTitle.textContent = reg.name.toUpperCase();
+  const variants = variantCountFor(reg);
+  featureSubtitle.textContent = (CAT_LABELS[reg.cat] || reg.cat.toUpperCase()) + ' · ' + reg.w + '×' + reg.h + ' · ' + variants + (variants === 1 ? ' render' : ' variants');
+  featureNote.textContent = FEATURE_NOTES[reg.id] || ((CAT_LABELS[reg.cat] || reg.cat.toUpperCase()) + ' sprite ready for catalogs, scenes, and product surfaces.');
+  featureOpenBtn.textContent = reg.axes ? 'OPEN VARIANTS' : 'JUMP TO CATEGORY';
+}
+
+function cycleFeatured(step = 1) {
+  featureIndex = (featureIndex + step + FEATURE_IDS.length) % FEATURE_IDS.length;
+  setFeatured(byId(FEATURE_IDS[featureIndex]) || REG[0]);
+}
+
+function drawFeatured() {
+  showcaseCtx.fillStyle = '#090a10';
+  showcaseCtx.fillRect(0, 0, showcase.width, showcase.height);
+
+  for (let y = 0; y < showcase.height; y += 16) {
+    for (let x = 0; x < showcase.width; x += 16) {
+      showcaseCtx.fillStyle = ((x + y) / 16) % 2 === 0 ? '#0f1016' : '#0b0c12';
+      showcaseCtx.fillRect(x, y, 16, 16);
+    }
+  }
+
+  showcaseCtx.strokeStyle = '#1d1e26';
+  showcaseCtx.strokeRect(10.5, 10.5, showcase.width - 21, showcase.height - 21);
+  if (!featuredReg) return;
+
+  const temp = document.createElement('canvas');
+  temp.width = featuredReg.w;
+  temp.height = featuredReg.h;
+  const tempCtx = temp.getContext('2d');
+  tempCtx.imageSmoothingEnabled = false;
+  tempCtx.fillStyle = featuredReg.cat === 'scenes' ? '#18121f' : '#141522';
+  tempCtx.fillRect(0, 0, temp.width, temp.height);
+  featuredReg.draw(tempCtx, t);
+
+  const scale = Math.max(1, Math.floor(Math.min((showcase.width - 40) / featuredReg.w, (showcase.height - 40) / featuredReg.h)));
+  const dw = featuredReg.w * scale;
+  const dh = featuredReg.h * scale;
+  const dx = Math.floor((showcase.width - dw) / 2);
+  const dy = Math.floor((showcase.height - dh) / 2);
+  showcaseCtx.imageSmoothingEnabled = false;
+  showcaseCtx.drawImage(temp, dx, dy, dw, dh);
+
+  showcaseCtx.fillStyle = 'rgba(255,29,108,0.12)';
+  showcaseCtx.fillRect(12, showcase.height - 30, showcase.width - 24, 18);
+  showcaseCtx.fillStyle = '#fff';
+  showcaseCtx.font = '10px "JetBrains Mono", monospace';
+  showcaseCtx.fillText((CAT_LABELS[featuredReg.cat] || featuredReg.cat.toUpperCase()) + ' / ' + featuredReg.name.toUpperCase(), 18, showcase.height - 18);
+}
+
+// IO for lazy animation
+const io = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    const id = e.target.dataset.id;
+    if (e.isIntersecting) visibleTiles.add(id);
+    else visibleTiles.delete(id);
+  }
+}, { rootMargin: '120px' });
+
+function makeTile(reg, container, opts = {}) {
+  const div = document.createElement('div');
+  div.className = 'tile' + (reg.axes ? ' has-variants' : '');
+  div.dataset.id = reg.id + (opts.suffix || '');
+  const canvas = document.createElement('canvas');
+  canvas.width = reg.w; canvas.height = reg.h;
+  const label = document.createElement('p');
+  label.textContent = opts.label || reg.name;
+  div.appendChild(canvas); div.appendChild(label);
+  if (reg.axes) {
+    const totalVariants = Object.values(reg.axes).reduce((a, b) => a * b.length, 1);
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = totalVariants + ' VARIANTS';
+    div.appendChild(badge);
+    div.addEventListener('click', () => openDrawer(reg));
+  }
+  div.addEventListener('mouseenter', () => setFeatured(reg));
+  container.appendChild(div);
+  io.observe(div);
+  tilesByEl.set(div.dataset.id, { canvas, ctx: canvas.getContext('2d'), reg, draw: opts.draw || reg.draw });
+  return div;
+}
+
+function buildLayout() {
+  main.innerHTML = '';
+  const filtered = REG.filter(r => {
+    if (activeCat !== 'all' && r.cat !== activeCat) return false;
+    if (query && !r.name.toLowerCase().includes(query) && !r.cat.includes(query)) return false;
+    return true;
+  });
+  // group by cat preserving order
+  const groups = new Map();
+  for (const r of filtered) {
+    if (!groups.has(r.cat)) groups.set(r.cat, []);
+    groups.get(r.cat).push(r);
+  }
+  tilesByEl.clear();
+  visibleTiles.clear();
+  for (const cat of CAT_ORDER) {
+    if (!groups.has(cat)) continue;
+    const list = groups.get(cat);
+    const g = document.createElement('div');
+    g.className = 'group';
+    const h = document.createElement('h2');
+    h.innerHTML = CAT_LABELS[cat] + '<span class="gn">' + list.length + ' ITEMS</span>';
+    g.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+    g.appendChild(grid);
+    main.appendChild(g);
+    list.forEach(r => makeTile(r, grid));
+  }
+  if (filtered.length === 0) {
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = 'NO SPRITES MATCH';
+    main.appendChild(e);
+  }
+  visibleCount.textContent = filtered.length;
+}
+
+function buildChips() {
+  const counts = { all: REG.length };
+  REG.forEach(r => counts[r.cat] = (counts[r.cat] || 0) + 1);
+  const order = ['all', ...CAT_ORDER];
+  chips.innerHTML = '';
+  for (const cat of order) {
+    if (cat !== 'all' && !counts[cat]) continue;
+    const c = document.createElement('button');
+    c.className = 'chip' + (cat === activeCat ? ' active' : '');
+    c.textContent = (cat === 'all' ? 'ALL' : CAT_LABELS[cat] || cat.toUpperCase());
+    const n = document.createElement('span');
+    n.className = 'n'; n.textContent = counts[cat];
+    c.appendChild(n);
+    c.addEventListener('click', () => { activeCat = cat; buildChips(); buildLayout(); });
+    chips.appendChild(c);
+  }
+}
+
+// ============== DRAWER (variant explorer) ==============
+const drawer = document.getElementById('drawer');
+const drawerTitle = document.getElementById('drawer-title');
+const drawerAxes = document.getElementById('drawer-axes');
+const drawerClose = document.getElementById('drawer-close');
+const vgrid = document.getElementById('vgrid');
+drawerClose.addEventListener('click', () => drawer.classList.remove('open'));
+
+function openDrawer(reg) {
+  setFeatured(reg);
+  drawerTitle.textContent = reg.cat.toUpperCase() + ' · ' + reg.name.toUpperCase() + ' VARIANTS';
+  drawerAxes.innerHTML = '';
+  for (const k of Object.keys(reg.axes)) {
+    const a = document.createElement('span');
+    a.className = 'axis';
+    a.innerHTML = k + ': <b>' + reg.axes[k].length + '</b>';
+    drawerAxes.appendChild(a);
+  }
+  vgrid.innerHTML = '';
+  // remove any prior tracking for vgrid tiles
+  for (const k of [...tilesByEl.keys()]) if (k.startsWith('v:' + reg.id)) tilesByEl.delete(k);
+  // expand all combos
+  const combos = VARIANTS.expand(reg.axes);
+  combos.forEach((opts, i) => {
+    const label = Object.values(opts).join(' · ');
+    const stub = {
+      id: 'v:' + reg.id + ':' + i,
+      cat: reg.cat,
+      name: label,
+      w: reg.w, h: reg.h,
+      draw: (ctx, time) => reg.baseObj[reg.baseKey](ctx, 0, 0, opts, time)
+    };
+    makeTile(stub, vgrid, { suffix: ':' + i });
+  });
+  drawer.classList.add('open');
+}
+
+// ============== ANIMATION ==============
+function tick() {
+  t++;
+  drawFeatured();
+  for (const id of visibleTiles) {
+    const tile = tilesByEl.get(id);
+    if (!tile) continue;
+    tile.ctx.fillStyle = '#1a1a2e';
+    tile.ctx.fillRect(0, 0, tile.canvas.width, tile.canvas.height);
+    tile.draw(tile.ctx, t);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ============== SEARCH ==============
+document.getElementById('q').addEventListener('input', e => {
+  query = e.target.value.toLowerCase().trim();
+  buildLayout();
+});
+
+featureOpenBtn.addEventListener('click', () => {
+  if (!featuredReg) return;
+  if (featuredReg.axes) openDrawer(featuredReg);
+  else setCategory(featuredReg.cat);
+});
+
+featureNextBtn.addEventListener('click', () => cycleFeatured(1));
+randomBtn.addEventListener('click', () => setFeatured(REG[Math.floor(Math.random() * REG.length)]));
+showScenesBtn.addEventListener('click', () => setCategory('scenes'));
+showBuildingsBtn.addEventListener('click', () => setCategory('buildings'));
+
+document.querySelectorAll('.quick-link').forEach(btn => {
+  btn.addEventListener('click', () => setCategory(btn.dataset.jump));
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && document.activeElement !== document.getElementById('q')) {
+    e.preventDefault();
+    document.getElementById('q').focus();
+  } else if (e.key.toLowerCase() === 'r' && !e.metaKey && !e.ctrlKey && document.activeElement !== document.getElementById('q')) {
+    e.preventDefault();
+    setFeatured(REG[Math.floor(Math.random() * REG.length)]);
+  } else if (e.key === 'Escape') {
+    drawer.classList.remove('open');
+    if (document.activeElement === document.getElementById('q')) document.getElementById('q').blur();
+  }
+});
+
+// ============== BOOT ==============
+const variantTotal = REG.reduce((s, r) => s + (r.axes ? Object.values(r.axes).reduce((a, b) => a * b.length, 1) : 1), 0);
+const variantableCount = REG.filter(r => r.axes).length;
+totalCount.textContent = REG.length;
+document.getElementById('variant-count').textContent = variantTotal;
+document.getElementById('metric-categories').textContent = CAT_ORDER.filter(cat => REG.some(r => r.cat === cat)).length;
+document.getElementById('metric-scenes').textContent = REG.filter(r => r.cat === 'scenes').length;
+document.getElementById('metric-agents').textContent = REG.filter(r => r.cat === 'agents').length;
+document.getElementById('metric-variantable').textContent = variantableCount;
+goalProgress.textContent = Math.min(999, Math.round((variantTotal / GOAL) * 100)) + '%';
+goalBar.style.width = Math.min(100, (variantTotal / GOAL) * 100) + '%';
+buildChips();
+buildLayout();
+setFeatured(byId(FEATURE_IDS[0]) || REG[0]);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

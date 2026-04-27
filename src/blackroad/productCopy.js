@@ -68,8 +68,12 @@ export function getProductCopy(productId) {
       eyebrow: `BlackRoad OS / ${p.name}`,
       headline: p.oneLine,
       subheadline: p.longDescription,
-      primaryCTA: { label: `Open ${p.name}`, url: `https://os.blackroad.io/open/${p.id}` },
-      secondaryCTA: { label: 'Learn more', url: `https://${p.domain}/about` }
+      primaryCTA: p.id === 'roadworld'
+        ? { label: 'Open okReusePixel', url: 'https://blackroad.io/home/apps/OkReusePixel/' }
+        : { label: `Open ${p.name}`, url: `https://os.blackroad.io/open/${p.id}` },
+      secondaryCTA: p.id === 'roadworld'
+        ? { label: 'Open PixelTown', url: 'https://blackroad.io/home/apps/PixelTown/' }
+        : { label: 'Learn more', url: `https://${p.domain}/about` }
     },
 
     // Footer

@@ -111,6 +111,15 @@ function renderSection(section) {
     case 'os-integration':
       return `<div class="br-section"><div class="br-section-title">${section.heading}</div><p style="color:var(--br-muted)">${section.text}</p><div style="margin-top:var(--br-gap-md)"><a href="${section.cta.url}" class="br-btn br-btn--secondary">${section.cta.label}</a></div></div>`;
 
+    case 'builder-tools':
+      const toolCards = section.items.map((item) => `
+        <a href="${item.url}" class="br-product-card">
+          <div class="br-product-card__name">${item.label}</div>
+          <div class="br-product-card__line">${item.note}</div>
+        </a>
+      `).join('');
+      return `<div class="br-section"><div class="br-section-title">${section.heading}</div><p style="color:var(--br-muted);margin-bottom:var(--br-gap-md)">${section.text}</p><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:var(--br-gap-md)">${toolCards}</div></div>`;
+
     case 'trust':
       const qas = section.items.map(i => `<div style="margin-bottom:var(--br-gap-md)"><div class="br-mono" style="margin-bottom:var(--br-gap-xs)">${i.question}</div><p style="color:var(--br-muted);font-size:13px">${i.answer}</p></div>`).join('');
       return `<div class="br-section"><div class="br-section-title">${section.heading}</div>${qas}<p class="br-mono" style="margin-top:var(--br-gap-lg);font-size:11px">${section.roadNodeCopy}</p></div>`;
