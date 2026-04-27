@@ -122,6 +122,11 @@
   let selection = null; // { x, y, w, h }
   let isSelecting = false;
   let selStart = null;  // { mx, my }
+
+  /** @type {{ id: string, name: string, w: number, h: number, layers: { atlasId: string, tiles: number[] }[] }[]} */
+  let stamps = [];
+  let activeStampId = null; // when set, click-on-map places this stamp instead of painting
+  let stampPreviewCell = null; // { mx, my } for hover preview
   /** @type {{ atlasIdx: number, tiles: Int32Array, visible: boolean }[]} */
   let layers = [];
   const atlasImages = new Array(ATLASES.length).fill(null);
@@ -150,6 +155,9 @@
   const elLoadFile = document.getElementById('loadFile');
   const elBrushSize = document.getElementById('brushSize');
   const elExportBtn = document.getElementById('exportBtn');
+  const elSaveStampBtn = document.getElementById('saveStampBtn');
+  const elClearStampsBtn = document.getElementById('clearStampsBtn');
+  const elStampList = document.getElementById('stampList');
   const elAtlasMeta = document.getElementById('atlasMeta');
   const elTileStatus = document.getElementById('tileStatus');
   const elMapStatus = document.getElementById('mapStatus');
@@ -380,6 +388,45 @@
       mapCtx.lineWidth = 2 / (dpr * mapView.zoom);
       mapCtx.strokeRect(x * baseTS + 0.5, y * baseTS + 0.5, w * baseTS, h * baseTS);
     }
+
+    // Stamp placement preview
+    if (activeStampId && stampPreviewCell) {
+      const stamp = stamps.find((s) => s.id === activeStampId);
+      if (stamp) {
+        const { mx, my } = stampPreviewCell;
+        mapCtx.globalAlpha = 0.6;
+        for (const sl of stamp.layers) {
+          const aIdx = ATLASES.findIndex((a) => a.id === sl.atlasId);
+          if (aIdx < 0) continue;
+          const img = atlasImages[aIdx];
+          const m = atlasMeta[aIdx];
+          if (!img || !m || !m.ready) continue;
+          const a = ATLASES[aIdx];
+          const animOn = isAnim(aIdx);
+          const across = animOn ? 1 : Math.max(1, Math.floor(m.w / a.tileSize));
+          const frame = animOn ? currentAnimFrame(a) : 0;
+          for (let dy = 0; dy < stamp.h; dy++) {
+            for (let dx = 0; dx < stamp.w; dx++) {
+              const t = sl.tiles[dy * stamp.w + dx];
+              if (t < 0) continue;
+              let sx, sy;
+              if (animOn) { sx = frame * a.tileSize; sy = 0; }
+              else { sx = (t % across) * a.tileSize; sy = Math.floor(t / across) * a.tileSize; }
+              mapCtx.drawImage(
+                img,
+                sx, sy, a.tileSize, a.tileSize,
+                (mx + dx) * baseTS, (my + dy) * baseTS, baseTS, baseTS
+              );
+            }
+          }
+        }
+        mapCtx.globalAlpha = 1.0;
+        // Footprint outline
+        mapCtx.strokeStyle = 'rgba(245,200,90,0.95)';
+        mapCtx.lineWidth = 2 / (dpr * mapView.zoom);
+        mapCtx.strokeRect(mx * baseTS + 0.5, my * baseTS + 0.5, stamp.w * baseTS, stamp.h * baseTS);
+      }
+    }
   }
 
   function drawAll() { drawAtlas(); drawMap(); }
@@ -519,6 +566,15 @@
 
   mapCanvas.addEventListener('mousedown', (ev) => {
     if (spaceDown || ev.button === 1 || ev.altKey) return;
+    // Stamp placement mode trumps tool when active
+    if (activeStampId && ev.button === 0) {
+      const stamp = stamps.find((s) => s.id === activeStampId);
+      if (!stamp) return;
+      const { mx, my } = mapCellOf(ev);
+      if (mx < 0 || my < 0) return;
+      placeStampAt(stamp, mx, my);
+      return;
+    }
     if (tool === 'paint') {
       if (ev.button === 2) { paintAt(ev, true); return; }
       if (ev.button === 0) { paintAt(ev, false); }
@@ -538,6 +594,12 @@
   });
   mapCanvas.addEventListener('mousemove', (ev) => {
     if (spaceDown) return;
+    if (activeStampId) {
+      const { mx, my } = mapCellOf(ev);
+      stampPreviewCell = { mx, my };
+      drawMap();
+      return;
+    }
     if (tool === 'paint') {
       if (ev.buttons === 1) paintAt(ev, false);
       if (ev.buttons === 2) paintAt(ev, true);
@@ -654,6 +716,15 @@
     brushSize = clamp(parseInt(elBrushSize.value, 10) || 1, 1, 5);
   });
 
+  elSaveStampBtn.addEventListener('click', saveSelectionAsStamp);
+  elClearStampsBtn.addEventListener('click', () => {
+    if (stamps.length === 0) return;
+    if (!confirm(`Delete all ${stamps.length} stamps?`)) return;
+    stamps = []; activeStampId = null;
+    saveToStorage();
+    renderStamps();
+  });
+
   function setTool(t) {
     tool = t;
     document.querySelectorAll('#toolGroup .tool').forEach((b) => {
@@ -696,6 +767,7 @@
         visible: L.visible,
         tiles: Array.from(L.tiles),
       })),
+      stamps,
     };
   }
 
@@ -718,12 +790,163 @@
     }
     layers = newLayers;
     activeLayer = clamp(data.activeLayer || 0, 0, N_LAYERS - 1);
+    stamps = Array.isArray(data.stamps) ? data.stamps : [];
+    activeStampId = null;
     const used = new Set(layers.map((L) => L.atlasIdx));
+    // Also preload atlases used by any saved stamp so thumbnails render
+    for (const s of stamps) for (const sl of s.layers) {
+      const aIdx = ATLASES.findIndex((a) => a.id === sl.atlasId);
+      if (aIdx >= 0) used.add(aIdx);
+    }
     await Promise.all([...used].map((i) => ensureAtlasLoaded(i)));
     elAtlasSelect.value = String(activeAtlasIdx());
     elHudBar.src = activeAtlas().hudBar;
     elTileSize.value = String(activeAtlas().tileSize);
-    refreshAtlasMetaUI(); renderLayerTabs(); updateTileStatus(); drawAll();
+    refreshAtlasMetaUI(); renderLayerTabs(); renderStamps(); updateTileStatus(); drawAll();
+  }
+
+  // ============== STAMPS ==============
+  function captureStampFromSelection() {
+    if (!selection) return null;
+    const { x, y, w, h } = selection;
+    const stampLayers = layers.map((L) => {
+      const tiles = new Array(w * h).fill(-1);
+      for (let dy = 0; dy < h; dy++) {
+        for (let dx = 0; dx < w; dx++) {
+          const sx = x + dx, sy = y + dy;
+          if (sx >= 0 && sy >= 0 && sx < mapW && sy < mapH) {
+            tiles[dy * w + dx] = L.tiles[sy * mapW + sx];
+          }
+        }
+      }
+      return { atlasId: ATLASES[L.atlasIdx].id, tiles };
+    });
+    // Skip if all layers empty
+    const anyTile = stampLayers.some((sl) => sl.tiles.some((t) => t >= 0));
+    if (!anyTile) return null;
+    return { w, h, layers: stampLayers };
+  }
+
+  function saveSelectionAsStamp() {
+    const captured = captureStampFromSelection();
+    if (!captured) {
+      elMapStatus.textContent = 'Select a non-empty region first (V tool)';
+      return;
+    }
+    const name = (prompt('Stamp name:', `stamp-${stamps.length + 1}`) || '').trim();
+    if (!name) return;
+    const id = 'st_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    stamps.push({ id, name, ...captured });
+    saveToStorage();
+    renderStamps();
+    elMapStatus.textContent = `Saved stamp "${name}" (${captured.w}×${captured.h})`;
+  }
+
+  function deleteStamp(id) {
+    stamps = stamps.filter((s) => s.id !== id);
+    if (activeStampId === id) activeStampId = null;
+    saveToStorage();
+    renderStamps();
+  }
+
+  function placeStampAt(stamp, mx, my) {
+    // Anchor at (mx, my) = top-left of stamp footprint
+    let placed = false;
+    stamp.layers.forEach((sl, li) => {
+      if (li >= layers.length) return;
+      const aIdx = ATLASES.findIndex((a) => a.id === sl.atlasId);
+      if (aIdx < 0) return;
+      // Switch this layer's atlas to match the stamp's source so visuals match
+      if (layers[li].atlasIdx !== aIdx) layers[li].atlasIdx = aIdx;
+      for (let dy = 0; dy < stamp.h; dy++) {
+        for (let dx = 0; dx < stamp.w; dx++) {
+          const t = sl.tiles[dy * stamp.w + dx];
+          if (t < 0) continue;
+          const tx = mx + dx, ty = my + dy;
+          if (tx < 0 || ty < 0 || tx >= mapW || ty >= mapH) continue;
+          layers[li].tiles[ty * mapW + tx] = t;
+          placed = true;
+        }
+      }
+    });
+    if (placed) {
+      // Ensure the newly-referenced atlases are loaded
+      const used = new Set(layers.map((L) => L.atlasIdx));
+      Promise.all([...used].map((i) => ensureAtlasLoaded(i))).then(() => {
+        renderLayerTabs();
+        elAtlasSelect.value = String(activeAtlasIdx());
+        elTileSize.value = String(activeAtlas().tileSize);
+        elHudBar.src = activeAtlas().hudBar;
+        refreshAtlasMetaUI();
+        updateTileStatus();
+        drawAll();
+      });
+      saveToStorageDebounced();
+    }
+  }
+
+  function renderStamps() {
+    elStampList.innerHTML = '';
+    if (stamps.length === 0) {
+      const empty = document.createElement('span');
+      empty.textContent = 'no stamps yet — drag-select on map then "Save selection"';
+      empty.style.color = 'var(--muted)';
+      empty.style.fontStyle = 'italic';
+      elStampList.appendChild(empty);
+      return;
+    }
+    for (const s of stamps) {
+      const el = document.createElement('div');
+      el.className = 'stamp' + (s.id === activeStampId ? ' active' : '');
+      const c = document.createElement('canvas');
+      c.width = 32; c.height = 32;
+      drawStampThumbnail(c.getContext('2d'), s);
+      el.appendChild(c);
+      const name = document.createElement('span');
+      name.className = 'stampName';
+      name.textContent = `${s.name} ${s.w}×${s.h}`;
+      el.appendChild(name);
+      const x = document.createElement('span');
+      x.className = 'x';
+      x.textContent = '×';
+      x.title = 'Delete';
+      x.addEventListener('click', (e) => { e.stopPropagation(); deleteStamp(s.id); });
+      el.appendChild(x);
+      el.addEventListener('click', () => {
+        activeStampId = activeStampId === s.id ? null : s.id;
+        renderStamps();
+        elMapStatus.textContent = activeStampId ? `Place mode: "${s.name}" — click on map (Esc to cancel)` : 'Stamp deselected';
+      });
+      elStampList.appendChild(el);
+    }
+  }
+
+  function drawStampThumbnail(g, stamp) {
+    g.fillStyle = '#0c0c14';
+    g.fillRect(0, 0, 32, 32);
+    const cellW = 32 / stamp.w;
+    const cellH = 32 / stamp.h;
+    g.imageSmoothingEnabled = false;
+    for (const sl of stamp.layers) {
+      const aIdx = ATLASES.findIndex((a) => a.id === sl.atlasId);
+      if (aIdx < 0) continue;
+      const img = atlasImages[aIdx];
+      const m = atlasMeta[aIdx];
+      if (!img || !m || !m.ready) continue;
+      const a = ATLASES[aIdx];
+      const animOn = isAnim(aIdx);
+      const across = animOn ? 1 : Math.max(1, Math.floor(m.w / a.tileSize));
+      for (let dy = 0; dy < stamp.h; dy++) {
+        for (let dx = 0; dx < stamp.w; dx++) {
+          const t = sl.tiles[dy * stamp.w + dx];
+          if (t < 0) continue;
+          let sx, sy;
+          if (animOn) { sx = 0; sy = 0; }
+          else { sx = (t % across) * a.tileSize; sy = Math.floor(t / across) * a.tileSize; }
+          g.drawImage(img, sx, sy, a.tileSize, a.tileSize, dx * cellW, dy * cellH, cellW, cellH);
+        }
+      }
+    }
   }
 
   // ============== EXPORT AS PLAYABLE HTML ==============
@@ -1008,7 +1231,17 @@ Promise.all(promises).then(() => {
     if (ev.key === 'x' || ev.key === 'X') { setTool('erase'); return; }
     if (ev.key === 'e' || ev.key === 'E') { setTool('eyedropper'); return; }
     if (ev.key === 'v' || ev.key === 'V') { setTool('select'); return; }
-    if (ev.key === 'Escape') { selection = null; drawMap(); return; }
+    if (ev.key === 'Escape') {
+      selection = null;
+      if (activeStampId) {
+        activeStampId = null;
+        stampPreviewCell = null;
+        renderStamps();
+        elMapStatus.textContent = 'Stamp placement cancelled';
+      }
+      drawMap();
+      return;
+    }
     if ((ev.key === 'Delete' || ev.key === 'Backspace') && selection) {
       clearSelectionInActiveLayer();
       ev.preventDefault();
@@ -1073,6 +1306,7 @@ Promise.all(promises).then(() => {
       activeLayer = 0;
     }
     renderLayerTabs();
+    renderStamps();
     elAtlasSelect.value = String(activeAtlasIdx());
     elHudBar.src = activeAtlas().hudBar;
     elHudBar.style.imageRendering = 'pixelated';

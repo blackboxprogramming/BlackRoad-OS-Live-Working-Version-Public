@@ -465,6 +465,32 @@ function renderPrimer(item) {
   `;
 }
 
+function renderRitual(item) {
+  return `
+    <div class="system-panel-ritual">
+      <div class="system-panel-ritual-label">${escapeHtml(item.label || '')}</div>
+      <div class="system-panel-ritual-title">${escapeHtml(item.title || '')}</div>
+      <div class="system-panel-ritual-lines">
+        <div class="system-panel-ritual-line">
+          <span class="system-panel-ritual-key">Practice</span>
+          <span class="system-panel-ritual-value">${escapeHtml(item.practice || '')}</span>
+        </div>
+        <div class="system-panel-ritual-line">
+          <span class="system-panel-ritual-key">Frequency</span>
+          <span class="system-panel-ritual-value">${escapeHtml(item.frequency || '')}</span>
+        </div>
+        <div class="system-panel-ritual-line">
+          <span class="system-panel-ritual-key">Purpose</span>
+          <span class="system-panel-ritual-value">${escapeHtml(item.purpose || '')}</span>
+        </div>
+      </div>
+      <div class="system-panel-ritual-actions">
+        ${(item.actions || []).map((action) => renderInlineAction(action, 'system-panel-ritual-action')).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderWidget(widget) {
   const body = widget.kind === 'facts'
     ? `<div class="system-panel-facts">${(widget.items || []).map(renderFact).join('')}</div>`
@@ -474,6 +500,8 @@ function renderWidget(widget) {
         ? `<div class="system-panel-spotlights">${(widget.items || []).map(renderSpotlight).join('')}</div>`
         : widget.kind === 'primers'
           ? `<div class="system-panel-primers">${(widget.items || []).map(renderPrimer).join('')}</div>`
+          : widget.kind === 'rituals'
+            ? `<div class="system-panel-rituals">${(widget.items || []).map(renderRitual).join('')}</div>`
         : widget.kind === 'briefs'
           ? `<div class="system-panel-briefs">${(widget.items || []).map(renderBrief).join('')}</div>`
         : widget.kind === 'runbooks'

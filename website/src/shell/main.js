@@ -831,6 +831,19 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    rituals: [
+      {
+        label: 'Weekly sync',
+        title: 'Executive team alignment',
+        practice: 'Gather for crew alignment on road status, blockers, and next steps',
+        frequency: 'Weekly on Monday mornings',
+        purpose: 'Keep crew moving together without losing executive focus',
+        actions: [
+          { label: 'Open RoadTrip', query: 'open roadtrip' },
+          { label: 'Check agents', query: 'agents' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Agenda prep',
@@ -1158,6 +1171,19 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
           { label: 'Open OneWay', query: 'open oneway' },
           { label: 'Open RoadWork', query: 'open roadwork' },
           { label: 'Open todo', query: 'todo' },
+        ],
+      },
+    ],
+    rituals: [
+      {
+        label: 'Build review',
+        title: 'Deployment readiness ritual',
+        practice: 'Review build status, gates, and deployment checklist',
+        frequency: 'Daily before deployment window',
+        purpose: 'Ensure all code changes are ready and gates are clear',
+        actions: [
+          { label: 'Open RoadCode', query: 'open roadcode' },
+          { label: 'Check status', query: 'status' },
         ],
       },
     ],
@@ -1490,6 +1516,19 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    rituals: [
+      {
+        label: 'Daily standup',
+        title: 'Execution team alignment',
+        practice: 'Review work items, blockers, and team capacity for the day',
+        frequency: 'Daily at start of work',
+        purpose: 'Align crew on what is being executed and what blocks need solving',
+        actions: [
+          { label: 'Open RoadWork', query: 'open roadwork' },
+          { label: 'Open collab', query: 'collab' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Work prep',
@@ -1817,6 +1856,19 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
           { label: 'Open RoadBook', query: 'open roadbook' },
           { label: 'Open BackRoad', query: 'open backroad' },
           { label: 'Open docs', query: 'docs' },
+        ],
+      },
+    ],
+    rituals: [
+      {
+        label: 'Clarity checkpoint',
+        title: 'Knowledge synthesis ritual',
+        practice: 'Review signal sources, reconcile context, update knowledge graph',
+        frequency: 'Weekly or when new data arrives',
+        purpose: 'Keep the room\'s understanding of the world current and aligned',
+        actions: [
+          { label: 'Open RoadView', query: 'open roadview' },
+          { label: 'Open search', query: 'search' },
         ],
       },
     ],
@@ -2152,6 +2204,19 @@ const FLAGSHIP_SITE_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    rituals: [
+      {
+        label: 'Knowledge refresh',
+        title: 'Documentation currency ritual',
+        practice: 'Audit and refresh documentation against current reality',
+        frequency: 'Weekly',
+        purpose: 'Keep docs current and operators finding what they need',
+        actions: [
+          { label: 'Open docs', query: 'docs' },
+          { label: 'Open search', query: 'search' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Documentation prep',
@@ -2478,6 +2543,19 @@ const FLAGSHIP_SITE_WORKSPACE_CONFIGS = {
           { label: 'Open Olympia', query: 'agent olympia' },
           { label: 'Open Alice', query: 'agent alice' },
           { label: 'Open sites', query: 'sites' },
+        ],
+      },
+    ],
+    rituals: [
+      {
+        label: 'Health check',
+        title: 'System status review ritual',
+        practice: 'Review metrics, alerts, and system health dashboards',
+        frequency: 'Daily',
+        purpose: 'Catch problems early and keep operations running smoothly',
+        actions: [
+          { label: 'Open status', query: 'status' },
+          { label: 'Check live', query: 'live' },
         ],
       },
     ],
@@ -2811,6 +2889,19 @@ const FLAGSHIP_SITE_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    rituals: [
+      {
+        label: 'Operator sync',
+        title: 'Agent team alignment',
+        practice: 'Review operator availability, capacity, and assignments',
+        frequency: 'Daily',
+        purpose: 'Know who is available and where resources should go',
+        actions: [
+          { label: 'Open agents', query: 'agents' },
+          { label: 'Check live', query: 'live' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Agent prep',
@@ -3141,6 +3232,19 @@ const FLAGSHIP_SITE_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    rituals: [
+      {
+        label: 'Index refresh',
+        title: 'Search quality ritual',
+        practice: 'Refresh search indexes and verify operators can find what they need',
+        frequency: 'Weekly',
+        purpose: 'Keep search responsive and accurate for knowledge discovery',
+        actions: [
+          { label: 'Open search', query: 'search' },
+          { label: 'Open docs', query: 'docs' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Search prep',
@@ -3467,6 +3571,19 @@ const FLAGSHIP_SITE_WORKSPACE_CONFIGS = {
           { label: 'Open RoadWorld', query: 'open roadworld' },
           { label: 'Open HighWay', query: 'open highway' },
           { label: 'Open RoadChain', query: 'open roadchain' },
+        ],
+      },
+    ],
+    rituals: [
+      {
+        label: 'Map sync',
+        title: 'Knowledge topology ritual',
+        practice: 'Update knowledge map with new relationships and connections',
+        frequency: 'Weekly',
+        purpose: 'Keep the map of how things connect up to date and navigable',
+        actions: [
+          { label: 'Open atlas', query: 'atlas' },
+          { label: 'Open search', query: 'search' },
         ],
       },
     ],
@@ -4672,6 +4789,29 @@ function buildPrimerItems(items = [], limit = 2) {
   return compact(items).slice(0, limit);
 }
 
+function createRitualItem(label, title, practice, frequency, purpose, actions = []) {
+  if (!title || !practice || !frequency || !purpose || !actions.length) return null;
+  return {
+    label,
+    title: String(title),
+    practice: String(practice),
+    frequency: String(frequency),
+    purpose: String(purpose),
+    actions: compact(actions.map((action) => (action?.label && (action?.query || action?.href || action?.surfaceId)
+      ? {
+          label: String(action.label),
+          query: action.query || null,
+          href: action.href || null,
+          surfaceId: action.surfaceId || null,
+        }
+      : null))),
+  };
+}
+
+function buildRitualItems(items = [], limit = 2) {
+  return compact(items).slice(0, limit);
+}
+
 function buildBoardColumns(columns = [], limit = 3) {
   return compact(columns.map((column) => {
     const items = compact(column.items || []).slice(0, limit);
@@ -4936,6 +5076,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
           title: 'Primer cards',
           note: 'Setup steps before the briefing starts',
           items: primerItems,
+        }
+      : null,
+    ritualItems.length
+      ? {
+          kind: 'rituals',
+          title: 'Ritual cards',
+          note: 'Recurring practices that keep the room moving',
+          items: ritualItems,
         }
       : null,
     boardColumns.length
@@ -5212,6 +5360,14 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
           title: 'Primer cards',
           note: 'Setup steps before the briefing starts',
           items: primerItems,
+        }
+      : null,
+    ritualItems.length
+      ? {
+          kind: 'rituals',
+          title: 'Ritual cards',
+          note: 'Recurring practices that keep the room moving',
+          items: ritualItems,
         }
       : null,
     boardColumns.length
