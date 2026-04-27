@@ -1287,6 +1287,30 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    flows: [
+      {
+        label: 'Weekly briefing',
+        title: 'Team synchronization and decision preparation',
+        pattern: 'Crew meets weekly to align on decisions and hand off next work',
+        steps: '1. Load last meeting notes. 2. Review signals and blockers. 3. Converge on key decisions. 4. Hand off to RoadWork.',
+        outcome: 'Team aligned, decisions made, next week\'s work clear',
+        actions: [
+          { label: 'Open RoadTrip', query: 'open roadtrip' },
+          { label: 'Load last session', query: 'memory roadtrip' },
+        ],
+      },
+      {
+        label: 'Ad-hoc escalation',
+        title: 'Handle unexpected blockers and urgent decisions',
+        pattern: 'When the room hits a blocker, convene to resolve or escalate',
+        steps: '1. Surface the blocker. 2. Get relevant experts in room. 3. Make decision or escalate. 4. Execute the resolution.',
+        outcome: 'Blocker resolved or properly escalated, forward motion restored',
+        actions: [
+          { label: 'View blockers', query: 'tripwires roadtrip' },
+          { label: 'Open support', query: 'open roadside' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Agenda prep',
@@ -5295,6 +5319,26 @@ function buildLaneItems(items = [], limit = 2) {
   return compact(items).slice(0, limit);
 }
 
+function createFlowItem(label, title, pattern, steps, outcome, actions) {
+  return {
+    label: String(label),
+    title: String(title),
+    pattern: String(pattern),
+    steps: String(steps),
+    outcome: String(outcome),
+    actions: (actions || []).map((action) => ({
+      label: String(action.label),
+      query: action.query || null,
+      href: action.href || null,
+      surfaceId: action.surfaceId || null,
+    })),
+  };
+}
+
+function buildFlowItems(items = [], limit = 3) {
+  return compact(items).slice(0, limit);
+}
+
 function buildBoardColumns(columns = [], limit = 3) {
   return compact(columns.map((column) => {
     const items = compact(column.items || []).slice(0, limit);
@@ -5452,6 +5496,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
     lane.active,
     lane.actions || []
   )));
+  const flowItems = buildFlowItems((config?.flows || []).map((flow) => createFlowItem(
+    flow.label,
+    flow.title,
+    flow.pattern,
+    flow.steps,
+    flow.outcome,
+    flow.actions || []
+  )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 
   return compact([
@@ -5599,6 +5651,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
           title: 'Lane cards',
           note: 'Explicit operating channels keeping the room moving',
           items: laneItems,
+        }
+      : null,
+    flowItems.length
+      ? {
+          kind: 'flows',
+          title: 'Flow cards',
+          note: 'Documented operating patterns keeping the room moving forward',
+          items: flowItems,
         }
       : null,
     boardColumns.length
@@ -5768,6 +5828,14 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
     lane.active,
     lane.actions || []
   )));
+  const flowItems = buildFlowItems((config?.flows || []).map((flow) => createFlowItem(
+    flow.label,
+    flow.title,
+    flow.pattern,
+    flow.steps,
+    flow.outcome,
+    flow.actions || []
+  )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 
   return compact([
@@ -5915,6 +5983,14 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
           title: 'Lane cards',
           note: 'Explicit operating channels keeping the room moving',
           items: laneItems,
+        }
+      : null,
+    flowItems.length
+      ? {
+          kind: 'flows',
+          title: 'Flow cards',
+          note: 'Documented operating patterns keeping the room moving forward',
+          items: flowItems,
         }
       : null,
     boardColumns.length

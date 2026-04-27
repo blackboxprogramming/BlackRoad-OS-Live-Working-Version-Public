@@ -61,3 +61,10 @@ Remember the Road. Pave Tomorrow!
 - [ ] Patch remaining surfaces: `pi-alice/www/`, `octavia-operator/packages/blackroad-*`, `website/index.html`
 - [ ] Strip duplicated brand vars from inline `<style>` blocks (cleanup, lower priority)
 - [ ] Fix carkeys.blackroad.io color leak (`color:#FF6B2B` → grayscale)
+
+## 2026-04-26 23:00 · canonical CSS rollout SHIPPED to GitHub
+- [x] Pushed 11 commits to `live-public` (BlackRoad-OS-Live-Working-Version-Public). HEAD = b56a7ac0
+- [x] 1,112 files in HEAD reference `images.blackroad.io/brand/brand.css`
+- [ ] **Worker production deploy still pending** — `web/workers/*.js` lack wrangler.toml; deploy script likely lives on octavia or another Pi
+- [ ] **gematria-www production ship still pending** — find the deploy mechanism for that subtree
+- [ ] Verify by re-probing: all 16 product subdomains + 20 root domains should link the canonical CSS after deploy

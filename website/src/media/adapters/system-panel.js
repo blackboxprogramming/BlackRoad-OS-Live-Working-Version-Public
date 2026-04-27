@@ -543,6 +543,32 @@ function renderLane(item) {
   `;
 }
 
+function renderFlow(item) {
+  return `
+    <div class="system-panel-flow">
+      <div class="system-panel-flow-label">${escapeHtml(item.label || '')}</div>
+      <div class="system-panel-flow-title">${escapeHtml(item.title || '')}</div>
+      <div class="system-panel-flow-lines">
+        <div class="system-panel-flow-line">
+          <span class="system-panel-flow-key">Pattern</span>
+          <span class="system-panel-flow-value">${escapeHtml(item.pattern || '')}</span>
+        </div>
+        <div class="system-panel-flow-line">
+          <span class="system-panel-flow-key">Steps</span>
+          <span class="system-panel-flow-value">${escapeHtml(item.steps || '')}</span>
+        </div>
+        <div class="system-panel-flow-line">
+          <span class="system-panel-flow-key">Outcome</span>
+          <span class="system-panel-flow-value">${escapeHtml(item.outcome || '')}</span>
+        </div>
+      </div>
+      <div class="system-panel-flow-actions">
+        ${(item.actions || []).map((action) => renderInlineAction(action, 'system-panel-flow-action')).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderWidget(widget) {
   const body = widget.kind === 'facts'
     ? `<div class="system-panel-facts">${(widget.items || []).map(renderFact).join('')}</div>`
@@ -558,6 +584,8 @@ function renderWidget(widget) {
               ? `<div class="system-panel-signals">${(widget.items || []).map(renderSignal).join('')}</div>`
               : widget.kind === 'lanes'
                 ? `<div class="system-panel-lanes">${(widget.items || []).map(renderLane).join('')}</div>`
+                : widget.kind === 'flows'
+                  ? `<div class="system-panel-flows">${(widget.items || []).map(renderFlow).join('')}</div>`
         : widget.kind === 'briefs'
           ? `<div class="system-panel-briefs">${(widget.items || []).map(renderBrief).join('')}</div>`
         : widget.kind === 'runbooks'
