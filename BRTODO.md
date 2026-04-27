@@ -53,3 +53,11 @@ Remember the Road. Pave Tomorrow!
 - contiguous IP range, 3 timeouts + 1 host-down ARP — suggests switch/PoE/strip issue, not 4 independent failures
 - gaia(.112) is up but auth fails — separate ssh-key drift, unrelated
 - [ ] Physically check the .10x rack and the strip those Pis share
+
+## 2026-04-26 · canonical brand.css rollout (LOCAL DONE, DEPLOY PENDING)
+- [x] Patched 9 worker files in `web/workers/` to link `images.blackroad.io/brand/brand.css` in every <head>
+- [x] Patched 1102 HTML files in `gematria-www/` to link the canonical CSS
+- [ ] Deploy edited workers via `wrangler deploy` per worker (needs sequential push)
+- [ ] Patch remaining surfaces: `pi-alice/www/`, `octavia-operator/packages/blackroad-*`, `website/index.html`
+- [ ] Strip duplicated brand vars from inline `<style>` blocks (cleanup, lower priority)
+- [ ] Fix carkeys.blackroad.io color leak (`color:#FF6B2B` → grayscale)

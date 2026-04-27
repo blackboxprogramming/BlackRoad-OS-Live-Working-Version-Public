@@ -214,7 +214,7 @@ footer{border-top:1px solid var(--border);padding:40px 0}
 }
 </style>
 <link rel="stylesheet" href="../blackroad-brand-base.css">
-</head>
+<link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head>
 <body>
 
 <div class="grad-bar"></div>

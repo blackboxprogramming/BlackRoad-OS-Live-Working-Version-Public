@@ -89,7 +89,7 @@ h2{font-size:16px;font-weight:600;margin-bottom:12px}
 .modal-btn{padding:8px 16px;border-radius:6px;font-family:var(--sg);font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text)}
 .modal-btn.primary{background:var(--white);color:#000;border:none;font-weight:600}
 </style>
-</head>
+<link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head>
 <body>
 <div class="grad-bar"></div>
 <div class="wrap">

@@ -7,7 +7,7 @@ function tokenLandingHtml(jwt) {
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Signing in...</title>
 <style>body{background:#000;color:#f5f5f5;font-family:-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
 .c{text-align:center}.s{width:24px;height:24px;border:2px solid #333;border-top-color:#f5f5f5;border-radius:50%;animation:s .6s linear infinite;margin:0 auto 16px}
-@keyframes s{to{transform:rotate(360deg)}}</style></head>
+@keyframes s{to{transform:rotate(360deg)}}</style><link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head>
 <body><div class="c"><div class="s"></div><p>Signing you in...</p></div>
 <script>localStorage.setItem('br_token','${jwt}');window.location.replace('https://os.blackroad.io/app/');</script>
 </body></html>`;
@@ -1217,7 +1217,7 @@ h1{font-size:28px;font-weight:700;margin-bottom:8px}h2{font-size:18px;font-weigh
 .desc{font-size:13px;opacity:.5;margin-top:6px}
 .param{font-family:monospace;font-size:12px;color:#f5a623;margin-top:4px}
 a{color:#a3a3a3;text-decoration:none}a:hover{text-decoration:underline}
-</style></head><body>
+</style><link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head><body>
 <h1>BlackRoad Auth</h1>
 <p class="subtitle">Sovereign authentication. Zero third-party dependencies. JWT + Web Crypto.</p>
 

@@ -517,6 +517,32 @@ function renderSignal(item) {
   `;
 }
 
+function renderLane(item) {
+  return `
+    <div class="system-panel-lane">
+      <div class="system-panel-lane-label">${escapeHtml(item.label || '')}</div>
+      <div class="system-panel-lane-title">${escapeHtml(item.title || '')}</div>
+      <div class="system-panel-lane-lines">
+        <div class="system-panel-lane-line">
+          <span class="system-panel-lane-key">Channel</span>
+          <span class="system-panel-lane-value">${escapeHtml(item.channel || '')}</span>
+        </div>
+        <div class="system-panel-lane-line">
+          <span class="system-panel-lane-key">Purpose</span>
+          <span class="system-panel-lane-value">${escapeHtml(item.purpose || '')}</span>
+        </div>
+        <div class="system-panel-lane-line">
+          <span class="system-panel-lane-key">Active</span>
+          <span class="system-panel-lane-value">${escapeHtml(item.active || '')}</span>
+        </div>
+      </div>
+      <div class="system-panel-lane-actions">
+        ${(item.actions || []).map((action) => renderInlineAction(action, 'system-panel-lane-action')).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderWidget(widget) {
   const body = widget.kind === 'facts'
     ? `<div class="system-panel-facts">${(widget.items || []).map(renderFact).join('')}</div>`
@@ -530,6 +556,8 @@ function renderWidget(widget) {
             ? `<div class="system-panel-rituals">${(widget.items || []).map(renderRitual).join('')}</div>`
             : widget.kind === 'signals'
               ? `<div class="system-panel-signals">${(widget.items || []).map(renderSignal).join('')}</div>`
+              : widget.kind === 'lanes'
+                ? `<div class="system-panel-lanes">${(widget.items || []).map(renderLane).join('')}</div>`
         : widget.kind === 'briefs'
           ? `<div class="system-panel-briefs">${(widget.items || []).map(renderBrief).join('')}</div>`
         : widget.kind === 'runbooks'

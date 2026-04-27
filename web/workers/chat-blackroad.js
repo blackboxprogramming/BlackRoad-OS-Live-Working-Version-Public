@@ -1817,7 +1817,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;heigh
   .chat-hdr-search input:focus{width:160px}
 }
 </style>
-</head><body>
+<link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head><body>
 
 <!-- Mobile overlay -->
 <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar(false)"></div>

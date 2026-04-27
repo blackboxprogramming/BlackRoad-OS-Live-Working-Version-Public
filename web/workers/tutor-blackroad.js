@@ -66,7 +66,7 @@ h1{font-size:28px;font-weight:700;margin-bottom:4px}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid var(--muted);border-top-color:var(--text);border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 </style>
-</head>
+<link rel="stylesheet" href="https://images.blackroad.io/brand/brand.css"></head>
 <body>
 <div class="grad-bar"></div>
 <div class="wrap">

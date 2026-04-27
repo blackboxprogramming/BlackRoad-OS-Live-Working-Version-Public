@@ -1071,6 +1071,222 @@ const FLAGSHIP_WORKSPACE_CONFIGS = {
         ],
       },
     ],
+    lanes: [
+      {
+        label: 'Decision lane',
+        title: 'Executive decision and escalation',
+        channel: 'RoadTrip → RoadWork/CarPool',
+        purpose: 'Move converged decisions into shared execution',
+        active: 'Alice (owner), Cecilia (collab)',
+        actions: [
+          { label: 'View decisions', query: 'decisions roadtrip' },
+          { label: 'Escalate to RoadWork', query: 'open roadwork' },
+        ],
+      },
+      {
+        label: 'Blocker lane',
+        title: 'Unresolved issues and escalation',
+        channel: 'RoadTrip → Issues/Support',
+        purpose: 'Surface and resolve blockers preventing forward motion',
+        active: 'Octavia (owner), Lucidia (advisory)',
+        actions: [
+          { label: 'View blockers', query: 'tripwires roadtrip' },
+          { label: 'Open support', query: 'open roadside' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Build lane',
+        title: 'Code implementation and testing',
+        channel: 'RoadCode → Tests/Staging',
+        purpose: 'Shape and validate code changes before promotion',
+        active: 'Sebastian (owner), Cecilia (review)',
+        actions: [
+          { label: 'View build', query: 'open roadcode' },
+          { label: 'Check tests', query: 'status' },
+        ],
+      },
+      {
+        label: 'Rollout lane',
+        title: 'Deployment and production promotion',
+        channel: 'RoadCode → OneWay/Production',
+        purpose: 'Move validated changes into production deployment',
+        active: 'Octavia (owner), Valeria (ops)',
+        actions: [
+          { label: 'View gates', query: 'protocols roadcode' },
+          { label: 'Start rollout', query: 'open oneway' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Work lane',
+        title: 'Execution and task assignment',
+        channel: 'RoadWork → Todo/Assigned',
+        purpose: 'Break down decisions into concrete work and assign ownership',
+        active: 'Alice (owner), Multiple assignees',
+        actions: [
+          { label: 'View work', query: 'open roadwork' },
+          { label: 'Update board', query: 'todo' },
+        ],
+      },
+      {
+        label: 'Blocker lane',
+        title: 'Work stoppers and escalation',
+        channel: 'RoadWork → Support/Escalation',
+        purpose: 'Surface and resolve obstacles blocking task completion',
+        active: 'Alice (owner), Roadie (support)',
+        actions: [
+          { label: 'View blockers', query: 'guardrails roadwork' },
+          { label: 'Escalate up', query: 'open roadtrip' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Data lane',
+        title: 'Information gathering and synthesis',
+        channel: 'RoadView → Data Sources/Docs',
+        purpose: 'Collect and organize market and product data into understanding',
+        active: 'Aria (owner), Thalia (research)',
+        actions: [
+          { label: 'View data', query: 'open roadview' },
+          { label: 'Source docs', query: 'docs roadview' },
+        ],
+      },
+      {
+        label: 'Insight lane',
+        title: 'Analysis and recommendation',
+        channel: 'RoadView → Decisions',
+        purpose: 'Transform data into actionable insights for decision-makers',
+        active: 'Aria (owner), Lyra (analysis)',
+        actions: [
+          { label: 'Share insights', query: 'collab' },
+          { label: 'Open decisions', query: 'decisions' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Write lane',
+        title: 'Documentation creation and updates',
+        channel: 'Docs → Authoring/Editor',
+        purpose: 'Create and maintain current documentation and guides',
+        active: 'Cecilia (owner), Multiple writers',
+        actions: [
+          { label: 'Open docs', query: 'docs' },
+          { label: 'Edit docs', query: 'doc edit' },
+        ],
+      },
+      {
+        label: 'Search lane',
+        title: 'Index refresh and discovery',
+        channel: 'Docs → Search/Index',
+        purpose: 'Keep documentation discoverable and searchable for operators',
+        active: 'Olympia (owner), Index service',
+        actions: [
+          { label: 'Test search', query: 'open search' },
+          { label: 'Refresh index', query: 'index refresh' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Monitor lane',
+        title: 'Health check and incident detection',
+        channel: 'Status → Dashboards/Alerts',
+        purpose: 'Continuously monitor system health and catch problems early',
+        active: 'Octavia (owner), Alert service',
+        actions: [
+          { label: 'View dashboard', query: 'status' },
+          { label: 'Check alerts', query: 'alerts' },
+        ],
+      },
+      {
+        label: 'Response lane',
+        title: 'Incident response and mitigation',
+        channel: 'Status → Incidents/Escalation',
+        purpose: 'Respond to alerts and restore service health quickly',
+        active: 'Octavia (owner), On-call team',
+        actions: [
+          { label: 'View incidents', query: 'incidents' },
+          { label: 'Escalate', query: 'open roadwork' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Roster lane',
+        title: 'Team membership and presence',
+        channel: 'Agents → Live/Roster',
+        purpose: 'Track operator availability, focus, and presence status',
+        active: 'Lucidia (owner), Live service',
+        actions: [
+          { label: 'View roster', query: 'agents' },
+          { label: 'Share status', query: 'live' },
+        ],
+      },
+      {
+        label: 'Capacity lane',
+        title: 'Workload and bandwidth distribution',
+        channel: 'Agents → Assignment/Load',
+        purpose: 'Balance team capacity and prevent burnout',
+        active: 'Lucidia (owner), Roadie (scheduler)',
+        actions: [
+          { label: 'Check load', query: 'agents' },
+          { label: 'Rebalance', query: 'open roadwork' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Index lane',
+        title: 'Search index maintenance and refresh',
+        channel: 'Search → Crawler/Indexer',
+        purpose: 'Keep search corpus fresh and comprehensive across all docs',
+        active: 'Olympia (owner), Index service',
+        actions: [
+          { label: 'Check status', query: 'open search' },
+          { label: 'Refresh index', query: 'index refresh' },
+        ],
+      },
+      {
+        label: 'Quality lane',
+        title: 'Relevance and performance tuning',
+        channel: 'Search → Ranking/Analysis',
+        purpose: 'Ensure search results are relevant and queries respond fast',
+        active: 'Olympia (owner), Lyra (analytics)',
+        actions: [
+          { label: 'View analytics', query: 'open search' },
+          { label: 'Tune ranking', query: 'index tune' },
+        ],
+      },
+    ],
+    lanes: [
+      {
+        label: 'Topology lane',
+        title: 'System architecture and connection mapping',
+        channel: 'Atlas → Visualization/Mapper',
+        purpose: 'Maintain accurate representation of system topology and connections',
+        active: 'Gaia (owner), Multiple maintainers',
+        actions: [
+          { label: 'View map', query: 'open atlas' },
+          { label: 'Edit topology', query: 'atlas edit' },
+        ],
+      },
+      {
+        label: 'Sync lane',
+        title: 'Discovery and reconciliation',
+        channel: 'Atlas → Auto-Discovery/Verify',
+        purpose: 'Keep topology synchronized with actual running systems',
+        active: 'Gaia (owner), Auto-discovery',
+        actions: [
+          { label: 'Verify connections', query: 'atlas verify' },
+          { label: 'Sync systems', query: 'atlas sync' },
+        ],
+      },
+    ],
     primers: [
       {
         label: 'Agenda prep',
@@ -5059,6 +5275,26 @@ function buildSignalItems(items = [], limit = 3) {
   return compact(items).slice(0, limit);
 }
 
+function createLaneItem(label, title, channel, purpose, active, actions = []) {
+  return {
+    label: String(label),
+    title: String(title),
+    channel: String(channel),
+    purpose: String(purpose),
+    active: String(active),
+    actions: (actions || []).map((action) => ({
+      label: String(action.label),
+      query: action.query || null,
+      href: action.href || null,
+      surfaceId: action.surfaceId || null,
+    })),
+  };
+}
+
+function buildLaneItems(items = [], limit = 2) {
+  return compact(items).slice(0, limit);
+}
+
 function buildBoardColumns(columns = [], limit = 3) {
   return compact(columns.map((column) => {
     const items = compact(column.items || []).slice(0, limit);
@@ -5208,6 +5444,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
     signal.insight,
     signal.actions || []
   )));
+  const laneItems = buildLaneItems((config?.lanes || []).map((lane) => createLaneItem(
+    lane.label,
+    lane.title,
+    lane.channel,
+    lane.purpose,
+    lane.active,
+    lane.actions || []
+  )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 
   return compact([
@@ -5347,6 +5591,14 @@ function buildProductWorkspaceWidgets(product, config, routeIds, routeItems, doc
           title: 'Signal cards',
           note: 'Real-time status indicators showing room health',
           items: signalItems,
+        }
+      : null,
+    laneItems.length
+      ? {
+          kind: 'lanes',
+          title: 'Lane cards',
+          note: 'Explicit operating channels keeping the room moving',
+          items: laneItems,
         }
       : null,
     boardColumns.length
@@ -5508,6 +5760,14 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
     signal.insight,
     signal.actions || []
   )));
+  const laneItems = buildLaneItems((config?.lanes || []).map((lane) => createLaneItem(
+    lane.label,
+    lane.title,
+    lane.channel,
+    lane.purpose,
+    lane.active,
+    lane.actions || []
+  )));
   const boardColumns = buildBoardColumns(config?.board?.columns || []);
 
   return compact([
@@ -5639,6 +5899,22 @@ function buildSiteWorkspaceWidgets(site, config, pathItems, routeItems, docItems
           title: 'Ritual cards',
           note: 'Recurring practices that keep the room moving',
           items: ritualItems,
+        }
+      : null,
+    signalItems.length
+      ? {
+          kind: 'signals',
+          title: 'Signal cards',
+          note: 'Real-time status indicators showing room health',
+          items: signalItems,
+        }
+      : null,
+    laneItems.length
+      ? {
+          kind: 'lanes',
+          title: 'Lane cards',
+          note: 'Explicit operating channels keeping the room moving',
+          items: laneItems,
         }
       : null,
     boardColumns.length
